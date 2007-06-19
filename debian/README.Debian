@@ -1,0 +1,7 @@
+libva for Debian
+----------------
+
+This library implements the Video Acceleration (VA) API for Linux.
+It will load a hardware dependendent video acceleration driver.
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Mon, 18 Jun 2007 21:35:31 -0700
