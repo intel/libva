@@ -6,6 +6,8 @@ Build-Depends: debhelper (>= 5),
                libdrm-dev (>= 2.3.0),
                mesa-common-dev,
                x11proto-gl-dev,
+               x11proto-xext-dev,
+               libxext-dev,
                pkg-config
 Standards-Version: 3.7.2
 Section: libs
