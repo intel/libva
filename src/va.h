@@ -259,6 +259,8 @@ typedef int VAContextID;
 /* generic surface ID type, can be re-typed for specific implementation */
 typedef int VASurfaceID;
 
+#define VA_INVALID_SURFACE	-1
+
 typedef struct _VAContext
 {
     VAContextID		context_id; /* to identify this context */
