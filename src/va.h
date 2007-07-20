@@ -375,6 +375,10 @@ typedef enum
  ****************************/
  
 /* MPEG-2 Picture Parameter Buffer */
+/* 
+ * For each frame or field, and before any slice data, a single
+ * picture parameter buffer must be send.
+ */
 typedef struct _VAPictureParameterBufferMPEG2
 {
     unsigned short horizontal_size;
@@ -494,6 +498,10 @@ typedef struct _VAMacroblockParameterBufferMPEG2
  ****************************/
  
 /* MPEG-4 Picture Parameter Buffer */
+/* 
+ * For each frame or field, and before any slice data, a single
+ * picture parameter buffer must be send.
+ */
 typedef struct _VAPictureParameterBufferMPEG4
 {
     unsigned short vop_width;
@@ -565,6 +573,13 @@ typedef struct _VASliceParameterBufferMPEG4
 */
  
 /* VC-1 Picture Parameter Buffer */
+/* 
+ * For each picture, and before any slice data, a picture parameter
+ * buffer must be send. Multiple picture parameter buffers may be
+ * sent for a single picture. In that case picture parameters will
+ * apply to all slice data that follow it until a new picture
+ * parameter buffer is sent.
+ */
 typedef struct _VAPictureParameterBufferVC1
 {
     VASurfaceID forward_reference_picture;
@@ -712,6 +727,10 @@ typedef struct _VAPictureH264
 #define VA_PICTURE_H264_USED_AS_REFERENCE	0x00000020
 
 /* H.264 Picture Parameter Buffer */
+/* 
+ * For each picture, and before any slice data, a single
+ * picture parameter buffer must be send.
+ */
 typedef struct _VAPictureParameterBufferH264
 {
     VAPictureH264 CurrPic;
