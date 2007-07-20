@@ -598,7 +598,7 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned char b_picture_fraction;	/* PICTURE_LAYER::BFRACTION */
     unsigned char cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
     unsigned char mb_mode_table;	/* PICTURE_LAYER::MBMODETAB */
-    unsigned char range_reduction_frame;/* PICTURE_LAYER::RNDCTRL */
+    unsigned char range_reduction_frame;/* PICTURE_LAYER::RANGEREDFRM */
     unsigned char rounding_control;	/* PICTURE_LAYER::RNDCTRL */
     unsigned char post_processing;	/* PICTURE_LAYER::POSTPROC */
     unsigned char picture_resolution_index;	/* PICTURE_LAYER::RESPIC */
