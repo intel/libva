@@ -1,7 +1,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.18
+ * Rev. 0.19
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -15,6 +15,7 @@
  * rev 0.17 (05/07/07 Jonathan Bian) - Added H.264/AVC data structures for slice level decode.
  * rev 0.18 (05/14/07 Jonathan Bian) - Added data structures for MPEG-4 slice level decode 
  *                                     and MPEG-2 motion compensation.
+ * rev 0.19 (08/06/07 Jonathan Bian) - Removed extra type for bitplane data (VAPictureBitPlaneBufferType)
  *
  * Acknowledgements:
  *  Thanks to Waldo Bastian for many valuable feedbacks.
@@ -359,15 +360,14 @@ typedef int VABufferID;
 typedef enum
 {
     VAPictureParameterBufferType	= 0,
-    VAPictureBitPlaneBufferType		= 1,
-    VAIQMatrixBufferType		= 2,
-    VABitPlaneBufferType		= 3,
-    VASliceGroupMapBufferType		= 4,
-    VASliceParameterBufferType		= 5,
-    VASliceDataBufferType		= 6,
-    VAMacroblockParameterBufferType	= 7,
-    VAResidualDataBufferType		= 8,
-    VADeblockingParameterBufferType	= 9,
+    VAIQMatrixBufferType		= 1,
+    VABitPlaneBufferType		= 2,
+    VASliceGroupMapBufferType		= 3,
+    VASliceParameterBufferType		= 4,
+    VASliceDataBufferType		= 5,
+    VAMacroblockParameterBufferType	= 6,
+    VAResidualDataBufferType		= 7,
+    VADeblockingParameterBufferType	= 8
 } VABufferType;
 
 /****************************

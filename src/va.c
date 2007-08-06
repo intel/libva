@@ -16,7 +16,7 @@
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_18"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_19"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define ASSERT_CONTEXT(dpy) assert( vaDbgContextIsValid(dpy) )
