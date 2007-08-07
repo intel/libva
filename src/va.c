@@ -12,7 +12,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
-#include <xf86dri.h>
+#include "va_dri.h"
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
@@ -136,10 +136,10 @@ static VAStatus va_getDriverName(VADriverContextP ctx, char **driver_name)
     }
     if (result)
     {
-        result = XF86DRIQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
+        result = VA_DRIQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
         if (!result)
         {
-            va_errorMessage("XF86DRIQueryDirectRenderingCapable failed\n");
+            va_errorMessage("VA_DRIQueryDirectRenderingCapable failed\n");
         }
     }
     if (result)
@@ -147,22 +147,22 @@ static VAStatus va_getDriverName(VADriverContextP ctx, char **driver_name)
         result = direct_capable;
         if (!result)
         {
-            va_errorMessage("XF86DRIQueryDirectRenderingCapable returned false\n");
+            va_errorMessage("VA_DRIQueryDirectRenderingCapable returned false\n");
         }
     }
     if (result)
     {
-        result = XF86DRIGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
+        result = VA_DRIGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
                                             &driver_patch, driver_name);
         if (!result)
         {
-            va_errorMessage("XF86DRIGetClientDriverName returned false\n");
+            va_errorMessage("VA_DRIGetClientDriverName returned false\n");
         }
     }
     if (result)
     {
         vaStatus = VA_STATUS_SUCCESS;
-        va_infoMessage("XF86DRIGetClientDriverName: %d.%d.%d %s (screen %d)\n",
+        va_infoMessage("VA_DRIGetClientDriverName: %d.%d.%d %s (screen %d)\n",
 	     driver_major, driver_minor, driver_patch, *driver_name, ctx->x11_screen);
     }
 

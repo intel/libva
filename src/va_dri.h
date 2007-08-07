@@ -3,6 +3,7 @@
 
 Copyright 1998-1999 Precision Insight, Inc., Cedar Park, Texas.
 Copyright 2000 VA Linux Systems, Inc.
+Copyright 2007 Intel Corporation
 All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -36,87 +37,84 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * \author Rickard E. (Rik) Faith <faith@valinux.com>
  */
 
-#ifndef _XF86DRI_H_
-#define _XF86DRI_H_
+#ifndef _VA_DRI_H_
+#define _VA_DRI_H_
 
 #include <X11/Xfuncproto.h>
 #include <xf86drm.h>
 
-#define X_XF86DRIQueryVersion			0
-#define X_XF86DRIQueryDirectRenderingCapable	1
-#define X_XF86DRIOpenConnection			2
-#define X_XF86DRICloseConnection		3
-#define X_XF86DRIGetClientDriverName		4
-#define X_XF86DRICreateContext			5
-#define X_XF86DRIDestroyContext			6
-#define X_XF86DRICreateDrawable			7
-#define X_XF86DRIDestroyDrawable		8
-#define X_XF86DRIGetDrawableInfo		9
-#define X_XF86DRIGetDeviceInfo			10
-#define X_XF86DRIAuthConnection                 11
-#define X_XF86DRIOpenFullScreen                 12   /* Deprecated */
-#define X_XF86DRICloseFullScreen                13   /* Deprecated */
+#define X_VA_DRIQueryVersion			0
+#define X_VA_DRIQueryDirectRenderingCapable	1
+#define X_VA_DRIOpenConnection			2
+#define X_VA_DRICloseConnection		3
+#define X_VA_DRIGetClientDriverName		4
+#define X_VA_DRICreateContext			5
+#define X_VA_DRIDestroyContext			6
+#define X_VA_DRICreateDrawable			7
+#define X_VA_DRIDestroyDrawable		8
+#define X_VA_DRIGetDrawableInfo		9
+#define X_VA_DRIGetDeviceInfo			10
+#define X_VA_DRIAuthConnection                 11
+#define X_VA_DRIOpenFullScreen                 12   /* Deprecated */
+#define X_VA_DRICloseFullScreen                13   /* Deprecated */
 
-#define XF86DRINumberEvents		0
+#define VA_DRINumberEvents		0
 
-#define XF86DRIClientNotLocal		0
-#define XF86DRIOperationNotSupported	1
-#define XF86DRINumberErrors		(XF86DRIOperationNotSupported + 1)
+#define VA_DRIClientNotLocal		0
+#define VA_DRIOperationNotSupported	1
+#define VA_DRINumberErrors		(VA_DRIOperationNotSupported + 1)
 
-#ifndef _XF86DRI_SERVER_
-
-#include "dri_interface.h"
+typedef unsigned long __DRIid;
+typedef void __DRInativeDisplay;
 
 _XFUNCPROTOBEGIN
 
-Bool XF86DRIQueryExtension( Display *dpy, int *event_base, int *error_base );
+Bool VA_DRIQueryExtension( Display *dpy, int *event_base, int *error_base );
 
-Bool XF86DRIQueryVersion( Display *dpy, int *majorVersion, int *minorVersion,
+Bool VA_DRIQueryVersion( Display *dpy, int *majorVersion, int *minorVersion,
     int *patchVersion );
 
-Bool XF86DRIQueryDirectRenderingCapable( Display *dpy, int screen,
+Bool VA_DRIQueryDirectRenderingCapable( Display *dpy, int screen,
     Bool *isCapable );
 
-Bool XF86DRIOpenConnection( Display *dpy, int screen, drm_handle_t *hSAREA,
+Bool VA_DRIOpenConnection( Display *dpy, int screen, drm_handle_t *hSAREA,
     char **busIDString );
 
-Bool XF86DRIAuthConnection( Display *dpy, int screen, drm_magic_t magic );
+Bool VA_DRIAuthConnection( Display *dpy, int screen, drm_magic_t magic );
 
-Bool XF86DRICloseConnection( Display *dpy, int screen );
+Bool VA_DRICloseConnection( Display *dpy, int screen );
 
-Bool XF86DRIGetClientDriverName( Display *dpy, int screen,
+Bool VA_DRIGetClientDriverName( Display *dpy, int screen,
     int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
     int *ddxDriverPatchVersion, char **clientDriverName );
 
-Bool XF86DRICreateContext( Display *dpy, int screen, Visual *visual,
+Bool VA_DRICreateContext( Display *dpy, int screen, Visual *visual,
     XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
 
-Bool XF86DRICreateContextWithConfig( Display *dpy, int screen, int configID,
+Bool VA_DRICreateContextWithConfig( Display *dpy, int screen, int configID,
     XID *ptr_to_returned_context_id, drm_context_t *hHWContext );
 
-extern GLboolean XF86DRIDestroyContext( __DRInativeDisplay *dpy, int screen,
+Bool VA_DRIDestroyContext( __DRInativeDisplay *dpy, int screen,
     __DRIid context_id );
 
-extern GLboolean XF86DRICreateDrawable( __DRInativeDisplay *dpy, int screen,
+Bool VA_DRICreateDrawable( __DRInativeDisplay *dpy, int screen,
     __DRIid drawable, drm_drawable_t *hHWDrawable );
 
-extern GLboolean XF86DRIDestroyDrawable( __DRInativeDisplay *dpy, int screen, 
+Bool VA_DRIDestroyDrawable( __DRInativeDisplay *dpy, int screen, 
     __DRIid drawable);
 
-Bool XF86DRIGetDrawableInfo( Display *dpy, int screen, Drawable drawable,
+Bool VA_DRIGetDrawableInfo( Display *dpy, int screen, Drawable drawable,
     unsigned int *index, unsigned int *stamp, 
     int *X, int *Y, int *W, int *H,
     int *numClipRects, drm_clip_rect_t ** pClipRects,
     int *backX, int *backY,
     int *numBackClipRects, drm_clip_rect_t **pBackClipRects );
 
-Bool XF86DRIGetDeviceInfo( Display *dpy, int screen,
+Bool VA_DRIGetDeviceInfo( Display *dpy, int screen,
     drm_handle_t *hFrameBuffer, int *fbOrigin, int *fbSize,
     int *fbStride, int *devPrivateSize, void **pDevPrivate );
 
 _XFUNCPROTOEND
 
-#endif /* _XF86DRI_SERVER_ */
-
-#endif /* _XF86DRI_H_ */
+#endif /* _VA_DRI_H_ */
 

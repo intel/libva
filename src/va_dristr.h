@@ -3,6 +3,7 @@
 
 Copyright 1998-1999 Precision Insight, Inc., Cedar Park, Texas.
 Copyright 2000 VA Linux Systems, Inc.
+Copyright 2007 Intel Corporation
 All Rights Reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -35,12 +36,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
 
-#ifndef _XF86DRISTR_H_
-#define _XF86DRISTR_H_
+#ifndef _VA_DRISTR_H_
+#define _VA_DRISTR_H_
 
-#include "xf86dri.h"
+#include "va_dri.h"
 
-#define XF86DRINAME "XFree86-DRI"
+#define VA_DRINAME "XFree86-DRI"
 
 /* The DRI version number.  This was originally set to be the same of the
  * XFree86 version number.  However, this version is really indepedent of
@@ -51,16 +52,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *    4.0.1: Patch to bump clipstamp when windows are destroyed, 28 May 02
  *    4.1.0: Add transition from single to multi in DRMInfo rec, 24 Jun 02
  */
-#define XF86DRI_MAJOR_VERSION	4
-#define XF86DRI_MINOR_VERSION	1
-#define XF86DRI_PATCH_VERSION	0
+#define VA_DRI_MAJOR_VERSION	4
+#define VA_DRI_MINOR_VERSION	1
+#define VA_DRI_PATCH_VERSION	0
 
-typedef struct _XF86DRIQueryVersion {
+typedef struct _VA_DRIQueryVersion {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIQueryVersion */
     CARD16	length B16;
-} xXF86DRIQueryVersionReq;
-#define sz_xXF86DRIQueryVersionReq	4
+} xVA_DRIQueryVersionReq;
+#define sz_xVA_DRIQueryVersionReq	4
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -74,16 +75,16 @@ typedef struct {
     CARD32	pad4 B32;
     CARD32	pad5 B32;
     CARD32	pad6 B32;
-} xXF86DRIQueryVersionReply;
-#define sz_xXF86DRIQueryVersionReply	32
+} xVA_DRIQueryVersionReply;
+#define sz_xVA_DRIQueryVersionReply	32
 
-typedef struct _XF86DRIQueryDirectRenderingCapable {
+typedef struct _VA_DRIQueryDirectRenderingCapable {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* X_DRIQueryDirectRenderingCapable */
     CARD16	length B16;
     CARD32	screen B32;
-} xXF86DRIQueryDirectRenderingCapableReq;
-#define sz_xXF86DRIQueryDirectRenderingCapableReq	8
+} xVA_DRIQueryDirectRenderingCapableReq;
+#define sz_xVA_DRIQueryDirectRenderingCapableReq	8
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -99,16 +100,16 @@ typedef struct {
     CARD32	pad7 B32;
     CARD32	pad8 B32;
     CARD32	pad9 B32;
-} xXF86DRIQueryDirectRenderingCapableReply;
-#define sz_xXF86DRIQueryDirectRenderingCapableReply	32
+} xVA_DRIQueryDirectRenderingCapableReply;
+#define sz_xVA_DRIQueryDirectRenderingCapableReply	32
 
-typedef struct _XF86DRIOpenConnection {
+typedef struct _VA_DRIOpenConnection {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIOpenConnection */
     CARD16	length B16;
     CARD32	screen B32;
-} xXF86DRIOpenConnectionReq;
-#define sz_xXF86DRIOpenConnectionReq	8
+} xVA_DRIOpenConnectionReq;
+#define sz_xVA_DRIOpenConnectionReq	8
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -121,17 +122,17 @@ typedef struct {
     CARD32	pad6 B32;
     CARD32	pad7 B32;
     CARD32	pad8 B32;
-} xXF86DRIOpenConnectionReply;
-#define sz_xXF86DRIOpenConnectionReply	32
+} xVA_DRIOpenConnectionReply;
+#define sz_xVA_DRIOpenConnectionReply	32
 
-typedef struct _XF86DRIAuthConnection {
+typedef struct _VA_DRIAuthConnection {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRICloseConnection */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32      magic B32;
-} xXF86DRIAuthConnectionReq;
-#define sz_xXF86DRIAuthConnectionReq	12
+} xVA_DRIAuthConnectionReq;
+#define sz_xVA_DRIAuthConnectionReq	12
 
 typedef struct {
     BYTE        type;
@@ -144,24 +145,24 @@ typedef struct {
     CARD32      pad4 B32;
     CARD32      pad5 B32;
     CARD32      pad6 B32;
-} xXF86DRIAuthConnectionReply;
-#define zx_xXF86DRIAuthConnectionReply  32
+} xVA_DRIAuthConnectionReply;
+#define zx_xVA_DRIAuthConnectionReply  32
 
-typedef struct _XF86DRICloseConnection {
+typedef struct _VA_DRICloseConnection {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRICloseConnection */
     CARD16	length B16;
     CARD32	screen B32;
-} xXF86DRICloseConnectionReq;
-#define sz_xXF86DRICloseConnectionReq	8
+} xVA_DRICloseConnectionReq;
+#define sz_xVA_DRICloseConnectionReq	8
 
-typedef struct _XF86DRIGetClientDriverName {
+typedef struct _VA_DRIGetClientDriverName {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIGetClientDriverName */
     CARD16	length B16;
     CARD32	screen B32;
-} xXF86DRIGetClientDriverNameReq;
-#define sz_xXF86DRIGetClientDriverNameReq	8
+} xVA_DRIGetClientDriverNameReq;
+#define sz_xVA_DRIGetClientDriverNameReq	8
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -174,18 +175,18 @@ typedef struct {
     CARD32	clientDriverNameLength B32;
     CARD32	pad5 B32;
     CARD32	pad6 B32;
-} xXF86DRIGetClientDriverNameReply;
-#define sz_xXF86DRIGetClientDriverNameReply	32
+} xVA_DRIGetClientDriverNameReply;
+#define sz_xVA_DRIGetClientDriverNameReply	32
 
-typedef struct _XF86DRICreateContext {
+typedef struct _VA_DRICreateContext {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRICreateContext */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32	visual B32;
     CARD32	context B32;
-} xXF86DRICreateContextReq;
-#define sz_xXF86DRICreateContextReq	16
+} xVA_DRICreateContextReq;
+#define sz_xVA_DRICreateContextReq	16
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -198,26 +199,26 @@ typedef struct {
     CARD32	pad4 B32;
     CARD32	pad5 B32;
     CARD32	pad6 B32;
-} xXF86DRICreateContextReply;
-#define sz_xXF86DRICreateContextReply	32
+} xVA_DRICreateContextReply;
+#define sz_xVA_DRICreateContextReply	32
 
-typedef struct _XF86DRIDestroyContext {
+typedef struct _VA_DRIDestroyContext {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIDestroyContext */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32	context B32;
-} xXF86DRIDestroyContextReq;
-#define sz_xXF86DRIDestroyContextReq	12
+} xVA_DRIDestroyContextReq;
+#define sz_xVA_DRIDestroyContextReq	12
 
-typedef struct _XF86DRICreateDrawable {
+typedef struct _VA_DRICreateDrawable {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRICreateDrawable */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32	drawable B32;
-} xXF86DRICreateDrawableReq;
-#define sz_xXF86DRICreateDrawableReq	12
+} xVA_DRICreateDrawableReq;
+#define sz_xVA_DRICreateDrawableReq	12
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -230,26 +231,26 @@ typedef struct {
     CARD32	pad4 B32;
     CARD32	pad5 B32;
     CARD32	pad6 B32;
-} xXF86DRICreateDrawableReply;
-#define sz_xXF86DRICreateDrawableReply	32
+} xVA_DRICreateDrawableReply;
+#define sz_xVA_DRICreateDrawableReply	32
 
-typedef struct _XF86DRIDestroyDrawable {
+typedef struct _VA_DRIDestroyDrawable {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIDestroyDrawable */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32	drawable B32;
-} xXF86DRIDestroyDrawableReq;
-#define sz_xXF86DRIDestroyDrawableReq	12
+} xVA_DRIDestroyDrawableReq;
+#define sz_xVA_DRIDestroyDrawableReq	12
 
-typedef struct _XF86DRIGetDrawableInfo {
+typedef struct _VA_DRIGetDrawableInfo {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIGetDrawableInfo */
     CARD16	length B16;
     CARD32	screen B32;
     CARD32	drawable B32;
-} xXF86DRIGetDrawableInfoReq;
-#define sz_xXF86DRIGetDrawableInfoReq	12
+} xVA_DRIGetDrawableInfoReq;
+#define sz_xVA_DRIGetDrawableInfoReq	12
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -266,18 +267,18 @@ typedef struct {
     INT16       backX B16;
     INT16       backY B16;
     CARD32      numBackClipRects B32;
-} xXF86DRIGetDrawableInfoReply;
+} xVA_DRIGetDrawableInfoReply;
 
-#define sz_xXF86DRIGetDrawableInfoReply	36
+#define sz_xVA_DRIGetDrawableInfoReply	36
 
 
-typedef struct _XF86DRIGetDeviceInfo {
+typedef struct _VA_DRIGetDeviceInfo {
     CARD8	reqType;		/* always DRIReqCode */
     CARD8	driReqType;		/* always X_DRIGetDeviceInfo */
     CARD16	length B16;
     CARD32	screen B32;
-} xXF86DRIGetDeviceInfoReq;
-#define sz_xXF86DRIGetDeviceInfoReq	8
+} xVA_DRIGetDeviceInfoReq;
+#define sz_xVA_DRIGetDeviceInfoReq	8
 
 typedef struct {
     BYTE	type;			/* X_Reply */
@@ -290,17 +291,17 @@ typedef struct {
     CARD32	framebufferSize B32;
     CARD32	framebufferStride B32;
     CARD32	devPrivateSize B32;
-} xXF86DRIGetDeviceInfoReply;
-#define sz_xXF86DRIGetDeviceInfoReply	32
+} xVA_DRIGetDeviceInfoReply;
+#define sz_xVA_DRIGetDeviceInfoReply	32
 
-typedef struct _XF86DRIOpenFullScreen {
+typedef struct _VA_DRIOpenFullScreen {
     CARD8       reqType;	/* always DRIReqCode */
     CARD8       driReqType;	/* always X_DRIOpenFullScreen */
     CARD16      length B16;
     CARD32      screen B32;
     CARD32      drawable B32;
-} xXF86DRIOpenFullScreenReq;
-#define sz_xXF86DRIOpenFullScreenReq    12
+} xVA_DRIOpenFullScreenReq;
+#define sz_xVA_DRIOpenFullScreenReq    12
 
 typedef struct {
     BYTE        type;
@@ -313,17 +314,17 @@ typedef struct {
     CARD32      pad4 B32;
     CARD32      pad5 B32;
     CARD32      pad6 B32;
-} xXF86DRIOpenFullScreenReply;
-#define sz_xXF86DRIOpenFullScreenReply  32
+} xVA_DRIOpenFullScreenReply;
+#define sz_xVA_DRIOpenFullScreenReply  32
 
-typedef struct _XF86DRICloseFullScreen {
+typedef struct _VA_DRICloseFullScreen {
     CARD8       reqType;	/* always DRIReqCode */
     CARD8       driReqType;	/* always X_DRICloseFullScreen */
     CARD16      length B16;
     CARD32      screen B32;
     CARD32      drawable B32;
-} xXF86DRICloseFullScreenReq;
-#define sz_xXF86DRICloseFullScreenReq   12
+} xVA_DRICloseFullScreenReq;
+#define sz_xVA_DRICloseFullScreenReq   12
 
 typedef struct {
     BYTE        type;
@@ -336,8 +337,8 @@ typedef struct {
     CARD32      pad5 B32;
     CARD32      pad6 B32;
     CARD32      pad7 B32;
-} xXF86DRICloseFullScreenReply;
-#define sz_xXF86DRICloseFullScreenReply  32
+} xVA_DRICloseFullScreenReply;
+#define sz_xVA_DRICloseFullScreenReply  32
 
 
-#endif /* _XF86DRISTR_H_ */
+#endif /* _VA_DRISTR_H_ */
