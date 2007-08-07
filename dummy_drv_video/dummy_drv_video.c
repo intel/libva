@@ -512,7 +512,6 @@ VAStatus dummy_CreateBuffer(
     switch (type)
     {
         case VAPictureParameterBufferType:
-        case VAPictureBitPlaneBufferType:
         case VAIQMatrixBufferType:
         case VASliceParameterBufferType:
         case VASliceDataBufferType:
