@@ -580,6 +580,11 @@ typedef struct _VASliceParameterBufferMPEG4
  * sent for a single picture. In that case picture parameters will
  * apply to all slice data that follow it until a new picture
  * parameter buffer is sent.
+ *
+ * Notes:
+ *   pic_quantizer_type should be set to the applicable quantizer
+ *   type as defined by QUANTIZER (J.1.19) and either
+ *   PQUANTIZER (7.1.1.8) or PQINDEX (7.1.1.6)
  */
 typedef struct _VAPictureParameterBufferVC1
 {
@@ -610,8 +615,8 @@ typedef struct _VAPictureParameterBufferVC1
         struct {
             unsigned char range_mapping_luma_flag: 	1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
             unsigned char range_mapping_luma: 		3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
-            unsigned char range_mapping_choma_flag:	1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
-            unsigned char range_mapping_choma:		3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
+            unsigned char range_mapping_chroma_flag:	1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
+            unsigned char range_mapping_chroma:		3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
         };
         unsigned char range_mapping_fields;
     };
