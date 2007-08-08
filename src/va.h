@@ -1,7 +1,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.19
+ * Rev. 0.20
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -9,13 +9,14 @@
  * rev 0.11 (12/15/06 Jonathan Bian) - Fixed some errors
  * rev 0.12 (02/05/07 Jonathan Bian) - Added VC-1 data structures for slice level decode
  * rev 0.13 (02/28/07 Jonathan Bian) - Added GetDisplay()
- * rev 0.14 (04/13/07 Jonathan Bian) - Fixed MPEG-2 PictureParameter struct, cleaned up a few funcs.
+ * rev 0.14 (04/13/07 Jonathan Bian) - Fixed MPEG-2 PictureParameter structure, cleaned up a few funcs.
  * rev 0.15 (04/20/07 Jonathan Bian) - Overhauled buffer management  
  * rev 0.16 (05/02/07 Jonathan Bian) - Added error codes and fixed some issues with configuration 
  * rev 0.17 (05/07/07 Jonathan Bian) - Added H.264/AVC data structures for slice level decode.
  * rev 0.18 (05/14/07 Jonathan Bian) - Added data structures for MPEG-4 slice level decode 
  *                                     and MPEG-2 motion compensation.
  * rev 0.19 (08/06/07 Jonathan Bian) - Removed extra type for bitplane data (VAPictureBitPlaneBufferType)
+ * rev 0.20 (08/07/07 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure.
  *
  * Acknowledgements:
  *  Thanks to Waldo Bastian for many valuable feedbacks.
@@ -589,12 +590,32 @@ typedef struct _VAPictureParameterBufferVC1
        picture as a reference picture */
     VASurfaceID inloop_decoded_picture;
 
+    /* sequence layer for AP or meta data for SP and MP */
+    union {
+        struct {
+            unsigned char interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
+            unsigned char syncmarker	: 1;/* METADATA::SYNCMARKER */
+            unsigned char overlap	: 1;/* METADATA::OVERLAP */
+        };
+        unsigned char sequence_fields;
+    };
+
     unsigned short coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
     unsigned short coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
     unsigned char closed_entry;		/* ENTRY_POINT_LAYER::CLOSED_ENTRY */
     unsigned char broken_link;		/* ENTRY_POINT_LAYER::BROKEN_LINK */
     unsigned char conditional_overlap_flag; /* ENTRY_POINT_LAYER::CONDOVER */
     unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
+    union {
+        struct {
+            unsigned char range_mapping_luma_flag: 	1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
+            unsigned char range_mapping_luma: 		3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
+            unsigned char range_mapping_choma_flag:	1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
+            unsigned char range_mapping_choma:		3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
+        };
+        unsigned char range_mapping_fields;
+    };
+
     unsigned char b_picture_fraction;	/* PICTURE_LAYER::BFRACTION */
     unsigned char cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
     unsigned char mb_mode_table;	/* PICTURE_LAYER::MBMODETAB */
@@ -609,6 +630,8 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char picture_type	: 2; 	/* PICTURE_LAYER::PTYPE */
             unsigned char frame_coding_mode	: 3;/* PICTURE_LAYER::FCM */
             unsigned char top_field_first	: 1;/* PICTURE_LAYER::TFF */
+            unsigned char is_first_field	: 1; /* set to 1 if it is first field */
+            unsigned char intensity_compensation: 1;/* PICTURE_LAYER::INTCOMP */
         };
         unsigned char picture_fields;
     };
@@ -655,7 +678,9 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char pic_quantizer_scale : 1;/* PICTURE_LAYER::PQUANT */
             unsigned char pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
             unsigned char dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
-            unsigned char dq_profile	: 1; 	/* VOPDQUANT::DQPROFILE */
+            unsigned char dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
+            unsigned char dq_sb_edge	: 2; 	/* VOPDQUANT::DQSBEDGE */
+            unsigned char dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
             unsigned char dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
             unsigned char alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
         };
