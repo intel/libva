@@ -609,6 +609,7 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned short coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
     unsigned char closed_entry;		/* ENTRY_POINT_LAYER::CLOSED_ENTRY */
     unsigned char broken_link;		/* ENTRY_POINT_LAYER::BROKEN_LINK */
+    unsigned char loopfilter;		/* ENTRY_POINT_LAYER::LOOPFILTER */
     unsigned char conditional_overlap_flag; /* ENTRY_POINT_LAYER::CONDOVER */
     unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
     union {
