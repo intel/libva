@@ -478,6 +478,9 @@ typedef struct _VAMacroblockParameterBufferMPEG2
      * The bitplanes for coded_block_pattern are described 
      * in Figure 6.10-12 in the spec
      */
+     
+    /* Number of skipped macroblocks after this macroblock */
+    unsigned short num_skipped_macroblocks;
 } VAMacroblockParameterBufferMPEG2;
 
 /* 
