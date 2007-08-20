@@ -829,8 +829,8 @@ typedef struct _VASliceParameterBufferH264
     unsigned short first_mb_in_slice;
     unsigned char slice_type;
     unsigned char direct_spatial_mv_pred_flag;
-    unsigned char num_ref_idx_10_active_minus1;
-    unsigned char num_ref_idx_11_active_minus1;
+    unsigned char num_ref_idx_l0_active_minus1;
+    unsigned char num_ref_idx_l1_active_minus1;
     unsigned char cabac_init_idc;
     char slice_qp_delta;
     unsigned char disable_deblocking_filter_idc;
