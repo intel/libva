@@ -1,27 +1,53 @@
 /*
+ * Copyright (c) 2007, Intel Corp.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  Redistributions of source code must retain the above copyright notice, 
+ *  this list of conditions and the following disclaimer.
+ *  Redistributions in binary form must reproduce the above copyright notice, 
+ *  this list of conditions and the following disclaimer in the documentation 
+ *  and/or other materials provided with the distribution.
+ *  Neither the name of Intel Corporation nor the names of its contributors 
+ *  may be used to endorse or promote products derived from this software 
+ *  without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/*
  * Video Decode Acceleration API Specification
  *
  * Rev. 0.20
  * <jonathan.bian@intel.com>
  *
  * Revision History:
- * rev 0.10 (12/10/06 Jonathan Bian) - Initial draft
- * rev 0.11 (12/15/06 Jonathan Bian) - Fixed some errors
- * rev 0.12 (02/05/07 Jonathan Bian) - Added VC-1 data structures for slice level decode
- * rev 0.13 (02/28/07 Jonathan Bian) - Added GetDisplay()
- * rev 0.14 (04/13/07 Jonathan Bian) - Fixed MPEG-2 PictureParameter structure, cleaned up a few funcs.
- * rev 0.15 (04/20/07 Jonathan Bian) - Overhauled buffer management  
- * rev 0.16 (05/02/07 Jonathan Bian) - Added error codes and fixed some issues with configuration 
- * rev 0.17 (05/07/07 Jonathan Bian) - Added H.264/AVC data structures for slice level decode.
- * rev 0.18 (05/14/07 Jonathan Bian) - Added data structures for MPEG-4 slice level decode 
- *                                     and MPEG-2 motion compensation.
- * rev 0.19 (08/06/07 Jonathan Bian) - Removed extra type for bitplane data (VAPictureBitPlaneBufferType)
- * rev 0.20 (08/07/07 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure.
+ * rev 0.10 (12/10/2006 Jonathan Bian) - Initial draft
+ * rev 0.11 (12/15/2006 Jonathan Bian) - Fixed some errors
+ * rev 0.12 (02/05/2007 Jonathan Bian) - Added VC-1 data structures for slice level decode
+ * rev 0.13 (02/28/2007 Jonathan Bian) - Added GetDisplay()
+ * rev 0.14 (04/13/2007 Jonathan Bian) - Fixed MPEG-2 PictureParameter structure, cleaned up a few funcs.
+ * rev 0.15 (04/20/2007 Jonathan Bian) - Overhauled buffer management  
+ * rev 0.16 (05/02/2007 Jonathan Bian) - Added error codes and fixed some issues with configuration 
+ * rev 0.17 (05/07/2007 Jonathan Bian) - Added H.264/AVC data structures for slice level decode.
+ * rev 0.18 (05/14/2007 Jonathan Bian) - Added data structures for MPEG-4 slice level decode 
+ *                                       and MPEG-2 motion compensation.
+ * rev 0.19 (08/06/2007 Jonathan Bian) - Removed extra type for bitplane data. 
+ * rev 0.20 (08/08/2007 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure. 
  *
  * Acknowledgements:
  *  Thanks to Waldo Bastian for many valuable feedbacks.
  */
-
 #ifndef _VA_H_
 #define _VA_H_
 
@@ -639,7 +665,7 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char picture_type	: 2; 	/* PICTURE_LAYER::PTYPE */
             unsigned char frame_coding_mode	: 3;/* PICTURE_LAYER::FCM */
             unsigned char top_field_first	: 1;/* PICTURE_LAYER::TFF */
-            unsigned char is_first_field	: 1; /* set to 1 if it is first field */
+            unsigned char is_first_field	: 1; /* set to 1 if it is the first field */
             unsigned char intensity_compensation: 1;/* PICTURE_LAYER::INTCOMP */
         };
         unsigned char picture_fields;
@@ -693,7 +719,7 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
             unsigned char alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
         };
-        unsigned short pic_quantizer_fields;
+        unsigned long pic_quantizer_fields;
     };
     union {
         struct {
@@ -781,6 +807,7 @@ typedef struct _VAPictureParameterBufferH264
             unsigned char frame_mbs_only_flag			: 1; 
             unsigned char mb_adaptive_frame_field_flag		: 1; 
             unsigned char direct_8x8_inference_flag		: 1; 
+            unsigned char MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
         };
         unsigned char seq_fields;
     };
@@ -796,6 +823,7 @@ typedef struct _VAPictureParameterBufferH264
             unsigned char weighted_bipred_idc		: 1; 
             unsigned char transform_8x8_mode_flag	: 1; 
             unsigned char field_pic_flag		: 1;
+            unsigned char constrained_intra_pred_flag	: 1;
         };
         unsigned char pic_fields;
     };
@@ -840,6 +868,18 @@ typedef struct _VASliceParameterBufferH264
     VAPictureH264 RefPicList1[32];	/* See 8.2.4.2 */
     unsigned char luma_log2_weight_denom;
     unsigned char chroma_log2_weight_denom;
+    unsigned char luma_weight_l0_flag;
+    short luma_weight_l0[32];
+    short luma_offset_l0[32];
+    unsigned char chroma_weight_l0_flag;
+    short chroma_weight_l0[32][2];
+    short chroma_offset_l0[32][2];
+    unsigned char luma_weight_l1_flag;
+    short luma_weight_l1[32];
+    short luma_offset_l1[32];
+    unsigned char chroma_weight_l1_flag;
+    short chroma_weight_l1[32][2];
+    short chroma_offset_l1[32][2];
 } VASliceParameterBufferH264;
 
 /* Buffer functions */
