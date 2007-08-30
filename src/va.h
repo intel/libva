@@ -427,6 +427,7 @@ typedef struct _VAPictureParameterBufferMPEG2
             unsigned char alternate_scan		: 1;
             unsigned char repeat_first_field		: 1;
             unsigned char progressive_frame		: 1;
+            unsigned char is_first_field		: 1;/* indicate whether the current field is the first field for field picture */
         };
         unsigned int picture_coding_extension;
     };
