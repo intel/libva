@@ -21,9 +21,9 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 dummy_drv_video_la_LTLIBRARIES = dummy_drv_video.la
-dummy_drv_video_ladir = $(libdir)
-dummy_drv_video_la_LDFLAGS = -no-undefined -module
-dummy_drv_video_la_LIBADD = 
+dummy_drv_video_ladir = /usr/X11R6/lib/modules/dri
+dummy_drv_video_la_LDFLAGS = -no-undefined -module -Wl,--no-undefined
+dummy_drv_video_la_LIBADD = -lva
 
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd
 dummy_drv_video_la_SOURCES = dummy_drv_video.c object_heap.c
