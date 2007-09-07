@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.20
+ * Rev. 0.22
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -40,8 +40,11 @@
  *                                       and MPEG-2 motion compensation.
  * rev 0.19 (08/06/2007 Jonathan Bian) - Removed extra type for bitplane data. 
  * rev 0.20 (08/08/2007 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure. 
+ * rev 0.21 (08/20/2007 Jonathan Bian) - Added image and subpicture support. 
+ * rev 0.22 (08/27/2007 Jonathan Bian) - Added support for chroma-keying and global alpha. 
  *
  * Acknowledgements:
+ *  Some concepts borrowed from XvMC and XvImage.
  *  Thanks to Waldo Bastian for many valuable feedbacks.
  */
 #ifndef _VA_H_
@@ -54,7 +57,9 @@ extern "C" {
 /* 
 Overview 
 
-This is a decode only interface currently.  The basic steps are:
+This is currently a decode only interface (with some rendering support).  
+
+The basic operation steps are:
 
 - Negotiate a mutually acceptable configuration with the server to lock
   down profile, entrypoints, and other attributes that will not change on 
@@ -139,7 +144,9 @@ typedef enum
     VAProfileVC1Advanced		= 10,
 } VAProfile;
 
-/* Currently defined entrypoints */
+/* 
+ *  Currently defined entrypoints 
+ */
 typedef enum
 {
     VAEntrypointVLD		= 1,
@@ -781,7 +788,6 @@ typedef struct _VAPictureH264
 #define VA_PICTURE_H264_BOTTOM_FIELD		0x00000004
 #define VA_PICTURE_H264_SHORT_TERM_REFERENCE	0x00000008
 #define VA_PICTURE_H264_LONG_TERM_REFERENCE	0x00000010
-#define VA_PICTURE_H264_USED_AS_REFERENCE	0x00000020
 
 /* H.264 Picture Parameter Buffer */
 /* 
@@ -1007,8 +1013,11 @@ VAStatus vaSyncSurface (
 
 typedef enum
 {
-    VASurfaceRendering	= 0,
-    VASurfaceReady	= 1,
+    VASurfaceRendering	= 0, /* Rendering in progress */ 
+    VASurfaceDisplaying	= 1, /* Displaying in progress (not safe to render into it) */ 
+                             /* this status is useful if surface is used as the source */
+                             /* of an overlay */
+    VASurfaceReady	= 2  /* not being rendered or displayed */
 } VASurfaceStatus;
 
 /*
@@ -1031,6 +1040,274 @@ VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
     void **buffer, /* out */
     unsigned int *stride /* out */
 );
+
+/*
+ * Images and Subpictures
+ * VAImage is used to either get the surface data to client memory, or 
+ * to copy image data in client memory to a surface. 
+ * Both images, subpictures and surfaces follow the same 2D coordinate system where origin 
+ * is at the upper left corner with positive X to the right and positive Y down
+ */
+#define MAKEFOURCC(ch0, ch1, ch2, ch3) \
+    ((unsigned long)(unsigned char) (ch0) | ((unsigned long)(unsigned char) (ch1) << 8) | \
+    ((unsigned long)(unsigned char) (ch2) << 16) | ((unsigned long)(unsigned char) (ch3) << 24 ))
+
+/* a few common FourCCs */
+#define VA_FOURCC_NV12		0x3231564E
+#define VA_FOURCC_AI44		0x34344149
+#define VA_FOURCC_RGBA		0x41424752
+
+typedef struct _VAImageFormat
+{
+    unsigned int	fourcc;
+    unsigned int	byte_order; /* VA_LSB_FIRST, VA_MSB_FIRST */
+    unsigned int	bits_per_pixel;
+    /* for RGB formats */
+    unsigned int	depth; /* significant bits per pixel */
+    unsigned int	red_mask;
+    unsigned int	green_mask;
+    unsigned int	blue_mask;
+    unsigned int	alpha_mask;
+} VAImageFormat;
+
+typedef int VAImageID;
+
+typedef struct _VAImage
+{
+    VAImageID		image_id; /* uniquely identify this image */
+    VASurfaceID		surface_id; /* which surface will this image be associated with */
+    VAImageFormat	format;
+    unsigned char	*data;	/* image data pointer */
+    /* The following fields are set by the library */
+    unsigned short	width; 
+    unsigned short	height;
+    unsigned int	data_size;
+    unsigned int	num_planes;
+    /* 
+     * An array of size num_planes indicating the scanline pitch in bytes.
+     * Each plane may have a different pitch.
+     */
+    unsigned int	*pitches;
+    /* 
+     * An array of size num_planes indicating the byte offset from
+     * "data" t the start of each plane.
+     */
+    unsigned int	*offsets;
+} VAImage;
+
+/* Get maximum number of image formats supported by the implementation */
+int vaMaxNumImageFormats (
+    VADisplay dpy
+);
+
+/* 
+ * Query supported image formats 
+ * The caller must provide a "format_list" array that can hold at
+ * least vaMaxNumImageFormats() entries. The actual number of formats
+ * returned in "format_list" is returned in "num_formats".
+ */
+VAStatus vaQueryImageFormats (
+    VADisplay dpy,
+    VAImageFormat *format_list,	/* out */
+    int *num_formats		/* out */
+);
+
+/* 
+ * The width and height fields returned in the VAImage structure may get 
+ * enlarged for some YUV formats. The size of the data buffer that needs
+ * to be allocated will be given in the "data_size" field in VAImage.
+ * Image data is not allocated by this function.  The client should
+ * allocate the memory  and fill in the VAImage structure's data field
+ * after looking at "data_size" returned from the library.
+ */
+VAStatus vaCreateImage (
+    VADisplay dpy,
+    VAImageFormat *format,
+    int width,
+    int height,
+    VAImage *image	/* out */
+);
+
+/*
+ * Should call DestroyImage before destroying the surface it is bound to
+ */
+VAStatus vaDestroyImage (
+    VADisplay dpy,
+    VAImage *image
+);
+
+/*
+ * Retrive surface data into a VAImage
+ * Image must be in a format supported by the implementation
+ */
+VAStatus vaGetImage (
+    VADisplay dpy,
+    VASurface *surface,
+    int x,	/* coordinates of the upper left source pixel */
+    int y,
+    unsigned int width, /* width and height of the region */
+    unsigned int height,
+    VAImage *image
+);
+
+/*
+ * Copy data from a VAImage to a surface
+ * Image must be in a format supported by the implementation
+ */
+VAStatus vaPutImage (
+    VADisplay dpy,
+    VASurface *surface,
+    VAImage *image,
+    int src_x,
+    int src_y,
+    unsigned int width,
+    unsigned int height,
+    int dest_x,
+    int dest_y
+);
+
+/*
+ * Subpictures 
+ * Subpicture is a special type of image that can be blended 
+ * with a surface during vaPutSurface(). Subpicture can be used to render
+ * DVD sub-titles or closed captioning text etc.  
+ */
+
+typedef int VASubpictureID;
+
+typedef struct _VASubpicture
+{
+    VASubpictureID	subpicture_id; /* uniquely identify this subpicture */
+    VASurfaceID		surface_id; /* which surface does this subpicture associate with */
+    VAImageID		image_id;
+    /* The following fields are set by the library */
+    int num_palette_entries; /* paletted formats only. set to zero for image without palettes */
+    /* 
+     * Each component is one byte and entry_bytes indicates the number of components in 
+     * each entry (eg. 3 for YUV palette entries). set to zero for image without palettes
+     */
+    int entry_bytes; 
+    /*
+     * An array of ascii characters describing teh order of the components within the bytes.
+     * Only entry_bytes characters of the string are used.
+     */
+    char component_order[4];
+    
+    /* chromakey range */
+    unsigned int chromakey_min;
+    unsigned int chromakey_max;
+
+    /* global alpha */
+    unsigned int global_alpha;
+
+    /* flags */
+    unsigned int flags; /* see below */
+} VASubpicture;
+
+/* flags for subpictures */
+#define VA_SUBPICTURE_CHROMA_KEYING	0x0001
+#define VA_SUBPICTURE_GLOBAL_ALPHA	0x0002
+
+/* Get maximum number of subpicture formats supported by the implementation */
+int vaMaxNumSubpictureFormats (
+    VADisplay dpy
+);
+
+/* 
+ * Query supported subpicture formats 
+ * The caller must provide a "format_list" array that can hold at
+ * least vaMaxNumSubpictureFormats() entries. The flags arrary holds the flag 
+ * for each format to indicate additional capabilities for that format. The actual 
+ * number of formats returned in "format_list" is returned in "num_formats".
+ */
+VAStatus vaQuerySubpictureFormats (
+    VADisplay dpy,
+    VAImageFormat *format_list,	/* out */
+    unsigned int *flags,	/* out */
+    unsigned int *num_formats	/* out */
+);
+
+/* 
+ * Subpictures are created with an image associated. 
+ */
+VAStatus vaCreateSubpicture (
+    VADisplay dpy,
+    VAImage *image,
+    VASubpicture *subpicture	/* out */
+);
+
+/*
+ * Destroy the subpicture before destroying the image it is assocated to
+ */
+VAStatus vaDestroySubpicture (
+    VADisplay dpy,
+    VASubpicture *subpicture
+);
+
+VAStatus vaSetSubpicturePalette (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    /* 
+     * pointer to an array holding the palette data.  The size of the array is 
+     * num_palette_entries * entry_bytes in size.  The order of the components
+     * in the palette is described by the component_order in VASubpicture struct
+     */
+    unsigned char *palette 
+);
+
+/*
+ * If chromakey is enabled, then the area where the source value falls within
+ * the chromakey [min, max] range is transparent
+ */
+VAStatus vaSetSubpictureChromakey (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    unsigned int chromakey_min,
+    unsigned int chromakey_max 
+);
+
+/*
+ * Global alpha value is between 0 and 1. A value of 1 means fully opaque and 
+ * a value of 0 means fully transparent. If per-pixel alpha is also specified then
+ * the overall alpha is per-pixel alpha multiplied by the global alpha
+ */
+VAStatus vaSetSubpictureGlobalAlpha (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    float global_alpha 
+);
+
+/*
+  vaAssociateSubpicture associates the subpicture with the target_surface.
+  It defines the region mapping between the subpicture and the target 
+  surface through source and destination rectangles (with the same width and height).
+  Both will be displayed at the next call to vaPutSurface.  Additional
+  associations before the call to vaPutSurface simply overrides the association.
+*/
+VAStatus vaAssociateSubpicture (
+    VADisplay dpy,
+    VASurface *target_surface,
+    VASubpicture *subpicture,
+    short src_x, /* upper left offset in subpicture */
+    short src_y,
+    short dest_x, /* upper left offset in surface */
+    short dest_y,
+    unsigned short width,
+    unsigned short height,
+    /*
+     * whether to enable chroma-keying or global-alpha
+     * see VA_SUBPICTURE_XXX values
+     */
+    unsigned int flags
+);
+
+typedef struct _VARectangle
+{
+    short x;
+    short y;
+    unsigned short width;
+    unsigned short height;
+} VARectangle;
 
 #ifdef __cplusplus
 }
@@ -1165,4 +1442,22 @@ Mostly to demonstrate program flow with no error handling ...
 
 	/* all slices have been sent, mark the end for this frame */
 	vaEndPicture(dpy, context);
+
+	/* The following code demonstrates rendering a sub-title with the target surface */
+	/* Find out supported Subpicture formats */
+	VAImageFormat sub_formats[4];
+        int num_formats;
+	vaQuerySubpictureFormats(dpy, sub_formats, &num_formats);
+        /* Assume that we find AI44 as a subpicture format in sub_formats[0] */
+        VAImage sub_image;
+	VASubpicture subpicture;
+        unsigned char sub_data[128][16];
+        /* fill sub_data with subtitle in AI44 */
+	vaCreateImage(dpy, surfaces, sub_formats, 128, 16, sub_data, &sub_image);
+	vaCreateSubpicture(dpy, &sub_image, &subpicture);
+	unsigned char palette[3][16];
+	/* fill the palette data */
+	vaSetSubpicturePalette(dpy, &subpicture, palette);
+	vaAssociateSubpicture(dpy, surfaces, &subpicture, 0, 0, 296, 400, 128, 16);
+	vaPutSurface(dpy, surfaces, win, 0, 0, 720, 480, 100, 100, 640, 480, NULL, 0, 0);
 #endif

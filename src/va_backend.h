@@ -46,19 +46,21 @@ struct VADriverContext
     int max_profiles;
     int max_entrypoints;
     int max_attributes;
+    int max_image_formats;
+    int max_subpic_formats;
     void *handle;			/* dlopen handle */
     void *pDriverData;
     struct
     {
-    VAStatus (*vaTerminate) ( VADriverContextP ctx );
+	 VAStatus (*vaTerminate) ( VADriverContextP ctx );
 
-    VAStatus (*vaQueryConfigProfiles) (
+	 VAStatus (*vaQueryConfigProfiles) (
 		VADriverContextP ctx,
 		VAProfile *profile_list,	/* out */
 		int *num_profiles			/* out */
 	);
 
-    VAStatus (*vaQueryConfigEntrypoints) (
+	VAStatus (*vaQueryConfigEntrypoints) (
 		VADriverContextP ctx,
 		VAProfile profile,
 		VAEntrypoint  *entrypoint_list,	/* out */
@@ -201,7 +203,109 @@ struct VADriverContext
 		short desty,
 		unsigned short destw,
 		unsigned short desth,
+		VARectangle *cliprects, /* client supplied clip list */
+		unsigned int number_cliprects, /* number of clip rects in the clip list */
 		int flags /* de-interlacing flags */
+	);
+
+	VAStatus (*vaQueryImageFormats) (
+		VADriverContextP ctx,
+		VAImageFormat *format_list,        /* out */
+		int *num_formats           /* out */
+	);
+
+	VAStatus (*vaCreateImage) (
+		VADriverContextP ctx,
+		VAImageFormat *format,
+		int width,
+		int height,
+		VAImage *image     /* out */
+	);
+
+	VAStatus (*vaDestroyImage) (
+		VADriverContextP ctx,
+		VAImage *image
+	);
+
+	VAStatus (*vaGetImage) (
+		VADriverContextP ctx,
+		VASurface *surface,
+		int x,     /* coordinates of the upper left source pixel */
+		int y,
+		unsigned int width, /* width and height of the region */
+		unsigned int height,
+		VAImage *image
+	);
+
+	VAStatus (*vaPutImage) (
+		VADriverContextP ctx,
+		VASurface *surface,
+		VAImage *image,
+		int src_x,
+		int src_y,
+		unsigned int width,
+		unsigned int height,
+		int dest_x,
+		int dest_y 
+	);
+
+	VAStatus (*vaQuerySubpictureFormats) (
+		VADriverContextP ctx,
+		VAImageFormat *format_list,        /* out */
+		unsigned int *flags,       /* out */
+		unsigned int *num_formats  /* out */
+	);
+
+	VAStatus (*vaCreateSubpicture) (
+		VADriverContextP ctx,
+		VAImage *image,
+		VASubpicture *subpicture   /* out */
+	);
+
+	VAStatus (*vaDestroySubpicture) (
+		VADriverContextP ctx,
+		VASubpicture *subpicture
+	);
+
+	VAStatus (*vaSetSubpicturePalette) (
+		VADriverContextP ctx,
+		VASubpicture *subpicture,
+		/*
+		 * pointer to an array holding the palette data.  The size of the array is
+		 * num_palette_entries * entry_bytes in size.  The order of the components
+		 * in the palette is described by the component_order in VASubpicture struct
+		 */
+		unsigned char *palette
+	);
+
+	VAStatus (*vaSetSubpictureChromakey) (
+		VADriverContextP ctx,
+		VASubpicture *subpicture,
+		unsigned int chromakey_min,
+		unsigned int chromakey_max
+	);
+
+	VAStatus (*vaSetSubpictureGlobalAlpha) (
+		VADriverContextP ctx,
+		VASubpicture *subpicture,
+		float global_alpha 
+	);
+
+	VAStatus (*vaAssociateSubpicture) (
+		VADriverContextP ctx,
+		VASurface *target_surface,
+		VASubpicture *subpicture,
+		short src_x, /* upper left offset in subpicture */
+		short src_y,
+		short dest_x, /* upper left offset in surface */
+		short dest_y,
+		unsigned short width,
+		unsigned short height,
+		/*
+		 * whether to enable chroma-keying or global-alpha
+		 * see VA_SUBPICTURE_XXX values
+		 */
+		unsigned int flags
 	);
 
 	VAStatus (*vaDbgCopySurfaceToBuffer) (

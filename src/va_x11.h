@@ -44,6 +44,8 @@ VAStatus vaPutSurface (
     short desty,
     unsigned short destw,
     unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
     int flags /* de-interlacing flags */
 );
 

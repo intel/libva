@@ -36,7 +36,7 @@
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_20"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_22"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define ASSERT_CONTEXT(dpy) assert( vaDbgContextIsValid(dpy) )
@@ -252,6 +252,8 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_MAXIMUM(vaStatus, ctx, profiles);
                     CHECK_MAXIMUM(vaStatus, ctx, entrypoints);
                     CHECK_MAXIMUM(vaStatus, ctx, attributes);
+                    CHECK_MAXIMUM(vaStatus, ctx, image_formats);
+                    CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
                     CHECK_VTABLE(vaStatus, ctx, Terminate);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigEntrypoints);
@@ -274,6 +276,18 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SyncSurface);
                     CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
                     CHECK_VTABLE(vaStatus, ctx, PutSurface);
+                    CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
+                    CHECK_VTABLE(vaStatus, ctx, CreateImage);
+                    CHECK_VTABLE(vaStatus, ctx, DestroyImage);
+                    CHECK_VTABLE(vaStatus, ctx, GetImage);
+                    CHECK_VTABLE(vaStatus, ctx, PutImage);
+                    CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
+                    CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, SetSubpicturePalette);
+                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
+                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
+                    CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DbgCopySurfaceToBuffer);
                 }
                 if (VA_STATUS_SUCCESS != vaStatus)
@@ -334,7 +348,7 @@ const char *vaErrorStr(VAStatus error_status)
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
-    return "unknwon libva error / description missing";
+    return "unknown libva error / description missing";
 }
       
 VAStatus vaInitialize (
@@ -431,6 +445,7 @@ int vaMaxNumEntrypoints (
   return ctx->max_entrypoints;
 }
 
+
 /* Get maximum number of attributs supported by the implementation */
 int vaMaxNumConfigAttributes (
     VADisplay dpy
@@ -441,7 +456,6 @@ int vaMaxNumConfigAttributes (
   
   return ctx->max_attributes;
 }
-
 
 VAStatus vaQueryConfigEntrypoints (
     VADisplay dpy,
@@ -734,6 +748,8 @@ VAStatus vaPutSurface (
     short desty,
     unsigned short destw,
     unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
     int flags /* de-interlacing flags */
 )
 {
@@ -742,8 +758,265 @@ VAStatus vaPutSurface (
 
   TRACE(vaPutSurface);
   return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth, flags );
+                                   destx, desty, destw, desth,
+                                   cliprects, number_cliprects, flags );
 }
+
+/* Get maximum number of image formats supported by the implementation */
+int vaMaxNumImageFormats (
+    VADisplay dpy
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+  
+  return ctx->max_image_formats;
+}
+
+VAStatus vaQueryImageFormats (
+    VADisplay dpy,
+    VAImageFormat *format_list,	/* out */
+    int *num_formats		/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaQueryImageFormats);
+  return ctx->vtable.vaQueryImageFormats ( ctx, format_list, num_formats);
+}
+
+/* 
+ * The width and height fields returned in the VAImage structure may get 
+ * enlarged for some YUV formats. The size of the data buffer that needs
+ * to be allocated will be given in the "data_size" field in VAImage.
+ * Image data is not allocated by this function.  The client should
+ * allocate the memory and fill in the VAImage structure's data field
+ * after looking at "data_size" returned from the library.
+ */
+VAStatus vaCreateImage (
+    VADisplay dpy,
+    VAImageFormat *format,
+    int width,
+    int height,
+    VAImage *image	/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaCreateImage);
+  return ctx->vtable.vaCreateImage ( ctx, format, width, height, image);
+}
+
+/*
+ * Should call DestroyImage before destroying the surface it is bound to
+ */
+VAStatus vaDestroyImage (
+    VADisplay dpy,
+    VAImage *image
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaDestroyImage);
+  return ctx->vtable.vaDestroyImage ( ctx, image);
+}
+
+/*
+ * Retrieve surface data into a VAImage
+ * Image must be in a format supported by the implementation
+ */
+VAStatus vaGetImage (
+    VADisplay dpy,
+    VASurface *surface,
+    int x,	/* coordinates of the upper left source pixel */
+    int y,
+    unsigned int width, /* width and height of the region */
+    unsigned int height,
+    VAImage *image
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaGetImage);
+  return ctx->vtable.vaGetImage ( ctx, surface, x, y, width, height, image);
+}
+
+/*
+ * Copy data from a VAImage to a surface
+ * Image must be in a format supported by the implementation
+ */
+VAStatus vaPutImage (
+    VADisplay dpy,
+    VASurface *surface,
+    VAImage *image,
+    int src_x,
+    int src_y,
+    unsigned int width,
+    unsigned int height,
+    int dest_x,
+    int dest_y
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaPutImage);
+  return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, width, height, dest_x, dest_y );
+}
+
+/* Get maximum number of subpicture formats supported by the implementation */
+int vaMaxNumSubpictureFormats (
+    VADisplay dpy
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+  
+  return ctx->max_subpic_formats;
+}
+
+/* 
+ * Query supported subpicture formats 
+ * The caller must provide a "format_list" array that can hold at
+ * least vaMaxNumSubpictureFormats() entries. The flags arrary holds the flag 
+ * for each format to indicate additional capabilities for that format. The actual 
+ * number of formats returned in "format_list" is returned in "num_formats".
+ */
+VAStatus vaQuerySubpictureFormats (
+    VADisplay dpy,
+    VAImageFormat *format_list,	/* out */
+    unsigned int *flags,	/* out */
+    unsigned int *num_formats	/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaQuerySubpictureFormats);
+  return ctx->vtable.vaQuerySubpictureFormats ( ctx, format_list, flags, num_formats);
+}
+
+/* 
+ * Subpictures are created with an image associated. 
+ */
+VAStatus vaCreateSubpicture (
+    VADisplay dpy,
+    VAImage *image,
+    VASubpicture *subpicture	/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaCreateSubpicture);
+  return ctx->vtable.vaCreateSubpicture ( ctx, image, subpicture );
+}
+
+/*
+ * Destroy the subpicture before destroying the image it is assocated to
+ */
+VAStatus vaDestroySubpicture (
+    VADisplay dpy,
+    VASubpicture *subpicture
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaDestroySubpicture);
+  return ctx->vtable.vaDestroySubpicture ( ctx, subpicture);
+}
+
+VAStatus vaSetSubpicturePalette (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    /* 
+     * pointer to an array holding the palette data.  The size of the array is 
+     * num_palette_entries * entry_bytes in size.  The order of the components
+     * in the palette is described by the component_order in VASubpicture struct
+     */
+    unsigned char *palette 
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaSetSubpicturePalette);
+  return ctx->vtable.vaSetSubpicturePalette ( ctx, subpicture, palette);
+}
+
+/*
+ * If chromakey is enabled, then the area where the source value falls within
+ * the chromakey [min, max] range is transparent
+ */
+VAStatus vaSetSubpictureChromakey (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    unsigned int chromakey_min,
+    unsigned int chromakey_max 
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaSetSubpictureChromakey);
+  return ctx->vtable.vaSetSubpictureChromakey ( ctx, subpicture, chromakey_min, chromakey_max );
+}
+
+
+/*
+ * Global alpha value is between 0 and 1. A value of 1 means fully opaque and 
+ * a value of 0 means fully transparent. If per-pixel alpha is also specified then
+ * the overall alpha is per-pixel alpha multiplied by the global alpha
+ */
+VAStatus vaSetSubpictureGlobalAlpha (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    float global_alpha 
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaSetSubpictureGlobalAlpha);
+  return ctx->vtable.vaSetSubpictureGlobalAlpha ( ctx, subpicture, global_alpha );
+}
+
+/*
+  vaAssociateSubpicture associates the subpicture with the target_surface.
+  It defines the region mapping between the subpicture and the target 
+  surface through source and destination rectangles (with the same width and height).
+  Both will be displayed at the next call to vaPutSurface.  Additional
+  associations before the call to vaPutSurface simply overrides the association.
+*/
+VAStatus vaAssociateSubpicture (
+    VADisplay dpy,
+    VASurface *target_surface,
+    VASubpicture *subpicture,
+    short src_x, /* upper left offset in subpicture */
+    short src_y,
+    short dest_x, /* upper left offset in surface */
+    short dest_y,
+    unsigned short width,
+    unsigned short height,
+    /*
+     * whether to enable chroma-keying or global-alpha
+     * see VA_SUBPICTURE_XXX values
+     */
+    unsigned int flags
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaAssociateSubpicture);
+  return ctx->vtable.vaAssociateSubpicture ( ctx, target_surface, subpicture, src_x, src_y, dest_x, dest_y, width, height, flags );
+}
+
 
 VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
     VASurface *surface,
