@@ -27,8 +27,8 @@ Description: Video Acceleration (VA) API for Linux -- development files
 Package: libva1
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: libx11-6,
+         libxext6, 
          libdrm2 (>= 2.3.0)
 Description: Video Acceleration (VA) API for Linux -- runtime
  The libva library implements the Video Acceleration (VA) API for Linux.
