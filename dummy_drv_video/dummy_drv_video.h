@@ -28,9 +28,11 @@
 #include "va.h"
 #include "object_heap.h"
 
-#define DUMMY_MAX_PROFILES				11
+#define DUMMY_MAX_PROFILES			11
 #define DUMMY_MAX_ENTRYPOINTS			5
 #define DUMMY_MAX_CONFIG_ATTRIBUTES		10
+#define DUMMY_MAX_IMAGE_FORMATS			10
+#define DUMMY_MAX_SUBPIC_FORMATS		4
 
 struct dummy_driver_data {
     struct object_heap	config_heap;
