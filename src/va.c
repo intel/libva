@@ -36,7 +36,7 @@
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_22"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_23"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define ASSERT_CONTEXT(dpy) assert( vaDbgContextIsValid(dpy) )
@@ -276,6 +276,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SyncSurface);
                     CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
                     CHECK_VTABLE(vaStatus, ctx, PutSurface);
+                    CHECK_VTABLE(vaStatus, ctx, CopySurfaceToGLXPbuffer);
                     CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateImage);
                     CHECK_VTABLE(vaStatus, ctx, DestroyImage);
@@ -284,6 +285,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureImage);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpicturePalette);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
@@ -762,6 +764,29 @@ VAStatus vaPutSurface (
                                    cliprects, number_cliprects, flags );
 }
 
+VAStatus vaCopySurfaceToGLXPbuffer (
+    VADisplay dpy,
+    VASurface *surface,	
+    XID pbuffer_id,
+    short srcx,
+    short srcy,
+    unsigned short width,
+    unsigned short height,
+    short destx,
+    short desty,
+    unsigned int draw_buffer,
+    unsigned int flags /* de-interlacing flags */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaCopySurfaceToGLXPbuffer);
+  return ctx->vtable.vaCopySurfaceToGLXPbuffer( ctx, surface, pbuffer_id,
+                                                srcx,srcy,width, height,destx,desty,
+                                                draw_buffer, flags );
+}
+
 /* Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy
@@ -930,6 +955,20 @@ VAStatus vaDestroySubpicture (
   TRACE(vaDestroySubpicture);
   return ctx->vtable.vaDestroySubpicture ( ctx, subpicture);
 }
+
+VAStatus vaSetSubpictureImage (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    VAImage *image
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaSetSubpictureImage);
+  return ctx->vtable.vaSetSubpictureImage ( ctx, subpicture, image);
+}
+
 
 VAStatus vaSetSubpicturePalette (
     VADisplay dpy,

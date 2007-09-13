@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.22
+ * Rev. 0.23
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -41,7 +41,8 @@
  * rev 0.19 (08/06/2007 Jonathan Bian) - Removed extra type for bitplane data. 
  * rev 0.20 (08/08/2007 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure. 
  * rev 0.21 (08/20/2007 Jonathan Bian) - Added image and subpicture support. 
- * rev 0.22 (08/27/2007 Jonathan Bian) - Added support for chroma-keying and global alpha. 
+ * rev 0.22 (08/27/2007 Jonathan Bian) - Added support for chroma-keying and global alpha.
+ * rev 0.23 (09/07/2007 Jonathan Bian) - Fixed some issues with images and subpictures. 
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -397,7 +398,8 @@ typedef enum
     VASliceDataBufferType		= 5,
     VAMacroblockParameterBufferType	= 6,
     VAResidualDataBufferType		= 7,
-    VADeblockingParameterBufferType	= 8
+    VADeblockingParameterBufferType	= 8,
+    VAImageBufferType			= 9
 } VABufferType;
 
 /****************************
@@ -430,7 +432,9 @@ typedef struct _VAPictureParameterBufferMPEG2
             unsigned char alternate_scan		: 1;
             unsigned char repeat_first_field		: 1;
             unsigned char progressive_frame		: 1;
-            unsigned char is_first_field		: 1;/* indicate whether the current field is the first field for field picture */
+            unsigned char is_first_field		: 1; /* indicate whether the current field
+                                                              * is the first field for field picture
+                                                              */
         };
         unsigned int picture_coding_extension;
     };
@@ -1030,6 +1034,7 @@ VAStatus vaQuerySurfaceStatus (
     VASurfaceStatus *status	/* out */
 );
 
+
 /*
  * Copies the surface to a buffer
  * The stride of the surface will be stored in *stride
@@ -1075,10 +1080,18 @@ typedef int VAImageID;
 typedef struct _VAImage
 {
     VAImageID		image_id; /* uniquely identify this image */
-    VASurfaceID		surface_id; /* which surface will this image be associated with */
     VAImageFormat	format;
-    unsigned char	*data;	/* image data pointer */
-    /* The following fields are set by the library */
+    VABufferID		buf;	/* image data buffer */
+    /*
+     * Image data will be stored in a buffer of type VAImageBufferType to facilitate
+     * data store on the server side for optimal performance.
+     * It is expected that the client will first call vaCreateImage which returns a VAImage
+     * structure with the following fields filled by the library. It will then 
+     * create the "buf" with vaBufferCreate. For PutImage, then client will call 
+     * vaBufferData() with the image data before calling PutImage, and for GetImage 
+     * the client will call vaBufferData() with a NULL data pointer, and then call GetImage.
+     * After that the client can use the Map/Unmap buffer functions to access the image data.
+     */
     unsigned short	width; 
     unsigned short	height;
     unsigned int	data_size;
@@ -1090,7 +1103,7 @@ typedef struct _VAImage
     unsigned int	*pitches;
     /* 
      * An array of size num_planes indicating the byte offset from
-     * "data" t the start of each plane.
+     * the beginning of the image data to the start of each plane.
      */
     unsigned int	*offsets;
 } VAImage;
@@ -1113,12 +1126,13 @@ VAStatus vaQueryImageFormats (
 );
 
 /* 
+ * Create a VAImage structure
  * The width and height fields returned in the VAImage structure may get 
  * enlarged for some YUV formats. The size of the data buffer that needs
  * to be allocated will be given in the "data_size" field in VAImage.
- * Image data is not allocated by this function.  The client should
- * allocate the memory  and fill in the VAImage structure's data field
- * after looking at "data_size" returned from the library.
+ * Image data is not allocated by this function.  The client should 
+ * allocate the memory required for the data and fill in the data field after 
+ * looking at "data_size" returned from this call.
  */
 VAStatus vaCreateImage (
     VADisplay dpy,
@@ -1242,6 +1256,16 @@ VAStatus vaCreateSubpicture (
 VAStatus vaDestroySubpicture (
     VADisplay dpy,
     VASubpicture *subpicture
+);
+
+/* 
+ * Bind an image to the subpicture. This image will now be associated with 
+ * the subpicture instead of the one at creation.
+ */
+VAStatus vaSetSubpictureImage (
+    VADisplay dpy,
+    VASubpicture *subpicture,
+    VAImage *image
 );
 
 VAStatus vaSetSubpicturePalette (
@@ -1453,7 +1477,7 @@ Mostly to demonstrate program flow with no error handling ...
 	VASubpicture subpicture;
         unsigned char sub_data[128][16];
         /* fill sub_data with subtitle in AI44 */
-	vaCreateImage(dpy, surfaces, sub_formats, 128, 16, sub_data, &sub_image);
+	vaCreateImage(dpy, sub_formats, 128, 16,&sub_image);
 	vaCreateSubpicture(dpy, &sub_image, &subpicture);
 	unsigned char palette[3][16];
 	/* fill the palette data */

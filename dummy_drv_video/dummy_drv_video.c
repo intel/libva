@@ -517,6 +517,18 @@ VAStatus dummy_DestroySubpicture(
     return VA_STATUS_SUCCESS;
 }
 
+VAStatus dummy_SetSubpictureImage(
+        VADriverContextP ctx,
+        VASubpicture *subpicture,
+        VAImage *image
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus dummy_SetSubpicturePalette(
 	VADriverContextP ctx,
 	VASubpicture *subpicture,
@@ -1005,6 +1017,25 @@ VAStatus dummy_PutSurface(
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
+
+VAStatus dummy_CopySurfaceToGLXPbuffer (
+               VADriverContextP ctx,
+               VASurface *surface,	
+               XID pbuffer_id,
+               short srcx,
+               short srcy,
+               unsigned short width,
+               unsigned short height,
+               short destx,
+               short desty,
+               unsigned int draw_buffer,
+               unsigned int flags /* de-interlacing flags */
+)
+{
+    /* TODO */
+    return VA_STATUS_ERROR_UNKNOWN;
+}
+
 VAStatus dummy_DbgCopySurfaceToBuffer(
 		VADriverContextP ctx,
 		VASurface *surface,
@@ -1056,7 +1087,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_22(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1094,6 +1125,7 @@ VAStatus __vaDriverInit_0_22(  VADriverContextP ctx )
     ctx->vtable.vaSyncSurface = dummy_SyncSurface;
     ctx->vtable.vaQuerySurfaceStatus = dummy_QuerySurfaceStatus;
     ctx->vtable.vaPutSurface = dummy_PutSurface;
+    ctx->vtable.vaCopySurfaceToGLXPbuffer = dummy_CopySurfaceToGLXPbuffer;
     ctx->vtable.vaQueryImageFormats = dummy_QueryImageFormats;
     ctx->vtable.vaCreateImage = dummy_CreateImage;
     ctx->vtable.vaDestroyImage = dummy_DestroyImage;
@@ -1102,6 +1134,7 @@ VAStatus __vaDriverInit_0_22(  VADriverContextP ctx )
     ctx->vtable.vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
     ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
+    ctx->vtable.vaSetSubpictureImage = dummy_SetSubpictureImage;
     ctx->vtable.vaSetSubpicturePalette = dummy_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;

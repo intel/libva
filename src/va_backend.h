@@ -208,6 +208,20 @@ struct VADriverContext
 		int flags /* de-interlacing flags */
 	);
 
+        VAStatus (*vaCopySurfaceToGLXPbuffer) (
+                VADriverContextP ctx,
+                VASurface *surface,	
+                XID pbuffer_id,
+                short srcx,
+                short srcy,
+                unsigned short width,
+                unsigned short height,
+                short destx,
+                short desty,
+                unsigned int draw_buffer,
+                unsigned int flags /* de-interlacing flags */
+        );
+        
 	VAStatus (*vaQueryImageFormats) (
 		VADriverContextP ctx,
 		VAImageFormat *format_list,        /* out */
@@ -267,6 +281,12 @@ struct VADriverContext
 		VASubpicture *subpicture
 	);
 
+        VAStatus (*vaSetSubpictureImage) (
+                VADriverContextP ctx,
+                VASubpicture *subpicture,
+                VAImage *image
+        );
+        
 	VAStatus (*vaSetSubpicturePalette) (
 		VADriverContextP ctx,
 		VASubpicture *subpicture,
