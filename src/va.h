@@ -820,9 +820,9 @@ typedef struct _VAPictureParameterBufferH264
     };
     unsigned char num_slice_groups_minus1;
     unsigned char slice_group_map_type;
-    unsigned char pic_init_qp_minus26;
-    unsigned char chroma_qp_index_offset;
-    unsigned char second_chroma_qp_index_offset;
+    signed char pic_init_qp_minus26;
+    signed char chroma_qp_index_offset;
+    signed char second_chroma_qp_index_offset;
     union {
         struct {
             unsigned char entropy_coding_mode_flag	: 1; 
