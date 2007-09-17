@@ -825,10 +825,10 @@ typedef struct _VAPictureParameterBufferH264
     signed char second_chroma_qp_index_offset;
     union {
         struct {
-            unsigned char entropy_coding_mode_flag	: 1; 
-            unsigned char weighted_pred_flag		: 1; 
-            unsigned char weighted_bipred_idc		: 1; 
-            unsigned char transform_8x8_mode_flag	: 1; 
+            unsigned char entropy_coding_mode_flag	: 1;
+            unsigned char weighted_pred_flag		: 1;
+            unsigned char weighted_bipred_idc		: 2;
+            unsigned char transform_8x8_mode_flag	: 1;
             unsigned char field_pic_flag		: 1;
             unsigned char constrained_intra_pred_flag	: 1;
         };
