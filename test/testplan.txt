@@ -1,0 +1,61 @@
+
+Test 1
+- Initialize & Terminate
+- vaGetDisplay, vaInitialize, vaTerminate
+
+Test 2
+- Query profiles
+- vaQueryConfigProfiles, vaMaxNumProfiles
+
+Test 3
+- Query Entrypoints for all profiles
+- vaQueryConfigEntryPoints, vaMaxNumEntryPoints
+
+Test 4
+- Query Config attributes for all profiles / entrypoints
+- vaQueryConfigAttributes, vaMaxNumConfigAttributes
+
+Test 5
+- Create & destroy config for each profile / entrypoint
+- vaCreateConfig
+- NOTE: vaDestroyConfig does not exist
+
+Test 6
+- Get config attributes of various possible configs
+- vaGetConfigAttributes
+- Check if results for vaGetConfigAttributes match with vaQueryConfigAttributes for
+a given profile / entrypoint
+
+Test 7
+- Create and destroy surfaces
+- vaCreateSurfaces, vaDestroySurfaces
+- Create surfaces of 352 x 288 pixels
+- Create 1, 4 and 16 surfaces, destroy 4, create 6 surfaces, destroy 16, 1
+and 6 surfaces.
+
+Test 8
+- Create and destroy surfaces of different sizes
+- Create surfaces of 10 x 10 pixels, 128 x 128 pixels, 176 x 144 pixels, 144 x 176
+pixels, 352 x 288 pixels, 399 x 299 pixels, 640 x 480 pixels, 1280 x 720
+pixels
+
+Test 9
+- Create and destroy a context for each profile / entrypoint
+- Pass 4 surfaces of 352 x 288 pixels
+- vaCreateContext, vaDestroyContext
+- See also Test 5
+
+Test 10
+- Create and destroy buffers
+- vaCreateBuffer, vaDestroyBuffer
+- For each different buffertype, create a buffer, then destroy them one by
+one.
+
+Test 11
+- Map & unmap buffers
+- vaBufferData, vaMapBuffer, vaUnmapBuffer
+- For each different buffertype, copy data to the buffer with vaBufferData.
+Then map the buffer and verify the contents of the buffer.
+
+
+
