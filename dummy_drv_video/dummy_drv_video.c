@@ -141,7 +141,7 @@ VAStatus dummy_QueryConfigEntrypoints(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus dummy_QueryConfigAttributes(
+VAStatus dummy_GetConfigAttributes(
 		VADriverContextP ctx,
 		VAProfile profile,
 		VAEntrypoint entrypoint,
@@ -332,7 +332,7 @@ VAStatus dummy_DestroyConfig(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus dummy_GetConfigAttributes(
+VAStatus dummy_QueryConfigAttributes(
 		VADriverContextP ctx,
 		VAConfigID config_id,
 		VAProfile *profile,		/* out */

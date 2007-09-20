@@ -68,7 +68,7 @@ struct VADriverContext
 		int *num_entrypoints			/* out */
 	);
 
-	VAStatus (*vaQueryConfigAttributes) (
+	VAStatus (*vaGetConfigAttributes) (
 		VADriverContextP ctx,
 		VAProfile profile,
 		VAEntrypoint entrypoint,
@@ -90,7 +90,7 @@ struct VADriverContext
 		VAConfigID config_id
 	);
 
-	VAStatus (*vaGetConfigAttributes) (
+	VAStatus (*vaQueryConfigAttributes) (
 		VADriverContextP ctx,
 		VAConfigID config_id, 
 		VAProfile *profile,		/* out */

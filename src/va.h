@@ -231,14 +231,14 @@ VAStatus vaQueryConfigEntrypoints (
 );
 
 /* 
- * Query attributes for a given profile/entrypoint pair 
+ * Get attributes for a given profile/entrypoint pair 
  * The caller must provide an “attrib_list” with all attributes to be 
  * queried.  Upon return, the attributes in “attrib_list” have been 
  * updated with their value.  Unknown attributes or attributes that are 
  * not supported for the given profile/entrypoint pair will have their 
  * value set to VA_ATTRIB_NOT_SUPPORTED
  */
-VAStatus vaQueryConfigAttributes (
+VAStatus vaGetConfigAttributes (
     VADisplay dpy,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -274,14 +274,14 @@ VAStatus vaDestroyConfig (
 );
 
 /* 
- * Get all attributes for a given configuration 
+ * Query all attributes for a given configuration 
  * The profile of the configuration is returned in “profile”
  * The entrypoint of the configuration is returned in “entrypoint”
  * The caller must provide an “attrib_list” array that can hold at least 
  * vaMaxNumConfigAttributes() entries. The actual number of attributes 
  * returned in “attrib_list” is returned in “num_attribs”
  */
-VAStatus vaGetConfigAttributes (
+VAStatus vaQueryConfigAttributes (
     VADisplay dpy,
     VAConfigID config_id, 
     VAProfile *profile, 	/* out */
@@ -1459,7 +1459,7 @@ Mostly to demonstrate program flow with no error handling ...
 	/* Assuming finding VLD, find out the format for the render target */
 	VAConfigAttrib attrib;
 	attrib.type = VAConfigAttribRTFormat;
-	vaQueryConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
+	vaGetConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
                                 &attrib, 1);
 
 	if (attrib.value & VA_RT_FORMAT_YUV420)

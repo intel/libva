@@ -477,7 +477,7 @@ VAStatus vaQueryConfigEntrypoints (
   return ctx->vtable.vaQueryConfigEntrypoints ( ctx, profile, entrypoints, num_entrypoints);
 }
 
-VAStatus vaQueryConfigAttributes (
+VAStatus vaGetConfigAttributes (
     VADisplay dpy,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -488,8 +488,8 @@ VAStatus vaQueryConfigAttributes (
   VADriverContextP ctx = CTX(dpy);
   ASSERT_CONTEXT(ctx);
 
-  TRACE(vaQueryConfigAttributes);
-  return ctx->vtable.vaQueryConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
+  TRACE(vaGetConfigAttributes);
+  return ctx->vtable.vaGetConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
 }
 
 VAStatus vaQueryConfigProfiles (
@@ -533,7 +533,7 @@ VAStatus vaDestroyConfig (
   return ctx->vtable.vaDestroyConfig ( ctx, config_id );
 }
 
-VAStatus vaGetConfigAttributes (
+VAStatus vaQueryConfigAttributes (
     VADisplay dpy,
     VAConfigID config_id, 
     VAProfile *profile, 	/* out */
@@ -545,8 +545,8 @@ VAStatus vaGetConfigAttributes (
   VADriverContextP ctx = CTX(dpy);
   ASSERT_CONTEXT(ctx);
 
-  TRACE(vaGetConfigAttributes);
-  return ctx->vtable.vaGetConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
+  TRACE(vaQueryConfigAttributes);
+  return ctx->vtable.vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
 VAStatus vaCreateSurfaces (
