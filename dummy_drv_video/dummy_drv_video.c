@@ -312,6 +312,26 @@ VAStatus dummy_CreateConfig(
     return vaStatus;
 }
 
+VAStatus dummy_DestroyConfig(
+		VADriverContextP ctx,
+		VAConfigID config_id
+	)
+{
+    INIT_DRIVER_DATA
+    VAStatus vaStatus;
+    object_config_p obj_config;
+
+    obj_config = CONFIG(config_id);
+    if (NULL == obj_config)
+    {
+        vaStatus = VA_STATUS_ERROR_INVALID_CONFIG;
+        return vaStatus;
+    }
+
+    object_heap_free( &driver_data->config_heap, (object_base_p) obj_config);
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus dummy_GetConfigAttributes(
 		VADriverContextP ctx,
 		VAConfigID config_id,
@@ -1010,31 +1030,61 @@ VAStatus dummy_PutSurface(
 		unsigned short desth,
 		VARectangle *cliprects, /* client supplied clip list */
 		unsigned int number_cliprects, /* number of clip rects in the clip list */
-		int flags /* de-interlacing flags */
+		unsigned int flags /* de-interlacing flags */
 	)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
-
-VAStatus dummy_CopySurfaceToGLXPbuffer (
-               VADriverContextP ctx,
-               VASurface *surface,	
-               XID pbuffer_id,
-               short srcx,
-               short srcy,
-               unsigned short width,
-               unsigned short height,
-               short destx,
-               short desty,
-               unsigned int draw_buffer,
-               unsigned int flags /* de-interlacing flags */
-)
+/* 
+ * Query display attributes 
+ * The caller must provide a "attr_list" array that can hold at
+ * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
+ * returned in "attr_list" is returned in "num_attributes".
+ */
+VAStatus dummy_QueryDisplayAttributes (
+		VADriverContextP ctx,
+		VADisplayAttribute *attr_list,	/* out */
+		int *num_attributes		/* out */
+	)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
 }
+
+/* 
+ * Get display attributes 
+ * This function returns the current attribute values in "attr_list".
+ * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can have their values retrieved.  
+ */
+VAStatus dummy_GetDisplayAttributes (
+		VADriverContextP ctx,
+		VADisplayAttribute *attr_list,	/* in/out */
+		int num_attributes
+	)
+{
+    /* TODO */
+    return VA_STATUS_ERROR_UNKNOWN;
+}
+
+/* 
+ * Set display attributes 
+ * Only attributes returned with VA_DISPLAY_ATTRIB_SETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or 
+ * the value is out of range, the function returns VA_STATUS_ERROR_ATTR_NOT_SUPPORTED
+ */
+VAStatus dummy_SetDisplayAttributes (
+		VADriverContextP ctx,
+		VADisplayAttribute *attr_list,
+		int num_attributes
+	)
+{
+    /* TODO */
+    return VA_STATUS_ERROR_UNKNOWN;
+}
+
 
 VAStatus dummy_DbgCopySurfaceToBuffer(
 		VADriverContextP ctx,
@@ -1087,7 +1137,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1095,12 +1145,13 @@ VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
     int i;
 
     ctx->version_major = 0;
-    ctx->version_minor = 22;
+    ctx->version_minor = 24;
     ctx->max_profiles = DUMMY_MAX_PROFILES;
     ctx->max_entrypoints = DUMMY_MAX_ENTRYPOINTS;
     ctx->max_attributes = DUMMY_MAX_CONFIG_ATTRIBUTES;
     ctx->max_image_formats = DUMMY_MAX_IMAGE_FORMATS;
     ctx->max_subpic_formats = DUMMY_MAX_SUBPIC_FORMATS;
+    ctx->max_display_attributes = DUMMY_MAX_DISPLAY_ATTRIBUTES;
 
     ctx->vtable.vaTerminate = dummy_Terminate;
     ctx->vtable.vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
@@ -1108,6 +1159,7 @@ VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
     ctx->vtable.vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
     ctx->vtable.vaQueryConfigAttributes = dummy_QueryConfigAttributes;
     ctx->vtable.vaCreateConfig = dummy_CreateConfig;
+    ctx->vtable.vaDestroyConfig = dummy_DestroyConfig;
     ctx->vtable.vaGetConfigAttributes = dummy_GetConfigAttributes;
     ctx->vtable.vaCreateSurfaces = dummy_CreateSurfaces;
     ctx->vtable.vaDestroySurface = dummy_DestroySurface;
@@ -1125,7 +1177,6 @@ VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
     ctx->vtable.vaSyncSurface = dummy_SyncSurface;
     ctx->vtable.vaQuerySurfaceStatus = dummy_QuerySurfaceStatus;
     ctx->vtable.vaPutSurface = dummy_PutSurface;
-    ctx->vtable.vaCopySurfaceToGLXPbuffer = dummy_CopySurfaceToGLXPbuffer;
     ctx->vtable.vaQueryImageFormats = dummy_QueryImageFormats;
     ctx->vtable.vaCreateImage = dummy_CreateImage;
     ctx->vtable.vaDestroyImage = dummy_DestroyImage;
@@ -1139,6 +1190,10 @@ VAStatus __vaDriverInit_0_23(  VADriverContextP ctx )
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
+    ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
+    ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;
+    ctx->vtable.vaSetDisplayAttributes = dummy_SetDisplayAttributes;
+    
     ctx->vtable.vaDbgCopySurfaceToBuffer = dummy_DbgCopySurfaceToBuffer;
 
     driver_data = (struct dummy_driver_data *) malloc( sizeof(*driver_data) );

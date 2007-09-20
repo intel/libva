@@ -48,6 +48,7 @@ struct VADriverContext
     int max_attributes;
     int max_image_formats;
     int max_subpic_formats;
+    int max_display_attributes;
     void *handle;			/* dlopen handle */
     void *pDriverData;
     struct
@@ -82,6 +83,11 @@ struct VADriverContext
 		VAConfigAttrib *attrib_list,
 		int num_attribs,
 		VAConfigID *config_id		/* out */
+	);
+
+	VAStatus (*vaDestroyConfig) (
+		VADriverContextP ctx,
+		VAConfigID config_id
 	);
 
 	VAStatus (*vaGetConfigAttributes) (
@@ -205,23 +211,9 @@ struct VADriverContext
 		unsigned short desth,
 		VARectangle *cliprects, /* client supplied clip list */
 		unsigned int number_cliprects, /* number of clip rects in the clip list */
-		int flags /* de-interlacing flags */
+		unsigned int flags /* de-interlacing flags */
 	);
 
-        VAStatus (*vaCopySurfaceToGLXPbuffer) (
-                VADriverContextP ctx,
-                VASurface *surface,	
-                XID pbuffer_id,
-                short srcx,
-                short srcy,
-                unsigned short width,
-                unsigned short height,
-                short destx,
-                short desty,
-                unsigned int draw_buffer,
-                unsigned int flags /* de-interlacing flags */
-        );
-        
 	VAStatus (*vaQueryImageFormats) (
 		VADriverContextP ctx,
 		VAImageFormat *format_list,        /* out */
@@ -327,6 +319,25 @@ struct VADriverContext
 		 */
 		unsigned int flags
 	);
+
+	VAStatus (*vaQueryDisplayAttributes) (
+		VADriverContextP ctx,
+		VADisplayAttribute *attr_list,	/* out */
+		int *num_attributes		/* out */
+        );
+
+	VAStatus (*vaGetDisplayAttributes) (
+		VADriverContextP ctx,
+		VADisplayAttribute *attr_list,	/* in/out */
+		int num_attributes
+        );
+        
+        VAStatus (*vaSetDisplayAttributes) (
+		VADriverContextP ctx,
+                VADisplayAttribute *attr_list,
+                int num_attributes
+        );
+
 
 	VAStatus (*vaDbgCopySurfaceToBuffer) (
 		VADriverContextP ctx,
