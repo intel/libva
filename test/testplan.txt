@@ -12,17 +12,16 @@ Test 3
 - vaQueryConfigEntryPoints, vaMaxNumEntryPoints
 
 Test 4
-- Query Config attributes for all profiles / entrypoints
-- vaQueryConfigAttributes, vaMaxNumConfigAttributes
+- Get Config attributes for all profiles / entrypoints
+- vaGetConfigAttributes
 
 Test 5
 - Create & destroy config for each profile / entrypoint
-- vaCreateConfig
-- NOTE: vaDestroyConfig does not exist
+- vaCreateConfig, vaDestroyConfig
 
 Test 6
 - Get config attributes of various possible configs
-- vaGetConfigAttributes
+- vaQueryConfigAttributes, vaMaxNumConfigAttributes
 - Check if results for vaGetConfigAttributes match with vaQueryConfigAttributes for
 a given profile / entrypoint
 
@@ -57,5 +56,51 @@ Test 11
 - For each different buffertype, copy data to the buffer with vaBufferData.
 Then map the buffer and verify the contents of the buffer.
 
+Test 12
+- Render single MPEG2 I-frame
+- vaBeginPicture, vaRenderPicture (num_buffers == 1), vaEndPicture
 
+Test 13
+- Render single MPEG2 I-frame, multiple buffer submission
+- vaRenderPicture (num_buffers > 1)
+
+Test 14
+- Render single MPEG2 I-frame, split buffers
+- Slice split over 2 buffers
+
+Test 15
+- Render single MPEG2 I-frame, split buffers
+- Slice split over 3 buffers
+
+Test 16
+- Sync Surface
+- Render single MPEG2 I-frame, then check vaQuerySurfaceStatus, vaSyncSurface and vaQuerySurfaceStatus
+
+Test 17
+- Query image formats
+- vaMaxNumImageFormats, vaQueryImageFormats
+
+Test 18
+- Create and destroy vaImage
+- vaCreateImage, vaDestroyImage
+
+Test 19
+- Get image data
+- Render single MPEG2 I-frame, copy surface data to image, check resulting
+image
+- vaGetImage
+
+Test 20
+- Put image data
+- Render single MPEG2 I-frame, copy half of a VAImage to surface, copy
+surface back to VAImage, check resulting image
+- vaPutImage
+
+Test 21
+- Query subpicture formats
+- vaMaxNumSubpictureFormats, vaQuerySubpictureFromats
+
+Test 22
+- Create and destory subpictures
+- vaCreateSubpicture, vaDestroySubpicture
 

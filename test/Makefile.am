@@ -20,14 +20,26 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-check_PROGRAMS = test
+check_PROGRAMS = test_01 test_02 test_03 test_04 test_05
 testdir = $(bindir)
-
-# This gives better backtraces when running valgrind:
-# test_LDADD = ../src/libva.la ../../psb-video/src/psb_drv_video.la
-test_LDADD = ../src/libva.la
 
 AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src
 test_SOURCES = test.c
 
 TESTS = $(check_PROGRAMS)
+
+test_01_LDADD = ../src/libva.la
+test_01_SOURCES = test_01.c
+
+test_02_LDADD = ../src/libva.la
+test_02_SOURCES = test_02.c
+
+test_03_LDADD = ../src/libva.la
+test_03_SOURCES = test_03.c
+
+test_04_LDADD = ../src/libva.la
+test_04_SOURCES = test_04.c
+
+test_05_LDADD = ../src/libva.la
+test_05_SOURCES = test_05.c
+
