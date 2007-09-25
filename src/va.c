@@ -36,7 +36,7 @@
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_23"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_24"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define ASSERT_CONTEXT(dpy) assert( vaDbgContextIsValid(dpy) )
@@ -254,11 +254,13 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_MAXIMUM(vaStatus, ctx, attributes);
                     CHECK_MAXIMUM(vaStatus, ctx, image_formats);
                     CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
+                    CHECK_MAXIMUM(vaStatus, ctx, display_attributes);
                     CHECK_VTABLE(vaStatus, ctx, Terminate);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigEntrypoints);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigAttributes);
                     CHECK_VTABLE(vaStatus, ctx, CreateConfig);
+                    CHECK_VTABLE(vaStatus, ctx, DestroyConfig);
                     CHECK_VTABLE(vaStatus, ctx, GetConfigAttributes);
                     CHECK_VTABLE(vaStatus, ctx, CreateSurfaces);
                     CHECK_VTABLE(vaStatus, ctx, DestroySurface);
@@ -276,7 +278,6 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SyncSurface);
                     CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
                     CHECK_VTABLE(vaStatus, ctx, PutSurface);
-                    CHECK_VTABLE(vaStatus, ctx, CopySurfaceToGLXPbuffer);
                     CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateImage);
                     CHECK_VTABLE(vaStatus, ctx, DestroyImage);
@@ -290,6 +291,9 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
+                    CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
+                    CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, DbgCopySurfaceToBuffer);
                 }
                 if (VA_STATUS_SUCCESS != vaStatus)
@@ -473,7 +477,7 @@ VAStatus vaQueryConfigEntrypoints (
   return ctx->vtable.vaQueryConfigEntrypoints ( ctx, profile, entrypoints, num_entrypoints);
 }
 
-VAStatus vaQueryConfigAttributes (
+VAStatus vaGetConfigAttributes (
     VADisplay dpy,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -484,8 +488,8 @@ VAStatus vaQueryConfigAttributes (
   VADriverContextP ctx = CTX(dpy);
   ASSERT_CONTEXT(ctx);
 
-  TRACE(vaQueryConfigAttributes);
-  return ctx->vtable.vaQueryConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
+  TRACE(vaGetConfigAttributes);
+  return ctx->vtable.vaGetConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
 }
 
 VAStatus vaQueryConfigProfiles (
@@ -517,7 +521,19 @@ VAStatus vaCreateConfig (
   return ctx->vtable.vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
 }
 
-VAStatus vaGetConfigAttributes (
+VAStatus vaDestroyConfig (
+    VADisplay dpy,
+    VAConfigID config_id
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaDestroyConfig);
+  return ctx->vtable.vaDestroyConfig ( ctx, config_id );
+}
+
+VAStatus vaQueryConfigAttributes (
     VADisplay dpy,
     VAConfigID config_id, 
     VAProfile *profile, 	/* out */
@@ -529,8 +545,8 @@ VAStatus vaGetConfigAttributes (
   VADriverContextP ctx = CTX(dpy);
   ASSERT_CONTEXT(ctx);
 
-  TRACE(vaGetConfigAttributes);
-  return ctx->vtable.vaGetConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
+  TRACE(vaQueryConfigAttributes);
+  return ctx->vtable.vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
 VAStatus vaCreateSurfaces (
@@ -752,7 +768,7 @@ VAStatus vaPutSurface (
     unsigned short desth,
     VARectangle *cliprects, /* client supplied clip list */
     unsigned int number_cliprects, /* number of clip rects in the clip list */
-    int flags /* de-interlacing flags */
+    unsigned int flags /* de-interlacing flags */
 )
 {
   VADriverContextP ctx = CTX(dpy);
@@ -762,29 +778,6 @@ VAStatus vaPutSurface (
   return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
-}
-
-VAStatus vaCopySurfaceToGLXPbuffer (
-    VADisplay dpy,
-    VASurface *surface,	
-    XID pbuffer_id,
-    short srcx,
-    short srcy,
-    unsigned short width,
-    unsigned short height,
-    short destx,
-    short desty,
-    unsigned int draw_buffer,
-    unsigned int flags /* de-interlacing flags */
-)
-{
-  VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
-
-  TRACE(vaCopySurfaceToGLXPbuffer);
-  return ctx->vtable.vaCopySurfaceToGLXPbuffer( ctx, surface, pbuffer_id,
-                                                srcx,srcy,width, height,destx,desty,
-                                                draw_buffer, flags );
 }
 
 /* Get maximum number of image formats supported by the implementation */
@@ -1055,6 +1048,75 @@ VAStatus vaAssociateSubpicture (
   TRACE(vaAssociateSubpicture);
   return ctx->vtable.vaAssociateSubpicture ( ctx, target_surface, subpicture, src_x, src_y, dest_x, dest_y, width, height, flags );
 }
+
+/* Get maximum number of display attributes supported by the implementation */
+int vaMaxNumDisplayAttributes (
+    VADisplay dpy
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+  
+  return ctx->max_display_attributes;
+}
+
+/* 
+ * Query display attributes 
+ * The caller must provide a "attr_list" array that can hold at
+ * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
+ * returned in "attr_list" is returned in "num_attributes".
+ */
+VAStatus vaQueryDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* out */
+    int *num_attributes			/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaQueryDisplayAttributes);
+  return ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
+}
+
+/* 
+ * Get display attributes 
+ * This function returns the current attribute values in "attr_list".
+ * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can have their values retrieved.  
+ */
+VAStatus vaGetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* in/out */
+    int num_attributes
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaGetDisplayAttributes);
+  return ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
+}
+
+/* 
+ * Set display attributes 
+ * Only attributes returned with VA_DISPLAY_ATTRIB_SETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or 
+ * the value is out of range, the function returns VA_STATUS_ERROR_ATTR_NOT_SUPPORTED
+ */
+VAStatus vaSetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  ASSERT_CONTEXT(ctx);
+
+  TRACE(vaSetDisplayAttributes);
+  return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
+}
+
 
 
 VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,

@@ -20,14 +20,52 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-check_PROGRAMS = test
+check_PROGRAMS = test_01 test_02 test_03 test_04 test_05 test_06 \
+		test_07 test_08 test_09 test_10 test_11
+
 testdir = $(bindir)
 
-# This gives better backtraces when running valgrind:
-# test_LDADD = ../src/libva.la ../../psb-video/src/psb_drv_video.la
-test_LDADD = ../src/libva.la
-
 AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src
-test_SOURCES = test.c
 
 TESTS = $(check_PROGRAMS)
+
+TEST_LIBS = ../src/libva.la
+
+test_01_LDADD = $(TEST_LIBS)
+test_01_SOURCES = test_01.c
+
+test_02_LDADD = $(TEST_LIBS)
+test_02_SOURCES = test_02.c
+
+test_03_LDADD = $(TEST_LIBS)
+test_03_SOURCES = test_03.c
+
+test_04_LDADD = $(TEST_LIBS)
+test_04_SOURCES = test_04.c
+
+test_05_LDADD = $(TEST_LIBS)
+test_05_SOURCES = test_05.c
+
+test_06_LDADD = $(TEST_LIBS)
+test_06_SOURCES = test_06.c
+
+test_07_LDADD = $(TEST_LIBS)
+test_07_SOURCES = test_07.c
+
+test_08_LDADD = $(TEST_LIBS)
+test_08_SOURCES = test_08.c
+
+test_09_LDADD = $(TEST_LIBS)
+test_09_SOURCES = test_09.c
+
+test_10_LDADD = $(TEST_LIBS)
+test_10_SOURCES = test_10.c
+
+test_11_LDADD = $(TEST_LIBS)
+test_11_SOURCES = test_11.c
+
+
+valgrind:	$(check_PROGRAMS)
+	for a in $(check_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done

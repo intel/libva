@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.23
+ * Rev. 0.24
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -43,6 +43,7 @@
  * rev 0.21 (08/20/2007 Jonathan Bian) - Added image and subpicture support. 
  * rev 0.22 (08/27/2007 Jonathan Bian) - Added support for chroma-keying and global alpha.
  * rev 0.23 (09/07/2007 Jonathan Bian) - Fixed some issues with images and subpictures. 
+ * rev 0.24 (09/18/2007 Jonathan Bian) - Added display attributes. 
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -90,7 +91,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_INVALID_CONTEXT		0x00000003
 #define VA_STATUS_ERROR_INVALID_SURFACE		0x00000004
 #define VA_STATUS_ERROR_INVALID_BUFFER		0x00000005
-#define VA_STATUS_ERROR_ATTR_NOT_SUPPORTED	0x00000006 /* Todo: Remove */
+#define VA_STATUS_ERROR_ATTR_NOT_SUPPORTED	0x00000006
 #define VA_STATUS_ERROR_MAX_NUM_EXCEEDED	0x00000007
 #define VA_STATUS_ERROR_UNSUPPORTED_PROFILE		0x00000008
 #define VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT	0x00000009
@@ -230,14 +231,14 @@ VAStatus vaQueryConfigEntrypoints (
 );
 
 /* 
- * Query attributes for a given profile/entrypoint pair 
+ * Get attributes for a given profile/entrypoint pair 
  * The caller must provide an “attrib_list” with all attributes to be 
  * queried.  Upon return, the attributes in “attrib_list” have been 
  * updated with their value.  Unknown attributes or attributes that are 
  * not supported for the given profile/entrypoint pair will have their 
  * value set to VA_ATTRIB_NOT_SUPPORTED
  */
-VAStatus vaQueryConfigAttributes (
+VAStatus vaGetConfigAttributes (
     VADisplay dpy,
     VAProfile profile,
     VAEntrypoint entrypoint,
@@ -245,7 +246,10 @@ VAStatus vaQueryConfigAttributes (
     int num_attribs
 );
 
-typedef int VAConfigID;
+/* Generic ID type, can be re-typed for specific implementation */
+typedef unsigned int VAGenericID;
+
+typedef VAGenericID VAConfigID;
 
 /* 
  * Create a configuration for the decode pipeline 
@@ -262,14 +266,22 @@ VAStatus vaCreateConfig (
 );
 
 /* 
- * Get all attributes for a given configuration 
+ * Free resources associdated with a given config 
+ */
+VAStatus vaDestroyConfig (
+    VADisplay dpy,
+    VAConfigID config_id
+);
+
+/* 
+ * Query all attributes for a given configuration 
  * The profile of the configuration is returned in “profile”
  * The entrypoint of the configuration is returned in “entrypoint”
  * The caller must provide an “attrib_list” array that can hold at least 
  * vaMaxNumConfigAttributes() entries. The actual number of attributes 
  * returned in “attrib_list” is returned in “num_attribs”
  */
-VAStatus vaGetConfigAttributes (
+VAStatus vaQueryConfigAttributes (
     VADisplay dpy,
     VAConfigID config_id, 
     VAProfile *profile, 	/* out */
@@ -285,11 +297,9 @@ VAStatus vaGetConfigAttributes (
  * Context represents a "virtual" video decode pipeline
  */
 
-/* generic context ID type, can be re-typed for specific implementation */
-typedef int VAContextID;
+typedef VAGenericID VAContextID;
 
-/* generic surface ID type, can be re-typed for specific implementation */
-typedef int VASurfaceID;
+typedef VAGenericID VASurfaceID;
 
 #define VA_INVALID_SURFACE	-1
 
@@ -386,7 +396,7 @@ VAStatus vaDestroyContext (
  *
  */
 
-typedef int VABufferID;
+typedef VAGenericID VABufferID;
 
 typedef enum
 {
@@ -820,15 +830,15 @@ typedef struct _VAPictureParameterBufferH264
     };
     unsigned char num_slice_groups_minus1;
     unsigned char slice_group_map_type;
-    unsigned char pic_init_qp_minus26;
-    unsigned char chroma_qp_index_offset;
-    unsigned char second_chroma_qp_index_offset;
+    signed char pic_init_qp_minus26;
+    signed char chroma_qp_index_offset;
+    signed char second_chroma_qp_index_offset;
     union {
         struct {
-            unsigned char entropy_coding_mode_flag	: 1; 
-            unsigned char weighted_pred_flag		: 1; 
-            unsigned char weighted_bipred_idc		: 1; 
-            unsigned char transform_8x8_mode_flag	: 1; 
+            unsigned char entropy_coding_mode_flag	: 1;
+            unsigned char weighted_pred_flag		: 1;
+            unsigned char weighted_bipred_idc		: 2;
+            unsigned char transform_8x8_mode_flag	: 1;
             unsigned char field_pic_flag		: 1;
             unsigned char constrained_intra_pred_flag	: 1;
         };
@@ -1075,7 +1085,7 @@ typedef struct _VAImageFormat
     unsigned int	alpha_mask;
 } VAImageFormat;
 
-typedef int VAImageID;
+typedef VAGenericID VAImageID;
 
 typedef struct _VAImage
 {
@@ -1187,7 +1197,7 @@ VAStatus vaPutImage (
  * DVD sub-titles or closed captioning text etc.  
  */
 
-typedef int VASubpictureID;
+typedef VAGenericID VASubpictureID;
 
 typedef struct _VASubpicture
 {
@@ -1333,6 +1343,79 @@ typedef struct _VARectangle
     unsigned short height;
 } VARectangle;
 
+/*
+ * Display attributes
+ * Display attributes are used to control things such as contrast, hue, saturation,
+ * brightness etc. in the rendering process.  The application can query what
+ * attributes are supported by the driver, and then set the appropriate attributes
+ * before calling vaPutSurface()
+ */
+
+/* Currently defined display attribute types */
+typedef enum
+{
+    VADisplayAttribBrightness		= 0,
+    VADisplayAttribContrast		= 1,
+    VADisplayAttribHue			= 2,
+    VADisplayAttribSaturation		= 3,
+} VADisplayAttribType;
+
+/* flags for VADisplayAttribute */
+#define VA_DISPLAY_ATTRIB_NOT_SUPPORTED	0x0000
+#define VA_DISPLAY_ATTRIB_GETTABLE	0x0001
+#define VA_DISPLAY_ATTRIB_SETTABLE	0x0002
+
+typedef struct _VADisplayAttribute
+{
+    VADisplayAttribType type;
+    int min_value;
+    int max_value;
+    int value;	/* used by the set/get attribute functions */
+/* flags can be VA_DISPLAY_ATTRIB_GETTABLE or VA_DISPLAY_ATTRIB_SETTABLE or OR'd together */
+    unsigned int flags;
+} VADisplayAttribute;
+
+/* Get maximum number of display attributs supported by the implementation */
+int vaMaxNumDisplayAttributes (
+    VADisplay dpy
+);
+
+/* 
+ * Query display attributes 
+ * The caller must provide a "attr_list" array that can hold at
+ * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
+ * returned in "attr_list" is returned in "num_attributes".
+ */
+VAStatus vaQueryDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* out */
+    int *num_attributes			/* out */
+);
+
+/* 
+ * Get display attributes 
+ * This function returns the current attribute values in "attr_list".
+ * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can have their values retrieved.  
+ */
+VAStatus vaGetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* in/out */
+    int num_attributes
+);
+
+/* 
+ * Set display attributes 
+ * Only attributes returned with VA_DISPLAY_ATTRIB_SETTABLE set in the "flags" field
+ * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or 
+ * the value is out of range, the function returns VA_STATUS_ERROR_ATTR_NOT_SUPPORTED
+ */
+VAStatus vaSetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+);
+
 #ifdef __cplusplus
 }
 #endif
@@ -1376,7 +1459,7 @@ Mostly to demonstrate program flow with no error handling ...
 	/* Assuming finding VLD, find out the format for the render target */
 	VAConfigAttrib attrib;
 	attrib.type = VAConfigAttribRTFormat;
-	vaQueryConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
+	vaGetConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
                                 &attrib, 1);
 
 	if (attrib.value & VA_RT_FORMAT_YUV420)
@@ -1476,8 +1559,11 @@ Mostly to demonstrate program flow with no error handling ...
         VAImage sub_image;
 	VASubpicture subpicture;
         unsigned char sub_data[128][16];
-        /* fill sub_data with subtitle in AI44 */
-	vaCreateImage(dpy, sub_formats, 128, 16,&sub_image);
+        /* create an image for the subtitle */
+	vaCreateImage(dpy, sub_formats, 128, 16, &sub_image);
+	vaCreateBuffer(dpy, VAImageBufferType, &sub_image->buf);
+        /* fill the image data */
+	vaBufferData(dpy, sub_image->buf, sub_image->data_size, sub_data);
 	vaCreateSubpicture(dpy, &sub_image, &subpicture);
 	unsigned char palette[3][16];
 	/* fill the palette data */
