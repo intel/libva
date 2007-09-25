@@ -737,11 +737,14 @@ VAStatus dummy_CreateBuffer(
     {
         case VAPictureParameterBufferType:
         case VAIQMatrixBufferType:
+        case VABitPlaneBufferType:
+        case VASliceGroupMapBufferType:
         case VASliceParameterBufferType:
         case VASliceDataBufferType:
         case VAMacroblockParameterBufferType:
         case VAResidualDataBufferType:
         case VADeblockingParameterBufferType:
+        case VAImageBufferType:
             /* Ok */
             break;
         default:
