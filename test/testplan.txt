@@ -27,7 +27,7 @@ a given profile / entrypoint
 
 Test 7
 - Create and destroy surfaces
-- vaCreateSurfaces, vaDestroySurfaces
+- vaCreateSurfaces, vaDestroySurface
 - Create surfaces of 352 x 288 pixels
 - Create 1, 4 and 16 surfaces, destroy 4, create 6 surfaces, destroy 16, 1
 and 6 surfaces.

@@ -22,7 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define TEST_DESCRIPTION	"Create/destroy configs for all profiles / entrypoints"
+#define TEST_DESCRIPTION	"Create/destroy contexts for all profiles / entrypoints"
 
 #include "test_common.c"
 
@@ -44,6 +44,7 @@ void test()
     ASSERT(entrypoints);
 
     VAConfigID *configs = malloc(max_entrypoints * num_profiles * sizeof(VAConfigID));
+    VAContext *contexts = malloc(max_entrypoints * num_profiles * sizeof(VAContext));
 
     for(i = 0; i < num_profiles; i++)
     {
@@ -60,6 +61,32 @@ void test()
         }
     }
 
+    int width = 352;
+    int height = 288;
+    int surface_count = 4;
+    int total_surfaces = config_count * surface_count;
+    
+    VASurface *surfaces = malloc(total_surfaces * sizeof(VASurface));
+
+    // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
+    va_status = vaCreateSurfaces(va_dpy, width, height, VA_RT_FORMAT_YUV420, total_surfaces, surfaces);
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    
+    for(i = 0; i < config_count; i++)
+    {
+        status("vaCreateContext with config %08x\n", configs[i]);
+        int flags = 0;
+        va_status = vaCreateContext( va_dpy, configs[i], width, height, flags, surfaces + i*surface_count, surface_count, &contexts[i] );
+        ASSERT( VA_STATUS_SUCCESS == va_status );
+    }
+
+    for(i = 0; i < config_count; i++)
+    {
+        status("vaDestroyContext for context %08x\n", contexts[i].context_id);
+        va_status = vaDestroyContext( va_dpy, &contexts[i] );
+        ASSERT( VA_STATUS_SUCCESS == va_status );
+    }
+
     for(i = 0; i < config_count; i++)
     {
         status("vaDestroyConfig for config %08x\n", configs[i]);
@@ -67,7 +94,12 @@ void test()
         ASSERT( VA_STATUS_SUCCESS == va_status );
     }
     
+    va_status = vaDestroySurface(va_dpy, surfaces, total_surfaces);
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    
+    free(contexts);
     free(configs);
+    free(surfaces);
     free(entrypoints);
 }
 
