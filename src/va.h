@@ -728,7 +728,7 @@ typedef struct _VAPictureParameterBufferVC1
         struct {
             unsigned char dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
             unsigned char half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
-            unsigned char pic_quantizer_scale : 1;/* PICTURE_LAYER::PQUANT */
+            unsigned char pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
             unsigned char pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
             unsigned char dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
             unsigned char dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
