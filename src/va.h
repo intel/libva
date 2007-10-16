@@ -694,7 +694,7 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char direct_mb	: 1; 	/* PICTURE::DIRECTMB */
             unsigned char skip_mb	: 1; 	/* PICTURE::SKIPMB */
             unsigned char field_tx	: 1; 	/* PICTURE::FIELDTX */
-            unsigned char foward_mb	: 1;	/* PICTURE::FORWARDMB */
+            unsigned char forward_mb	: 1;	/* PICTURE::FORWARDMB */
             unsigned char ac_pred	: 1;	/* PICTURE::ACPRED */
             unsigned char overflags	: 1;	/* PICTURE::OVERFLAGS */
         };
@@ -711,8 +711,8 @@ typedef struct _VAPictureParameterBufferVC1
     };
     union {
         struct {
-            unsigned char mv_mode	: 2; 	/* PICTURE_LAYER::MVMODE */
-            unsigned char mv_mode2	: 2; 	/* PICTURE_LAYER::MVMODE2 */
+            unsigned char mv_mode	: 3; 	/* PICTURE_LAYER::MVMODE */
+            unsigned char mv_mode2	: 3; 	/* PICTURE_LAYER::MVMODE2 */
             unsigned char mv_table	: 3;/* PICTURE_LAYER::MVTAB/IMVTAB */
             unsigned char two_mv_block_pattern_table: 2;/* PICTURE_LAYER::2MVBPTAB */
             unsigned char four_mv_switch: 1; 	/* PICTURE_LAYER::4MVSWITCH */
