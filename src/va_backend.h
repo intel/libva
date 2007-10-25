@@ -51,7 +51,7 @@ struct VADriverContext
     int max_display_attributes;
     void *handle;			/* dlopen handle */
     void *pDriverData;
-    struct
+    struct VADriverVTable
     {
 	 VAStatus (*vaTerminate) ( VADriverContextP ctx );
 
@@ -139,15 +139,15 @@ struct VADriverContext
 	VAStatus (*vaBufferData) (
 		VADriverContextP ctx,
 		VABufferID buf_id,	/* in */
-        unsigned int size,	/* in */
-        unsigned int num_elements,	/* in */
-        void *data		/* in */
+		unsigned int size,	/* in */
+		unsigned int num_elements,	/* in */
+		void *data		/* in */
 	);
 
 	VAStatus (*vaBufferSetNumElements) (
 		VADriverContextP ctx,
 		VABufferID buf_id,	/* in */
-        unsigned int num_elements	/* in */
+		unsigned int num_elements	/* in */
 	);
 
 	VAStatus (*vaMapBuffer) (
