@@ -33,7 +33,7 @@ void pre()
 
 #define DEAD_SURFACE_ID 	(VASurfaceID) 0xbeefdead
 
-void test_unique_surfaces(VASurface *surface_list1, int surface_count1, VASurface *surface_list2, int surface_count2)
+void test_unique_surfaces(VASurfaceID *surface_list1, int surface_count1, VASurfaceID *surface_list2, int surface_count2)
 {
     int i,j;
     
@@ -42,9 +42,9 @@ void test_unique_surfaces(VASurface *surface_list1, int surface_count1, VASurfac
         for(j = 0; j < surface_count2; j++)
         {
             if ((surface_list1 == surface_list2) && (i == j)) continue;
-            ASSERT(surface_list1[i].surface_id != VA_INVALID_SURFACE);
-            ASSERT(surface_list2[j].surface_id != VA_INVALID_SURFACE);
-            ASSERT(surface_list1[i].surface_id != surface_list2[j].surface_id);
+            ASSERT(surface_list1[i] != VA_INVALID_SURFACE);
+            ASSERT(surface_list2[j] != VA_INVALID_SURFACE);
+            ASSERT(surface_list1[i] != surface_list2[j]);
         }
     }
 }
@@ -52,10 +52,10 @@ void test_unique_surfaces(VASurface *surface_list1, int surface_count1, VASurfac
 
 void test()
 {
-    VASurface surfaces_1[1+1];
-    VASurface surfaces_4[4+1];
-    VASurface surfaces_16[16+1];
-    VASurface surfaces_6[6+1];
+    VASurfaceID surfaces_1[1+1];
+    VASurfaceID surfaces_4[4+1];
+    VASurfaceID surfaces_16[16+1];
+    VASurfaceID surfaces_6[6+1];
     
     memset(surfaces_1, 0xff, sizeof(surfaces_1));
     memset(surfaces_4, 0xff, sizeof(surfaces_4));
@@ -63,22 +63,22 @@ void test()
     memset(surfaces_6, 0xff, sizeof(surfaces_6));
 
     status("vaCreateSurfaces 1 surface\n");
-    surfaces_1[1].surface_id = DEAD_SURFACE_ID;
+    surfaces_1[1] = DEAD_SURFACE_ID;
     va_status = vaCreateSurfaces(va_dpy, 352, 288, VA_RT_FORMAT_YUV420, 1, surfaces_1);
     ASSERT( VA_STATUS_SUCCESS == va_status );
-    ASSERT( DEAD_SURFACE_ID == surfaces_1[1].surface_id ); /* bounds check */
+    ASSERT( DEAD_SURFACE_ID == surfaces_1[1] ); /* bounds check */
 
     status("vaCreateSurfaces 4 surfaces\n");
-    surfaces_4[4].surface_id = DEAD_SURFACE_ID;
+    surfaces_4[4] = DEAD_SURFACE_ID;
     va_status = vaCreateSurfaces(va_dpy, 352, 288, VA_RT_FORMAT_YUV420, 4, surfaces_4);
     ASSERT( VA_STATUS_SUCCESS == va_status );
-    ASSERT( DEAD_SURFACE_ID == surfaces_4[4].surface_id ); /* bounds check */
+    ASSERT( DEAD_SURFACE_ID == surfaces_4[4] ); /* bounds check */
 
     status("vaCreateSurfaces 16 surfaces\n");
-    surfaces_16[16].surface_id = DEAD_SURFACE_ID;
+    surfaces_16[16] = DEAD_SURFACE_ID;
     va_status = vaCreateSurfaces(va_dpy, 352, 288, VA_RT_FORMAT_YUV420, 16, surfaces_16);
     ASSERT( VA_STATUS_SUCCESS == va_status );
-    ASSERT( DEAD_SURFACE_ID == surfaces_16[16].surface_id ); /* bounds check */
+    ASSERT( DEAD_SURFACE_ID == surfaces_16[16] ); /* bounds check */
     
     test_unique_surfaces(surfaces_1, 1, surfaces_4, 4);
     test_unique_surfaces(surfaces_4, 4, surfaces_16, 4);
@@ -87,29 +87,29 @@ void test()
     test_unique_surfaces(surfaces_1, 16, surfaces_16, 16);
 
     status("vaDestroySurface 4 surfaces\n");
-    va_status = vaDestroySurface(va_dpy, surfaces_4, 4);
+    va_status = vaDestroySurfaces(va_dpy, surfaces_4, 4);
     ASSERT( VA_STATUS_SUCCESS == va_status );
     
     status("vaCreateSurfaces 6 surfaces\n");
-    surfaces_6[6].surface_id = DEAD_SURFACE_ID;
+    surfaces_6[6] = DEAD_SURFACE_ID;
     va_status = vaCreateSurfaces(va_dpy, 352, 288, VA_RT_FORMAT_YUV420, 6, surfaces_6);
     ASSERT( VA_STATUS_SUCCESS == va_status );
-    ASSERT( DEAD_SURFACE_ID == surfaces_6[6].surface_id ); /* bounds check */
+    ASSERT( DEAD_SURFACE_ID == surfaces_6[6] ); /* bounds check */
 
     test_unique_surfaces(surfaces_1, 1, surfaces_6, 6);
     test_unique_surfaces(surfaces_6, 6, surfaces_16, 16);
     test_unique_surfaces(surfaces_1, 6, surfaces_16, 6);
 
     status("vaDestroySurface 16 surfaces\n");
-    va_status = vaDestroySurface(va_dpy, surfaces_16, 16);
+    va_status = vaDestroySurfaces(va_dpy, surfaces_16, 16);
     ASSERT( VA_STATUS_SUCCESS == va_status );
     
     status("vaDestroySurface 1 surface\n");
-    va_status = vaDestroySurface(va_dpy, surfaces_1, 1);
+    va_status = vaDestroySurfaces(va_dpy, surfaces_1, 1);
     ASSERT( VA_STATUS_SUCCESS == va_status );
 
     status("vaDestroySurface 6 surfaces\n");
-    va_status = vaDestroySurface(va_dpy, surfaces_6, 6);
+    va_status = vaDestroySurfaces(va_dpy, surfaces_6, 6);
     ASSERT( VA_STATUS_SUCCESS == va_status );
 }
 

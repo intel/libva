@@ -34,6 +34,7 @@
 #define DUMMY_MAX_IMAGE_FORMATS			10
 #define DUMMY_MAX_SUBPIC_FORMATS		4
 #define DUMMY_MAX_DISPLAY_ATTRIBUTES		4
+#define DUMMY_STR_VENDOR			"Dummy-dummy-1.0-dummy"
 
 struct dummy_driver_data {
     struct object_heap	config_heap;
@@ -52,14 +53,19 @@ struct object_config {
 
 struct object_context {
     struct object_base base;
-    VAContext *context;
-    VAConfigID config;
+    VAContextID context_id;
+    VAConfigID config_id;
     VASurfaceID current_render_target;
+    int picture_width;
+    int picture_height;
+    int num_render_targets;
+    int flags;
+    VASurfaceID *render_targets;
 };
 
 struct object_surface {
     struct object_base base;
-    VASurface *surface;
+    VASurfaceID surface_id;
 };
 
 struct object_buffer {

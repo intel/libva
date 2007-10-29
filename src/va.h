@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.24
+ * Rev. 0.25
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -33,22 +33,24 @@
  * rev 0.12 (02/05/2007 Jonathan Bian) - Added VC-1 data structures for slice level decode
  * rev 0.13 (02/28/2007 Jonathan Bian) - Added GetDisplay()
  * rev 0.14 (04/13/2007 Jonathan Bian) - Fixed MPEG-2 PictureParameter structure, cleaned up a few funcs.
- * rev 0.15 (04/20/2007 Jonathan Bian) - Overhauled buffer management  
- * rev 0.16 (05/02/2007 Jonathan Bian) - Added error codes and fixed some issues with configuration 
+ * rev 0.15 (04/20/2007 Jonathan Bian) - Overhauled buffer management
+ * rev 0.16 (05/02/2007 Jonathan Bian) - Added error codes and fixed some issues with configuration
  * rev 0.17 (05/07/2007 Jonathan Bian) - Added H.264/AVC data structures for slice level decode.
  * rev 0.18 (05/14/2007 Jonathan Bian) - Added data structures for MPEG-4 slice level decode 
  *                                       and MPEG-2 motion compensation.
- * rev 0.19 (08/06/2007 Jonathan Bian) - Removed extra type for bitplane data. 
- * rev 0.20 (08/08/2007 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure. 
- * rev 0.21 (08/20/2007 Jonathan Bian) - Added image and subpicture support. 
+ * rev 0.19 (08/06/2007 Jonathan Bian) - Removed extra type for bitplane data.
+ * rev 0.20 (08/08/2007 Jonathan Bian) - Added missing fields to VC-1 PictureParameter structure.
+ * rev 0.21 (08/20/2007 Jonathan Bian) - Added image and subpicture support.
  * rev 0.22 (08/27/2007 Jonathan Bian) - Added support for chroma-keying and global alpha.
- * rev 0.23 (09/07/2007 Jonathan Bian) - Fixed some issues with images and subpictures. 
- * rev 0.24 (09/18/2007 Jonathan Bian) - Added display attributes. 
+ * rev 0.23 (09/11/2007 Jonathan Bian) - Fixed some issues with images and subpictures.
+ * rev 0.24 (09/18/2007 Jonathan Bian) - Added display attributes.
+ * rev 0.25 (10/18/2007 Jonathan Bian) - Changed to use IDs only for some types.
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
- *  Thanks to Waldo Bastian for many valuable feedbacks.
+ *  Thanks to Waldo Bastian, Matt Sottek and Austin Yuan at Intel for many valuable feedbacks.
  */
+
 #ifndef _VA_H_
 #define _VA_H_
 
@@ -59,7 +61,10 @@ extern "C" {
 /* 
 Overview 
 
-This is currently a decode only interface (with some rendering support).  
+This API is intended to provide an interface between a video decode
+application (client) and a hardware decode accelerator (server), to off-load 
+video decode operations from the host to the hardware accelerator at various 
+entry-points.
 
 The basic operation steps are:
 
@@ -93,12 +98,15 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_INVALID_CONTEXT		0x00000005
 #define VA_STATUS_ERROR_INVALID_SURFACE		0x00000006
 #define VA_STATUS_ERROR_INVALID_BUFFER		0x00000007
-#define VA_STATUS_ERROR_ATTR_NOT_SUPPORTED	0x00000008
-#define VA_STATUS_ERROR_MAX_NUM_EXCEEDED	0x00000009
-#define VA_STATUS_ERROR_UNSUPPORTED_PROFILE	0x0000000a
-#define VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT	0x0000000b
-#define VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT	0x0000000c
-#define VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE	0x0000000d
+#define VA_STATUS_ERROR_INVALID_IMAGE		0x00000008
+#define VA_STATUS_ERROR_INVALID_SUBPICTURE	0x00000009
+#define VA_STATUS_ERROR_ATTR_NOT_SUPPORTED	0x0000000a
+#define VA_STATUS_ERROR_MAX_NUM_EXCEEDED	0x0000000b
+#define VA_STATUS_ERROR_UNSUPPORTED_PROFILE	0x0000000c
+#define VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT	0x0000000d
+#define VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT	0x0000000e
+#define VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE	0x0000000f
+#define VA_STATUS_ERROR_SURFACE_BUSY		0x00000010
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /*
@@ -119,6 +127,9 @@ VADisplay vaGetDisplay (
     NativeDisplay native_dpy	/* implementation specific */
 );
 
+/*
+ * Initialize the library 
+ */
 VAStatus vaInitialize (
     VADisplay dpy,
     int *major_version,	 /* out */
@@ -129,6 +140,18 @@ VAStatus vaInitialize (
  * After this call, all library internal resources will be cleaned up
  */ 
 VAStatus vaTerminate (
+    VADisplay dpy
+);
+
+/*
+ * vaQueryVendorString returns a pointer to a zero-terminated string
+ * describing some aspects of the VA implemenation on a specific    
+ * hardware accelerator. The format of the returned string is:      
+ * <vendorname>-<major_version>-<minor_version>-<addtional_info>    
+ * e.g. for the Intel GMA500 implementation, an example would be:   
+ * "IntelGMA500-1.0-0.2-patch3
+ */
+const char *vaQueryVendorString (
     VADisplay dpy
 );
 
@@ -234,8 +257,8 @@ VAStatus vaQueryConfigEntrypoints (
 
 /* 
  * Get attributes for a given profile/entrypoint pair 
- * The caller must provide an “attrib_list” with all attributes to be 
- * queried.  Upon return, the attributes in “attrib_list” have been 
+ * The caller must provide an "attrib_list" with all attributes to be 
+ * retrieved.  Upon return, the attributes in "attrib_list" have been 
  * updated with their value.  Unknown attributes or attributes that are 
  * not supported for the given profile/entrypoint pair will have their 
  * value set to VA_ATTRIB_NOT_SUPPORTED
@@ -277,11 +300,11 @@ VAStatus vaDestroyConfig (
 
 /* 
  * Query all attributes for a given configuration 
- * The profile of the configuration is returned in “profile”
- * The entrypoint of the configuration is returned in “entrypoint”
- * The caller must provide an “attrib_list” array that can hold at least 
+ * The profile of the configuration is returned in "profile"
+ * The entrypoint of the configuration is returned in "entrypoint"
+ * The caller must provide an "attrib_list" array that can hold at least 
  * vaMaxNumConfigAttributes() entries. The actual number of attributes 
- * returned in “attrib_list” is returned in “num_attribs”
+ * returned in "attrib_list" is returned in "num_attribs"
  */
 VAStatus vaQueryConfigAttributes (
     VADisplay dpy,
@@ -294,9 +317,19 @@ VAStatus vaQueryConfigAttributes (
 
 
 /*
- * Context 
+ * Contexts and Surfaces
  *
- * Context represents a "virtual" video decode pipeline
+ * Context represents a "virtual" video decode pipeline. Surfaces are render 
+ * targets for a given context. The data in the surfaces are not accessible  
+ * to the client and the internal data format of the surface is implementatin 
+ * specific. 
+ *
+ * Surfaces will be bound to a context when the context is created. Once
+ * a surface is bound to a given context, it can not be used to create  
+ * another context. The association is removed when the context is destroyed
+ * 
+ * Both contexts and surfaces are identified by unique IDs and its
+ * implementation specific internals are kept opaque to the clients
  */
 
 typedef VAGenericID VAContextID;
@@ -305,97 +338,78 @@ typedef VAGenericID VASurfaceID;
 
 #define VA_INVALID_SURFACE	-1
 
-typedef struct _VAContext
-{
-    VAContextID		context_id; /* to identify this context */
-    VAConfigID		config_id;
-    unsigned short	picture_width;
-    unsigned short	picture_height;
-    VASurfaceID		*render_targets;
-    int			num_render_targets;	
-    int 		flags;
-    void		*privData;	 
-} VAContext;
-
-/*
-    flags - Any combination of the following:
-      VA_PROGRESSIVE (only progressive frame pictures in the sequence when set)
-*/
-#define VA_PROGRESSIVE	0x1
-
-/*
-
-Surface Management 
-
-Surfaces are render targets for a given context. The data in the surfaces 
-are not accessible to the client and the internal data format of
-the surface is implementatin specific. 
-
-Question: Is there a need to know the data format (fourcc) or just 
-differentiate between 420/422/444 is sufficient?
-
-*/
-
-typedef struct _VASurface
-{
-    VASurfaceID		surface_id; /* uniquely identify this surface */
-    VAContextID		context_id; /* which context does this surface belong */
-    unsigned short	width;
-    unsigned short	height;
-    int			format; /* 420/422/444 */
-    void		*privData; /* private to the library */
-} VASurface;
-
 /* 
- * Surfaces will be bound to a context when the context is created. Once
- * a surface is bound to a given context, it can not be used to create
- * another context. The association is removed when the context is destroyed
+ * vaCreateSurfaces - Create an array of surfaces used for decode and display  
+ *  dpy: display
+ *  width: surface width
+ *  height: surface height
+ *  format: VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422 or VA_RT_FORMAT_YUV444
+ *  num_surfaces: number of surfaces to be created
+ *  surfaces: array of surfaces created upon return
  */
-
-/* Surface Functions */
 VAStatus vaCreateSurfaces (
     VADisplay dpy,
     int width,
     int height,
     int format,
     int num_surfaces,
-    VASurface *surfaces	/* out */
+    VASurfaceID *surfaces	/* out */
 );
 
 /*
- * surfaces can only be destroyed after the context associated has been 
- * destroyed
+ * vaDestroySurfaces - Destroy resources associated with surfaces. 
+ *  Surfaces can only be destroyed after the context associated has been 
+ *  destroyed.  
+ *  dpy: display
+ *  surfaces: array of surfaces to destroy
+ *  num_surfaces: number of surfaces in the array to be destroyed.
  */
-VAStatus vaDestroySurface (
+VAStatus vaDestroySurfaces (
     VADisplay dpy,
-    VASurface *surface_list,
+    VASurfaceID *surfaces,
     int num_surfaces
 );
 
+#define VA_PROGRESSIVE 0x1
+/*
+ * vaCreateContext - Create a context
+ *  dpy: display
+ *  config_id: configuration for the context
+ *  picture_width: coded picture width
+ *  picture_height: coded picture height
+ *  flag: any combination of the following:
+ *    VA_PROGRESSIVE (only progressive frame pictures in the sequence when set)
+ *  render_targets: render targets (surfaces) tied to the context
+ *  num_render_targets: number of render targets in the above array
+ *  context: created context id upon return
+ */
 VAStatus vaCreateContext (
     VADisplay dpy,
     VAConfigID config_id,
     int picture_width,
     int picture_height,
     int flag,
-    VASurface *render_targets,
+    VASurfaceID *render_targets,
     int num_render_targets,
-    VAContext *context		/* out */
-);
-
-VAStatus vaDestroyContext (
-    VADisplay dpy,
-    VAContext *context
+    VAContextID *context		/* out */
 );
 
 /*
- *
- *	Buffers 
- *	Buffers are used to pass various types of data from the
- *	client to the server. The server maintains a data store
- *	for each buffer created, and the client idenfies a buffer
- *	through a unique buffer id assigned by the server.
- *
+ * vaDestroyContext - Destroy a context 
+ *  dpy: display
+ *  context: context to be destroyed
+ */
+VAStatus vaDestroyContext (
+    VADisplay dpy,
+    VAContextID context
+);
+
+/*
+ * Buffers 
+ * Buffers are used to pass various types of data from the
+ * client to the server. The server maintains a data store
+ * for each buffer created, and the client idenfies a buffer
+ * through a unique buffer id assigned by the server.
  */
 
 typedef VAGenericID VABufferID;
@@ -621,7 +635,16 @@ typedef struct _VASliceParameterBufferMPEG4
 /*
  VC-1 data structures
 */
- 
+
+typedef enum   /* see 7.1.1.32 */
+{
+    VAMvMode1Mv                        = 0,
+    VAMvMode1MvHalfPel                 = 1,
+    VAMvMode1MvHalfPelBilinear         = 2,
+    VAMvModeMixedMv                    = 3,
+    VAMvModeIntensityCompensation      = 4 
+} VAMvModeVC1;
+
 /* VC-1 Picture Parameter Buffer */
 /* 
  * For each picture, and before any slice data, a picture parameter
@@ -691,7 +714,7 @@ typedef struct _VAPictureParameterBufferVC1
         unsigned char picture_fields;
     };
     union {
-       struct {
+        struct {
             unsigned char mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
             unsigned char direct_mb	: 1; 	/* PICTURE::DIRECTMB */
             unsigned char skip_mb	: 1; 	/* PICTURE::SKIPMB */
@@ -704,6 +727,18 @@ typedef struct _VAPictureParameterBufferVC1
     };
     union {
         struct {
+            unsigned char bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
+            unsigned char bp_direct_mb    : 1;    /* PICTURE::DIRECTMB */
+            unsigned char bp_skip_mb      : 1;    /* PICTURE::SKIPMB */  
+            unsigned char bp_field_tx     : 1;    /* PICTURE::FIELDTX */ 
+            unsigned char bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
+            unsigned char bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
+            unsigned char bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
+        };
+        unsigned char bitplane_present_flag; /* signal what bitplane is being passed via the bitplane buffer */
+    };
+    union {
+        struct {
             unsigned char reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
             unsigned char reference_distance	: 1;/* PICTURE_LAYER::REFDIST */
             unsigned char num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
@@ -713,16 +748,16 @@ typedef struct _VAPictureParameterBufferVC1
     };
     union {
         struct {
-            unsigned char mv_mode	: 3; 	/* PICTURE_LAYER::MVMODE */
-            unsigned char mv_mode2	: 3; 	/* PICTURE_LAYER::MVMODE2 */
-            unsigned char mv_table	: 3;/* PICTURE_LAYER::MVTAB/IMVTAB */
-            unsigned char two_mv_block_pattern_table: 2;/* PICTURE_LAYER::2MVBPTAB */
-            unsigned char four_mv_switch: 1; 	/* PICTURE_LAYER::4MVSWITCH */
-            unsigned char four_mv_block_pattern_table : 2;/* PICTURE_LAYER::4MVBPTAB */
-            unsigned char extended_mv_flag: 1;/* ENTRY_POINT_LAYER::EXTENDED_MV */
-            unsigned char extended_mv_range : 2;/* PICTURE_LAYER::MVRANGE */
-            unsigned char extended_dmv_flag : 1;/* ENTRY_POINT_LAYER::EXTENDED_DMV */
-            unsigned char extended_dmv_range : 2;/* PICTURE_LAYER::DMVRANGE */
+            VAMvModeVC1 mv_mode              : 3; /* PICTURE_LAYER::MVMODE */
+            VAMvModeVC1 mv_mode2             : 3; /* PICTURE_LAYER::MVMODE2 */
+            unsigned char mv_table           : 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
+            unsigned char two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
+            unsigned char four_mv_switch     : 1; /* PICTURE_LAYER::4MVSWITCH */
+            unsigned char four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
+            unsigned char extended_mv_flag   : 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
+            unsigned char extended_mv_range  : 2; /* PICTURE_LAYER::MVRANGE */
+            unsigned char extended_dmv_flag  : 1; /* ENTRY_POINT_LAYER::EXTENDED_DMV */
+            unsigned char extended_dmv_range : 2; /* PICTURE_LAYER::DMVRANGE */
         };
         unsigned int mv_fields;
     };
@@ -905,6 +940,8 @@ typedef struct _VASliceParameterBufferH264
 
 /*
  * Creates a buffer for storing a certain type of data, no data store allocated
+ *  Note: image buffers are created by the library, not the client. Please see 
+ *        vaCreateImage on how image buffers are managed.
  */
 VAStatus vaCreateBuffer (
     VADisplay dpy,
@@ -985,8 +1022,8 @@ The Begin/Render/End sequence sends the decode buffers to the server
  */
 VAStatus vaBeginPicture (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target
+    VAContextID context,
+    VASurfaceID render_target
 );
 
 /* 
@@ -994,7 +1031,7 @@ VAStatus vaBeginPicture (
  */
 VAStatus vaRenderPicture (
     VADisplay dpy,
-    VAContext *context,
+    VAContextID context,
     VABufferID *buffers,
     int num_buffers
 );
@@ -1007,7 +1044,7 @@ VAStatus vaRenderPicture (
  */
 VAStatus vaEndPicture (
     VADisplay dpy,
-    VAContext *context
+    VAContextID context
 );
 
 /*
@@ -1023,8 +1060,8 @@ Synchronization
  */
 VAStatus vaSyncSurface (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target
+    VAContextID context,
+    VASurfaceID render_target
 );
 
 typedef enum
@@ -1041,8 +1078,7 @@ typedef enum
  */
 VAStatus vaQuerySurfaceStatus (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target,
+    VASurfaceID render_target,
     VASurfaceStatus *status	/* out */
 );
 
@@ -1053,7 +1089,7 @@ VAStatus vaQuerySurfaceStatus (
  * Caller should free the returned buffer with free() when done. 
  */
 VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     void **buffer, /* out */
     unsigned int *stride /* out */
 );
@@ -1096,28 +1132,38 @@ typedef struct _VAImage
     VABufferID		buf;	/* image data buffer */
     /*
      * Image data will be stored in a buffer of type VAImageBufferType to facilitate
-     * data store on the server side for optimal performance.
-     * It is expected that the client will first call vaCreateImage which returns a VAImage
-     * structure with the following fields filled by the library. It will then 
-     * create the "buf" with vaBufferCreate. For PutImage, then client will call 
-     * vaBufferData() with the image data before calling PutImage, and for GetImage 
-     * the client will call vaBufferData() with a NULL data pointer, and then call GetImage.
-     * After that the client can use the Map/Unmap buffer functions to access the image data.
+     * data store on the server side for optimal performance. The buffer will be 
+     * created by the CreateImage function, and proper storage allocated based on the image
+     * size and format. This buffer is managed by the library implementation, and 
+     * accessed by the client through the buffer Map/Unmap functions.
      */
     unsigned short	width; 
     unsigned short	height;
     unsigned int	data_size;
-    unsigned int	num_planes;
+    unsigned int	num_planes;	/* can not be greater than 3 */
     /* 
-     * An array of size num_planes indicating the scanline pitch in bytes.
-     * Each plane may have a different pitch.
+     * An array indicating the scanline pitch in bytes for each plane.
+     * Each plane may have a different pitch. Maximum 3 planes for planar formats
      */
-    unsigned int	*pitches;
+    unsigned int	pitches[3];
     /* 
-     * An array of size num_planes indicating the byte offset from
-     * the beginning of the image data to the start of each plane.
+     * An array indicating the byte offset from the beginning of the image data 
+     * to the start of each plane.
      */
-    unsigned int	*offsets;
+    unsigned int	offsets[3];
+
+    /* The following fields are only needed for paletted formats */
+    int num_palette_entries;   /* set to zero for non-palette images */
+    /* 
+     * Each component is one byte and entry_bytes indicates the number of components in 
+     * each entry (eg. 3 for YUV palette entries). set to zero for non-palette images   
+     */
+    int entry_bytes; 
+    /*
+     * An array of ascii characters describing the order of the components within the bytes.
+     * Only entry_bytes characters of the string are used.
+     */
+    char component_order[4];
 } VAImage;
 
 /* Get maximum number of image formats supported by the implementation */
@@ -1140,11 +1186,9 @@ VAStatus vaQueryImageFormats (
 /* 
  * Create a VAImage structure
  * The width and height fields returned in the VAImage structure may get 
- * enlarged for some YUV formats. The size of the data buffer that needs
- * to be allocated will be given in the "data_size" field in VAImage.
- * Image data is not allocated by this function.  The client should 
- * allocate the memory required for the data and fill in the data field after 
- * looking at "data_size" returned from this call.
+ * enlarged for some YUV formats. Upon return from this function, 
+ * image->buf has been created and proper storage allocated by the library. 
+ * The client can access the image through the Map/Unmap calls.
  */
 VAStatus vaCreateImage (
     VADisplay dpy,
@@ -1159,7 +1203,18 @@ VAStatus vaCreateImage (
  */
 VAStatus vaDestroyImage (
     VADisplay dpy,
-    VAImage *image
+    VAImageID image
+);
+
+VAStatus vaSetImagePalette (
+    VADisplay dpy,
+    VAImageID image,
+    /* 
+     * pointer to an array holding the palette data.  The size of the array is 
+     * num_palette_entries * entry_bytes in size.  The order of the components 
+     * in the palette is described by the component_order in VAImage struct    
+     */
+    unsigned char *palette 
 );
 
 /*
@@ -1168,22 +1223,26 @@ VAStatus vaDestroyImage (
  */
 VAStatus vaGetImage (
     VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     int x,	/* coordinates of the upper left source pixel */
     int y,
     unsigned int width, /* width and height of the region */
     unsigned int height,
-    VAImage *image
+    VAImageID image
 );
 
 /*
  * Copy data from a VAImage to a surface
  * Image must be in a format supported by the implementation
+ * Returns a VA_STATUS_ERROR_SURFACE_BUSY if the surface
+ * shouldn't be rendered into when this is called
+ * The source and destionation width and height are the same and
+ * no scaling is performed with this operation.
  */
 VAStatus vaPutImage (
     VADisplay dpy,
-    VASurface *surface,
-    VAImage *image,
+    VASurfaceID surface,
+    VAImageID image,
     int src_x,
     int src_y,
     unsigned int width,
@@ -1201,50 +1260,23 @@ VAStatus vaPutImage (
 
 typedef VAGenericID VASubpictureID;
 
-typedef struct _VASubpicture
-{
-    VASubpictureID	subpicture_id; /* uniquely identify this subpicture */
-    VASurfaceID		surface_id; /* which surface does this subpicture associate with */
-    VAImageID		image_id;
-    /* The following fields are set by the library */
-    int num_palette_entries; /* paletted formats only. set to zero for image without palettes */
-    /* 
-     * Each component is one byte and entry_bytes indicates the number of components in 
-     * each entry (eg. 3 for YUV palette entries). set to zero for image without palettes
-     */
-    int entry_bytes; 
-    /*
-     * An array of ascii characters describing teh order of the components within the bytes.
-     * Only entry_bytes characters of the string are used.
-     */
-    char component_order[4];
-    
-    /* chromakey range */
-    unsigned int chromakey_min;
-    unsigned int chromakey_max;
-
-    /* global alpha */
-    unsigned int global_alpha;
-
-    /* flags */
-    unsigned int flags; /* see below */
-} VASubpicture;
-
-/* flags for subpictures */
-#define VA_SUBPICTURE_CHROMA_KEYING	0x0001
-#define VA_SUBPICTURE_GLOBAL_ALPHA	0x0002
-
 /* Get maximum number of subpicture formats supported by the implementation */
 int vaMaxNumSubpictureFormats (
     VADisplay dpy
 );
 
+/* flags for subpictures */
+#define VA_SUBPICTURE_CHROMA_KEYING	0x0001
+#define VA_SUBPICTURE_GLOBAL_ALPHA	0x0002
 /* 
  * Query supported subpicture formats 
  * The caller must provide a "format_list" array that can hold at
  * least vaMaxNumSubpictureFormats() entries. The flags arrary holds the flag 
  * for each format to indicate additional capabilities for that format. The actual 
  * number of formats returned in "format_list" is returned in "num_formats".
+ *  flags: returned value to indicate addtional capabilities
+ *         VA_SUBPICTURE_CHROMA_KEYING - supports chroma-keying
+ *         VA_SUBPICTURE_GLOBAL_ALPHA - supports global alpha  
  */
 VAStatus vaQuerySubpictureFormats (
     VADisplay dpy,
@@ -1258,8 +1290,8 @@ VAStatus vaQuerySubpictureFormats (
  */
 VAStatus vaCreateSubpicture (
     VADisplay dpy,
-    VAImage *image,
-    VASubpicture *subpicture	/* out */
+    VAImageID image,
+    VASubpictureID *subpicture	/* out */
 );
 
 /*
@@ -1267,7 +1299,7 @@ VAStatus vaCreateSubpicture (
  */
 VAStatus vaDestroySubpicture (
     VADisplay dpy,
-    VASubpicture *subpicture
+    VASubpictureID subpicture
 );
 
 /* 
@@ -1276,17 +1308,17 @@ VAStatus vaDestroySubpicture (
  */
 VAStatus vaSetSubpictureImage (
     VADisplay dpy,
-    VASubpicture *subpicture,
-    VAImage *image
+    VASubpictureID subpicture,
+    VAImageID image
 );
 
 VAStatus vaSetSubpicturePalette (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     /* 
      * pointer to an array holding the palette data.  The size of the array is 
      * num_palette_entries * entry_bytes in size.  The order of the components
-     * in the palette is described by the component_order in VASubpicture struct
+     * in the palette is described by the component_order in VAImage struct
      */
     unsigned char *palette 
 );
@@ -1294,12 +1326,18 @@ VAStatus vaSetSubpicturePalette (
 /*
  * If chromakey is enabled, then the area where the source value falls within
  * the chromakey [min, max] range is transparent
+ * The chromakey component format is the following:
+ *  For RGB: [0:7] Red [8:15] Blue [16:23] Green   
+ *  For YUV: [0:7] V [8:15] U [16:23] Y
+ * The chromakey mask can be used to mask out certain components for chromakey
+ * comparision
  */
 VAStatus vaSetSubpictureChromakey (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     unsigned int chromakey_min,
-    unsigned int chromakey_max 
+    unsigned int chromakey_max,
+    unsigned int chromakey_mask
 );
 
 /*
@@ -1309,21 +1347,22 @@ VAStatus vaSetSubpictureChromakey (
  */
 VAStatus vaSetSubpictureGlobalAlpha (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     float global_alpha 
 );
 
 /*
-  vaAssociateSubpicture associates the subpicture with the target_surface.
-  It defines the region mapping between the subpicture and the target 
-  surface through source and destination rectangles (with the same width and height).
-  Both will be displayed at the next call to vaPutSurface.  Additional
-  associations before the call to vaPutSurface simply overrides the association.
-*/
+ * vaAssociateSubpicture associates the subpicture with target_surfaces.
+ * It defines the region mapping between the subpicture and the target  
+ * surfaces through source and destination rectangles (with the same width and height).
+ * Both will be displayed at the next call to vaPutSurface.  Additional
+ * associations before the call to vaPutSurface simply overrides the association.
+ */
 VAStatus vaAssociateSubpicture (
     VADisplay dpy,
-    VASurface *target_surface,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces,
     short src_x, /* upper left offset in subpicture */
     short src_y,
     short dest_x, /* upper left offset in surface */
@@ -1335,6 +1374,16 @@ VAStatus vaAssociateSubpicture (
      * see VA_SUBPICTURE_XXX values
      */
     unsigned int flags
+);
+
+/*
+ * vaDeassociateSubpicture removes the association of the subpicture with target_surfaces.
+ */
+VAStatus vaDeassociateSubpicture (
+    VADisplay dpy,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces
 );
 
 typedef struct _VARectangle
@@ -1360,6 +1409,17 @@ typedef enum
     VADisplayAttribContrast		= 1,
     VADisplayAttribHue			= 2,
     VADisplayAttribSaturation		= 3,
+    /* client can specifiy a background color for the target window */
+    VADisplayAttribBackgroundColor      = 4,
+    /*
+     * this is a gettable only attribute. For some implementations that use the
+     * hardware overlay, after PutSurface is called, the surface can not be    
+     * re-used until after the subsequent PutSurface call. If this is the case 
+     * then the value for this attribute will be set to 1 so that the client   
+     * will not attempt to re-use the surface right after returning from a call
+     * to PutSurface.
+     */
+    VADisplayAttribDirectSurface       = 5,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
@@ -1475,13 +1535,13 @@ Mostly to demonstrate program flow with no error handling ...
          * create surfaces for the current target as well as reference frames
 	 * we can get by with 4 surfaces for MPEG-2
 	 */
-	VASurface surfaces[4];
+	VASurfaceID surfaces[4];
 	vaCreateSurfaces(dpy, 720, 480, VA_RT_FORMAT_YUV420, 4, surfaces);
 
 	/* 
          * Create a context for this decode pipe
 	 */
-	VAContext context;
+	VAContextID context;
 	vaCreateContext(dpy, config_id, 720, 480, VA_PROGRESSIVE, surfaces,
                         4, &context);
 
@@ -1497,7 +1557,6 @@ Mostly to demonstrate program flow with no error handling ...
 	/* fill in picture_coding_extension fields here */
 	vaUnmapBuffer(dpy, picture_buf);
 
-
 	/* Create an IQ matrix buffer for this frame */
 	VABufferID iq_buf;
 	VAIQMatrixBufferMPEG2 *iq_matrix;
@@ -1508,7 +1567,7 @@ Mostly to demonstrate program flow with no error handling ...
 	vaUnmapBuffer(dpy, iq_buf);
 
 	/* send the picture and IQ matrix buffers to the server */
-	vaBeginPicture(dpy, context, &surfaces[0]);
+	vaBeginPicture(dpy, context, surfaces[0]);
 
 	vaRenderPicture(dpy, context, &picture_buf, 1);
 	vaRenderPicture(dpy, context, &iq_buf, 1);
@@ -1559,17 +1618,17 @@ Mostly to demonstrate program flow with no error handling ...
 	vaQuerySubpictureFormats(dpy, sub_formats, &num_formats);
         /* Assume that we find AI44 as a subpicture format in sub_formats[0] */
         VAImage sub_image;
-	VASubpicture subpicture;
-        unsigned char sub_data[128][16];
+	VASubpictureID subpicture;
+        unsigned char *sub_data;
         /* create an image for the subtitle */
 	vaCreateImage(dpy, sub_formats, 128, 16, &sub_image);
-	vaCreateBuffer(dpy, VAImageBufferType, &sub_image->buf);
+	vaMapBuffer(dpy, sub_image->buf, &sub_data);
         /* fill the image data */
-	vaBufferData(dpy, sub_image->buf, sub_image->data_size, sub_data);
-	vaCreateSubpicture(dpy, &sub_image, &subpicture);
+        vaUnmapBuffer(dpy, sub_image->buf);
+	vaCreateSubpicture(dpy, sub_image, &subpicture);
 	unsigned char palette[3][16];
 	/* fill the palette data */
-	vaSetSubpicturePalette(dpy, &subpicture, palette);
-	vaAssociateSubpicture(dpy, surfaces, &subpicture, 0, 0, 296, 400, 128, 16);
+	vaSetSubpicturePalette(dpy, subpicture, palette);
+	vaAssociateSubpicture(dpy, subpicture, surfaces, 1, 0, 0, 296, 400, 128, 16);
 	vaPutSurface(dpy, surfaces, win, 0, 0, 720, 480, 100, 100, 640, 480, NULL, 0, 0);
 #endif

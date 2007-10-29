@@ -36,9 +36,16 @@ extern "C" {
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
 #define VA_FRAME_PICTURE        0x00000004 /* weave */
+/* 
+ * clears the drawable with background color.
+ * for hardware overlay based implementation this flag
+ * can be used to turn off the overlay
+ */
+#define VA_CLEAR_DRAWABLE       0x00000008 
+
 VAStatus vaPutSurface (
     VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     Drawable draw, /* X Drawable */
     short srcx,
     short srcy,
