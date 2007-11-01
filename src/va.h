@@ -1110,6 +1110,10 @@ VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
 #define VA_FOURCC_AI44		0x34344149
 #define VA_FOURCC_RGBA		0x41424752
 
+/* byte order */
+#define VA_LSB_FIRST		1
+#define VA_MSB_FIRST		2
+
 typedef struct _VAImageFormat
 {
     unsigned int	fourcc;
