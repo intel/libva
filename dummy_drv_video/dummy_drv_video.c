@@ -734,11 +734,28 @@ VAStatus dummy_DestroyContext(
 }
 
 
+
+static VAStatus dummy__allocate_buffer(object_buffer_p obj_buffer, int size)
+{
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+
+    obj_buffer->buffer_data = realloc(obj_buffer->buffer_data, size);
+    if (NULL == obj_buffer->buffer_data)
+    {
+        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+    }
+    return vaStatus;
+}
+
 VAStatus dummy_CreateBuffer(
 		VADriverContextP ctx,
-		VABufferType type,  /* in */
-		VABufferID *buf_desc	/* out */
-	)
+                VAContextID context,	/* in */
+                VABufferType type,	/* in */
+                unsigned int size,		/* in */
+                unsigned int num_elements,	/* in */
+                void *data,			/* in */
+                VABufferID *buf_id		/* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -775,36 +792,6 @@ VAStatus dummy_CreateBuffer(
 
     obj_buffer->buffer_data = NULL;
 
-    *buf_desc = bufferID;
-
-    return vaStatus;
-}
-
-static VAStatus dummy__allocate_buffer(object_buffer_p obj_buffer, int size)
-{
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-
-    obj_buffer->buffer_data = realloc(obj_buffer->buffer_data, size);
-    if (NULL == obj_buffer->buffer_data)
-    {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    return vaStatus;
-}
-
-VAStatus dummy_BufferData(
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-        unsigned int size,	/* in */
-        unsigned int num_elements,	/* in */
-        void *data		/* in */
-	)
-{
-    INIT_DRIVER_DATA
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    object_buffer_p obj_buffer = BUFFER(buf_id);
-    ASSERT(obj_buffer);
-
     vaStatus = dummy__allocate_buffer(obj_buffer, size * num_elements);
     if (VA_STATUS_SUCCESS == vaStatus)
     {
@@ -816,8 +803,14 @@ VAStatus dummy_BufferData(
         }
     }
 
+    if (VA_STATUS_SUCCESS == vaStatus)
+    {
+        *buf_id = bufferID;
+    }
+
     return vaStatus;
 }
+
 
 VAStatus dummy_BufferSetNumElements(
 		VADriverContextP ctx,
@@ -950,6 +943,14 @@ VAStatus dummy_RenderPicture(
             vaStatus = VA_STATUS_ERROR_INVALID_BUFFER;
             break;
         }
+    }
+    
+    /* Release buffers */
+    for(i = 0; i < num_buffers; i++)
+    {
+        object_buffer_p obj_buffer = BUFFER(buffers[i]);
+        ASSERT(obj_buffer);
+        dummy__destroy_buffer(driver_data, obj_buffer);
     }
 
     return vaStatus;
@@ -1140,7 +1141,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_25(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1148,7 +1149,7 @@ VAStatus __vaDriverInit_0_25(  VADriverContextP ctx )
     int i;
 
     ctx->version_major = 0;
-    ctx->version_minor = 25;
+    ctx->version_minor = 26;
     ctx->max_profiles = DUMMY_MAX_PROFILES;
     ctx->max_entrypoints = DUMMY_MAX_ENTRYPOINTS;
     ctx->max_attributes = DUMMY_MAX_CONFIG_ATTRIBUTES;
@@ -1170,7 +1171,6 @@ VAStatus __vaDriverInit_0_25(  VADriverContextP ctx )
     ctx->vtable.vaCreateContext = dummy_CreateContext;
     ctx->vtable.vaDestroyContext = dummy_DestroyContext;
     ctx->vtable.vaCreateBuffer = dummy_CreateBuffer;
-    ctx->vtable.vaBufferData = dummy_BufferData;
     ctx->vtable.vaBufferSetNumElements = dummy_BufferSetNumElements;
     ctx->vtable.vaMapBuffer = dummy_MapBuffer;
     ctx->vtable.vaUnmapBuffer = dummy_UnmapBuffer;

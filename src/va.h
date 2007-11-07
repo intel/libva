@@ -45,6 +45,7 @@
  * rev 0.23 (09/11/2007 Jonathan Bian) - Fixed some issues with images and subpictures.
  * rev 0.24 (09/18/2007 Jonathan Bian) - Added display attributes.
  * rev 0.25 (10/18/2007 Jonathan Bian) - Changed to use IDs only for some types.
+ * rev 0.26 (11/07/2007 Waldo Bastian) - Change vaCreateBuffer semantics
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -939,33 +940,27 @@ typedef struct _VASliceParameterBufferH264
 /* Buffer functions */
 
 /*
- * Creates a buffer for storing a certain type of data, no data store allocated
+ * Creates a buffer for "num_elements" elements of "size" bytes and 
+ * initalize with "data".
+ * if "data" is null, then the contents of the buffer data store
+ * are undefined.
+ * Basically there are two ways to get buffer data to the server side. One is 
+ * to call vaCreateBuffer() with a non-null "data", which results the data being
+ * copied to the data store on the server side.  A different method that 
+ * eliminates this copy is to pass null as "data" when calling vaCreateBuffer(),
+ * and then use vaMapBuffer() to map the data store from the server side to the
+ * client address space for access.
  *  Note: image buffers are created by the library, not the client. Please see 
  *        vaCreateImage on how image buffers are managed.
  */
 VAStatus vaCreateBuffer (
     VADisplay dpy,
+    VAContextID context,
     VABufferType type,	/* in */
-    VABufferID *buf_id	/* out */
-);
-
-/*
- * Create data store for the buffer and initalize with "data".
- * if "data" is null, then the contents of the buffer data store
- * are undefined.
- * Basically there are two ways to get buffer data to the server side. One is 
- * to call vaBufferData() with a non-null "data", which results the data being
- * copied to the data store on the server side.  A different method that 
- * eliminates this copy is to pass null as "data" when calling vaBufferData(),
- * and then use vaMapBuffer() to map the data store from the server side to the
- * client address space for access.
- */
-VAStatus vaBufferData (
-    VADisplay dpy,
-    VABufferID buf_id,	/* in */
     unsigned int size,	/* in */
     unsigned int num_elements, /* in */
-    void *data		/* in */
+    void *data,		/* in */
+    VABufferID *buf_id	/* out */
 );
 
 /*
@@ -982,7 +977,7 @@ VAStatus vaBufferSetNumElements (
 
 /*
  * Map data store of the buffer into the client's address space
- * vaBufferData() needs to be called with "data" set to NULL before
+ * vaCreateBuffer() needs to be called with "data" set to NULL before
  * calling vaMapBuffer()
  */
 VAStatus vaMapBuffer (
@@ -1003,6 +998,7 @@ VAStatus vaUnmapBuffer (
 
 /*
  * After this call, the buffer is deleted and this buffer_id is no longer valid
+ * Only call this if the buffer is not going to be passed to vaRenderBuffer
  */
 VAStatus vaDestroyBuffer (
     VADisplay dpy,
@@ -1028,6 +1024,7 @@ VAStatus vaBeginPicture (
 
 /* 
  * Send decode buffers to the server.
+ * Buffers are automatically destroyed afterwards
  */
 VAStatus vaRenderPicture (
     VADisplay dpy,
@@ -1552,8 +1549,7 @@ Mostly to demonstrate program flow with no error handling ...
 	/* Create a picture parameter buffer for this frame */
 	VABufferID picture_buf;
 	VAPictureParameterBufferMPEG2 *picture_param;
-	vaCreateBuffer(dpy, VAPictureParameterBufferType, &picture_buf);
-	vaBufferData(dpy, picture_buf, sizeof(VAPictureParameterBufferMPEG2), NULL);
+	vaCreateBuffer(dpy, context, VAPictureParameterBufferType, sizeof(VAPictureParameterBufferMPEG2), 1, NULL, &picture_buf);
 	vaMapBuffer(dpy, picture_buf, &picture_param);
 	picture_param->horizontal_size = 720;
 	picture_param->vertical_size = 480;
@@ -1564,8 +1560,7 @@ Mostly to demonstrate program flow with no error handling ...
 	/* Create an IQ matrix buffer for this frame */
 	VABufferID iq_buf;
 	VAIQMatrixBufferMPEG2 *iq_matrix;
-	vaCreateBuffer(dpy, VAIQMatrixBufferType, &iq_buf);
-	vaBufferData(dpy, iq_buf, sizeof(VAIQMatrixBufferMPEG2), NULL);
+	vaCreateBuffer(dpy, context, VAIQMatrixBufferType, sizeof(VAIQMatrixBufferMPEG2), 1, NULL, &iq_buf);
 	vaMapBuffer(dpy, iq_buf, &iq_matrix);
 	/* fill values for IQ_matrix here */
 	vaUnmapBuffer(dpy, iq_buf);
@@ -1586,8 +1581,7 @@ Mostly to demonstrate program flow with no error handling ...
 		/* Create a slice parameter buffer */
 		VABufferID slice_param_buf;
 		VASliceParameterBufferMPEG2 *slice_param;
-		vaCreateBuffer(dpy, VASliceParameterBufferType, &slice_param_buf);
-		vaBufferData(dpy, slice_param_buf, sizeof(VASliceParameterBufferMPEG2), NULL);
+		vaCreateBuffer(dpy, context, VASliceParameterBufferType, sizeof(VASliceParameterBufferMPEG2), 1, NULL, &slice_param_buf);
 		vaMapBuffer(dpy, slice_param_buf, &slice_param);
 		slice_param->slice_data_offset = 0;
 		/* Let's say all slices in this bit-stream has 64-bit header */
@@ -1602,8 +1596,7 @@ Mostly to demonstrate program flow with no error handling ...
 		/* Create a slice data buffer */
 		unsigned char *slice_data;
 		VABufferID slice_data_buf;
-		vaCreateBuffer(dpy, VASliceDataBufferType, slice_data_buf);
-		vaBufferData(dpy, slice_data_buf, x /* decoder figure out how big */, NULL);
+		vaCreateBuffer(dpy, context, VASliceDataBufferType, x /* decoder figure out how big */, 1, NULL, &slice_data_buf);
 		vaMapBuffer(dpy, slice_data_buf, &slice_data);
 		/* decoder fill in slice_data */
 		vaUnmapBuffer(dpy, slice_data_buf);

@@ -36,7 +36,7 @@
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_25"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_26"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define CHECK_CONTEXT(dpy) if( !vaContextIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
@@ -279,7 +279,6 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, CreateContext);
                     CHECK_VTABLE(vaStatus, ctx, DestroyContext);
                     CHECK_VTABLE(vaStatus, ctx, CreateBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, BufferData);
                     CHECK_VTABLE(vaStatus, ctx, BufferSetNumElements);
                     CHECK_VTABLE(vaStatus, ctx, MapBuffer);
                     CHECK_VTABLE(vaStatus, ctx, UnmapBuffer);
@@ -656,30 +655,19 @@ VAStatus vaDestroyContext (
 
 VAStatus vaCreateBuffer (
     VADisplay dpy,
-    VABufferType type,	/* in */
-    VABufferID *buf_id	/* out */
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
   CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateBuffer);
-  return ctx->vtable.vaCreateBuffer( ctx, type, buf_id);
-}
-
-VAStatus vaBufferData (
-    VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    unsigned int size,	/* in */
-    unsigned int num_elements, /* in */
-    void *data		/* in */
-)
-{
-  VADriverContextP ctx = CTX(dpy);
-  CHECK_CONTEXT(ctx);
-
-  TRACE(vaBufferData);
-  return ctx->vtable.vaBufferData( ctx, buf_id, size, num_elements, data);
+  return ctx->vtable.vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
 }
 
 VAStatus vaBufferSetNumElements (

@@ -26,9 +26,34 @@
 
 #include "test_common.c"
 
+VAConfigID config;
+VAContextID context;
+VASurfaceID *surfaces;
+int total_surfaces;
+
 void pre()
 {
     test_init();
+
+    va_status = vaCreateConfig(va_dpy, VAProfileMPEG2Main, VAEntrypointVLD, NULL, 0, &config);
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    status("vaCreateConfig returns %08x\n", config);
+
+    int width = 352;
+    int height = 288;
+    int surface_count = 4;
+    total_surfaces = surface_count;
+    
+    surfaces = malloc(total_surfaces * sizeof(VASurfaceID));
+
+    // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
+    va_status = vaCreateSurfaces(va_dpy, width, height, VA_RT_FORMAT_YUV420, total_surfaces, surfaces);
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    
+    status("vaCreateContext with config %08x\n", config);
+    int flags = 0;
+    va_status = vaCreateContext( va_dpy, config, width, height, flags, surfaces, surface_count, &context );
+    ASSERT( VA_STATUS_SUCCESS == va_status );
 }
 
 void test_unique_buffers(VABufferID *buffer_list, int buffer_count)
@@ -58,6 +83,21 @@ VABufferType buffer_types[] =
   VAImageBufferType
 };
 
+unsigned int buffer_sizes[] =
+{
+  sizeof(VAPictureParameterBufferMPEG4), 
+  sizeof(VAIQMatrixBufferH264),
+  32*1024,
+  48*1024,
+  sizeof(VASliceParameterBufferMPEG2),
+  128*1024,
+  sizeof(VAMacroblockParameterBufferMPEG2),
+  32*1024,
+  15*1024,
+  32*1024,
+};
+
+
 #define NUM_BUFFER_TYPES 	(sizeof(buffer_types) / sizeof(VABufferType))
 
 #define DEAD_BUFFER_ID	((VABufferID) 0x1234ffff)
@@ -70,7 +110,7 @@ void test()
     for(i=0; i < NUM_BUFFER_TYPES; i++)
     {
         buffer_ids[i+1] = DEAD_BUFFER_ID;
-        va_status = vaCreateBuffer(va_dpy, buffer_types[i], &buffer_ids[i]);
+        va_status = vaCreateBuffer(va_dpy, context, buffer_types[i], buffer_sizes[i], 1, NULL, &buffer_ids[i]);
         ASSERT( VA_STATUS_SUCCESS == va_status );
         ASSERT( DEAD_BUFFER_ID == buffer_ids[i+1] ); /* Bounds check */
     }
@@ -85,5 +125,18 @@ void test()
 
 void post()
 {
+    status("vaDestroyContext for context %08x\n", context);
+    va_status = vaDestroyContext( va_dpy, context );
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+
+    status("vaDestroyConfig for config %08x\n", config);
+    va_status = vaDestroyConfig( va_dpy, config );
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    
+    va_status = vaDestroySurfaces(va_dpy, surfaces, total_surfaces);
+    ASSERT( VA_STATUS_SUCCESS == va_status );
+    
+    free(surfaces);
+
     test_terminate();
 }

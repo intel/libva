@@ -118,16 +118,12 @@ struct VADriverVTable
 
 	VAStatus (*vaCreateBuffer) (
 		VADriverContextP ctx,
-		VABufferType type,  /* in */
-		VABufferID *buf_desc	/* out */
-	);
-
-	VAStatus (*vaBufferData) (
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-		unsigned int size,	/* in */
+		VAContextID context,		/* in */
+		VABufferType type,		/* in */
+		unsigned int size,		/* in */
 		unsigned int num_elements,	/* in */
-		void *data		/* in */
+		void *data,			/* in */
+		VABufferID *buf_id		/* out */
 	);
 
 	VAStatus (*vaBufferSetNumElements) (
