@@ -80,7 +80,6 @@ VABufferType buffer_types[] =
   VAMacroblockParameterBufferType,
   VAResidualDataBufferType,
   VADeblockingParameterBufferType,
-  VAImageBufferType
 };
 
 unsigned int buffer_sizes[] =
@@ -94,7 +93,6 @@ unsigned int buffer_sizes[] =
   sizeof(VAMacroblockParameterBufferMPEG2),
   32*1024,
   15*1024,
-  32*1024,
 };
 
 
