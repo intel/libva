@@ -72,6 +72,11 @@ VADisplay vaGetDisplay (
   VADisplay dpy = NULL;
   VADriverContextP ctx = pDriverContexts;
 
+  if (!native_dpy)
+  {
+      return NULL;
+  }
+
   while (ctx)
   {
       if (ctx->x11_dpy == (Display *)native_dpy)
