@@ -34,9 +34,12 @@
 #include <unistd.h>
 #include "va_dri.h"
 
+#define VA_MAJOR_VERSION	0
+#define VA_MINOR_VERSION	26
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_26"
+
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_26"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
 #define CHECK_CONTEXT(dpy) if( !vaContextIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
@@ -397,8 +400,8 @@ VAStatus vaInitialize (
       vaStatus = va_openDriver(ctx, driver_name);
       va_infoMessage("va_openDriver() returns %d\n", vaStatus);
       
-      *major_version = ctx->version_major;
-      *minor_version = ctx->version_minor;
+      *major_version = VA_MAJOR_VERSION;
+      *minor_version = VA_MINOR_VERSION;
   }
 
   if (driver_name)
