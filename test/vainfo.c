@@ -66,6 +66,7 @@ int main(int argc, const char* argv[])
               name, va_status, vaErrorStr(va_status));
       return 3;
   }
+  printf("%s: VA API version: %d.%d\n", name, major_version, minor_version);
 
   driver = vaQueryVendorString(va_dpy);
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
