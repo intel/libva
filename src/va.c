@@ -35,8 +35,8 @@
 #include "va_dri.h"
 
 #define VA_MAJOR_VERSION	0
-#define VA_MINOR_VERSION	26
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_26"
+#define VA_MINOR_VERSION	28
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_28"
 
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
@@ -211,7 +211,7 @@ static VAStatus va_getDriverName(VADriverContextP ctx, char **driver_name)
 static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
 {
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-    char *search_path;
+    char *search_path = NULL;
     char *saveptr;
     char *driver_dir;
     
@@ -299,10 +299,12 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, PutSurface);
                     CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateImage);
+                    CHECK_VTABLE(vaStatus, ctx, DeriveImage);
                     CHECK_VTABLE(vaStatus, ctx, DestroyImage);
                     CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
                     CHECK_VTABLE(vaStatus, ctx, GetImage);
                     CHECK_VTABLE(vaStatus, ctx, PutImage);
+                    CHECK_VTABLE(vaStatus, ctx, PutImage2);
                     CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
@@ -311,6 +313,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture2);
                     CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
@@ -338,6 +341,18 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
     free(search_path);    
     
     return vaStatus;
+}
+
+VAPrivFunc vaGetLibFunc(VADisplay dpy, const char *func)
+{
+    VADriverContextP ctx = CTX(dpy);
+    if( !vaContextIsValid(ctx) )
+        return NULL;
+
+    if (NULL == ctx->handle)
+        return NULL;
+        
+    return (VAPrivFunc) dlsym(ctx->handle, func);
 }
 
 
@@ -942,6 +957,76 @@ VAStatus vaPutImage (
   return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, width, height, dest_x, dest_y );
 }
 
+/*
+ * Similar to vaPutImage but with additional destination width
+ * and height arguments to enable scaling
+ */
+VAStatus vaPutImage2 (
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAImageID image,
+    int src_x,
+    int src_y,
+    unsigned int src_width,
+    unsigned int src_height,
+    int dest_x,
+    int dest_y,
+    unsigned int dest_width,
+    unsigned int dest_height
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  CHECK_CONTEXT(ctx);
+
+  TRACE(vaPutImage2);
+  return ctx->vtable.vaPutImage2 ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
+}
+
+/*
+ * Derive an VAImage from an existing surface.
+ * This interface will derive a VAImage and corresponding image buffer from
+ * an existing VA Surface. The image buffer can then be mapped/unmapped for
+ * direct CPU access. This operation is only possible on implementations with
+ * direct rendering capabilities and internal surface formats that can be
+ * represented with a VAImage. When the operation is not possible this interface
+ * will return VA_STATUS_ERROR_OPERATION_FAILED. Clients should then fall back
+ * to using vaCreateImage + vaPutImage to accomplish the same task in an
+ * indirect manner.
+ *
+ * Implementations should only return success when the resulting image buffer
+ * would be useable with vaMap/Unmap.
+ *
+ * When directly accessing a surface special care must be taken to insure
+ * proper synchronization with the graphics hardware. Clients should call
+ * vaQuerySurfaceStatus to insure that a surface is not the target of concurrent
+ * rendering or currently being displayed by an overlay.
+ *
+ * Additionally nothing about the contents of a surface should be assumed
+ * following a vaPutSurface. Implementations are free to modify the surface for
+ * scaling or subpicture blending within a call to vaPutImage.
+ *
+ * Calls to vaPutImage or vaGetImage using the same surface from which the image
+ * has been derived will return VA_STATUS_ERROR_SURFACE_BUSY. vaPutImage or
+ * vaGetImage with other surfaces is supported.
+ *
+ * An image created with vaDeriveImage should be freed with vaDestroyImage. The
+ * image and image buffer structures will be destroyed; however, the underlying
+ * surface will remain unchanged until freed with vaDestroySurfaces.
+ */
+VAStatus vaDeriveImage (
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAImage *image	/* out */
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  CHECK_CONTEXT(ctx);
+
+  TRACE(vaDeriveImage);
+  return ctx->vtable.vaDeriveImage ( ctx, surface, image );
+}
+
+
 /* Get maximum number of subpicture formats supported by the implementation */
 int vaMaxNumSubpictureFormats (
     VADisplay dpy
@@ -1021,7 +1106,7 @@ VAStatus vaSetSubpictureImage (
   return ctx->vtable.vaSetSubpictureImage ( ctx, subpicture, image);
 }
 
-
+#warning TODO: Remove vaSetSubpicturePalette in rev 0.29
 VAStatus vaSetSubpicturePalette (
     VADisplay dpy,
     VASubpictureID subpicture,
@@ -1108,6 +1193,33 @@ VAStatus vaAssociateSubpicture (
 
   TRACE(vaAssociateSubpicture);
   return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, dest_x, dest_y, width, height, flags );
+}
+
+VAStatus vaAssociateSubpicture2 (
+    VADisplay dpy,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces,
+    short src_x, /* upper left offset in subpicture */
+    short src_y,
+    unsigned short src_width,
+    unsigned short src_height,
+    short dest_x, /* upper left offset in surface */
+    short dest_y,
+    unsigned short dest_width,
+    unsigned short dest_height,
+    /*
+     * whether to enable chroma-keying or global-alpha
+     * see VA_SUBPICTURE_XXX values
+     */
+    unsigned int flags
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  CHECK_CONTEXT(ctx);
+
+  TRACE(vaAssociateSubpicture2);
+  return ctx->vtable.vaAssociateSubpicture2 ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
 }
 
 /*
@@ -1200,7 +1312,7 @@ VAStatus vaSetDisplayAttributes (
 }
 
 
-
+#warning TODO: Remove vaDbgCopySurfaceToBuffer in rev 0.29
 VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
     VASurfaceID surface,
     void **buffer, /* out */

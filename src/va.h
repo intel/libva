@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.25
+ * Rev. 0.28
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -46,6 +46,9 @@
  * rev 0.24 (09/18/2007 Jonathan Bian) - Added display attributes.
  * rev 0.25 (10/18/2007 Jonathan Bian) - Changed to use IDs only for some types.
  * rev 0.26 (11/07/2007 Waldo Bastian) - Change vaCreateBuffer semantics
+ * rev 0.27 (11/19/2007 Matt Sottek)   - Added DeriveImage
+ * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture
+ *                                       to enable scaling
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -147,13 +150,24 @@ VAStatus vaTerminate (
 /*
  * vaQueryVendorString returns a pointer to a zero-terminated string
  * describing some aspects of the VA implemenation on a specific    
- * hardware accelerator. The format of the returned string is:      
- * <vendorname>-<major_version>-<minor_version>-<addtional_info>    
+ * hardware accelerator. The format of the returned string is vendor
+ * specific and at the discretion of the implementer.
  * e.g. for the Intel GMA500 implementation, an example would be:   
- * "IntelGMA500-1.0-0.2-patch3
+ * "Intel GMA500 - 2.0.0.32L.0005"
  */
 const char *vaQueryVendorString (
     VADisplay dpy
+);
+
+typedef int (*VAPrivFunc)();
+
+/*
+ * Return a function pointer given a function name in the library.
+ * This allows private interfaces into the library
+ */ 
+VAPrivFunc vaGetLibFunc (
+    VADisplay dpy,
+    const char *func
 );
 
 /* Currently defined profiles */
@@ -906,9 +920,9 @@ typedef struct _VAIQMatrixBufferH264
 typedef struct _VASliceParameterBufferH264
 {
     unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
-    unsigned int slice_data_offset;/* the offset to first byte of slice data */
+    unsigned int slice_data_offset;/* the offset to the NAL start code for this slice */
     unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
-    unsigned short slice_data_bit_offset; /* bit offset in the first byte of valid data */
+    unsigned short slice_data_bit_offset; /* bit offset from NAL start code to the beginning of slice data */
     unsigned short first_mb_in_slice;
     unsigned char slice_type;
     unsigned char direct_spatial_mv_pred_flag;
@@ -1079,18 +1093,6 @@ VAStatus vaQuerySurfaceStatus (
     VASurfaceStatus *status	/* out */
 );
 
-
-/*
- * Copies the surface to a buffer
- * The stride of the surface will be stored in *stride
- * Caller should free the returned buffer with free() when done. 
- */
-VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
-    VASurfaceID surface,
-    void **buffer, /* out */
-    unsigned int *stride /* out */
-);
-
 /*
  * Images and Subpictures
  * VAImage is used to either get the surface data to client memory, or 
@@ -1252,6 +1254,63 @@ VAStatus vaPutImage (
     int dest_y
 );
 
+ /*
+ * Similar to vaPutImage but with additional destination width
+ * and height arguments to enable scaling
+ */
+VAStatus vaPutImage2 (
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAImageID image,
+    int src_x,
+    int src_y,
+    unsigned int src_width,
+    unsigned int src_height,
+    int dest_x,
+    int dest_y,
+    unsigned int dest_width,
+    unsigned int dest_height
+);
+
+/*
+ * Derive an VAImage from an existing surface.
+ * This interface will derive a VAImage and corresponding image buffer from
+ * an existing VA Surface. The image buffer can then be mapped/unmapped for
+ * direct CPU access. This operation is only possible on implementations with
+ * direct rendering capabilities and internal surface formats that can be
+ * represented with a VAImage. When the operation is not possible this interface
+ * will return VA_STATUS_ERROR_OPERATION_FAILED. Clients should then fall back
+ * to using vaCreateImage + vaPutImage to accomplish the same task in an
+ * indirect manner.
+ *
+ * Implementations should only return success when the resulting image buffer
+ * would be useable with vaMap/Unmap.
+ *
+ * When directly accessing a surface special care must be taken to insure
+ * proper synchronization with the graphics hardware. Clients should call
+ * vaQuerySurfaceStatus to insure that a surface is not the target of concurrent
+ * rendering or currently being displayed by an overlay.
+ *
+ * Additionally nothing about the contents of a surface should be assumed
+ * following a vaPutSurface. Implementations are free to modify the surface for
+ * scaling or subpicture blending within a call to vaPutImage.
+ *
+ * Calls to vaPutImage or vaGetImage using the same surface from which the image
+ * has been derived will return VA_STATUS_ERROR_SURFACE_BUSY. vaPutImage or
+ * vaGetImage with other surfaces is supported.
+ *
+ * An image created with vaDeriveImage should be freed with vaDestroyImage. The
+ * image and image buffer structures will be destroyed; however, the underlying
+ * surface will remain unchanged until freed with vaDestroySurfaces.
+ */
+VAStatus vaDeriveImage (
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAImage *image	/* out */
+);
+
+
+
 /*
  * Subpictures 
  * Subpicture is a special type of image that can be blended 
@@ -1313,17 +1372,6 @@ VAStatus vaSetSubpictureImage (
     VAImageID image
 );
 
-VAStatus vaSetSubpicturePalette (
-    VADisplay dpy,
-    VASubpictureID subpicture,
-    /* 
-     * pointer to an array holding the palette data.  The size of the array is 
-     * num_palette_entries * entry_bytes in size.  The order of the components
-     * in the palette is described by the component_order in VAImage struct
-     */
-    unsigned char *palette 
-);
-
 /*
  * If chromakey is enabled, then the area where the source value falls within
  * the chromakey [min, max] range is transparent
@@ -1370,6 +1418,30 @@ VAStatus vaAssociateSubpicture (
     short dest_y,
     unsigned short width,
     unsigned short height,
+    /*
+     * whether to enable chroma-keying or global-alpha
+     * see VA_SUBPICTURE_XXX values
+     */
+    unsigned int flags
+);
+
+/*
+ * Similar to vaAssociateSubpicture but with additional destination width
+ * and height to enable scaling
+ */
+VAStatus vaAssociateSubpicture2 (
+    VADisplay dpy,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces,
+    short src_x, /* upper left offset in subpicture */
+    short src_y,
+    unsigned short src_width,
+    unsigned short src_height,
+    short dest_x, /* upper left offset in surface */
+    short dest_y,
+    unsigned short dest_width,
+    unsigned short dest_height,
     /*
      * whether to enable chroma-keying or global-alpha
      * see VA_SUBPICTURE_XXX values
@@ -1501,8 +1573,8 @@ Mostly to demonstrate program flow with no error handling ...
 
 	int max_num_profiles, max_num_entrypoints, max_num_attribs;
 	max_num_profiles = vaMaxNumProfiles(dpy);
-	max_num_entrypoints = vaMaxNumProfiles(dpy);
-	max_num_attribs = vaMaxNumProfiles(dpy);
+	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
+	max_num_attribs = vaMaxNumAttributes(dpy);
 
 	/* find out whether MPEG2 MP is supported */
 	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);

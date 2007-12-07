@@ -209,6 +209,12 @@ struct VADriverVTable
 		VAImage *image     /* out */
 	);
 
+	VAStatus (*vaDeriveImage) (
+		VADriverContextP ctx,
+		VASurfaceID surface,
+		VAImage *image     /* out */
+	);
+
 	VAStatus (*vaDestroyImage) (
 		VADriverContextP ctx,
 		VAImageID image
@@ -245,6 +251,20 @@ struct VADriverVTable
 		unsigned int height,
 		int dest_x,
 		int dest_y 
+	);
+
+	VAStatus (*vaPutImage2) (
+		VADriverContextP ctx,
+		VASurfaceID surface,
+		VAImageID image,
+		int src_x,
+		int src_y,
+		unsigned int src_width,
+		unsigned int src_height,
+		int dest_x,
+		int dest_y,
+		unsigned int dest_width,
+		unsigned int dest_height
 	);
 
 	VAStatus (*vaQuerySubpictureFormats) (
@@ -307,6 +327,26 @@ struct VADriverVTable
 		short dest_y,
 		unsigned short width,
 		unsigned short height,
+		/*
+		 * whether to enable chroma-keying or global-alpha
+		 * see VA_SUBPICTURE_XXX values
+		 */
+		unsigned int flags
+	);
+
+	VAStatus (*vaAssociateSubpicture2) (
+		VADriverContextP ctx,
+		VASubpictureID subpicture,
+		VASurfaceID *target_surfaces,
+		int num_surfaces,
+		short src_x, /* upper left offset in subpicture */
+		short src_y,
+		unsigned short src_width,
+		unsigned short src_height,
+		short dest_x, /* upper left offset in surface */
+		short dest_y,
+		unsigned short dest_width,
+		unsigned short dest_height,
 		/*
 		 * whether to enable chroma-keying or global-alpha
 		 * see VA_SUBPICTURE_XXX values
