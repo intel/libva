@@ -44,7 +44,7 @@ void test()
     ASSERT(entrypoints);
 
     VAConfigID *configs = malloc(max_entrypoints * num_profiles * sizeof(VAConfigID));
-    VAContext *contexts = malloc(max_entrypoints * num_profiles * sizeof(VAContext));
+    VAContextID *contexts = malloc(max_entrypoints * num_profiles * sizeof(VAContextID));
 
     for(i = 0; i < num_profiles; i++)
     {
@@ -66,7 +66,7 @@ void test()
     int surface_count = 4;
     int total_surfaces = config_count * surface_count;
     
-    VASurface *surfaces = malloc(total_surfaces * sizeof(VASurface));
+    VASurfaceID *surfaces = malloc(total_surfaces * sizeof(VASurfaceID));
 
     // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
     va_status = vaCreateSurfaces(va_dpy, width, height, VA_RT_FORMAT_YUV420, total_surfaces, surfaces);
@@ -82,8 +82,8 @@ void test()
 
     for(i = 0; i < config_count; i++)
     {
-        status("vaDestroyContext for context %08x\n", contexts[i].context_id);
-        va_status = vaDestroyContext( va_dpy, &contexts[i] );
+        status("vaDestroyContext for context %08x\n", contexts[i]);
+        va_status = vaDestroyContext( va_dpy, contexts[i] );
         ASSERT( VA_STATUS_SUCCESS == va_status );
     }
 
@@ -94,7 +94,7 @@ void test()
         ASSERT( VA_STATUS_SUCCESS == va_status );
     }
     
-    va_status = vaDestroySurface(va_dpy, surfaces, total_surfaces);
+    va_status = vaDestroySurfaces(va_dpy, surfaces, total_surfaces);
     ASSERT( VA_STATUS_SUCCESS == va_status );
     
     free(contexts);

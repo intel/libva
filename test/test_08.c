@@ -33,17 +33,17 @@ void pre()
 
 #define DEAD_SURFACE_ID 	(VASurfaceID) 0xbeefdead
 
-void test_unique_surfaces(VASurface *surface_list, int surface_count)
+void test_unique_surfaces(VASurfaceID *surface_list, int surface_count)
 {
     int i,j;
     
     for(i = 0; i < surface_count; i++)
     {
-        ASSERT(surface_list[i].surface_id != VA_INVALID_SURFACE);
+        ASSERT(surface_list[i] != VA_INVALID_SURFACE);
         for(j = 0; j < i; j++)
         {
             if (i == j) continue;
-            ASSERT(surface_list[i].surface_id != surface_list[j].surface_id);
+            ASSERT(surface_list[i] != surface_list[j]);
         }
     }
 }
@@ -65,7 +65,7 @@ test_size_t test_sizes[] = {
 
 void test()
 {
-    VASurface surfaces[NUM_SIZES+1];
+    VASurfaceID surfaces[NUM_SIZES+1];
     int i;    
     
     memset(surfaces, 0xff, sizeof(surfaces));
@@ -73,16 +73,16 @@ void test()
     for(i = 0; i < NUM_SIZES; i++)
     {
         status("vaCreateSurfaces create %dx%d surface\n", test_sizes[i].w, test_sizes[i].h);
-        surfaces[i+1].surface_id = DEAD_SURFACE_ID;
+        surfaces[i+1] = DEAD_SURFACE_ID;
         va_status = vaCreateSurfaces(va_dpy,  test_sizes[i].w, test_sizes[i].h, VA_RT_FORMAT_YUV420, 1, &surfaces[i]);
         ASSERT( VA_STATUS_SUCCESS == va_status );
-        ASSERT( DEAD_SURFACE_ID == surfaces[i+1].surface_id );
+        ASSERT( DEAD_SURFACE_ID == surfaces[i+1] );
     }
     
     test_unique_surfaces(surfaces, NUM_SIZES);
 
     status("vaDestroySurface all surfaces\n");
-    va_status = vaDestroySurface(va_dpy, surfaces, NUM_SIZES);
+    va_status = vaDestroySurfaces(va_dpy, surfaces, NUM_SIZES);
     ASSERT( VA_STATUS_SUCCESS == va_status );
 }
 

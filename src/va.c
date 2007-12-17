@@ -34,22 +34,26 @@
 #include <unistd.h>
 #include "va_dri.h"
 
+#define VA_MAJOR_VERSION	0
+#define VA_MINOR_VERSION	26
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_26"
+
 #define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_24"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
-#define ASSERT_CONTEXT(dpy) assert( vaDbgContextIsValid(dpy) )
+#define CHECK_CONTEXT(dpy) if( !vaContextIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 #define ASSERT		assert
 #define CHECK_VTABLE(s, ctx, func) if (!va_checkVtable(ctx->vtable.va##func, #func)) s = VA_STATUS_ERROR_UNKNOWN;
 #define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
+#define CHECK_STRING(s, ctx, var) if (!va_checkString(ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
 #define TRACE(func) if (va_debug_trace) va_infoMessage("[TR] %s\n", #func);
 
 static VADriverContextP pDriverContexts = NULL;
 static int va_debug_trace = 0;
 
-static Bool vaDbgContextIsValid(VADriverContextP arg_ctx)
+static Bool vaContextIsValid(VADriverContextP arg_ctx)
 {
   VADriverContextP ctx = pDriverContexts;
   
@@ -70,7 +74,12 @@ VADisplay vaGetDisplay (
 {
   VADisplay dpy = NULL;
   VADriverContextP ctx = pDriverContexts;
-  
+
+  if (!native_dpy)
+  {
+      return NULL;
+  }
+
   while (ctx)
   {
       if (ctx->x11_dpy == (Display *)native_dpy)
@@ -129,6 +138,16 @@ static Bool va_checkMaximum(int value, char *variable)
     if (!value)
     {
         va_errorMessage("Failed to define max_%s in init\n", variable);
+        return False;
+    }
+    return True;
+}
+
+static Bool va_checkString(const char* value, char *variable)
+{
+    if (!value)
+    {
+        va_errorMessage("Failed to define str_%s in init\n", variable);
         return False;
     }
     return True;
@@ -255,6 +274,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_MAXIMUM(vaStatus, ctx, image_formats);
                     CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
                     CHECK_MAXIMUM(vaStatus, ctx, display_attributes);
+                    CHECK_STRING(vaStatus, ctx, vendor);
                     CHECK_VTABLE(vaStatus, ctx, Terminate);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigEntrypoints);
@@ -263,11 +283,10 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, DestroyConfig);
                     CHECK_VTABLE(vaStatus, ctx, GetConfigAttributes);
                     CHECK_VTABLE(vaStatus, ctx, CreateSurfaces);
-                    CHECK_VTABLE(vaStatus, ctx, DestroySurface);
+                    CHECK_VTABLE(vaStatus, ctx, DestroySurfaces);
                     CHECK_VTABLE(vaStatus, ctx, CreateContext);
                     CHECK_VTABLE(vaStatus, ctx, DestroyContext);
                     CHECK_VTABLE(vaStatus, ctx, CreateBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, BufferData);
                     CHECK_VTABLE(vaStatus, ctx, BufferSetNumElements);
                     CHECK_VTABLE(vaStatus, ctx, MapBuffer);
                     CHECK_VTABLE(vaStatus, ctx, UnmapBuffer);
@@ -281,6 +300,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateImage);
                     CHECK_VTABLE(vaStatus, ctx, DestroyImage);
+                    CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
                     CHECK_VTABLE(vaStatus, ctx, GetImage);
                     CHECK_VTABLE(vaStatus, ctx, PutImage);
                     CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
@@ -291,6 +311,7 @@ static VAStatus va_openDriver(VADriverContextP ctx, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
+                    CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
@@ -367,7 +388,7 @@ VAStatus vaInitialize (
   char *driver_name = NULL;
   VAStatus vaStatus;
   
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   va_debug_trace = (getenv("LIBVA_DEBUG_TRACE") != NULL);
 
@@ -379,8 +400,8 @@ VAStatus vaInitialize (
       vaStatus = va_openDriver(ctx, driver_name);
       va_infoMessage("va_openDriver() returns %d\n", vaStatus);
       
-      *major_version = ctx->version_major;
-      *minor_version = ctx->version_minor;
+      *major_version = VA_MAJOR_VERSION;
+      *minor_version = VA_MINOR_VERSION;
   }
 
   if (driver_name)
@@ -400,7 +421,7 @@ VAStatus vaTerminate (
 {
   VAStatus vaStatus = VA_STATUS_SUCCESS;
   VADriverContextP old_ctx = CTX(dpy);
-  ASSERT_CONTEXT(old_ctx);
+  CHECK_CONTEXT(old_ctx);
 
   if (old_ctx->handle)
   {
@@ -429,13 +450,38 @@ VAStatus vaTerminate (
   return vaStatus;
 }
 
+/*
+ * vaQueryVendorString returns a pointer to a zero-terminated string
+ * describing some aspects of the VA implemenation on a specific
+ * hardware accelerator. The format of the returned string is:
+ * <vendorname>-<major_version>-<minor_version>-<addtional_info>
+ * e.g. for the Intel GMA500 implementation, an example would be:
+ * "IntelGMA500-1.0-0.2-patch3
+ */
+const char *vaQueryVendorString (
+    VADisplay dpy
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  if( !vaContextIsValid(ctx) )
+  {
+      return NULL;
+  }
+  
+  return ctx->str_vendor;
+}
+
+
 /* Get maximum number of profiles supported by the implementation */
 int vaMaxNumProfiles (
     VADisplay dpy
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_profiles;
 }
@@ -446,7 +492,10 @@ int vaMaxNumEntrypoints (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_entrypoints;
 }
@@ -458,7 +507,10 @@ int vaMaxNumConfigAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_attributes;
 }
@@ -471,7 +523,7 @@ VAStatus vaQueryConfigEntrypoints (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQueryConfigEntrypoints);
   return ctx->vtable.vaQueryConfigEntrypoints ( ctx, profile, entrypoints, num_entrypoints);
@@ -486,7 +538,7 @@ VAStatus vaGetConfigAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaGetConfigAttributes);
   return ctx->vtable.vaGetConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
@@ -499,7 +551,7 @@ VAStatus vaQueryConfigProfiles (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQueryConfigProfiles);
   return ctx->vtable.vaQueryConfigProfiles ( ctx, profile_list, num_profiles );
@@ -515,7 +567,7 @@ VAStatus vaCreateConfig (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateConfig);
   return ctx->vtable.vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
@@ -527,7 +579,7 @@ VAStatus vaDestroyConfig (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDestroyConfig);
   return ctx->vtable.vaDestroyConfig ( ctx, config_id );
@@ -543,7 +595,7 @@ VAStatus vaQueryConfigAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQueryConfigAttributes);
   return ctx->vtable.vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
@@ -555,27 +607,27 @@ VAStatus vaCreateSurfaces (
     int height,
     int format,
     int num_surfaces,
-    VASurface *surfaces	/* out */
+    VASurfaceID *surfaces	/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateSurfaces);
   return ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
 }
 
-VAStatus vaDestroySurface (
+VAStatus vaDestroySurfaces (
     VADisplay dpy,
-    VASurface *surface_list,
+    VASurfaceID *surface_list,
     int num_surfaces
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
-  TRACE(vaDestroySurface);
-  return ctx->vtable.vaDestroySurface( ctx, surface_list, num_surfaces );
+  TRACE(vaDestroySurfaces);
+  return ctx->vtable.vaDestroySurfaces( ctx, surface_list, num_surfaces );
 }
 
 VAStatus vaCreateContext (
@@ -584,13 +636,13 @@ VAStatus vaCreateContext (
     int picture_width,
     int picture_height,
     int flag,
-    VASurface *render_targets,
+    VASurfaceID *render_targets,
     int num_render_targets,
-    VAContext *context		/* out */
+    VAContextID *context		/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateContext);
   return ctx->vtable.vaCreateContext( ctx, config_id, picture_width, picture_height,
@@ -599,11 +651,11 @@ VAStatus vaCreateContext (
 
 VAStatus vaDestroyContext (
     VADisplay dpy,
-    VAContext *context
+    VAContextID context
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDestroyContext);
   return ctx->vtable.vaDestroyContext( ctx, context );
@@ -611,30 +663,19 @@ VAStatus vaDestroyContext (
 
 VAStatus vaCreateBuffer (
     VADisplay dpy,
-    VABufferType type,	/* in */
-    VABufferID *buf_id	/* out */
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateBuffer);
-  return ctx->vtable.vaCreateBuffer( ctx, type, buf_id);
-}
-
-VAStatus vaBufferData (
-    VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    unsigned int size,	/* in */
-    unsigned int num_elements, /* in */
-    void *data		/* in */
-)
-{
-  VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
-
-  TRACE(vaBufferData);
-  return ctx->vtable.vaBufferData( ctx, buf_id, size, num_elements, data);
+  return ctx->vtable.vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
 }
 
 VAStatus vaBufferSetNumElements (
@@ -644,7 +685,7 @@ VAStatus vaBufferSetNumElements (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaBufferSetNumElements);
   return ctx->vtable.vaBufferSetNumElements( ctx, buf_id, num_elements );
@@ -658,7 +699,7 @@ VAStatus vaMapBuffer (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaMapBuffer);
   return ctx->vtable.vaMapBuffer( ctx, buf_id, pbuf );
@@ -670,7 +711,7 @@ VAStatus vaUnmapBuffer (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaUnmapBuffer);
   return ctx->vtable.vaUnmapBuffer( ctx, buf_id );
@@ -682,7 +723,7 @@ VAStatus vaDestroyBuffer (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDestroyBuffer);
   return ctx->vtable.vaDestroyBuffer( ctx, buffer_id );
@@ -690,12 +731,12 @@ VAStatus vaDestroyBuffer (
 
 VAStatus vaBeginPicture (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target
+    VAContextID context,
+    VASurfaceID render_target
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaBeginPicture);
   return ctx->vtable.vaBeginPicture( ctx, context, render_target );
@@ -703,13 +744,13 @@ VAStatus vaBeginPicture (
 
 VAStatus vaRenderPicture (
     VADisplay dpy,
-    VAContext *context,
+    VAContextID context,
     VABufferID *buffers,
     int num_buffers
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaRenderPicture);
   return ctx->vtable.vaRenderPicture( ctx, context, buffers, num_buffers );
@@ -717,11 +758,11 @@ VAStatus vaRenderPicture (
 
 VAStatus vaEndPicture (
     VADisplay dpy,
-    VAContext *context
+    VAContextID context
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaEndPicture);
   return ctx->vtable.vaEndPicture( ctx, context );
@@ -729,12 +770,12 @@ VAStatus vaEndPicture (
 
 VAStatus vaSyncSurface (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target
+    VAContextID context,
+    VASurfaceID render_target
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSyncSurface);
   return ctx->vtable.vaSyncSurface( ctx, context, render_target );
@@ -742,21 +783,20 @@ VAStatus vaSyncSurface (
 
 VAStatus vaQuerySurfaceStatus (
     VADisplay dpy,
-    VAContext *context,
-    VASurface *render_target,
+    VASurfaceID render_target,
     VASurfaceStatus *status	/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQuerySurfaceStatus);
-  return ctx->vtable.vaQuerySurfaceStatus( ctx, context, render_target, status );
+  return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
 }
 
 VAStatus vaPutSurface (
     VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     Drawable draw, /* X Drawable */
     short srcx,
     short srcy,
@@ -772,7 +812,7 @@ VAStatus vaPutSurface (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaPutSurface);
   return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
@@ -786,7 +826,10 @@ int vaMaxNumImageFormats (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_image_formats;
 }
@@ -798,7 +841,7 @@ VAStatus vaQueryImageFormats (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQueryImageFormats);
   return ctx->vtable.vaQueryImageFormats ( ctx, format_list, num_formats);
@@ -821,7 +864,7 @@ VAStatus vaCreateImage (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateImage);
   return ctx->vtable.vaCreateImage ( ctx, format, width, height, image);
@@ -832,14 +875,27 @@ VAStatus vaCreateImage (
  */
 VAStatus vaDestroyImage (
     VADisplay dpy,
-    VAImage *image
+    VAImageID image
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDestroyImage);
   return ctx->vtable.vaDestroyImage ( ctx, image);
+}
+
+VAStatus vaSetImagePalette (
+    VADisplay dpy,
+    VAImageID image,
+    unsigned char *palette
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  CHECK_CONTEXT(ctx);
+
+  TRACE(vaSetImagePalette);
+  return ctx->vtable.vaSetImagePalette ( ctx, image, palette);
 }
 
 /*
@@ -848,16 +904,16 @@ VAStatus vaDestroyImage (
  */
 VAStatus vaGetImage (
     VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     int x,	/* coordinates of the upper left source pixel */
     int y,
     unsigned int width, /* width and height of the region */
     unsigned int height,
-    VAImage *image
+    VAImageID image
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaGetImage);
   return ctx->vtable.vaGetImage ( ctx, surface, x, y, width, height, image);
@@ -869,8 +925,8 @@ VAStatus vaGetImage (
  */
 VAStatus vaPutImage (
     VADisplay dpy,
-    VASurface *surface,
-    VAImage *image,
+    VASurfaceID surface,
+    VAImageID image,
     int src_x,
     int src_y,
     unsigned int width,
@@ -880,7 +936,7 @@ VAStatus vaPutImage (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaPutImage);
   return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, width, height, dest_x, dest_y );
@@ -892,7 +948,10 @@ int vaMaxNumSubpictureFormats (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_subpic_formats;
 }
@@ -912,7 +971,7 @@ VAStatus vaQuerySubpictureFormats (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQuerySubpictureFormats);
   return ctx->vtable.vaQuerySubpictureFormats ( ctx, format_list, flags, num_formats);
@@ -923,12 +982,12 @@ VAStatus vaQuerySubpictureFormats (
  */
 VAStatus vaCreateSubpicture (
     VADisplay dpy,
-    VAImage *image,
-    VASubpicture *subpicture	/* out */
+    VAImageID image,
+    VASubpictureID *subpicture	/* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaCreateSubpicture);
   return ctx->vtable.vaCreateSubpicture ( ctx, image, subpicture );
@@ -939,11 +998,11 @@ VAStatus vaCreateSubpicture (
  */
 VAStatus vaDestroySubpicture (
     VADisplay dpy,
-    VASubpicture *subpicture
+    VASubpictureID subpicture
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDestroySubpicture);
   return ctx->vtable.vaDestroySubpicture ( ctx, subpicture);
@@ -951,12 +1010,12 @@ VAStatus vaDestroySubpicture (
 
 VAStatus vaSetSubpictureImage (
     VADisplay dpy,
-    VASubpicture *subpicture,
-    VAImage *image
+    VASubpictureID subpicture,
+    VAImageID image
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSetSubpictureImage);
   return ctx->vtable.vaSetSubpictureImage ( ctx, subpicture, image);
@@ -965,7 +1024,7 @@ VAStatus vaSetSubpictureImage (
 
 VAStatus vaSetSubpicturePalette (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     /* 
      * pointer to an array holding the palette data.  The size of the array is 
      * num_palette_entries * entry_bytes in size.  The order of the components
@@ -975,7 +1034,7 @@ VAStatus vaSetSubpicturePalette (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSetSubpicturePalette);
   return ctx->vtable.vaSetSubpicturePalette ( ctx, subpicture, palette);
@@ -987,16 +1046,17 @@ VAStatus vaSetSubpicturePalette (
  */
 VAStatus vaSetSubpictureChromakey (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     unsigned int chromakey_min,
-    unsigned int chromakey_max 
+    unsigned int chromakey_max,
+    unsigned int chromakey_mask
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSetSubpictureChromakey);
-  return ctx->vtable.vaSetSubpictureChromakey ( ctx, subpicture, chromakey_min, chromakey_max );
+  return ctx->vtable.vaSetSubpictureChromakey ( ctx, subpicture, chromakey_min, chromakey_max, chromakey_mask );
 }
 
 
@@ -1007,12 +1067,12 @@ VAStatus vaSetSubpictureChromakey (
  */
 VAStatus vaSetSubpictureGlobalAlpha (
     VADisplay dpy,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
     float global_alpha 
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSetSubpictureGlobalAlpha);
   return ctx->vtable.vaSetSubpictureGlobalAlpha ( ctx, subpicture, global_alpha );
@@ -1027,8 +1087,9 @@ VAStatus vaSetSubpictureGlobalAlpha (
 */
 VAStatus vaAssociateSubpicture (
     VADisplay dpy,
-    VASurface *target_surface,
-    VASubpicture *subpicture,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces,
     short src_x, /* upper left offset in subpicture */
     short src_y,
     short dest_x, /* upper left offset in surface */
@@ -1043,11 +1104,29 @@ VAStatus vaAssociateSubpicture (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaAssociateSubpicture);
-  return ctx->vtable.vaAssociateSubpicture ( ctx, target_surface, subpicture, src_x, src_y, dest_x, dest_y, width, height, flags );
+  return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, dest_x, dest_y, width, height, flags );
 }
+
+/*
+ * vaDeassociateSubpicture removes the association of the subpicture with target_surfaces.
+ */
+VAStatus vaDeassociateSubpicture (
+    VADisplay dpy,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces
+)
+{
+  VADriverContextP ctx = CTX(dpy);
+  CHECK_CONTEXT(ctx);
+
+  TRACE(vaDeassociateSubpicture);
+  return ctx->vtable.vaDeassociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces );
+}
+
 
 /* Get maximum number of display attributes supported by the implementation */
 int vaMaxNumDisplayAttributes (
@@ -1055,7 +1134,10 @@ int vaMaxNumDisplayAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  if( !vaContextIsValid(ctx) )
+  {
+      return 0;
+  }
   
   return ctx->max_display_attributes;
 }
@@ -1073,7 +1155,7 @@ VAStatus vaQueryDisplayAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaQueryDisplayAttributes);
   return ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
@@ -1092,7 +1174,7 @@ VAStatus vaGetDisplayAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaGetDisplayAttributes);
   return ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
@@ -1111,7 +1193,7 @@ VAStatus vaSetDisplayAttributes (
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaSetDisplayAttributes);
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
@@ -1120,13 +1202,13 @@ VAStatus vaSetDisplayAttributes (
 
 
 VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
-    VASurface *surface,
+    VASurfaceID surface,
     void **buffer, /* out */
     unsigned int *stride /* out */
 )
 {
   VADriverContextP ctx = CTX(dpy);
-  ASSERT_CONTEXT(ctx);
+  CHECK_CONTEXT(ctx);
 
   TRACE(vaDbgCopySurfaceToBuffer);
   return ctx->vtable.vaDbgCopySurfaceToBuffer( ctx, surface, buffer, stride );

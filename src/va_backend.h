@@ -34,28 +34,14 @@
 
 #include <stdlib.h>
 
+
 typedef struct VADriverContext *VADriverContextP;
 
-struct VADriverContext
+struct VADriverVTable
 {
-    VADriverContextP pNext;
-    Display *x11_dpy;
-    int x11_screen;
-    int version_major;
-    int version_minor;
-    int max_profiles;
-    int max_entrypoints;
-    int max_attributes;
-    int max_image_formats;
-    int max_subpic_formats;
-    int max_display_attributes;
-    void *handle;			/* dlopen handle */
-    void *pDriverData;
-    struct
-    {
-	 VAStatus (*vaTerminate) ( VADriverContextP ctx );
+	VAStatus (*vaTerminate) ( VADriverContextP ctx );
 
-	 VAStatus (*vaQueryConfigProfiles) (
+	VAStatus (*vaQueryConfigProfiles) (
 		VADriverContextP ctx,
 		VAProfile *profile_list,	/* out */
 		int *num_profiles			/* out */
@@ -105,12 +91,12 @@ struct VADriverContext
 		int height,
 		int format,
 		int num_surfaces,
-		VASurface *surfaces		/* out */
+		VASurfaceID *surfaces		/* out */
 	);
 
-	VAStatus (*vaDestroySurface) (
+	VAStatus (*vaDestroySurfaces) (
 		VADriverContextP ctx,
-		VASurface *surface_list,
+		VASurfaceID *surface_list,
 		int num_surfaces
 	);
 
@@ -120,34 +106,30 @@ struct VADriverContext
 		int picture_width,
 		int picture_height,
 		int flag,
-		VASurface *render_targets,
+		VASurfaceID *render_targets,
 		int num_render_targets,
-		VAContext *context		/* out */
+		VAContextID *context		/* out */
 	);
 
 	VAStatus (*vaDestroyContext) (
 		VADriverContextP ctx,
-		VAContext *context
+		VAContextID context
 	);
 
 	VAStatus (*vaCreateBuffer) (
 		VADriverContextP ctx,
-		VABufferType type,  /* in */
-		VABufferID *buf_desc	/* out */
-	);
-
-	VAStatus (*vaBufferData) (
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-        unsigned int size,	/* in */
-        unsigned int num_elements,	/* in */
-        void *data		/* in */
+		VAContextID context,		/* in */
+		VABufferType type,		/* in */
+		unsigned int size,		/* in */
+		unsigned int num_elements,	/* in */
+		void *data,			/* in */
+		VABufferID *buf_id		/* out */
 	);
 
 	VAStatus (*vaBufferSetNumElements) (
 		VADriverContextP ctx,
 		VABufferID buf_id,	/* in */
-        unsigned int num_elements	/* in */
+		unsigned int num_elements	/* in */
 	);
 
 	VAStatus (*vaMapBuffer) (
@@ -168,38 +150,37 @@ struct VADriverContext
 
 	VAStatus (*vaBeginPicture) (
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target
+		VAContextID context,
+		VASurfaceID render_target
 	);
 
 	VAStatus (*vaRenderPicture) (
 		VADriverContextP ctx,
-		VAContext *context,
+		VAContextID context,
 		VABufferID *buffers,
 		int num_buffers
 	);
 
 	VAStatus (*vaEndPicture) (
 		VADriverContextP ctx,
-		VAContext *context
+		VAContextID context
 	);
 
 	VAStatus (*vaSyncSurface) (
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target
+		VAContextID context,
+		VASurfaceID render_target
 	);
 
 	VAStatus (*vaQuerySurfaceStatus) (
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target,
+		VASurfaceID render_target,
 		VASurfaceStatus *status	/* out */
 	);
 
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
-		VASurface *surface,
+		VASurfaceID surface,
 		Drawable draw, /* X Drawable */
 		short srcx,
 		short srcy,
@@ -230,23 +211,34 @@ struct VADriverContext
 
 	VAStatus (*vaDestroyImage) (
 		VADriverContextP ctx,
-		VAImage *image
+		VAImageID image
 	);
-
+	
+	VAStatus (*vaSetImagePalette) (
+	        VADriverContextP ctx,
+	        VAImageID image,
+	        /*
+                 * pointer to an array holding the palette data.  The size of the array is
+                 * num_palette_entries * entry_bytes in size.  The order of the components
+                 * in the palette is described by the component_order in VAImage struct
+                 */
+                unsigned char *palette
+	);
+	
 	VAStatus (*vaGetImage) (
 		VADriverContextP ctx,
-		VASurface *surface,
+		VASurfaceID surface,
 		int x,     /* coordinates of the upper left source pixel */
 		int y,
 		unsigned int width, /* width and height of the region */
 		unsigned int height,
-		VAImage *image
+		VAImageID image
 	);
 
 	VAStatus (*vaPutImage) (
 		VADriverContextP ctx,
-		VASurface *surface,
-		VAImage *image,
+		VASurfaceID surface,
+		VAImageID image,
 		int src_x,
 		int src_y,
 		unsigned int width,
@@ -264,24 +256,24 @@ struct VADriverContext
 
 	VAStatus (*vaCreateSubpicture) (
 		VADriverContextP ctx,
-		VAImage *image,
-		VASubpicture *subpicture   /* out */
+		VAImageID image,
+		VASubpictureID *subpicture   /* out */
 	);
 
 	VAStatus (*vaDestroySubpicture) (
 		VADriverContextP ctx,
-		VASubpicture *subpicture
+		VASubpictureID subpicture
 	);
 
         VAStatus (*vaSetSubpictureImage) (
                 VADriverContextP ctx,
-                VASubpicture *subpicture,
-                VAImage *image
+                VASubpictureID subpicture,
+                VAImageID image
         );
         
 	VAStatus (*vaSetSubpicturePalette) (
 		VADriverContextP ctx,
-		VASubpicture *subpicture,
+		VASubpictureID subpicture,
 		/*
 		 * pointer to an array holding the palette data.  The size of the array is
 		 * num_palette_entries * entry_bytes in size.  The order of the components
@@ -292,21 +284,23 @@ struct VADriverContext
 
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
-		VASubpicture *subpicture,
+		VASubpictureID subpicture,
 		unsigned int chromakey_min,
-		unsigned int chromakey_max
+		unsigned int chromakey_max,
+		unsigned int chromakey_mask
 	);
 
 	VAStatus (*vaSetSubpictureGlobalAlpha) (
 		VADriverContextP ctx,
-		VASubpicture *subpicture,
+		VASubpictureID subpicture,
 		float global_alpha 
 	);
 
 	VAStatus (*vaAssociateSubpicture) (
 		VADriverContextP ctx,
-		VASurface *target_surface,
-		VASubpicture *subpicture,
+		VASubpictureID subpicture,
+		VASurfaceID *target_surfaces,
+		int num_surfaces,
 		short src_x, /* upper left offset in subpicture */
 		short src_y,
 		short dest_x, /* upper left offset in surface */
@@ -318,6 +312,13 @@ struct VADriverContext
 		 * see VA_SUBPICTURE_XXX values
 		 */
 		unsigned int flags
+	);
+
+	VAStatus (*vaDeassociateSubpicture) (
+		VADriverContextP ctx,
+		VASubpictureID subpicture,
+		VASurfaceID *target_surfaces,
+		int num_surfaces
 	);
 
 	VAStatus (*vaQueryDisplayAttributes) (
@@ -341,12 +342,33 @@ struct VADriverContext
 
 	VAStatus (*vaDbgCopySurfaceToBuffer) (
 		VADriverContextP ctx,
-		VASurface *surface,
+		VASurfaceID surface,
 		void **buffer, /* out */
 		unsigned int *stride /* out */
 	);
+};
 
-    } vtable;
+struct VADriverContext
+{
+    VADriverContextP pNext;
+
+    void *pDriverData;
+    struct VADriverVTable vtable;
+
+    Display *x11_dpy;
+    int x11_screen;
+
+    int version_major;
+    int version_minor;
+    int max_profiles;
+    int max_entrypoints;
+    int max_attributes;
+    int max_image_formats;
+    int max_subpic_formats;
+    int max_display_attributes;
+    const char *str_vendor;
+
+    void *handle;			/* dlopen handle */
 };
 
 typedef VAStatus (*VADriverInit) (

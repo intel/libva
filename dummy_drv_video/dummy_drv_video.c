@@ -366,7 +366,7 @@ VAStatus dummy_CreateSurfaces(
 		int height,
 		int format,
 		int num_surfaces,
-		VASurface *surfaces		/* out */
+		VASurfaceID *surfaces		/* out */
 	)
 {
     INIT_DRIVER_DATA
@@ -388,13 +388,8 @@ VAStatus dummy_CreateSurfaces(
             vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
             break;
         }
-        obj_surface->surface = &(surfaces[i]);
-        obj_surface->surface->surface_id = surfaceID;
-        obj_surface->surface->context_id = -1;
-        obj_surface->surface->width = width;
-        obj_surface->surface->height = height;
-        obj_surface->surface->format = format;
-        obj_surface->surface->privData = NULL;
+        obj_surface->surface_id = surfaceID;
+        surfaces[i] = surfaceID;
     }
 
     /* Error recovery */
@@ -403,8 +398,8 @@ VAStatus dummy_CreateSurfaces(
         /* surfaces[i-1] was the last successful allocation */
         for(; i--; )
         {
-            object_surface_p obj_surface = SURFACE(surfaces[i].surface_id);
-            surfaces[i].surface_id = -1;
+            object_surface_p obj_surface = SURFACE(surfaces[i]);
+            surfaces[i] = VA_INVALID_SURFACE;
             ASSERT(obj_surface);
             object_heap_free( &driver_data->surface_heap, (object_base_p) obj_surface);
         }
@@ -413,9 +408,9 @@ VAStatus dummy_CreateSurfaces(
     return vaStatus;
 }
 
-VAStatus dummy_DestroySurface(
+VAStatus dummy_DestroySurfaces(
 		VADriverContextP ctx,
-		VASurface *surface_list,
+		VASurfaceID *surface_list,
 		int num_surfaces
 	)
 {
@@ -423,7 +418,7 @@ VAStatus dummy_DestroySurface(
     int i;
     for(i = num_surfaces; i--; )
     {
-        object_surface_p obj_surface = SURFACE(surface_list[i].surface_id);
+        object_surface_p obj_surface = SURFACE(surface_list[i]);
         ASSERT(obj_surface);
         object_heap_free( &driver_data->surface_heap, (object_base_p) obj_surface);
     }
@@ -458,7 +453,19 @@ VAStatus dummy_CreateImage(
 
 VAStatus dummy_DestroyImage(
 	VADriverContextP ctx,
-	VAImage *image
+	VAImageID image
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
+VAStatus dummy_SetImagePalette(
+	VADriverContextP ctx,
+	VAImageID image,
+	unsigned char *palette
 )
 {
     INIT_DRIVER_DATA
@@ -469,12 +476,12 @@ VAStatus dummy_DestroyImage(
 
 VAStatus dummy_GetImage(
 	VADriverContextP ctx,
-	VASurface *surface,
+	VASurfaceID surface,
 	int x,     /* coordinates of the upper left source pixel */
 	int y,
 	unsigned int width, /* width and height of the region */
 	unsigned int height,
-	VAImage *image
+	VAImageID image
 )
 {
     INIT_DRIVER_DATA
@@ -485,8 +492,8 @@ VAStatus dummy_GetImage(
 
 VAStatus dummy_PutImage(
 	VADriverContextP ctx,
-	VASurface *surface,
-	VAImage *image,
+	VASurfaceID surface,
+	VAImageID image,
 	int src_x,
 	int src_y,
 	unsigned int width,
@@ -516,8 +523,8 @@ VAStatus dummy_QuerySubpictureFormats(
 
 VAStatus dummy_CreateSubpicture(
 	VADriverContextP ctx,
-	VAImage *image,
-	VASubpicture *subpicture   /* out */
+	VAImageID image,
+	VASubpictureID *subpicture   /* out */
 )
 {
     INIT_DRIVER_DATA
@@ -528,7 +535,7 @@ VAStatus dummy_CreateSubpicture(
 
 VAStatus dummy_DestroySubpicture(
 	VADriverContextP ctx,
-	VASubpicture *subpicture
+	VASubpictureID subpicture
 )
 {
     INIT_DRIVER_DATA
@@ -539,8 +546,8 @@ VAStatus dummy_DestroySubpicture(
 
 VAStatus dummy_SetSubpictureImage(
         VADriverContextP ctx,
-        VASubpicture *subpicture,
-        VAImage *image
+        VASubpictureID subpicture,
+        VAImageID image
 )
 {
     INIT_DRIVER_DATA
@@ -551,7 +558,7 @@ VAStatus dummy_SetSubpictureImage(
 
 VAStatus dummy_SetSubpicturePalette(
 	VADriverContextP ctx,
-	VASubpicture *subpicture,
+	VASubpictureID subpicture,
 	/*
 	 * pointer to an array holding the palette data.  The size of the array is
 	 * num_palette_entries * entry_bytes in size.  The order of the components
@@ -568,9 +575,10 @@ VAStatus dummy_SetSubpicturePalette(
 
 VAStatus dummy_SetSubpictureChromakey(
 	VADriverContextP ctx,
-	VASubpicture *subpicture,
+	VASubpictureID subpicture,
 	unsigned int chromakey_min,
-	unsigned int chromakey_max
+	unsigned int chromakey_max,
+	unsigned int chromakey_mask
 )
 {
     INIT_DRIVER_DATA
@@ -581,7 +589,7 @@ VAStatus dummy_SetSubpictureChromakey(
 
 VAStatus dummy_SetSubpictureGlobalAlpha(
 	VADriverContextP ctx,
-	VASubpicture *subpicture,
+	VASubpictureID subpicture,
 	float global_alpha 
 )
 {
@@ -593,8 +601,9 @@ VAStatus dummy_SetSubpictureGlobalAlpha(
 
 VAStatus dummy_AssociateSubpicture(
 	VADriverContextP ctx,
-	VASurface *target_surface,
-	VASubpicture *subpicture,
+	VASubpictureID subpicture,
+	VASurfaceID *target_surfaces,
+	int num_surfaces,
 	short src_x, /* upper left offset in subpicture */
 	short src_y,
 	short dest_x, /* upper left offset in surface */
@@ -614,15 +623,28 @@ VAStatus dummy_AssociateSubpicture(
     return VA_STATUS_SUCCESS;
 }
 
+VAStatus dummy_DeassociateSubpicture(
+	VADriverContextP ctx,
+	VASubpictureID subpicture,
+	VASurfaceID *target_surfaces,
+	int num_surfaces
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus dummy_CreateContext(
 		VADriverContextP ctx,
 		VAConfigID config_id,
 		int picture_width,
 		int picture_height,
 		int flag,
-		VASurface *render_targets,
+		VASurfaceID *render_targets,
 		int num_render_targets,
-		VAContext *context		/* out */
+		VAContextID *context		/* out */
 	)
 {
     INIT_DRIVER_DATA
@@ -648,41 +670,34 @@ VAStatus dummy_CreateContext(
         return vaStatus;
     }
 
-    obj_context->context = context;
+    obj_context->context_id  = contextID;
+    *context = contextID;
     obj_context->current_render_target = -1;
-
-    obj_context->context->context_id = contextID;
-    obj_context->context->config_id = config_id;
-    obj_context->context->picture_width = picture_width;
-    obj_context->context->picture_height = picture_height;
-    obj_context->context->num_render_targets = num_render_targets;
-    obj_context->context->render_targets = (VASurfaceID *) malloc(num_render_targets * sizeof(VASurfaceID));
+    obj_context->config_id = config_id;
+    obj_context->picture_width = picture_width;
+    obj_context->picture_height = picture_height;
+    obj_context->num_render_targets = num_render_targets;
+    obj_context->render_targets = (VASurfaceID *) malloc(num_render_targets * sizeof(VASurfaceID));
     for(i = 0; i < num_render_targets; i++)
     {
-        if (NULL == SURFACE(render_targets[i].surface_id))
+        if (NULL == SURFACE(render_targets[i]))
         {
             vaStatus = VA_STATUS_ERROR_INVALID_SURFACE;
             break;
         }
-        obj_context->context->render_targets[i] = render_targets[i].surface_id;
+        obj_context->render_targets[i] = render_targets[i];
     }
-    obj_context->context->flags = flag;
-    obj_context->context->privData = NULL;
+    obj_context->flags = flag;
 
     /* Error recovery */
     if (VA_STATUS_SUCCESS != vaStatus)
     {
-        free(obj_context->context->render_targets);
-        obj_context->context->render_targets = NULL;
-        obj_context->context->context_id = -1;
-        obj_context->context->config_id = -1;
-        obj_context->context->picture_width = 0;
-        obj_context->context->picture_height = 0;
-        free(obj_context->context->render_targets);
-        obj_context->context->render_targets = NULL;
-        obj_context->context->num_render_targets = 0;
-        obj_context->context->flags = 0;
-        obj_context->context->privData = NULL;
+        obj_context->context_id = -1;
+        obj_context->config_id = -1;
+        free(obj_context->render_targets);
+        obj_context->render_targets = NULL;
+        obj_context->num_render_targets = 0;
+        obj_context->flags = 0;
         object_heap_free( &driver_data->context_heap, (object_base_p) obj_context);
     }
 
@@ -692,27 +707,25 @@ VAStatus dummy_CreateContext(
 
 VAStatus dummy_DestroyContext(
 		VADriverContextP ctx,
-		VAContext *context
+		VAContextID context
 	)
 {
     INIT_DRIVER_DATA
-    object_context_p obj_context = CONTEXT(context->context_id);
+    object_context_p obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
-    obj_context->context->context_id = -1;
-    obj_context->context->config_id = -1;
-    obj_context->context->picture_width = 0;
-    obj_context->context->picture_height = 0;
-    if (obj_context->context->render_targets)
+    obj_context->context_id = -1;
+    obj_context->config_id = -1;
+    obj_context->picture_width = 0;
+    obj_context->picture_height = 0;
+    if (obj_context->render_targets)
     {
-        free(obj_context->context->render_targets);
+        free(obj_context->render_targets);
     }
-    obj_context->context->render_targets = NULL;
-    obj_context->context->num_render_targets = 0;
-    obj_context->context->flags = 0;
-    obj_context->context->privData = NULL;
+    obj_context->render_targets = NULL;
+    obj_context->num_render_targets = 0;
+    obj_context->flags = 0;
 
-    obj_context->context = NULL;
     obj_context->current_render_target = -1;
 
     object_heap_free( &driver_data->context_heap, (object_base_p) obj_context);
@@ -721,11 +734,28 @@ VAStatus dummy_DestroyContext(
 }
 
 
+
+static VAStatus dummy__allocate_buffer(object_buffer_p obj_buffer, int size)
+{
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+
+    obj_buffer->buffer_data = realloc(obj_buffer->buffer_data, size);
+    if (NULL == obj_buffer->buffer_data)
+    {
+        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+    }
+    return vaStatus;
+}
+
 VAStatus dummy_CreateBuffer(
 		VADriverContextP ctx,
-		VABufferType type,  /* in */
-		VABufferID *buf_desc	/* out */
-	)
+                VAContextID context,	/* in */
+                VABufferType type,	/* in */
+                unsigned int size,		/* in */
+                unsigned int num_elements,	/* in */
+                void *data,			/* in */
+                VABufferID *buf_id		/* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -762,36 +792,6 @@ VAStatus dummy_CreateBuffer(
 
     obj_buffer->buffer_data = NULL;
 
-    *buf_desc = bufferID;
-
-    return vaStatus;
-}
-
-static VAStatus dummy__allocate_buffer(object_buffer_p obj_buffer, int size)
-{
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-
-    obj_buffer->buffer_data = realloc(obj_buffer->buffer_data, size);
-    if (NULL == obj_buffer->buffer_data)
-    {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    return vaStatus;
-}
-
-VAStatus dummy_BufferData(
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-        unsigned int size,	/* in */
-        unsigned int num_elements,	/* in */
-        void *data		/* in */
-	)
-{
-    INIT_DRIVER_DATA
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    object_buffer_p obj_buffer = BUFFER(buf_id);
-    ASSERT(obj_buffer);
-
     vaStatus = dummy__allocate_buffer(obj_buffer, size * num_elements);
     if (VA_STATUS_SUCCESS == vaStatus)
     {
@@ -803,8 +803,14 @@ VAStatus dummy_BufferData(
         }
     }
 
+    if (VA_STATUS_SUCCESS == vaStatus)
+    {
+        *buf_id = bufferID;
+    }
+
     return vaStatus;
 }
+
 
 VAStatus dummy_BufferSetNumElements(
 		VADriverContextP ctx,
@@ -888,8 +894,8 @@ VAStatus dummy_DestroyBuffer(
 
 VAStatus dummy_BeginPicture(
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target
+		VAContextID context,
+		VASurfaceID render_target
 	)
 {
     INIT_DRIVER_DATA
@@ -897,10 +903,10 @@ VAStatus dummy_BeginPicture(
     object_context_p obj_context;
     object_surface_p obj_surface;
 
-    obj_context = CONTEXT(context->context_id);
+    obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
-    obj_surface = SURFACE(render_target->surface_id);
+    obj_surface = SURFACE(render_target);
     ASSERT(obj_surface);
 
     obj_context->current_render_target = obj_surface->base.id;
@@ -910,7 +916,7 @@ VAStatus dummy_BeginPicture(
 
 VAStatus dummy_RenderPicture(
 		VADriverContextP ctx,
-		VAContext *context,
+		VAContextID context,
 		VABufferID *buffers,
 		int num_buffers
 	)
@@ -921,7 +927,7 @@ VAStatus dummy_RenderPicture(
     object_surface_p obj_surface;
     int i;
 
-    obj_context = CONTEXT(context->context_id);
+    obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
     obj_surface = SURFACE(obj_context->current_render_target);
@@ -938,13 +944,21 @@ VAStatus dummy_RenderPicture(
             break;
         }
     }
+    
+    /* Release buffers */
+    for(i = 0; i < num_buffers; i++)
+    {
+        object_buffer_p obj_buffer = BUFFER(buffers[i]);
+        ASSERT(obj_buffer);
+        dummy__destroy_buffer(driver_data, obj_buffer);
+    }
 
     return vaStatus;
 }
 
 VAStatus dummy_EndPicture(
 		VADriverContextP ctx,
-		VAContext *context
+		VAContextID context
 	)
 {
     INIT_DRIVER_DATA
@@ -952,7 +966,7 @@ VAStatus dummy_EndPicture(
     object_context_p obj_context;
     object_surface_p obj_surface;
 
-    obj_context = CONTEXT(context->context_id);
+    obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
     obj_surface = SURFACE(obj_context->current_render_target);
@@ -967,8 +981,8 @@ VAStatus dummy_EndPicture(
 
 VAStatus dummy_SyncSurface(
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target
+		VAContextID context,
+		VASurfaceID render_target
 	)
 {
     INIT_DRIVER_DATA
@@ -976,10 +990,10 @@ VAStatus dummy_SyncSurface(
     object_context_p obj_context;
     object_surface_p obj_surface;
 
-    obj_context = CONTEXT(context->context_id);
+    obj_context = CONTEXT(context);
     ASSERT(obj_context);
 
-    obj_surface = SURFACE(render_target->surface_id);
+    obj_surface = SURFACE(render_target);
     ASSERT(obj_surface);
 
     /* Assume that this shouldn't be called before vaEndPicture() */
@@ -990,38 +1004,25 @@ VAStatus dummy_SyncSurface(
 
 VAStatus dummy_QuerySurfaceStatus(
 		VADriverContextP ctx,
-		VAContext *context,
-		VASurface *render_target,
+		VASurfaceID render_target,
 		VASurfaceStatus *status	/* out */
 	)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
-    object_context_p obj_context;
     object_surface_p obj_surface;
 
-    obj_context = CONTEXT(context->context_id);
-    ASSERT(obj_context);
-
-    obj_surface = SURFACE(render_target->surface_id);
+    obj_surface = SURFACE(render_target);
     ASSERT(obj_surface);
 
-    /* Assume that we are busy until vaEndPicture() is called */
-    if ( obj_context->current_render_target == obj_surface->base.id )
-    {
-        *status = VASurfaceRendering;
-    }
-    else
-    {
-        *status = VASurfaceReady;
-    }
+    *status = VASurfaceReady;
 
     return vaStatus;
 }
 
 VAStatus dummy_PutSurface(
    		VADriverContextP ctx,
-		VASurface *surface,
+		VASurfaceID surface,
 		Drawable draw, /* X Drawable */
 		short srcx,
 		short srcy,
@@ -1091,7 +1092,7 @@ VAStatus dummy_SetDisplayAttributes (
 
 VAStatus dummy_DbgCopySurfaceToBuffer(
 		VADriverContextP ctx,
-		VASurface *surface,
+		VASurfaceID surface,
 		void **buffer, /* out */
 		unsigned int *stride /* out */
 	)
@@ -1140,7 +1141,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1148,13 +1149,14 @@ VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
     int i;
 
     ctx->version_major = 0;
-    ctx->version_minor = 24;
+    ctx->version_minor = 26;
     ctx->max_profiles = DUMMY_MAX_PROFILES;
     ctx->max_entrypoints = DUMMY_MAX_ENTRYPOINTS;
     ctx->max_attributes = DUMMY_MAX_CONFIG_ATTRIBUTES;
     ctx->max_image_formats = DUMMY_MAX_IMAGE_FORMATS;
     ctx->max_subpic_formats = DUMMY_MAX_SUBPIC_FORMATS;
     ctx->max_display_attributes = DUMMY_MAX_DISPLAY_ATTRIBUTES;
+    ctx->str_vendor = DUMMY_STR_VENDOR;
 
     ctx->vtable.vaTerminate = dummy_Terminate;
     ctx->vtable.vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
@@ -1165,11 +1167,10 @@ VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
     ctx->vtable.vaDestroyConfig = dummy_DestroyConfig;
     ctx->vtable.vaGetConfigAttributes = dummy_GetConfigAttributes;
     ctx->vtable.vaCreateSurfaces = dummy_CreateSurfaces;
-    ctx->vtable.vaDestroySurface = dummy_DestroySurface;
+    ctx->vtable.vaDestroySurfaces = dummy_DestroySurfaces;
     ctx->vtable.vaCreateContext = dummy_CreateContext;
     ctx->vtable.vaDestroyContext = dummy_DestroyContext;
     ctx->vtable.vaCreateBuffer = dummy_CreateBuffer;
-    ctx->vtable.vaBufferData = dummy_BufferData;
     ctx->vtable.vaBufferSetNumElements = dummy_BufferSetNumElements;
     ctx->vtable.vaMapBuffer = dummy_MapBuffer;
     ctx->vtable.vaUnmapBuffer = dummy_UnmapBuffer;
@@ -1183,6 +1184,7 @@ VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
     ctx->vtable.vaQueryImageFormats = dummy_QueryImageFormats;
     ctx->vtable.vaCreateImage = dummy_CreateImage;
     ctx->vtable.vaDestroyImage = dummy_DestroyImage;
+    ctx->vtable.vaSetImagePalette = dummy_SetImagePalette;
     ctx->vtable.vaGetImage = dummy_GetImage;
     ctx->vtable.vaPutImage = dummy_PutImage;
     ctx->vtable.vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
@@ -1193,6 +1195,7 @@ VAStatus __vaDriverInit_0_24(  VADriverContextP ctx )
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
+    ctx->vtable.vaDeassociateSubpicture = dummy_DeassociateSubpicture;
     ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
     ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;
     ctx->vtable.vaSetDisplayAttributes = dummy_SetDisplayAttributes;
