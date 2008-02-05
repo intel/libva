@@ -111,6 +111,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT	0x0000000e
 #define VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE	0x0000000f
 #define VA_STATUS_ERROR_SURFACE_BUSY		0x00000010
+#define VA_STATUS_ERROR_FLAG_NOT_SUPPORTED      0x00000011
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /*
@@ -755,7 +756,7 @@ typedef struct _VAPictureParameterBufferVC1
     union {
         struct {
             unsigned char reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
-            unsigned char reference_distance	: 1;/* PICTURE_LAYER::REFDIST */
+            unsigned char reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
             unsigned char num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
             unsigned char reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
         };

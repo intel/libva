@@ -387,6 +387,10 @@ const char *vaErrorStr(VAStatus error_status)
             return "the requested RT Format is not supported";
         case VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE:
             return "the requested VABufferType is not supported";
+        case VA_STATUS_ERROR_SURFACE_BUSY:
+            return "surface is in use";
+        case VA_STATUS_ERROR_FLAG_NOT_SUPPORTED:
+            return "flag not supported";
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
