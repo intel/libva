@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.28
+ * Rev. 0.29
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -49,6 +49,7 @@
  * rev 0.27 (11/19/2007 Matt Sottek)   - Added DeriveImage
  * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture
  *                                       to enable scaling
+ * rev 0.29 (02/07/2007 Jonathan Bian) - VC1 parameter fixes
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -780,6 +781,7 @@ typedef struct _VAPictureParameterBufferVC1
     union {
         struct {
             unsigned char dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
+            unsigned char quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
             unsigned char half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
             unsigned char pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
             unsigned char pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
