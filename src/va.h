@@ -49,7 +49,8 @@
  * rev 0.27 (11/19/2007 Matt Sottek)   - Added DeriveImage
  * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture
  *                                       to enable scaling
- * rev 0.29 (02/07/2007 Jonathan Bian) - VC1 parameter fixes
+ * rev 0.29 (02/07/2007 Jonathan Bian) - VC1 parameter fixes,
+ *                                       added VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -114,6 +115,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_SURFACE_BUSY		0x00000010
 #define VA_STATUS_ERROR_FLAG_NOT_SUPPORTED      0x00000011
 #define VA_STATUS_ERROR_INVALID_PARAMETER	0x00000012
+#define VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED 0x00000013
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /*
