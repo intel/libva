@@ -365,8 +365,12 @@ const char *vaErrorStr(VAStatus error_status)
     {
         case VA_STATUS_SUCCESS:
             return "success (no error)";
+        case VA_STATUS_ERROR_OPERATION_FAILED:
+            return "operation failed";
         case VA_STATUS_ERROR_ALLOCATION_FAILED:
             return "resource allocation failed";
+        case VA_STATUS_ERROR_INVALID_DISPLAY:
+            return "invalid VADisplay";
         case VA_STATUS_ERROR_INVALID_CONFIG:
             return "invalid VAConfigID";
         case VA_STATUS_ERROR_INVALID_CONTEXT:
@@ -375,6 +379,10 @@ const char *vaErrorStr(VAStatus error_status)
             return "invalid VASurfaceID";
         case VA_STATUS_ERROR_INVALID_BUFFER:
             return "invalid VABufferID";
+        case VA_STATUS_ERROR_INVALID_IMAGE:
+            return "invalid VAImageID";
+        case VA_STATUS_ERROR_INVALID_SUBPICTURE:
+            return "invalid VASubpictureID";
         case VA_STATUS_ERROR_ATTR_NOT_SUPPORTED:
             return "attribute not supported";
         case VA_STATUS_ERROR_MAX_NUM_EXCEEDED:
@@ -391,6 +399,10 @@ const char *vaErrorStr(VAStatus error_status)
             return "surface is in use";
         case VA_STATUS_ERROR_FLAG_NOT_SUPPORTED:
             return "flag not supported";
+        case VA_STATUS_ERROR_INVALID_PARAMETER:
+            return "invalid parameter";
+        case VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED:
+            return "resolution not supported";
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
