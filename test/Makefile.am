@@ -21,7 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 check_PROGRAMS = test_01 test_02 test_03 test_04 test_05 test_06 \
-		test_07 test_08 test_09 test_10 test_11
+		test_07 test_08 test_09 test_10 test_11 test_12
 
 bin_PROGRAMS = vainfo
 
@@ -68,6 +68,9 @@ test_10_SOURCES = test_10.c
 
 test_11_LDADD = $(TEST_LIBS)
 test_11_SOURCES = test_11.c
+
+test_12_LDADD = $(TEST_LIBS)
+test_12_SOURCES = test_12.c
 
 
 valgrind:	$(check_PROGRAMS)
