@@ -189,6 +189,7 @@ typedef enum
     VAProfileVC1Simple			= 8,
     VAProfileVC1Main			= 9,
     VAProfileVC1Advanced		= 10,
+    VAProfileH263Baseline		= 11
 } VAProfile;
 
 /* 
@@ -201,6 +202,8 @@ typedef enum
     VAEntrypointIDCT		= 3,
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
+    /* Encode entrypoints */
+    VAEntrypointVLC		= 6, /* slice level encode */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -211,6 +214,7 @@ typedef enum
     VAConfigAttribSpatialClipping	= 2,
     VAConfigAttribIntraResidual		= 3,
     VAConfigAttribEncryption		= 4,
+    VAConfigAttribRateControl		= 5,    
 } VAConfigAttribType;
 
 /*
@@ -228,6 +232,11 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV420	0x00000001	
 #define VA_RT_FORMAT_YUV422	0x00000002
 #define VA_RT_FORMAT_YUV444	0x00000004
+
+/* attribute value for VAConfigAttribRateControl */
+#define VA_RC_NONE		0x00000001	
+#define VA_RC_CBR		0x00000002
+#define VA_RC_VBR		0x00000004
 
 /*
  * if an attribute is not applicable for a given
@@ -445,7 +454,11 @@ typedef enum
     VAMacroblockParameterBufferType	= 6,
     VAResidualDataBufferType		= 7,
     VADeblockingParameterBufferType	= 8,
-    VAImageBufferType			= 9
+    VAImageBufferType			= 9,
+    VAEncCodedBufferType		= 10,
+    VAEncSequenceParameterBufferType	= 11,
+    VAEncPictureParameterBufferType	= 12,
+    VAEncSliceParameterBufferType	= 13,
 } VABufferType;
 
 /****************************
@@ -956,6 +969,103 @@ typedef struct _VASliceParameterBufferH264
     short chroma_weight_l1[32][2];
     short chroma_offset_l1[32][2];
 } VASliceParameterBufferH264;
+
+/*****************************************
+  Encode Data Structures
+ ****************************************/
+typedef struct _VAEncSequenceParameterBufferH264
+{
+    unsigned char level_idc;
+    unsigned int picture_width_in_mbs;
+    unsigned int picture_height_in_mbs;
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    int initial_qp;
+    int min_qp;
+    unsigned int basic_unit_size;
+    unsigned char vui_flag;
+} VAEncSequenceParameterBufferH264;
+
+typedef struct _VAEncVUIParameterBufferH264
+{
+    unsigned int time_scale;
+    unsigned char initial_cpb_removeal_delay_length_minus1;
+    unsigned char dpb_output_delay_length_minus1;
+    unsigned char time_offset_length;
+} VAEncVUIParameterBufferH264;
+
+typedef struct _VAEncSequenceParameterBufferMPEG4
+{
+    unsigned char profile_and_level_indication;
+    unsigned int video_object_layer_width;
+    unsigned int video_object_layer_height;
+    unsigned int vop_time_increment_resolution;
+    unsigned int fixed_vop_time_increment;
+    unsigned int bits_per_second;
+    int initial_qp;
+    int min_qp;
+} VAEncSequenceParameterBufferMPEG4;
+
+typedef struct _VAEncSequenceParameterBufferH263
+{   
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    int initial_qp;
+    int min_qp;
+} VAEncSequenceParameterBufferH263;
+
+typedef struct _VAEncPictureParameterBufferH264
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    unsigned int frame_num;
+} VAEncPictureParameterBufferH264;
+
+typedef enum
+{
+    VAEncPictureTypeIntra	= 0,
+    VAEncPictureTypePredictive	= 1,
+    VAEncPictureTypeBidirectional	= 2,
+} VAEncPictureType;
+
+typedef struct _VAEncPictureParameterBufferMPEG4
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    unsigned int vop_time_increment;
+    VAEncPictureType picture_type;
+} VAEncPictureParameterBufferMPEG4;
+
+typedef struct _VAEncPictureParameterBufferH263
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    VAEncPictureType picture_type;
+} VAEncPictureParameterBufferH263;
+
+/* Encode Slice Parameter Buffer */
+typedef struct _VAEncSliceParameterBuffer
+{
+    unsigned int start_row_number;	/* starting MB row number for this slice */
+    unsigned int slice_height;	/* slice height measured in MB */
+    union {
+        struct {
+            unsigned char is_intra	: 1;
+            unsigned char deblock_on	: 1;
+        };
+        unsigned char flags;
+    };
+} VAEncSliceParameterBuffer;
+
 
 /* Buffer functions */
 
@@ -1706,4 +1816,160 @@ Mostly to demonstrate program flow with no error handling ...
 	vaSetSubpicturePalette(dpy, subpicture, palette);
 	vaAssociateSubpicture(dpy, subpicture, surfaces, 1, 0, 0, 296, 400, 128, 16);
 	vaPutSurface(dpy, surfaces, win, 0, 0, 720, 480, 100, 100, 640, 480, NULL, 0, 0);
+	
+/*****************************************************************************/ 
+
+Sample Encode Program (w/ pseudo code)
+
+Mostly to demonstrate program flow with no error handling ...
+
+/*****************************************************************************/
+
+	/* H.264 VLC encode for a 640x480 frame */
+	int major_ver, minor_ver;
+	vaInitialize(dpy, &major_ver, &minor_ver);
+
+	int max_num_profiles, max_num_entrypoints, max_num_attribs;
+	max_num_profiles = vaMaxNumProfiles(dpy);
+	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
+	max_num_attribs = vaMaxNumAttributes(dpy);
+
+	/* find out whether H.264 BP encode is supported */
+	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
+	int num_profiles;
+	vaQueryConfigProfiles(dpy, profiles, &profiles);
+	/*
+	 * traverse "profiles" to locate the one that matches VAProfileH264BP
+	 */ 
+
+	/* now get the available entrypoints for H.264 BP */
+	VAEntrypoint *entrypoints = malloc(sizeof(VAEntrypoint)*max_num_entrypoints);
+	int num_entrypoints;
+	vaQueryConfigEntrypoints(dpy, VAProfileH264Baseline, entrypoints, &num_entrypoints);
+
+	/* traverse "entrypoints" to see whether VLC is there */
+
+	/* Assuming finding VLC, find out the format and rate control mode for the source */
+	VAConfigAttrib attrib;
+	attrib.type = VAConfigAttribRTFormat;
+	vaGetConfigAttributes(dpy, VAProfileH264Baseline, VAEntrypointVLC,
+                        &attrib, 1);
+
+	if (attrib[0].value & VA_RT_FORMAT_YUV420)
+		/* Found desired format, keep going */ 
+
+	if (attrib[1].value & VA_RC_CBR)
+		/* Found desired rate control mode, keep going */ 
+
+	VAConfigID config_id;
+	vaCreateConfig(dpy, VAProfileMPEG4Simple, VAEntrypointVLC, &attrib[0], 2,
+                 &config_id);
+
+	/*
+	 * create surfaces for the current target as well as reference frames
+	 * we can get by with 3 surfaces for H.264 BP
+	 */
+	VASurfaceID surfaces[3];
+	vaCreateSurfaces(dpy, 640, 480, VA_RT_FORMAT_YUV420, 3, surfaces);
+
+	/* Create a context for this encode pipe */
+	VAContextID context;
+	vaCreateContext(dpy, config_id, 640, 480, VA_PROGRESSIVE, surfaces,
+                  3, &context);
+
+	/*
+	 * Create a coded buffer
+	 */
+	VABufferID coded_buf;
+	int coded_buf_size = 640*480*400/(16*16);
+	vaCreateBuffer(dpy, context, VAEncCodedBufferType, coded_buf_size, 1, NULL, &coded_buf);
+
+
+	/*
+	 * Create header buffer for sequence header, picture header, and slice header 
+	 */
+	VABufferID sequence_param_buf, picture_param_buf, slice_param_buf;
+	vaCreateBuffer(dpy, context, VAEncSequenceParameterBufferType, sizof(VAEncSequenceParameterBufferH264), 1, NULL, &sequence_param_buf);
+	vaCreateBuffer(dpy, context, VAEncPictureParameterBufferType, sizof(VAEncPictureParameterBufferH264), 1, NULL, &picture_param_buf);
+	vaCreateBuffer(dpy, context, VAEncSliceParameterBufferType, sizof(VAEncSliceParameterBuffer), 1, NULL, &slice_param_buf);
+
+	/* Create sequence parameter */
+	VAEncSequenceParameterBufferH264 sequence_param;
+	vaMapBuffer(dpy, sequence_param_buf, &sequence_param);
+	sequence_param.picture_width_in_mbs = 40;
+	sequence_param.picture_width_in_mbs = 30;
+	sequence_param.bits_per_second = 3000000;
+	sequence_param.basic_unit_size = 5;
+	sequence_param.frame_rate = 30;
+	sequence_param.initial_qp = 25;
+	sequence_param.min_qp = 0;
+	vaUnmapBuffer(dpy,sequence_param_buf);
+
+	/*
+	 * Derive 3 image from the surface to upload RAW source YUV data
+	 */
+	int src_srf=0,rec_srf=1,ref_srf=2;
+	VAImage *source_image[3];
+
+	for (int i=0; i<3;i++)
+		vaDeriveImage(dpy,surface[i], source_image[i]);
+
+	/* encoding 30 frames */
+	for (int i = 0; i <= 30; i++) {
+		/*
+		 * Progess the buffers 
+		 *   src_srf      rec_srf     ref_srf
+		 *     <--------------------------
+		 */
+		int temp = rec_srf;
+		rec_srf = src_srf;
+		src_srf = ref_src;
+		ref_srf = temp;
+		
+		void *source_buf;
+		vaMapBuffer(dpy, source_image[src_srf].buf, source_buf);
+		/* put RAW YUV data into source_buf here */
+		vaUnmapBuffer(dpy, source_image[src_srf].buf);
+
+		vaBeginPicture(dpy, context, surfaces[src_srf]);
+
+		if (i==0) {
+			/* Fill sequence header into sequence_header_buf here */
+			vaRenderPicture(dpy,context, &sequence_param, 1);
+		}
+
+		vaMapBuffer(dpy, picture_param_buf, &picture_param);
+		if (i==0) /* first frame refer itself */
+			picture->reference_picture = surfaces[src_srf];
+		else 
+			picture_param->reference_picture = surfaces[ref_srf];
+		picture_param->reconstructed_picture = surfaces[rec_srf];
+		picture_param->coded_buf = coded_buf;
+		picture_param->picture_width= 640;
+		picture_param->picture_height = 480;
+		if ((i % 10) == 0) { /* one I frame within 10 frames */
+			picture_param->picture_type = VAEncPictureTypeIntra;
+		}	else {
+			picture_param->picture_type = VAEncPictureTypePredictive;
+		}	
+		vaUnmapBuffer(dpy,picture_param_buf);
+	
+		vaRenderPicture(dpy, context, &picture_param_buf, 1);
+		
+		/* Render slice 	*/	
+		vaMapBuffer(dpy, slice_param_buf, &slice_param);
+		slice_param->start_row_number = 0;
+		slice_param->slice_height = 480;
+		slice_param->is_intra = 1;
+		vaUnmapBuffer(dpy,slice_buf);
+
+		vaRenderPicture(dpy,context,&slice_param_buf, 1);
+	        vaEndPicture(dpy, context);
+	  
+	        void *coded_data;
+	        vaMapBuffer(dpy, coded_buf, &coded_data)
+	        /* output coded buf from coded_data here */
+	        vaUnmapBuffer(dpy, coded_buf);
+        }
+	
 #endif
