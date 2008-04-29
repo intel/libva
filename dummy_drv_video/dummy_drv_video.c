@@ -451,6 +451,18 @@ VAStatus dummy_CreateImage(
     return VA_STATUS_SUCCESS;
 }
 
+VAStatus dummy_DeriveImage(
+	VADriverContextP ctx,
+	VASurfaceID surface,
+	VAImage *image     /* out */
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus dummy_DestroyImage(
 	VADriverContextP ctx,
 	VAImageID image
@@ -500,6 +512,26 @@ VAStatus dummy_PutImage(
 	unsigned int height,
 	int dest_x,
 	int dest_y 
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
+VAStatus dummy_PutImage2(
+	VADriverContextP ctx,
+	VASurfaceID surface,
+	VAImageID image,
+	int src_x,
+	int src_y,
+	unsigned int src_width,
+	unsigned int src_height,
+	int dest_x,
+	int dest_y,
+	unsigned int dest_width,
+	unsigned int dest_height
 )
 {
     INIT_DRIVER_DATA
@@ -610,6 +642,32 @@ VAStatus dummy_AssociateSubpicture(
 	short dest_y,
 	unsigned short width,
 	unsigned short height,
+	/*
+	 * whether to enable chroma-keying or global-alpha
+	 * see VA_SUBPICTURE_XXX values
+	 */
+	unsigned int flags
+)
+{
+    INIT_DRIVER_DATA
+    
+    /* TODO */
+    return VA_STATUS_SUCCESS;
+}
+
+VAStatus dummy_AssociateSubpicture2(
+	VADriverContextP ctx,
+	VASubpictureID subpicture,
+	VASurfaceID *target_surfaces,
+	int num_surfaces,
+	short src_x, /* upper left offset in subpicture */
+	short src_y,
+	unsigned short src_width,
+	unsigned short src_height,
+	short dest_x, /* upper left offset in surface */
+	short dest_y,
+	unsigned short dest_width,
+	unsigned short dest_height,
 	/*
 	 * whether to enable chroma-keying or global-alpha
 	 * see VA_SUBPICTURE_XXX values
@@ -1141,7 +1199,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_28(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1149,7 +1207,7 @@ VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
     int i;
 
     ctx->version_major = 0;
-    ctx->version_minor = 26;
+    ctx->version_minor = 28;
     ctx->max_profiles = DUMMY_MAX_PROFILES;
     ctx->max_entrypoints = DUMMY_MAX_ENTRYPOINTS;
     ctx->max_attributes = DUMMY_MAX_CONFIG_ATTRIBUTES;
@@ -1183,10 +1241,12 @@ VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
     ctx->vtable.vaPutSurface = dummy_PutSurface;
     ctx->vtable.vaQueryImageFormats = dummy_QueryImageFormats;
     ctx->vtable.vaCreateImage = dummy_CreateImage;
+    ctx->vtable.vaDeriveImage = dummy_DeriveImage;
     ctx->vtable.vaDestroyImage = dummy_DestroyImage;
     ctx->vtable.vaSetImagePalette = dummy_SetImagePalette;
     ctx->vtable.vaGetImage = dummy_GetImage;
     ctx->vtable.vaPutImage = dummy_PutImage;
+    ctx->vtable.vaPutImage2 = dummy_PutImage2;
     ctx->vtable.vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
     ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
@@ -1195,6 +1255,7 @@ VAStatus __vaDriverInit_0_26(  VADriverContextP ctx )
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
+    ctx->vtable.vaAssociateSubpicture2 = dummy_AssociateSubpicture2;
     ctx->vtable.vaDeassociateSubpicture = dummy_DeassociateSubpicture;
     ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
     ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;

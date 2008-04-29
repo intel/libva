@@ -34,7 +34,7 @@
 #define DUMMY_MAX_IMAGE_FORMATS			10
 #define DUMMY_MAX_SUBPIC_FORMATS		4
 #define DUMMY_MAX_DISPLAY_ATTRIBUTES		4
-#define DUMMY_STR_VENDOR			"Dummy-dummy-1.0-dummy"
+#define DUMMY_STR_VENDOR			"Dummy Driver 1.0"
 
 struct dummy_driver_data {
     struct object_heap	config_heap;
