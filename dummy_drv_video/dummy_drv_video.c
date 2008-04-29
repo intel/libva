@@ -1199,7 +1199,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_28(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_29(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
@@ -1207,7 +1207,7 @@ VAStatus __vaDriverInit_0_28(  VADriverContextP ctx )
     int i;
 
     ctx->version_major = 0;
-    ctx->version_minor = 28;
+    ctx->version_minor = 29;
     ctx->max_profiles = DUMMY_MAX_PROFILES;
     ctx->max_entrypoints = DUMMY_MAX_ENTRYPOINTS;
     ctx->max_attributes = DUMMY_MAX_CONFIG_ATTRIBUTES;

@@ -228,12 +228,10 @@ void test()
     XMapWindow(dpy, win);
     XSync(dpy, False);
 
-#if 0
     va_status = vaPutSurface(va_dpy, vaSurface, win,
                             0,0,surf_width,surf_height,
                             0,0,win_width,win_height,
                             NULL,0,0);
-#endif
     ASSERT( VA_STATUS_SUCCESS == va_status );
 
     printf("press any key to exit\n");
