@@ -203,7 +203,7 @@ typedef enum
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
     /* Encode entrypoints */
-    VAEntrypointVLC		= 6, /* slice level encode */
+    VAEntrypointEncodeES        = 6, /* slice level encode */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -1837,7 +1837,7 @@ Mostly to demonstrate program flow with no error handling ...
 	/* find out whether H.264 BP encode is supported */
 	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
 	int num_profiles;
-	vaQueryConfigProfiles(dpy, profiles, &profiles);
+	vaQueryConfigProfiles(dpy, profiles, &num_profiles);
 	/*
 	 * traverse "profiles" to locate the one that matches VAProfileH264BP
 	 */ 
@@ -1849,11 +1849,12 @@ Mostly to demonstrate program flow with no error handling ...
 
 	/* traverse "entrypoints" to see whether VLC is there */
 
-	/* Assuming finding VLC, find out the format and rate control mode for the source */
-	VAConfigAttrib attrib;
-	attrib.type = VAConfigAttribRTFormat;
+	/* Assuming finding VAEntrypointEncodeES, find out the format and rate control mode for the source */
+	VAConfigAttrib attrib[2];
+	attrib[0].type = VAConfigAttribRTFormat;
+	attrib[1].type = VAConfigAttribRateControl;
 	vaGetConfigAttributes(dpy, VAProfileH264Baseline, VAEntrypointVLC,
-                        &attrib, 1);
+                        &attrib, 2);
 
 	if (attrib[0].value & VA_RT_FORMAT_YUV420)
 		/* Found desired format, keep going */ 
