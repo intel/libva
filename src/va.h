@@ -1690,7 +1690,7 @@ Mostly to demonstrate program flow with no error handling ...
 	int max_num_profiles, max_num_entrypoints, max_num_attribs;
 	max_num_profiles = vaMaxNumProfiles(dpy);
 	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
-	max_num_attribs = vaMaxNumAttributes(dpy);
+	max_num_attribs = vaMaxNumConfigAttributes(dpy);
 
 	/* find out whether MPEG2 MP is supported */
 	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
@@ -1832,7 +1832,7 @@ Mostly to demonstrate program flow with no error handling ...
 	int max_num_profiles, max_num_entrypoints, max_num_attribs;
 	max_num_profiles = vaMaxNumProfiles(dpy);
 	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
-	max_num_attribs = vaMaxNumAttributes(dpy);
+	max_num_attribs = vaMaxNumConfigAttributes(dpy);
 
 	/* find out whether H.264 BP encode is supported */
 	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
@@ -1847,7 +1847,7 @@ Mostly to demonstrate program flow with no error handling ...
 	int num_entrypoints;
 	vaQueryConfigEntrypoints(dpy, VAProfileH264Baseline, entrypoints, &num_entrypoints);
 
-	/* traverse "entrypoints" to see whether VLC is there */
+	/* traverse "entrypoints" to see whether VAEntrypointEncodeES is there */
 
 	/* Assuming finding VAEntrypointEncodeES, find out the format and rate control mode for the source */
 	VAConfigAttrib attrib[2];
@@ -1863,7 +1863,7 @@ Mostly to demonstrate program flow with no error handling ...
 		/* Found desired rate control mode, keep going */ 
 
 	VAConfigID config_id;
-	vaCreateConfig(dpy, VAProfileMPEG4Simple, VAEntrypointVLC, &attrib[0], 2,
+	vaCreateConfig(dpy, VAProfileH264Baseline, VAEntrypointEncodeES, &attrib[0], 2,
                  &config_id);
 
 	/*
