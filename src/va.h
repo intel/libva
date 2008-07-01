@@ -1060,7 +1060,7 @@ typedef struct _VAEncSliceParameterBuffer
     union {
         struct {
             unsigned char is_intra	: 1;
-            unsigned char deblock_on	: 1;
+            unsigned char disable_deblocking_filter_idc : 2;
         };
         unsigned char flags;
     };
@@ -1197,7 +1197,8 @@ typedef enum
     VASurfaceDisplaying	= 1, /* Displaying in progress (not safe to render into it) */ 
                              /* this status is useful if surface is used as the source */
                              /* of an overlay */
-    VASurfaceReady	= 2  /* not being rendered or displayed */
+    VASurfaceReady	= 2, /* not being rendered or displayed */
+    VASurfaceSkipped    = 3  /* to indicate a skipped frame during encode */
 } VASurfaceStatus;
 
 /*
