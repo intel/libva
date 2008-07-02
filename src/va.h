@@ -1002,6 +1002,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG4
     unsigned int vop_time_increment_resolution;
     unsigned int fixed_vop_time_increment;
     unsigned int bits_per_second;
+    unsigned int frame_rate;
     int initial_qp;
     int min_qp;
 } VAEncSequenceParameterBufferMPEG4;
