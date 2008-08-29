@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2008 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -24,7 +24,7 @@
 /*
  * Video Decode Acceleration API Specification
  *
- * Rev. 0.29
+ * Rev. 0.30
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -47,10 +47,12 @@
  * rev 0.25 (10/18/2007 Jonathan Bian) - Changed to use IDs only for some types.
  * rev 0.26 (11/07/2007 Waldo Bastian) - Change vaCreateBuffer semantics
  * rev 0.27 (11/19/2007 Matt Sottek)   - Added DeriveImage
- * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture
+ * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture 
  *                                       to enable scaling
- * rev 0.29 (02/07/2007 Jonathan Bian) - VC1 parameter fixes,
+ * rev 0.29 (02/07/2008 Jonathan Bian) - VC1 parameter fixes,
  *                                       added VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED
+ * rev 0.30 (08/25/2008 Jonathan Bian) - Added encoding support for H.264 BP and MPEG-4 SP. 
+ *                                       Added support for protected decode.
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -157,7 +159,7 @@ VAStatus vaTerminate (
  * describing some aspects of the VA implemenation on a specific    
  * hardware accelerator. The format of the returned string is vendor
  * specific and at the discretion of the implementer.
- * e.g. for the Intel GMA500 implementation, an example would be:   
+ * e.g. for the Intel GMA500 implementation, an example would be:
  * "Intel GMA500 - 2.0.0.32L.0005"
  */
 const char *vaQueryVendorString (
@@ -202,8 +204,7 @@ typedef enum
     VAEntrypointIDCT		= 3,
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
-    /* Encode entrypoints */
-    VAEntrypointEncodeES        = 6, /* slice level encode */
+    VAEntrypointEncSlice	= 6	/* slice level encode */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -214,7 +215,7 @@ typedef enum
     VAConfigAttribSpatialClipping	= 2,
     VAConfigAttribIntraResidual		= 3,
     VAConfigAttribEncryption		= 4,
-    VAConfigAttribRateControl		= 5,    
+    VAConfigAttribRateControl		= 5
 } VAConfigAttribType;
 
 /*
@@ -232,11 +233,12 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV420	0x00000001	
 #define VA_RT_FORMAT_YUV422	0x00000002
 #define VA_RT_FORMAT_YUV444	0x00000004
+#define VA_RT_FORMAT_PROTECTED	0x80000000
 
 /* attribute value for VAConfigAttribRateControl */
-#define VA_RC_NONE		0x00000001	
-#define VA_RC_CBR		0x00000002
-#define VA_RC_VBR		0x00000004
+#define VA_RC_NONE	0x00000001	
+#define VA_RC_CBR	0x00000002	
+#define VA_RC_VBR	0x00000004	
 
 /*
  * if an attribute is not applicable for a given
@@ -455,10 +457,12 @@ typedef enum
     VAResidualDataBufferType		= 7,
     VADeblockingParameterBufferType	= 8,
     VAImageBufferType			= 9,
-    VAEncCodedBufferType		= 10,
-    VAEncSequenceParameterBufferType	= 11,
-    VAEncPictureParameterBufferType	= 12,
-    VAEncSliceParameterBufferType	= 13,
+    VAProtectedSliceDataBufferType	= 10,
+/* Following are encode buffer types */
+    VAEncCodedBufferType		= 21,
+    VAEncSequenceParameterBufferType	= 22,
+    VAEncPictureParameterBufferType	= 23,
+    VAEncSliceParameterBufferType	= 24
 } VABufferType;
 
 /****************************
@@ -797,7 +801,7 @@ typedef struct _VAPictureParameterBufferVC1
     union {
         struct {
             unsigned char dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
-            unsigned char quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
+            unsigned char quantizer	: 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
             unsigned char half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
             unsigned char pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
             unsigned char pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
@@ -970,9 +974,34 @@ typedef struct _VASliceParameterBufferH264
     short chroma_offset_l1[32][2];
 } VASliceParameterBufferH264;
 
-/*****************************************
-  Encode Data Structures
- ****************************************/
+/****************************
+ * Common encode data structures 
+ ****************************/
+typedef enum
+{
+    VAEncPictureTypeIntra		= 0,
+    VAEncPictureTypePredictive		= 1,
+    VAEncPictureTypeBidirectional	= 2,
+} VAEncPictureType;
+
+/* Encode Slice Parameter Buffer */
+typedef struct _VAEncSliceParameterBuffer
+{
+    unsigned int start_row_number;	/* starting MB row number for this slice */
+    unsigned int slice_height;	/* slice height measured in MB */
+    union {
+        struct {
+            unsigned char is_intra	: 1;
+            unsigned char disable_deblocking_filter_idc : 2;
+        };
+        unsigned char flags;
+    };
+} VAEncSliceParameterBuffer;
+
+/****************************
+ * H.264 specific encode data structures
+ ****************************/
+
 typedef struct _VAEncSequenceParameterBufferH264
 {
     unsigned char level_idc;
@@ -994,6 +1023,42 @@ typedef struct _VAEncVUIParameterBufferH264
     unsigned char time_offset_length;
 } VAEncVUIParameterBufferH264;
 
+typedef struct _VAEncPictureParameterBufferH264
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence */
+} VAEncPictureParameterBufferH264;
+
+/****************************
+ * H.263 specific encode data structures
+ ****************************/
+
+typedef struct _VAEncSequenceParameterBufferH263
+{   
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    int initial_qp;
+    int min_qp;
+} VAEncSequenceParameterBufferH263;
+
+typedef struct _VAEncPictureParameterBufferH263
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    VAEncPictureType picture_type;
+} VAEncPictureParameterBufferH263;
+
+/****************************
+ * MPEG-4 specific encode data structures
+ ****************************/
+
 typedef struct _VAEncSequenceParameterBufferMPEG4
 {
     unsigned char profile_and_level_indication;
@@ -1007,31 +1072,6 @@ typedef struct _VAEncSequenceParameterBufferMPEG4
     int min_qp;
 } VAEncSequenceParameterBufferMPEG4;
 
-typedef struct _VAEncSequenceParameterBufferH263
-{   
-    unsigned int bits_per_second;
-    unsigned int frame_rate;
-    int initial_qp;
-    int min_qp;
-} VAEncSequenceParameterBufferH263;
-
-typedef struct _VAEncPictureParameterBufferH264
-{
-    VASurfaceID reference_picture;
-    VASurfaceID reconstructed_picture;
-    VABufferID coded_buf;
-    unsigned short picture_width;
-    unsigned short picture_height;
-    unsigned char last_picture;/* if set to 1 it indicates the last picture in the sequence */
-} VAEncPictureParameterBufferH264;
-
-typedef enum
-{
-    VAEncPictureTypeIntra	= 0,
-    VAEncPictureTypePredictive	= 1,
-    VAEncPictureTypeBidirectional	= 2,
-} VAEncPictureType;
-
 typedef struct _VAEncPictureParameterBufferMPEG4
 {
     VASurfaceID reference_picture;
@@ -1042,31 +1082,6 @@ typedef struct _VAEncPictureParameterBufferMPEG4
     unsigned int vop_time_increment;
     VAEncPictureType picture_type;
 } VAEncPictureParameterBufferMPEG4;
-
-typedef struct _VAEncPictureParameterBufferH263
-{
-    VASurfaceID reference_picture;
-    VASurfaceID reconstructed_picture;
-    VABufferID coded_buf;
-    unsigned short picture_width;
-    unsigned short picture_height;
-    VAEncPictureType picture_type;
-} VAEncPictureParameterBufferH263;
-
-/* Encode Slice Parameter Buffer */
-typedef struct _VAEncSliceParameterBuffer
-{
-    unsigned int start_row_number;	/* starting MB row number for this slice */
-    unsigned int slice_height;	/* slice height measured in MB */
-    union {
-        struct {
-            unsigned char is_intra	: 1;
-            unsigned char disable_deblocking_filter_idc : 2;
-        };
-        unsigned char flags;
-    };
-} VAEncSliceParameterBuffer;
-
 
 /* Buffer functions */
 
@@ -1199,7 +1214,7 @@ typedef enum
                              /* this status is useful if surface is used as the source */
                              /* of an overlay */
     VASurfaceReady	= 2, /* not being rendered or displayed */
-    VASurfaceSkipped    = 3  /* to indicate a skipped frame during encode */
+    VASurfaceSkipped	= 3  /* Indicate a skipped frame during encode */
 } VASurfaceStatus;
 
 /*
@@ -1378,7 +1393,7 @@ VAStatus vaPutImage (
     int dest_y
 );
 
- /*
+/*
  * Similar to vaPutImage but with additional destination width
  * and height arguments to enable scaling
  */
@@ -1432,8 +1447,6 @@ VAStatus vaDeriveImage (
     VASurfaceID surface,
     VAImage *image	/* out */
 );
-
-
 
 /*
  * Subpictures 
@@ -1680,305 +1693,3 @@ VAStatus vaSetDisplayAttributes (
 #endif
 
 #endif /* _VA_H_ */
-
-#if 0
-/*****************************************************************************/ 
-
-Sample Program (w/ pseudo code)
-
-Mostly to demonstrate program flow with no error handling ...
-
-/*****************************************************************************/
-
-	/* MPEG-2 VLD decode for a 720x480 frame */
-
-	int major_ver, minor_ver;
-	vaInitialize(dpy, &major_ver, &minor_ver);
-
-	int max_num_profiles, max_num_entrypoints, max_num_attribs;
-	max_num_profiles = vaMaxNumProfiles(dpy);
-	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
-	max_num_attribs = vaMaxNumConfigAttributes(dpy);
-
-	/* find out whether MPEG2 MP is supported */
-	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
-	int num_profiles;
-	vaQueryConfigProfiles(dpy, profiles, &profiles);
-	/*
-	 * traverse "profiles" to locate the one that matches VAProfileMPEG2Main
-         */ 
-
-	/* now get the available entrypoints for MPEG2 MP */
-	VAEntrypoint *entrypoints = malloc(sizeof(VAEntrypoint)*max_num_entrypoints);
-	int num_entrypoints;
-	vaQueryConfigEntrypoints(dpy, VAProfileMPEG2Main, entrypoints, &num_entrypoints);
-
-	/* traverse "entrypoints" to see whether VLD is there */
-
-	/* Assuming finding VLD, find out the format for the render target */
-	VAConfigAttrib attrib;
-	attrib.type = VAConfigAttribRTFormat;
-	vaGetConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
-                                &attrib, 1);
-
-	if (attrib.value & VA_RT_FORMAT_YUV420)
-		/* Found desired RT format, keep going */ 
-
-	VAConfigID config_id;
-	vaCreateConfig(dpy, VAProfileMPEG2Main, VAEntrypointVLD, &attrib, 1,
-                       &config_id);
-
-	/* 
-         * create surfaces for the current target as well as reference frames
-	 * we can get by with 4 surfaces for MPEG-2
-	 */
-	VASurfaceID surfaces[4];
-	vaCreateSurfaces(dpy, 720, 480, VA_RT_FORMAT_YUV420, 4, surfaces);
-
-	/* 
-         * Create a context for this decode pipe
-	 */
-	VAContextID context;
-	vaCreateContext(dpy, config_id, 720, 480, VA_PROGRESSIVE, surfaces,
-                        4, &context);
-
-	/* Create a picture parameter buffer for this frame */
-	VABufferID picture_buf;
-	VAPictureParameterBufferMPEG2 *picture_param;
-	vaCreateBuffer(dpy, context, VAPictureParameterBufferType, sizeof(VAPictureParameterBufferMPEG2), 1, NULL, &picture_buf);
-	vaMapBuffer(dpy, picture_buf, &picture_param);
-	picture_param->horizontal_size = 720;
-	picture_param->vertical_size = 480;
-	picture_param->picture_coding_type = 1; /* I-frame */	
-	/* fill in picture_coding_extension fields here */
-	vaUnmapBuffer(dpy, picture_buf);
-
-	/* Create an IQ matrix buffer for this frame */
-	VABufferID iq_buf;
-	VAIQMatrixBufferMPEG2 *iq_matrix;
-	vaCreateBuffer(dpy, context, VAIQMatrixBufferType, sizeof(VAIQMatrixBufferMPEG2), 1, NULL, &iq_buf);
-	vaMapBuffer(dpy, iq_buf, &iq_matrix);
-	/* fill values for IQ_matrix here */
-	vaUnmapBuffer(dpy, iq_buf);
-
-	/* send the picture and IQ matrix buffers to the server */
-	vaBeginPicture(dpy, context, surfaces[0]);
-
-	vaRenderPicture(dpy, context, &picture_buf, 1);
-	vaRenderPicture(dpy, context, &iq_buf, 1);
-
-	/* 
-         * Send slices in this frame to the server.
-         * For MPEG-2, each slice is one row of macroblocks, and
-         * we have 30 slices for a 720x480 frame 
-         */
-	for (int i = 1; i <= 30; i++) {
-
-		/* Create a slice parameter buffer */
-		VABufferID slice_param_buf;
-		VASliceParameterBufferMPEG2 *slice_param;
-		vaCreateBuffer(dpy, context, VASliceParameterBufferType, sizeof(VASliceParameterBufferMPEG2), 1, NULL, &slice_param_buf);
-		vaMapBuffer(dpy, slice_param_buf, &slice_param);
-		slice_param->slice_data_offset = 0;
-		/* Let's say all slices in this bit-stream has 64-bit header */
-		slice_param->macroblock_offset = 64; 
-		slice_param->vertical_position = i;
-		/* set up the rest based on what is in the slice header ... */
-		vaUnmapBuffer(dpy, slice_param_buf);
-
-		/* send the slice parameter buffer */
-		vaRenderPicture(dpy, context, &slice_param_buf, 1);
-
-		/* Create a slice data buffer */
-		unsigned char *slice_data;
-		VABufferID slice_data_buf;
-		vaCreateBuffer(dpy, context, VASliceDataBufferType, x /* decoder figure out how big */, 1, NULL, &slice_data_buf);
-		vaMapBuffer(dpy, slice_data_buf, &slice_data);
-		/* decoder fill in slice_data */
-		vaUnmapBuffer(dpy, slice_data_buf);
-
-		/* send the slice data buffer */
-		vaRenderPicture(dpy, context, &slice_data_buf, 1);
-	}
-
-	/* all slices have been sent, mark the end for this frame */
-	vaEndPicture(dpy, context);
-
-	/* The following code demonstrates rendering a sub-title with the target surface */
-	/* Find out supported Subpicture formats */
-	VAImageFormat sub_formats[4];
-        int num_formats;
-	vaQuerySubpictureFormats(dpy, sub_formats, &num_formats);
-        /* Assume that we find AI44 as a subpicture format in sub_formats[0] */
-        VAImage sub_image;
-	VASubpictureID subpicture;
-        unsigned char *sub_data;
-        /* create an image for the subtitle */
-	vaCreateImage(dpy, sub_formats, 128, 16, &sub_image);
-	vaMapBuffer(dpy, sub_image->buf, &sub_data);
-        /* fill the image data */
-        vaUnmapBuffer(dpy, sub_image->buf);
-	vaCreateSubpicture(dpy, sub_image, &subpicture);
-	unsigned char palette[3][16];
-	/* fill the palette data */
-	vaSetSubpicturePalette(dpy, subpicture, palette);
-	vaAssociateSubpicture(dpy, subpicture, surfaces, 1, 0, 0, 296, 400, 128, 16);
-	vaPutSurface(dpy, surfaces, win, 0, 0, 720, 480, 100, 100, 640, 480, NULL, 0, 0);
-	
-/*****************************************************************************/ 
-
-Sample Encode Program (w/ pseudo code)
-
-Mostly to demonstrate program flow with no error handling ...
-
-/*****************************************************************************/
-
-	/* H.264 VLC encode for a 640x480 frame */
-	int major_ver, minor_ver;
-	vaInitialize(dpy, &major_ver, &minor_ver);
-
-	int max_num_profiles, max_num_entrypoints, max_num_attribs;
-	max_num_profiles = vaMaxNumProfiles(dpy);
-	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
-	max_num_attribs = vaMaxNumConfigAttributes(dpy);
-
-	/* find out whether H.264 BP encode is supported */
-	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
-	int num_profiles;
-	vaQueryConfigProfiles(dpy, profiles, &num_profiles);
-	/*
-	 * traverse "profiles" to locate the one that matches VAProfileH264BP
-	 */ 
-
-	/* now get the available entrypoints for H.264 BP */
-	VAEntrypoint *entrypoints = malloc(sizeof(VAEntrypoint)*max_num_entrypoints);
-	int num_entrypoints;
-	vaQueryConfigEntrypoints(dpy, VAProfileH264Baseline, entrypoints, &num_entrypoints);
-
-	/* traverse "entrypoints" to see whether VAEntrypointEncodeES is there */
-
-	/* Assuming finding VAEntrypointEncodeES, find out the format and rate control mode for the source */
-	VAConfigAttrib attrib[2];
-	attrib[0].type = VAConfigAttribRTFormat;
-	attrib[1].type = VAConfigAttribRateControl;
-	vaGetConfigAttributes(dpy, VAProfileH264Baseline, VAEntrypointVLC,
-                        &attrib, 2);
-
-	if (attrib[0].value & VA_RT_FORMAT_YUV420)
-		/* Found desired format, keep going */ 
-
-	if (attrib[1].value & VA_RC_CBR)
-		/* Found desired rate control mode, keep going */ 
-
-	VAConfigID config_id;
-	vaCreateConfig(dpy, VAProfileH264Baseline, VAEntrypointEncodeES, &attrib[0], 2,
-                 &config_id);
-
-	/*
-	 * create surfaces for the current target as well as reference frames
-	 * we can get by with 3 surfaces for H.264 BP
-	 */
-	VASurfaceID surfaces[3];
-	vaCreateSurfaces(dpy, 640, 480, VA_RT_FORMAT_YUV420, 3, surfaces);
-
-	/* Create a context for this encode pipe */
-	VAContextID context;
-	vaCreateContext(dpy, config_id, 640, 480, VA_PROGRESSIVE, surfaces,
-                  3, &context);
-
-	/*
-	 * Create a coded buffer
-	 */
-	VABufferID coded_buf;
-	int coded_buf_size = 640*480*400/(16*16);
-	vaCreateBuffer(dpy, context, VAEncCodedBufferType, coded_buf_size, 1, NULL, &coded_buf);
-
-
-	/*
-	 * Create header buffer for sequence header, picture header, and slice header 
-	 */
-	VABufferID sequence_param_buf, picture_param_buf, slice_param_buf;
-	vaCreateBuffer(dpy, context, VAEncSequenceParameterBufferType, sizof(VAEncSequenceParameterBufferH264), 1, NULL, &sequence_param_buf);
-	vaCreateBuffer(dpy, context, VAEncPictureParameterBufferType, sizof(VAEncPictureParameterBufferH264), 1, NULL, &picture_param_buf);
-	vaCreateBuffer(dpy, context, VAEncSliceParameterBufferType, sizof(VAEncSliceParameterBuffer), 1, NULL, &slice_param_buf);
-
-	/* Create sequence parameter */
-	VAEncSequenceParameterBufferH264 sequence_param;
-	vaMapBuffer(dpy, sequence_param_buf, &sequence_param);
-	sequence_param.picture_width_in_mbs = 40;
-	sequence_param.picture_width_in_mbs = 30;
-	sequence_param.bits_per_second = 3000000;
-	sequence_param.basic_unit_size = 5;
-	sequence_param.frame_rate = 30;
-	sequence_param.initial_qp = 25;
-	sequence_param.min_qp = 0;
-	vaUnmapBuffer(dpy,sequence_param_buf);
-
-	/*
-	 * Derive 3 image from the surface to upload RAW source YUV data
-	 */
-	int src_srf=0,rec_srf=1,ref_srf=2;
-	VAImage *source_image[3];
-
-	for (int i=0; i<3;i++)
-		vaDeriveImage(dpy,surface[i], source_image[i]);
-
-	/* encoding 30 frames */
-	for (int i = 0; i <= 30; i++) {
-		/*
-		 * Progess the buffers 
-		 *   src_srf      rec_srf     ref_srf
-		 *     <--------------------------
-		 */
-		int temp = rec_srf;
-		rec_srf = src_srf;
-		src_srf = ref_src;
-		ref_srf = temp;
-		
-		void *source_buf;
-		vaMapBuffer(dpy, source_image[src_srf].buf, source_buf);
-		/* put RAW YUV data into source_buf here */
-		vaUnmapBuffer(dpy, source_image[src_srf].buf);
-
-		vaBeginPicture(dpy, context, surfaces[src_srf]);
-
-		if (i==0) {
-			/* Fill sequence header into sequence_header_buf here */
-			vaRenderPicture(dpy,context, &sequence_param, 1);
-		}
-
-		vaMapBuffer(dpy, picture_param_buf, &picture_param);
-		if (i==0) /* first frame refer itself */
-			picture->reference_picture = surfaces[src_srf];
-		else 
-			picture_param->reference_picture = surfaces[ref_srf];
-		picture_param->reconstructed_picture = surfaces[rec_srf];
-		picture_param->coded_buf = coded_buf;
-		picture_param->picture_width= 640;
-		picture_param->picture_height = 480;
-		if ((i % 10) == 0) { /* one I frame within 10 frames */
-			picture_param->picture_type = VAEncPictureTypeIntra;
-		}	else {
-			picture_param->picture_type = VAEncPictureTypePredictive;
-		}	
-		vaUnmapBuffer(dpy,picture_param_buf);
-	
-		vaRenderPicture(dpy, context, &picture_param_buf, 1);
-		
-		/* Render slice 	*/	
-		vaMapBuffer(dpy, slice_param_buf, &slice_param);
-		slice_param->start_row_number = 0;
-		slice_param->slice_height = 480;
-		slice_param->is_intra = 1;
-		vaUnmapBuffer(dpy,slice_buf);
-
-		vaRenderPicture(dpy,context,&slice_param_buf, 1);
-	        vaEndPicture(dpy, context);
-	  
-	        void *coded_data;
-	        vaMapBuffer(dpy, coded_buf, &coded_data)
-	        /* output coded buf from coded_data here */
-	        vaUnmapBuffer(dpy, coded_buf);
-        }
-	
-#endif

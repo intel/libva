@@ -22,7 +22,7 @@
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
-libva_la_LDFLAGS = -version-number 0:29:0 -no-undefined
+libva_la_LDFLAGS = -version-number 0:30:0 -no-undefined
 libva_la_LIBADD = -ldl -lX11 -lXext -lXfixes -lXdamage
 
 libva_la_SOURCES = va_dri.c va.c va_dristr.h
