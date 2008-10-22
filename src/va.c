@@ -35,10 +35,10 @@
 #include "va_dri.h"
 
 #define VA_MAJOR_VERSION	0
-#define VA_MINOR_VERSION	29
+#define VA_MINOR_VERSION	30
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
 
-#define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
+#define DEFAULT_DRIVER_DIR	"/usr/lib/dri/"
 #define DRIVER_EXTENSION	"_drv_video.so"
 
 #define CTX(dpy) ((VADriverContextP) dpy );
