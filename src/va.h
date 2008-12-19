@@ -1247,6 +1247,7 @@ VAStatus vaQuerySurfaceStatus (
 #define VA_FOURCC_NV11          0x3131564e
 #define VA_FOURCC_YV12          0x32315659
 #define VA_FOURCC_P208          0x38303250
+#define VA_FOURCC_IYUV          0x56555949
 
 /* byte order */
 #define VA_LSB_FIRST		1
