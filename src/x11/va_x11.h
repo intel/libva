@@ -17,12 +17,20 @@
 #ifndef _VA_X11_H_
 #define _VA_X11_H_
 
-#include "va.h"
+#include <va.h>
 #include <X11/Xlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Returns a suitable VADisplay for VA API
+ */
+VADisplay vaGetDisplay (
+    Display *dpy
+);
+
 /*
  * Output rendering
  * Following is the rendering interface for X windows, 

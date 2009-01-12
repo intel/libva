@@ -4,7 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libva
-Description: Userspace Video Acceleration (VA) interface
+Description: Userspace Video Acceleration (VA) core interface
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lva
 Cflags: -I${includedir}

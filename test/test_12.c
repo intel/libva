@@ -24,15 +24,12 @@
 
 #define TEST_DESCRIPTION	"Sample MPEG2 VLD Decoding"
 
+#include <va_x11.h>
 #include "test_common.c"
-
-#include <X11/Xlib.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#include "va_x11.h"
 
 void pre()
 {

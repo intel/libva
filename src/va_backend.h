@@ -36,6 +36,7 @@
 
 
 typedef struct VADriverContext *VADriverContextP;
+typedef struct VADisplayContext *VADisplayContextP;
 
 struct VADriverVTable
 {
@@ -390,7 +391,7 @@ struct VADriverVTable
 
 struct VADriverContext
 {
-    VADriverContextP pNext;
+    void *old_pNext;			/* preserved for binary compatibility */
 
     void *pDriverData;
     struct VADriverVTable vtable;
@@ -409,6 +410,25 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
+};
+
+struct VADisplayContext
+{
+    VADisplayContextP pNext;
+    VADriverContextP pDriverContext;
+
+    int (*vaIsValid) (
+	VADisplayContextP ctx
+    );
+
+    void (*vaDestroy) (
+	VADisplayContextP ctx
+    );
+
+    VAStatus (*vaGetDriverName) (
+	VADisplayContextP ctx,
+	char **driver_name
+    );
 };
 
 typedef VAStatus (*VADriverInit) (

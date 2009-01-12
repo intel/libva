@@ -21,7 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AC_PREREQ(2.57)
-AC_INIT([libva], 0.29, [waldo.bastian@intel.com], libva)
+AC_INIT([libva], 0.30, [waldo.bastian@intel.com], libva)
 AC_CONFIG_SRCDIR([Makefile.am])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
@@ -36,11 +36,12 @@ AC_SYS_LARGEFILE
 
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT], [xext])
-PKG_CHECK_MODULES([XDAMAGE], [xfixes])
+PKG_CHECK_MODULES([Xfixes], [xfixes])
 PKG_CHECK_MODULES([XDAMAGE], [xdamage])
-PKG_CHECK_MODULES([libva_la], [libdrm])
+PKG_CHECK_MODULES([DRM], [libdrm])
+#PKG_CHECK_MODULES([libva_la], [libdrm])
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
-AC_OUTPUT([Makefile src/Makefile dummy_drv_video/Makefile test/Makefile libva.pc])
+AC_OUTPUT([Makefile src/Makefile src/x11/Makefile dummy_drv_video/Makefile test/Makefile libva.pc])
