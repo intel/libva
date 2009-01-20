@@ -30,7 +30,7 @@
 #define _VA_BACKEND_H_
 
 #include "va.h"
-#include "va_x11.h"
+#include "x11/va_x11.h"
 
 #include <stdlib.h>
 
