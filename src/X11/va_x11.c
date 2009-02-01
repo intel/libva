@@ -145,11 +145,11 @@ static VAStatus va_DisplayContextGetDriverName (
         vaStatus = VA_STATUS_SUCCESS;
         va_infoMessage("VA_DRIGetClientDriverName: %d.%d.%d %s (screen %d)\n",
 	     driver_major, driver_minor, driver_patch, x_driver_name, ctx->x11_screen);
-	if (driver_name)
+        if (driver_name)
 	    *driver_name = strdup(x_driver_name);
     }
     if (x_driver_name)
-	XFree(x_driver_name);
+        XFree(x_driver_name);
 
     return vaStatus;
 }

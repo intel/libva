@@ -143,10 +143,10 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         char *driver_path = (char *) malloc( strlen(driver_dir) +
                                              strlen(driver_name) +
                                              strlen(DRIVER_EXTENSION) + 2 );
-        strcpy( driver_path, driver_dir );
-        strcat( driver_path, "/" );
-        strcat( driver_path, driver_name );
-        strcat( driver_path, DRIVER_EXTENSION );
+        strncpy( driver_path, driver_dir, strlen(driver_dir) );
+        strncat( driver_path, "/", strlen("/") );
+        strncat( driver_path, driver_name, strlen(driver_name) );
+        strncat( driver_path, DRIVER_EXTENSION, strlen(DRIVER_EXTENSION) );
         
         va_infoMessage("Trying to open %s\n", driver_path);
 
