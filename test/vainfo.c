@@ -22,7 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <va_x11.h>
+#include <X11/va_x11.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -44,7 +44,7 @@ int main(int argc, const char* argv[])
   else
       name = argv[0];
 
-  dpy = XOpenDisplay(NULL);
+  dpy = XOpenDisplay(":0.0");
   if (NULL == dpy)
   {
       fprintf(stderr, "%s: Error, can't open display: '%s'\n", name, display ? display : "");
