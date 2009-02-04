@@ -535,6 +535,21 @@ VAStatus vaCreateSurfaces (
   return ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
 }
 
+
+VAStatus vaCreateSurfaceFromCIFrame (
+    VADisplay dpy,
+    unsigned long frame_id,
+    VASurfaceID *surface	/* out */
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  TRACE(vaCreateSurfacesFromCIFrame);
+  return ctx->vtable.vaCreateSurfaceFromCIFrame( ctx, frame_id, surface );
+}
+
 VAStatus vaDestroySurfaces (
     VADisplay dpy,
     VASurfaceID *surface_list,

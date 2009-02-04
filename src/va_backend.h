@@ -95,6 +95,12 @@ struct VADriverVTable
 		VASurfaceID *surfaces		/* out */
 	);
 
+	VAStatus (*vaCreateSurfaceFromCIFrame) (
+		VADriverContextP ctx,
+		unsigned long frame_id,
+		VASurfaceID *surface		/* out */
+	);
+    
 	VAStatus (*vaDestroySurfaces) (
 		VADriverContextP ctx,
 		VASurfaceID *surface_list,
