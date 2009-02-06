@@ -1271,3 +1271,21 @@ VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
   return ctx->vtable.vaDbgCopySurfaceToBuffer( ctx, surface, buffer, stride );
 }
 
+
+VAStatus vaDbgCreateSurfaceFromUB(
+    VADisplay dpy,
+    unsigned int width,
+    unsigned int height,
+    unsigned int size,
+    void *start,
+    VASurfaceID *surface	/* out */
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  TRACE(vaDbgCreateSurfaceFromUB);
+  return ctx->vtable.vaDbgCreateSurfaceFromUB( ctx, width, height, size, start, surface );
+}
+

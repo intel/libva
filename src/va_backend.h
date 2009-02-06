@@ -393,6 +393,14 @@ struct VADriverVTable
 		void **buffer, /* out */
 		unsigned int *stride /* out */
 	);
+        VAStatus (*vaDbgCreateSurfaceFromUB) (
+		VADriverContextP ctx,
+                unsigned int width,
+                unsigned int height,
+                unsigned int size,
+                void *start,
+                VASurfaceID *surface	/* out */
+        );
 };
 
 struct VADriverContext
