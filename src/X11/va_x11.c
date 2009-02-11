@@ -154,6 +154,28 @@ static VAStatus va_DisplayContextGetDriverName (
     return vaStatus;
 }
 
+int vaDisplayIsValid(VADisplay dpy)
+{
+  VADisplayContextP tmp=NULL;
+  VADisplayContextP pDisplayContext = pDisplayContexts;
+
+  while (pDisplayContext)
+  {
+      if (pDisplayContext == (VADisplayContextP)dpy)
+      {
+          tmp = (VADisplay)pDisplayContext;
+          break;
+      }
+      pDisplayContext = pDisplayContext->pNext;
+  }
+
+  if (!tmp)
+      return 0;
+  
+  return tmp->vaIsValid(pDisplayContext);
+}
+
+
 VADisplay vaGetDisplay (
     Display *native_dpy
 )
