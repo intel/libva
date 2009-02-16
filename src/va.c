@@ -1271,13 +1271,19 @@ VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
   return ctx->vtable.vaDbgCopySurfaceToBuffer( ctx, surface, buffer, stride );
 }
 
-
-VAStatus vaDbgCreateSurfaceFromUB(
+#warning TODO: Remove vaDbgCreateSurfaceFromMrstV4L2Buf in rev 0.29
+VAStatus vaDbgCreateSurfaceFromMrstV4L2Buf(
     VADisplay dpy,
     unsigned int width,
     unsigned int height,
     unsigned int size,
-    void *start,
+    unsigned int fourcc,
+    unsigned int luma_stride,
+    unsigned int chroma_u_stride,
+    unsigned int chroma_v_stride,
+    unsigned int luma_offset,
+    unsigned int chroma_u_offset,
+    unsigned int chroma_v_offset,
     VASurfaceID *surface	/* out */
 )
 {
@@ -1285,7 +1291,7 @@ VAStatus vaDbgCreateSurfaceFromUB(
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDbgCreateSurfaceFromUB);
-  return ctx->vtable.vaDbgCreateSurfaceFromUB( ctx, width, height, size, start, surface );
+  TRACE(vtable.vaDbgCreateSurfaceFromMrstV4L2Buf);
+  return ctx->vtable.vaDbgCreateSurfaceFromMrstV4L2Buf( ctx, width, height, size, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, surface );
 }
 
