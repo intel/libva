@@ -177,11 +177,12 @@ int vaDisplayIsValid(VADisplay dpy)
 
 
 VADisplay vaGetDisplay (
-    Display *native_dpy
+    NativeDisplay native_display /* implementation specific */
 )
 {
   VADisplay dpy = NULL;
   VADisplayContextP pDisplayContext = pDisplayContexts;
+  Display *native_dpy = (Display *)native_display;
 
   if (!native_dpy)
       return NULL;
