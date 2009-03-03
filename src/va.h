@@ -135,10 +135,6 @@ const char *vaErrorStr(VAStatus error_status);
  */
 typedef void* NativeDisplay;	/* window system dependent */
 
-VADisplay vaGetDisplay (
-    NativeDisplay native_dpy	/* implementation specific */
-);
-
 /*
  * Initialize the library 
  */
@@ -1688,7 +1684,6 @@ VAStatus vaSetDisplayAttributes (
     VADisplayAttribute *attr_list,
     int num_attributes
 );
-
 
 #ifdef __cplusplus
 }
