@@ -27,7 +27,7 @@ bin_PROGRAMS = vainfo
 
 testdir = $(bindir)
 
-AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src  -I$(top_srcdir)/src/X11
+AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src -DIN_LIBVA
 
 TESTS = $(check_PROGRAMS)
 

@@ -21,7 +21,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 INCLUDES = \
-	$(LIBVA_CFLAGS)
+	$(LIBVA_CFLAGS) \
+	-DIN_LIBVA
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
@@ -32,5 +33,5 @@ SUBDIRS = X11
 
 libva_la_SOURCES = va.c 
 
-libvaincludedir = ${includedir}
+libvaincludedir = ${includedir}/va
 libvainclude_HEADERS = va.h va_backend.h

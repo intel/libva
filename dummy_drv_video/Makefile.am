@@ -25,7 +25,7 @@ dummy_drv_video_ladir = /usr/lib/dri
 dummy_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined
 dummy_drv_video_la_LIBADD = ../src/libva.la
 
-AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd
+AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd -DIN_LIBVA
 dummy_drv_video_la_SOURCES = dummy_drv_video.c object_heap.c
 
 noinst_HEADERS = dummy_drv_video.h object_heap.h
