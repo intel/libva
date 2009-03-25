@@ -31,5 +31,3 @@ libva_la_SOURCES = va.c
 
 libvaincludedir = ${includedir}
 libvainclude_HEADERS = va.h va_backend.h
-
-EXTRA_DIST = ChangeLog TODO
