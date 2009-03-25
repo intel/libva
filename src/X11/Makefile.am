@@ -18,7 +18,7 @@
 # otherwise. Any license under such intellectual property rights must be
 # express and approved by Intel in writing.
 
-AM_CFLAGS = -DLINUX -I$(top_srcdir)/src $(DRM_CFLAGS)
+AM_CFLAGS = -DLINUX -DIN_LIBVA -I$(top_srcdir)/src $(DRM_CFLAGS)
 
 noinst_LTLIBRARIES = libva_X11.la	
 

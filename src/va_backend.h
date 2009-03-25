@@ -34,7 +34,7 @@
 #include "X11/va_x11.h"
 #else
 #include <va/va.h>
-#include <X11/va_x11.h>
+#include <va/va_x11.h>
 #endif
 
 #include <stdlib.h>
