@@ -36,7 +36,7 @@
 #define VA_MINOR_VERSION	30
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
 
-#define DEFAULT_DRIVER_DIR	"/usr/lib/dri/"
+#define DEFAULT_DRIVER_DIR	"/usr/X11R6/lib/modules/dri"
 #define DRIVER_EXTENSION	"_drv_video.so"
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
@@ -128,7 +128,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
     if (!search_path)
     {
-        search_path = DEFAULT_DRIVER_DIR;
+        search_path = VA_DRIVERS_PATH;
     }
 
     search_path = strdup(search_path);
