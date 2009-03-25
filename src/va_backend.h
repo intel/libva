@@ -29,8 +29,13 @@
 #ifndef _VA_BACKEND_H_
 #define _VA_BACKEND_H_
 
+#ifdef IN_LIBVA
 #include "va.h"
 #include "X11/va_x11.h"
+#else
+#include <va/va.h>
+#include <X11/va_x11.h>
+#endif
 
 #include <stdlib.h>
 

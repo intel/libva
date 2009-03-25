@@ -1,7 +1,11 @@
 #ifndef _VA_X11_H_
 #define _VA_X11_H_
 
-#include <va.h>
+#ifdef IN_LIBVA
+#include "va.h"
+#else
+#include <va/va.h>
+#endif
 #include <X11/Xlib.h>
 
 #ifdef __cplusplus
