@@ -39,7 +39,12 @@ PKG_CHECK_MODULES([XEXT], [xext])
 PKG_CHECK_MODULES([Xfixes], [xfixes])
 PKG_CHECK_MODULES([XDAMAGE], [xdamage])
 PKG_CHECK_MODULES([DRM], [libdrm])
-#PKG_CHECK_MODULES([libva_la], [libdrm])
+PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
+
+# We only need the headers, we don't link against the DRM libraries
+LIBVA_CFLAGS="$LIBDRM_DEPS_CFLAGS"
+AC_SUBST(LIBVA_CFLAGS)
+AC_SUBST(LIBVA_LIBS)
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
