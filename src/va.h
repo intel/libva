@@ -1229,7 +1229,7 @@ VAStatus vaQuerySurfaceStatus (
  * Both images, subpictures and surfaces follow the same 2D coordinate system where origin 
  * is at the upper left corner with positive X to the right and positive Y down
  */
-#define VA_MAKEFOURCC(ch0, ch1, ch2, ch3) \
+#define VA_FOURCC(ch0, ch1, ch2, ch3) \
     ((unsigned long)(unsigned char) (ch0) | ((unsigned long)(unsigned char) (ch1) << 8) | \
     ((unsigned long)(unsigned char) (ch2) << 16) | ((unsigned long)(unsigned char) (ch3) << 24 ))
 
