@@ -56,4 +56,10 @@ AC_SUBST(LIBVA_LIBS)
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
-AC_OUTPUT([Makefile src/Makefile src/X11/Makefile dummy_drv_video/Makefile test/Makefile libva.pc])
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+	dummy_drv_video/Makefile
+	test/Makefile
+	libva.pc
+])
