@@ -59,6 +59,7 @@ AC_SUBST(pkgconfigdir)
 AC_OUTPUT([
 	Makefile
 	src/Makefile
+	src/X11/Makefile
 	dummy_drv_video/Makefile
 	test/Makefile
 	libva.pc
