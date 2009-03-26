@@ -22,8 +22,7 @@
 
 INCLUDES = \
 	$(LIBVA_CFLAGS) \
-	-DIN_LIBVA \
-	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
+	-DIN_LIBVA
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
