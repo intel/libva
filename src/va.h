@@ -992,7 +992,7 @@ typedef struct _VAEncSliceParameterBuffer
         struct {
             unsigned char is_intra	: 1;
             unsigned char disable_deblocking_filter_idc : 2;
-        };
+        } bits;
         unsigned char flags;
     };
 } VAEncSliceParameterBuffer;
