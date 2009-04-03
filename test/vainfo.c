@@ -113,11 +113,14 @@ int main(int argc, const char* argv[])
 
       va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
                                            &num_entrypoint);
+      if (va_status == VA_STATUS_ERROR_UNSUPPORTED_PROFILE)
+	continue;
+
       CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints", 4);
 
       profile_str = profile_string(profile);
       for (entrypoint = 0; entrypoint < num_entrypoint; entrypoint++)
-          printf("      %32s:%s\n", profile_str, entrypoint_string(entrypoints[entrypoint]));
+          printf("      %-32s:	%s\n", profile_str, entrypoint_string(entrypoints[entrypoint]));
   }
   
   vaTerminate(va_dpy);
