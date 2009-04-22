@@ -27,9 +27,14 @@
 #include "va_backend.h"
 #include "va_x11.h"
 #include "va_dri.h"
+#include "va_dri2.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
 
 static VADisplayContextP pDisplayContexts = NULL;
 
@@ -97,7 +102,8 @@ static VAStatus va_DRI2GetDriverName (
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-    char *driverName, *deviceName;
+    int eventBase, errorBase;
+    char *device_name;
     int driver_major;
     int driver_minor;
     int driver_patch;
@@ -114,7 +120,7 @@ static VAStatus va_DRI2GetDriverName (
     }
     
     if (!VA_DRI2Connect(ctx->x11_dpy, RootWindow(ctx->x11_dpy, ctx->x11_screen),
-		     &driver_name, &device_name)) {
+		     driver_name, &device_name)) {
         va_infoMessage("DRI2 isn't enabled, fallback to DRI1\n");
         return VA_STATUS_ERROR_UNKNOWN;
     }
@@ -214,7 +220,7 @@ static VAStatus va_DisplayContextGetDriverName (
         {
             /* For easier debugging */
             if (*driver_name)
-                Xfree(*driver_name);
+                XFree(*driver_name);
             
             *driver_name = strdup(getenv("LIBVA_DRIVER_NAME"));
             return VA_STATUS_SUCCESS;

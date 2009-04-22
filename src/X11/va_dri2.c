@@ -40,7 +40,8 @@
 #include "va_dri2.h"
 
 static char va_dri2ExtensionName[] = DRI2_NAME;
-static XExtensionInfo *va_dri2Info;
+static XExtensionInfo _va_dri2_info_data;
+static XExtensionInfo *va_dri2Info = &_va_dri2_info_data;
 static XEXT_GENERATE_CLOSE_DISPLAY (VA_DRI2CloseDisplay, va_dri2Info)
 static /* const */ XExtensionHooks va_dri2ExtensionHooks = {
     NULL,				/* create_gc */
@@ -49,7 +50,7 @@ static /* const */ XExtensionHooks va_dri2ExtensionHooks = {
     NULL,				/* free_gc */
     NULL,				/* create_font */
     NULL,				/* free_font */
-    VA_DRI2CloseDisplay,			/* close_display */
+    VA_DRI2CloseDisplay,		/* close_display */
     NULL,				/* wire_to_event */
     NULL,				/* event_to_wire */
     NULL,				/* error */
