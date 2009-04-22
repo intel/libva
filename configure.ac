@@ -36,9 +36,8 @@ AC_SYS_LARGEFILE
 
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT], [xext])
-PKG_CHECK_MODULES([Xfixes], [xfixes])
-PKG_CHECK_MODULES([XDAMAGE], [xdamage])
 PKG_CHECK_MODULES([DRM], [libdrm])
+PKG_CHECK_MODULES([XV], [xv]) #neccessary, orelse segment fault when XCloseDisplay
 PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
 
 # We only need the headers, we don't link against the DRM libraries
