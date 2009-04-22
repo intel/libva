@@ -23,6 +23,6 @@ AM_CFLAGS = -DLINUX -DIN_LIBVA -I$(top_srcdir)/src $(DRM_CFLAGS)
 noinst_LTLIBRARIES = libva_X11.la	
 
 libva_X11includedir =  ${includedir}/va
-libva_X11include_HEADERS = va_x11.h va_dri.h
+libva_X11include_HEADERS = va_x11.h va_dri.h va_dri2.h
 
-libva_X11_la_SOURCES = va_x11.c va_dri.c
+libva_X11_la_SOURCES = va_x11.c va_dri.c va_dri2.c
