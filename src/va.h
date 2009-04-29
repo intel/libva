@@ -464,6 +464,7 @@ typedef enum
     VAEncH264SEIBufferType		= 26,
 } VABufferType;
 
+
 /****************************
  * MPEG-2 data structures
  ****************************/
@@ -556,7 +557,7 @@ typedef struct _VAMacroblockParameterBufferMPEG2
             unsigned int field_motion_type		: 2; 
             unsigned int dct_type			: 1; 
         } bits;
-        unsigned int value;
+        unsigned char value;
     } macroblock_modes;
     unsigned char motion_vertical_field_select; 
     /* 
@@ -610,18 +611,18 @@ typedef struct _VAPictureParameterBufferMPEG4
     VASurfaceID backward_reference_picture;
     union {
         struct {
-            unsigned int short_video_header		: 1; 
-            unsigned int chroma_format			: 2; 
-            unsigned int interlaced			: 1; 
-            unsigned int obmc_disable			: 1; 
-            unsigned int sprite_enable			: 2; 
-            unsigned int sprite_warping_accuracy	: 2; 
-            unsigned int quant_type			: 1; 
-            unsigned int quarter_sample			: 1; 
-            unsigned int data_partitioned		: 1; 
-            unsigned int reversible_vlc			: 1; 
+            unsigned char short_video_header		: 1; 
+            unsigned char chroma_format			: 2; 
+            unsigned char interlaced			: 1; 
+            unsigned char obmc_disable			: 1; 
+            unsigned char sprite_enable			: 2; 
+            unsigned char sprite_warping_accuracy	: 2; 
+            unsigned char quant_type			: 1; 
+            unsigned char quarter_sample			: 1; 
+            unsigned char data_partitioned		: 1; 
+            unsigned char reversible_vlc			: 1; 
         } bits;
-        unsigned int value;
+        unsigned short value;
     } vol_fields;
     unsigned char no_of_sprite_warping_points;
     short sprite_trajectory_du[3];
@@ -629,14 +630,14 @@ typedef struct _VAPictureParameterBufferMPEG4
     unsigned char quant_precision;
     union {
         struct {
-            unsigned int vop_coding_type		: 2; 
-            unsigned int backward_reference_vop_coding_type	: 2; 
-            unsigned int vop_rounding_type		: 1; 
-            unsigned int intra_dc_vlc_thr		: 3; 
-            unsigned int top_field_first		: 1; 
-            unsigned int alternate_vertical_scan_flag	: 1; 
+            unsigned char vop_coding_type		: 2; 
+            unsigned char backward_reference_vop_coding_type	: 2; 
+            unsigned char vop_rounding_type		: 1; 
+            unsigned char intra_dc_vlc_thr		: 3; 
+            unsigned char top_field_first		: 1; 
+            unsigned char alternate_vertical_scan_flag	: 1; 
         } bits;
-        unsigned int value;
+        unsigned short value;
     } vop_fields;
     unsigned char vop_fcode_forward;
     unsigned char vop_fcode_backward;
@@ -706,11 +707,11 @@ typedef struct _VAPictureParameterBufferVC1
     /* sequence layer for AP or meta data for SP and MP */
     union {
         struct {
-            unsigned int interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
-            unsigned int syncmarker	: 1;/* METADATA::SYNCMARKER */
-            unsigned int overlap	: 1;/* METADATA::OVERLAP */
+            unsigned char interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
+            unsigned char syncmarker	: 1;/* METADATA::SYNCMARKER */
+            unsigned char overlap	: 1;/* METADATA::OVERLAP */
         } bits;
-        unsigned int value;
+        unsigned char value;
     } sequence_fields;
 
     unsigned short coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
@@ -722,12 +723,12 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
     union {
         struct {
-            unsigned int luma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
-            unsigned int luma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
-            unsigned int chroma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
-            unsigned int chroma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
+            unsigned char luma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
+            unsigned char luma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
+            unsigned char chroma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
+            unsigned char chroma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
         } bits;
-        unsigned int value;
+        unsigned char value;
     } range_mapping_fields;
 
     unsigned char b_picture_fraction;	/* PICTURE_LAYER::BFRACTION */
@@ -741,88 +742,88 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned char luma_shift;		/* PICTURE_LAYER::LUMSHIFT */
     union {
         struct {
-            unsigned int picture_type		: 2; /* PICTURE_LAYER::PTYPE */
-            unsigned int frame_coding_mode	: 3; /* PICTURE_LAYER::FCM */
-            unsigned int top_field_first	: 1; /* PICTURE_LAYER::TFF */
-            unsigned int is_first_field		: 1; /* set to 1 if it is the first field */
-            unsigned int intensity_compensation	: 1; /* PICTURE_LAYER::INTCOMP */
+            unsigned char picture_type		: 2; /* PICTURE_LAYER::PTYPE */
+            unsigned char frame_coding_mode	: 3; /* PICTURE_LAYER::FCM */
+            unsigned char top_field_first	: 1; /* PICTURE_LAYER::TFF */
+            unsigned char is_first_field		: 1; /* set to 1 if it is the first field */
+            unsigned char intensity_compensation	: 1; /* PICTURE_LAYER::INTCOMP */
         } bits;
-        unsigned int value;
+        unsigned char value;
     } picture_fields;
     union {
         struct {
-            unsigned int mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
-            unsigned int direct_mb	: 1; 	/* PICTURE::DIRECTMB */
-            unsigned int skip_mb	: 1; 	/* PICTURE::SKIPMB */
-            unsigned int field_tx	: 1; 	/* PICTURE::FIELDTX */
-            unsigned int forward_mb	: 1;	/* PICTURE::FORWARDMB */
-            unsigned int ac_pred	: 1;	/* PICTURE::ACPRED */
-            unsigned int overflags	: 1;	/* PICTURE::OVERFLAGS */
+            unsigned char mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
+            unsigned char direct_mb	: 1; 	/* PICTURE::DIRECTMB */
+            unsigned char skip_mb	: 1; 	/* PICTURE::SKIPMB */
+            unsigned char field_tx	: 1; 	/* PICTURE::FIELDTX */
+            unsigned char forward_mb	: 1;	/* PICTURE::FORWARDMB */
+            unsigned char ac_pred	: 1;	/* PICTURE::ACPRED */
+            unsigned char overflags	: 1;	/* PICTURE::OVERFLAGS */
         } flags;
-        unsigned int value;
+        unsigned char value;
     } raw_coding;
     union {
         struct {
-            unsigned int bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
-            unsigned int bp_direct_mb    : 1;    /* PICTURE::DIRECTMB */
-            unsigned int bp_skip_mb      : 1;    /* PICTURE::SKIPMB */  
-            unsigned int bp_field_tx     : 1;    /* PICTURE::FIELDTX */ 
-            unsigned int bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
-            unsigned int bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
-            unsigned int bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
+            unsigned char bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
+            unsigned char bp_direct_mb    : 1;    /* PICTURE::DIRECTMB */
+            unsigned char bp_skip_mb      : 1;    /* PICTURE::SKIPMB */  
+            unsigned char bp_field_tx     : 1;    /* PICTURE::FIELDTX */ 
+            unsigned char bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
+            unsigned char bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
+            unsigned char bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
         } flags;
-        unsigned int value;
+        unsigned char value;
     } bitplane_present; /* signal what bitplane is being passed via the bitplane buffer */
     union {
         struct {
-            unsigned int reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
-            unsigned int reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
-            unsigned int num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
-            unsigned int reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
+            unsigned char reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
+            unsigned char reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
+            unsigned char num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
+            unsigned char reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
         } bits;
-        unsigned int value;
+        unsigned short value;
     } reference_fields;
     union {
         struct {
-            unsigned int mv_mode		: 3; /* PICTURE_LAYER::MVMODE */
-            unsigned int mv_mode2		: 3; /* PICTURE_LAYER::MVMODE2 */
-            unsigned int mv_table		: 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
-            unsigned int two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
-            unsigned int four_mv_switch		: 1; /* PICTURE_LAYER::4MVSWITCH */
-            unsigned int four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
-            unsigned int extended_mv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
-            unsigned int extended_mv_range	: 2; /* PICTURE_LAYER::MVRANGE */
-            unsigned int extended_dmv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_DMV */
-            unsigned int extended_dmv_range	: 2; /* PICTURE_LAYER::DMVRANGE */
+            unsigned char mv_mode		: 3; /* PICTURE_LAYER::MVMODE */
+            unsigned char mv_mode2		: 3; /* PICTURE_LAYER::MVMODE2 */
+            unsigned char mv_table		: 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
+            unsigned char two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
+            unsigned char four_mv_switch		: 1; /* PICTURE_LAYER::4MVSWITCH */
+            unsigned char four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
+            unsigned char extended_mv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
+            unsigned char extended_mv_range	: 2; /* PICTURE_LAYER::MVRANGE */
+            unsigned char extended_dmv_flag	: 1; /* ENTRY_POCHAR_LAYER::EXTENDED_DMV */
+            unsigned char extended_dmv_range	: 2; /* PICTURE_LAYER::DMVRANGE */
         } bits;
         unsigned int value;
     } mv_fields;
     union {
         struct {
-            unsigned int dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
-            unsigned int quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
-            unsigned int half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
-            unsigned int pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
-            unsigned int pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
-            unsigned int dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
-            unsigned int dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
-            unsigned int dq_sb_edge	: 2; 	/* VOPDQUANT::DQSBEDGE */
-            unsigned int dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
-            unsigned int dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
-            unsigned int alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
+            unsigned char dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
+            unsigned char quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
+            unsigned char half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
+            unsigned char pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
+            unsigned char pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
+            unsigned char dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
+            unsigned char dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
+            unsigned char dq_sb_edge	: 2; 	/* VOPDQUANT::DQSBEDGE */
+            unsigned char dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
+            unsigned char dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
+            unsigned char alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
         } bits;
-        unsigned int value;
+        unsigned long value;
     } pic_quantizer_fields;
     union {
         struct {
-            unsigned int variable_sized_transform_flag	: 1;/* ENTRY_POINT_LAYER::VSTRANSFORM */
-            unsigned int mb_level_transform_type_flag	: 1;/* PICTURE_LAYER::TTMBF */
-            unsigned int frame_level_transform_type	: 2;/* PICTURE_LAYER::TTFRM */
-            unsigned int transform_ac_codingset_idx1	: 2;/* PICTURE_LAYER::TRANSACFRM */
-            unsigned int transform_ac_codingset_idx2	: 2;/* PICTURE_LAYER::TRANSACFRM2 */
-            unsigned int intra_transform_dc_table	: 1;/* PICTURE_LAYER::TRANSDCTAB */
+            unsigned char variable_sized_transform_flag	: 1;/* ENTRY_POINT_LAYER::VSTRANSFORM */
+            unsigned char mb_level_transform_type_flag	: 1;/* PICTURE_LAYER::TTMBF */
+            unsigned char frame_level_transform_type	: 2;/* PICTURE_LAYER::TTFRM */
+            unsigned char transform_ac_codingset_idx1	: 2;/* PICTURE_LAYER::TRANSACFRM */
+            unsigned char transform_ac_codingset_idx2	: 2;/* PICTURE_LAYER::TRANSACFRM2 */
+            unsigned char intra_transform_dc_table	: 1;/* PICTURE_LAYER::TRANSDCTAB */
         } bits;
-        unsigned int value;
+        unsigned short value;
     } transform_fields;
 } VAPictureParameterBufferVC1;
 
@@ -893,14 +894,14 @@ typedef struct _VAPictureParameterBufferH264
     unsigned char num_ref_frames;
     union {
         struct {
-            unsigned int chroma_format_idc			: 2; 
-            unsigned int residual_colour_transform_flag		: 1; 
-            unsigned int frame_mbs_only_flag			: 1; 
-            unsigned int mb_adaptive_frame_field_flag		: 1; 
-            unsigned int direct_8x8_inference_flag		: 1; 
-            unsigned int MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
+            unsigned char chroma_format_idc			: 2; 
+            unsigned char residual_colour_transform_flag		: 1; 
+            unsigned char frame_mbs_only_flag			: 1; 
+            unsigned char mb_adaptive_frame_field_flag		: 1; 
+            unsigned char direct_8x8_inference_flag		: 1; 
+            unsigned char MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
         } bits;
-        unsigned int value;
+        unsigned char value;
     } seq_fields;
     unsigned char num_slice_groups_minus1;
     unsigned char slice_group_map_type;
@@ -909,14 +910,14 @@ typedef struct _VAPictureParameterBufferH264
     signed char second_chroma_qp_index_offset;
     union {
         struct {
-            unsigned int entropy_coding_mode_flag	: 1;
-            unsigned int weighted_pred_flag		: 1;
-            unsigned int weighted_bipred_idc		: 2;
-            unsigned int transform_8x8_mode_flag	: 1;
-            unsigned int field_pic_flag			: 1;
-            unsigned int constrained_intra_pred_flag	: 1;
+            unsigned char entropy_coding_mode_flag	: 1;
+            unsigned char weighted_pred_flag		: 1;
+            unsigned char weighted_bipred_idc		: 2;
+            unsigned char transform_8x8_mode_flag	: 1;
+            unsigned char field_pic_flag			: 1;
+            unsigned char constrained_intra_pred_flag	: 1;
         } bits;
-        unsigned int value;
+        unsigned char value;
     } pic_fields;
     unsigned short frame_num;
 } VAPictureParameterBufferH264;
@@ -993,8 +994,8 @@ typedef struct _VAEncSliceParameterBuffer
             unsigned char is_intra	: 1;
             unsigned char disable_deblocking_filter_idc : 2;
         } bits;
-        unsigned char flags;
-    };
+        unsigned char value;
+    } slice_flags;
 } VAEncSliceParameterBuffer;
 
 /****************************
@@ -1078,6 +1079,8 @@ typedef struct _VAEncPictureParameterBufferMPEG4
     unsigned int vop_time_increment;
     VAEncPictureType picture_type;
 } VAEncPictureParameterBufferMPEG4;
+
+
 
 /* Buffer functions */
 

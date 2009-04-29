@@ -26,3 +26,4 @@ libva_X11includedir =  ${includedir}/va
 libva_X11include_HEADERS = va_x11.h va_dri.h va_dri2.h
 
 libva_X11_la_SOURCES = va_x11.c va_dri.c va_dri2.c
+CFLAGS = -ansi -O2 
