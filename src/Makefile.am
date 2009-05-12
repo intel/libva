@@ -30,6 +30,16 @@ libva_la_LDFLAGS = -version-number 0:30:0 -no-undefined
 libva_la_LIBADD = $(LIBVA_LIBS) -ldl -ldrm -lX11 -lXext -lXv X11/libva_X11.la
 CFLAGS = -ansi -O2 
 
+nodist_libva_la_SOURCES = va_version.h
+BUILT_SOURCES = va_version.h
+
+CLEANFILES = va_version.h
+
+va_version.h: Makefile
+	echo "#define VA_BUILD_DATE \"$(shell date +'%Y%m%d') $(shell date +'1%H%M%S') \"" > va_version.h
+	echo "#define VA_BUILD_GIT  \"($(shell git log  | head -n1 | cut -f2 -d' ')) \" "    >> va_version.h
+
+
 SUBDIRS = X11
 
 libva_la_SOURCES = va.c 
