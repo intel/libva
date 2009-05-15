@@ -37,7 +37,12 @@
 #include <X11/extensions/extutil.h>
 #include "xf86drm.h"
 #include "va_dri2.h"
+#include "va_dri2tokens.h"
 #include "va_dri2str.h"
+
+#ifndef DRI2DriverDRI
+#define DRI2DriverDRI 0
+#endif
 
 static char va_dri2ExtensionName[] = DRI2_NAME;
 static XExtensionInfo _va_dri2_info_data;
