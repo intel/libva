@@ -27,3 +27,4 @@ pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = libva.pc
 
 EXTRA_DIST = libva.pc.in
+
