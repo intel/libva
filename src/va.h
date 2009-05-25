@@ -1032,7 +1032,8 @@ typedef struct _VAEncPictureParameterBufferH264
  ****************************/
 
 typedef struct _VAEncSequenceParameterBufferH263
-{   
+{
+    unsigned int intra_period;
     unsigned int bits_per_second;
     unsigned int frame_rate;
     unsigned int initial_qp;
