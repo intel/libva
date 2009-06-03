@@ -38,9 +38,9 @@
 #include "xf86drm.h"
 #include "va_dri2.h"
 #include "va_dri2str.h"
+#include "va_dri2tokens.h"
 
 #ifndef DRI2DriverDRI
-#include "va_dri2tokens.h"
 #define DRI2DriverDRI 0
 #endif
 

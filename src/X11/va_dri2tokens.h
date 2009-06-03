@@ -1,5 +1,5 @@
 /*
- * Copyright © 2007,2008 Red Hat, Inc.
+ * Copyright © 2008 Red Hat, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Soft-
@@ -30,42 +30,19 @@
  *   Kristian Høgsberg (krh@redhat.com)
  */
 
-#ifndef _VA_DRI2_H_
-#define _VA_DRI2_H_
+#ifndef _DRI2_TOKENS_H_
+#define _DRI2_TOKENS_H_
 
-#include <X11/extensions/Xfixes.h>
-#include <X11/Xfuncproto.h>
-#include <xf86drm.h>
+#define DRI2BufferFrontLeft		0
+#define DRI2BufferBackLeft		1
+#define DRI2BufferFrontRight		2
+#define DRI2BufferBackRight		3
+#define DRI2BufferDepth			4
+#define DRI2BufferStencil		5
+#define DRI2BufferAccum			6
+#define DRI2BufferFakeFrontLeft		7
+#define DRI2BufferFakeFrontRight	8
 
-typedef struct {
-    unsigned int attachment;
-    unsigned int name;
-    unsigned int pitch;
-    unsigned int cpp;
-    unsigned int flags;
-} VA_DRI2Buffer;
+#define DRI2DriverDRI			0
 
-extern Bool
-VA_DRI2QueryExtension(Display *display, int *eventBase, int *errorBase);
-extern Bool
-VA_DRI2QueryVersion(Display *display, int *major, int *minor);
-extern Bool
-VA_DRI2Connect(Display *display, XID window,
-	    char **driverName, char **deviceName);
-extern Bool
-VA_DRI2Authenticate(Display *display, XID window, drm_magic_t magic);
-extern void
-VA_DRI2CreateDrawable(Display *display, XID drawable);
-extern void
-VA_DRI2DestroyDrawable(Display *display, XID handle);
-extern VA_DRI2Buffer *
-VA_DRI2GetBuffers(Display *dpy, XID drawable,
-	       int *width, int *height,
-	       unsigned int *attachments, int count,
-	       int *outCount);
-#if 0
-extern void
-VA_DRI2CopyRegion(Display *dpy, XID drawable, XserverRegion region,
-	       CARD32 dest, CARD32 src);
-#endif
 #endif
