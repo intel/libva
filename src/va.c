@@ -150,7 +150,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         
         va_infoMessage("Trying to open %s\n", driver_path);
 
-        handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL );
+        handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
         if (!handle)
         {
             /* Don't give errors for non-existing files */
