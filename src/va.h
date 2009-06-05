@@ -1214,7 +1214,7 @@ typedef enum
                              /* this status is useful if surface is used as the source */
                              /* of an overlay */
     VASurfaceReady	= 2, /* not being rendered or displayed */
-    VASurfaceSkipped	= 3  /* Indicate a skipped frame during encode */
+    VASurfaceSkipped	= 4  /* Indicate a skipped frame during encode */
 } VASurfaceStatus;
 
 /*
