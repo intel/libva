@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2009 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -16,15 +16,15 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
- * IN NO EVENT SHALL PRECISION INSIGHT AND/OR ITS SUPPLIERS BE LIABLE FOR
+ * IN NO EVENT SHALL INTEL AND/OR ITS SUPPLIERS BE LIABLE FOR
  * ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 /*
- * Video Decode Acceleration API Specification
+ * Video Acceleration (VA) API Specification
  *
- * Rev. 0.29
+ * Rev. 0.30
  * <jonathan.bian@intel.com>
  *
  * Revision History:
@@ -47,14 +47,17 @@
  * rev 0.25 (10/18/2007 Jonathan Bian) - Changed to use IDs only for some types.
  * rev 0.26 (11/07/2007 Waldo Bastian) - Change vaCreateBuffer semantics
  * rev 0.27 (11/19/2007 Matt Sottek)   - Added DeriveImage
- * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture
+ * rev 0.28 (12/06/2007 Jonathan Bian) - Added new versions of PutImage and AssociateSubpicture 
  *                                       to enable scaling
- * rev 0.29 (02/07/2007 Jonathan Bian) - VC1 parameter fixes,
+ * rev 0.29 (02/07/2008 Jonathan Bian) - VC1 parameter fixes,
  *                                       added VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED
+ * rev 0.30 (03/01/2009 Jonathan Bian) - Added encoding support for H.264 BP and MPEG-4 SP and fixes
+ *                                       for ISO C conformance.
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
- *  Thanks to Waldo Bastian, Matt Sottek and Austin Yuan at Intel for many valuable feedbacks.
+ *  Waldo Bastian (Intel), Matt Sottek (Intel),  Austin Yuan (Intel), and Gwenole Beauchesne (SDS)
+ *  contributed to various aspects of the API.
  */
 
 #ifndef _VA_H_
@@ -67,9 +70,9 @@ extern "C" {
 /* 
 Overview 
 
-This API is intended to provide an interface between a video decode
-application (client) and a hardware decode accelerator (server), to off-load 
-video decode operations from the host to the hardware accelerator at various 
+The VA API is intended to provide an interface between a video decode/encode/display
+application (client) and a hardware accelerator (server), to off-load 
+video decode/encode/display operations from the host to the hardware accelerator at various 
 entry-points.
 
 The basic operation steps are:
@@ -132,10 +135,6 @@ const char *vaErrorStr(VAStatus error_status);
  */
 typedef void* NativeDisplay;	/* window system dependent */
 
-VADisplay vaGetDisplay (
-    NativeDisplay native_dpy	/* implementation specific */
-);
-
 /*
  * Initialize the library 
  */
@@ -157,7 +156,7 @@ VAStatus vaTerminate (
  * describing some aspects of the VA implemenation on a specific    
  * hardware accelerator. The format of the returned string is vendor
  * specific and at the discretion of the implementer.
- * e.g. for the Intel GMA500 implementation, an example would be:   
+ * e.g. for the Intel GMA500 implementation, an example would be:
  * "Intel GMA500 - 2.0.0.32L.0005"
  */
 const char *vaQueryVendorString (
@@ -189,6 +188,7 @@ typedef enum
     VAProfileVC1Simple			= 8,
     VAProfileVC1Main			= 9,
     VAProfileVC1Advanced		= 10,
+    VAProfileH263Baseline		= 11
 } VAProfile;
 
 /* 
@@ -201,6 +201,7 @@ typedef enum
     VAEntrypointIDCT		= 3,
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
+    VAEntrypointEncSlice	= 6	/* slice level encode */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -211,6 +212,7 @@ typedef enum
     VAConfigAttribSpatialClipping	= 2,
     VAConfigAttribIntraResidual		= 3,
     VAConfigAttribEncryption		= 4,
+    VAConfigAttribRateControl		= 5
 } VAConfigAttribType;
 
 /*
@@ -228,6 +230,12 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV420	0x00000001	
 #define VA_RT_FORMAT_YUV422	0x00000002
 #define VA_RT_FORMAT_YUV444	0x00000004
+#define VA_RT_FORMAT_PROTECTED	0x80000000
+
+/* attribute value for VAConfigAttribRateControl */
+#define VA_RC_NONE	0x00000001	
+#define VA_RC_CBR	0x00000002	
+#define VA_RC_VBR	0x00000004	
 
 /*
  * if an attribute is not applicable for a given
@@ -445,8 +453,17 @@ typedef enum
     VAMacroblockParameterBufferType	= 6,
     VAResidualDataBufferType		= 7,
     VADeblockingParameterBufferType	= 8,
-    VAImageBufferType			= 9
+    VAImageBufferType			= 9,
+    VAProtectedSliceDataBufferType	= 10,
+/* Following are encode buffer types */
+    VAEncCodedBufferType		= 21,
+    VAEncSequenceParameterBufferType	= 22,
+    VAEncPictureParameterBufferType	= 23,
+    VAEncSliceParameterBufferType	= 24,
+    VAEncH264VUIBufferType		= 25,
+    VAEncH264SEIBufferType		= 26,
 } VABufferType;
+
 
 /****************************
  * MPEG-2 data structures
@@ -468,22 +485,22 @@ typedef struct _VAPictureParameterBufferMPEG2
     int f_code; /* pack all four fcode into this */
     union {
         struct {
-            unsigned char intra_dc_precision		: 2; 
-            unsigned char picture_structure		: 2; 
-            unsigned char top_field_first		: 1; 
-            unsigned char frame_pred_frame_dct		: 1; 
-            unsigned char concealment_motion_vectors	: 1;
-            unsigned char q_scale_type			: 1;
-            unsigned char intra_vlc_format		: 1;
-            unsigned char alternate_scan		: 1;
-            unsigned char repeat_first_field		: 1;
-            unsigned char progressive_frame		: 1;
-            unsigned char is_first_field		: 1; /* indicate whether the current field
+            unsigned int intra_dc_precision		: 2; 
+            unsigned int picture_structure		: 2; 
+            unsigned int top_field_first		: 1; 
+            unsigned int frame_pred_frame_dct		: 1; 
+            unsigned int concealment_motion_vectors	: 1;
+            unsigned int q_scale_type			: 1;
+            unsigned int intra_vlc_format		: 1;
+            unsigned int alternate_scan			: 1;
+            unsigned int repeat_first_field		: 1;
+            unsigned int progressive_frame		: 1;
+            unsigned int is_first_field			: 1; /* indicate whether the current field
                                                               * is the first field for field picture
                                                               */
-        };
-        unsigned int picture_coding_extension;
-    };
+        } bits;
+        unsigned int value;
+    } picture_coding_extension;
 } VAPictureParameterBufferMPEG2;
 
 /* MPEG-2 Inverse Quantization Matrix Buffer */
@@ -536,12 +553,12 @@ typedef struct _VAMacroblockParameterBufferMPEG2
     unsigned char macroblock_type;  /* see definition below */
     union {
         struct {
-            unsigned char frame_motion_type		: 2; 
-            unsigned char field_motion_type		: 2; 
-            unsigned char dct_type			: 1; 
-        };
-        unsigned char macroblock_modes;
-    };
+            unsigned int frame_motion_type		: 2; 
+            unsigned int field_motion_type		: 2; 
+            unsigned int dct_type			: 1; 
+        } bits;
+        unsigned char value;
+    } macroblock_modes;
     unsigned char motion_vertical_field_select; 
     /* 
      * motion_vertical_field_select:
@@ -601,12 +618,12 @@ typedef struct _VAPictureParameterBufferMPEG4
             unsigned char sprite_enable			: 2; 
             unsigned char sprite_warping_accuracy	: 2; 
             unsigned char quant_type			: 1; 
-            unsigned char quarter_sample		: 1; 
+            unsigned char quarter_sample			: 1; 
             unsigned char data_partitioned		: 1; 
-            unsigned char reversible_vlc		: 1; 
-        };
-        unsigned short vol_fields;
-    };
+            unsigned char reversible_vlc			: 1; 
+        } bits;
+        unsigned short value;
+    } vol_fields;
     unsigned char no_of_sprite_warping_points;
     short sprite_trajectory_du[3];
     short sprite_trajectory_dv[3];
@@ -619,9 +636,9 @@ typedef struct _VAPictureParameterBufferMPEG4
             unsigned char intra_dc_vlc_thr		: 3; 
             unsigned char top_field_first		: 1; 
             unsigned char alternate_vertical_scan_flag	: 1; 
-        };
-        unsigned short vop_fields;
-    };
+        } bits;
+        unsigned short value;
+    } vop_fields;
     unsigned char vop_fcode_forward;
     unsigned char vop_fcode_backward;
     /* short header related */
@@ -693,9 +710,9 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
             unsigned char syncmarker	: 1;/* METADATA::SYNCMARKER */
             unsigned char overlap	: 1;/* METADATA::OVERLAP */
-        };
-        unsigned char sequence_fields;
-    };
+        } bits;
+        unsigned char value;
+    } sequence_fields;
 
     unsigned short coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
     unsigned short coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
@@ -706,13 +723,13 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
     union {
         struct {
-            unsigned char range_mapping_luma_flag: 	1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
-            unsigned char range_mapping_luma: 		3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
-            unsigned char range_mapping_chroma_flag:	1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
-            unsigned char range_mapping_chroma:		3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
-        };
-        unsigned char range_mapping_fields;
-    };
+            unsigned char luma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
+            unsigned char luma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
+            unsigned char chroma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
+            unsigned char chroma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
+        } bits;
+        unsigned char value;
+    } range_mapping_fields;
 
     unsigned char b_picture_fraction;	/* PICTURE_LAYER::BFRACTION */
     unsigned char cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
@@ -725,14 +742,14 @@ typedef struct _VAPictureParameterBufferVC1
     unsigned char luma_shift;		/* PICTURE_LAYER::LUMSHIFT */
     union {
         struct {
-            unsigned char picture_type	: 2; 	/* PICTURE_LAYER::PTYPE */
-            unsigned char frame_coding_mode	: 3;/* PICTURE_LAYER::FCM */
-            unsigned char top_field_first	: 1;/* PICTURE_LAYER::TFF */
-            unsigned char is_first_field	: 1; /* set to 1 if it is the first field */
-            unsigned char intensity_compensation: 1;/* PICTURE_LAYER::INTCOMP */
-        };
-        unsigned char picture_fields;
-    };
+            unsigned char picture_type		: 2; /* PICTURE_LAYER::PTYPE */
+            unsigned char frame_coding_mode	: 3; /* PICTURE_LAYER::FCM */
+            unsigned char top_field_first	: 1; /* PICTURE_LAYER::TFF */
+            unsigned char is_first_field		: 1; /* set to 1 if it is the first field */
+            unsigned char intensity_compensation	: 1; /* PICTURE_LAYER::INTCOMP */
+        } bits;
+        unsigned char value;
+    } picture_fields;
     union {
         struct {
             unsigned char mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
@@ -742,9 +759,9 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char forward_mb	: 1;	/* PICTURE::FORWARDMB */
             unsigned char ac_pred	: 1;	/* PICTURE::ACPRED */
             unsigned char overflags	: 1;	/* PICTURE::OVERFLAGS */
-        };
-        unsigned char raw_coding_flag;
-    };
+        } flags;
+        unsigned char value;
+    } raw_coding;
     union {
         struct {
             unsigned char bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
@@ -754,33 +771,33 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
             unsigned char bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
             unsigned char bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
-        };
-        unsigned char bitplane_present_flag; /* signal what bitplane is being passed via the bitplane buffer */
-    };
+        } flags;
+        unsigned char value;
+    } bitplane_present; /* signal what bitplane is being passed via the bitplane buffer */
     union {
         struct {
             unsigned char reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
             unsigned char reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
             unsigned char num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
             unsigned char reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
-        };
-        unsigned short reference_fields;
-    };
+        } bits;
+        unsigned short value;
+    } reference_fields;
     union {
         struct {
-            VAMvModeVC1 mv_mode              : 3; /* PICTURE_LAYER::MVMODE */
-            VAMvModeVC1 mv_mode2             : 3; /* PICTURE_LAYER::MVMODE2 */
-            unsigned char mv_table           : 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
+            unsigned char mv_mode		: 3; /* PICTURE_LAYER::MVMODE */
+            unsigned char mv_mode2		: 3; /* PICTURE_LAYER::MVMODE2 */
+            unsigned char mv_table		: 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
             unsigned char two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
-            unsigned char four_mv_switch     : 1; /* PICTURE_LAYER::4MVSWITCH */
+            unsigned char four_mv_switch		: 1; /* PICTURE_LAYER::4MVSWITCH */
             unsigned char four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
-            unsigned char extended_mv_flag   : 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
-            unsigned char extended_mv_range  : 2; /* PICTURE_LAYER::MVRANGE */
-            unsigned char extended_dmv_flag  : 1; /* ENTRY_POINT_LAYER::EXTENDED_DMV */
-            unsigned char extended_dmv_range : 2; /* PICTURE_LAYER::DMVRANGE */
-        };
-        unsigned int mv_fields;
-    };
+            unsigned char extended_mv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
+            unsigned char extended_mv_range	: 2; /* PICTURE_LAYER::MVRANGE */
+            unsigned char extended_dmv_flag	: 1; /* ENTRY_POCHAR_LAYER::EXTENDED_DMV */
+            unsigned char extended_dmv_range	: 2; /* PICTURE_LAYER::DMVRANGE */
+        } bits;
+        unsigned int value;
+    } mv_fields;
     union {
         struct {
             unsigned char dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
@@ -794,9 +811,9 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
             unsigned char dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
             unsigned char alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
-        };
-        unsigned long pic_quantizer_fields;
-    };
+        } bits;
+        unsigned long value;
+    } pic_quantizer_fields;
     union {
         struct {
             unsigned char variable_sized_transform_flag	: 1;/* ENTRY_POINT_LAYER::VSTRANSFORM */
@@ -805,9 +822,9 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned char transform_ac_codingset_idx1	: 2;/* PICTURE_LAYER::TRANSACFRM */
             unsigned char transform_ac_codingset_idx2	: 2;/* PICTURE_LAYER::TRANSACFRM2 */
             unsigned char intra_transform_dc_table	: 1;/* PICTURE_LAYER::TRANSDCTAB */
-        };
-        unsigned short transform_fields;
-    };
+        } bits;
+        unsigned short value;
+    } transform_fields;
 } VAPictureParameterBufferVC1;
 
 /* VC-1 Bitplane Buffer 
@@ -878,14 +895,14 @@ typedef struct _VAPictureParameterBufferH264
     union {
         struct {
             unsigned char chroma_format_idc			: 2; 
-            unsigned char residual_colour_transform_flag	: 1; 
+            unsigned char residual_colour_transform_flag		: 1; 
             unsigned char frame_mbs_only_flag			: 1; 
             unsigned char mb_adaptive_frame_field_flag		: 1; 
             unsigned char direct_8x8_inference_flag		: 1; 
             unsigned char MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
-        };
-        unsigned char seq_fields;
-    };
+        } bits;
+        unsigned char value;
+    } seq_fields;
     unsigned char num_slice_groups_minus1;
     unsigned char slice_group_map_type;
     signed char pic_init_qp_minus26;
@@ -897,11 +914,11 @@ typedef struct _VAPictureParameterBufferH264
             unsigned char weighted_pred_flag		: 1;
             unsigned char weighted_bipred_idc		: 2;
             unsigned char transform_8x8_mode_flag	: 1;
-            unsigned char field_pic_flag		: 1;
+            unsigned char field_pic_flag			: 1;
             unsigned char constrained_intra_pred_flag	: 1;
-        };
-        unsigned char pic_fields;
-    };
+        } bits;
+        unsigned char value;
+    } pic_fields;
     unsigned short frame_num;
 } VAPictureParameterBufferH264;
 
@@ -956,6 +973,115 @@ typedef struct _VASliceParameterBufferH264
     short chroma_weight_l1[32][2];
     short chroma_offset_l1[32][2];
 } VASliceParameterBufferH264;
+
+/****************************
+ * Common encode data structures 
+ ****************************/
+typedef enum
+{
+    VAEncPictureTypeIntra		= 0,
+    VAEncPictureTypePredictive		= 1,
+    VAEncPictureTypeBidirectional	= 2,
+} VAEncPictureType;
+
+/* Encode Slice Parameter Buffer */
+typedef struct _VAEncSliceParameterBuffer
+{
+    unsigned int start_row_number;	/* starting MB row number for this slice */
+    unsigned int slice_height;	/* slice height measured in MB */
+    union {
+        struct {
+            unsigned char is_intra	: 1;
+            unsigned char disable_deblocking_filter_idc : 2;
+        } bits;
+        unsigned char value;
+    } slice_flags;
+} VAEncSliceParameterBuffer;
+
+/****************************
+ * H.264 specific encode data structures
+ ****************************/
+
+typedef struct _VAEncSequenceParameterBufferH264
+{
+    unsigned char seq_parameter_set_id;
+    unsigned char level_idc;
+    unsigned int intra_period;
+    unsigned int picture_width_in_mbs;
+    unsigned int picture_height_in_mbs;
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    unsigned int initial_qp;
+    unsigned int min_qp;
+    unsigned int basic_unit_size;
+    unsigned char vui_flag;
+} VAEncSequenceParameterBufferH264;
+
+typedef struct _VAEncPictureParameterBufferH264
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence */
+} VAEncPictureParameterBufferH264;
+
+/****************************
+ * H.263 specific encode data structures
+ ****************************/
+
+typedef struct _VAEncSequenceParameterBufferH263
+{
+    unsigned int intra_period;
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    unsigned int initial_qp;
+    unsigned int min_qp;
+} VAEncSequenceParameterBufferH263;
+
+typedef struct _VAEncPictureParameterBufferH263
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    VAEncPictureType picture_type;
+} VAEncPictureParameterBufferH263;
+
+/****************************
+ * MPEG-4 specific encode data structures
+ ****************************/
+
+typedef struct _VAEncSequenceParameterBufferMPEG4
+{
+    unsigned char profile_and_level_indication;
+    unsigned int intra_period;
+    unsigned int video_object_layer_width;
+    unsigned int video_object_layer_height;
+    unsigned int vop_time_increment_resolution;
+    unsigned int fixed_vop_rate;
+    unsigned int fixed_vop_time_increment;
+    unsigned int bits_per_second;
+    unsigned int frame_rate;
+    unsigned int initial_qp;
+    unsigned int min_qp;
+} VAEncSequenceParameterBufferMPEG4;
+
+typedef struct _VAEncPictureParameterBufferMPEG4
+{
+    VASurfaceID reference_picture;
+    VASurfaceID reconstructed_picture;
+    VABufferID coded_buf;
+    unsigned short picture_width;
+    unsigned short picture_height;
+    unsigned int modulo_time_base; /* number of 1s */
+    unsigned int vop_time_increment;
+    VAEncPictureType picture_type;
+} VAEncPictureParameterBufferMPEG4;
+
+
 
 /* Buffer functions */
 
@@ -1087,7 +1213,8 @@ typedef enum
     VASurfaceDisplaying	= 1, /* Displaying in progress (not safe to render into it) */ 
                              /* this status is useful if surface is used as the source */
                              /* of an overlay */
-    VASurfaceReady	= 2  /* not being rendered or displayed */
+    VASurfaceReady	= 2, /* not being rendered or displayed */
+    VASurfaceSkipped	= 4  /* Indicate a skipped frame during encode */
 } VASurfaceStatus;
 
 /*
@@ -1106,7 +1233,7 @@ VAStatus vaQuerySurfaceStatus (
  * Both images, subpictures and surfaces follow the same 2D coordinate system where origin 
  * is at the upper left corner with positive X to the right and positive Y down
  */
-#define MAKEFOURCC(ch0, ch1, ch2, ch3) \
+#define VA_FOURCC(ch0, ch1, ch2, ch3) \
     ((unsigned long)(unsigned char) (ch0) | ((unsigned long)(unsigned char) (ch1) << 8) | \
     ((unsigned long)(unsigned char) (ch2) << 16) | ((unsigned long)(unsigned char) (ch3) << 24 ))
 
@@ -1114,6 +1241,13 @@ VAStatus vaQuerySurfaceStatus (
 #define VA_FOURCC_NV12		0x3231564E
 #define VA_FOURCC_AI44		0x34344149
 #define VA_FOURCC_RGBA		0x41424752
+#define VA_FOURCC_UYVY          0x59565955
+#define VA_FOURCC_YUY2          0x32595559
+#define VA_FOURCC_AYUV          0x56555941
+#define VA_FOURCC_NV11          0x3131564e
+#define VA_FOURCC_YV12          0x32315659
+#define VA_FOURCC_P208          0x38303250
+#define VA_FOURCC_IYUV          0x56555949
 
 /* byte order */
 #define VA_LSB_FIRST		1
@@ -1260,7 +1394,7 @@ VAStatus vaPutImage (
     int dest_y
 );
 
- /*
+/*
  * Similar to vaPutImage but with additional destination width
  * and height arguments to enable scaling
  */
@@ -1314,8 +1448,6 @@ VAStatus vaDeriveImage (
     VASurfaceID surface,
     VAImage *image	/* out */
 );
-
-
 
 /*
  * Subpictures 
@@ -1562,148 +1694,3 @@ VAStatus vaSetDisplayAttributes (
 #endif
 
 #endif /* _VA_H_ */
-
-#if 0
-/*****************************************************************************/ 
-
-Sample Program (w/ pseudo code)
-
-Mostly to demonstrate program flow with no error handling ...
-
-/*****************************************************************************/
-
-	/* MPEG-2 VLD decode for a 720x480 frame */
-
-	int major_ver, minor_ver;
-	vaInitialize(dpy, &major_ver, &minor_ver);
-
-	int max_num_profiles, max_num_entrypoints, max_num_attribs;
-	max_num_profiles = vaMaxNumProfiles(dpy);
-	max_num_entrypoints = vaMaxNumEntrypoints(dpy);
-	max_num_attribs = vaMaxNumAttributes(dpy);
-
-	/* find out whether MPEG2 MP is supported */
-	VAProfile *profiles = malloc(sizeof(VAProfile)*max_num_profiles);
-	int num_profiles;
-	vaQueryConfigProfiles(dpy, profiles, &profiles);
-	/*
-	 * traverse "profiles" to locate the one that matches VAProfileMPEG2Main
-         */ 
-
-	/* now get the available entrypoints for MPEG2 MP */
-	VAEntrypoint *entrypoints = malloc(sizeof(VAEntrypoint)*max_num_entrypoints);
-	int num_entrypoints;
-	vaQueryConfigEntrypoints(dpy, VAProfileMPEG2Main, entrypoints, &num_entrypoints);
-
-	/* traverse "entrypoints" to see whether VLD is there */
-
-	/* Assuming finding VLD, find out the format for the render target */
-	VAConfigAttrib attrib;
-	attrib.type = VAConfigAttribRTFormat;
-	vaGetConfigAttributes(dpy, VAProfileMPEG2Main, VAEntrypointVLD,
-                                &attrib, 1);
-
-	if (attrib.value & VA_RT_FORMAT_YUV420)
-		/* Found desired RT format, keep going */ 
-
-	VAConfigID config_id;
-	vaCreateConfig(dpy, VAProfileMPEG2Main, VAEntrypointVLD, &attrib, 1,
-                       &config_id);
-
-	/* 
-         * create surfaces for the current target as well as reference frames
-	 * we can get by with 4 surfaces for MPEG-2
-	 */
-	VASurfaceID surfaces[4];
-	vaCreateSurfaces(dpy, 720, 480, VA_RT_FORMAT_YUV420, 4, surfaces);
-
-	/* 
-         * Create a context for this decode pipe
-	 */
-	VAContextID context;
-	vaCreateContext(dpy, config_id, 720, 480, VA_PROGRESSIVE, surfaces,
-                        4, &context);
-
-	/* Create a picture parameter buffer for this frame */
-	VABufferID picture_buf;
-	VAPictureParameterBufferMPEG2 *picture_param;
-	vaCreateBuffer(dpy, context, VAPictureParameterBufferType, sizeof(VAPictureParameterBufferMPEG2), 1, NULL, &picture_buf);
-	vaMapBuffer(dpy, picture_buf, &picture_param);
-	picture_param->horizontal_size = 720;
-	picture_param->vertical_size = 480;
-	picture_param->picture_coding_type = 1; /* I-frame */	
-	/* fill in picture_coding_extension fields here */
-	vaUnmapBuffer(dpy, picture_buf);
-
-	/* Create an IQ matrix buffer for this frame */
-	VABufferID iq_buf;
-	VAIQMatrixBufferMPEG2 *iq_matrix;
-	vaCreateBuffer(dpy, context, VAIQMatrixBufferType, sizeof(VAIQMatrixBufferMPEG2), 1, NULL, &iq_buf);
-	vaMapBuffer(dpy, iq_buf, &iq_matrix);
-	/* fill values for IQ_matrix here */
-	vaUnmapBuffer(dpy, iq_buf);
-
-	/* send the picture and IQ matrix buffers to the server */
-	vaBeginPicture(dpy, context, surfaces[0]);
-
-	vaRenderPicture(dpy, context, &picture_buf, 1);
-	vaRenderPicture(dpy, context, &iq_buf, 1);
-
-	/* 
-         * Send slices in this frame to the server.
-         * For MPEG-2, each slice is one row of macroblocks, and
-         * we have 30 slices for a 720x480 frame 
-         */
-	for (int i = 1; i <= 30; i++) {
-
-		/* Create a slice parameter buffer */
-		VABufferID slice_param_buf;
-		VASliceParameterBufferMPEG2 *slice_param;
-		vaCreateBuffer(dpy, context, VASliceParameterBufferType, sizeof(VASliceParameterBufferMPEG2), 1, NULL, &slice_param_buf);
-		vaMapBuffer(dpy, slice_param_buf, &slice_param);
-		slice_param->slice_data_offset = 0;
-		/* Let's say all slices in this bit-stream has 64-bit header */
-		slice_param->macroblock_offset = 64; 
-		slice_param->vertical_position = i;
-		/* set up the rest based on what is in the slice header ... */
-		vaUnmapBuffer(dpy, slice_param_buf);
-
-		/* send the slice parameter buffer */
-		vaRenderPicture(dpy, context, &slice_param_buf, 1);
-
-		/* Create a slice data buffer */
-		unsigned char *slice_data;
-		VABufferID slice_data_buf;
-		vaCreateBuffer(dpy, context, VASliceDataBufferType, x /* decoder figure out how big */, 1, NULL, &slice_data_buf);
-		vaMapBuffer(dpy, slice_data_buf, &slice_data);
-		/* decoder fill in slice_data */
-		vaUnmapBuffer(dpy, slice_data_buf);
-
-		/* send the slice data buffer */
-		vaRenderPicture(dpy, context, &slice_data_buf, 1);
-	}
-
-	/* all slices have been sent, mark the end for this frame */
-	vaEndPicture(dpy, context);
-
-	/* The following code demonstrates rendering a sub-title with the target surface */
-	/* Find out supported Subpicture formats */
-	VAImageFormat sub_formats[4];
-        int num_formats;
-	vaQuerySubpictureFormats(dpy, sub_formats, &num_formats);
-        /* Assume that we find AI44 as a subpicture format in sub_formats[0] */
-        VAImage sub_image;
-	VASubpictureID subpicture;
-        unsigned char *sub_data;
-        /* create an image for the subtitle */
-	vaCreateImage(dpy, sub_formats, 128, 16, &sub_image);
-	vaMapBuffer(dpy, sub_image->buf, &sub_data);
-        /* fill the image data */
-        vaUnmapBuffer(dpy, sub_image->buf);
-	vaCreateSubpicture(dpy, sub_image, &subpicture);
-	unsigned char palette[3][16];
-	/* fill the palette data */
-	vaSetSubpicturePalette(dpy, subpicture, palette);
-	vaAssociateSubpicture(dpy, subpicture, surfaces, 1, 0, 0, 296, 400, 128, 16);
-	vaPutSurface(dpy, surfaces, win, 0, 0, 720, 480, 100, 100, 640, 480, NULL, 0, 0);
-#endif

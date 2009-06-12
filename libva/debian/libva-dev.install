@@ -1,0 +1,8 @@
+debian/tmp/usr/include/va.h
+debian/tmp/usr/include/va_x11.h
+debian/tmp/usr/include/va_backend.h
+debian/tmp/usr/include/va_dri.h
+debian/tmp/usr/X11R6/lib/modules/dri/dummy_drv_video.*
+debian/tmp/usr/lib/libva.la
+debian/tmp/usr/lib/libva.so
+debian/tmp/usr/lib/pkgconfig/libva.pc

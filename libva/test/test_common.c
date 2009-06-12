@@ -22,8 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "va.h"
-#include "X11/Xlib.h"
+#include <va_x11.h>
 
 #include "assert.h"
 #include <stdarg.h>

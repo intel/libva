@@ -20,14 +20,38 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-libva_la_LTLIBRARIES = libva.la
-libva_ladir = $(libdir)
-libva_la_LDFLAGS = -version-number 0:29:0 -no-undefined
-libva_la_LIBADD = -ldl -lX11 -lXext -lXfixes -lXdamage
+AC_PREREQ(2.57)
+AC_INIT([libva], 0.30, [waldo.bastian@intel.com], libva)
+AC_CONFIG_SRCDIR([Makefile.am])
+AM_INIT_AUTOMAKE([dist-bzip2])
 
-libva_la_SOURCES = va_dri.c va.c va_dristr.h
+AM_CONFIG_HEADER([src/config.h])
 
-libvaincludedir = ${includedir}
-libvainclude_HEADERS = va.h va_x11.h va_dri.h va_backend.h
+AC_DISABLE_STATIC
+AC_PROG_LIBTOOL
+AC_PROG_CC
 
-EXTRA_DIST = ChangeLog TODO
+AC_HEADER_STDC
+AC_SYS_LARGEFILE
+
+PKG_CHECK_MODULES([X11], [x11])
+PKG_CHECK_MODULES([XEXT],[xext])
+PKG_CHECK_MODULES([DRM], [libdrm])
+PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
+
+# We only need the headers, we don't link against the DRM libraries
+LIBVA_CFLAGS="$LIBDRM_DEPS_CFLAGS"
+AC_SUBST(LIBVA_CFLAGS)
+AC_SUBST(LIBVA_LIBS)
+
+pkgconfigdir=${libdir}/pkgconfig
+AC_SUBST(pkgconfigdir)
+
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+	src/X11/Makefile
+	dummy_drv_video/Makefile
+	test/Makefile
+	libva.pc
+])

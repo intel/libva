@@ -736,6 +736,12 @@ VAStatus dummy_CreateContext(
     obj_context->picture_height = picture_height;
     obj_context->num_render_targets = num_render_targets;
     obj_context->render_targets = (VASurfaceID *) malloc(num_render_targets * sizeof(VASurfaceID));
+    if (obj_context->render_targets == NULL)
+    {
+        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+        return vaStatus;
+    }
+    
     for(i = 0; i < num_render_targets; i++)
     {
         if (NULL == SURFACE(render_targets[i]))
@@ -1251,7 +1257,6 @@ VAStatus __vaDriverInit_0_29(  VADriverContextP ctx )
     ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
     ctx->vtable.vaSetSubpictureImage = dummy_SetSubpictureImage;
-    ctx->vtable.vaSetSubpicturePalette = dummy_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;

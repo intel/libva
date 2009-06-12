@@ -27,7 +27,7 @@ bin_PROGRAMS = vainfo
 
 testdir = $(bindir)
 
-AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src
+AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src -DIN_LIBVA
 
 TESTS = $(check_PROGRAMS)
 
@@ -72,6 +72,7 @@ test_11_SOURCES = test_11.c
 test_12_LDADD = $(TEST_LIBS)
 test_12_SOURCES = test_12.c
 
+EXTRA_DIST = test_common.c
 
 valgrind:	$(check_PROGRAMS)
 	for a in $(check_PROGRAMS); do \

@@ -20,11 +20,12 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src dummy_drv_video test
+dummy_drv_video_la_LTLIBRARIES = dummy_drv_video.la
+dummy_drv_video_ladir = /usr/lib/dri
+dummy_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined
+dummy_drv_video_la_LIBADD = ../src/libva.la
 
-pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = libva.pc
+AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd -DIN_LIBVA
+dummy_drv_video_la_SOURCES = dummy_drv_video.c object_heap.c
 
-EXTRA_DIST = libva.pc.in
-
+noinst_HEADERS = dummy_drv_video.h object_heap.h

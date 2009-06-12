@@ -1,0 +1,1 @@
+shlibs:Depends=libc6 (>= 2.6-1), libx11-6, libxext6

@@ -1,0 +1,27 @@
+libva (0.24-1) unstable; urgency=low
+
+  * Updated to v0.24
+  * Display attributes added
+  * H264 parameter fixes
+  * Swapped vaGetConfigAttributes and vaQueryConfigAttributes
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Thu, 20 Sep 2007 15:08:04 -0700
+
+  * Updated to v0.22
+  * VAImage and VASubpicture added
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Fri, 07 Sep 2007 04:32:28 -0700
+
+  * Updated to v0.20
+  * Clean up & exporting DRI interface
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Thu, 09 Aug 2007 11:49:43 -0700
+
+  * Add VA_INVALID_SURFACE
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Wed, 11 Jul 2007 17:24:10 -0700
+
+  * Initial release of libva
+
+ -- Waldo Bastian <waldo.bastian@intel.com>  Mon, 18 Jun 2007 21:35:31 -0700
+

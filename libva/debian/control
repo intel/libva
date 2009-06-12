@@ -1,0 +1,36 @@
+Source: libva
+Priority: extra
+Maintainer: Waldo Bastian <waldo.bastian@intel.com>
+Build-Depends: debhelper (>= 5),
+               autotools-dev,
+               libdrm-dev (>= 2.3.0),
+               mesa-common-dev,
+               x11proto-gl-dev,
+               x11proto-xext-dev,
+               libxext-dev,
+               pkg-config
+Standards-Version: 3.7.2
+Section: libs
+
+Package: libva-dev
+Section: libdevel
+Architecture: any
+Depends: libva1 (= ${binary:Version}),
+         libdrm-dev (>= 2.3.0),
+         pkg-config
+Description: Video Acceleration (VA) API for Linux -- development files
+ The libva library implements the Video Acceleration (VA) API for Linux.
+ The library loads a hardware dependendent driver.
+ .
+ This package provides the development environment for libva.
+
+Package: libva1
+Section: libs
+Architecture: any
+Depends: libx11-6,
+         libxext6, 
+         libdrm2 (>= 2.3.0)
+Description: Video Acceleration (VA) API for Linux -- runtime
+ The libva library implements the Video Acceleration (VA) API for Linux.
+ The library loads a hardware dependendent driver.
+

@@ -20,11 +20,29 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-dummy_drv_video_la_LTLIBRARIES = dummy_drv_video.la
-dummy_drv_video_ladir = /usr/X11R6/lib/modules/dri
-dummy_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined
-dummy_drv_video_la_LIBADD = ../src/libva.la
+INCLUDES = \
+	$(LIBVA_CFLAGS) \
+	-DIN_LIBVA
 
-AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd
-dummy_drv_video_la_SOURCES = dummy_drv_video.c object_heap.c
+libva_la_LTLIBRARIES = libva.la
+libva_ladir = $(libdir)
+libva_la_LDFLAGS = -version-number 0:30:0 -no-undefined
+libva_la_LIBADD = $(LIBVA_LIBS) -ldl -lX11 -lXext X11/libva_X11.la
+CFLAGS = -ansi -O2 
 
+nodist_libva_la_SOURCES = va_version.h
+BUILT_SOURCES = va_version.h
+
+CLEANFILES = va_version.h
+
+va_version.h: Makefile
+	echo "#define VA_BUILD_DATE \"$(shell date +'%Y%m%d') $(shell date +'1%H%M%S') \"" > va_version.h
+	echo "#define VA_BUILD_GIT  \"($(shell git log  | head -n1 | cut -f2 -d' ')) \" "    >> va_version.h
+
+
+SUBDIRS = X11
+
+libva_la_SOURCES = va.c 
+
+libvaincludedir = ${includedir}/va
+libvainclude_HEADERS = va.h va_backend.h

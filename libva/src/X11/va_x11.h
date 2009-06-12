@@ -1,28 +1,24 @@
-/*
- * Video Decode Acceleration API, X11 specific functions
- *
- * Rev. 0.15
- * <jonathan.bian@intel.com>
- *
- * Revision History:
- * rev 0.1 (12/10/06 Jonathan Bian) - Initial draft
- * rev 0.11 (12/15/06 Jonathan Bian) - Fixed some errors
- * rev 0.12 (02/05/07 Jonathan Bian) - Added VC-1 data structures
- * rev 0.13 (02/28/07 Jonathan Bian) - Added GetDisplay()
- * rev 0.14 (04/13/07 Jonathan Bian) - Fixed MPEG-2 PictureParameter struct, cleaned up a few funcs.
- * rev 0.15 (04/20/07 Jonathan Bian) - Overhauled buffer management  
- *
- */
-
 #ifndef _VA_X11_H_
 #define _VA_X11_H_
 
+#ifdef IN_LIBVA
 #include "va.h"
+#else
+#include <va/va.h>
+#endif
 #include <X11/Xlib.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*
+ * Returns a suitable VADisplay for VA API
+ */
+VADisplay vaGetDisplay (
+    Display *dpy
+);
+
 /*
  * Output rendering
  * Following is the rendering interface for X windows, 
@@ -31,21 +27,25 @@ extern "C" {
  * color space conversion and scaling to the destination
  * rectangle
  */
+/* de-interlacing flags for vaPutSurface */
+#define VA_FRAME_PICTURE	0x00000000 
+#define VA_TOP_FIELD		0x00000001
+#define VA_BOTTOM_FIELD		0x00000002
 
-/* de-interlace flags for vaPutSurface */
-#define VA_FRAME_PICTURE        0x00000000 
-#define VA_TOP_FIELD            0x00000001
-#define VA_BOTTOM_FIELD         0x00000002
 /* 
  * clears the drawable with background color.
  * for hardware overlay based implementation this flag
  * can be used to turn off the overlay
  */
-#define VA_CLEAR_DRAWABLE       0x00000008 
+#define VA_CLEAR_DRAWABLE	0x00000008 
+
+/* color space conversion flags for vaPutSurface */
+#define VA_SRC_BT601		0x00000010
+#define VA_SRC_BT709		0x00000020
 
 VAStatus vaPutSurface (
     VADisplay dpy,
-    VASurfaceID surface,
+    VASurfaceID surface,	
     Drawable draw, /* X Drawable */
     short srcx,
     short srcy,
@@ -55,9 +55,9 @@ VAStatus vaPutSurface (
     short desty,
     unsigned short destw,
     unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
+    VARectangle *cliprects, /* client supplied destination clip list */
     unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
+    unsigned int flags /* PutSurface flags */
 );
 
 #ifdef __cplusplus

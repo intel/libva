@@ -29,13 +29,19 @@
 #ifndef _VA_BACKEND_H_
 #define _VA_BACKEND_H_
 
+#ifdef IN_LIBVA
 #include "va.h"
-#include "va_x11.h"
+#include "X11/va_x11.h"
+#else
+#include <va/va.h>
+#include <va/va_x11.h>
+#endif
 
 #include <stdlib.h>
 
 
 typedef struct VADriverContext *VADriverContextP;
+typedef struct VADisplayContext *VADisplayContextP;
 
 struct VADriverVTable
 {
@@ -94,6 +100,12 @@ struct VADriverVTable
 		VASurfaceID *surfaces		/* out */
 	);
 
+	VAStatus (*vaCreateSurfaceFromCIFrame) (
+		VADriverContextP ctx,
+		unsigned long frame_id,
+		VASurfaceID *surface		/* out */
+	);
+    
 	VAStatus (*vaDestroySurfaces) (
 		VADriverContextP ctx,
 		VASurfaceID *surface_list,
@@ -291,17 +303,6 @@ struct VADriverVTable
                 VAImageID image
         );
         
-	VAStatus (*vaSetSubpicturePalette) (
-		VADriverContextP ctx,
-		VASubpictureID subpicture,
-		/*
-		 * pointer to an array holding the palette data.  The size of the array is
-		 * num_palette_entries * entry_bytes in size.  The order of the components
-		 * in the palette is described by the component_order in VASubpicture struct
-		 */
-		unsigned char *palette
-	);
-
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
@@ -386,18 +387,32 @@ struct VADriverVTable
 		void **buffer, /* out */
 		unsigned int *stride /* out */
 	);
+        VAStatus (*vaDbgCreateSurfaceFromMrstV4L2Buf) (
+		VADriverContextP ctx,
+                unsigned int width,
+                unsigned int height,
+                unsigned int size,
+                unsigned int fourcc,
+                unsigned int luma_stride,
+                unsigned int chroma_u_stride,
+                unsigned int chroma_v_stride,
+                unsigned int luma_offset,
+                unsigned int chroma_u_offset,
+                unsigned int chroma_v_offset,
+                VASurfaceID *surface	/* out */
+        );
 };
 
 struct VADriverContext
 {
-    VADriverContextP pNext;
+    void *old_pNext;			/* preserved for binary compatibility */
 
     void *pDriverData;
     struct VADriverVTable vtable;
 
     Display *x11_dpy;
     int x11_screen;
-
+    int dri2;
     int version_major;
     int version_minor;
     int max_profiles;
@@ -409,6 +424,25 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
+};
+
+struct VADisplayContext
+{
+    VADisplayContextP pNext;
+    VADriverContextP pDriverContext;
+
+    int (*vaIsValid) (
+	VADisplayContextP ctx
+    );
+
+    void (*vaDestroy) (
+	VADisplayContextP ctx
+    );
+
+    VAStatus (*vaGetDriverName) (
+	VADisplayContextP ctx,
+	char **driver_name
+    );
 };
 
 typedef VAStatus (*VADriverInit) (
