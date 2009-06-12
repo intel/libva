@@ -215,7 +215,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureImage);
-                    CHECK_VTABLE(vaStatus, ctx, SetSubpicturePalette);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
@@ -1046,25 +1045,6 @@ VAStatus vaSetSubpictureImage (
   return ctx->vtable.vaSetSubpictureImage ( ctx, subpicture, image);
 }
 
-#warning TODO: Remove vaSetSubpicturePalette in rev 0.29
-VAStatus vaSetSubpicturePalette (
-    VADisplay dpy,
-    VASubpictureID subpicture,
-    /* 
-     * pointer to an array holding the palette data.  The size of the array is 
-     * num_palette_entries * entry_bytes in size.  The order of the components
-     * in the palette is described by the component_order in VASubpicture struct
-     */
-    unsigned char *palette 
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaSetSubpicturePalette);
-  return ctx->vtable.vaSetSubpicturePalette ( ctx, subpicture, palette);
-}
 
 /*
  * If chromakey is enabled, then the area where the source value falls within

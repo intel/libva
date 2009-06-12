@@ -303,17 +303,6 @@ struct VADriverVTable
                 VAImageID image
         );
         
-	VAStatus (*vaSetSubpicturePalette) (
-		VADriverContextP ctx,
-		VASubpictureID subpicture,
-		/*
-		 * pointer to an array holding the palette data.  The size of the array is
-		 * num_palette_entries * entry_bytes in size.  The order of the components
-		 * in the palette is described by the component_order in VASubpicture struct
-		 */
-		unsigned char *palette
-	);
-
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
