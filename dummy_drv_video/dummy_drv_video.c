@@ -1257,7 +1257,6 @@ VAStatus __vaDriverInit_0_29(  VADriverContextP ctx )
     ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
     ctx->vtable.vaSetSubpictureImage = dummy_SetSubpictureImage;
-    ctx->vtable.vaSetSubpicturePalette = dummy_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
