@@ -34,6 +34,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include <linux/videodev2.h>
+
 #define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
 
 #define VA_MAJOR_VERSION	0
@@ -1242,29 +1244,22 @@ VAStatus vaCreateSurfaceFromCIFrame (
 }
 
 
-VAStatus vaCreateSurfaceFromMrstV4L2Buf(
+VAStatus vaCreateSurfaceFromV4L2Buf(
     VADisplay dpy,
-    unsigned int width,
-    unsigned int height,
-    unsigned int size,
-    unsigned int fourcc,
-    unsigned int luma_stride,
-    unsigned int chroma_u_stride,
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset,
-    unsigned int chroma_u_offset,
-    unsigned int chroma_v_offset,
-    VASurfaceID *surface	/* out */
+    int v4l2_fd,         /* file descriptor of V4L2 device */
+    struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
+    struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
+    VASurfaceID *surface	       /* out */
 )
 {
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vtable.vaCreateSurfaceFromMrstV4L2Buf);
+  TRACE(vtable.vaCreateSurfaceFromV4L2Buf);
 
-  if (ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf) 
-      return ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf( ctx, width, height, size, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, surface );
+  if (ctx->vtable.vaCreateSurfaceFromV4L2Buf) 
+      return ctx->vtable.vaCreateSurfaceFromV4L2Buf( ctx, v4l2_fd, v4l2_fmt, v4l2_buf, surface );
   else
       return VA_STATUS_ERROR_UNKNOWN;
 }

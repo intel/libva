@@ -38,6 +38,7 @@
 #endif
 
 #include <stdlib.h>
+#include <linux/videodev2.h>
 
 
 typedef struct VADriverContext *VADriverContextP;
@@ -382,19 +383,12 @@ struct VADriverVTable
 	);
     
     
-        VAStatus (*vaCreateSurfaceFromMrstV4L2Buf) (
+        VAStatus (*vaCreateSurfaceFromV4L2Buf) (
 		VADriverContextP ctx,
-                unsigned int width,
-                unsigned int height,
-                unsigned int size,
-                unsigned int fourcc,
-                unsigned int luma_stride,
-                unsigned int chroma_u_stride,
-                unsigned int chroma_v_stride,
-                unsigned int luma_offset,
-                unsigned int chroma_u_offset,
-                unsigned int chroma_v_offset,
-                VASurfaceID *surface	/* out */
+                int v4l2_fd,         /* file descriptor of V4L2 device */
+                struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
+                struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
+                VASurfaceID *surface	           /* out */
         );
     
         VAStatus (*vaCopySurfaceToBuffer) (
