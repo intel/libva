@@ -100,12 +100,6 @@ struct VADriverVTable
 		VASurfaceID *surfaces		/* out */
 	);
 
-	VAStatus (*vaCreateSurfaceFromCIFrame) (
-		VADriverContextP ctx,
-		unsigned long frame_id,
-		VASurfaceID *surface		/* out */
-	);
-    
 	VAStatus (*vaDestroySurfaces) (
 		VADriverContextP ctx,
 		VASurfaceID *surface_list,
@@ -380,14 +374,15 @@ struct VADriverVTable
                 int num_attributes
         );
 
-
-	VAStatus (*vaDbgCopySurfaceToBuffer) (
+        /* device specific */
+	VAStatus (*vaCreateSurfaceFromCIFrame) (
 		VADriverContextP ctx,
-		VASurfaceID surface,
-		void **buffer, /* out */
-		unsigned int *stride /* out */
+		unsigned long frame_id,
+		VASurfaceID *surface		/* out */
 	);
-        VAStatus (*vaDbgCreateSurfaceFromMrstV4L2Buf) (
+    
+    
+        VAStatus (*vaCreateSurfaceFromMrstV4L2Buf) (
 		VADriverContextP ctx,
                 unsigned int width,
                 unsigned int height,
@@ -400,6 +395,19 @@ struct VADriverVTable
                 unsigned int chroma_u_offset,
                 unsigned int chroma_v_offset,
                 VASurfaceID *surface	/* out */
+        );
+    
+        VAStatus (*vaCopySurfaceToBuffer) (
+		VADriverContextP ctx,
+                VASurfaceID surface,
+                unsigned int *fourcc, /* out  for follow argument */
+                unsigned int *luma_stride,
+                unsigned int *chroma_u_stride,
+                unsigned int *chroma_v_stride,
+                unsigned int *luma_offset,
+                unsigned int *chroma_u_offset,
+                unsigned int *chroma_v_offset,
+                void **buffer
         );
 };
 
