@@ -223,7 +223,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
-                    CHECK_VTABLE(vaStatus, ctx, DbgCopySurfaceToBuffer);
                 }
                 if (VA_STATUS_SUCCESS != vaStatus)
                 {
@@ -536,20 +535,6 @@ VAStatus vaCreateSurfaces (
   return ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
 }
 
-
-VAStatus vaCreateSurfaceFromCIFrame (
-    VADisplay dpy,
-    unsigned long frame_id,
-    VASurfaceID *surface	/* out */
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaCreateSurfacesFromCIFrame);
-  return ctx->vtable.vaCreateSurfaceFromCIFrame( ctx, frame_id, surface );
-}
 
 VAStatus vaDestroySurfaces (
     VADisplay dpy,
@@ -1238,23 +1223,26 @@ VAStatus vaSetDisplayAttributes (
 }
 
 
-#warning TODO: Remove vaDbgCopySurfaceToBuffer in rev 0.29
-VAStatus vaDbgCopySurfaceToBuffer(VADisplay dpy,
-    VASurfaceID surface,
-    void **buffer, /* out */
-    unsigned int *stride /* out */
+VAStatus vaCreateSurfaceFromCIFrame (
+    VADisplay dpy,
+    unsigned long frame_id,
+    VASurfaceID *surface	/* out */
 )
 {
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDbgCopySurfaceToBuffer);
-  return ctx->vtable.vaDbgCopySurfaceToBuffer( ctx, surface, buffer, stride );
+  TRACE(vaCreateSurfacesFromCIFrame);
+
+  if (ctx->vtable.vaCreateSurfaceFromCIFrame)
+      return ctx->vtable.vaCreateSurfaceFromCIFrame( ctx, frame_id, surface );
+  else
+      return VA_STATUS_ERROR_UNKNOWN;
 }
 
-#warning TODO: Remove vaDbgCreateSurfaceFromMrstV4L2Buf in rev 0.29
-VAStatus vaDbgCreateSurfaceFromMrstV4L2Buf(
+
+VAStatus vaCreateSurfaceFromMrstV4L2Buf(
     VADisplay dpy,
     unsigned int width,
     unsigned int height,
@@ -1273,7 +1261,34 @@ VAStatus vaDbgCreateSurfaceFromMrstV4L2Buf(
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vtable.vaDbgCreateSurfaceFromMrstV4L2Buf);
-  return ctx->vtable.vaDbgCreateSurfaceFromMrstV4L2Buf( ctx, width, height, size, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, surface );
+  TRACE(vtable.vaCreateSurfaceFromMrstV4L2Buf);
+
+  if (ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf) 
+      return ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf( ctx, width, height, size, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, surface );
+  else
+      return VA_STATUS_ERROR_UNKNOWN;
 }
 
+
+VAStatus vaCopySurfaceToBuffer(VADisplay dpy,
+    VASurfaceID surface,
+    unsigned int *fourcc, /* following are output argument */
+    unsigned int *luma_stride,
+    unsigned int *chroma_u_stride,
+    unsigned int *chroma_v_stride,
+    unsigned int *luma_offset,
+    unsigned int *chroma_u_offset,
+    unsigned int *chroma_v_offset,
+    void **buffer 
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  TRACE(vaCopySurfaceToBuffer);
+  if (ctx->vtable.vaCopySurfaceToBuffer)
+      return ctx->vtable.vaCopySurfaceToBuffer( ctx, surface, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, buffer);
+  else
+      return VA_STATUS_ERROR_UNKNOWN;
+}
