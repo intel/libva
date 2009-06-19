@@ -1154,11 +1154,17 @@ VAStatus dummy_SetDisplayAttributes (
 }
 
 
-VAStatus dummy_DbgCopySurfaceToBuffer(
+VAStatus dummy_CopySurfaceToBuffer(
 		VADriverContextP ctx,
 		VASurfaceID surface,
-		void **buffer, /* out */
-		unsigned int *stride /* out */
+                unsigned int *fourcc, /* following are output argument */
+                unsigned int *luma_stride,
+                unsigned int *chroma_u_stride,
+                unsigned int *chroma_v_stride,
+                unsigned int *luma_offset,
+                unsigned int *chroma_u_offset,
+                unsigned int *chroma_v_offset,
+		void **buffer
 	)
 {
     /* TODO */
@@ -1266,7 +1272,7 @@ VAStatus __vaDriverInit_0_29(  VADriverContextP ctx )
     ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;
     ctx->vtable.vaSetDisplayAttributes = dummy_SetDisplayAttributes;
     
-    ctx->vtable.vaDbgCopySurfaceToBuffer = dummy_DbgCopySurfaceToBuffer;
+    ctx->vtable.vaCopySurfaceToBuffer = dummy_CopySurfaceToBuffer;
 
     driver_data = (struct dummy_driver_data *) malloc( sizeof(*driver_data) );
     ctx->pDriverData = (void *) driver_data;

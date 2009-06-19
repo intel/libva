@@ -34,6 +34,8 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#include <linux/videodev2.h>
+
 #define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
 
 #define VA_MAJOR_VERSION	0
@@ -1222,7 +1224,14 @@ VAStatus vaSetDisplayAttributes (
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
-
+/* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
+ * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
+ * of the frame, and to determine if the frame can be wrapped as a VA surface
+ *
+ * Application should make sure the frame is idle before the frame is passed into VA stack
+ * and also a vaSyncSurface should be called before application tries to access the frame
+ * from CI stack
+ */
 VAStatus vaCreateSurfaceFromCIFrame (
     VADisplay dpy,
     unsigned long frame_id,
@@ -1242,33 +1251,42 @@ VAStatus vaCreateSurfaceFromCIFrame (
 }
 
 
-VAStatus vaCreateSurfaceFromMrstV4L2Buf(
+/* Wrap a V4L2 buffer as a VA surface, so that V4L2 camera, VA encode
+ * can share the data without copy
+ * The VA driver should query the camera device from v4l2_fd to see
+ * if camera device memory/buffer can be wrapped into a VA surface
+ * Buffer information is passed in by v4l2_fmt and v4l2_buf structure,
+ * VA driver also needs do further check if the buffer can meet encode
+ * hardware requirement, such as dimension, fourcc, stride, etc
+ *
+ * Application should make sure the buffer is idle before the frame into VA stack
+ * and also a vaSyncSurface should be called before application tries to access the frame
+ * from V4L2 stack
+ */
+VAStatus vaCreateSurfaceFromV4L2Buf(
     VADisplay dpy,
-    unsigned int width,
-    unsigned int height,
-    unsigned int size,
-    unsigned int fourcc,
-    unsigned int luma_stride,
-    unsigned int chroma_u_stride,
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset,
-    unsigned int chroma_u_offset,
-    unsigned int chroma_v_offset,
-    VASurfaceID *surface	/* out */
+    int v4l2_fd,         /* file descriptor of V4L2 device */
+    struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
+    struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
+    VASurfaceID *surface	       /* out */
 )
 {
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vtable.vaCreateSurfaceFromMrstV4L2Buf);
+  TRACE(vtable.vaCreateSurfaceFromV4L2Buf);
 
-  if (ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf) 
-      return ctx->vtable.vaCreateSurfaceFromMrstV4L2Buf( ctx, width, height, size, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, surface );
+  if (ctx->vtable.vaCreateSurfaceFromV4L2Buf) 
+      return ctx->vtable.vaCreateSurfaceFromV4L2Buf( ctx, v4l2_fd, v4l2_fmt, v4l2_buf, surface );
   else
       return VA_STATUS_ERROR_UNKNOWN;
 }
 
+/* It is a debug interface, and isn't exported in core VAAPI
+ * It is used to dump surface data into system memory
+ * Application should explicitly call free to release the buffer memory
+ */
 
 VAStatus vaCopySurfaceToBuffer(VADisplay dpy,
     VASurfaceID surface,
