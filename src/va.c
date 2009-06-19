@@ -1224,7 +1224,14 @@ VAStatus vaSetDisplayAttributes (
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
-
+/* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
+ * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
+ * of the frame, and to determine if the frame can be wrapped as a VA surface
+ *
+ * Application should make sure the frame is idle before the frame is passed into VA stack
+ * and also a vaSyncSurface should be called before application tries to access the frame
+ * from CI stack
+ */
 VAStatus vaCreateSurfaceFromCIFrame (
     VADisplay dpy,
     unsigned long frame_id,
@@ -1244,6 +1251,18 @@ VAStatus vaCreateSurfaceFromCIFrame (
 }
 
 
+/* Wrap a V4L2 buffer as a VA surface, so that V4L2 camera, VA encode
+ * can share the data without copy
+ * The VA driver should query the camera device from v4l2_fd to see
+ * if camera device memory/buffer can be wrapped into a VA surface
+ * Buffer information is passed in by v4l2_fmt and v4l2_buf structure,
+ * VA driver also needs do further check if the buffer can meet encode
+ * hardware requirement, such as dimension, fourcc, stride, etc
+ *
+ * Application should make sure the buffer is idle before the frame into VA stack
+ * and also a vaSyncSurface should be called before application tries to access the frame
+ * from V4L2 stack
+ */
 VAStatus vaCreateSurfaceFromV4L2Buf(
     VADisplay dpy,
     int v4l2_fd,         /* file descriptor of V4L2 device */
@@ -1264,6 +1283,10 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
       return VA_STATUS_ERROR_UNKNOWN;
 }
 
+/* It is a debug interface, and isn't exported in core VAAPI
+ * It is used to dump surface data into system memory
+ * Application should explicitly call free to release the buffer memory
+ */
 
 VAStatus vaCopySurfaceToBuffer(VADisplay dpy,
     VASurfaceID surface,
