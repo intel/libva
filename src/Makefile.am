@@ -26,7 +26,7 @@ INCLUDES = \
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
-libva_la_LDFLAGS = -version-number 0:30:0 -no-undefined
+libva_la_LDFLAGS = -version-number 0:30:4 -no-undefined
 libva_la_LIBADD = $(LIBVA_LIBS) -ldl -lX11 -lXext X11/libva_X11.la
 CFLAGS = -ansi -O2 
 
