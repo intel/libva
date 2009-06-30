@@ -1397,7 +1397,7 @@ __vaDriverInit_0_30(  VADriverContextP ctx )
     ctx->vtable.vaCreateSubpicture = i965_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = i965_DestroySubpicture;
     ctx->vtable.vaSetSubpictureImage = i965_SetSubpictureImage;
-    ctx->vtable.vaSetSubpicturePalette = i965_SetSubpicturePalette;
+    //ctx->vtable.vaSetSubpicturePalette = i965_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = i965_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = i965_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = i965_AssociateSubpicture;

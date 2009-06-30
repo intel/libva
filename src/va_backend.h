@@ -298,11 +298,6 @@ struct VADriverVTable
                 VAImageID image
         );
 
-	VAStatus (*vaSetSubpicturePalette) (
-		VADriverContextP ctx,
-		VASubpictureID subpicture,
-		unsigned char *palette);
-
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
