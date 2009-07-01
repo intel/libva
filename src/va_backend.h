@@ -31,7 +31,7 @@
 
 #ifdef IN_LIBVA
 #include "va.h"
-#include "X11/va_x11.h"
+#include "dri/va_x11.h"
 #else
 #include <va/va.h>
 #include <va/va_x11.h>
