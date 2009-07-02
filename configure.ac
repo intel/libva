@@ -53,14 +53,14 @@ AC_SUBST(pkgconfigdir)
 AC_OUTPUT([
 	Makefile
 	src/Makefile
-	src/X11/Makefile
+	dri/Makefile
 	dummy_drv_video/Makefile
-	test/Makefile
 	i965_drv_video/Makefile
 	i965_drv_video/shaders/Makefile
 	i965_drv_video/shaders/mpeg2/Makefile
 	i965_drv_video/shaders/mpeg2/vld/Makefile
 	i965_drv_video/shaders/render/Makefile
+	test/Makefile
 	libva.pc
 ])
 

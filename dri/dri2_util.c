@@ -10,6 +10,7 @@
 #include "va_backend.h"
 
 #include "va_dri2.h"
+#include "va_dri2tokens.h"
 #include "va_dricommon.h"
 
 #define __DRI_BUFFER_FRONT_LEFT         0
@@ -85,7 +86,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     int i;
     int count;
     unsigned int attachments[5];
-    DRI2Buffer *buffers;
+    VA_DRI2Buffer *buffers;
     
     i = 0;
     attachments[i++] = __DRI_BUFFER_BACK_LEFT;
