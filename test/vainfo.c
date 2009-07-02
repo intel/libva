@@ -22,7 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <X11/va_x11.h>
+#include <va_x11.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -32,7 +32,7 @@
 
 #define CHECK_VASTATUS(va_status,func, ret)                             \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
-    fprintf(stderr,"%s failed with error code %d (%s),exit\n",func, vaErrorStr(va_status)); \
+    fprintf(stderr,"%s failed with error code %d (%s),exit\n",func, va_status, vaErrorStr(va_status)); \
     exit(ret);                                                          \
 }
 
@@ -52,6 +52,7 @@ static char * profile_string(VAProfile profile)
             case VAProfileVC1Advanced: return "VAProfileVC1Advanced";
             case VAProfileH263Baseline: return "VAProfileH263Baseline";
     }
+    return "<unknown profile>";
 }
 
 
@@ -65,6 +66,7 @@ static char * entrypoint_string(VAEntrypoint entrypoint)
             case VAEntrypointDeblocking:return "VAEntrypointDeblocking";
             case VAEntrypointEncSlice:return "VAEntrypointEncSlice";
     }
+    return "<unknown entrypoint>";
 }
 
 int main(int argc, const char* argv[])
@@ -75,7 +77,7 @@ int main(int argc, const char* argv[])
   int major_version, minor_version;
   const char *driver;
   const char *display = getenv("DISPLAY");
-  const char *name = rindex(argv[0], '/'); 
+  const char *name = strrchr(argv[0], '/'); 
   VAProfile profile;
   VAEntrypoint entrypoint, entrypoints[10];
   int num_entrypoint;
