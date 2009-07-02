@@ -42,7 +42,7 @@ va_version.h: Makefile
 
 SUBDIRS = X11
 
-libva_la_SOURCES = va.c 
+libva_la_SOURCES = va.c va_dricommon.c dri2_util.c dri1_util.c
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_backend.h
+libvainclude_HEADERS = va.h va_backend.h va_dricommon.h

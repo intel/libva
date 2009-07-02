@@ -297,7 +297,12 @@ struct VADriverVTable
                 VASubpictureID subpicture,
                 VAImageID image
         );
-        
+
+	VAStatus (*vaSetSubpicturePalette) (
+		VADriverContextP ctx,
+		VASubpictureID subpicture,
+		unsigned char *palette);
+
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
@@ -426,6 +431,8 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
+    
+    void *dri_state;
 };
 
 struct VADisplayContext

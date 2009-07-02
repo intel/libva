@@ -35,6 +35,10 @@
 #include <unistd.h>
 
 #include <linux/videodev2.h>
+#include "va_dri.h"
+#include "va_dri2.h"
+#include "va_dricommon.h"
+
 
 #define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
 
@@ -112,7 +116,21 @@ static Bool va_checkString(const char* value, char *variable)
 static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
+    VADriverContextP ctx = CTX(dpy);
+
+    VAStatus ret;
+    ret = pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
+    if (ret == VA_STATUS_SUCCESS) 
+    {
+	if (isDRI2Connected(ctx, driver_name)) 
+	{
+	    ret = VA_STATUS_SUCCESS;
+	} else if (isDRI1Connected(ctx, driver_name)) 
+	{
+	    ret = VA_STATUS_SUCCESS;
+	}
+    }
+    return ret;
 }
 
 static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
@@ -137,8 +155,8 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         search_path = DEFAULT_DRIVER_DIR;
     }
 
-    search_path = strdup(search_path);
-    driver_dir = strtok_r(search_path, ":", &saveptr);
+    search_path = strdup((const char *)search_path);
+    driver_dir = strtok_r((const char *)search_path, ":", &saveptr);
     while(driver_dir)
     {
         void *handle = NULL;

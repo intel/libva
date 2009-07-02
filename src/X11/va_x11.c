@@ -28,6 +28,7 @@
 #include "va_x11.h"
 #include "va_dri.h"
 #include "va_dri2.h"
+#include "va_dricommon.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -289,6 +290,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
 	  pDisplayContexts                 = pDisplayContext;
+	  pDriverContext->dri_state 	   = calloc(1, sizeof(struct dri_state));
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else

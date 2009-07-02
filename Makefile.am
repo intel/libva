@@ -21,7 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src dummy_drv_video test
+SUBDIRS = src dummy_drv_video test i965_drv_video
 
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = libva.pc

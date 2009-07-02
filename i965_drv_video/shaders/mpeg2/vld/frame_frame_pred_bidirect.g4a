@@ -1,0 +1,120 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT table
+   g31:    thread payload 
+   g32:    message descriptor for reading reference data
+   g58~g81:reference data
+   g82:    thread payload backup
+   g83~g106:IDCT data                           */
+mov (8) g82.0<1>UD g31.0<8,8,1>UD {align1};
+mov (2) g31.0<1>UD g82.12<2,2,1>UW {align1};
+mov (1) g126.8<1>UD ip {align1};
+mov (1) ip g21.0<1,1,1>UD {align1};
+
+//Y, Forward
+mov (1) g31.8<1>UD 0x0070007UD {align1};  
+define(`input_surface',	`4')
+define(`mv1',	`g82.16')
+define(`mv2',	`g82.18')
+asr (2) g31.14<1>W g82.16<2,2,1>W 1W {align1};
+add (2) g32.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+include(`motion_frame_y.g4i')
+//Save Forward
+mov (16) g108.0<1>UD g58.0<16,16,1>UD {align1 compr};
+mov (16) g110.0<1>UD g60.0<16,16,1>UD {align1 compr};
+mov (16) g112.0<1>UD g62.0<16,16,1>UD {align1 compr};
+mov (16) g114.0<1>UD g64.0<16,16,1>UD {align1 compr};
+mov (16) g116.0<1>UD g66.0<16,16,1>UD {align1 compr};
+mov (16) g118.0<1>UD g68.0<16,16,1>UD {align1 compr};
+mov (16) g120.0<1>UD g70.0<16,16,1>UD {align1 compr};
+mov (16) g122.0<1>UD g72.0<16,16,1>UD {align1 compr};
+//Y, Backward
+define(`input_surface',	`7')
+define(`mv1',	`g82.20')
+define(`mv2',	`g82.22')  
+asr (2) g31.14<1>W g82.20<2,2,1>W 1W {align1};
+add (2) g32.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+include(`motion_frame_y.g4i')
+//Average Forward and Backward
+avg.sat (16) g58.0<1>UW g58.0<16,16,1>UW g108.0<16,16,1>UW {align1};
+avg.sat (16) g59.0<1>UW g59.0<16,16,1>UW g109.0<16,16,1>UW {align1};
+avg.sat (16) g60.0<1>UW g60.0<16,16,1>UW g110.0<16,16,1>UW {align1};
+avg.sat (16) g61.0<1>UW g61.0<16,16,1>UW g111.0<16,16,1>UW {align1};
+avg.sat (16) g62.0<1>UW g62.0<16,16,1>UW g112.0<16,16,1>UW {align1};
+avg.sat (16) g63.0<1>UW g63.0<16,16,1>UW g113.0<16,16,1>UW {align1};
+avg.sat (16) g64.0<1>UW g64.0<16,16,1>UW g114.0<16,16,1>UW {align1};
+avg.sat (16) g65.0<1>UW g65.0<16,16,1>UW g115.0<16,16,1>UW {align1};
+avg.sat (16) g66.0<1>UW g66.0<16,16,1>UW g116.0<16,16,1>UW {align1};
+avg.sat (16) g67.0<1>UW g67.0<16,16,1>UW g117.0<16,16,1>UW {align1};
+avg.sat (16) g68.0<1>UW g68.0<16,16,1>UW g118.0<16,16,1>UW {align1};
+avg.sat (16) g69.0<1>UW g69.0<16,16,1>UW g119.0<16,16,1>UW {align1};
+avg.sat (16) g70.0<1>UW g70.0<16,16,1>UW g120.0<16,16,1>UW {align1};
+avg.sat (16) g71.0<1>UW g71.0<16,16,1>UW g121.0<16,16,1>UW {align1};
+avg.sat (16) g72.0<1>UW g72.0<16,16,1>UW g122.0<16,16,1>UW {align1};
+avg.sat (16) g73.0<1>UW g73.0<16,16,1>UW g123.0<16,16,1>UW {align1};
+
+//UV, Forward
+shr (2) g31.0<1>UD g31.0<2,2,1>UD 1UD {align1};
+asr (2) g31.14<1>W g82.16<2,2,1>W 2W {align1};
+add (2) g32.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+define(`input_surface1', `5')
+define(`input_surface2', `6')
+mov (1) g32.8<1>UD 0x007000fUD  {align1};
+include(`motion_frame_uv.g4i')
+//Save UV Forward
+mov (16) g108.0<1>UB  g74.0<16,16,2>UB {align1};
+mov (16) g108.16<1>UB g75.0<16,16,2>UB {align1};
+mov (16) g109.0<1>UB  g76.0<16,16,2>UB {align1};
+mov (16) g109.16<1>UB g77.0<16,16,2>UB {align1};
+mov (16) g110.0<1>UB  g78.0<16,16,2>UB {align1};
+mov (16) g110.16<1>UB g79.0<16,16,2>UB {align1};
+mov (16) g111.0<1>UB  g80.0<16,16,2>UB {align1};
+mov (16) g111.16<1>UB g81.0<16,16,2>UB {align1};
+//UV, Backward
+asr (2) g31.14<1>W g82.20<2,2,1>W 2W {align1};
+add (2) g32.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+define(`input_surface1', `8')
+define(`input_surface2', `9')
+include(`motion_frame_uv.g4i')
+//Average Forward and Backward
+avg.sat (16) g74.0<1>UW g74.0<16,16,1>UW g108.0<16,16,1>UB {align1};
+avg.sat (16) g75.0<1>UW g75.0<16,16,1>UW g108.16<16,16,1>UB {align1};
+avg.sat (16) g76.0<1>UW g76.0<16,16,1>UW g109.0<16,16,1>UB {align1};
+avg.sat (16) g77.0<1>UW g77.0<16,16,1>UW g109.16<16,16,1>UB {align1};
+avg.sat (16) g78.0<1>UW g78.0<16,16,1>UW g110.0<16,16,1>UB {align1};
+avg.sat (16) g79.0<1>UW g79.0<16,16,1>UW g110.16<16,16,1>UB {align1};
+avg.sat (16) g80.0<1>UW g80.0<16,16,1>UW g111.0<16,16,1>UB {align1};
+avg.sat (16) g81.0<1>UW g81.0<16,16,1>UW g111.16<16,16,1>UB {align1};
+
+include(`addidct.g4i')
+send (16) 0 acc0<1>UW g0<8,8,1>UW 
+	thread_spawner(0, 0, 0) mlen 1 rlen 0 { align1 EOT};

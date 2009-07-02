@@ -20,47 +20,21 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AC_PREREQ(2.57)
-AC_INIT([libva], 0.30.4, [waldo.bastian@intel.com], libva)
-AC_CONFIG_SRCDIR([Makefile.am])
-AM_INIT_AUTOMAKE([dist-bzip2])
+SUBDIRS = shaders
 
-AM_CONFIG_HEADER([config.h])
+AM_CFLAGS = -Wall -I$(top_srcdir)/src -I$(top_srcdir)/common -I$(top_srcdir)/intel @DRM_CFLAGS@ -DIN_LIBVA
 
-AC_DISABLE_STATIC
-AC_PROG_LIBTOOL
-AC_PROG_CC
+i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
+i965_drv_video_ladir = $(libdir)/dri
+i965_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined @DRM_LIBS@ -ldrm_intel
+i965_drv_video_la_LIBADD = ../src/libva.la -lpthread
 
-AC_HEADER_STDC
-AC_SYS_LARGEFILE
-
-PKG_CHECK_MODULES([X11], [x11])
-PKG_CHECK_MODULES([XEXT],[xext])
-PKG_CHECK_MODULES([DRM], [libdrm])
-PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
-
-AC_CHECK_PROG(gen4asm, [intel-gen4asm], yes, no)
-AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
-
-# We only need the headers, we don't link against the DRM libraries
-LIBVA_CFLAGS="$LIBDRM_DEPS_CFLAGS"
-AC_SUBST(LIBVA_CFLAGS)
-AC_SUBST(LIBVA_LIBS)
-
-pkgconfigdir=${libdir}/pkgconfig
-AC_SUBST(pkgconfigdir)
-
-AC_OUTPUT([
-	Makefile
-	src/Makefile
-	src/X11/Makefile
-	dummy_drv_video/Makefile
-	test/Makefile
-	i965_drv_video/Makefile
-	i965_drv_video/shaders/Makefile
-	i965_drv_video/shaders/mpeg2/Makefile
-	i965_drv_video/shaders/mpeg2/vld/Makefile
-	i965_drv_video/shaders/render/Makefile
-	libva.pc
-])
-
+i965_drv_video_la_SOURCES =	\
+	object_heap.c		\
+	intel_batchbuffer.c	\
+	intel_memman.c		\
+	intel_driver.c		\
+	i965_media.c		\
+	i965_media_mpeg2.c	\
+	i965_render.c		\
+	i965_drv_video.c
