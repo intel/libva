@@ -72,7 +72,7 @@ test_11_SOURCES = test_11.c
 test_12_LDADD = $(TEST_LIBS)
 test_12_SOURCES = test_12.c
 
-EXTRA_DIST = test_common.c
+EXTRA_DIST = test_common.c mpeg2-I.jpg mpeg2-I.mpg
 
 valgrind:	$(check_PROGRAMS)
 	for a in $(check_PROGRAMS); do \

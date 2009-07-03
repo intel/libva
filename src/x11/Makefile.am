@@ -27,3 +27,5 @@ libva_x11include_HEADERS = va_x11.h va_dri.h va_dri2.h va_dricommon.h
 
 libva_x11_la_SOURCES = va_x11.c va_dri.c va_dri2.c va_dricommon.c dri2_util.c dri1_util.c
 CFLAGS = -ansi -O2 
+
+EXTRA_DIST = va_dristr.h va_dri2str.h va_dri2tokens.h

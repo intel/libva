@@ -38,3 +38,15 @@ i965_drv_video_la_SOURCES =	\
 	i965_media_mpeg2.c	\
 	i965_render.c		\
 	i965_drv_video.c
+
+noinst_HEADERS =                \
+	object_heap.h           \
+	intel_batchbuffer.h     \
+	intel_memman.h          \
+	intel_driver.h          \
+	i965_media.h            \
+	i965_media_mpeg2.h      \
+	i965_render.h           \
+	i965_drv_video.h        \
+	i965_defines.h          \
+	i965_structs.h
