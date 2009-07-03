@@ -22,7 +22,7 @@
 
 SUBDIRS = shaders
 
-AM_CFLAGS = -Wall -I$(top_srcdir)/src -I$(top_srcdir)/dri @DRM_CFLAGS@ -DIN_LIBVA
+AM_CFLAGS = -Wall -I$(top_srcdir)/src -I$(top_srcdir)/src/X11 @DRM_CFLAGS@ -DIN_LIBVA
 
 i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
 i965_drv_video_ladir = $(libdir)/dri
