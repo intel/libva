@@ -73,7 +73,7 @@ AC_ARG_ENABLE(i965-driver,
 
 AC_ARG_WITH(drivers-path,
 	    [AC_HELP_STRING([--with-drivers-path=[[path]]], [drivers path])],,
-	    [with_drivers_path="$libdir/va/drivers"])
+	    [with_drivers_path="$libdir/dri"])
 
 LIBVA_DRIVERS_PATH="$with_drivers_path"
 AC_SUBST(LIBVA_DRIVERS_PATH)
