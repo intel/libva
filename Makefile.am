@@ -31,11 +31,16 @@ SUBDIRS += i965_drv_video
 endif
 
 pcfiles = \
-	libva.pc
+	libva.pc \
+	libva-$(LIBVA_DISPLAY).pc
+
+# libva-<display>.pc - for display-specific dependencies
+libva-$(LIBVA_DISPLAY).pc: libva_display.pc
+	@cp $< $@
 
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = $(pcfiles)
 
-EXTRA_DIST = libva.pc.in
+EXTRA_DIST = libva.pc.in libva_display.pc.in
 
 CLEANFILES = $(pcfiles)

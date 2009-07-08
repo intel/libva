@@ -56,7 +56,11 @@
 
 static int va_debug_trace = 0;
 
-int vaDisplayIsValid(VADisplay dpy);
+static int vaDisplayIsValid(VADisplay dpy)
+{
+  VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+  return pDisplayContext && pDisplayContext->vaIsValid(pDisplayContext);
+}
 
 static void va_errorMessage(const char *msg, ...)
 {

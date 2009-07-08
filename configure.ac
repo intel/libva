@@ -114,8 +114,12 @@ AC_SUBST(LIBVA_LIBS)
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
-libvabackendlib=libva.la
+LIBVA_DISPLAY=x11
+libvacorelib=libva.la
+libvabackendlib=libva-$LIBVA_DISPLAY.la
+AC_SUBST([libvacorelib])
 AC_SUBST([libvabackendlib])
+AC_SUBST(LIBVA_DISPLAY)
 
 AC_OUTPUT([
 	Makefile
@@ -130,5 +134,6 @@ AC_OUTPUT([
 	i965_drv_video/shaders/render/Makefile
 	test/Makefile
 	libva.pc
+	libva_display.pc
 ])
 
