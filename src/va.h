@@ -722,18 +722,32 @@ typedef struct _VAPictureParameterBufferVC1
     /* sequence layer for AP or meta data for SP and MP */
     union {
         struct {
-            unsigned char interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
-            unsigned char syncmarker	: 1;/* METADATA::SYNCMARKER */
-            unsigned char overlap	: 1;/* METADATA::OVERLAP */
+            unsigned int pulldown	: 1; /* SEQUENCE_LAYER::PULLDOWN */
+            unsigned int interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
+            unsigned int tfcntrflag	: 1; /* SEQUENCE_LAYER::TFCNTRFLAG */
+            unsigned int finterpflag	: 1; /* SEQUENCE_LAYER::FINTERPFLAG */
+            unsigned int psf		: 1; /* SEQUENCE_LAYER::PSF */
+            unsigned int multires	: 1; /* METADATA::MULTIRES */
+            unsigned int overlap	: 1; /* METADATA::OVERLAP */
+            unsigned int syncmarker	: 1; /* METADATA::SYNCMARKER */
+            unsigned int rangered	: 1; /* METADATA::RANGERED */
+            unsigned int max_b_frames	: 3; /* METADATA::MAXBFRAMES */
         } bits;
-        unsigned char value;
+        unsigned int value;
     } sequence_fields;
 
     unsigned short coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
     unsigned short coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
-    unsigned char closed_entry;		/* ENTRY_POINT_LAYER::CLOSED_ENTRY */
-    unsigned char broken_link;		/* ENTRY_POINT_LAYER::BROKEN_LINK */
-    unsigned char loopfilter;		/* ENTRY_POINT_LAYER::LOOPFILTER */
+    union {
+ 	struct {
+            unsigned int broken_link	: 1; /* ENTRY_POINT_LAYER::BROKEN_LINK */
+            unsigned int closed_entry	: 1; /* ENTRY_POINT_LAYER::CLOSED_ENTRY */
+            unsigned int panscan_flag	: 1; /* ENTRY_POINT_LAYER::PANSCAN_FLAG */
+            unsigned int loopfilter	: 1; /* ENTRY_POINT_LAYER::LOOPFILTER */
+ 	} bits;
+ 	unsigned int value;
+    } entrypoint_fields;
+    
     unsigned char conditional_overlap_flag; /* ENTRY_POINT_LAYER::CONDOVER */
     unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
     union {
