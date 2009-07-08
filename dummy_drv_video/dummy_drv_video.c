@@ -1211,7 +1211,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_29(  VADriverContextP ctx )
+VAStatus __vaDriverInit_0_30(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;
