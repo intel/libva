@@ -30,6 +30,7 @@
 #include "va_dri.h"
 #include "va_dri2.h"
 #include "va_dricommon.h"
+#include "va_nvctrl.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -125,6 +126,57 @@ static VAStatus va_DRIGetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
+static VAStatus va_NVCTRL_GetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
+    int direct_capable;
+    int driver_major;
+    int driver_minor;
+    int driver_patch;
+    Bool result = True;
+    char *nvidia_driver_name = NULL;
+
+    if (result)
+    {
+        result = VA_NVCTRLQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable failed\n");
+        }
+    }
+    if (result)
+    {
+        result = direct_capable;
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable returned false\n");
+        }
+    }
+    if (result)
+    {
+        result = VA_NVCTRLGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
+                                              &driver_patch, &nvidia_driver_name);
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLGetClientDriverName returned false\n");
+        }
+    }
+    if (result)
+    {
+        vaStatus = VA_STATUS_SUCCESS;
+        va_infoMessage("va_NVCTRL_GetDriverName: %d.%d.%d %s (screen %d)\n",
+                       driver_major, driver_minor, driver_patch,
+                       nvidia_driver_name, ctx->x11_screen);
+	if (driver_name)
+            *driver_name = nvidia_driver_name;
+    }
+    return vaStatus;
+}
+
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
@@ -147,6 +199,8 @@ static VAStatus va_DisplayContextGetDriverName (
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
    
     return vaStatus;
 }
