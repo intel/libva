@@ -27,6 +27,17 @@ AM_INIT_AUTOMAKE([dist-bzip2])
 
 AM_CONFIG_HEADER([config.h])
 
+AC_ARG_ENABLE(dummy-driver,
+              [AC_HELP_STRING([--enable-dummy-driver],
+                              [build dummy video driver])],
+              [], [enable_dummy_driver=yes])
+AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
+
+AC_ARG_ENABLE(i965-driver,
+              [AC_HELP_STRING([--enable-i965-driver],
+                              [build i965 video driver])],
+              [], [enable_i965_driver=yes])
+
 AC_ARG_WITH(drivers-path,
 	    [AC_HELP_STRING([--with-drivers-path=[[path]]], [drivers path])],,
 	    [with_drivers_path="$libdir/va/drivers"])
@@ -48,6 +59,13 @@ PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
 
 AC_CHECK_PROG(gen4asm, [intel-gen4asm], yes, no)
 AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
+
+# Check for libdrm >= 2.4 (needed for i965_drv_video.so)
+if test x$enable_i965_driver = xyes && ! $PKG_CONFIG --atleast-version=2.4 libdrm; then
+    AC_MSG_WARN([libdrm < 2.4 found, disabling build of i965 video driver])
+    enable_i965_driver=no
+fi
+AM_CONDITIONAL(BUILD_I965_DRIVER, test x$enable_i965_driver = xyes)
 
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$LIBDRM_DEPS_CFLAGS"
