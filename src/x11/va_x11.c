@@ -204,7 +204,6 @@ VADisplay vaGetDisplay (
       dri_state       = calloc(1, sizeof(*dri_state));
       if (pDisplayContext && pDriverContext && dri_state)
       {
-	  pDriverContext->old_pNext        = (void *)(unsigned long)0xdeadbeef;
 	  pDriverContext->x11_dpy          = native_dpy;
 	  pDisplayContext->pNext           = pDisplayContexts;
 	  pDisplayContext->pDriverContext  = pDriverContext;
