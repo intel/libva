@@ -93,6 +93,7 @@ static void va_DisplayContextDestroy (
 	}
 	ctx = &((*ctx)->pNext);
     }
+    free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
@@ -197,9 +198,11 @@ VADisplay vaGetDisplay (
   {
       /* create new entry */
       VADriverContextP pDriverContext;
+      struct dri_state *dri_state;
       pDisplayContext = calloc(1, sizeof(*pDisplayContext));
       pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      if (pDisplayContext && pDriverContext)
+      dri_state       = calloc(1, sizeof(*dri_state));
+      if (pDisplayContext && pDriverContext && dri_state)
       {
 	  pDriverContext->old_pNext        = (void *)(unsigned long)0xdeadbeef;
 	  pDriverContext->x11_dpy          = native_dpy;
@@ -209,7 +212,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
 	  pDisplayContexts                 = pDisplayContext;
-	  pDriverContext->dri_state 	   = calloc(1, sizeof(struct dri_state));
+	  pDriverContext->dri_state 	   = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else
@@ -218,6 +221,8 @@ VADisplay vaGetDisplay (
 	      free(pDisplayContext);
 	  if (pDriverContext)
 	      free(pDriverContext);
+          if (dri_state)
+              free(dri_state);
       }
   }
   
