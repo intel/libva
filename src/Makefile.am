@@ -22,7 +22,8 @@
 
 INCLUDES = \
 	$(LIBVA_CFLAGS) -I$(top_srcdir)/src/x11 \
-	-DIN_LIBVA
+	-DIN_LIBVA \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
