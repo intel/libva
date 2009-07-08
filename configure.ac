@@ -54,6 +54,7 @@ AC_SYS_LARGEFILE
 
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT],[xext])
+PKG_CHECK_MODULES([XFIXES], [xfixes])
 PKG_CHECK_MODULES([DRM], [libdrm])
 
 AC_CHECK_PROG(gen4asm, [intel-gen4asm], yes, no)
