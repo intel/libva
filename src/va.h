@@ -466,6 +466,27 @@ typedef enum
 } VABufferType;
 
 
+/* 
+ * There will be cases where the bitstream buffer will not have enough room to hold
+ * the data for the entire slice, and the following flags will be used in the slice
+ * parameter to signal to the server for the possible cases.
+ * If a slice parameter buffer and slice data buffer pair is sent to the server with 
+ * the slice data partially in the slice data buffer (BEGIN and MIDDLE cases below), 
+ * then a slice parameter and data buffer needs to be sent again to complete this slice. 
+ */
+#define VA_SLICE_DATA_FLAG_ALL		0x00	/* whole slice is in the buffer */
+#define VA_SLICE_DATA_FLAG_BEGIN	0x01	/* The beginning of the slice is in the buffer but the end if not */
+#define VA_SLICE_DATA_FLAG_MIDDLE	0x02	/* Neither beginning nor end of the slice is in the buffer */
+#define VA_SLICE_DATA_FLAG_END		0x04	/* end of the slice is in the buffer */
+
+/* Codec-independent Slice Parameter Buffer base */
+typedef struct _VASliceParameterBufferBase
+{
+    unsigned int slice_data_size;	/* number of bytes in the slice data buffer for this slice */
+    unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
+    unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
+} VASliceParameterBufferBase;
+
 /****************************
  * MPEG-2 data structures
  ****************************/
@@ -516,19 +537,6 @@ typedef struct _VAIQMatrixBufferMPEG2
     unsigned char chroma_intra_quantiser_matrix[64];
     unsigned char chroma_non_intra_quantiser_matrix[64];
 } VAIQMatrixBufferMPEG2;
-
-/* 
- * There will be cases where the bitstream buffer will not have enough room to hold
- * the data for the entire slice, and the following flags will be used in the slice
- * parameter to signal to the server for the possible cases.
- * If a slice parameter buffer and slice data buffer pair is sent to the server with 
- * the slice data partially in the slice data buffer (BEGIN and MIDDLE cases below), 
- * then a slice parameter and data buffer needs to be sent again to complete this slice. 
- */
-#define VA_SLICE_DATA_FLAG_ALL		0x00	/* whole slice is in the buffer */
-#define VA_SLICE_DATA_FLAG_BEGIN	0x01	/* The beginning of the slice is in the buffer but the end if not */
-#define VA_SLICE_DATA_FLAG_MIDDLE	0x02	/* Neither beginning nor end of the slice is in the buffer */
-#define VA_SLICE_DATA_FLAG_END		0x04	/* end of the slice is in the buffer */
 
 /* MPEG-2 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferMPEG2
