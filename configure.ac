@@ -55,7 +55,6 @@ AC_SYS_LARGEFILE
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT],[xext])
 PKG_CHECK_MODULES([DRM], [libdrm])
-PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
 
 AC_CHECK_PROG(gen4asm, [intel-gen4asm], yes, no)
 AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
@@ -68,7 +67,7 @@ fi
 AM_CONDITIONAL(BUILD_I965_DRIVER, test x$enable_i965_driver = xyes)
 
 # We only need the headers, we don't link against the DRM libraries
-LIBVA_CFLAGS="$LIBDRM_DEPS_CFLAGS"
+LIBVA_CFLAGS="$DRM_CFLAGS"
 AC_SUBST(LIBVA_CFLAGS)
 AC_SUBST(LIBVA_LIBS)
 
