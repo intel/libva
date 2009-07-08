@@ -206,30 +206,23 @@ static VAStatus va_DisplayContextGetDriverName (
     int driver_minor;
     int driver_patch;
     Bool result = True;
-    char *x_driver_name = NULL;
+    char *driver_name_env;
 
     if (driver_name)
 	*driver_name = NULL;
-    
-    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
 
-    if ((vaStatus == VA_STATUS_SUCCESS)
+    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
         && geteuid() == getuid())
     {
         /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        if (getenv("LIBVA_DRIVER_NAME"))
-        {
-            /* For easier debugging */
-            if (*driver_name)
-                XFree(*driver_name);
-            
-            *driver_name = strdup(getenv("LIBVA_DRIVER_NAME"));
-            return VA_STATUS_SUCCESS;
-        }
+        *driver_name = strdup(driver_name_env);
+        return VA_STATUS_SUCCESS;
     }
-    
+
+    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
+   
     return vaStatus;
 }
 
