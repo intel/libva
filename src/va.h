@@ -925,7 +925,8 @@ typedef struct _VAPictureParameterBufferH264
     union {
         struct {
             unsigned char chroma_format_idc			: 2; 
-            unsigned char residual_colour_transform_flag		: 1; 
+            unsigned char residual_colour_transform_flag	: 1;
+            unsigned int gaps_in_frame_num_value_allowed_flag	: 1; 
             unsigned char frame_mbs_only_flag			: 1; 
             unsigned char mb_adaptive_frame_field_flag		: 1; 
             unsigned char direct_8x8_inference_flag		: 1; 
@@ -939,7 +940,9 @@ typedef struct _VAPictureParameterBufferH264
     } seq_fields;
     unsigned char num_slice_groups_minus1;
     unsigned char slice_group_map_type;
+    unsigned short slice_group_change_rate_minus1;
     signed char pic_init_qp_minus26;
+    signed char pic_init_qs_minus26;
     signed char chroma_qp_index_offset;
     signed char second_chroma_qp_index_offset;
     union {
@@ -953,6 +956,7 @@ typedef struct _VAPictureParameterBufferH264
             unsigned int pic_order_present_flag			: 1;
             unsigned int deblocking_filter_control_present_flag : 1;
             unsigned int redundant_pic_cnt_present_flag		: 1;
+            unsigned int reference_pic_flag			: 1; /* nal_ref_idc != 0 */
         } bits;
         unsigned char value;
     } pic_fields;
