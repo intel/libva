@@ -26,8 +26,6 @@
 #include "va.h"
 #include "va_backend.h"
 
-#include "va_version.h"
-
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -41,10 +39,6 @@
 #include "va_dricommon.h"
 
 
-#define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
-
-#define VA_MAJOR_VERSION	0
-#define VA_MINOR_VERSION	30
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
 
 #define DRIVER_EXTENSION	"_drv_video.so"
@@ -334,7 +328,7 @@ VAStatus vaInitialize (
 
   va_debug_trace = (getenv("LIBVA_DEBUG_TRACE") != NULL);
 
-  va_infoMessage("libva build on %s\n", VA_STR_VERSION);
+  va_infoMessage("libva version %s\n", VA_VERSION_S);
 
   vaStatus = va_getDriverName(dpy, &driver_name);
   va_infoMessage("va_getDriverName() returns %d\n", vaStatus);

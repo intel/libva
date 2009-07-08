@@ -63,6 +63,12 @@
 #ifndef _VA_H_
 #define _VA_H_
 
+#ifdef IN_LIBVA
+#include "va_version.h"
+#else
+#include <va/va_version.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
