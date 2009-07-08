@@ -882,6 +882,7 @@ This is simplely a buffer containing raw bit-stream bytes
 typedef struct _VAPictureH264
 {
     VASurfaceID picture_id;
+    unsigned int frame_idx;
     unsigned int flags;
     unsigned int TopFieldOrderCnt;
     unsigned int BottomFieldOrderCnt;
@@ -915,6 +916,10 @@ typedef struct _VAPictureParameterBufferH264
             unsigned char mb_adaptive_frame_field_flag		: 1; 
             unsigned char direct_8x8_inference_flag		: 1; 
             unsigned char MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
+            unsigned int log2_max_frame_num_minus4		: 4;
+            unsigned int pic_order_cnt_type			: 2;
+            unsigned int log2_max_pic_order_cnt_lsb_minus4	: 4;
+            unsigned int delta_pic_order_always_zero_flag	: 1;
         } bits;
         unsigned char value;
     } seq_fields;
@@ -931,6 +936,9 @@ typedef struct _VAPictureParameterBufferH264
             unsigned char transform_8x8_mode_flag	: 1;
             unsigned char field_pic_flag			: 1;
             unsigned char constrained_intra_pred_flag	: 1;
+            unsigned int pic_order_present_flag			: 1;
+            unsigned int deblocking_filter_control_present_flag : 1;
+            unsigned int redundant_pic_cnt_present_flag		: 1;
         } bits;
         unsigned char value;
     } pic_fields;
