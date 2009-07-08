@@ -69,7 +69,7 @@ AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
 AC_ARG_ENABLE(i965-driver,
               [AC_HELP_STRING([--enable-i965-driver],
                               [build i965 video driver])],
-              [], [enable_i965_driver=yes])
+              [], [enable_i965_driver=no])
 
 AC_ARG_WITH(drivers-path,
 	    [AC_HELP_STRING([--with-drivers-path=[[path]]], [drivers path])],,
