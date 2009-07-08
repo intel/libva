@@ -364,7 +364,8 @@ typedef VAGenericID VAContextID;
 
 typedef VAGenericID VASurfaceID;
 
-#define VA_INVALID_SURFACE	-1
+#define VA_INVALID_ID		0xffffffff
+#define VA_INVALID_SURFACE	VA_INVALID_ID
 
 /* 
  * vaCreateSurfaces - Create an array of surfaces used for decode and display  
