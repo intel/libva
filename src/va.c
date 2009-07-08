@@ -116,21 +116,8 @@ static Bool va_checkString(const char* value, char *variable)
 static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    VADriverContextP ctx = CTX(dpy);
 
-    VAStatus ret;
-    ret = pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
-    if (ret == VA_STATUS_SUCCESS) 
-    {
-	if (isDRI2Connected(ctx, driver_name)) 
-	{
-	    ret = VA_STATUS_SUCCESS;
-	} else if (isDRI1Connected(ctx, driver_name)) 
-	{
-	    ret = VA_STATUS_SUCCESS;
-	}
-    }
-    return ret;
+    return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
 }
 
 static VAStatus va_openDriver(VADisplay dpy, char *driver_name)

@@ -414,7 +414,7 @@ struct VADriverContext
 
     Display *x11_dpy;
     int x11_screen;
-    int dri2;
+    int old_dri2; /* obsolete */
     int version_major;
     int version_minor;
     int max_profiles;
