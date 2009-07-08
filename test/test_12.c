@@ -24,7 +24,12 @@
 
 #define TEST_DESCRIPTION	"Sample MPEG2 VLD Decoding"
 
+#ifdef IN_LIBVA
 #include <va_x11.h>
+#else
+#include <va/va_x11.h>
+#endif
+
 #include "test_common.c"
 
 #include <sys/types.h>
