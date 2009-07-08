@@ -23,7 +23,8 @@
 dummy_drv_video_la_LTLIBRARIES = dummy_drv_video.la
 dummy_drv_video_ladir = @LIBVA_DRIVERS_PATH@
 dummy_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined
-dummy_drv_video_la_LIBADD = ../src/libva.la
+dummy_drv_video_la_LIBADD = $(top_srcdir)/src/$(libvabackendlib)
+dummy_drv_video_la_DEPENDENCIES = $(top_srcdir)/src/$(libvabackendlib)
 
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/../../include/kmd -DIN_LIBVA
 dummy_drv_video_la_SOURCES = dummy_drv_video.c object_heap.c

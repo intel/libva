@@ -30,7 +30,12 @@ if BUILD_I965_DRIVER
 SUBDIRS += i965_drv_video
 endif
 
+pcfiles = \
+	libva.pc
+
 pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = libva.pc
+pkgconfig_DATA = $(pcfiles)
 
 EXTRA_DIST = libva.pc.in
+
+CLEANFILES = $(pcfiles)

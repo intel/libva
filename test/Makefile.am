@@ -31,9 +31,10 @@ AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src -I$(top_
 
 TESTS = $(check_PROGRAMS)
 
-TEST_LIBS = ../src/libva.la
+TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib)
 
-vainfo_LDADD = ../src/libva.la
+vainfo_LDADD = $(top_srcdir)/src/$(libvabackendlib)
+vainfo_DEPENDENCIES = $(top_srcdir)/src/$(libvabackendlib)
 vainfo_SOURCES = vainfo.c
 
 test_01_LDADD = $(TEST_LIBS)

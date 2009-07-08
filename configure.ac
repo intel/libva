@@ -20,12 +20,45 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# libva package version number, (as distinct from shared library version)
+m4_define([libva_major_version], [0])
+m4_define([libva_minor_version], [30])
+m4_define([libva_micro_version], [4])
+
+m4_define([libva_version],
+          [libva_major_version.libva_minor_version.libva_micro_version])
+
+# if the library source code has changed, increment revision
+m4_define([libva_lt_revision], [0])
+# if any interface was added/removed/changed, then inc current, reset revision
+m4_define([libva_lt_current], [1])
+# if any interface was added since last public release, then increment age
+# if any interface was removed since last public release, then set age to 0
+m4_define([libva_lt_age], [0])
+
 AC_PREREQ(2.57)
-AC_INIT([libva], 0.30.4, [waldo.bastian@intel.com], libva)
+AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)
 AC_CONFIG_SRCDIR([Makefile.am])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
 AM_CONFIG_HEADER([config.h])
+
+LIBVA_MAJOR_VERSION=libva_major_version
+LIBVA_MINOR_VERSION=libva_minor_version
+LIBVA_MICRO_VERSION=libva_micro_version
+LIBVA_VERSION=libva_version
+AC_SUBST(LIBVA_MAJOR_VERSION)
+AC_SUBST(LIBVA_MINOR_VERSION)
+AC_SUBST(LIBVA_MICRO_VERSION)
+AC_SUBST(LIBVA_VERSION)
+
+LIBVA_LT_CURRENT=libva_lt_current
+LIBVA_LT_REV=libva_lt_revision
+LIBVA_LT_AGE=libva_lt_age
+LIBVA_LT_VERSION="$LIBVA_LT_CURRENT:$LIBVA_LT_REV:$LIBVA_LT_AGE"
+LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION -release $LIBVA_VERSION"
+AC_SUBST(LIBVA_LT_VERSION)
+AC_SUBST(LIBVA_LT_LDFLAGS)
 
 AC_ARG_ENABLE(dummy-driver,
               [AC_HELP_STRING([--enable-dummy-driver],
@@ -74,6 +107,9 @@ AC_SUBST(LIBVA_LIBS)
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
+
+libvabackendlib=libva.la
+AC_SUBST([libvabackendlib])
 
 AC_OUTPUT([
 	Makefile
