@@ -39,7 +39,7 @@ PKG_CHECK_MODULES([XEXT],[xext])
 PKG_CHECK_MODULES([DRM], [libdrm])
 PKG_CHECK_MODULES(LIBDRM_DEPS, [libdrm])
 
-AC_CHECK_PROG(gen4asm, [intel-gen4asm], yes, no)
+PKG_CHECK_MODULES(GEN4ASM, [intel-gen4asm >= 1.0], [gen4asm=yes], [gen4asm=no])
 AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
 
 # We only need the headers, we don't link against the DRM libraries
