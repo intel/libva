@@ -74,6 +74,27 @@ static const unsigned int ps_subpic_kernel_static[][4] =
 #include "shaders/render/exa_wm_write.g4b"
 };
 
+/* On IGDNG */
+static const unsigned int sf_kernel_static_gen5[][4] = 
+{
+#include "shaders/render/exa_sf.g4b.gen5"
+};
+
+static const unsigned int ps_kernel_static_gen5[][4] = 
+{
+#include "shaders/render/exa_wm_xy.g4b.gen5"
+#include "shaders/render/exa_wm_src_affine.g4b.gen5"
+#include "shaders/render/exa_wm_src_sample_planar.g4b.gen5"
+#include "shaders/render/exa_wm_yuv_rgb.g4b.gen5"
+#include "shaders/render/exa_wm_write.g4b.gen5"
+};
+static const unsigned int ps_subpic_kernel_static_gen5[][4] = 
+{
+#include "shaders/render/exa_wm_xy.g4b.gen5"
+#include "shaders/render/exa_wm_src_affine.g4b.gen5"
+#include "shaders/render/exa_wm_blend_subpicture.g4b.gen5"
+#include "shaders/render/exa_wm_write.g4b.gen5"
+};
 
 static uint32_t float_to_uint (float f) 
 {
@@ -99,7 +120,9 @@ struct render_kernel
     const unsigned int (*bin)[4];
     int size;
     dri_bo *bo;
-} render_kernels[] = {
+};
+
+static struct render_kernel render_kernels_gen4[] = {
     {
         "SF",
         sf_kernel_static,
@@ -121,7 +144,31 @@ struct render_kernel
     }
 };
 
-#define NUM_RENDER_KERNEL (sizeof(render_kernels)/sizeof(render_kernels[0]))
+static struct render_kernel render_kernels_gen5[] = {
+    {
+        "SF",
+        sf_kernel_static_gen5,
+        sizeof(sf_kernel_static_gen5),
+        NULL
+    },
+    {
+        "PS",
+        ps_kernel_static_gen5,
+        sizeof(ps_kernel_static_gen5),
+        NULL
+    },
+
+    {
+        "PS_SUBPIC",
+        ps_subpic_kernel_static_gen5,
+        sizeof(ps_subpic_kernel_static_gen5),
+        NULL
+    }
+};
+
+static struct render_kernel *render_kernels = NULL;
+
+#define NUM_RENDER_KERNEL (sizeof(render_kernels_gen4)/sizeof(render_kernels_gen4[0]))
 
 #define URB_VS_ENTRIES	      8
 #define URB_VS_ENTRY_SIZE     1
@@ -150,7 +197,11 @@ i965_render_vs_unit(VADriverContextP ctx)
     vs_state = render_state->vs.state->virtual;
     memset(vs_state, 0, sizeof(*vs_state));
 
-    vs_state->thread4.nr_urb_entries = URB_VS_ENTRIES;
+    if (IS_IGDNG(i965->intel.device_id))
+        vs_state->thread4.nr_urb_entries = URB_VS_ENTRIES >> 2;
+    else
+        vs_state->thread4.nr_urb_entries = URB_VS_ENTRIES;
+
     vs_state->thread4.urb_entry_allocation_size = URB_VS_ENTRY_SIZE - 1;
     vs_state->vs6.vs_enable = 0;
     vs_state->vs6.vert_cache_disable = 1;
@@ -259,7 +310,11 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
     wm_state->thread0.kernel_start_pointer = render_kernels[PS_SUBPIC_KERNEL].bo->offset >> 6;
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
-    wm_state->thread1.binding_table_entry_count = 7;
+
+    if (IS_IGDNG(i965->intel.device_id))
+        wm_state->thread1.binding_table_entry_count = 0; /* hardware requirement */
+    else
+        wm_state->thread1.binding_table_entry_count = 7;
 
     wm_state->thread2.scratch_space_base_pointer = 0;
     wm_state->thread2.per_thread_scratch_space = 0; /* 1024 bytes */
@@ -272,7 +327,11 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
 
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
-    wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
+
+    if (IS_IGDNG(i965->intel.device_id))
+        wm_state->wm4.sampler_count = 0;        /* hardware requirement */
+    else
+        wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
 
     wm_state->wm5.max_threads = PS_MAX_THREADS - 1;
     wm_state->wm5.thread_dispatch_enable = 1;
@@ -314,7 +373,11 @@ i965_render_wm_unit(VADriverContextP ctx)
     wm_state->thread0.kernel_start_pointer = render_kernels[PS_KERNEL].bo->offset >> 6;
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
-    wm_state->thread1.binding_table_entry_count = 7;
+
+    if (IS_IGDNG(i965->intel.device_id))
+        wm_state->thread1.binding_table_entry_count = 0;        /* hardware requirement */
+    else
+        wm_state->thread1.binding_table_entry_count = 7;
 
     wm_state->thread2.scratch_space_base_pointer = 0;
     wm_state->thread2.per_thread_scratch_space = 0; /* 1024 bytes */
@@ -327,7 +390,11 @@ i965_render_wm_unit(VADriverContextP ctx)
 
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
-    wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
+
+    if (IS_IGDNG(i965->intel.device_id))
+        wm_state->wm4.sampler_count = 0;        /* hardware requirement */
+    else 
+        wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
 
     wm_state->wm5.max_threads = PS_MAX_THREADS - 1;
     wm_state->wm5.thread_dispatch_enable = 1;
@@ -903,14 +970,29 @@ i965_render_state_sip(VADriverContextP ctx)
 static void
 i965_render_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    ADVANCE_BATCH(ctx);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    if (IS_IGDNG(i965->intel.device_id)) {
+        BEGIN_BATCH(ctx, 8);
+        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(ctx);
+    } else {
+        BEGIN_BATCH(ctx, 6);
+        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 static void
@@ -1026,29 +1108,55 @@ i965_render_drawing_rectangle(VADriverContextP ctx)
 static void
 i965_render_vertex_elements(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 5);
-    OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
-    /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
-    OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
-	      VE0_VALID |
-	      (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
-	      (0 << VE0_OFFSET_SHIFT));
-    OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
-	      (0 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
-    /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
-    OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
-	      VE0_VALID |
-	      (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
-	      (8 << VE0_OFFSET_SHIFT));
-    OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
-	      (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
-	      (4 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
-    ADVANCE_BATCH(ctx);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+
+    if (IS_IGDNG(i965->intel.device_id)) {
+        BEGIN_BATCH(ctx, 5);
+        OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
+        /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
+        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+                  VE0_VALID |
+                  (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
+                  (0 << VE0_OFFSET_SHIFT));
+        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
+        /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
+        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+                  VE0_VALID |
+                  (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
+                  (8 << VE0_OFFSET_SHIFT));
+        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
+        ADVANCE_BATCH(ctx);
+    } else {
+        BEGIN_BATCH(ctx, 5);
+        OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
+        /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
+        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+                  VE0_VALID |
+                  (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
+                  (0 << VE0_OFFSET_SHIFT));
+        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
+                  (0 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
+        /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
+        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+                  VE0_VALID |
+                  (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
+                  (8 << VE0_OFFSET_SHIFT));
+        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
+                  (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
+                  (4 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 void
@@ -1079,7 +1187,12 @@ i965_render_startup(VADriverContextP ctx)
               VB0_VERTEXDATA |
               ((4 * 4) << VB0_BUFFER_PITCH_SHIFT));
     OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
-    OUT_BATCH(ctx, 3);
+
+    if (IS_IGDNG(i965->intel.device_id))
+        OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
+    else
+        OUT_BATCH(ctx, 3);
+
     OUT_BATCH(ctx, 0);
 
     OUT_BATCH(ctx, 
@@ -1270,6 +1383,14 @@ i965_render_init(VADriverContextP ctx)
     int i;
 
     /* kernel */
+    assert(NUM_RENDER_KERNEL == (sizeof(render_kernels_gen5) / 
+                                 sizeof(render_kernels_gen5[0])));
+
+    if (IS_IGDNG(i965->intel.device_id))
+        render_kernels = render_kernels_gen5;
+    else
+        render_kernels = render_kernels_gen4;
+
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
         struct render_kernel *kernel = &render_kernels[i];
         kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 

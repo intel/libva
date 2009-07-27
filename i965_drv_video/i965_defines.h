@@ -321,5 +321,6 @@
 #define I965_TILEWALK_XMAJOR                 0
 #define I965_TILEWALK_YMAJOR                 1
 
-#define URB_SIZE(intel)         (IS_G4X(intel->device_id) ? 384 : 256)
+#define URB_SIZE(intel)         (IS_IGDNG(intel->device_id) ? 1024 : \
+                                 IS_G4X(intel->device_id) ? 384 : 256)
 #endif /* _I965_DEFINES_H_ */

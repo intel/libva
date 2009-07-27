@@ -107,11 +107,18 @@ struct intel_region
 #define PCI_CHIP_G45_G                  0x2E22
 #define PCI_CHIP_G41_G                  0x2E32
 
+#define PCI_CHIP_IGDNG_D_G              0x0042
+#define PCI_CHIP_IGDNG_M_G              0x0046
+
 #define IS_G45(devid)           (devid == PCI_CHIP_IGD_E_G || \
                                  devid == PCI_CHIP_Q45_G || \
                                  devid == PCI_CHIP_G45_G || \
                                  devid == PCI_CHIP_G41_G)
 #define IS_GM45(devid)          (devid == PCI_CHIP_GM45_GM)
 #define IS_G4X(devid)		(IS_G45(devid) || IS_GM45(devid))
+
+#define IS_IGDNG_D(devid)       (devid == PCI_CHIP_IGDNG_D_G)
+#define IS_IGDNG_M(devid)       (devid == PCI_CHIP_IGDNG_M_G)
+#define IS_IGDNG(devid)         (IS_IGDNG_D(devid) || IS_IGDNG_M(devid))
 
 #endif /* _INTEL_DRIVER_H_ */

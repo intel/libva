@@ -158,7 +158,7 @@ static uint32_t field_bidirect_16x8_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_bidirect_16x8.g4b"
 };
 
-static struct media_kernel  mpeg2_vld_kernels[] = {
+static struct media_kernel  mpeg2_vld_kernels_gen4[] = {
     {
         "FRAME_INTRA",
         FRAME_INTRA,
@@ -280,7 +280,179 @@ static struct media_kernel  mpeg2_vld_kernels[] = {
     }
 };
 
-#define NUM_MPEG2_VLD_KERNELS (sizeof(mpeg2_vld_kernels)/sizeof(mpeg2_vld_kernels[0]))
+/* On IGDNG */
+static uint32_t frame_intra_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_intra.g4b.gen5"
+};
+static uint32_t frame_frame_pred_forward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_frame_pred_forward.g4b.gen5"
+};
+static uint32_t frame_frame_pred_backward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_frame_pred_backward.g4b.gen5"
+};
+static uint32_t frame_frame_pred_bidirect_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_frame_pred_bidirect.g4b.gen5"
+};
+static uint32_t frame_field_pred_forward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_field_pred_forward.g4b.gen5"
+};
+static uint32_t frame_field_pred_backward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_field_pred_backward.g4b.gen5"
+};
+static uint32_t frame_field_pred_bidirect_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/frame_field_pred_bidirect.g4b.gen5"
+};
+static uint32_t lib_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/lib.g4b.gen5"
+};
+/*field picture*/
+static uint32_t field_intra_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_intra.g4b.gen5"
+};
+static uint32_t field_forward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_forward.g4b.gen5"
+};
+static uint32_t field_forward_16x8_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_forward_16x8.g4b.gen5"
+};
+static uint32_t field_backward_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_backward.g4b.gen5"
+};
+static uint32_t field_backward_16x8_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_backward_16x8.g4b.gen5"
+};
+static uint32_t field_bidirect_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_bidirect.g4b.gen5"
+};
+static uint32_t field_bidirect_16x8_kernel_gen5[][4] = {
+   #include "shaders/mpeg2/vld/field_bidirect_16x8.g4b.gen5"
+};
+
+static struct media_kernel  mpeg2_vld_kernels_gen5[] = {
+    {
+        "FRAME_INTRA",
+        FRAME_INTRA,
+        frame_intra_kernel_gen5, 
+        sizeof(frame_intra_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FRAME_FRAME_PRED_FORWARD",
+    	FRAME_FRAME_PRED_FORWARD,
+        frame_frame_pred_forward_kernel_gen5, 
+        sizeof(frame_frame_pred_forward_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FRAME_FRAME_PRED_BACKWARD",
+        FRAME_FRAME_PRED_BACKWARD,
+        frame_frame_pred_backward_kernel_gen5, 
+        sizeof(frame_frame_pred_backward_kernel_gen5),
+        NULL
+    },
+
+    {   
+        "FRAME_FRAME_PRED_BIDIRECT",
+        FRAME_FRAME_PRED_BIDIRECT,
+        frame_frame_pred_bidirect_kernel_gen5, 
+        sizeof(frame_frame_pred_bidirect_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FRAME_FIELD_PRED_FORWARD",
+        FRAME_FIELD_PRED_FORWARD,
+        frame_field_pred_forward_kernel_gen5, 
+        sizeof(frame_field_pred_forward_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FRAME_FIELD_PRED_BACKWARD",
+        FRAME_FIELD_PRED_BACKWARD,
+        frame_field_pred_backward_kernel_gen5, 
+        sizeof(frame_field_pred_backward_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FRAME_FIELD_PRED_BIDIRECT",
+        FRAME_FIELD_PRED_BIDIRECT,
+        frame_field_pred_bidirect_kernel_gen5, 
+        sizeof(frame_field_pred_bidirect_kernel_gen5),
+        NULL
+    },
+    
+    {   
+        "LIB",
+        LIB_INTERFACE,
+        lib_kernel_gen5, 
+        sizeof(lib_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_INTRA",
+        FIELD_INTRA,
+        field_intra_kernel_gen5, 
+        sizeof(field_intra_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_FORWARD",
+        FIELD_FORWARD,
+        field_forward_kernel_gen5, 
+        sizeof(field_forward_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_FORWARD_16X8",
+        FIELD_FORWARD_16X8,
+        field_forward_16x8_kernel_gen5, 
+        sizeof(field_forward_16x8_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_BACKWARD",
+        FIELD_BACKWARD,
+        field_backward_kernel_gen5, 
+        sizeof(field_backward_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_BACKWARD_16X8",
+        FIELD_BACKWARD_16X8,
+        field_backward_16x8_kernel_gen5, 
+        sizeof(field_backward_16x8_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_BIDIRECT",
+        FIELD_BIDIRECT,
+        field_bidirect_kernel_gen5, 
+        sizeof(field_bidirect_kernel_gen5),
+        NULL
+    },
+
+    {
+        "FIELD_BIDIRECT_16X8",
+        FIELD_BIDIRECT_16X8,
+        field_bidirect_16x8_kernel_gen5, 
+        sizeof(field_bidirect_16x8_kernel_gen5),
+        NULL
+    }
+};
+
+static struct media_kernel  *mpeg2_vld_kernels = NULL;
+
+#define NUM_MPEG2_VLD_KERNELS (sizeof(mpeg2_vld_kernels_gen4)/sizeof(mpeg2_vld_kernels_gen4[0]))
 
 static void
 i965_media_mpeg2_surface_state(VADriverContextP ctx, 
@@ -747,7 +919,14 @@ i965_media_mpeg2_init(VADriverContextP ctx)
     int i;
 
     /* kernel */
+    assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
+                                     sizeof(mpeg2_vld_kernels_gen5[0])));
     assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
+
+    if (IS_IGDNG(i965->intel.device_id))
+        mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
+    else
+        mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
 
     for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
         struct media_kernel *kernel = &mpeg2_vld_kernels[i];

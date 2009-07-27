@@ -71,14 +71,29 @@ i965_media_urb_layout(VADriverContextP ctx)
 static void
 i965_media_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    ADVANCE_BATCH(ctx);
+    struct i965_driver_data *i965 = i965_driver_data(ctx); 
+
+    if (IS_IGDNG(i965->intel.device_id)) {
+        BEGIN_BATCH(ctx, 8);
+        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(ctx);
+    } else {
+        BEGIN_BATCH(ctx, 6);
+        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 static void
