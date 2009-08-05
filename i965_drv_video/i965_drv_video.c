@@ -70,6 +70,8 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
                             VAEntrypoint *entrypoint_list,      /* out */
                             int *num_entrypoints)               /* out */
 {
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
@@ -78,7 +80,7 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
         break;
 
     default:
-        assert(0);
+        vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
         *num_entrypoints = 0;
         break;
     }
@@ -86,7 +88,7 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
     /* If the assert fails then I965_MAX_ENTRYPOINTS needs to be bigger */
     assert(*num_entrypoints <= I965_MAX_ENTRYPOINTS);
 
-    return VA_STATUS_SUCCESS;
+    return vaStatus;
 }
 
 VAStatus 
@@ -173,7 +175,6 @@ i965_CreateConfig(VADriverContextP ctx,
         break;
 
     default:
-        assert(0);
         vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
         break;
     }
