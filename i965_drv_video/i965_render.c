@@ -860,7 +860,8 @@ i965_render_upload_vertex(VADriverContextP ctx,
     struct intel_region *dest_region = render_state->draw_region;
     struct object_surface *obj_surface;
     float *vb;
-    float src_scale_x, src_scale_y;
+
+    float u1, v1, u2, v2;
     int i, width, height;
     int box_x1 = dest_region->x + destx;
     int box_y1 = dest_region->y + desty;
@@ -872,26 +873,28 @@ i965_render_upload_vertex(VADriverContextP ctx,
     width = obj_surface->width;
     height = obj_surface->height;
 
-    src_scale_x = ((float)srcw / width) / (float)destw;
-    src_scale_y = ((float)srch / height) / (float)desth;
+    u1 = (float)srcx / width;
+    v1 = (float)srcy / height;
+    u2 = (float)(srcx + srcw) / width;
+    v2 = (float)(srcy + srch) / height;
 
     dri_bo_map(render_state->vb.vertex_buffer, 1);
     assert(render_state->vb.vertex_buffer->virtual);
     vb = render_state->vb.vertex_buffer->virtual;
 
     i = 0;
-    vb[i++] = (destx + destw) * src_scale_x;
-    vb[i++] = (desty + desth) * src_scale_y;
+    vb[i++] = u2;
+    vb[i++] = v2;
     vb[i++] = (float)box_x2;
     vb[i++] = (float)box_y2;
     
-    vb[i++] = destx * src_scale_x;
-    vb[i++] = (desty + desth) * src_scale_y;
+    vb[i++] = u1;
+    vb[i++] = v2;
     vb[i++] = (float)box_x1;
     vb[i++] = (float)box_y2;
 
-    vb[i++] = destx * src_scale_x;
-    vb[i++] = desty * src_scale_y;
+    vb[i++] = u1;
+    vb[i++] = v1;
     vb[i++] = (float)box_x1;
     vb[i++] = (float)box_y1;
 
