@@ -21,6 +21,7 @@
 #define BATCH_RESERVED  0x10
 
 #define CMD_MI                                  (0x0 << 29)
+#define CMD_2D                                  (0x2 << 29)
 
 #define MI_NOOP                                 (CMD_MI | 0)
 
@@ -28,6 +29,15 @@
 
 #define MI_FLUSH                                (CMD_MI | (0x4 << 23))
 #define STATE_INSTRUCTION_CACHE_INVALIDATE      (0x1 << 0)
+
+#define XY_COLOR_BLT_CMD                        (CMD_2D | (0x50 << 22) | 0x04)
+#define XY_COLOR_BLT_WRITE_ALPHA                (1 << 21)
+#define XY_COLOR_BLT_WRITE_RGB                  (1 << 20)
+#define XY_COLOR_BLT_DST_TILED                  (1 << 11)
+
+/* BR13 */
+#define BR13_565                                (0x1 << 24)
+#define BR13_8888                               (0x3 << 24)
 
 struct intel_batchbuffer;
 

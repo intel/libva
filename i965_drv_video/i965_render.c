@@ -1212,11 +1212,53 @@ i965_render_startup(VADriverContextP ctx)
     ADVANCE_BATCH(ctx);
 }
 
+static void 
+i965_clear_dest_region(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_render_state *render_state = &i965->render_state;
+    struct intel_region *dest_region = render_state->draw_region;
+    unsigned int blt_cmd, br13;
+    int pitch;
+
+    blt_cmd = XY_COLOR_BLT_CMD;
+    br13 = 0xf0 << 16;
+    pitch = dest_region->pitch;
+
+    if (dest_region->cpp == 4) {
+        br13 |= BR13_8888;
+        blt_cmd |= (XY_COLOR_BLT_WRITE_RGB | XY_COLOR_BLT_WRITE_ALPHA);
+    } else {
+        assert(dest_region->cpp == 2);
+        br13 |= BR13_565;
+    }
+
+    if (dest_region->tiling != I915_TILING_NONE) {
+        blt_cmd |= XY_COLOR_BLT_DST_TILED;
+        pitch /= 4;
+    }
+
+    br13 |= pitch;
+
+    BEGIN_BATCH(ctx, 6);
+    OUT_BATCH(ctx, blt_cmd);
+    OUT_BATCH(ctx, br13);
+    OUT_BATCH(ctx, (dest_region->y << 16) | (dest_region->x));
+    OUT_BATCH(ctx, ((dest_region->y + dest_region->height) << 16) |
+              (dest_region->x + dest_region->width));
+    OUT_RELOC(ctx, dest_region->bo, 
+              I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
+              0);
+    OUT_BATCH(ctx, 0x0);
+    ADVANCE_BATCH(ctx);
+}
+
 static void
 i965_surface_render_pipeline_setup(VADriverContextP ctx)
 {
     intel_batchbuffer_start_atomic(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush(ctx);
+    i965_clear_dest_region(ctx);
     i965_render_pipeline_select(ctx);
     i965_render_state_sip(ctx);
     i965_render_state_base_address(ctx);
