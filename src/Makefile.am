@@ -39,7 +39,7 @@ libva_la_LIBADD = $(LIBVA_LIBS) -ldl
 libva_x11_la_SOURCES = 
 libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
 libva_x11_la_LDFLAGS = $(LDADD)
-libva_x11_la_DEPENDENCIES = $(libvacorelib)
+libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
 
 SUBDIRS = x11
 
