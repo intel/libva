@@ -377,9 +377,16 @@ Bool VA_NVCTRLGetClientDriverName( Display *dpy, int screen,
             *ddxDriverMajorVersion = v;
         if (*(str = end) == '.') {
             v = strtoul(str + 1, &end, 10);
-            if (end && end != str && *end == '\0') {
+            if (end && end != str && (*end == '.' || *end == '\0')) {
                 if (ddxDriverMinorVersion)
                     *ddxDriverMinorVersion = v;
+                if (*(str = end) == '.') {
+                    v = strtoul(str + 1, &end, 10);
+                    if (end && end != str && *end == '\0') {
+                        if (ddxDriverPatchVersion)
+                            *ddxDriverPatchVersion = v;
+                    }
+                }
             }
         }
     }
