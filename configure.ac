@@ -32,9 +32,9 @@ m4_define([libva_version],
 m4_define([libva_sds_version], [2])
 
 # if the library source code has changed, increment revision
-m4_define([libva_lt_revision], [0])
+m4_define([libva_lt_revision], [1])
 # if any interface was added/removed/changed, then inc current, reset revision
-m4_define([libva_lt_current], [1])
+m4_define([libva_lt_current], [0])
 # if any interface was added since last public release, then increment age
 # if any interface was removed since last public release, then set age to 0
 m4_define([libva_lt_age], [0])
@@ -62,7 +62,7 @@ LIBVA_LT_CURRENT=libva_lt_current
 LIBVA_LT_REV=libva_lt_revision
 LIBVA_LT_AGE=libva_lt_age
 LIBVA_LT_VERSION="$LIBVA_LT_CURRENT:$LIBVA_LT_REV:$LIBVA_LT_AGE"
-LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION -release $LIBVA_VERSION.$LIBVA_SDS_VERSION"
+LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION"
 AC_SUBST(LIBVA_LT_VERSION)
 AC_SUBST(LIBVA_LT_LDFLAGS)
 
