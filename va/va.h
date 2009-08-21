@@ -127,6 +127,22 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_SURFACE_IN_DISPLAYING   0x00000015
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
+/* De-interlacing flags for vaPutSurface() */
+#define VA_FRAME_PICTURE        0x00000000 
+#define VA_TOP_FIELD            0x00000001
+#define VA_BOTTOM_FIELD         0x00000002
+
+/*
+ * Clears the drawable with background color.
+ * for hardware overlay based implementation this flag
+ * can be used to turn off the overlay
+ */
+#define VA_CLEAR_DRAWABLE       0x00000008 
+
+/* Color space conversion flags for vaPutSurface() */
+#define VA_SRC_BT601            0x00000010
+#define VA_SRC_BT709            0x00000020
+
 /*
  * Returns a short english description of error_status
  */
