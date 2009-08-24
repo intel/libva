@@ -1,0 +1,57 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT table
+   g31:    thread payload 
+   g58~g81:reference data
+   g82:    thread payload backup
+   g83~g106:IDCT data
+   g115:   message descriptor for reading reference data   */
+mov (1) g115.8<1>UD 0x01FUD {align1};
+send (16) 0 g40.0<1>UW g115<8,8,1>UW read(surface,2,0,2) mlen 1 rlen 1 {align1};
+add (1) g115.4<1>UD g115.4<1,1,1>UD 2UD {align1};
+send (16) 0 g42.0<1>UW g115<8,8,1>UW read(surface,2,0,2) mlen 1 rlen 1 {align1};
+add (1) g115.4<1>UD g115.4<1,1,1>UD 2UD {align1};
+send (16) 0 g44.0<1>UW g115<8,8,1>UW read(surface,2,0,2) mlen 1 rlen 1 {align1};
+add (1) g115.4<1>UD g115.4<1,1,1>UD 2UD {align1};
+send (16) 0 g46.0<1>UW g115<8,8,1>UW read(surface,2,0,2) mlen 1 rlen 1 {align1};
+add (1) g115.4<1>UD g115.4<1,1,1>UD 2UD {align1};
+mov (1) g115.8<1>UD 0x07001FUD {align1};
+send (16) 0 g48.0<1>UW g115<8,8,1>UW read(surface,2,0,2) mlen 1 rlen 8 {align1};
+
+avg.sat (16) g32.0<1>UW g40.0<16,16,1>UB g40.1<16,16,1>UB {align1};
+avg.sat (16) g33.0<1>UW g42.0<16,16,1>UB g42.1<16,16,1>UB {align1};
+avg.sat (16) g34.0<1>UW g44.0<16,16,1>UB g44.1<16,16,1>UB {align1};
+avg.sat (16) g35.0<1>UW g46.0<16,16,1>UB g46.1<16,16,1>UB {align1};
+avg.sat (16) g36.0<1>UW g48.0<16,16,1>UB g48.1<16,16,1>UB {align1};
+avg.sat (16) g37.0<1>UW g50.0<16,16,1>UB g50.1<16,16,1>UB {align1};
+avg.sat (16) g38.0<1>UW g52.0<16,16,1>UB g52.1<16,16,1>UB {align1};
+avg.sat (16) g39.0<1>UW g54.0<16,16,1>UB g54.1<16,16,1>UB {align1};

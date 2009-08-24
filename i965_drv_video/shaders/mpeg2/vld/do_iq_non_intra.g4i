@@ -1,0 +1,59 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT table 
+   g112~g115: intra IQ matrix in UW format (in order to use instruction compress), copys from g1~g2
+   g[a0.0]:DCT data of a block
+   g125:   ip before jump
+   F''[v][u]=(((QF[v][u]*2)+Sign(QF[v][u])) * W[w][v][u] * quantiser_scale)/32;  
+*/
+DO_IQ_NON_INTRA:
+add (1)  a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+mul (16) g116.0<1>D g[a0.0]<8,8,1>W g112.0<8,8,1>UW {align1 compr};
+mul (16) g116.0<1>D g116.0<8,8,1>D  g109.0<8,8,0>UW {align1 compr};
+asr (16) g116.0<1>D g116.0<8,8,1>D  4UW {align1 compr};
+
+add (1)  a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+mul (16) g118.0<1>D g[a0.0]<8,8,1>W g113.0<8,8,1>UW {align1 compr};
+mul (16) g118.0<1>D g118.0<8,8,1>D  g109.0<8,8,0>UW {align1 compr};
+asr (16) g118.0<1>D g118.0<8,8,1>D  4UW {align1 compr};
+
+add (1)  a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+mul (16) g120.0<1>D g[a0.0]<8,8,1>W g114.0<8,8,1>UW {align1 compr};
+mul (16) g120.0<1>D g120.0<8,8,1>D  g109.0<8,8,0>UW {align1 compr};
+asr (16) g120.0<1>D g120.0<8,8,1>D  4UW {align1 compr};
+
+add (1)  a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+mul (16) g122.0<1>D g[a0.0]<8,8,1>W g115.0<8,8,1>UW {align1 compr};
+mul (16) g122.0<1>D g122.0<8,8,1>D  g109.0<8,8,0>UW {align1 compr};
+asr (16) g122.0<1>D g122.0<8,8,1>D  4UW {align1 compr};
+
+add (1) ip g125.0<1,1,1>UD 0x20UD {align1};            //jump back

@@ -22,10 +22,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
-
-#include "va_version.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -35,14 +34,14 @@
 #include <unistd.h>
 
 #include <linux/videodev2.h>
+#include "va_dri.h"
+#include "va_dri2.h"
+#include "va_dricommon.h"
 
-#define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
 
-#define VA_MAJOR_VERSION	0
-#define VA_MINOR_VERSION	30
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
+#define DRIVER_INIT_FUNC_SDS	"__vaDriverInit_0_30_sds"
 
-#define DEFAULT_DRIVER_DIR	"/usr/lib/dri/"
 #define DRIVER_EXTENSION	"_drv_video.so"
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
@@ -112,6 +111,7 @@ static Bool va_checkString(const char* value, char *variable)
 static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+
     return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
 }
 
@@ -134,11 +134,11 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
     if (!search_path)
     {
-        search_path = DEFAULT_DRIVER_DIR;
+        search_path = VA_DRIVERS_PATH;
     }
 
-    search_path = strdup(search_path);
-    driver_dir = strtok_r(search_path, ":", &saveptr);
+    search_path = strdup((const char *)search_path);
+    driver_dir = strtok_r((const char *)search_path, ":", &saveptr);
     while(driver_dir)
     {
         void *handle = NULL;
@@ -165,6 +165,11 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         {
             VADriverInit init_func;
             init_func = (VADriverInit) dlsym(handle, DRIVER_INIT_FUNC);
+            if (!init_func)
+            {
+                /* Then try SDS extensions (VDPAU and XvBA backends) */
+                init_func = (VADriverInit) dlsym(handle, DRIVER_INIT_FUNC_SDS);
+            }
             if (!init_func)
             {
                 va_errorMessage("%s has no function %s\n", driver_path, DRIVER_INIT_FUNC);
@@ -329,7 +334,7 @@ VAStatus vaInitialize (
 
   va_debug_trace = (getenv("LIBVA_DEBUG_TRACE") != NULL);
 
-  va_infoMessage("libva build on %s\n", VA_STR_VERSION);
+  va_infoMessage("libva version %s\n", VA_VERSION_S);
 
   vaStatus = va_getDriverName(dpy, &driver_name);
   va_infoMessage("va_getDriverName() returns %d\n", vaStatus);

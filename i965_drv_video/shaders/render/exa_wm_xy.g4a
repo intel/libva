@@ -1,0 +1,52 @@
+/*
+ * Copyright © 2006 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * Authors:
+ *    Wang Zhenyu <zhenyu.z.wang@intel.com>
+ *    Keith Packard <keithp@keithp.com>
+ */
+ 
+/*
+ * Register assignments:
+ *
+ *  x		    g6/g7
+ *  y		    g8/g9
+ *
+ *  temp x	    g10/g11
+ *  temp y	    g12/g13
+ *
+ *  src w	    g14/g15
+ *  src u	    m1/m2
+ *  src v	    m3/m4
+ */
+ 
+/* Fragment to compute per-pixel XY values */
+
+include(`exa_wm.g4i')
+    
+    /* Load X and Y coordinates and compute per-pixel coordinates */
+add (16)	temp_x_uw<1>UW	dst_x_uw		0x10101010V	{ align1 };
+add (16)	temp_y_uw<1>UW	dst_y_uw		0x11001100V	{ align1 };
+
+    /* subtract screen-space origin of vertex 0 */
+add (16)	dst_x<1>F	temp_x_uw<8,8,1>UW	-screen_x0	{ compr align1 };
+add (16)	dst_y<1>F	temp_y_uw<8,8,1>UW	-screen_y0	{ compr align1 };

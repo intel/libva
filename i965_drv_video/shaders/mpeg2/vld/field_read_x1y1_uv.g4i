@@ -1,0 +1,91 @@
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT table
+   g31:    thread payload 
+   g58~g81:reference data
+   g82:    thread payload backup
+   g83~g106:IDCT data
+   g115:   message descriptor for reading reference data   */
+mov (1) g32.8<1>UD 0x7000FUD {align1}; //8*16
+send (16) 0 g40.0<1>UW g32<8,8,1>UW read(surface_u, 2, 0, 2) mlen 1 rlen 4 {align1};//U
+send (16) 0 g46.0<1>UW g32<8,8,1>UW read(surface_v, 2, 0, 2) mlen 1 rlen 4 {align1};//V
+add (1) g32.4<1>UD g32.4<1,1,1>UD 8UD {align1};
+mov (1) g32.8<1>UD 0x0FUD {align1}; 
+send (16) 0 g44.0<1>UW g32<8,8,1>UW read(surface_u, 2, 0, 2) mlen 1 rlen 1 {align1};//U
+send (16) 0 g50.0<1>UW g32<8,8,1>UW read(surface_v, 2, 0, 2) mlen 1 rlen 1 {align1};//V
+//U
+add (8) g74.0<1>UW  g40.0<8,8,1>UB g40.1<8,8,1>UB {align1};
+add (8) g74.16<1>UW g41.0<8,8,1>UB g41.1<8,8,1>UB {align1};
+add (8) g75.0<1>UW  g42.0<8,8,1>UB g42.1<8,8,1>UB {align1};
+add (8) g75.16<1>UW g43.0<8,8,1>UB g43.1<8,8,1>UB {align1};
+
+add (8) g74.0<1>UW  g74.0<8,8,1>UW  g41.0<8,8,1>UB {align1};
+add (8) g74.16<1>UW g74.16<8,8,1>UW g42.0<8,8,1>UB {align1};
+add (8) g75.0<1>UW  g75.0<8,8,1>UW  g43.0<8,8,1>UB {align1};
+add (8) g75.16<1>UW g75.16<8,8,1>UW g44.0<8,8,1>UB {align1};
+
+add (8) g74.0<1>UW  g74.0<8,8,1>UW  g41.1<8,8,1>UB {align1};
+add (8) g74.16<1>UW g74.16<8,8,1>UW g42.1<8,8,1>UB {align1};
+add (8) g75.0<1>UW  g75.0<8,8,1>UW  g43.1<8,8,1>UB {align1};
+add (8) g75.16<1>UW g75.16<8,8,1>UW g44.1<8,8,1>UB {align1};
+//V
+add (8) g78.0<1>UW  g46.0<8,8,1>UB g46.1<8,8,1>UB {align1};
+add (8) g78.16<1>UW g47.0<8,8,1>UB g47.1<8,8,1>UB {align1};
+add (8) g79.0<1>UW  g48.0<8,8,1>UB g48.1<8,8,1>UB {align1};
+add (8) g79.16<1>UW g49.0<8,8,1>UB g49.1<8,8,1>UB {align1};
+
+add (8) g78.0<1>UW  g78.0<8,8,1>UW  g47.0<8,8,1>UB {align1};
+add (8) g78.16<1>UW g78.16<8,8,1>UW g48.0<8,8,1>UB {align1};
+add (8) g79.0<1>UW  g79.0<8,8,1>UW  g49.0<8,8,1>UB {align1};
+add (8) g79.16<1>UW g79.16<8,8,1>UW g50.0<8,8,1>UB {align1};
+
+add (8) g78.0<1>UW  g78.0<8,8,1>UW  g47.1<8,8,1>UB {align1};
+add (8) g78.16<1>UW g78.16<8,8,1>UW g48.1<8,8,1>UB {align1};
+add (8) g79.0<1>UW  g79.0<8,8,1>UW  g49.1<8,8,1>UB {align1};
+add (8) g79.16<1>UW g79.16<8,8,1>UW g50.1<8,8,1>UB {align1};
+
+mov (1) g32.8<1>UD 0x7000FUD {align1}; //8*16
+send (16) 0 g40.0<1>UW g32<8,8,1>UW read(surface_u, 2, 0, 2) mlen 1 rlen 4 {align1};//U
+send (16) 0 g46.0<1>UW g32<8,8,1>UW read(surface_v, 2, 0, 2) mlen 1 rlen 4 {align1};//V
+add (1) g32.4<1>UD g32.4<1,1,1>UD 8UD {align1};
+mov (1) g32.8<1>UD 0x0FUD {align1}; 
+send (16) 0 g44.0<1>UW g32<8,8,1>UW read(surface_u, 2, 0, 2) mlen 1 rlen 1 {align1};//U
+send (16) 0 g50.0<1>UW g32<8,8,1>UW read(surface_v, 2, 0, 2) mlen 1 rlen 1 {align1};//V
+//U
+add (8) g76.0<1>UW  g40.0<8,8,1>UB g40.1<8,8,1>UB {align1};
+add (8) g76.16<1>UW g41.0<8,8,1>UB g41.1<8,8,1>UB {align1};
+add (8) g77.0<1>UW  g42.0<8,8,1>UB g42.1<8,8,1>UB {align1};
+add (8) g77.16<1>UW g43.0<8,8,1>UB g43.1<8,8,1>UB {align1};
+
+add (8) g76.0<1>UW  g76.0<8,8,1>UW  g41.0<8,8,1>UB {align1};
+add (8) g76.16<1>UW g76.16<8,8,1>UW g42.0<8,8,1>UB {align1};
+add (8) g77.0<1>UW  g77.0<8,8,1>UW  g43.0<8,8,1>UB {align1};
+add (8) g77.16<1>UW g77.16<8,8,1>UW g44.0<8,8,1>UB {align1};
+
+add (8) g76.0<1>UW  g76.0<8,8,1>UW  g41.1<8,8,1>UB {align1};
+add (8) g76.16<1>UW g76.16<8,8,1>UW g42.1<8,8,1>UB {align1};
+add (8) g77.0<1>UW  g77.0<8,8,1>UW  g43.1<8,8,1>UB {align1};
+add (8) g77.16<1>UW g77.16<8,8,1>UW g44.1<8,8,1>UB {align1};
+//V
+add (8) g80.0<1>UW  g46.0<8,8,1>UB g46.1<8,8,1>UB {align1};
+add (8) g80.16<1>UW g47.0<8,8,1>UB g47.1<8,8,1>UB {align1};
+add (8) g81.0<1>UW  g48.0<8,8,1>UB g48.1<8,8,1>UB {align1};
+add (8) g81.16<1>UW g49.0<8,8,1>UB g49.1<8,8,1>UB {align1};
+
+add (8) g80.0<1>UW  g80.0<8,8,1>UW  g47.0<8,8,1>UB {align1};
+add (8) g80.16<1>UW g80.16<8,8,1>UW g48.0<8,8,1>UB {align1};
+add (8) g81.0<1>UW  g81.0<8,8,1>UW  g49.0<8,8,1>UB {align1};
+add (8) g81.16<1>UW g81.16<8,8,1>UW g50.0<8,8,1>UB {align1};
+
+add (8) g80.0<1>UW  g80.0<8,8,1>UW  g47.1<8,8,1>UB {align1};
+add (8) g80.16<1>UW g80.16<8,8,1>UW g48.1<8,8,1>UB {align1};
+add (8) g81.0<1>UW  g81.0<8,8,1>UW  g49.1<8,8,1>UB {align1};
+add (8) g81.16<1>UW g81.16<8,8,1>UW g50.1<8,8,1>UB {align1};
+
+shr (32) g74.0<1>UW g74.0<16,16,1>UW 2UW {align1 compr};
+shr (32) g76.0<1>UW g76.0<16,16,1>UW 2UW {align1 compr};
+shr (32) g78.0<1>UW g78.0<16,16,1>UW 2UW {align1 compr};
+shr (32) g80.0<1>UW g80.0<16,16,1>UW 2UW {align1 compr};
+

@@ -21,28 +21,27 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 INCLUDES = \
-	$(LIBVA_CFLAGS) \
-	-DIN_LIBVA
+	$(LIBVA_CFLAGS) -I$(top_srcdir)/src/x11 \
+	-DIN_LIBVA \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
+
+LDADD = \
+	$(LIBVA_LT_LDFLAGS)
 
 libva_la_LTLIBRARIES = libva.la
 libva_ladir = $(libdir)
-libva_la_LDFLAGS = -version-number 0:30:4 -no-undefined
-libva_la_LIBADD = $(LIBVA_LIBS) -ldl -lX11 -lXext X11/libva_X11.la
-CFLAGS = -ansi -O2 
+libva_la_LDFLAGS = $(LDADD) -no-undefined
+libva_la_LIBADD = $(LIBVA_LIBS) -ldl -lX11 -lXext x11/libva_x11.la -ldrm -lXfixes
 
-nodist_libva_la_SOURCES = va_version.h
-BUILT_SOURCES = va_version.h
+SUBDIRS = x11
 
-CLEANFILES = va_version.h
-
-va_version.h: Makefile
-	echo "#define VA_BUILD_DATE \"$(shell date +'%Y%m%d') $(shell date +'1%H%M%S') \"" > va_version.h
-	echo "#define VA_BUILD_GIT  \"($(shell git log  | head -n1 | cut -f2 -d' ')) \" "    >> va_version.h
-
-
-SUBDIRS = X11
-
-libva_la_SOURCES = va.c 
+libva_la_SOURCES = va.c
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_backend.h
+libvainclude_HEADERS = va.h va_backend.h va_version.h
+
+DISTCLEANFILES = \
+	va_version.h
+
+EXTRA_DIST = \
+	va_version.h.in

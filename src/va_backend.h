@@ -31,7 +31,7 @@
 
 #ifdef IN_LIBVA
 #include "va.h"
-#include "X11/va_x11.h"
+#include "x11/va_x11.h"
 #else
 #include <va/va.h>
 #include <va/va_x11.h>
@@ -297,7 +297,7 @@ struct VADriverVTable
                 VASubpictureID subpicture,
                 VAImageID image
         );
-        
+
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
@@ -407,14 +407,11 @@ struct VADriverVTable
 
 struct VADriverContext
 {
-    void *old_pNext;			/* preserved for binary compatibility */
-
     void *pDriverData;
     struct VADriverVTable vtable;
 
     Display *x11_dpy;
     int x11_screen;
-    int dri2;
     int version_major;
     int version_minor;
     int max_profiles;
@@ -426,6 +423,8 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
+    
+    void *dri_state;
 };
 
 struct VADisplayContext

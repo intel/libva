@@ -1,0 +1,51 @@
+#ifndef _INTEL_BATCHBUFFER_H_
+#define _INTEL_BATCHBUFFER_H_
+
+#include <xf86drm.h>
+#include <drm.h>
+#include <i915_drm.h>
+#include <intel_bufmgr.h>
+
+#include "intel_driver.h"
+
+struct intel_batchbuffer 
+{
+    struct intel_driver_data *intel;
+    dri_bo *buffer;
+    unsigned int size;
+    unsigned char *map;
+    unsigned char *ptr;
+    int atomic;
+};
+
+Bool intel_batchbuffer_init(struct intel_driver_data *intel);
+Bool intel_batchbuffer_terminate(struct intel_driver_data *intel);
+void intel_batchbuffer_emit_dword(VADriverContextP ctx, unsigned int x);
+void intel_batchbuffer_emit_reloc(VADriverContextP ctx, dri_bo *bo, 
+                                  uint32_t read_domains, uint32_t write_domains, 
+                                  uint32_t delta);
+void intel_batchbuffer_require_space(VADriverContextP ctx, unsigned int size);
+void intel_batchbuffer_data(VADriverContextP ctx, void *data, unsigned int size);
+void intel_batchbuffer_emit_mi_flush(VADriverContextP ctx);
+void intel_batchbuffer_start_atomic(VADriverContextP ctx, unsigned int size);
+void intel_batchbuffer_end_atomic(VADriverContextP ctx);
+Bool intel_batchbuffer_flush(VADriverContextP ctx);
+
+#define BEGIN_BATCH(ctx, n) do {                                \
+   intel_batchbuffer_require_space(ctx, (n) * 4);               \
+} while (0)
+
+#define OUT_BATCH(ctx, d) do {                                  \
+   intel_batchbuffer_emit_dword(ctx, d);                        \
+} while (0)
+
+#define OUT_RELOC(ctx, bo, read_domains, write_domain, delta) do {      \
+   assert((delta) >= 0);                                                \
+   intel_batchbuffer_emit_reloc(ctx, bo,                                \
+                                read_domains, write_domain, delta);     \
+} while (0)
+
+#define ADVANCE_BATCH(ctx) do {                                         \
+} while (0)
+
+#endif /* _INTEL_BATCHBUFFER_H_ */

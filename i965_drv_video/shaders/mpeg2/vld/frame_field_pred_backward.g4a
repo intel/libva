@@ -1,0 +1,126 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT table
+   g31:    thread payload 
+   g58~g81:reference data
+   g82:    thread payload backup
+   g83~g106:IDCT data
+   g115:   message descriptor for reading reference data   */
+mov (8) g82.0<1>UD g31.0<8,8,1>UD {align1};
+mov(2) g31.0<1>UD g82.12<2,2,1>UW {align1};
+mov (1) g126.8<1>UD ip {align1};
+mov (1) ip g21.0<1,1,1>UD {align1};
+
+/*field 0 of Y*/
+asr (2) g31.14<1>W g82.20<2,2,1>W 1W {align1};
+shl (1) g31.16<1>W g31.16<1,1,1>W 1W {align1};
+add (2) g115.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+and (1) g115.4<1>UD g115.4<1,1,1>UD 0xFFFFFFFEUD {align1};
+and.nz (1) null g82.2<1,1,1>UW 0x2000UW {align1};
+(f0) add (1) g115.4<1>UD g115.4<1,1,1>UD 1UD {align1};
+define(`surface',`7')
+define(`mv1',`g82.20')
+define(`mv2',`g82.22')
+include(`motion_field_y.g4i')
+mov (8) g58.0<1>UD g32.0<8,8,1>UD {align1};
+mov (8) g60.0<1>UD g33.0<8,8,1>UD {align1};
+mov (8) g62.0<1>UD g34.0<8,8,1>UD {align1};
+mov (8) g64.0<1>UD g35.0<8,8,1>UD {align1};
+mov (8) g66.0<1>UD g36.0<8,8,1>UD {align1};
+mov (8) g68.0<1>UD g37.0<8,8,1>UD {align1};
+mov (8) g70.0<1>UD g38.0<8,8,1>UD {align1};
+mov (8) g72.0<1>UD g39.0<8,8,1>UD {align1};
+
+/*field 1 of Y*/
+asr (2) g31.14<1>W g82.28<2,2,1>W 1W {align1};
+shl (1) g31.16<1>W g31.16<1,1,1>W 1W {align1};
+add (2) g115.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+and (1) g115.4<1>UD g115.4<1,1,1>UD 0xFFFFFFFEUD {align1};
+and.nz (1) null g82.2<1,1,1>UW 0x8000UW {align1};
+(f0) add (1) g115.4<1>UD g115.4<1,1,1>UD 1UD {align1};
+define(`surface',`7')
+define(`mv1',`g82.28')
+define(`mv2',`g82.30')
+include(`motion_field_y.g4i')
+mov (8) g59.0<1>UD g32.0<8,8,1>UD {align1};
+mov (8) g61.0<1>UD g33.0<8,8,1>UD {align1};
+mov (8) g63.0<1>UD g34.0<8,8,1>UD {align1};
+mov (8) g65.0<1>UD g35.0<8,8,1>UD {align1};
+mov (8) g67.0<1>UD g36.0<8,8,1>UD {align1};
+mov (8) g69.0<1>UD g37.0<8,8,1>UD {align1};
+mov (8) g71.0<1>UD g38.0<8,8,1>UD {align1};
+mov (8) g73.0<1>UD g39.0<8,8,1>UD {align1};
+
+/*field 0 of UV*/
+shr (2) g31.0<1>UD g31.0<2,2,1>UD 1UD {align1};
+asr (2) g82.20<1>W g82.20<2,2,1>W 1W {align1};
+asr (2) g31.14<1>W g82.20<2,2,1>W 1W {align1};
+shl (1) g31.16<1>W g31.16<1,1,1>W 1W {align1};
+add (2) g115.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+and.nz (1) null g82.2<1,1,1>UW 0x2000UW {align1};
+(f0) add (1) g115.4<1>UD g115.4<1,1,1>UD 1UD {align1};
+define(`surface_u', `8')
+define(`surface_v', `9')
+define(`mv1',`g82.20')
+define(`mv2',`g82.22')
+include(`motion_field_uv.g4i')
+mov (8) g74.0<1>UW g32.0<8,8,1>UW {align1};
+mov (8) g75.0<1>UW g33.0<8,8,1>UW {align1};
+mov (8) g76.0<1>UW g34.0<8,8,1>UW {align1};
+mov (8) g77.0<1>UW g35.0<8,8,1>UW {align1};
+mov (8) g78.0<1>UW g36.0<8,8,1>UW {align1};
+mov (8) g79.0<1>UW g37.0<8,8,1>UW {align1};
+mov (8) g80.0<1>UW g38.0<8,8,1>UW {align1};
+mov (8) g81.0<1>UW g39.0<8,8,1>UW {align1};
+
+/*field 1 of UV*/
+asr (2) g82.28<1>W g82.28<2,2,1>W 1W {align1};
+asr (2) g31.14<1>W g82.28<2,2,1>W 1W {align1};
+shl (1) g31.16<1>W g31.16<1,1,1>W 1W {align1};
+add (2) g115.0<1>UD g31.0<2,2,1>UD g31.14<2,2,1>W {align1};
+and.nz (1) null g82.2<1,1,1>UW 0x8000UW {align1};
+(f0) add (1) g115.4<1>UD g115.4<1,1,1>UD 1UD {align1};
+define(`mv1',`g82.28')
+define(`mv2',`g82.30')
+include(`motion_field_uv.g4i')
+mov (8) g74.16<1>UW g32.0<8,8,1>UW {align1};
+mov (8) g75.16<1>UW g33.0<8,8,1>UW {align1};
+mov (8) g76.16<1>UW g34.0<8,8,1>UW {align1};
+mov (8) g77.16<1>UW g35.0<8,8,1>UW {align1};
+mov (8) g78.16<1>UW g36.0<8,8,1>UW {align1};
+mov (8) g79.16<1>UW g37.0<8,8,1>UW {align1};
+mov (8) g80.16<1>UW g38.0<8,8,1>UW {align1};
+mov (8) g81.16<1>UW g39.0<8,8,1>UW {align1};
+
+include(`addidct.g4i')
+send (16) 0 acc0<1>UW g0<8,8,1>UW 
+	thread_spawner(0, 0, 0) mlen 1 rlen 0 { align1 EOT};

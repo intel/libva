@@ -22,7 +22,11 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef IN_LIBVA
 #include <va_x11.h>
+#else
+#include <va/va_x11.h>
+#endif
 
 #include "assert.h"
 #include <stdarg.h>
@@ -59,7 +63,7 @@ void status(const char *msg, ...)
 
 int main(int argc, const char* argv[])
 {
-  const char *name = rindex(argv[0], '/');
+  const char *name = strrchr(argv[0], '/');
   if (name)
       name++;
   else
