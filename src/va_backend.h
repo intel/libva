@@ -407,14 +407,11 @@ struct VADriverVTable
 
 struct VADriverContext
 {
-    void *old_pNext;			/* preserved for binary compatibility */
-
     void *pDriverData;
     struct VADriverVTable vtable;
 
     Display *x11_dpy;
     int x11_screen;
-    int dri2;
     int version_major;
     int version_minor;
     int max_profiles;

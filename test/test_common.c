@@ -63,7 +63,7 @@ void status(const char *msg, ...)
 
 int main(int argc, const char* argv[])
 {
-  const char *name = rindex(argv[0], '/');
+  const char *name = strrchr(argv[0], '/');
   if (name)
       name++;
   else

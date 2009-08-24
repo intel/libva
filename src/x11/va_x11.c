@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define _GNU_SOURCE 1
 #include "config.h"
 #include "va.h"
 #include "va_backend.h"
@@ -29,9 +30,11 @@
 #include "va_dri.h"
 #include "va_dri2.h"
 #include "va_dricommon.h"
+#include "va_nvctrl.h"
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -91,6 +94,7 @@ static void va_DisplayContextDestroy (
 	}
 	ctx = &((*ctx)->pNext);
     }
+    free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
@@ -102,34 +106,10 @@ static VAStatus va_DRI2GetDriverName (
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
-    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-    int eventBase, errorBase;
-    char *device_name;
-    int driver_major;
-    int driver_minor;
-    int driver_patch;
-    Bool result = True;
 
-    if (!VA_DRI2QueryExtension(ctx->x11_dpy, &eventBase, &errorBase)) {
-        va_infoMessage("DRI2 extension isn't present\n");
+    if (!isDRI2Connected(ctx, driver_name))
         return VA_STATUS_ERROR_UNKNOWN;
-    }
 
-    if (!VA_DRI2QueryVersion(ctx->x11_dpy, &driver_major, &driver_minor)) {
-        va_errorMessage("VA_DRI2QueryVersion failed\n");
-        return VA_STATUS_ERROR_UNKNOWN;
-    }
-    
-    if (!VA_DRI2Connect(ctx->x11_dpy, RootWindow(ctx->x11_dpy, ctx->x11_screen),
-		     driver_name, &device_name)) {
-        va_infoMessage("DRI2 isn't enabled, fallback to DRI1\n");
-        return VA_STATUS_ERROR_UNKNOWN;
-    }
-
-    va_infoMessage("VA_DRI2Connect: %d.%d.%d %s (screen %d)\n",
-                   driver_major, driver_minor, driver_patch, *driver_name, ctx->x11_screen);
-    ctx->dri2 = 1;
-    
     return VA_STATUS_SUCCESS;
 }
 
@@ -139,60 +119,14 @@ static VAStatus va_DRIGetDriverName (
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
-    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-    int eventBase, errorBase;
-    int direct_capable;
-    int driver_major;
-    int driver_minor;
-    int driver_patch;
-    Bool result = True;
-    char *x_driver_name = NULL;
 
-    if (!VA_DRIQueryExtension(ctx->x11_dpy, &eventBase, &errorBase)) {
-        va_errorMessage("VA_DRIQueryExtension failed\n");
+    if (!isDRI1Connected(ctx, driver_name))
         return VA_STATUS_ERROR_UNKNOWN;
-    }
-    
-    if (result)
-    {
-        result = VA_DRIQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
-        if (!result)
-        {
-            va_errorMessage("VA_DRIQueryDirectRenderingCapable failed\n");
-        }
-    }
-    if (result)
-    {
-        result = direct_capable;
-        if (!result)
-        {
-            va_errorMessage("VA_DRIQueryDirectRenderingCapable returned false\n");
-        }
-    }
-    if (result)
-    {
-        result = VA_DRIGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
-                                            &driver_patch, &x_driver_name);
-        if (!result)
-        {
-            va_errorMessage("VA_DRIGetClientDriverName returned false\n");
-        }
-    }
-    if (result)
-    {
-        vaStatus = VA_STATUS_SUCCESS;
-        va_infoMessage("VA_DRIGetClientDriverName: %d.%d.%d %s (screen %d)\n",
-	     driver_major, driver_minor, driver_patch, x_driver_name, ctx->x11_screen);
-        if (driver_name)
-	    *driver_name = strdup(x_driver_name);
-    }
-    if (x_driver_name)
-        XFree(x_driver_name);
 
-    return vaStatus;
+    return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_DisplayContextGetDriverName (
+static VAStatus va_NVCTRL_GetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
 )
@@ -204,30 +138,70 @@ static VAStatus va_DisplayContextGetDriverName (
     int driver_minor;
     int driver_patch;
     Bool result = True;
-    char *x_driver_name = NULL;
+    char *nvidia_driver_name = NULL;
+
+    if (result)
+    {
+        result = VA_NVCTRLQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable failed\n");
+        }
+    }
+    if (result)
+    {
+        result = direct_capable;
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable returned false\n");
+        }
+    }
+    if (result)
+    {
+        result = VA_NVCTRLGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
+                                              &driver_patch, &nvidia_driver_name);
+        if (!result)
+        {
+            va_errorMessage("VA_NVCTRLGetClientDriverName returned false\n");
+        }
+    }
+    if (result)
+    {
+        vaStatus = VA_STATUS_SUCCESS;
+        va_infoMessage("va_NVCTRL_GetDriverName: %d.%d.%d %s (screen %d)\n",
+                       driver_major, driver_minor, driver_patch,
+                       nvidia_driver_name, ctx->x11_screen);
+	if (driver_name)
+            *driver_name = nvidia_driver_name;
+    }
+    return vaStatus;
+}
+
+static VAStatus va_DisplayContextGetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name
+)
+{
+    VAStatus vaStatus;
+    char *driver_name_env;
 
     if (driver_name)
 	*driver_name = NULL;
-    
-    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
 
-    if ((vaStatus == VA_STATUS_SUCCESS)
+    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
         && geteuid() == getuid())
     {
         /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        if (getenv("LIBVA_DRIVER_NAME"))
-        {
-            /* For easier debugging */
-            if (*driver_name)
-                XFree(*driver_name);
-            
-            *driver_name = strdup(getenv("LIBVA_DRIVER_NAME"));
-            return VA_STATUS_SUCCESS;
-        }
+        *driver_name = strdup(driver_name_env);
+        return VA_STATUS_SUCCESS;
     }
-    
+
+    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
+   
     return vaStatus;
 }
 
@@ -278,11 +252,12 @@ VADisplay vaGetDisplay (
   {
       /* create new entry */
       VADriverContextP pDriverContext;
+      struct dri_state *dri_state;
       pDisplayContext = calloc(1, sizeof(*pDisplayContext));
       pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      if (pDisplayContext && pDriverContext)
+      dri_state       = calloc(1, sizeof(*dri_state));
+      if (pDisplayContext && pDriverContext && dri_state)
       {
-	  pDriverContext->old_pNext        = (void *)(unsigned long)0xdeadbeef;
 	  pDriverContext->x11_dpy          = native_dpy;
 	  pDisplayContext->pNext           = pDisplayContexts;
 	  pDisplayContext->pDriverContext  = pDriverContext;
@@ -290,7 +265,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
 	  pDisplayContexts                 = pDisplayContext;
-	  pDriverContext->dri_state 	   = calloc(1, sizeof(struct dri_state));
+	  pDriverContext->dri_state 	   = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else
@@ -299,6 +274,8 @@ VADisplay vaGetDisplay (
 	      free(pDisplayContext);
 	  if (pDriverContext)
 	      free(pDriverContext);
+          if (dri_state)
+              free(dri_state);
       }
   }
   

@@ -5,7 +5,8 @@
 
 #include <xf86drm.h>
 
-#include "X11/Xlib.h"
+#include <X11/Xlibint.h>
+#include <X11/Xlib.h>
 #include "va.h"
 #include "va_backend.h"
 

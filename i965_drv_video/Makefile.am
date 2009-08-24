@@ -25,7 +25,7 @@ SUBDIRS = shaders
 AM_CFLAGS = -Wall -I$(top_srcdir)/src -I$(top_srcdir)/src/x11 @DRM_CFLAGS@ -DIN_LIBVA
 
 i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
-i965_drv_video_ladir = $(libdir)/dri
+i965_drv_video_ladir = @LIBVA_DRIVERS_PATH@
 i965_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined @DRM_LIBS@ -ldrm_intel
 i965_drv_video_la_LIBADD = ../src/libva.la -lpthread
 
