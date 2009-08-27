@@ -1250,12 +1250,12 @@ VAStatus vaSyncSurface (
 
 typedef enum
 {
-    VASurfaceRendering	= 0, /* Rendering in progress */ 
-    VASurfaceDisplaying	= 1, /* Displaying in progress (not safe to render into it) */ 
+    VASurfaceRendering	= 1, /* Rendering in progress */ 
+    VASurfaceDisplaying	= 2, /* Displaying in progress (not safe to render into it) */ 
                              /* this status is useful if surface is used as the source */
                              /* of an overlay */
-    VASurfaceReady	= 2, /* not being rendered or displayed */
-    VASurfaceSkipped	= 4  /* Indicate a skipped frame during encode */
+    VASurfaceReady	= 4, /* not being rendered or displayed */
+    VASurfaceSkipped	= 8  /* Indicate a skipped frame during encode */
 } VASurfaceStatus;
 
 /*
