@@ -217,7 +217,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
                     CHECK_VTABLE(vaStatus, ctx, GetImage);
                     CHECK_VTABLE(vaStatus, ctx, PutImage);
-                    CHECK_VTABLE(vaStatus, ctx, PutImage2);
                     CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
@@ -225,7 +224,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture2);
                     CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
@@ -871,30 +869,6 @@ VAStatus vaPutImage (
     VAImageID image,
     int src_x,
     int src_y,
-    unsigned int width,
-    unsigned int height,
-    int dest_x,
-    int dest_y
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaPutImage);
-  return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, width, height, dest_x, dest_y );
-}
-
-/*
- * Similar to vaPutImage but with additional destination width
- * and height arguments to enable scaling
- */
-VAStatus vaPutImage2 (
-    VADisplay dpy,
-    VASurfaceID surface,
-    VAImageID image,
-    int src_x,
-    int src_y,
     unsigned int src_width,
     unsigned int src_height,
     int dest_x,
@@ -907,8 +881,8 @@ VAStatus vaPutImage2 (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaPutImage2);
-  return ctx->vtable.vaPutImage2 ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
+  TRACE(vaPutImage);
+  return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
 }
 
 /*
@@ -1092,32 +1066,6 @@ VAStatus vaAssociateSubpicture (
     int num_surfaces,
     short src_x, /* upper left offset in subpicture */
     short src_y,
-    short dest_x, /* upper left offset in surface */
-    short dest_y,
-    unsigned short width,
-    unsigned short height,
-    /*
-     * whether to enable chroma-keying or global-alpha
-     * see VA_SUBPICTURE_XXX values
-     */
-    unsigned int flags
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaAssociateSubpicture);
-  return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, dest_x, dest_y, width, height, flags );
-}
-
-VAStatus vaAssociateSubpicture2 (
-    VADisplay dpy,
-    VASubpictureID subpicture,
-    VASurfaceID *target_surfaces,
-    int num_surfaces,
-    short src_x, /* upper left offset in subpicture */
-    short src_y,
     unsigned short src_width,
     unsigned short src_height,
     short dest_x, /* upper left offset in surface */
@@ -1135,8 +1083,8 @@ VAStatus vaAssociateSubpicture2 (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaAssociateSubpicture2);
-  return ctx->vtable.vaAssociateSubpicture2 ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
+  TRACE(vaAssociateSubpicture);
+  return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
 }
 
 /*

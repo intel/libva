@@ -1420,26 +1420,8 @@ VAStatus vaGetImage (
  * Image must be in a format supported by the implementation
  * Returns a VA_STATUS_ERROR_SURFACE_BUSY if the surface
  * shouldn't be rendered into when this is called
- * The source and destionation width and height are the same and
- * no scaling is performed with this operation.
  */
 VAStatus vaPutImage (
-    VADisplay dpy,
-    VASurfaceID surface,
-    VAImageID image,
-    int src_x,
-    int src_y,
-    unsigned int width,
-    unsigned int height,
-    int dest_x,
-    int dest_y
-);
-
-/*
- * Similar to vaPutImage but with additional destination width
- * and height arguments to enable scaling
- */
-VAStatus vaPutImage2 (
     VADisplay dpy,
     VASurfaceID surface,
     VAImageID image,
@@ -1587,28 +1569,6 @@ VAStatus vaSetSubpictureGlobalAlpha (
  * associations before the call to vaPutSurface simply overrides the association.
  */
 VAStatus vaAssociateSubpicture (
-    VADisplay dpy,
-    VASubpictureID subpicture,
-    VASurfaceID *target_surfaces,
-    int num_surfaces,
-    short src_x, /* upper left offset in subpicture */
-    short src_y,
-    short dest_x, /* upper left offset in surface */
-    short dest_y,
-    unsigned short width,
-    unsigned short height,
-    /*
-     * whether to enable chroma-keying or global-alpha
-     * see VA_SUBPICTURE_XXX values
-     */
-    unsigned int flags
-);
-
-/*
- * Similar to vaAssociateSubpicture but with additional destination width
- * and height to enable scaling
- */
-VAStatus vaAssociateSubpicture2 (
     VADisplay dpy,
     VASubpictureID subpicture,
     VASurfaceID *target_surfaces,
