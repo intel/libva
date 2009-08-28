@@ -995,18 +995,12 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
 
 VAStatus 
 i965_SyncSurface(VADriverContextP ctx,
-                 VAContextID context,
                  VASurfaceID render_target)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
-    struct object_context *obj_context = CONTEXT(context);
     struct object_surface *obj_surface = SURFACE(render_target);
 
-    assert(obj_context);
     assert(obj_surface);
-
-    /* Assume that this shouldn't be called before vaEndPicture() */
-    assert(obj_context->decode_state.current_render_target != render_target);
 
     return VA_STATUS_SUCCESS;
 }

@@ -709,7 +709,6 @@ VAStatus vaEndPicture (
 
 VAStatus vaSyncSurface (
     VADisplay dpy,
-    VAContextID context,
     VASurfaceID render_target
 )
 {
@@ -718,7 +717,7 @@ VAStatus vaSyncSurface (
   ctx = CTX(dpy);
 
   TRACE(vaSyncSurface);
-  return ctx->vtable.vaSyncSurface( ctx, context, render_target );
+  return ctx->vtable.vaSyncSurface( ctx, render_target );
 }
 
 VAStatus vaQuerySurfaceStatus (

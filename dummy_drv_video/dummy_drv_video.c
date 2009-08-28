@@ -1005,23 +1005,15 @@ VAStatus dummy_EndPicture(
 
 VAStatus dummy_SyncSurface(
 		VADriverContextP ctx,
-		VAContextID context,
 		VASurfaceID render_target
 	)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
-    object_context_p obj_context;
     object_surface_p obj_surface;
-
-    obj_context = CONTEXT(context);
-    ASSERT(obj_context);
 
     obj_surface = SURFACE(render_target);
     ASSERT(obj_surface);
-
-    /* Assume that this shouldn't be called before vaEndPicture() */
-    ASSERT( obj_context->current_render_target != obj_surface->base.id );
 
     return vaStatus;
 }

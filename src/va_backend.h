@@ -175,7 +175,6 @@ struct VADriverVTable
 
 	VAStatus (*vaSyncSurface) (
 		VADriverContextP ctx,
-		VAContextID context,
 		VASurfaceID render_target
 	);
 

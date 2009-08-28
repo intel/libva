@@ -1244,7 +1244,6 @@ Synchronization
  */
 VAStatus vaSyncSurface (
     VADisplay dpy,
-    VAContextID context,
     VASurfaceID render_target
 );
 
