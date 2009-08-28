@@ -175,7 +175,6 @@ struct VADriverVTable
 
 	VAStatus (*vaSyncSurface) (
 		VADriverContextP ctx,
-		VAContextID context,
 		VASurfaceID render_target
 	);
 
@@ -254,18 +253,6 @@ struct VADriverVTable
 		VAImageID image,
 		int src_x,
 		int src_y,
-		unsigned int width,
-		unsigned int height,
-		int dest_x,
-		int dest_y 
-	);
-
-	VAStatus (*vaPutImage2) (
-		VADriverContextP ctx,
-		VASurfaceID surface,
-		VAImageID image,
-		int src_x,
-		int src_y,
 		unsigned int src_width,
 		unsigned int src_height,
 		int dest_x,
@@ -313,24 +300,6 @@ struct VADriverVTable
 	);
 
 	VAStatus (*vaAssociateSubpicture) (
-		VADriverContextP ctx,
-		VASubpictureID subpicture,
-		VASurfaceID *target_surfaces,
-		int num_surfaces,
-		short src_x, /* upper left offset in subpicture */
-		short src_y,
-		short dest_x, /* upper left offset in surface */
-		short dest_y,
-		unsigned short width,
-		unsigned short height,
-		/*
-		 * whether to enable chroma-keying or global-alpha
-		 * see VA_SUBPICTURE_XXX values
-		 */
-		unsigned int flags
-	);
-
-	VAStatus (*vaAssociateSubpicture2) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
 		VASurfaceID *target_surfaces,

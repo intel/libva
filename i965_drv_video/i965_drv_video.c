@@ -350,7 +350,7 @@ i965_QueryImageFormats(VADriverContextP ctx,
 }
 
 VAStatus 
-i965_PutImage2(VADriverContextP ctx,
+i965_PutImage(VADriverContextP ctx,
                VASurfaceID surface,
                VAImageID image,
                int src_x,
@@ -480,8 +480,12 @@ i965_AssociateSubpicture(VADriverContextP ctx,
                          int num_surfaces,
                          short src_x, /* upper left offset in subpicture */
                          short src_y,
+                         unsigned short src_width,
+                         unsigned short src_height,
                          short dest_x, /* upper left offset in surface */
                          short dest_y,
+                         unsigned short dest_width,
+                         unsigned short dest_height,
                          unsigned short width,
                          unsigned short height,
                          /*
@@ -510,27 +514,6 @@ i965_AssociateSubpicture(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus 
-i965_AssociateSubpicture2(VADriverContextP ctx,
-                          VASubpictureID subpicture,
-                          VASurfaceID *target_surfaces,
-                          int num_surfaces,
-                          short src_x, /* upper left offset in subpicture */
-                          short src_y,
-                          unsigned short src_width,
-                          unsigned short src_height,
-                          short dest_x, /* upper left offset in surface */
-                          short dest_y,
-                          unsigned short dest_width,
-                          unsigned short dest_height,
-                          /*
-                           * whether to enable chroma-keying or global-alpha
-                           * see VA_SUBPICTURE_XXX values
-                           */
-                          unsigned int flags)
-{
-    return VA_STATUS_SUCCESS;
-}
 
 VAStatus 
 i965_DeassociateSubpicture(VADriverContextP ctx,
@@ -1012,18 +995,12 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
 
 VAStatus 
 i965_SyncSurface(VADriverContextP ctx,
-                 VAContextID context,
                  VASurfaceID render_target)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
-    struct object_context *obj_context = CONTEXT(context);
     struct object_surface *obj_surface = SURFACE(render_target);
 
-    assert(obj_context);
     assert(obj_surface);
-
-    /* Assume that this shouldn't be called before vaEndPicture() */
-    assert(obj_context->decode_state.current_render_target != render_target);
 
     return VA_STATUS_SUCCESS;
 }
@@ -1226,20 +1203,6 @@ i965_GetImage(VADriverContextP ctx,
 }
 
 VAStatus 
-i965_PutImage(VADriverContextP ctx,
-              VASurfaceID surface,
-              VAImageID image,
-              int src_x,
-              int src_y,
-              unsigned int width,
-              unsigned int height,
-              int dest_x,
-              int dest_y)
-{
-    return VA_STATUS_SUCCESS;
-}
-
-VAStatus 
 i965_PutSurface(VADriverContextP ctx,
                 VASurfaceID surface,
                 Drawable draw, /* X Drawable */
@@ -1394,7 +1357,6 @@ __vaDriverInit_0_30(  VADriverContextP ctx )
     ctx->vtable.vaSetImagePalette = i965_SetImagePalette;
     ctx->vtable.vaGetImage = i965_GetImage;
     ctx->vtable.vaPutImage = i965_PutImage;
-    ctx->vtable.vaPutImage2 = i965_PutImage2;
     ctx->vtable.vaQuerySubpictureFormats = i965_QuerySubpictureFormats;
     ctx->vtable.vaCreateSubpicture = i965_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = i965_DestroySubpicture;
@@ -1403,7 +1365,6 @@ __vaDriverInit_0_30(  VADriverContextP ctx )
     ctx->vtable.vaSetSubpictureChromakey = i965_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = i965_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = i965_AssociateSubpicture;
-    ctx->vtable.vaAssociateSubpicture2 = i965_AssociateSubpicture2;
     ctx->vtable.vaDeassociateSubpicture = i965_DeassociateSubpicture;
     ctx->vtable.vaQueryDisplayAttributes = i965_QueryDisplayAttributes;
     ctx->vtable.vaGetDisplayAttributes = i965_GetDisplayAttributes;

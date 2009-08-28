@@ -22,8 +22,8 @@
 
 # libva package version number, (as distinct from shared library version)
 m4_define([libva_major_version], [0])
-m4_define([libva_minor_version], [30])
-m4_define([libva_micro_version], [4])
+m4_define([libva_minor_version], [31])
+m4_define([libva_micro_version], [0])
 
 m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
@@ -32,9 +32,9 @@ m4_define([libva_version],
 m4_define([libva_sds_version], [2])
 
 # if the library source code has changed, increment revision
-m4_define([libva_lt_revision], [1])
+m4_define([libva_lt_revision], [0])
 # if any interface was added/removed/changed, then inc current, reset revision
-m4_define([libva_lt_current], [0])
+m4_define([libva_lt_current], [1])
 # if any interface was added since last public release, then increment age
 # if any interface was removed since last public release, then set age to 0
 m4_define([libva_lt_age], [0])
@@ -114,8 +114,12 @@ AC_SUBST(LIBVA_LIBS)
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
-libvabackendlib=libva.la
+LIBVA_DISPLAY=x11
+libvacorelib=libva.la
+libvabackendlib=libva-$LIBVA_DISPLAY.la
+AC_SUBST([libvacorelib])
 AC_SUBST([libvabackendlib])
+AC_SUBST(LIBVA_DISPLAY)
 
 AC_OUTPUT([
 	Makefile
@@ -130,5 +134,6 @@ AC_OUTPUT([
 	i965_drv_video/shaders/render/Makefile
 	test/Makefile
 	libva.pc
+	libva_display.pc
 ])
 

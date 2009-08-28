@@ -502,25 +502,8 @@ VAStatus dummy_GetImage(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus dummy_PutImage(
-	VADriverContextP ctx,
-	VASurfaceID surface,
-	VAImageID image,
-	int src_x,
-	int src_y,
-	unsigned int width,
-	unsigned int height,
-	int dest_x,
-	int dest_y 
-)
-{
-    INIT_DRIVER_DATA
-    
-    /* TODO */
-    return VA_STATUS_SUCCESS;
-}
 
-VAStatus dummy_PutImage2(
+VAStatus dummy_PutImage(
 	VADriverContextP ctx,
 	VASurfaceID surface,
 	VAImageID image,
@@ -631,31 +614,8 @@ VAStatus dummy_SetSubpictureGlobalAlpha(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus dummy_AssociateSubpicture(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	VASurfaceID *target_surfaces,
-	int num_surfaces,
-	short src_x, /* upper left offset in subpicture */
-	short src_y,
-	short dest_x, /* upper left offset in surface */
-	short dest_y,
-	unsigned short width,
-	unsigned short height,
-	/*
-	 * whether to enable chroma-keying or global-alpha
-	 * see VA_SUBPICTURE_XXX values
-	 */
-	unsigned int flags
-)
-{
-    INIT_DRIVER_DATA
-    
-    /* TODO */
-    return VA_STATUS_SUCCESS;
-}
 
-VAStatus dummy_AssociateSubpicture2(
+VAStatus dummy_AssociateSubpicture(
 	VADriverContextP ctx,
 	VASubpictureID subpicture,
 	VASurfaceID *target_surfaces,
@@ -1045,23 +1005,15 @@ VAStatus dummy_EndPicture(
 
 VAStatus dummy_SyncSurface(
 		VADriverContextP ctx,
-		VAContextID context,
 		VASurfaceID render_target
 	)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
-    object_context_p obj_context;
     object_surface_p obj_surface;
-
-    obj_context = CONTEXT(context);
-    ASSERT(obj_context);
 
     obj_surface = SURFACE(render_target);
     ASSERT(obj_surface);
-
-    /* Assume that this shouldn't be called before vaEndPicture() */
-    ASSERT( obj_context->current_render_target != obj_surface->base.id );
 
     return vaStatus;
 }
@@ -1258,7 +1210,6 @@ VAStatus __vaDriverInit_0_30(  VADriverContextP ctx )
     ctx->vtable.vaSetImagePalette = dummy_SetImagePalette;
     ctx->vtable.vaGetImage = dummy_GetImage;
     ctx->vtable.vaPutImage = dummy_PutImage;
-    ctx->vtable.vaPutImage2 = dummy_PutImage2;
     ctx->vtable.vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
     ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
@@ -1266,7 +1217,6 @@ VAStatus __vaDriverInit_0_30(  VADriverContextP ctx )
     ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
-    ctx->vtable.vaAssociateSubpicture2 = dummy_AssociateSubpicture2;
     ctx->vtable.vaDeassociateSubpicture = dummy_DeassociateSubpicture;
     ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
     ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;

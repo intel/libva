@@ -28,10 +28,18 @@ INCLUDES = \
 LDADD = \
 	$(LIBVA_LT_LDFLAGS)
 
-libva_la_LTLIBRARIES = libva.la
+lib_LTLIBRARIES = \
+	libva.la \
+	libva-x11.la
+
 libva_ladir = $(libdir)
 libva_la_LDFLAGS = $(LDADD) -no-undefined
-libva_la_LIBADD = $(LIBVA_LIBS) -ldl -lX11 -lXext x11/libva_x11.la -ldrm -lXfixes
+libva_la_LIBADD = $(LIBVA_LIBS) -ldl
+
+libva_x11_la_SOURCES = 
+libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
+libva_x11_la_LDFLAGS = $(LDADD)
+libva_x11_la_DEPENDENCIES = $(libvacorelib)
 
 SUBDIRS = x11
 
