@@ -39,8 +39,8 @@
 #include "va_dricommon.h"
 
 
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
-#define DRIVER_INIT_FUNC_SDS	"__vaDriverInit_0_30_sds"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
+#define DRIVER_INIT_FUNC_SDS	"__vaDriverInit_0_31_sds"
 
 #define DRIVER_EXTENSION	"_drv_video.so"
 
