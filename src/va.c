@@ -40,7 +40,6 @@
 
 
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
-#define DRIVER_INIT_FUNC_SDS	"__vaDriverInit_0_31_sds"
 
 #define DRIVER_EXTENSION	"_drv_video.so"
 
@@ -169,11 +168,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         {
             VADriverInit init_func;
             init_func = (VADriverInit) dlsym(handle, DRIVER_INIT_FUNC);
-            if (!init_func)
-            {
-                /* Then try SDS extensions (VDPAU and XvBA backends) */
-                init_func = (VADriverInit) dlsym(handle, DRIVER_INIT_FUNC_SDS);
-            }
             if (!init_func)
             {
                 va_errorMessage("%s has no function %s\n", driver_path, DRIVER_INIT_FUNC);
