@@ -2,7 +2,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
-display=@LIBVA_DISPLAY@
+display=x11
 
 Name: libva-${display}
 Description: Userspace Video Acceleration (VA) ${display} interface

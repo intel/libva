@@ -28,9 +28,6 @@ m4_define([libva_micro_version], [0])
 m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
 
-# increase this number for each API change
-m4_define([libva_sds_version], [2])
-
 # if the library source code has changed, increment revision
 m4_define([libva_lt_revision], [0])
 # if any interface was added/removed/changed, then inc current, reset revision
@@ -54,9 +51,6 @@ AC_SUBST(LIBVA_MAJOR_VERSION)
 AC_SUBST(LIBVA_MINOR_VERSION)
 AC_SUBST(LIBVA_MICRO_VERSION)
 AC_SUBST(LIBVA_VERSION)
-
-LIBVA_SDS_VERSION=libva_sds_version
-AC_SUBST(LIBVA_SDS_VERSION)
 
 LIBVA_LT_CURRENT=libva_lt_current
 LIBVA_LT_REV=libva_lt_revision
@@ -119,7 +113,6 @@ libvacorelib=libva.la
 libvabackendlib=libva-$LIBVA_DISPLAY.la
 AC_SUBST([libvacorelib])
 AC_SUBST([libvabackendlib])
-AC_SUBST(LIBVA_DISPLAY)
 
 AC_OUTPUT([
 	Makefile
@@ -134,6 +127,6 @@ AC_OUTPUT([
 	i965_drv_video/shaders/render/Makefile
 	test/Makefile
 	libva.pc
-	libva_display.pc
+	libva-x11.pc
 ])
 
