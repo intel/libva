@@ -53,6 +53,8 @@
  *                                       added VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED
  * rev 0.30 (03/01/2009 Jonathan Bian) - Added encoding support for H.264 BP and MPEG-4 SP and fixes
  *                                       for ISO C conformance.
+ * rev 0.31 (09/02/2009 Gwenole Beauchesne) - VC-1/H264 fields change for VDPAU and XvBA backend
+ *                                       Application needs to relink with the new library.
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
