@@ -569,6 +569,7 @@ typedef struct _VASliceParameterBufferMPEG2
     unsigned int slice_data_offset;/* the offset to the first byte of slice data */
     unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
     unsigned int macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
+    unsigned int slice_horizontal_position;
     unsigned int slice_vertical_position;
     int quantiser_scale_code;
     int intra_slice_flag;
