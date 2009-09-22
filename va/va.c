@@ -135,10 +135,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     {
         /* don't allow setuid apps to use LIBVA_DRIVERS_PATH */
         search_path = getenv("LIBVA_DRIVERS_PATH");
-        if (!search_path)
-        {
-            search_path = getenv("LIBGL_DRIVERS_PATH");
-        }
     }
     if (!search_path)
     {
