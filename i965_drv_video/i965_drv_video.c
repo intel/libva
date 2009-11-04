@@ -76,7 +76,7 @@ static const i965_subpic_format_map_t *
 get_subpic_format(const VAImageFormat *va_format)
 {
     unsigned int i;
-    for (i = 0; i < sizeof(i965_subpic_formats_map)/sizeof(i965_subpic_formats_map[0]); i++) {
+    for (i = 0; i965_subpic_formats_map[i].type != 0; i++) {
         const i965_subpic_format_map_t * const m = &i965_subpic_formats_map[i];
         if (m->va_format.fourcc == va_format->fourcc &&
             (m->type == I965_SURFACETYPE_RGBA ?
