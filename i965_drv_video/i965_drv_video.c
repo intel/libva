@@ -54,6 +54,18 @@ enum {
     I965_SURFACETYPE_INDEXED
 };
 
+/* List of supported image formats */
+typedef struct {
+    unsigned int        type;
+    VAImageFormat       va_format;
+} i965_image_format_map_t;
+
+static const i965_image_format_map_t
+i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
+    { I965_SURFACETYPE_YUV,
+      { VA_FOURCC('Y','V','1','2'), VA_LSB_FIRST, 12, } },
+};
+
 /* List of supported subpicture formats */
 typedef struct {
     unsigned int        type;
@@ -419,8 +431,16 @@ i965_QueryImageFormats(VADriverContextP ctx,
                        VAImageFormat *format_list,      /* out */
                        int *num_formats)                /* out */
 {
+    int n;
+
+    for (n = 0; i965_image_formats_map[n].va_format.fourcc != 0; n++) {
+        const i965_image_format_map_t * const m = &i965_image_formats_map[n];
+        if (format_list)
+            format_list[n] = m->va_format;
+    }
+
     if (num_formats)
-        *num_formats = 0;
+        *num_formats = n;
 
     return VA_STATUS_SUCCESS;
 }
@@ -1319,6 +1339,16 @@ i965_CreateImage(VADriverContextP ctx,
         image->pitches[0] = width * 4;
         image->offsets[0] = 0;
         image->data_size  = image->offsets[0] + image->pitches[0] * height;
+        break;
+    case VA_FOURCC('Y','V','1','2'):
+        image->num_planes = 3;
+        image->pitches[0] = width;
+        image->offsets[0] = 0;
+        image->pitches[1] = width2;
+        image->offsets[1] = size + size2;
+        image->pitches[2] = width2;
+        image->offsets[2] = size;
+        image->data_size  = size + 2 * size2;
         break;
     default:
         goto error;
