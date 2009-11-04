@@ -1446,6 +1446,66 @@ i965_SetImagePalette(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
+static void
+get_image_yv12(struct object_image *obj_image, uint8_t *image_data,
+               struct object_surface *obj_surface,
+               const VARectangle *rect)
+{
+    uint8_t *dst[3], *src[3];
+    int i, x, y, w, h;
+
+    if (!obj_surface->bo)
+        return;
+
+    dri_bo_map(obj_surface->bo, 0);
+
+    if (!obj_surface->bo->virtual)
+        return;
+
+    x = rect->x;
+    y = rect->y;
+    w = rect->width;
+    h = rect->height;
+
+    dst[0] = image_data + obj_image->image.offsets[0];
+    src[0] = (uint8_t *)obj_surface->bo->virtual;
+    dst[1] = image_data + obj_image->image.offsets[1];
+    src[1] = src[0] + obj_surface->width * obj_surface->height;
+    dst[2] = image_data + obj_image->image.offsets[2];
+    src[2] = src[1] + (obj_surface->width / 2) * (obj_surface->height / 2);
+
+    dst[0] += y * obj_image->image.pitches[0] + x;
+    src[0] += y * obj_surface->width + x;
+    for (i = 0; i < h; i++) {
+        memcpy(dst[0], src[0], w);
+        dst[0] += obj_image->image.pitches[0];
+        src[0] += obj_surface->width;
+    }
+
+    x /= 2;
+    y /= 2;
+    w /= 2;
+    h /= 2;
+
+    dst[1] += y * obj_image->image.pitches[1] + x;
+    src[1] += y * obj_surface->width / 2 + x;
+    for (i = 0; i < h; i++) {
+        memcpy(dst[1], src[1], w);
+        dst[1] += obj_image->image.pitches[1];
+        src[1] += obj_surface->width / 2;
+    }
+
+    dst[2] += y * obj_image->image.pitches[2] + y;
+    src[2] += y * obj_surface->width / 2 + x;
+    for (i = 0; i < h; i++) {
+        memcpy(dst[2], src[2], w);
+        dst[2] += obj_image->image.pitches[2];
+        src[2] += obj_surface->width / 2;
+    }
+
+    dri_bo_unmap(obj_surface->bo);
+}
+
 VAStatus 
 i965_GetImage(VADriverContextP ctx,
               VASurfaceID surface,
@@ -1455,7 +1515,51 @@ i965_GetImage(VADriverContextP ctx,
               unsigned int height,
               VAImageID image)
 {
-    return VA_STATUS_SUCCESS;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+
+    struct object_surface *obj_surface = SURFACE(surface);
+    if (!obj_surface)
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+
+    struct object_image *obj_image = IMAGE(image);
+    if (!obj_image)
+        return VA_STATUS_ERROR_INVALID_IMAGE;
+
+    if (x < 0 || y < 0)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+    if (width > obj_surface->width || height > obj_surface->height)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+    if (width > obj_image->image.width || height > obj_image->image.height)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+    VAStatus va_status;
+    void *image_data = NULL;
+
+    va_status = i965_MapBuffer(ctx, obj_image->image.buf, &image_data);
+    if (va_status != VA_STATUS_SUCCESS)
+        return va_status;
+
+    VARectangle rect;
+    rect.x = x;
+    rect.y = y;
+    rect.width = width;
+    rect.height = height;
+
+    switch (obj_image->image.format.fourcc) {
+    case VA_FOURCC('Y','V','1','2'): /* YV12 is native format here */
+        if (render_state->interleaved_uv)
+            goto operation_failed;
+        get_image_yv12(obj_image, image_data, obj_surface, &rect);
+        break;
+    default:
+    operation_failed:
+        va_status = VA_STATUS_ERROR_OPERATION_FAILED;
+        break;
+    }
+
+    i965_UnmapBuffer(ctx, obj_image->image.buf);
+    return va_status;
 }
 
 VAStatus 
