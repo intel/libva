@@ -517,7 +517,8 @@ i965_SetSubpictureImage(VADriverContextP ctx,
                         VASubpictureID subpicture,
                         VAImageID image)
 {
-    return VA_STATUS_SUCCESS;
+    /* TODO */
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus 
@@ -527,7 +528,8 @@ i965_SetSubpictureChromakey(VADriverContextP ctx,
                             unsigned int chromakey_max,
                             unsigned int chromakey_mask)
 {
-    return VA_STATUS_SUCCESS;
+    /* TODO */
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus 
@@ -535,7 +537,8 @@ i965_SetSubpictureGlobalAlpha(VADriverContextP ctx,
                               VASubpictureID subpicture,
                               float global_alpha)
 {
-    return VA_STATUS_SUCCESS;
+    /* TODO */
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus 
@@ -1184,7 +1187,7 @@ i965_GetDisplayAttributes(VADriverContextP ctx,
                           int num_attributes)
 {
     /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 /* 
@@ -1199,7 +1202,7 @@ i965_SetDisplayAttributes(VADriverContextP ctx,
                           int num_attributes)
 {
     /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus 
@@ -1209,7 +1212,7 @@ i965_DbgCopySurfaceToBuffer(VADriverContextP ctx,
                             unsigned int *stride)       /* out */
 {
     /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 static VAStatus 
@@ -1351,7 +1354,8 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
                           VASurfaceID surface,
                           VAImage *image)        /* out */
 {
-    return VA_STATUS_SUCCESS;
+    /* TODO */
+    return VA_STATUS_ERROR_OPERATION_FAILED;
 }
 
 static void 
