@@ -70,6 +70,14 @@ i965_subpic_formats_map[I965_MAX_SUBPIC_FORMATS + 1] = {
     { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_A4P4_UNORM,
       { VA_FOURCC('A','I','4','4'), VA_MSB_FIRST, 8, },
       0 },
+    { I965_SURFACETYPE_RGBA, I965_SURFACEFORMAT_B8G8R8A8_UNORM,
+      { VA_FOURCC('B','G','R','A'), VA_LSB_FIRST, 32,
+        32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 },
+      0 },
+    { I965_SURFACETYPE_RGBA, I965_SURFACEFORMAT_R8G8B8A8_UNORM,
+      { VA_FOURCC('R','G','B','A'), VA_LSB_FIRST, 32,
+        32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 },
+      0 },
 };
 
 static const i965_subpic_format_map_t *
@@ -488,6 +496,7 @@ i965_CreateSubpicture(VADriverContextP ctx,
     obj_subpic->format = m->format;
     obj_subpic->width  = obj_image->image.width;
     obj_subpic->height = obj_image->image.height;
+    obj_subpic->pitch  = obj_image->image.pitches[0];
     obj_subpic->bo     = obj_image->bo;
     return VA_STATUS_SUCCESS;
 }
@@ -1298,6 +1307,15 @@ i965_CreateImage(VADriverContextP ctx,
         image->component_order[0]  = 'R';
         image->component_order[1]  = 'G';
         image->component_order[2]  = 'B';
+        break;
+    case VA_FOURCC('A','R','G','B'):
+    case VA_FOURCC('A','B','G','R'):
+    case VA_FOURCC('B','G','R','A'):
+    case VA_FOURCC('R','G','B','A'):
+        image->num_planes = 1;
+        image->pitches[0] = width * 4;
+        image->offsets[0] = 0;
+        image->data_size  = image->offsets[0] + image->pitches[0] * height;
         break;
     default:
         goto error;

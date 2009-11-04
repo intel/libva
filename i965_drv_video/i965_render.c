@@ -592,7 +592,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h, int format)
+                              int w, int h, int p, int format)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
@@ -626,7 +626,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     ss->ss2.mip_count = 0;
     ss->ss2.render_target_rotation = 0;
 
-    ss->ss3.pitch = w - 1;
+    ss->ss3.pitch = p - 1;
 
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
@@ -691,8 +691,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
 }
 
 static void
