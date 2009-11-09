@@ -1,0 +1,147 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix in UB format
+           g3~g4:non intra IQ matrix in UB format
+           g5~g20:IDCT table
+   g56~g79:DCT data after IQ before idct
+   g83~g106: IDCT data after idct
+   g82:    thread payload backup
+   g125:   ip before idct
+*/
+IDCT_START:
+mov (1) g126.0<1>UD ip {align1};
+jmpi DO_IDCT;
+add (16) g32<1>D g32<8,8,1>D ROW_ADD {compr};
+add (16) g34<1>D g34<8,8,1>D ROW_ADD {compr};
+add (16) g36<1>D g36<8,8,1>D ROW_ADD {compr};
+add (16) g38<1>D g38<8,8,1>D ROW_ADD {compr};
+
+shr (16) g32<1>D g32<8,8,1>D ROW_SHIFT {compr};
+shr (16) g34<1>D g34<8,8,1>D ROW_SHIFT {compr};
+shr (16) g36<1>D g36<8,8,1>D ROW_SHIFT {compr};
+shr (16) g38<1>D g38<8,8,1>D ROW_SHIFT {compr};
+
+mov (16) g110.0<1>W g32<16,8,2>W {align1};
+mov (16) g111.0<1>W g34<16,8,2>W {align1};
+mov (16) g112.0<1>W g36<16,8,2>W {align1};
+mov (16) g113.0<1>W g38<16,8,2>W {align1};
+
+mov (1) g80.0<1>UD a0.0<1,1,1>UD {align1};  //save a0
+mov (1) a0.0<1>UD 0x0DB00DA0UD {align1};  //begin at g110.0, the output of idct_row.g4i
+mov (1) g126.0<1>UD ip {align1};
+jmpi DO_IDCT;
+
+add (16) g32<1>D g32<8,8,1>D COL_ADD {compr};
+add (16) g34<1>D g34<8,8,1>D COL_ADD {compr};
+add (16) g36<1>D g36<8,8,1>D COL_ADD {compr};
+add (16) g38<1>D g38<8,8,1>D COL_ADD {compr};
+
+shr (16) g32<1>D g32<8,8,1>D COL_SHIFT {compr};
+shr (16) g34<1>D g34<8,8,1>D COL_SHIFT {compr};
+shr (16) g36<1>D g36<8,8,1>D COL_SHIFT {compr};
+shr (16) g38<1>D g38<8,8,1>D COL_SHIFT {compr};
+
+mov (1) a0.0<1>UD g80.0<1,1,1>UD {align1};             //restore a0 
+add (1) ip g125.0<1,1,1>UD 0x20UD {align1};            //jump back
+
+DO_IDCT:
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};           //increase the address 
+dp4 (16) g40<1>D g[a0.0]<8,8,1>W g5<8,8,1>D {align1 compr};
+dp4 (16) g42<1>D g[a0.0]<8,8,1>W g7<8,8,1>D {align1 compr};
+dp4 (16) g44<1>D g[a0.0]<8,8,1>W g9<8,8,1>D {align1 compr};
+dp4 (16) g46<1>D g[a0.0]<8,8,1>W g11<8,8,1>D {align1 compr};
+dp4 (16) g48<1>D g[a0.0]<8,8,1>W g13<8,8,1>D {align1 compr};
+dp4 (16) g50<1>D g[a0.0]<8,8,1>W g15<8,8,1>D {align1 compr};
+dp4 (16) g52<1>D g[a0.0]<8,8,1>W g17<8,8,1>D {align1 compr};
+dp4 (16) g54<1>D g[a0.0]<8,8,1>W g19<8,8,1>D {align1 compr};
+add (2) g32.0<1>D g40.0<8,1,8>D g40.16<8,1,8>D {align1};
+add (2) g33.0<1>D g42.0<8,1,8>D g42.16<8,1,8>D {align1};
+add (2) g34.0<1>D g44.0<8,1,8>D g44.16<8,1,8>D {align1};
+add (2) g35.0<1>D g46.0<8,1,8>D g46.16<8,1,8>D {align1};
+add (2) g36.0<1>D g48.0<8,1,8>D g48.16<8,1,8>D {align1};
+add (2) g37.0<1>D g50.0<8,1,8>D g50.16<8,1,8>D {align1};
+add (2) g38.0<1>D g52.0<8,1,8>D g52.16<8,1,8>D {align1};
+add (2) g39.0<1>D g54.0<8,1,8>D g54.16<8,1,8>D {align1};
+
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+dp4 (16) g40<1>D g[a0.0]<8,8,1>W g5<8,8,1>D {align1 compr};
+dp4 (16) g42<1>D g[a0.0]<8,8,1>W g7<8,8,1>D {align1 compr};
+dp4 (16) g44<1>D g[a0.0]<8,8,1>W g9<8,8,1>D {align1 compr};
+dp4 (16) g46<1>D g[a0.0]<8,8,1>W g11<8,8,1>D {align1 compr};
+dp4 (16) g48<1>D g[a0.0]<8,8,1>W g13<8,8,1>D {align1 compr};
+dp4 (16) g50<1>D g[a0.0]<8,8,1>W g15<8,8,1>D {align1 compr};
+dp4 (16) g52<1>D g[a0.0]<8,8,1>W g17<8,8,1>D {align1 compr};
+dp4 (16) g54<1>D g[a0.0]<8,8,1>W g19<8,8,1>D {align1 compr};
+add (2) g32.8<1>D g40.0<8,1,8>D g40.16<8,1,8>D {align1};
+add (2) g33.8<1>D g42.0<8,1,8>D g42.16<8,1,8>D {align1};
+add (2) g34.8<1>D g44.0<8,1,8>D g44.16<8,1,8>D {align1};
+add (2) g35.8<1>D g46.0<8,1,8>D g46.16<8,1,8>D {align1};
+add (2) g36.8<1>D g48.0<8,1,8>D g48.16<8,1,8>D {align1};
+add (2) g37.8<1>D g50.0<8,1,8>D g50.16<8,1,8>D {align1};
+add (2) g38.8<1>D g52.0<8,1,8>D g52.16<8,1,8>D {align1};
+add (2) g39.8<1>D g54.0<8,1,8>D g54.16<8,1,8>D {align1};
+
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+dp4 (16) g40<1>D g[a0.0]<8,8,1>W g5<8,8,1>D {align1 compr};
+dp4 (16) g42<1>D g[a0.0]<8,8,1>W g7<8,8,1>D {align1 compr};
+dp4 (16) g44<1>D g[a0.0]<8,8,1>W g9<8,8,1>D {align1 compr};
+dp4 (16) g46<1>D g[a0.0]<8,8,1>W g11<8,8,1>D {align1 compr};
+dp4 (16) g48<1>D g[a0.0]<8,8,1>W g13<8,8,1>D {align1 compr};
+dp4 (16) g50<1>D g[a0.0]<8,8,1>W g15<8,8,1>D {align1 compr};
+dp4 (16) g52<1>D g[a0.0]<8,8,1>W g17<8,8,1>D {align1 compr};
+dp4 (16) g54<1>D g[a0.0]<8,8,1>W g19<8,8,1>D {align1 compr};
+add (2) g32.16<1>D g40.0<8,1,8>D g40.16<8,1,8>D {align1};
+add (2) g33.16<1>D g42.0<8,1,8>D g42.16<8,1,8>D {align1};
+add (2) g34.16<1>D g44.0<8,1,8>D g44.16<8,1,8>D {align1};
+add (2) g35.16<1>D g46.0<8,1,8>D g46.16<8,1,8>D {align1};
+add (2) g36.16<1>D g48.0<8,1,8>D g48.16<8,1,8>D {align1};
+add (2) g37.16<1>D g50.0<8,1,8>D g50.16<8,1,8>D {align1};
+add (2) g38.16<1>D g52.0<8,1,8>D g52.16<8,1,8>D {align1};
+add (2) g39.16<1>D g54.0<8,1,8>D g54.16<8,1,8>D {align1};
+
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00200020UD {align1};
+dp4 (16) g40<1>D g[a0.0]<8,8,1>W g5<8,8,1>D {align1 compr};
+dp4 (16) g42<1>D g[a0.0]<8,8,1>W g7<8,8,1>D {align1 compr};
+dp4 (16) g44<1>D g[a0.0]<8,8,1>W g9<8,8,1>D {align1 compr};
+dp4 (16) g46<1>D g[a0.0]<8,8,1>W g11<8,8,1>D {align1 compr};
+dp4 (16) g48<1>D g[a0.0]<8,8,1>W g13<8,8,1>D {align1 compr};
+dp4 (16) g50<1>D g[a0.0]<8,8,1>W g15<8,8,1>D {align1 compr};
+dp4 (16) g52<1>D g[a0.0]<8,8,1>W g17<8,8,1>D {align1 compr};
+dp4 (16) g54<1>D g[a0.0]<8,8,1>W g19<8,8,1>D {align1 compr};
+add (2) g32.24<1>D g40.0<8,1,8>D g40.16<8,1,8>D {align1};
+add (2) g33.24<1>D g42.0<8,1,8>D g42.16<8,1,8>D {align1};
+add (2) g34.24<1>D g44.0<8,1,8>D g44.16<8,1,8>D {align1};
+add (2) g35.24<1>D g46.0<8,1,8>D g46.16<8,1,8>D {align1};
+add (2) g36.24<1>D g48.0<8,1,8>D g48.16<8,1,8>D {align1};
+add (2) g37.24<1>D g50.0<8,1,8>D g50.16<8,1,8>D {align1};
+add (2) g38.24<1>D g52.0<8,1,8>D g52.16<8,1,8>D {align1};
+add (2) g39.24<1>D g54.0<8,1,8>D g54.16<8,1,8>D {align1};
+
+add (1) ip g126.0<1,1,1>UD 0x20UD {align1};            //jump back

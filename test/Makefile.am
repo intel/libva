@@ -27,13 +27,14 @@ bin_PROGRAMS = vainfo
 
 testdir = $(bindir)
 
-AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src -DIN_LIBVA
+AM_CFLAGS = -I$(top_srcdir)/../../include/external/ -I$(top_srcdir)/src -I$(top_srcdir)/src/x11 -DIN_LIBVA
 
 TESTS = $(check_PROGRAMS)
 
-TEST_LIBS = ../src/libva.la
+TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib)
 
-vainfo_LDADD = ../src/libva.la
+vainfo_LDADD = $(top_srcdir)/src/$(libvabackendlib)
+vainfo_DEPENDENCIES = $(top_srcdir)/src/$(libvabackendlib)
 vainfo_SOURCES = vainfo.c
 
 test_01_LDADD = $(TEST_LIBS)
@@ -72,7 +73,7 @@ test_11_SOURCES = test_11.c
 test_12_LDADD = $(TEST_LIBS)
 test_12_SOURCES = test_12.c
 
-EXTRA_DIST = test_common.c
+EXTRA_DIST = test_common.c mpeg2-I.jpg mpeg2-I.mpg
 
 valgrind:	$(check_PROGRAMS)
 	for a in $(check_PROGRAMS); do \

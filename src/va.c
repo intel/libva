@@ -22,10 +22,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
-
-#include "va_version.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -35,14 +34,13 @@
 #include <unistd.h>
 
 #include <linux/videodev2.h>
+#include "va_dri.h"
+#include "va_dri2.h"
+#include "va_dricommon.h"
 
-#define VA_STR_VERSION		VA_BUILD_DATE VA_BUILD_GIT
 
-#define VA_MAJOR_VERSION	0
-#define VA_MINOR_VERSION	30
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_30"
+#define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
 
-#define DEFAULT_DRIVER_DIR	"/usr/lib/dri/"
 #define DRIVER_EXTENSION	"_drv_video.so"
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
@@ -57,7 +55,11 @@
 
 static int va_debug_trace = 0;
 
-int vaDisplayIsValid(VADisplay dpy);
+static int vaDisplayIsValid(VADisplay dpy)
+{
+  VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+  return pDisplayContext && pDisplayContext->vaIsValid(pDisplayContext);
+}
 
 static void va_errorMessage(const char *msg, ...)
 {
@@ -112,6 +114,7 @@ static Bool va_checkString(const char* value, char *variable)
 static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+
     return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
 }
 
@@ -134,11 +137,11 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
     if (!search_path)
     {
-        search_path = DEFAULT_DRIVER_DIR;
+        search_path = VA_DRIVERS_PATH;
     }
 
-    search_path = strdup(search_path);
-    driver_dir = strtok_r(search_path, ":", &saveptr);
+    search_path = strdup((const char *)search_path);
+    driver_dir = strtok_r((const char *)search_path, ":", &saveptr);
     while(driver_dir)
     {
         void *handle = NULL;
@@ -212,7 +215,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
                     CHECK_VTABLE(vaStatus, ctx, GetImage);
                     CHECK_VTABLE(vaStatus, ctx, PutImage);
-                    CHECK_VTABLE(vaStatus, ctx, PutImage2);
                     CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
@@ -220,7 +222,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
                     CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
                     CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture2);
                     CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
                     CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
                     CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
@@ -310,6 +311,8 @@ const char *vaErrorStr(VAStatus error_status)
             return "invalid parameter";
         case VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED:
             return "resolution not supported";
+        case VA_STATUS_ERROR_UNIMPLEMENTED:
+            return "the requested function is not implemented";
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
@@ -329,7 +332,7 @@ VAStatus vaInitialize (
 
   va_debug_trace = (getenv("LIBVA_DEBUG_TRACE") != NULL);
 
-  va_infoMessage("libva build on %s\n", VA_STR_VERSION);
+  va_infoMessage("libva version %s\n", VA_VERSION_S);
 
   vaStatus = va_getDriverName(dpy, &driver_name);
   va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
@@ -702,7 +705,6 @@ VAStatus vaEndPicture (
 
 VAStatus vaSyncSurface (
     VADisplay dpy,
-    VAContextID context,
     VASurfaceID render_target
 )
 {
@@ -711,7 +713,7 @@ VAStatus vaSyncSurface (
   ctx = CTX(dpy);
 
   TRACE(vaSyncSurface);
-  return ctx->vtable.vaSyncSurface( ctx, context, render_target );
+  return ctx->vtable.vaSyncSurface( ctx, render_target );
 }
 
 VAStatus vaQuerySurfaceStatus (
@@ -866,30 +868,6 @@ VAStatus vaPutImage (
     VAImageID image,
     int src_x,
     int src_y,
-    unsigned int width,
-    unsigned int height,
-    int dest_x,
-    int dest_y
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaPutImage);
-  return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, width, height, dest_x, dest_y );
-}
-
-/*
- * Similar to vaPutImage but with additional destination width
- * and height arguments to enable scaling
- */
-VAStatus vaPutImage2 (
-    VADisplay dpy,
-    VASurfaceID surface,
-    VAImageID image,
-    int src_x,
-    int src_y,
     unsigned int src_width,
     unsigned int src_height,
     int dest_x,
@@ -902,8 +880,8 @@ VAStatus vaPutImage2 (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaPutImage2);
-  return ctx->vtable.vaPutImage2 ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
+  TRACE(vaPutImage);
+  return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
 }
 
 /*
@@ -1087,32 +1065,6 @@ VAStatus vaAssociateSubpicture (
     int num_surfaces,
     short src_x, /* upper left offset in subpicture */
     short src_y,
-    short dest_x, /* upper left offset in surface */
-    short dest_y,
-    unsigned short width,
-    unsigned short height,
-    /*
-     * whether to enable chroma-keying or global-alpha
-     * see VA_SUBPICTURE_XXX values
-     */
-    unsigned int flags
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  TRACE(vaAssociateSubpicture);
-  return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, dest_x, dest_y, width, height, flags );
-}
-
-VAStatus vaAssociateSubpicture2 (
-    VADisplay dpy,
-    VASubpictureID subpicture,
-    VASurfaceID *target_surfaces,
-    int num_surfaces,
-    short src_x, /* upper left offset in subpicture */
-    short src_y,
     unsigned short src_width,
     unsigned short src_height,
     short dest_x, /* upper left offset in surface */
@@ -1130,8 +1082,8 @@ VAStatus vaAssociateSubpicture2 (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaAssociateSubpicture2);
-  return ctx->vtable.vaAssociateSubpicture2 ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
+  TRACE(vaAssociateSubpicture);
+  return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
 }
 
 /*

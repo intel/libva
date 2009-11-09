@@ -31,7 +31,7 @@
 
 #ifdef IN_LIBVA
 #include "va.h"
-#include "X11/va_x11.h"
+#include "x11/va_x11.h"
 #else
 #include <va/va.h>
 #include <va/va_x11.h>
@@ -175,7 +175,6 @@ struct VADriverVTable
 
 	VAStatus (*vaSyncSurface) (
 		VADriverContextP ctx,
-		VAContextID context,
 		VASurfaceID render_target
 	);
 
@@ -254,18 +253,6 @@ struct VADriverVTable
 		VAImageID image,
 		int src_x,
 		int src_y,
-		unsigned int width,
-		unsigned int height,
-		int dest_x,
-		int dest_y 
-	);
-
-	VAStatus (*vaPutImage2) (
-		VADriverContextP ctx,
-		VASurfaceID surface,
-		VAImageID image,
-		int src_x,
-		int src_y,
 		unsigned int src_width,
 		unsigned int src_height,
 		int dest_x,
@@ -297,7 +284,7 @@ struct VADriverVTable
                 VASubpictureID subpicture,
                 VAImageID image
         );
-        
+
 	VAStatus (*vaSetSubpictureChromakey) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
@@ -313,24 +300,6 @@ struct VADriverVTable
 	);
 
 	VAStatus (*vaAssociateSubpicture) (
-		VADriverContextP ctx,
-		VASubpictureID subpicture,
-		VASurfaceID *target_surfaces,
-		int num_surfaces,
-		short src_x, /* upper left offset in subpicture */
-		short src_y,
-		short dest_x, /* upper left offset in surface */
-		short dest_y,
-		unsigned short width,
-		unsigned short height,
-		/*
-		 * whether to enable chroma-keying or global-alpha
-		 * see VA_SUBPICTURE_XXX values
-		 */
-		unsigned int flags
-	);
-
-	VAStatus (*vaAssociateSubpicture2) (
 		VADriverContextP ctx,
 		VASubpictureID subpicture,
 		VASurfaceID *target_surfaces,
@@ -407,14 +376,11 @@ struct VADriverVTable
 
 struct VADriverContext
 {
-    void *old_pNext;			/* preserved for binary compatibility */
-
     void *pDriverData;
     struct VADriverVTable vtable;
 
     Display *x11_dpy;
     int x11_screen;
-    int dri2;
     int version_major;
     int version_minor;
     int max_profiles;
@@ -426,6 +392,8 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
+    
+    void *dri_state;
 };
 
 struct VADisplayContext

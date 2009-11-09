@@ -21,9 +21,21 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = src dummy_drv_video test
+
+SUBDIRS = src test
+if BUILD_DUMMY_DRIVER
+SUBDIRS += dummy_drv_video
+endif
+if BUILD_I965_DRIVER
+SUBDIRS += i965_drv_video
+endif
+
+pcfiles = libva.pc
+pcfiles += libva-x11.pc
 
 pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = libva.pc
+pkgconfig_DATA = $(pcfiles)
 
-EXTRA_DIST = libva.pc.in
+EXTRA_DIST = libva.pc.in libva-x11.pc.in
+
+CLEANFILES = $(pcfiles)

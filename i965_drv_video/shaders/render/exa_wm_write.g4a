@@ -1,0 +1,85 @@
+/*
+ * Copyright © 2006 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * Authors:
+ *    Wang Zhenyu <zhenyu.z.wang@intel.com>
+ *    Keith Packard <keithp@keithp.com>
+ */
+
+include(`exa_wm.g4i')
+
+/*
+ * Prepare data in m2-m5 for subspan(1,0), m6-m9 for subspan(3,2),
+ *
+ * Note that the SIMD16 write message takes data for the first
+ * two sub-spans followed by the data for the second two sub-spans
+ * instead of having the two sub-spans interleaved by channel. Weird.
+ */
+
+mov (8) data_port_r_01<1>F	g14<8,8,1>F { align1 };
+mov (8) data_port_g_01<1>F	g16<8,8,1>F { align1 };
+mov (8) data_port_b_01<1>F	g18<8,8,1>F { align1 };
+mov (8) data_port_a_01<1>F	src_sample_a_01<8,8,1>F { align1 };
+
+mov (8) data_port_r_23<1>F	src_sample_r_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_g_23<1>F	src_sample_g_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_b_23<1>F	src_sample_b_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_a_23<1>F 	src_sample_a_23<8,8,1>F { sechalf align1 };
+
+
+mov (8) data_port_r_01<1>F	src_sample_r_01<8,8,1>F { align1 };
+mov (8) data_port_g_01<1>F	src_sample_g_01<8,8,1>F { align1 };
+mov (8) data_port_b_01<1>F	src_sample_b_01<8,8,1>F { align1 };
+mov (8) data_port_a_01<1>F	src_sample_a_01<8,8,1>F { align1 };
+
+mov (8) data_port_r_23<1>F	src_sample_r_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_g_23<1>F	src_sample_g_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_b_23<1>F	src_sample_b_23<8,8,1>F { sechalf align1 };
+mov (8) data_port_a_23<1>F 	src_sample_a_23<8,8,1>F { sechalf align1 };
+
+/* m0, m1 are all direct passed by PS thread payload */
+mov (8) data_port_msg_1<1>UD	g1<8,8,1>UD		{ mask_disable align1 };
+
+/* write */
+send (16) 
+	data_port_msg_0_ind 
+	acc0<1>UW 
+	g0<8,8,1>UW 
+	write (
+	       0,  /* binding_table */
+	       8,  /* pixel scordboard clear, msg type simd16 single source */
+	       4,  /* render target write */
+	       0   /* no write commit message */
+	) 
+	mlen 10
+	rlen 0
+	{ align1 EOT };
+
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+

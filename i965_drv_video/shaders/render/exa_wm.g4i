@@ -1,0 +1,156 @@
+/*
+ * Copyright © 2006 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * Authors:
+ *    Wang Zhenyu <zhenyu.z.wang@intel.com>
+ *    Keith Packard <keithp@keithp.com>
+ */
+ 
+/*
+ * Input parameters
+ */
+
+/* Destination X/Y */
+define(`dst_x_uw',  `g1.8<2,4,0>UW')
+define(`dst_y_uw',  `g1.10<2,4,0>UW')
+define(`screen_x0', `g1.0<0,1,0>F')
+define(`screen_y0', `g1.4<0,1,0>F')
+
+/* Source transformation parameters */
+define(`src_du_dx', `g3.0<0,1,0>F')
+define(`src_du_dy', `g3.4<0,1,0>F')
+define(`src_uo',    `g3.12<0,1,0>F')
+define(`src_dv_dx', `g3.16<0,1,0>F')
+define(`src_dv_dy', `g3.20<0,1,0>F')
+define(`src_vo',    `g3.28<0,1,0>F')
+define(`src_dw_dx', `g4.0<0,1,0>F')
+define(`src_dw_dy', `g4.4<0,1,0>F')
+define(`src_wo',    `g4.12<0,1,0>F')
+
+define(`mask_du_dx', `g5.0<0,1,0>F')
+define(`mask_du_dy', `g5.4<0,1,0>F')
+define(`mask_uo',    `g5.12<0,1,0>F')
+define(`mask_dv_dx', `g5.16<0,1,0>F')
+define(`mask_dv_dy', `g5.20<0,1,0>F')
+define(`mask_vo',    `g5.28<0,1,0>F')
+define(`mask_dw_dx', `g6.0<0,1,0>F')
+define(`mask_dw_dy', `g6.4<0,1,0>F')
+define(`mask_wo',    `g6.12<0,1,0>F')
+
+/*
+ * Local variables. Pairs must be aligned on even reg boundry
+ */
+
+/* this holds the X dest coordinates */
+define(`dst_x',	    `g8')
+define(`dst_x_0',   `dst_x')
+define(`dst_x_1',   `g9')
+
+/* this holds the Y dest coordinates */
+define(`dst_y',	    `g10')
+define(`dst_y_0',   `dst_y')
+define(`dst_y_1',   `g11')
+
+/* When computing x * dn/dx, use this */
+define(`temp_x',    `g30')
+define(`temp_x_0',  `temp_x')
+define(`temp_x_1',  `g31')
+
+/* When computing y * dn/dy, use this */
+define(`temp_y',    `g28')
+define(`temp_y_0',  temp_y)
+define(`temp_y_1',  `g29')
+
+/* when loading x/y, use these to hold them in UW format */
+define(`temp_x_uw', temp_x)
+define(`temp_y_uw', temp_y)
+
+/* compute source and mask u/v to this pair to send to sampler */
+define(`src_msg',   `m1')
+define(`src_msg_ind',`1')
+define(`src_u',	    `m2')
+define(`src_v',	    `m4')
+define(`src_w',	    `g12')
+define(`src_w_0',   `src_w')
+define(`src_w_1',   `g13')
+
+define(`mask_msg',  `m7')
+define(`mask_msg_ind',`7')
+define(`mask_u',    `m8')
+define(`mask_v',    `m10')
+define(`mask_w',    `src_w')
+define(`mask_w_0',  `src_w_0')
+define(`mask_w_1',  `src_w_1')
+
+/* sample src to these registers */
+define(`src_sample_base',	`g14')
+
+define(`src_sample_r',		`g14')
+define(`src_sample_r_01',	`g14')
+define(`src_sample_r_23',	`g15')
+
+define(`src_sample_g',		`g16')
+define(`src_sample_g_01',	`g16')
+define(`src_sample_g_23',	`g17')
+
+define(`src_sample_b',		`g18')
+define(`src_sample_b_01',	`g18')
+define(`src_sample_b_23',	`g19')
+
+define(`src_sample_a',		`g20')
+define(`src_sample_a_01',	`g20')
+define(`src_sample_a_23',	`g21')
+
+/* sample mask to these registers */
+define(`mask_sample_base',	`g22')
+    
+define(`mask_sample_r',		`g22')
+define(`mask_sample_r_01',	`g22')
+define(`mask_sample_r_23',	`g23')
+    
+define(`mask_sample_g',		`g24')
+define(`mask_sample_g_01',	`g24')
+define(`mask_sample_g_23',	`g25')
+    
+define(`mask_sample_b',		`g26')
+define(`mask_sample_b_01',	`g26')
+define(`mask_sample_b_23',	`g27')
+    
+define(`mask_sample_a',		`g28')
+define(`mask_sample_a_01',	`g28')
+define(`mask_sample_a_23',	`g29')
+
+/* data port SIMD16 send registers */
+
+define(`data_port_msg_0',	`m0')
+define(`data_port_msg_0_ind',	`0')
+define(`data_port_msg_1',	`m1')
+define(`data_port_r_01',	`m2')
+define(`data_port_g_01',	`m3')
+define(`data_port_b_01',	`m4')
+define(`data_port_a_01',	`m5')
+
+define(`data_port_r_23',	`m6')
+define(`data_port_g_23',	`m7')
+define(`data_port_b_23',	`m8')
+define(`data_port_a_23',	`m9')
+

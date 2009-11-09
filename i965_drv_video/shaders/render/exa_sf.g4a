@@ -1,0 +1,107 @@
+/*
+ * Copyright © 2006 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * Authors:
+ *    Keith Packard <keithp@keithp.com>
+ *    Eric Anholt <eric@anholt.net>
+ *
+ */
+
+/*
+ * Inputs (note all sub-register addresses are bytes, not float indices)
+ *
+ * Note that the vertices will have been reordered:
+ *
+ * V0 is topmost (leftmost among topmost) (upper left)
+ * V1 is next clockwise (lower right)
+ * V2 is remaining (lower left)
+ *
+ *  V0 ...................... XX
+ *  |                          .
+ *  |                          .
+ *  |                          .
+ *  V2------------------------V1
+ *
+ *  G0	    thread state -- just pass along
+ *
+ *  G1 and G2 are fixed by SF spec
+ *
+ *  G1.0    reserved
+ *  G1.4    Provoking vertex
+ *  G1.8    Determinant
+ *  G1.12   X1 - X0
+ *  G1.16   X2 - X0
+ *  G1.20   Y1 - Y0
+ *  G1.24   Y2 - Y0
+ *  G1.30   reserved
+ *
+ *  G2.0    Z0
+ *  G2.4    1/W0
+ *  G2.8    Z1
+ *  G2.12   1/W1
+ *  G2.16   Z2
+ *  G2.20   1/W2
+ *  G2.24   reserved
+ *  G2.30   reserved
+ *
+ *  G3 is V0 Vertex Attribute Data from URB (upper left)
+ *
+ *  G3.0    u0
+ *  G3.4    v0
+ *
+ *  G4 is V1 Vertex Attribute Data from URB (lower right)
+ *
+ *  G4.0    u1
+ *  G4.4    v1
+ *
+ *  G5 is V2 Vertex Attribute Data from URB (lower left)
+ *
+ */
+
+/* Compute inverses of the input deltas */
+send (4) 0 g6<1>F g1.12<4,4,1>F math inv mlen 1 rlen 1 { align1 };
+
+/* texture location at V0 */
+mov (4) m3<1>F g3<4,4,1>F { align1 };
+
+/* compute V1 - V2 (motion in X) for texture coordinates */
+add (4) g7<1>F g4<4,4,1>F -g5<4,4,1>F { align1 };
+
+/* multiply by 1/dx */
+mul (4) m1<1>F g7<4,4,1>F g6.0<0,1,0>F { align1 };
+
+/* Compute V2 - V0 (motion in Y) for texture coordinates */
+add (4) g7<1>F g5<4,4,1>F -g3<4,4,1>F { align1 };
+
+/* multiply by 1/dy */
+mul (4) m2<1>F g7<4,4,1>F g6.8<0,1,0>F {align1 };
+
+/* and we're done */
+send (8) 0 null g0<8,8,1>F urb 0 transpose used complete mlen 4 rlen 0 { align1 EOT };
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;

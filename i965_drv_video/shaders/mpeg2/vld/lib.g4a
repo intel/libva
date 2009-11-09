@@ -1,0 +1,190 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix in UB format
+           g3~g4:non intra IQ matrix in UB format
+           g5~g20:IDCT table
+   g32~g55:DCT data before IQ
+   g56~g79:DCT data after IQ
+   g83~g106: IDCT data after idct
+   g82:    thread payload backup
+   g125:   ip before jump
+*/
+include(`iq_non_intra.g4i')
+
+define(`ROW_SHIFT', `11UD') //define for idct
+define(`ROW_ADD', `0x400UD')            
+define(`COL_SHIFT', `20UD') 
+define(`COL_ADD', `0x80000UD')           
+
+mov (1) a0.0<1>UD 0x06F006E0UD {align1};//0x06F006E0UD+0x00200020UD=0x07100700UD (g56.0 and g56.16,the start of DCT data)
+
+//Y0
+and.nz (1) null g82.8<1,1,1>UW 0x800UW {align1};
+(f0) jmpi do_idct_y0;
+
+mov (8) g83.0<1>UW 0UW {align1}; 
+mov (8) g84.0<1>UW 0UW {align1}; 
+mov (8) g85.0<1>UW 0UW {align1}; 
+mov (8) g86.0<1>UW 0UW {align1}; 
+mov (8) g87.0<1>UW 0UW {align1}; 
+mov (8) g88.0<1>UW 0UW {align1}; 
+mov (8) g89.0<1>UW 0UW {align1}; 
+mov (8) g90.0<1>UW 0UW {align1}; 
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00800080UD {align1};
+jmpi block_y1;
+do_idct_y0:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (8) g83.0<1>W g32.0<16,8,2>W {align1};
+mov (8) g84.0<1>W g33.0<16,8,2>W {align1};
+mov (8) g85.0<1>W g34.0<16,8,2>W {align1};
+mov (8) g86.0<1>W g35.0<16,8,2>W {align1};
+mov (8) g87.0<1>W g36.0<16,8,2>W {align1};
+mov (8) g88.0<1>W g37.0<16,8,2>W {align1};
+mov (8) g89.0<1>W g38.0<16,8,2>W {align1};
+mov (8) g90.0<1>W g39.0<16,8,2>W {align1};
+
+//Y1
+block_y1:
+and.nz (1) null g82.8<1,1,1>UW 0x400UW {align1};
+(f0) jmpi do_idct_y1;
+mov (8) g83.16<1>UW 0UW {align1}; 
+mov (8) g84.16<1>UW 0UW {align1}; 
+mov (8) g85.16<1>UW 0UW {align1}; 
+mov (8) g86.16<1>UW 0UW {align1}; 
+mov (8) g87.16<1>UW 0UW {align1}; 
+mov (8) g88.16<1>UW 0UW {align1}; 
+mov (8) g89.16<1>UW 0UW {align1}; 
+mov (8) g90.16<1>UW 0UW {align1}; 
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00800080UD {align1};
+jmpi block_y2;
+do_idct_y1:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (8) g83.16<1>W g32.0<16,8,2>W {align1};
+mov (8) g84.16<1>W g33.0<16,8,2>W {align1};
+mov (8) g85.16<1>W g34.0<16,8,2>W {align1};
+mov (8) g86.16<1>W g35.0<16,8,2>W {align1};
+mov (8) g87.16<1>W g36.0<16,8,2>W {align1};
+mov (8) g88.16<1>W g37.0<16,8,2>W {align1};
+mov (8) g89.16<1>W g38.0<16,8,2>W {align1};
+mov (8) g90.16<1>W g39.0<16,8,2>W {align1};
+
+//Y2
+block_y2:
+and.nz (1) null g82.8<1,1,1>UW 0x200UW {align1};
+(f0) jmpi do_idct_y2;
+mov (8) g91.0<1>UW 0UW {align1}; 
+mov (8) g92.0<1>UW 0UW {align1}; 
+mov (8) g93.0<1>UW 0UW {align1}; 
+mov (8) g94.0<1>UW 0UW {align1}; 
+mov (8) g95.0<1>UW 0UW {align1}; 
+mov (8) g96.0<1>UW 0UW {align1}; 
+mov (8) g97.0<1>UW 0UW {align1}; 
+mov (8) g98.0<1>UW 0UW {align1}; 
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00800080UD {align1};
+jmpi block_y3;
+do_idct_y2:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (8) g91.0<1>W g32.0<16,8,2>W {align1};
+mov (8) g92.0<1>W g33.0<16,8,2>W {align1};
+mov (8) g93.0<1>W g34.0<16,8,2>W {align1};
+mov (8) g94.0<1>W g35.0<16,8,2>W {align1};
+mov (8) g95.0<1>W g36.0<16,8,2>W {align1};
+mov (8) g96.0<1>W g37.0<16,8,2>W {align1};
+mov (8) g97.0<1>W g38.0<16,8,2>W {align1};
+mov (8) g98.0<1>W g39.0<16,8,2>W {align1};
+
+//Y3
+block_y3:
+and.nz (1) null g82.8<1,1,1>UW 0x100UW {align1};
+(f0) jmpi do_idct_y3;
+mov (8) g91.16<1>UW 0UW {align1}; 
+mov (8) g92.16<1>UW 0UW {align1}; 
+mov (8) g93.16<1>UW 0UW {align1}; 
+mov (8) g94.16<1>UW 0UW {align1}; 
+mov (8) g95.16<1>UW 0UW {align1}; 
+mov (8) g96.16<1>UW 0UW {align1}; 
+mov (8) g97.16<1>UW 0UW {align1}; 
+mov (8) g98.16<1>UW 0UW {align1}; 
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00800080UD {align1};
+jmpi block_u;
+do_idct_y3:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (8) g91.16<1>W g32.0<16,8,2>W {align1};
+mov (8) g92.16<1>W g33.0<16,8,2>W {align1};
+mov (8) g93.16<1>W g34.0<16,8,2>W {align1};
+mov (8) g94.16<1>W g35.0<16,8,2>W {align1};
+mov (8) g95.16<1>W g36.0<16,8,2>W {align1};
+mov (8) g96.16<1>W g37.0<16,8,2>W {align1};
+mov (8) g97.16<1>W g38.0<16,8,2>W {align1};
+mov (8) g98.16<1>W g39.0<16,8,2>W {align1};
+
+//U
+block_u:
+and.nz (1) null g82.8<1,1,1>UW 0x80UW {align1};
+(f0) jmpi do_idct_u;
+mov (16) g99.0<1>UW 0UW {align1}; 
+mov (16) g100.0<1>UW 0UW {align1}; 
+mov (16) g101.0<1>UW 0UW {align1}; 
+mov (16) g102.0<1>UW 0UW {align1}; 
+add (1) a0.0<1>UD a0.0<1,1,1>UD 0x00800080UD {align1};
+jmpi block_v;
+do_idct_u:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (16) g99.0<1>W g32.0<16,8,2>W {align1};
+mov (16) g100.0<1>W g34.0<16,8,2>W {align1};
+mov (16) g101.0<1>W g36.0<16,8,2>W {align1};
+mov (16) g102.0<1>W g38.0<16,8,2>W {align1};
+
+//V
+block_v:
+and.nz (1) null g82.8<1,1,1>UW 0x40UW {align1};
+(f0) jmpi do_idct_v;
+mov (16) g103.0<1>UW 0UW {align1}; 
+mov (16) g104.0<1>UW 0UW {align1}; 
+mov (16) g105.0<1>UW 0UW {align1}; 
+mov (16) g106.0<1>UW 0UW {align1};  
+jmpi block_end;
+do_idct_v:
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+mov (16) g103.0<1>W g32.0<16,8,2>W {align1};
+mov (16) g104.0<1>W g34.0<16,8,2>W {align1};
+mov (16) g105.0<1>W g36.0<16,8,2>W {align1};
+mov (16) g106.0<1>W g38.0<16,8,2>W {align1};
+block_end:
+
+add (1) ip g126.8<1,1,1>UD 0x20UD {align1};            //jump back
+include(`do_iq_non_intra.g4i')
+include(`idct.g4i')

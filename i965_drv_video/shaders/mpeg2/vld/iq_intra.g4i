@@ -1,0 +1,131 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/* GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix in UB format
+           g3~g4:non intra IQ matrix in UB format
+           g5~g20:IDCT table
+   g32~g55:DCT data before IQ
+   g56~g79:DCT data after IQ
+   g82:    thread payload backup
+   g109:   g109.0:q_scale_code, g109.4:intra_dc_mult, 
+   g110:   q_scale_code
+   g111:   intra DC coefficient 
+   g112~g115: intra IQ matrix in UW format (in order to use instruction compress), copys from g1~g2
+   g125:   ip before jump
+*/
+and (1) g109.0<1>UW g82.8<1,1,1>UW 0x1fUW {align1};    //q_scale_code
+
+and (1) g109.4<1>UW g82.8<1,1,1>UW 0x6000UW {align1};   //intra_dc_presion
+shr (1) g109.4<1>UW g109.4<1,1,1>UW 13UW {align1};
+mov (1) g109.6<1>UW 0x8UW {align1};
+shr (1) g109.4<1>UW g109.6<1,1,1>UW g109.4<1,1,1>UW {align1};  //intra_dc_mult
+ 
+and.z (1) null g82.8<1,1,1>UW 0x20UW {align1};   //if(q_scale_type==0) q_scale=q_scale_code*2;
+(f0) jmpi Q_SCALE_TYPE_0;
+
+cmp.l (1) null g109.0<1,1,1>UW 9UW {align1};      //if(q_scale_type!=0) calculate q_scale
+(f0) jmpi DO_IQ;
+cmp.l (1) null g109.0<1,1,1>UW 17UW {align1};
+(f0) jmpi RANG_9_16;
+cmp.l (1) null g109.0<1,1,1>UW 25UW {align1};
+(f0) jmpi RANG_17_24;
+
+RANG_25_31:
+add (1) g109.0<1>UW g109.0<1,1,1>UW -25W {align1};
+shl (1) g109.0<1>UW g109.0<1,1,1>UW 3UW {align1};
+add (1) g109.0<1>UW g109.0<1,1,1>UW 64UW {align1};
+jmpi DO_IQ;
+
+RANG_9_16:
+add (1) g109.0<1>UW g109.0<1,1,1>UW -9W {align1};
+shl (1) g109.0<1>UW g109.0<1,1,1>UW 1UW {align1};
+add (1) g109.0<1>UW g109.0<1,1,1>UW 10UW {align1};
+jmpi DO_IQ;
+
+RANG_17_24:
+add (1) g109.0<1>UW g109.0<1,1,1>UW -17W {align1};
+shl (1) g109.0<1>UW g109.0<1,1,1>UW 2UW {align1};
+add (1) g109.0<1>UW g109.0<1,1,1>UW 28UW {align1};
+jmpi DO_IQ;
+
+Q_SCALE_TYPE_0:
+shl (1) g109.0<1>UW g109.0<1,1,1>UW 1UD {align1};
+
+DO_IQ:
+mov (1) g110.0<1>UW g109.0<1,1,1>UW {align1};
+
+mov (16) g112.0<1>UW g1.0<16,16,1>UB {align1};
+mov (16) g113.0<1>UW g1.16<16,16,1>UB {align1};
+mov (16) g114.0<1>UW g2.0<16,16,1>UB {align1};
+mov (16) g115.0<1>UW g2.16<16,16,1>UB {align1};
+
+mov (1) a0.0<1>UD 0x03F003E0UD {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g56.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g57.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g58.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g59.0<1>W g122.0<16,8,2>W {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g60.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g61.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g62.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g63.0<1>W g122.0<16,8,2>W {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g64.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g65.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g66.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g67.0<1>W g122.0<16,8,2>W {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g68.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g69.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g70.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g71.0<1>W g122.0<16,8,2>W {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g72.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g73.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g74.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g75.0<1>W g122.0<16,8,2>W {align1};
+
+mov (1) g125.0<1>UD ip {align1};
+jmpi DO_IQ_INTRA;
+mov (16) g76.0<1>W g116.0<16,8,2>W {align1};
+mov (16) g77.0<1>W g118.0<16,8,2>W {align1};
+mov (16) g78.0<1>W g120.0<16,8,2>W {align1};
+mov (16) g79.0<1>W g122.0<16,8,2>W {align1};
+

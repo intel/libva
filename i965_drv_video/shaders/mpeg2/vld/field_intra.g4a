@@ -1,0 +1,209 @@
+/*
+ * Copyright © 2009 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Author:
+ *    Zou Nan hai <nanhai.zou@intel.com>
+ *    Yan Li <li.l.yan@intel.com>
+ *    Liu Xi bin<xibin.liu@intel.com>
+ */
+/*
+   GRF allocation:
+   g1~g30: constant buffer
+           g1~g2:intra IQ matrix
+           g3~g4:non intra IQ matrix
+           g5~g20:IDCT tab
+   g31:    read and write message descriptor
+   g32~g55:DCT data
+   g58~g81:reference data
+   g82:    thread payload 
+   g83~g106:IDCT data 
+*/
+mov (8) g82.0<1>UD g31.0<8,8,1>UD {align1};
+mov (2) g31.0<1>UD g82.12<2,2,1>UW {align1};
+
+include(`iq_intra.g4i')
+
+//defined for idct
+define(`ROW_SHIFT', `11UD') 
+define(`ROW_ADD', `0x400UD')          
+define(`COL_SHIFT', `20UD') 
+define(`COL_ADD', `0x80000UD')          
+
+mov (1) a0.0<1>UD 0x06F006E0UD {align1};      //0x06F006E0UD+0x00200020UD=0x07100700UD (g56.0 and g56.16)
+
+//Y0
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (8) g83.0<1>W g32.0<16,8,2>W 128UW {align1};
+add (8) g84.0<1>W g33.0<16,8,2>W 128UW {align1};
+add (8) g85.0<1>W g34.0<16,8,2>W 128UW {align1};
+add (8) g86.0<1>W g35.0<16,8,2>W 128UW {align1};
+add (8) g87.0<1>W g36.0<16,8,2>W 128UW {align1};
+add (8) g88.0<1>W g37.0<16,8,2>W 128UW {align1};
+add (8) g89.0<1>W g38.0<16,8,2>W 128UW {align1};
+add (8) g90.0<1>W g39.0<16,8,2>W 128UW {align1};
+
+//Y1
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (8) g83.16<1>W g32.0<16,8,2>W 128UW {align1};
+add (8) g84.16<1>W g33.0<16,8,2>W 128UW {align1};
+add (8) g85.16<1>W g34.0<16,8,2>W 128UW {align1};
+add (8) g86.16<1>W g35.0<16,8,2>W 128UW {align1};
+add (8) g87.16<1>W g36.0<16,8,2>W 128UW {align1};
+add (8) g88.16<1>W g37.0<16,8,2>W 128UW {align1};
+add (8) g89.16<1>W g38.0<16,8,2>W 128UW {align1};
+add (8) g90.16<1>W g39.0<16,8,2>W 128UW {align1};
+
+//Y2
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (8) g91.0<1>W g32.0<16,8,2>W 128UW {align1};
+add (8) g92.0<1>W g33.0<16,8,2>W 128UW {align1};
+add (8) g93.0<1>W g34.0<16,8,2>W 128UW {align1};
+add (8) g94.0<1>W g35.0<16,8,2>W 128UW {align1};
+add (8) g95.0<1>W g36.0<16,8,2>W 128UW {align1};
+add (8) g96.0<1>W g37.0<16,8,2>W 128UW {align1};
+add (8) g97.0<1>W g38.0<16,8,2>W 128UW {align1};
+add (8) g98.0<1>W g39.0<16,8,2>W 128UW {align1};
+
+//Y3
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (8) g91.16<1>W g32.0<16,8,2>W 128UW {align1};
+add (8) g92.16<1>W g33.0<16,8,2>W 128UW {align1};
+add (8) g93.16<1>W g34.0<16,8,2>W 128UW {align1};
+add (8) g94.16<1>W g35.0<16,8,2>W 128UW {align1};
+add (8) g95.16<1>W g36.0<16,8,2>W 128UW {align1};
+add (8) g96.16<1>W g37.0<16,8,2>W 128UW {align1};
+add (8) g97.16<1>W g38.0<16,8,2>W 128UW {align1};
+add (8) g98.16<1>W g39.0<16,8,2>W 128UW {align1};
+
+//U
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (16) g99.0<1>W g32.0<16,8,2>W 128UW {align1};
+add (16) g100.0<1>W g34.0<16,8,2>W 128UW {align1};
+add (16) g101.0<1>W g36.0<16,8,2>W 128UW {align1};
+add (16) g102.0<1>W g38.0<16,8,2>W 128UW {align1};
+
+//V
+mov (1) g125.0<1>UD ip {align1};
+jmpi IDCT_START;
+add (16) g103.0<1>W g32.0<16,8,2>W 128UW {align1};
+add (16) g104.0<1>W g34.0<16,8,2>W 128UW {align1};
+add (16) g105.0<1>W g36.0<16,8,2>W 128UW {align1};
+add (16) g106.0<1>W g38.0<16,8,2>W 128UW {align1};
+
+//send msg
+mov (1) g31.8<1>UD 0x00F000FUD {align1};
+mov.sat (16) g83.0<2>UB g83.0<16,16,1>W {align1};
+mov.sat (16) g84.0<2>UB g84.0<16,16,1>W {align1};
+mov.sat (16) g85.0<2>UB g85.0<16,16,1>W {align1};
+mov.sat (16) g86.0<2>UB g86.0<16,16,1>W {align1};
+mov.sat (16) g87.0<2>UB g87.0<16,16,1>W {align1};
+mov.sat (16) g88.0<2>UB g88.0<16,16,1>W {align1};
+mov.sat (16) g89.0<2>UB g89.0<16,16,1>W {align1};
+mov.sat (16) g90.0<2>UB g90.0<16,16,1>W {align1};
+mov.sat (16) g91.0<2>UB g91.0<16,16,1>W {align1};
+mov.sat (16) g92.0<2>UB g92.0<16,16,1>W {align1};
+mov.sat (16) g93.0<2>UB g93.0<16,16,1>W {align1};
+mov.sat (16) g94.0<2>UB g94.0<16,16,1>W {align1};
+mov.sat (16) g95.0<2>UB g95.0<16,16,1>W {align1};
+mov.sat (16) g96.0<2>UB g96.0<16,16,1>W {align1};
+mov.sat (16) g97.0<2>UB g97.0<16,16,1>W {align1};
+mov.sat (16) g98.0<2>UB g98.0<16,16,1>W {align1};
+
+and.nz (1) null g82.2<1,1,1>UW 0x20UW{align1};
+(f0) jmpi field_dct;
+
+mov (16) m1.0<1>UB  g83.0<16,16,2>UB {align1};
+mov (16) m1.16<1>UB g84.0<16,16,2>UB {align1};
+mov (16) m2.0<1>UB  g85.0<16,16,2>UB {align1};
+mov (16) m2.16<1>UB g86.0<16,16,2>UB {align1};
+mov (16) m3.0<1>UB  g87.0<16,16,2>UB {align1};
+mov (16) m3.16<1>UB g88.0<16,16,2>UB {align1};
+mov (16) m4.0<1>UB  g89.0<16,16,2>UB {align1};
+mov (16) m4.16<1>UB g90.0<16,16,2>UB {align1};
+mov (16) m5.0<1>UB  g91.0<16,16,2>UB {align1};
+mov (16) m5.16<1>UB g92.0<16,16,2>UB {align1};
+mov (16) m6.0<1>UB  g93.0<16,16,2>UB {align1};
+mov (16) m6.16<1>UB g94.0<16,16,2>UB {align1};
+mov (16) m7.0<1>UB  g95.0<16,16,2>UB {align1};
+mov (16) m7.16<1>UB g96.0<16,16,2>UB {align1};
+mov (16) m8.0<1>UB  g97.0<16,16,2>UB {align1};
+mov (16) m8.16<1>UB g98.0<16,16,2>UB {align1};
+jmpi write_back;
+
+field_dct:
+mov (16) m1.0<1>UB  g83.0<16,16,2>UB {align1};
+mov (16) m1.16<1>UB g91.0<16,16,2>UB {align1};
+mov (16) m2.0<1>UB  g84.0<16,16,2>UB {align1};
+mov (16) m2.16<1>UB g92.0<16,16,2>UB {align1};
+mov (16) m3.0<1>UB  g85.0<16,16,2>UB {align1};
+mov (16) m3.16<1>UB g93.0<16,16,2>UB {align1};
+mov (16) m4.0<1>UB  g86.0<16,16,2>UB {align1};
+mov (16) m4.16<1>UB g94.0<16,16,2>UB {align1};
+mov (16) m5.0<1>UB  g87.0<16,16,2>UB {align1};
+mov (16) m5.16<1>UB g95.0<16,16,2>UB {align1};
+mov (16) m6.0<1>UB  g88.0<16,16,2>UB {align1};
+mov (16) m6.16<1>UB g96.0<16,16,2>UB {align1};
+mov (16) m7.0<1>UB  g89.0<16,16,2>UB {align1};
+mov (16) m7.16<1>UB g97.0<16,16,2>UB {align1};
+mov (16) m8.0<1>UB  g90.0<16,16,2>UB {align1};
+mov (16) m8.16<1>UB g98.0<16,16,2>UB {align1};
+
+write_back:
+send (16) 0 acc0<1>UW g31<8,8,1>UW write(0,0,2,0) mlen 9 rlen 0 {align1};
+
+//U
+mov (1) g31.8<1>UD 0x0070007UD  { align1 };
+shr (2) g31.0<1>UD g82.12<2,2,1>UW 1D {align1};
+mov.sat (16) g99.0<2>UB g99.0<16,16,1>W {align1};
+mov.sat (16) g100.0<2>UB g100.0<16,16,1>W {align1};
+mov.sat (16) g101.0<2>UB g101.0<16,16,1>W {align1};
+mov.sat (16) g102.0<2>UB g102.0<16,16,1>W {align1};
+
+mov (16) m1.0<1>UB  g99.0<16,16,2>UB {align1};
+mov (16) m1.16<1>UB g100.0<16,16,2>UB {align1};
+mov (16) m2.0<1>UB  g101.0<16,16,2>UB {align1};
+mov (16) m2.16<1>UB g102.0<16,16,2>UB {align1};
+send (16) 0 acc0<1>UW g31<8,8,1>UW write(1, 0, 2, 0) mlen 3 rlen 0 { align1 };
+
+//V
+mov.sat (16) g103.0<2>UB g103.0<16,16,1>W {align1};
+mov.sat (16) g104.0<2>UB g104.0<16,16,1>W {align1};
+mov.sat (16) g105.0<2>UB g105.0<16,16,1>W {align1};
+mov.sat (16) g106.0<2>UB g106.0<16,16,1>W {align1};
+
+mov (16) m1.0<1>UB  g103.0<16,16,2>UB {align1};
+mov (16) m1.16<1>UB g104.0<16,16,2>UB {align1};
+mov (16) m2.0<1>UB  g105.0<16,16,2>UB {align1};
+mov (16) m2.16<1>UB g106.0<16,16,2>UB {align1};
+send (16) 0 acc0<1>UW g31<8,8,1>UW write(2, 0, 2, 0) mlen 3 rlen 0 { align1 };
+
+OUT:
+send (16) 0 acc0<1>UW g0<8,8,1>UW
+        thread_spawner(0, 0, 0) mlen 1 rlen 0 { align1 EOT};
+
+include(`do_iq_intra.g4i')
+include(`idct.g4i')

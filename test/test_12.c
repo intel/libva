@@ -24,7 +24,12 @@
 
 #define TEST_DESCRIPTION	"Sample MPEG2 VLD Decoding"
 
+#ifdef IN_LIBVA
 #include <va_x11.h>
+#else
+#include <va/va_x11.h>
+#endif
+
 #include "test_common.c"
 
 #include <sys/types.h>
@@ -217,7 +222,7 @@ void test()
     va_status = vaEndPicture(va_dpy,vaContext);
     ASSERT( VA_STATUS_SUCCESS == va_status );
 
-    va_status = vaSyncSurface(va_dpy, vaContext, vaSurface);
+    va_status = vaSyncSurface(va_dpy, vaSurface);
     ASSERT( VA_STATUS_SUCCESS == va_status );
     
     win = XCreateSimpleWindow(dpy, RootWindow(dpy, 0), 0, 0,
