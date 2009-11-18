@@ -91,7 +91,7 @@ struct object_surface
     struct object_base base;
     VASurfaceStatus status;
     VASubpictureID subpic;
-	int width;
+    int width;
     int height;
     int size;
     dri_bo *bo;
@@ -118,12 +118,12 @@ struct object_subpic
 {
     struct object_base base;
     VAImageID image;
-	int dstx;
-	int dsty;
-	int width;
-	int height;
-	unsigned char palette[3][16];
-	dri_bo *bo;
+    VARectangle src_rect;
+    VARectangle dst_rect;
+    int width;
+    int height;
+    unsigned char palette[3][16];
+    dri_bo *bo;
 };
 
 

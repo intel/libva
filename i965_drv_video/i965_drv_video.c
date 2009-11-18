@@ -499,8 +499,14 @@ i965_AssociateSubpicture(VADriverContextP ctx,
     struct object_subpic *obj_subpic = SUBPIC(subpicture);
     int i;
 
-    obj_subpic->dstx = dest_x;
-    obj_subpic->dsty = dest_y;
+    obj_subpic->src_rect.x      = src_x;
+    obj_subpic->src_rect.y      = src_y;
+    obj_subpic->src_rect.width  = src_width;
+    obj_subpic->src_rect.height = src_height;
+    obj_subpic->dst_rect.x      = dest_x;
+    obj_subpic->dst_rect.y      = dest_y;
+    obj_subpic->dst_rect.width  = dest_width;
+    obj_subpic->dst_rect.height = dest_height;
 
     for (i = 0; i < num_surfaces; i++) {
         struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
