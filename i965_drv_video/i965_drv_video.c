@@ -293,6 +293,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
 
         surfaces[i] = surfaceID;
         obj_surface->status = VASurfaceReady;
+        obj_surface->subpic = VA_INVALID_ID;
         obj_surface->width = width;
         obj_surface->height = height;
         obj_surface->size = SIZE_YUV420(width, height);
@@ -495,22 +496,18 @@ i965_AssociateSubpicture(VADriverContextP ctx,
                          unsigned int flags)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    /*only ipicture*/
-	
-    struct object_surface *obj_surface = SURFACE(*target_surfaces);
     struct object_subpic *obj_subpic = SUBPIC(subpicture);
+    int i;
 
-    if (NULL == obj_surface) {
-        vaStatus = VA_STATUS_ERROR_INVALID_CONFIG;
-        return vaStatus;
-    }
-  
     obj_subpic->dstx = dest_x;
     obj_subpic->dsty = dest_y;
 
-    obj_surface->subpic = subpicture;
-
+    for (i = 0; i < num_surfaces; i++) {
+        struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
+        if (!obj_surface)
+            return VA_STATUS_ERROR_INVALID_SURFACE;
+        obj_surface->subpic = subpicture;
+    }
     return VA_STATUS_SUCCESS;
 }
 
@@ -521,6 +518,16 @@ i965_DeassociateSubpicture(VADriverContextP ctx,
                            VASurfaceID *target_surfaces,
                            int num_surfaces)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    int i;
+
+    for (i = 0; i < num_surfaces; i++) {
+        struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
+        if (!obj_surface)
+            return VA_STATUS_ERROR_INVALID_SURFACE;
+        if (obj_surface->subpic == subpicture)
+            obj_surface->subpic = VA_INVALID_ID;
+    }
     return VA_STATUS_SUCCESS;
 }
 
@@ -1317,7 +1324,7 @@ i965_PutSurface(VADriverContextP ctx,
                             srcx, srcy, srcw, srch,
                             destx, desty, destw, desth);
     obj_surface = SURFACE(surface);
-    if(obj_surface->subpic != 0) {	
+    if(obj_surface->subpic != VA_INVALID_ID) {	
 	i965_render_put_subpic(ctx, surface,
                            srcx, srcy, srcw, srch,
                            destx, desty, destw, desth);
