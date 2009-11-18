@@ -1322,8 +1322,8 @@ __vaDriverInit_0_31(  VADriverContextP ctx )
     struct i965_driver_data *i965;
     int result;
 
-    ctx->version_major = 0;
-    ctx->version_minor = 29;
+    ctx->version_major = VA_MAJOR_VERSION;
+    ctx->version_minor = VA_MINOR_VERSION;
     ctx->max_profiles = I965_MAX_PROFILES;
     ctx->max_entrypoints = I965_MAX_ENTRYPOINTS;
     ctx->max_attributes = I965_MAX_CONFIG_ATTRIBUTES;
