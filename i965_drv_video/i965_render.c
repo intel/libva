@@ -580,17 +580,31 @@ i965_render_src_surface_state(VADriverContextP ctx,
     render_state->wm.surface[index] = ss_bo;
     render_state->wm.sampler_count++;
 }
+
 static void
 i965_subpic_render_src_surface_state(VADriverContextP ctx, 
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h)
+                              int w, int h, int fourcc)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct i965_surface_state *ss;
     dri_bo *ss_bo;
+    int surface_format;
+
+    switch (fourcc) {
+    case VA_FOURCC('I','A','4','4'):
+        surface_format = I965_SURFACEFORMAT_P4A4_UNORM;
+        break;
+    case VA_FOURCC('A','I','4','4'):
+        surface_format = I965_SURFACEFORMAT_A4P4_UNORM;
+        break;
+    default:
+        assert(0); /* XXX: fix supported subpicture formats */
+        break;
+    }
 
     ss_bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "surface state", 
@@ -601,7 +615,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     ss = ss_bo->virtual;
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
-    ss->ss0.surface_format = I965_SURFACEFORMAT_R8_UNORM;
+    ss->ss0.surface_format = surface_format;
     ss->ss0.writedisable_alpha = 0;
     ss->ss0.writedisable_red = 0;
     ss->ss0.writedisable_green = 0;
@@ -677,8 +691,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->image.width, obj_image->image.height);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->image.width, obj_image->image.height);
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->image.width, obj_image->image.height, obj_image->image.format.fourcc);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->image.width, obj_image->image.height, obj_image->image.format.fourcc);     
 }
 
 static void
@@ -1165,21 +1179,31 @@ i965_render_vertex_elements(VADriverContextP ctx)
     }
 }
 
-void
-i965_render_upload_palette(VADriverContextP ctx)
+static void
+i965_render_upload_image_palette(
+    VADriverContextP ctx,
+    VAImageID        image_id,
+    unsigned int     alpha
+)
 {
-    BEGIN_BATCH(ctx, 17);
-    OUT_BATCH(ctx, CMD_SAMPLER_PALETTE_LOAD | 15);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    unsigned int i;
+
+    struct object_image *obj_image = IMAGE(image_id);
+    assert(obj_image);
+
+    if (obj_image->image.num_palette_entries == 0)
+        return;
+
+    BEGIN_BATCH(ctx, 1 + obj_image->image.num_palette_entries);
+    OUT_BATCH(ctx, CMD_SAMPLER_PALETTE_LOAD | (obj_image->image.num_palette_entries - 1));
     /*fill palette*/
     //int32_t out[16]; //0-23:color 23-31:alpha
-    int32_t i,c;
-    for(i = 0; i < 16; i ++){
-        c = i*16; //16 colors
-        OUT_BATCH(ctx,c<<24/*alpha*/|c<<16/*R*/|c<<8/*G*/|c/*B*/);//c<<24/*alpha*/|c<<16/*R*/|c<<8/*G*/|c/*B*/);
-    }
-
+    for (i = 0; i < obj_image->image.num_palette_entries; i++)
+        OUT_BATCH(ctx, (alpha << 24) | obj_image->palette[i]);
     ADVANCE_BATCH(ctx);
 }
+
 static void
 i965_render_startup(VADriverContextP ctx)
 {
@@ -1287,7 +1311,6 @@ i965_subpic_render_pipeline_setup(VADriverContextP ctx)
     i965_render_binding_table_pointers(ctx);
     i965_render_constant_color(ctx);
     i965_render_pipelined_pointers(ctx);
-    //i965_render_upload_palette(ctx);
     i965_render_urb_layout(ctx);
     i965_render_cs_urb_layout(ctx);
     i965_render_drawing_rectangle(ctx);
@@ -1415,11 +1438,17 @@ i965_render_put_subpic(VADriverContextP ctx,
                         unsigned short destw,
                         unsigned short desth)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_surface *obj_surface = SURFACE(surface);
+    struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
+    assert(obj_subpic);
+
     i965_render_initialize(ctx);
     i965_subpic_render_state_setup(ctx, surface,
 	    srcx, srcy, srcw, srch,
 	    destx, desty, destw, desth);
     i965_subpic_render_pipeline_setup(ctx);
+    i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(ctx);
 }
 

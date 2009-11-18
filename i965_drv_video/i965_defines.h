@@ -14,7 +14,7 @@
 #define CMD_STATE_BASE_ADDRESS                  CMD(0, 1, 1)
 #define CMD_STATE_SIP                           CMD(0, 1, 2)
 #define CMD_PIPELINE_SELECT                     CMD(1, 1, 4)
-#define CMD_SAMPLER_PALETTE_LOAD                CMD(3, 3, 2)
+#define CMD_SAMPLER_PALETTE_LOAD                CMD(3, 1, 2)
 
 #define CMD_MEDIA_STATE_POINTERS                CMD(2, 0, 0)
 #define CMD_MEDIA_OBJECT                        CMD(2, 1, 0)
