@@ -1149,7 +1149,8 @@ i965_CreateImage(VADriverContextP ctx,
     image->buf = img_buf_id;
     image->width = width;
     image->height = height;
-	
+
+    obj_image->buf = img_buf_id;
     obj_image->width = width;
     obj_image->height = height;
     obj_image->size = subpic_size;
@@ -1178,8 +1179,11 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_image *obj_image = IMAGE(image); 
 
-    i965_DestroyBuffer(ctx, image);				
-	
+    if (obj_image && obj_image->buf != VA_INVALID_ID) {
+        i965_DestroyBuffer(ctx, obj_image->buf);
+        obj_image->buf = VA_INVALID_ID;
+    }
+
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
 	
     return VA_STATUS_SUCCESS;

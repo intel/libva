@@ -109,11 +109,13 @@ struct object_buffer
 struct object_image 
 {
     struct object_base base;
+    VABufferID buf;
     int width;
     int height;
     int size;
     dri_bo *bo;
 };
+
 struct object_subpic 
 {
     struct object_base base;
