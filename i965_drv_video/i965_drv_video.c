@@ -437,27 +437,6 @@ i965_SetSubpictureImage(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
-/*
- * pointer to an array holding the palette data.  The size of the array is
- * num_palette_entries * entry_bytes in size.  The order of the components
- * in the palette is described by the component_order in VASubpicture struct
- */
-VAStatus 
-i965_SetSubpicturePalette(VADriverContextP ctx,
-                          VASubpictureID subpicture,
-                          unsigned char *palette)
-{
-    /*set palette in shader,so the following code is unused*/
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    struct object_subpic *obj_subpic = SUBPIC(subpicture);
-    if (NULL == obj_subpic) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    memcpy(obj_subpic->palette, palette, 3*16);	
-    return VA_STATUS_SUCCESS;
-}
-
 VAStatus 
 i965_SetSubpictureChromakey(VADriverContextP ctx,
                             VASubpictureID subpicture,
@@ -1157,6 +1136,8 @@ i965_CreateImage(VADriverContextP ctx,
     obj_image = IMAGE(image_id);
     if (!obj_image)
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
+    obj_image->bo         = NULL;
+    obj_image->palette    = NULL;
 
     VAImage * const image = &obj_image->image;
     image->image_id       = image_id;
@@ -1195,6 +1176,12 @@ i965_CreateImage(VADriverContextP ctx,
 
     obj_image->bo = BUFFER(image->buf)->buffer_store->bo;
 
+    if (image->num_palette_entries > 0 && image->entry_bytes > 0) {
+        obj_image->palette = malloc(image->num_palette_entries * sizeof(obj_image->palette));
+        if (!obj_image->palette)
+            goto error;
+    }
+
     image->image_id             = image_id;
     image->format               = *format;
     image->width                = width;
@@ -1228,9 +1215,17 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_image *obj_image = IMAGE(image); 
 
-    if (obj_image && obj_image->image.buf != VA_INVALID_ID) {
+    if (!obj_image)
+        return VA_STATUS_SUCCESS;
+
+    if (obj_image->image.buf != VA_INVALID_ID) {
         i965_DestroyBuffer(ctx, obj_image->image.buf);
         obj_image->image.buf = VA_INVALID_ID;
+    }
+
+    if (obj_image->palette) {
+        free(obj_image->palette);
+        obj_image->palette = NULL;
     }
 
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
@@ -1238,11 +1233,30 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     return VA_STATUS_SUCCESS;
 }
 
+/*
+ * pointer to an array holding the palette data.  The size of the array is
+ * num_palette_entries * entry_bytes in size.  The order of the components
+ * in the palette is described by the component_order in VASubpicture struct
+ */
 VAStatus 
 i965_SetImagePalette(VADriverContextP ctx,
                      VAImageID image,
                      unsigned char *palette)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    unsigned int i;
+
+    struct object_image *obj_image = IMAGE(image);
+    if (!obj_image)
+        return VA_STATUS_ERROR_INVALID_IMAGE;
+
+    if (!obj_image->palette)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED; /* XXX: unpaletted/error */
+
+    for (i = 0; i < obj_image->image.num_palette_entries; i++)
+        obj_image->palette[i] = (((unsigned int)palette[3*i + 0] << 16) |
+                                 ((unsigned int)palette[3*i + 1] <<  8) |
+                                  (unsigned int)palette[3*i + 2]);
     return VA_STATUS_SUCCESS;
 }
 
@@ -1417,7 +1431,6 @@ __vaDriverInit_0_31(  VADriverContextP ctx )
     ctx->vtable.vaCreateSubpicture = i965_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = i965_DestroySubpicture;
     ctx->vtable.vaSetSubpictureImage = i965_SetSubpictureImage;
-    //ctx->vtable.vaSetSubpicturePalette = i965_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = i965_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = i965_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = i965_AssociateSubpicture;

@@ -112,6 +112,7 @@ struct object_image
     struct object_base base;
     VAImage image;
     dri_bo *bo;
+    unsigned int *palette;
 };
 
 struct object_subpic 
@@ -122,7 +123,6 @@ struct object_subpic
     VARectangle dst_rect;
     int width;
     int height;
-    unsigned char palette[3][16];
     dri_bo *bo;
 };
 
