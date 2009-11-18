@@ -1031,8 +1031,10 @@ i965_QueryDisplayAttributes(VADriverContextP ctx,
                             VADisplayAttribute *attr_list,	/* out */
                             int *num_attributes)		/* out */
 {
-    /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    if (num_attributes)
+        *num_attributes = 0;
+
+    return VA_STATUS_SUCCESS;
 }
 
 /* 
