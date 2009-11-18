@@ -43,6 +43,7 @@ struct intel_batchbuffer;
 
 #define ALIGN(i, n)    (((i) + (n) - 1) & ~((n) - 1))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 #define SET_BLOCKED_SIGSET()   do {     \
         sigset_t bl_mask;               \
