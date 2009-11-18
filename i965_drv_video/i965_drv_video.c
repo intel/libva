@@ -489,8 +489,6 @@ i965_AssociateSubpicture(VADriverContextP ctx,
                          short dest_y,
                          unsigned short dest_width,
                          unsigned short dest_height,
-                         unsigned short width,
-                         unsigned short height,
                          /*
                           * whether to enable chroma-keying or global-alpha
                           * see VA_SUBPICTURE_XXX values
