@@ -106,13 +106,11 @@ struct object_buffer
     int size_element;
     VABufferType type;
 };
+
 struct object_image 
 {
     struct object_base base;
-    VABufferID buf;
-    int width;
-    int height;
-    int size;
+    VAImage image;
     dri_bo *bo;
 };
 

@@ -677,8 +677,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->width, obj_image->height);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->width, obj_image->height);
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->image.width, obj_image->image.height);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->image.width, obj_image->image.height);
 }
 
 static void

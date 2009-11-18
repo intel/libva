@@ -410,11 +410,10 @@ i965_CreateSubpicture(VADriverContextP ctx,
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
     }
     *subpicture = subpicID;
-    obj_subpic->image = image;
-    obj_subpic->width = obj_image->width;
-    obj_subpic->height = obj_image->height;
-    obj_subpic->bo = obj_image->bo;
-	
+    obj_subpic->image  = image;
+    obj_subpic->width  = obj_image->image.width;
+    obj_subpic->height = obj_image->image.height;
+    obj_subpic->bo     = obj_image->bo;
     return vaStatus;
 }
 
@@ -1119,44 +1118,81 @@ i965_destroy_heap(struct object_heap *heap,
 }
 
 
+VAStatus 
+i965_DestroyImage(VADriverContextP ctx, VAImageID image);
 
 VAStatus 
 i965_CreateImage(VADriverContextP ctx,
                  VAImageFormat *format,
                  int width,
                  int height,
-                 VAImage *image)        /* out */
+                 VAImage *out_image)        /* out */
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus va_status;
-    /*we will receive the actual subpicture size from the player,now we assume it is 720*32*/
-    char subpic_buf[width*height];
-    int subpic_size = 720*32;
-    unsigned int img_buf_id;
+    struct object_image *obj_image;
+    VAStatus va_status = VA_STATUS_ERROR_OPERATION_FAILED;
+    VAImageID image_id;
+    unsigned int width2, height2, size2, size;
 
-    image->image_id = NEW_IMAGE_ID();
-    struct object_image *obj_image = IMAGE(image->image_id);
+    out_image->image_id = VA_INVALID_ID;
+    out_image->buf      = VA_INVALID_ID;
 
-    /*assume we got IA44 in format[0]*/
-    image->format = *format;
-	
-    /*create empty buffer*/
-    va_status = i965_CreateBuffer(ctx, 0, VAImageBufferType, 
-	    subpic_size, 1, subpic_buf, &img_buf_id);				
-    assert( VA_STATUS_SUCCESS == va_status );
-    struct object_buffer *obj_buf = BUFFER(img_buf_id);
+    image_id = NEW_IMAGE_ID();
+    if (image_id == VA_INVALID_ID)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
-    image->buf = img_buf_id;
-    image->width = width;
-    image->height = height;
+    obj_image = IMAGE(image_id);
+    if (!obj_image)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
-    obj_image->buf = img_buf_id;
-    obj_image->width = width;
-    obj_image->height = height;
-    obj_image->size = subpic_size;
-    obj_image->bo = obj_buf->buffer_store->bo;
-	
+    VAImage * const image = &obj_image->image;
+    image->image_id       = image_id;
+    image->buf            = VA_INVALID_ID;
+
+    size    = width * height;
+    width2  = (width  + 1) / 2;
+    height2 = (height + 1) / 2;
+    size2   = width2 * height2;
+
+    image->num_palette_entries = 0;
+    image->entry_bytes         = 0;
+    memset(image->component_order, 0, sizeof(image->component_order));
+
+    switch (format->fourcc) {
+    case VA_FOURCC('I','A','4','4'):
+    case VA_FOURCC('A','I','4','4'):
+        image->num_planes = 1;
+        image->pitches[0] = width;
+        image->offsets[0] = 0;
+        image->data_size  = image->offsets[0] + image->pitches[0] * height;
+        image->num_palette_entries = 16;
+        image->entry_bytes         = 3;
+        image->component_order[0]  = 'R';
+        image->component_order[1]  = 'G';
+        image->component_order[2]  = 'B';
+        break;
+    default:
+        goto error;
+    }
+
+    va_status = i965_CreateBuffer(ctx, 0, VAImageBufferType,
+                                  image->data_size, 1, NULL, &image->buf);
+    if (va_status != VA_STATUS_SUCCESS)
+        goto error;
+
+    obj_image->bo = BUFFER(image->buf)->buffer_store->bo;
+
+    image->image_id             = image_id;
+    image->format               = *format;
+    image->width                = width;
+    image->height               = height;
+
+    *out_image                  = *image;
     return VA_STATUS_SUCCESS;
+
+ error:
+    i965_DestroyImage(ctx, image_id);
+    return va_status;
 }
 
 VAStatus i965_DeriveImage(VADriverContextP ctx,
@@ -1179,9 +1215,9 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_image *obj_image = IMAGE(image); 
 
-    if (obj_image && obj_image->buf != VA_INVALID_ID) {
-        i965_DestroyBuffer(ctx, obj_image->buf);
-        obj_image->buf = VA_INVALID_ID;
+    if (obj_image && obj_image->image.buf != VA_INVALID_ID) {
+        i965_DestroyBuffer(ctx, obj_image->image.buf);
+        obj_image->image.buf = VA_INVALID_ID;
     }
 
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
