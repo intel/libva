@@ -346,6 +346,9 @@ i965_QueryImageFormats(VADriverContextP ctx,
                        VAImageFormat *format_list,      /* out */
                        int *num_formats)                /* out */
 {
+    if (num_formats)
+        *num_formats = 0;
+
     return VA_STATUS_SUCCESS;
 }
 
