@@ -70,7 +70,7 @@ static const unsigned int ps_subpic_kernel_static[][4] =
 {
 #include "shaders/render/exa_wm_xy.g4b"
 #include "shaders/render/exa_wm_src_affine.g4b"
-#include "shaders/render/exa_wm_blend_subpicture.g4b"
+#include "shaders/render/exa_wm_src_sample_argb.g4b"
 #include "shaders/render/exa_wm_write.g4b"
 };
 
@@ -92,7 +92,7 @@ static const unsigned int ps_subpic_kernel_static_gen5[][4] =
 {
 #include "shaders/render/exa_wm_xy.g4b.gen5"
 #include "shaders/render/exa_wm_src_affine.g4b.gen5"
-#include "shaders/render/exa_wm_blend_subpicture.g4b.gen5"
+#include "shaders/render/exa_wm_src_sample_argb.g4b.gen5"
 #include "shaders/render/exa_wm_write.g4b.gen5"
 };
 
