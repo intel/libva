@@ -39,6 +39,7 @@
 
 #include "i965_media.h"
 #include "i965_drv_video.h"
+#include "i965_defines.h"
 
 #define CONFIG_ID_OFFSET                0x01000000
 #define CONTEXT_ID_OFFSET               0x02000000
@@ -46,6 +47,48 @@
 #define BUFFER_ID_OFFSET                0x08000000
 #define IMAGE_ID_OFFSET                 0x0a000000
 #define SUBPIC_ID_OFFSET                0x10000000
+
+enum {
+    I965_SURFACETYPE_RGBA = 1,
+    I965_SURFACETYPE_YUV,
+    I965_SURFACETYPE_INDEXED
+};
+
+/* List of supported subpicture formats */
+typedef struct {
+    unsigned int        type;
+    unsigned int        format;
+    VAImageFormat       va_format;
+    unsigned int        va_flags;
+} i965_subpic_format_map_t;
+
+static const i965_subpic_format_map_t
+i965_subpic_formats_map[I965_MAX_SUBPIC_FORMATS + 1] = {
+    { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_P4A4_UNORM,
+      { VA_FOURCC('I','A','4','4'), VA_MSB_FIRST, 8, },
+      0 },
+    { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_A4P4_UNORM,
+      { VA_FOURCC('A','I','4','4'), VA_MSB_FIRST, 8, },
+      0 },
+};
+
+static const i965_subpic_format_map_t *
+get_subpic_format(const VAImageFormat *va_format)
+{
+    unsigned int i;
+    for (i = 0; i < sizeof(i965_subpic_formats_map)/sizeof(i965_subpic_formats_map[0]); i++) {
+        const i965_subpic_format_map_t * const m = &i965_subpic_formats_map[i];
+        if (m->va_format.fourcc == va_format->fourcc &&
+            (m->type == I965_SURFACETYPE_RGBA ?
+             (m->va_format.byte_order == va_format->byte_order &&
+              m->va_format.red_mask   == va_format->red_mask   &&
+              m->va_format.green_mask == va_format->green_mask &&
+              m->va_format.blue_mask  == va_format->blue_mask  &&
+              m->va_format.alpha_mask == va_format->alpha_mask) : 1))
+            return m;
+    }
+    return NULL;
+}
 
 VAStatus 
 i965_QueryConfigProfiles(VADriverContextP ctx,
@@ -375,12 +418,19 @@ i965_QuerySubpictureFormats(VADriverContextP ctx,
                             unsigned int *flags,                /* out */
                             unsigned int *num_formats)          /* out */
 {
-    /*support 2 subpicture formats*/
-    *num_formats = 2;
-    format_list[0].fourcc=FOURCC_IA44;
-    format_list[0].byte_order=VA_LSB_FIRST;
-    format_list[1].fourcc=FOURCC_AI44;
-    format_list[1].byte_order=VA_LSB_FIRST;
+    int n;
+
+    for (n = 0; i965_subpic_formats_map[n].va_format.fourcc != 0; n++) {
+        const i965_subpic_format_map_t * const m = &i965_subpic_formats_map[n];
+        if (format_list)
+            format_list[n] = m->va_format;
+        if (flags)
+            flags[n] = m->va_flags;
+    }
+
+    if (num_formats)
+        *num_formats = n;
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -398,24 +448,27 @@ i965_CreateSubpicture(VADriverContextP ctx,
                       VASubpictureID *subpicture)         /* out */
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
     VASubpictureID subpicID = NEW_SUBPIC_ID()
 	
     struct object_subpic *obj_subpic = SUBPIC(subpicID);
+    if (!obj_subpic)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
     struct object_image *obj_image = IMAGE(image);
-    
-    if (NULL == obj_subpic) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    if (NULL == obj_image) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
+    if (!obj_image)
+        return VA_STATUS_ERROR_INVALID_IMAGE;
+
+    const i965_subpic_format_map_t * const m = get_subpic_format(&obj_image->image.format);
+    if (!m)
+        return VA_STATUS_ERROR_UNKNOWN; /* XXX: VA_STATUS_ERROR_UNSUPPORTED_FORMAT? */
+
     *subpicture = subpicID;
     obj_subpic->image  = image;
+    obj_subpic->format = m->format;
     obj_subpic->width  = obj_image->image.width;
     obj_subpic->height = obj_image->image.height;
     obj_subpic->bo     = obj_image->bo;
-    return vaStatus;
+    return VA_STATUS_SUCCESS;
 }
 
 VAStatus 

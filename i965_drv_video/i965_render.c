@@ -586,25 +586,12 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h, int fourcc)
+                              int w, int h, int format)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct i965_surface_state *ss;
     dri_bo *ss_bo;
-    int surface_format;
-
-    switch (fourcc) {
-    case VA_FOURCC('I','A','4','4'):
-        surface_format = I965_SURFACEFORMAT_P4A4_UNORM;
-        break;
-    case VA_FOURCC('A','I','4','4'):
-        surface_format = I965_SURFACEFORMAT_A4P4_UNORM;
-        break;
-    default:
-        assert(0); /* XXX: fix supported subpicture formats */
-        break;
-    }
 
     ss_bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "surface state", 
@@ -615,7 +602,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     ss = ss_bo->virtual;
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
-    ss->ss0.surface_format = surface_format;
+    ss->ss0.surface_format = format;
     ss->ss0.writedisable_alpha = 0;
     ss->ss0.writedisable_red = 0;
     ss->ss0.writedisable_green = 0;
@@ -691,8 +678,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->image.width, obj_image->image.height, obj_image->image.format.fourcc);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->image.width, obj_image->image.height, obj_image->image.format.fourcc);     
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
 }
 
 static void
