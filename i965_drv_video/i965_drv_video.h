@@ -42,7 +42,7 @@
 #define I965_MAX_ENTRYPOINTS                    5
 #define I965_MAX_CONFIG_ATTRIBUTES              10
 #define I965_MAX_IMAGE_FORMATS                  10
-#define I965_MAX_SUBPIC_FORMATS                 4
+#define I965_MAX_SUBPIC_FORMATS                 2
 #define I965_MAX_DISPLAY_ATTRIBUTES             4
 #define I965_STR_VENDOR                         "i965 Driver 0.1"
 
@@ -91,7 +91,7 @@ struct object_surface
     struct object_base base;
     VASurfaceStatus status;
     VASubpictureID subpic;
-	int width;
+    int width;
     int height;
     int size;
     dri_bo *bo;
@@ -106,24 +106,25 @@ struct object_buffer
     int size_element;
     VABufferType type;
 };
+
 struct object_image 
 {
     struct object_base base;
-    int width;
-    int height;
-    int size;
+    VAImage image;
     dri_bo *bo;
+    unsigned int *palette;
 };
+
 struct object_subpic 
 {
     struct object_base base;
     VAImageID image;
-	int dstx;
-	int dsty;
-	int width;
-	int height;
-	unsigned char palette[3][16];
-	dri_bo *bo;
+    VARectangle src_rect;
+    VARectangle dst_rect;
+    unsigned int format;
+    int width;
+    int height;
+    dri_bo *bo;
 };
 
 

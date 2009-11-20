@@ -25,7 +25,8 @@
  *    Keith Packard <keithp@keithp.com>
  */
 
-/* Sample the src surface in planar format */
+/* Sample the src surface */
+
 include(`exa_wm.g4i')
 
 /* prepare sampler read back gX register, which would be written back to output */
@@ -33,51 +34,14 @@ include(`exa_wm.g4i')
 /* use simd16 sampler, param 0 is u, param 1 is v. */
 /* 'payload' loading, assuming tex coord start from g4 */
 
-/* load r */
-mov (1) g0.8<1>UD	0x0000e000UD { align1 mask_disable };
+/* load argb */
+mov (1) g0.8<1>UD	0x00000000UD { align1 mask_disable };
 
 /* src_msg will be copied with g0, as it contains send desc */
 /* emit sampler 'send' cmd */
-
-
-/* sample Y */
 send (16) src_msg_ind		/* msg reg index */
-	src_sample_g<1>UW 	/* readback */
+	src_sample_base<1>UW 	/* readback */
 	g0<8,8,1>UW		/* copy to msg start reg*/
-	sampler (1,0,F)		/* sampler message description, (binding_table,sampler_index,datatype)*/
-	mlen 5 rlen 2 {align1};
-
-/* sample U (Cr) */
-send (16) src_msg_ind		/* msg reg index */
-	src_sample_r<1>UW 	/* readback */
-	g0<8,8,1>UW		/* copy to msg start reg*/
-	sampler (1,2,F)		/* sampler message description, (binding_table,sampler_index,datatype)
+	sampler (1,0,F)		/* sampler message description, (binding_table,sampler_index,datatype)
 				/* here(src->dst) we should use src_sampler and src_surface */
-	mlen 5 rlen 2 { align1 };   /* required message len 5, readback len 8 */
-	
-/* sample V (Cb) */
-send (16) src_msg_ind		/* msg reg index */
-	src_sample_b<1>UW 	/* readback */
-	g0<8,8,1>UW		/* copy to msg start reg*/
-	sampler (1,4,F)		/* sampler message description, (binding_table,sampler_index,datatype)
-				/* here(src->dst) we should use src_sampler and src_surface */
-	mlen 5 rlen 2 { align1 };   /* required message len 5, readback len 8 */
-
-/*extract alpha value, alpha value stores in one float with color value, because the color value is small,
-we can neglect it when doing alpha blend*/
-mov (8) src_sample_a<1>F g14<8,8,1>F { align1 };
-mov (8) src_sample_a_23<1>F g15<8,8,1>F { align1 };
-
-
-/*set subtitle color*/
-add (8) g14<1>F g14<8,8,1>F 0.5F { align1 };
-add (8) g15<1>F g15<8,8,1>F 0.5F { align1 };
-add (8) g16<1>F g16<8,8,1>F 0.5F { align1 };
-add (8) g17<1>F g17<8,8,1>F 0.5F { align1 };
-add (8) g18<1>F g18<8,8,1>F 0.5F { align1 };
-add (8) g19<1>F g19<8,8,1>F 0.5F { align1 };
-
-nop;
-nop;
-nop;
-
+	mlen 5 rlen 8 { align1 };   /* required message len 5, readback len 8 */

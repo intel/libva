@@ -127,7 +127,8 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_FLAG_NOT_SUPPORTED      0x00000011
 #define VA_STATUS_ERROR_INVALID_PARAMETER	0x00000012
 #define VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED 0x00000013
-#define VA_STATUS_ERROR_UNIMPLEMENTED           0x00000014    
+#define VA_STATUS_ERROR_UNIMPLEMENTED           0x00000014
+#define VA_STATUS_ERROR_SURFACE_IN_DISPLAYING   0x00000015
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /*
@@ -569,6 +570,7 @@ typedef struct _VASliceParameterBufferMPEG2
     unsigned int slice_data_offset;/* the offset to the first byte of slice data */
     unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
     unsigned int macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
+    unsigned int slice_horizontal_position;
     unsigned int slice_vertical_position;
     int quantiser_scale_code;
     int intra_slice_flag;

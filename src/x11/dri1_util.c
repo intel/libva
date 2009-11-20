@@ -107,7 +107,6 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
     
     dri_state->fd = drmOpenOnce(NULL, BusID, &newlyopened);
     XFree(BusID);
-    assert(dri_state->fd >= 0);
 
     if (dri_state->fd < 0)
         goto err_out1;

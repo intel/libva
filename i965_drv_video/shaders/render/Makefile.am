@@ -7,27 +7,27 @@ INTEL_G4A =				\
 	exa_sf.g4a			\
 	exa_wm_xy.g4a			\
 	exa_wm_src_affine.g4a		\
+	exa_wm_src_sample_argb.g4a	\
 	exa_wm_src_sample_planar.g4a	\
 	exa_wm_yuv_rgb.g4a		\
-	exa_wm_blend_subpicture.g4a		\
 	exa_wm_write.g4a
 
 INTEL_G4B =				\
 	exa_sf.g4b			\
 	exa_wm_xy.g4b			\
 	exa_wm_src_affine.g4b		\
+	exa_wm_src_sample_argb.g4b	\
 	exa_wm_src_sample_planar.g4b	\
 	exa_wm_yuv_rgb.g4b		\
-	exa_wm_blend_subpicture.g4b		\
 	exa_wm_write.g4b
 
 INTEL_G4B_GEN5 =				\
 	exa_sf.g4b.gen5				\
 	exa_wm_xy.g4b.gen5			\
 	exa_wm_src_affine.g4b.gen5		\
+	exa_wm_src_sample_argb.g4b.gen5	\
 	exa_wm_src_sample_planar.g4b.gen5	\
 	exa_wm_yuv_rgb.g4b.gen5			\
-	exa_wm_blend_subpicture.g4b.gen5	\
 	exa_wm_write.g4b.gen5
 
 EXTRA_DIST = $(INTEL_G4I)	\
