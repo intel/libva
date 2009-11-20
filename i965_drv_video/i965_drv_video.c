@@ -39,6 +39,7 @@
 
 #include "i965_media.h"
 #include "i965_drv_video.h"
+#include "i965_defines.h"
 
 #define CONFIG_ID_OFFSET                0x01000000
 #define CONTEXT_ID_OFFSET               0x02000000
@@ -46,6 +47,48 @@
 #define BUFFER_ID_OFFSET                0x08000000
 #define IMAGE_ID_OFFSET                 0x0a000000
 #define SUBPIC_ID_OFFSET                0x10000000
+
+enum {
+    I965_SURFACETYPE_RGBA = 1,
+    I965_SURFACETYPE_YUV,
+    I965_SURFACETYPE_INDEXED
+};
+
+/* List of supported subpicture formats */
+typedef struct {
+    unsigned int        type;
+    unsigned int        format;
+    VAImageFormat       va_format;
+    unsigned int        va_flags;
+} i965_subpic_format_map_t;
+
+static const i965_subpic_format_map_t
+i965_subpic_formats_map[I965_MAX_SUBPIC_FORMATS + 1] = {
+    { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_P4A4_UNORM,
+      { VA_FOURCC('I','A','4','4'), VA_MSB_FIRST, 8, },
+      0 },
+    { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_A4P4_UNORM,
+      { VA_FOURCC('A','I','4','4'), VA_MSB_FIRST, 8, },
+      0 },
+};
+
+static const i965_subpic_format_map_t *
+get_subpic_format(const VAImageFormat *va_format)
+{
+    unsigned int i;
+    for (i = 0; i < sizeof(i965_subpic_formats_map)/sizeof(i965_subpic_formats_map[0]); i++) {
+        const i965_subpic_format_map_t * const m = &i965_subpic_formats_map[i];
+        if (m->va_format.fourcc == va_format->fourcc &&
+            (m->type == I965_SURFACETYPE_RGBA ?
+             (m->va_format.byte_order == va_format->byte_order &&
+              m->va_format.red_mask   == va_format->red_mask   &&
+              m->va_format.green_mask == va_format->green_mask &&
+              m->va_format.blue_mask  == va_format->blue_mask  &&
+              m->va_format.alpha_mask == va_format->alpha_mask) : 1))
+            return m;
+    }
+    return NULL;
+}
 
 VAStatus 
 i965_QueryConfigProfiles(VADriverContextP ctx,
@@ -293,6 +336,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
 
         surfaces[i] = surfaceID;
         obj_surface->status = VASurfaceReady;
+        obj_surface->subpic = VA_INVALID_ID;
         obj_surface->width = width;
         obj_surface->height = height;
         obj_surface->size = SIZE_YUV420(width, height);
@@ -346,6 +390,9 @@ i965_QueryImageFormats(VADriverContextP ctx,
                        VAImageFormat *format_list,      /* out */
                        int *num_formats)                /* out */
 {
+    if (num_formats)
+        *num_formats = 0;
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -371,12 +418,19 @@ i965_QuerySubpictureFormats(VADriverContextP ctx,
                             unsigned int *flags,                /* out */
                             unsigned int *num_formats)          /* out */
 {
-    /*support 2 subpicture formats*/
-    *num_formats = 2;
-    format_list[0].fourcc=FOURCC_IA44;
-    format_list[0].byte_order=VA_LSB_FIRST;
-    format_list[1].fourcc=FOURCC_AI44;
-    format_list[1].byte_order=VA_LSB_FIRST;
+    int n;
+
+    for (n = 0; i965_subpic_formats_map[n].va_format.fourcc != 0; n++) {
+        const i965_subpic_format_map_t * const m = &i965_subpic_formats_map[n];
+        if (format_list)
+            format_list[n] = m->va_format;
+        if (flags)
+            flags[n] = m->va_flags;
+    }
+
+    if (num_formats)
+        *num_formats = n;
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -394,25 +448,27 @@ i965_CreateSubpicture(VADriverContextP ctx,
                       VASubpictureID *subpicture)         /* out */
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
     VASubpictureID subpicID = NEW_SUBPIC_ID()
 	
     struct object_subpic *obj_subpic = SUBPIC(subpicID);
+    if (!obj_subpic)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
     struct object_image *obj_image = IMAGE(image);
-    
-    if (NULL == obj_subpic) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    if (NULL == obj_image) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
+    if (!obj_image)
+        return VA_STATUS_ERROR_INVALID_IMAGE;
+
+    const i965_subpic_format_map_t * const m = get_subpic_format(&obj_image->image.format);
+    if (!m)
+        return VA_STATUS_ERROR_UNKNOWN; /* XXX: VA_STATUS_ERROR_UNSUPPORTED_FORMAT? */
+
     *subpicture = subpicID;
-    obj_subpic->image = image;
-    obj_subpic->width = obj_image->width;
-    obj_subpic->height = obj_image->height;
-    obj_subpic->bo = obj_image->bo;
-	
-    return vaStatus;
+    obj_subpic->image  = image;
+    obj_subpic->format = m->format;
+    obj_subpic->width  = obj_image->image.width;
+    obj_subpic->height = obj_image->image.height;
+    obj_subpic->bo     = obj_image->bo;
+    return VA_STATUS_SUCCESS;
 }
 
 VAStatus 
@@ -431,27 +487,6 @@ i965_SetSubpictureImage(VADriverContextP ctx,
                         VASubpictureID subpicture,
                         VAImageID image)
 {
-    return VA_STATUS_SUCCESS;
-}
-
-/*
- * pointer to an array holding the palette data.  The size of the array is
- * num_palette_entries * entry_bytes in size.  The order of the components
- * in the palette is described by the component_order in VASubpicture struct
- */
-VAStatus 
-i965_SetSubpicturePalette(VADriverContextP ctx,
-                          VASubpictureID subpicture,
-                          unsigned char *palette)
-{
-    /*set palette in shader,so the following code is unused*/
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    struct object_subpic *obj_subpic = SUBPIC(subpicture);
-    if (NULL == obj_subpic) {
-        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-    }
-    memcpy(obj_subpic->palette, palette, 3*16);	
     return VA_STATUS_SUCCESS;
 }
 
@@ -486,8 +521,6 @@ i965_AssociateSubpicture(VADriverContextP ctx,
                          short dest_y,
                          unsigned short dest_width,
                          unsigned short dest_height,
-                         unsigned short width,
-                         unsigned short height,
                          /*
                           * whether to enable chroma-keying or global-alpha
                           * see VA_SUBPICTURE_XXX values
@@ -495,22 +528,24 @@ i965_AssociateSubpicture(VADriverContextP ctx,
                          unsigned int flags)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    /*only ipicture*/
-	
-    struct object_surface *obj_surface = SURFACE(*target_surfaces);
     struct object_subpic *obj_subpic = SUBPIC(subpicture);
+    int i;
 
-    if (NULL == obj_surface) {
-        vaStatus = VA_STATUS_ERROR_INVALID_CONFIG;
-        return vaStatus;
+    obj_subpic->src_rect.x      = src_x;
+    obj_subpic->src_rect.y      = src_y;
+    obj_subpic->src_rect.width  = src_width;
+    obj_subpic->src_rect.height = src_height;
+    obj_subpic->dst_rect.x      = dest_x;
+    obj_subpic->dst_rect.y      = dest_y;
+    obj_subpic->dst_rect.width  = dest_width;
+    obj_subpic->dst_rect.height = dest_height;
+
+    for (i = 0; i < num_surfaces; i++) {
+        struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
+        if (!obj_surface)
+            return VA_STATUS_ERROR_INVALID_SURFACE;
+        obj_surface->subpic = subpicture;
     }
-  
-    obj_subpic->dstx = dest_x;
-    obj_subpic->dsty = dest_y;
-
-    obj_surface->subpic = subpicture;
-
     return VA_STATUS_SUCCESS;
 }
 
@@ -521,6 +556,16 @@ i965_DeassociateSubpicture(VADriverContextP ctx,
                            VASurfaceID *target_surfaces,
                            int num_surfaces)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    int i;
+
+    for (i = 0; i < num_surfaces; i++) {
+        struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
+        if (!obj_surface)
+            return VA_STATUS_ERROR_INVALID_SURFACE;
+        if (obj_surface->subpic == subpicture)
+            obj_surface->subpic = VA_INVALID_ID;
+    }
     return VA_STATUS_SUCCESS;
 }
 
@@ -1031,8 +1076,10 @@ i965_QueryDisplayAttributes(VADriverContextP ctx,
                             VADisplayAttribute *attr_list,	/* out */
                             int *num_attributes)		/* out */
 {
-    /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    if (num_attributes)
+        *num_attributes = 0;
+
+    return VA_STATUS_SUCCESS;
 }
 
 /* 
@@ -1116,43 +1163,89 @@ i965_destroy_heap(struct object_heap *heap,
 }
 
 
+VAStatus 
+i965_DestroyImage(VADriverContextP ctx, VAImageID image);
 
 VAStatus 
 i965_CreateImage(VADriverContextP ctx,
                  VAImageFormat *format,
                  int width,
                  int height,
-                 VAImage *image)        /* out */
+                 VAImage *out_image)        /* out */
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    VAStatus va_status;
-    /*we will receive the actual subpicture size from the player,now we assume it is 720*32*/
-    char subpic_buf[width*height];
-    int subpic_size = 720*32;
-    unsigned int img_buf_id;
+    struct object_image *obj_image;
+    VAStatus va_status = VA_STATUS_ERROR_OPERATION_FAILED;
+    VAImageID image_id;
+    unsigned int width2, height2, size2, size;
 
-    image->image_id = NEW_IMAGE_ID();
-    struct object_image *obj_image = IMAGE(image->image_id);
+    out_image->image_id = VA_INVALID_ID;
+    out_image->buf      = VA_INVALID_ID;
 
-    /*assume we got IA44 in format[0]*/
-    image->format = *format;
-	
-    /*create empty buffer*/
-    va_status = i965_CreateBuffer(ctx, 0, VAImageBufferType, 
-	    subpic_size, 1, subpic_buf, &img_buf_id);				
-    assert( VA_STATUS_SUCCESS == va_status );
-    struct object_buffer *obj_buf = BUFFER(img_buf_id);
+    image_id = NEW_IMAGE_ID();
+    if (image_id == VA_INVALID_ID)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
-    image->buf = img_buf_id;
-    image->width = width;
-    image->height = height;
-	
-    obj_image->width = width;
-    obj_image->height = height;
-    obj_image->size = subpic_size;
-    obj_image->bo = obj_buf->buffer_store->bo;
-	
+    obj_image = IMAGE(image_id);
+    if (!obj_image)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+    obj_image->bo         = NULL;
+    obj_image->palette    = NULL;
+
+    VAImage * const image = &obj_image->image;
+    image->image_id       = image_id;
+    image->buf            = VA_INVALID_ID;
+
+    size    = width * height;
+    width2  = (width  + 1) / 2;
+    height2 = (height + 1) / 2;
+    size2   = width2 * height2;
+
+    image->num_palette_entries = 0;
+    image->entry_bytes         = 0;
+    memset(image->component_order, 0, sizeof(image->component_order));
+
+    switch (format->fourcc) {
+    case VA_FOURCC('I','A','4','4'):
+    case VA_FOURCC('A','I','4','4'):
+        image->num_planes = 1;
+        image->pitches[0] = width;
+        image->offsets[0] = 0;
+        image->data_size  = image->offsets[0] + image->pitches[0] * height;
+        image->num_palette_entries = 16;
+        image->entry_bytes         = 3;
+        image->component_order[0]  = 'R';
+        image->component_order[1]  = 'G';
+        image->component_order[2]  = 'B';
+        break;
+    default:
+        goto error;
+    }
+
+    va_status = i965_CreateBuffer(ctx, 0, VAImageBufferType,
+                                  image->data_size, 1, NULL, &image->buf);
+    if (va_status != VA_STATUS_SUCCESS)
+        goto error;
+
+    obj_image->bo = BUFFER(image->buf)->buffer_store->bo;
+
+    if (image->num_palette_entries > 0 && image->entry_bytes > 0) {
+        obj_image->palette = malloc(image->num_palette_entries * sizeof(obj_image->palette));
+        if (!obj_image->palette)
+            goto error;
+    }
+
+    image->image_id             = image_id;
+    image->format               = *format;
+    image->width                = width;
+    image->height               = height;
+
+    *out_image                  = *image;
     return VA_STATUS_SUCCESS;
+
+ error:
+    i965_DestroyImage(ctx, image_id);
+    return va_status;
 }
 
 VAStatus i965_DeriveImage(VADriverContextP ctx,
@@ -1175,18 +1268,48 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_image *obj_image = IMAGE(image); 
 
-    i965_DestroyBuffer(ctx, image);				
-	
+    if (!obj_image)
+        return VA_STATUS_SUCCESS;
+
+    if (obj_image->image.buf != VA_INVALID_ID) {
+        i965_DestroyBuffer(ctx, obj_image->image.buf);
+        obj_image->image.buf = VA_INVALID_ID;
+    }
+
+    if (obj_image->palette) {
+        free(obj_image->palette);
+        obj_image->palette = NULL;
+    }
+
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
 	
     return VA_STATUS_SUCCESS;
 }
 
+/*
+ * pointer to an array holding the palette data.  The size of the array is
+ * num_palette_entries * entry_bytes in size.  The order of the components
+ * in the palette is described by the component_order in VASubpicture struct
+ */
 VAStatus 
 i965_SetImagePalette(VADriverContextP ctx,
                      VAImageID image,
                      unsigned char *palette)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    unsigned int i;
+
+    struct object_image *obj_image = IMAGE(image);
+    if (!obj_image)
+        return VA_STATUS_ERROR_INVALID_IMAGE;
+
+    if (!obj_image->palette)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED; /* XXX: unpaletted/error */
+
+    for (i = 0; i < obj_image->image.num_palette_entries; i++)
+        obj_image->palette[i] = (((unsigned int)palette[3*i + 0] << 16) |
+                                 ((unsigned int)palette[3*i + 1] <<  8) |
+                                  (unsigned int)palette[3*i + 2]);
     return VA_STATUS_SUCCESS;
 }
 
@@ -1274,7 +1397,7 @@ i965_PutSurface(VADriverContextP ctx,
                             srcx, srcy, srcw, srch,
                             destx, desty, destw, desth);
     obj_surface = SURFACE(surface);
-    if(obj_surface->subpic != 0) {	
+    if(obj_surface->subpic != VA_INVALID_ID) {	
 	i965_render_put_subpic(ctx, surface,
                            srcx, srcy, srcw, srch,
                            destx, desty, destw, desth);
@@ -1317,8 +1440,8 @@ __vaDriverInit_0_31(  VADriverContextP ctx )
     struct i965_driver_data *i965;
     int result;
 
-    ctx->version_major = 0;
-    ctx->version_minor = 29;
+    ctx->version_major = VA_MAJOR_VERSION;
+    ctx->version_minor = VA_MINOR_VERSION;
     ctx->max_profiles = I965_MAX_PROFILES;
     ctx->max_entrypoints = I965_MAX_ENTRYPOINTS;
     ctx->max_attributes = I965_MAX_CONFIG_ATTRIBUTES;
@@ -1361,7 +1484,6 @@ __vaDriverInit_0_31(  VADriverContextP ctx )
     ctx->vtable.vaCreateSubpicture = i965_CreateSubpicture;
     ctx->vtable.vaDestroySubpicture = i965_DestroySubpicture;
     ctx->vtable.vaSetSubpictureImage = i965_SetSubpictureImage;
-    //ctx->vtable.vaSetSubpicturePalette = i965_SetSubpicturePalette;
     ctx->vtable.vaSetSubpictureChromakey = i965_SetSubpictureChromakey;
     ctx->vtable.vaSetSubpictureGlobalAlpha = i965_SetSubpictureGlobalAlpha;
     ctx->vtable.vaAssociateSubpicture = i965_AssociateSubpicture;

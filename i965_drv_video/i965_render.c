@@ -70,7 +70,7 @@ static const unsigned int ps_subpic_kernel_static[][4] =
 {
 #include "shaders/render/exa_wm_xy.g4b"
 #include "shaders/render/exa_wm_src_affine.g4b"
-#include "shaders/render/exa_wm_blend_subpicture.g4b"
+#include "shaders/render/exa_wm_src_sample_argb.g4b"
 #include "shaders/render/exa_wm_write.g4b"
 };
 
@@ -92,7 +92,7 @@ static const unsigned int ps_subpic_kernel_static_gen5[][4] =
 {
 #include "shaders/render/exa_wm_xy.g4b.gen5"
 #include "shaders/render/exa_wm_src_affine.g4b.gen5"
-#include "shaders/render/exa_wm_blend_subpicture.g4b.gen5"
+#include "shaders/render/exa_wm_src_sample_argb.g4b.gen5"
 #include "shaders/render/exa_wm_write.g4b.gen5"
 };
 
@@ -580,12 +580,13 @@ i965_render_src_surface_state(VADriverContextP ctx,
     render_state->wm.surface[index] = ss_bo;
     render_state->wm.sampler_count++;
 }
+
 static void
 i965_subpic_render_src_surface_state(VADriverContextP ctx, 
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h)
+                              int w, int h, int format)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
@@ -601,7 +602,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     ss = ss_bo->virtual;
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
-    ss->ss0.surface_format = I965_SURFACEFORMAT_R8_UNORM;
+    ss->ss0.surface_format = format;
     ss->ss0.writedisable_alpha = 0;
     ss->ss0.writedisable_red = 0;
     ss->ss0.writedisable_green = 0;
@@ -677,8 +678,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_image->width, obj_image->height);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_image->width, obj_image->height);
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
 }
 
 static void
@@ -788,58 +789,57 @@ i965_render_binding_table(VADriverContextP ctx)
 
 static void 
 i965_subpic_render_upload_vertex(VADriverContextP ctx,
-                          VASurfaceID surface,
-                          short srcx,
-                          short srcy,
-                          unsigned short srcw,
-                          unsigned short srch,
-                          short destx,
-                          short desty,
-                          unsigned short destw,
-                          unsigned short desth)
+                                 VASurfaceID surface,
+                                 const VARectangle *output_rect)
 {    
-	struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_driver_data  *i965         = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
-    struct intel_region *dest_region = render_state->draw_region;
-    struct object_surface *obj_surface;
-    struct object_subpic *obj_subpic;
-    float *vb;
-    float src_scale_x, src_scale_y;
-    int i, width, height;
-    obj_surface = SURFACE(surface);
-    obj_subpic = SUBPIC(obj_surface->subpic);
-    assert(obj_surface);
-    assert(obj_subpic);
-    
-    int box_x1 = dest_region->x + obj_subpic->dstx;
-    int box_y1 = dest_region->y + obj_subpic->dsty;
-    int box_x2 = box_x1 + obj_subpic->width;
-    int box_y2 = box_y1 + obj_subpic->height;
+    struct object_surface    *obj_surface  = SURFACE(surface);
+    struct object_subpic     *obj_subpic   = SUBPIC(obj_surface->subpic);
 
-    width = obj_surface->width;
-    height = obj_surface->height;
-    src_scale_x = ((float)srcw / width) / (float)destw;
-    src_scale_y = ((float)srch / height) / (float)desth;
+    const float psx = (float)obj_surface->width  / (float)obj_subpic->width;
+    const float psy = (float)obj_surface->height / (float)obj_subpic->height;
+    const float ssx = (float)output_rect->width  / (float)obj_surface->width;
+    const float ssy = (float)output_rect->height / (float)obj_surface->height;
+    const float sx  = psx * ssx;
+    const float sy  = psy * ssy;
+    float *vb, tx1, tx2, ty1, ty2, x1, x2, y1, y2;
+    int i = 0;
+
+    VARectangle dst_rect;
+    dst_rect.x      = output_rect->x + sx * (float)obj_subpic->dst_rect.x;
+    dst_rect.y      = output_rect->y + sx * (float)obj_subpic->dst_rect.y;
+    dst_rect.width  = sx * (float)obj_subpic->dst_rect.width;
+    dst_rect.height = sy * (float)obj_subpic->dst_rect.height;
 
     dri_bo_map(render_state->vb.vertex_buffer, 1);
     assert(render_state->vb.vertex_buffer->virtual);
     vb = render_state->vb.vertex_buffer->virtual;
-    /*vertex covers the full subpicture*/
-    i = 0;
-    vb[i++] = 1;
-    vb[i++] = 1;
-    vb[i++] = (float)box_x2;
-    vb[i++] = (float)box_y2;
-    
-    vb[i++] = 0.0;
-    vb[i++] = 1;
-    vb[i++] = (float)box_x1;
-    vb[i++] = (float)box_y2;
 
-    vb[i++] = 0.0;
-    vb[i++] = 0.0;
-    vb[i++] = (float)box_x1;
-    vb[i++] = (float)box_y1;
+    tx1 = (float)obj_subpic->src_rect.x / (float)obj_subpic->width;
+    ty1 = (float)obj_subpic->src_rect.y / (float)obj_subpic->height;
+    tx2 = (float)(obj_subpic->src_rect.x + obj_subpic->src_rect.width) / (float)obj_subpic->width;
+    ty2 = (float)(obj_subpic->src_rect.y + obj_subpic->src_rect.height) / (float)obj_subpic->height;
+
+    x1 = (float)dst_rect.x;
+    y1 = (float)dst_rect.y;
+    x2 = (float)(dst_rect.x + dst_rect.width);
+    y2 = (float)(dst_rect.y + dst_rect.height);
+
+    vb[i++] = tx2;
+    vb[i++] = ty2;
+    vb[i++] = x2;
+    vb[i++] = y2;
+
+    vb[i++] = tx1;
+    vb[i++] = ty2;
+    vb[i++] = x1;
+    vb[i++] = y2;
+
+    vb[i++] = tx1;
+    vb[i++] = ty1;
+    vb[i++] = x1;
+    vb[i++] = y1;
     dri_bo_unmap(render_state->vb.vertex_buffer);
 }
 
@@ -947,9 +947,13 @@ i965_subpic_render_state_setup(VADriverContextP ctx,
     i965_render_cc_viewport(ctx);
     i965_subpic_render_cc_unit(ctx);
     i965_render_binding_table(ctx);
-    i965_subpic_render_upload_vertex(ctx, surface,
-	    srcx, srcy, srcw, srch,
-	    destx, desty, destw, desth);
+
+    VARectangle output_rect;
+    output_rect.x      = destx;
+    output_rect.y      = desty;
+    output_rect.width  = destw;
+    output_rect.height = desth;
+    i965_subpic_render_upload_vertex(ctx, surface, &output_rect);
 }
 
 
@@ -1162,21 +1166,31 @@ i965_render_vertex_elements(VADriverContextP ctx)
     }
 }
 
-void
-i965_render_upload_palette(VADriverContextP ctx)
+static void
+i965_render_upload_image_palette(
+    VADriverContextP ctx,
+    VAImageID        image_id,
+    unsigned int     alpha
+)
 {
-    BEGIN_BATCH(ctx, 17);
-    OUT_BATCH(ctx, CMD_SAMPLER_PALETTE_LOAD | 15);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    unsigned int i;
+
+    struct object_image *obj_image = IMAGE(image_id);
+    assert(obj_image);
+
+    if (obj_image->image.num_palette_entries == 0)
+        return;
+
+    BEGIN_BATCH(ctx, 1 + obj_image->image.num_palette_entries);
+    OUT_BATCH(ctx, CMD_SAMPLER_PALETTE_LOAD | (obj_image->image.num_palette_entries - 1));
     /*fill palette*/
     //int32_t out[16]; //0-23:color 23-31:alpha
-    int32_t i,c;
-    for(i = 0; i < 16; i ++){
-        c = i*16; //16 colors
-        OUT_BATCH(ctx,c<<24/*alpha*/|c<<16/*R*/|c<<8/*G*/|c/*B*/);//c<<24/*alpha*/|c<<16/*R*/|c<<8/*G*/|c/*B*/);
-    }
-
+    for (i = 0; i < obj_image->image.num_palette_entries; i++)
+        OUT_BATCH(ctx, (alpha << 24) | obj_image->palette[i]);
     ADVANCE_BATCH(ctx);
 }
+
 static void
 i965_render_startup(VADriverContextP ctx)
 {
@@ -1284,7 +1298,6 @@ i965_subpic_render_pipeline_setup(VADriverContextP ctx)
     i965_render_binding_table_pointers(ctx);
     i965_render_constant_color(ctx);
     i965_render_pipelined_pointers(ctx);
-    //i965_render_upload_palette(ctx);
     i965_render_urb_layout(ctx);
     i965_render_cs_urb_layout(ctx);
     i965_render_drawing_rectangle(ctx);
@@ -1412,11 +1425,17 @@ i965_render_put_subpic(VADriverContextP ctx,
                         unsigned short destw,
                         unsigned short desth)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_surface *obj_surface = SURFACE(surface);
+    struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
+    assert(obj_subpic);
+
     i965_render_initialize(ctx);
     i965_subpic_render_state_setup(ctx, surface,
 	    srcx, srcy, srcw, srch,
 	    destx, desty, destw, desth);
     i965_subpic_render_pipeline_setup(ctx);
+    i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(ctx);
 }
 

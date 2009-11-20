@@ -868,7 +868,7 @@ i965_media_mpeg2_objects(VADriverContextP ctx, struct decode_state *decode_state
                   I915_GEM_DOMAIN_SAMPLER, 0, 
                   slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
         OUT_BATCH(ctx, 
-                  ((0 << 24) |     
+                  ((slice_param->slice_horizontal_position << 24) |     
                    (slice_param->slice_vertical_position << 16) |
                    (127 << 8) | 
                    (slice_param->macroblock_offset & 0x7)));

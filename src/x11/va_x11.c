@@ -42,26 +42,6 @@
 
 static VADisplayContextP pDisplayContexts = NULL;
 
-static void va_errorMessage(const char *msg, ...)
-{
-    va_list args;
-
-    fprintf(stderr, "libva error: ");
-    va_start(args, msg);
-    vfprintf(stderr, msg, args);
-    va_end(args);
-}
-
-static void va_infoMessage(const char *msg, ...)
-{
-    va_list args;
-
-    fprintf(stderr, "libva: ");
-    va_start(args, msg);
-    vfprintf(stderr, msg, args);
-    va_end(args);
-}
-
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
 )
@@ -132,49 +112,21 @@ static VAStatus va_NVCTRL_GetDriverName (
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
-    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-    int direct_capable;
-    int driver_major;
-    int driver_minor;
-    int driver_patch;
-    Bool result = True;
-    char *nvidia_driver_name = NULL;
+    int direct_capable, driver_major, driver_minor, driver_patch;
+    Bool result;
 
-    if (result)
-    {
-        result = VA_NVCTRLQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen, &direct_capable);
-        if (!result)
-        {
-            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable failed\n");
-        }
-    }
-    if (result)
-    {
-        result = direct_capable;
-        if (!result)
-        {
-            va_errorMessage("VA_NVCTRLQueryDirectRenderingCapable returned false\n");
-        }
-    }
-    if (result)
-    {
-        result = VA_NVCTRLGetClientDriverName(ctx->x11_dpy, ctx->x11_screen, &driver_major, &driver_minor,
-                                              &driver_patch, &nvidia_driver_name);
-        if (!result)
-        {
-            va_errorMessage("VA_NVCTRLGetClientDriverName returned false\n");
-        }
-    }
-    if (result)
-    {
-        vaStatus = VA_STATUS_SUCCESS;
-        va_infoMessage("va_NVCTRL_GetDriverName: %d.%d.%d %s (screen %d)\n",
-                       driver_major, driver_minor, driver_patch,
-                       nvidia_driver_name, ctx->x11_screen);
-	if (driver_name)
-            *driver_name = nvidia_driver_name;
-    }
-    return vaStatus;
+    result = VA_NVCTRLQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen,
+                                                  &direct_capable);
+    if (!result || !direct_capable)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    result = VA_NVCTRLGetClientDriverName(ctx->x11_dpy, ctx->x11_screen,
+                                          &driver_major, &driver_minor,
+                                          &driver_patch, driver_name);
+    if (!result)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    return VA_STATUS_SUCCESS;
 }
 
 static VAStatus va_DisplayContextGetDriverName (

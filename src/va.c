@@ -313,6 +313,8 @@ const char *vaErrorStr(VAStatus error_status)
             return "resolution not supported";
         case VA_STATUS_ERROR_UNIMPLEMENTED:
             return "the requested function is not implemented";
+        case VA_STATUS_ERROR_SURFACE_IN_DISPLAYING:
+            return "surface is in displaying (may by overlay)" ;
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
