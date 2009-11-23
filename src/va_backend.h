@@ -398,6 +398,8 @@ struct VADriverContext
 
 struct VADisplayContext
 {
+    int vadpy_magic;
+    
     VADisplayContextP pNext;
     VADriverContextP pDriverContext;
 
