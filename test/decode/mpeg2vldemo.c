@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2008 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -22,23 +22,38 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define TEST_DESCRIPTION	"Sample MPEG2 VLD Decoding"
+/*
+ * it is a real program to show how VAAPI decode work,
+ * It does VLD decode for a simple MPEG2 clip "mpeg2-I.m2v"
+ * "mpeg2-I.m2v" and VA parameters are hardcoded into mpeg2vldemo.c,
+ * See mpeg2-I.jif to know how those VA parameters come from
+ *
+ * gcc -o  mpeg2vldemo  mpeg2vldemo.c -lva -lva-x11
+ * ./mpeg2vldemo  : only do decode
+ * ./mpeg2vldemo <any parameter >: decode+display
+ *
+ */  
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <getopt.h>
+#include <X11/Xlib.h>
 
-#ifdef IN_LIBVA
-#include <va_x11.h>
-#else
-#include <va/va_x11.h>
-#endif
-
-#include "test_common.c"
+#include <unistd.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
-void pre()
-{
-    test_init();
+#include <assert.h>
+
+#include <va/va.h>
+#include <va/va_x11.h>
+
+#define CHECK_VASTATUS(va_status,func)                                  \
+if (va_status != VA_STATUS_SUCCESS) {                                   \
+    fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
+    exit(1);                                                            \
 }
 
 /* Data dump of a 16x16 MPEG2 video clip,it has one I frame
@@ -120,23 +135,43 @@ static VASliceParameterBufferMPEG2 slice_param={
 #define CLIP_WIDTH  16
 #define CLIP_HEIGHT 16
 
-int surf_width=CLIP_WIDTH,surf_height=CLIP_HEIGHT;
-int win_width=CLIP_WIDTH<<1,win_height=CLIP_HEIGHT<<1;
+#define WIN_WIDTH  (CLIP_WIDTH<<1)
+#define WIN_HEIGHT (CLIP_HEIGHT<<1)
 
-void test()
+int main(int argc,char **argv)
 {
     VAEntrypoint entrypoints[5];
     int num_entrypoints,vld_entrypoint;
     VAConfigAttrib attrib;
     VAConfigID config_id;
-    VASurfaceID vaSurface;
-    VAContextID vaContext;
-    VABufferID vaPicParamBuf,vaIQMatrixBuf,vaSliceParamBuf,vaSliceDataBuf;
-    Window win = 0;
+    VASurfaceID surface_id;
+    VAContextID context_id;
+    VABufferID pic_param_buf,iqmatrix_buf,slice_param_buf,slice_data_buf;
+    int major_ver, minor_ver;
+    Display *x11_display;
+    VADisplay	va_dpy;
+    VAStatus va_status;
+    int putsurface=0;
+
+    if (argc > 1)
+        putsurface=1;
+ 
+    x11_display = XOpenDisplay(":0.0");
+
+    if (x11_display == NULL) {
+      fprintf(stderr, "Can't connect X server!\n");
+      exit(-1);
+    }
+
+    assert(x11_display);
+    
+    va_dpy = vaGetDisplay(x11_display);
+    va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
+    assert(va_status == VA_STATUS_SUCCESS);
     
     va_status = vaQueryConfigEntrypoints(va_dpy, VAProfileMPEG2Main, entrypoints, 
                              &num_entrypoints);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+    CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
     for	(vld_entrypoint = 0; vld_entrypoint < num_entrypoints; vld_entrypoint++) {
         if (entrypoints[vld_entrypoint] == VAEntrypointVLD)
@@ -144,107 +179,108 @@ void test()
     }
     if (vld_entrypoint == num_entrypoints) {
         /* not find VLD entry point */
-        ASSERT(0);
+        assert(0);
     }
 
     /* Assuming finding VLD, find out the format for the render target */
     attrib.type = VAConfigAttribRTFormat;
-    va_status = vaGetConfigAttributes(va_dpy, VAProfileMPEG2Main, VAEntrypointVLD,
+    vaGetConfigAttributes(va_dpy, VAProfileMPEG2Main, VAEntrypointVLD,
                           &attrib, 1);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
     if ((attrib.value & VA_RT_FORMAT_YUV420) == 0) {
         /* not find desired YUV420 RT format */
-        ASSERT(0);
+        assert(0);
     }
     
     va_status = vaCreateConfig(va_dpy, VAProfileMPEG2Main, VAEntrypointVLD,
                               &attrib, 1,&config_id);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-    
-    va_status = vaCreateSurfaces(va_dpy,surf_width,surf_height,
-                                VA_RT_FORMAT_YUV420, 1, &vaSurface);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+    CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
+
+    va_status = vaCreateSurfaces(va_dpy,CLIP_WIDTH,CLIP_HEIGHT,
+                                VA_RT_FORMAT_YUV420, 1, &surface_id);
+    CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* Create a context for this decode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
                                CLIP_WIDTH,
                                ((CLIP_HEIGHT+15)/16)*16,
                                VA_PROGRESSIVE,
-                               &vaSurface,
+                               &surface_id,
                                1,
-                               &vaContext);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+                               &context_id);
+    CHECK_VASTATUS(va_status, "vaCreateContext");
     
-    va_status = vaCreateBuffer(va_dpy, vaContext,
+    va_status = vaCreateBuffer(va_dpy, context_id,
                               VAPictureParameterBufferType,
                               sizeof(VAPictureParameterBufferMPEG2),
                               1, &pic_param,
-                              &vaPicParamBuf);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaCreateBuffer(va_dpy, vaContext,
+                              &pic_param_buf);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+    
+    va_status = vaCreateBuffer(va_dpy, context_id,
                               VAIQMatrixBufferType,
                               sizeof(VAIQMatrixBufferMPEG2),
                               1, &iq_matrix,
-                              &vaIQMatrixBuf );
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+                              &iqmatrix_buf );
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
                 
-    va_status = vaCreateBuffer(va_dpy, vaContext,
+    va_status = vaCreateBuffer(va_dpy, context_id,
                               VASliceParameterBufferType,
                               sizeof(VASliceParameterBufferMPEG2),
                               1,
-                              &slice_param, &vaSliceParamBuf);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+                              &slice_param, &slice_param_buf);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    va_status = vaCreateBuffer(va_dpy, vaContext,
+    va_status = vaCreateBuffer(va_dpy, context_id,
                               VASliceDataBufferType,
                               0xc4-0x2f+1,
                               1,
                               mpeg2_clip+0x2f,
-                              &vaSliceDataBuf);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+                              &slice_data_buf);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    va_status = vaBeginPicture(va_dpy, vaContext, vaSurface);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+    va_status = vaBeginPicture(va_dpy, context_id, surface_id);
+    CHECK_VASTATUS(va_status, "vaBeginPicture");
+
+    va_status = vaRenderPicture(va_dpy,context_id, &pic_param_buf, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
     
-    va_status = vaRenderPicture(va_dpy,vaContext, &vaPicParamBuf, 1);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaRenderPicture(va_dpy,vaContext, &vaIQMatrixBuf, 1);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaRenderPicture(va_dpy,vaContext, &vaSliceParamBuf, 1);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaRenderPicture(va_dpy,vaContext, &vaSliceDataBuf, 1);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaEndPicture(va_dpy,vaContext);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
-
-    va_status = vaSyncSurface(va_dpy, vaSurface);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+    va_status = vaRenderPicture(va_dpy,context_id, &iqmatrix_buf, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
     
-    win = XCreateSimpleWindow(dpy, RootWindow(dpy, 0), 0, 0,
-                              win_width,win_height, 0, 0, WhitePixel(dpy, 0));
-    XMapWindow(dpy, win);
-    XSync(dpy, False);
+    va_status = vaRenderPicture(va_dpy,context_id, &slice_param_buf, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+    
+    va_status = vaRenderPicture(va_dpy,context_id, &slice_data_buf, 1);
+    CHECK_VASTATUS(va_status, "vaRenderPicture");
+    
+    va_status = vaEndPicture(va_dpy,context_id);
+    CHECK_VASTATUS(va_status, "vaEndPicture");
 
-    va_status = vaPutSurface(va_dpy, vaSurface, win,
-                            0,0,surf_width,surf_height,
-                            0,0,win_width,win_height,
-                            NULL,0,0);
-    ASSERT( VA_STATUS_SUCCESS == va_status );
+    va_status = vaSyncSurface(va_dpy, surface_id);
+    CHECK_VASTATUS(va_status, "vaSyncSurface");
+    
+    if (putsurface) {
+        Window  win;
+        win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
+                              WIN_WIDTH,WIN_HEIGHT, 0, 0, WhitePixel(x11_display, 0));
+        XMapWindow(x11_display, win);
+        XSync(x11_display, False);
+        va_status = vaPutSurface(va_dpy, surface_id, win,
+                                0,0,CLIP_WIDTH,CLIP_HEIGHT,
+                                0,0,WIN_WIDTH,WIN_HEIGHT,
+                                NULL,0,0);
+        CHECK_VASTATUS(va_status, "vaPutSurface");
+    }
 
     printf("press any key to exit\n");
     getchar();
-    
-    vaDestroySurfaces(va_dpy,&vaSurface,1);
-    vaDestroyConfig(va_dpy,config_id);
-    vaDestroyContext(va_dpy,vaContext);
-}
 
-void post()
-{
-    test_terminate();
+    vaDestroySurfaces(va_dpy,&surface_id,1);
+    vaDestroyConfig(va_dpy,config_id);
+    vaDestroyContext(va_dpy,context_id);
+
+    vaTerminate(va_dpy);
+    XCloseDisplay(x11_display);
+    
+    return 0;
 }

@@ -126,6 +126,10 @@ AC_OUTPUT([
 	i965_drv_video/shaders/mpeg2/vld/Makefile
 	i965_drv_video/shaders/render/Makefile
 	test/Makefile
+	test/basic/Makefile
+	test/decode/Makefile
+	test/putsurface/Makefile
+	test/encode/Makefile
 	libva.pc
 	libva-x11.pc
 ])
