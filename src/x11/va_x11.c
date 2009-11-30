@@ -189,7 +189,7 @@ VADisplay vaGetDisplay (
       dri_state       = calloc(1, sizeof(*dri_state));
       if (pDisplayContext && pDriverContext && dri_state)
       {
-	  pDisplayContext->vadpy_magic = 0x789abcde;          
+	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
 	  pDriverContext->x11_dpy          = native_dpy;
 	  pDisplayContext->pNext           = pDisplayContexts;
