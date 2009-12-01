@@ -28,7 +28,7 @@
  * "mpeg2-I.m2v" and VA parameters are hardcoded into mpeg2vldemo.c,
  * See mpeg2-I.jif to know how those VA parameters come from
  *
- * gcc -o  mpeg2vldemo  mpeg2vldemo.c -lva -lva-x11
+ * gcc -o  mpeg2vldemo  mpeg2vldemo.c -lva -lva-x11 -I/usr/include/va
  * ./mpeg2vldemo  : only do decode
  * ./mpeg2vldemo <any parameter >: decode+display
  *
@@ -47,8 +47,8 @@
 
 #include <assert.h>
 
-#include <va/va.h>
-#include <va/va_x11.h>
+#include "va.h"
+#include "va_x11.h"
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
