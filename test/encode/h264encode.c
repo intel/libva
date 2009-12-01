@@ -26,7 +26,7 @@
  * it is a real program to show how VAAPI encoding work,
  * It does H264 element stream level encoding on auto-generated YUV data
  *
- * gcc -o  h264encode  h264encode -lva -lva-x11 -I /usr/include/va
+ * gcc -o  h264encode  h264encode -lva -lva-x11 -I/usr/include/va
  * ./h264encode -w <width> -h <height> -n <frame_num>
  *
  */  
@@ -54,6 +54,8 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     exit(1);                                                            \
 }
 
+#include "loadsurface.h"
+
 #define SURFACE_NUM 18 /* 16 surfaces for src, 2 surface for reconstructed/reference */
 
 static  Display *x11_display;
@@ -67,11 +69,15 @@ static  int win_height;
 static  int coded_fd;
 static  char coded_file[256];
 
+#define CODEDBUF_NUM 5
+static  VABufferID coded_buf[CODEDBUF_NUM];
+
+static  int frame_display = 0; /* display the frame during encoding */
 static  int frame_width=352, frame_height=288;
 static  int frame_rate = 30;
-static  int frame_count = 1000;
+static  int frame_count = 400;
 static  int intra_count = 30;
-static  int frame_bitrate = 64000;
+static  int frame_bitrate = 8000000; /* 8M */
 static  int initial_qp = 15;
 static  int minimal_qp = 0;
 
@@ -85,11 +91,13 @@ static int upload_source_YUV_once_for_all()
     int i;
     
     for (i=0; i<SURFACE_NUM-2; i++) {
-        upload_surafce(va_dpy, surface_id[i], box_width, row_shift, 0);
+        printf("\rLoading data into surface %d.....", i);
+        upload_surface(va_dpy, surface_id[i], box_width, row_shift, 0);
         
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
     }
+    printf("\n", i);
 
     return 0;
 }
@@ -102,12 +110,18 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
     VAStatus va_status;
 
     va_status = vaMapBuffer(va_dpy,coded_buf,&coded_p);
+    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    
     coded_size = *((unsigned long *) coded_p); /* first DWord is the coded video size */
     coded_offset = *((unsigned long *) (coded_p + 4)); /* second DWord is byte offset */
-    wrt_size = write(coded_fd,coded_p+coded_offset,coded_size);
-    assert(wrt_size==coded_size);
-    vaUnmapBuffer(va_dpy,coded_buf);
 
+    wrt_size = write(coded_fd,coded_p+coded_offset,coded_size);
+    if (wrt_size != coded_size) {
+        fprintf(stderr, "Trying to write %d bytes, but actual %d bytes\n",
+                coded_size, wrt_size);
+        exit(1);
+    }
+    vaUnmapBuffer(va_dpy,coded_buf);
 
     printf("\r      "); /* return back to startpoint */
     switch (current_frame % 4) {
@@ -133,23 +147,22 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
     printf("(%06d bytes coded)",coded_size);
     if (frame_skipped)
         printf("(SKipped)");
+    printf("                                    ");
 
     return;
 }
 
 
-static int display_surface(int current_frame, int *exit_encode)
+static int display_surface(int frame_id, int *exit_encode)
 {
     Window win = display_win;
     XEvent event;
     VAStatus va_status;
     
-    if (current_frame == 0) {
+    if (win == 0) { /* display reconstructed surface */
         win_width = frame_width;
         win_height = frame_height;
-    }
-    
-    if (win == 0) { /* display reconstructed surface */
+        
         win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
                                   frame_width, frame_height, 0, 0, WhitePixel(x11_display, 0));
         XMapWindow(x11_display, win);
@@ -157,6 +170,11 @@ static int display_surface(int current_frame, int *exit_encode)
 
         display_win = win;
     }
+
+    va_status = vaPutSurface(va_dpy, surface_id[frame_id], win,
+                             0,0, frame_width, frame_height,
+                             0,0, win_width, win_height,
+                             NULL,0,0);
 
     *exit_encode = 0;
     while(XPending(x11_display)) {
@@ -174,11 +192,7 @@ static int display_surface(int current_frame, int *exit_encode)
             win_height = event.xconfigure.height;
         }	
     }	
-    
-    va_status = vaPutSurface(va_dpy, surface_id[current_frame], win,
-                             0,0, frame_width, frame_height,
-                             0,0, win_width, win_height,
-                             NULL,0,0);
+
     return;
 }
 
@@ -195,7 +209,6 @@ enum {
 
 static int do_h264_encoding(void)
 {
-    VAEncSequenceParameterBufferH264 seq_h264;
     VAEncPictureParameterBufferH264 pic_h264;
     VAEncSliceParameterBuffer slice_h264;
     VAStatus va_status;
@@ -203,14 +216,20 @@ static int do_h264_encoding(void)
     int codedbuf_size;
     VASurfaceStatus surface_status;
     int src_surface, dst_surface, ref_surface;
-    int putsurface=0, frame_skipped = 0;
-    int exit_encode = 0;
+    int frame_skipped = 0;
     int i;
 
+
+    va_status = vaCreateSurfaces(va_dpy,frame_width, frame_height,
+                                 VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
+    CHECK_VASTATUS(va_status, "vaCreateSurfaces");
+    
+    /* upload RAW YUV data into all surfaces */
+    upload_source_YUV_once_for_all();
+    
     codedbuf_size = (frame_width * frame_height * 400) / (16*16);
 
     src_surface = 0;
-    
     /* the last two frames are reference/reconstructed frame */
     dst_surface = SURFACE_NUM - 1;
     ref_surface = SURFACE_NUM - 2;
@@ -220,9 +239,12 @@ static int do_h264_encoding(void)
         CHECK_VASTATUS(va_status,"vaBeginPicture");
 
         if (i == 0) {
+            VAEncSequenceParameterBufferH264 seq_h264 = {0};
+            VABufferID seq_param_buf;
+            
             seq_h264.level_idc = SH_LEVEL_3;
-            seq_h264.picture_width_in_mbs = frame_width;
-            seq_h264.picture_height_in_mbs = frame_height;
+            seq_h264.picture_width_in_mbs = frame_width / 16;
+            seq_h264.picture_height_in_mbs = frame_height / 16;
             seq_h264.bits_per_second = frame_bitrate;
             seq_h264.frame_rate = frame_rate;
             seq_h264.initial_qp = initial_qp;
@@ -242,14 +264,6 @@ static int do_h264_encoding(void)
         va_status = vaCreateBuffer(va_dpy,context_id,VAEncCodedBufferType,
                                    codedbuf_size, 1, NULL, &coded_buf);
 
-        /* if a frame is skipped, current frame still use last reference frame */
-        if (frame_skipped == 0) {
-            /* swap ref/dst */
-            int tmp = dst_surface;
-            dst_surface = ref_surface;
-            ref_surface = tmp;
-        } 
-        
         pic_h264.reference_picture = surface_id[ref_surface];
         pic_h264.reconstructed_picture= surface_id[dst_surface];
         pic_h264.coded_buf = coded_buf;
@@ -261,41 +275,54 @@ static int do_h264_encoding(void)
                                    sizeof(pic_h264),1,&pic_h264,&pic_param_buf);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");;
 
+        va_status = vaRenderPicture(va_dpy,context_id, &pic_param_buf, 1);
+        CHECK_VASTATUS(va_status,"vaRenderPicture");
+
         /* one frame, one slice */
         slice_h264.start_row_number = 0;
         slice_h264.slice_height = frame_height/16; /* Measured by MB */
-        slice_h264.slice_flags.bits.is_intra = i % intra_count;
+        slice_h264.slice_flags.bits.is_intra = ((i % intra_count) == 0);
         slice_h264.slice_flags.bits.disable_deblocking_filter_idc = 0;
         va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
                                    sizeof(slice_h264),1,&slice_h264,&slice_param_buf);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");;
-
-        va_status = vaRenderPicture(va_dpy,context_id, &pic_param_buf, 1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");;
         
         va_status = vaRenderPicture(va_dpy,context_id, &slice_param_buf, 1);
-        CHECK_VASTATUS(va_status,"vaRenderPicture");;
+        CHECK_VASTATUS(va_status,"vaRenderPicture");
         
         va_status = vaEndPicture(va_dpy,context_id);
         CHECK_VASTATUS(va_status,"vaEndPicture");;
 
-        va_status = vaSyncSurface(va_dpy, surface_id[0]);
-        CHECK_VASTATUS(va_status,"vaSyncSurface");;
+        va_status = vaSyncSurface(va_dpy, surface_id[src_surface]);
+        CHECK_VASTATUS(va_status,"vaSyncSurface");
 
+        surface_status = 0;
         va_status = vaQuerySurfaceStatus(va_dpy, surface_id[src_surface],&surface_status);
         frame_skipped = (surface_status & VASurfaceSkipped);
 
         save_coded_buf(coded_buf, i, frame_skipped);
         
         /* should display reconstructed frame, but just diplay source frame */
-        display_surface(src_surface, &exit_encode);
-        if (exit_encode)
-            frame_count = i;
+        if (frame_display) {
+            int exit_encode = 0;
+
+            display_surface(src_surface, &exit_encode);
+            if (exit_encode)
+                frame_count = i;
+        }
         
         /* use next surface */
         src_surface++;
         if (src_surface == (SURFACE_NUM - 2))
             src_surface = 0;
+
+        /* if a frame is skipped, current frame still use last reference frame */
+        if (frame_skipped == 0) {
+            /* swap ref/dst */
+            int tmp = dst_surface;
+            dst_surface = ref_surface;
+            ref_surface = tmp;
+        } 
     }
 
     return 0;
@@ -312,7 +339,7 @@ int main(int argc,char **argv)
     char c;
 
     strcpy(coded_file, "/tmp/demo.264");
-    while ((c =getopt(argc,argv,"w:h:n:p:f:r:q:s:o:?") ) != EOF) {
+    while ((c =getopt(argc,argv,"w:h:n:p:f:r:q:s:o:d?") ) != EOF) {
         switch (c) {
                 case 'w':
                     frame_width = atoi(optarg);
@@ -338,6 +365,9 @@ int main(int argc,char **argv)
                 case 's':
                     minimal_qp = atoi(optarg);
                     break;
+                case 'd':
+                    frame_display = 1;
+                    break;
                 case 'o':
                     strcpy(coded_file, optarg);
                     break;
@@ -351,7 +381,7 @@ int main(int argc,char **argv)
                     printf("   -r bit rate\n");
                     printf("   -q initial QP\n");
                     printf("   -s maximum QP\n");
-                    printf("   -s coded file\n");
+                    printf("   -o coded file\n");
                     exit(0);
         }
     }
@@ -415,8 +445,10 @@ int main(int argc,char **argv)
     printf("Coded %d frames, %dx%d, save the coded file into %s\n",
            frame_count, frame_width, frame_height, coded_file);
     do_h264_encoding();
+
+    printf("\n\n");
     
-    vaDestroySurfaces(va_dpy,&surface_id[0],3);
+    vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);
     vaDestroyConfig(va_dpy,config_id);
     vaDestroyContext(va_dpy,context_id);
     

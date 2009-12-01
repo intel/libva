@@ -23,6 +23,8 @@
  */
 
 
+/* gcc -o putsurface putsurface.c -lva -lva-x11 -I/usr/include/va */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -37,8 +39,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include <va/va.h>
-#include <va/va_x11.h>
+#include "va.h"
+#include "va_x11.h"
 
 #include <assert.h>
 
@@ -75,7 +77,7 @@ static  Display *x11_display;
 static  VADisplay *va_dpy;
 static  int multi_thread=0;
 static  int put_pixmap = 0;
-static  int test_clip = 1;
+static  int test_clip = 0;
 static  int display_field = VA_FRAME_PICTURE;
 static  int check_event = 1;
 static  int verbose=0;
@@ -185,6 +187,17 @@ static VASurfaceID get_next_free_surface(int *index)
         return surface_id[i];
 }
 
+/*
+ * Helper function for profiling purposes
+ */
+static unsigned long get_tick_count(void)
+{
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL))
+        return 0;
+    return tv.tv_usec/1000+tv.tv_sec*1000;
+}
+
 static int putsurface_thread(void *data)
 {
     int width=win_width, height=win_height;
@@ -198,7 +211,9 @@ static int putsurface_thread(void *data)
     int index = 0;
     Bool is_event; 
     XEvent event;
-
+    unsigned int frame_num=0, start_time, putsurface_time;
+    VARectangle cliprects[2]; /* client supplied clip list */
+    
     if (win == win_thread0) {
         printf("Enter into thread0\n\n");
         pixmap = pixmap_thread0;
@@ -218,7 +233,8 @@ static int putsurface_thread(void *data)
         printf("vaPutSurface into a Window directly\n\n");
         draw = win;
     }
-    
+
+    putsurface_time = 0;
     while (!quit) {
         VASurfaceID surface_id = VA_INVALID_SURFACE;
         
@@ -228,13 +244,39 @@ static int putsurface_thread(void *data)
         if (verbose) printf("Thread %x Display surface 0x%p,\n", (unsigned int)win, (void *)surface_id);
 
         upload_surface(va_dpy, surface_id, box_width, row_shift, display_field);
-        
+
+        start_time = get_tick_count();
         vaStatus = vaPutSurface(va_dpy, surface_id, draw,
                                 0,0,surface_width,surface_height,
                                 0,0,width,height,
-                                NULL,0,display_field);
+                                (test_clip==0)?NULL:&cliprects[0],
+                                (test_clip==0)?0:2,
+                                display_field);
         CHECK_VASTATUS(vaStatus,"vaPutSurface");
+        putsurface_time += (get_tick_count() - start_time);
+        
+        if ((frame_num % 0xff) == 0) {
+            fprintf(stderr, "%.2f FPS             \r", 256000.0 / (float)putsurface_time);
+            putsurface_time = 0;
 
+            if (test_clip) {
+                srand((unsigned)time(NULL));
+                
+                cliprects[0].x = (rand() % width);
+                cliprects[0].y = (rand() % height);
+                cliprects[0].width = (rand() % (width - cliprects[0].x));
+                cliprects[0].height = (rand() % (height - cliprects[0].y));
+
+                cliprects[1].x = (rand() % width);
+                cliprects[1].y = (rand() % height);
+                cliprects[1].width = (rand() % (width - cliprects[1].x));
+                cliprects[1].height = (rand() % (height - cliprects[1].y));
+                printf("\nTest clip (%d,%d, %d x %d) and (%d,%d, %d x %d) \n",
+                       cliprects[0].x, cliprects[0].y, cliprects[0].width, cliprects[0].height,
+                       cliprects[1].x, cliprects[1].y, cliprects[1].width, cliprects[1].height);
+            }
+        }
+        
         if (put_pixmap)
             XCopyArea(x11_display, pixmap, win,  context, 0, 0, width, height, 0, 0);
         
@@ -242,7 +284,7 @@ static int putsurface_thread(void *data)
 
         if (check_event) {
             pthread_mutex_lock(&gmutex);
-            is_event =XCheckWindowEvent(x11_display, win, StructureNotifyMask|KeyPressMask,&event);
+            is_event = XCheckWindowEvent(x11_display, win, StructureNotifyMask|KeyPressMask,&event);
             pthread_mutex_unlock(&gmutex);
             if (is_event) {
                 /* bail on any focused key press */
@@ -262,6 +304,8 @@ static int putsurface_thread(void *data)
         
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
+
+        frame_num++;
     }
 
     pthread_exit(NULL);
@@ -277,7 +321,7 @@ int main(int argc,char **argv)
     char c;
     int i;
 
-    while ((c =getopt(argc,argv,"w:h:d:f:tep?nv") ) != EOF) {
+    while ((c =getopt(argc,argv,"w:h:d:f:tcep?nv") ) != EOF) {
         switch (c) {
             case '?':
                 printf("putsurface <options>\n");
