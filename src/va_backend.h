@@ -396,6 +396,7 @@ struct VADriverContext
     void *dri_state;
 };
 
+#define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
 struct VADisplayContext
 {
     int vadpy_magic;

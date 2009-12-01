@@ -20,17 +20,17 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+bin_PROGRAMS = mpeg2vldemo
 
-bin_PROGRAMS = vainfo
+AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/x11 -DIN_LIBVA
 
-AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x11 -DIN_LIBVA
+TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib)
+
+mpeg2vldemo_LDADD = $(TEST_LIBS)
+mpeg2vldemo_SOURCES = mpeg2vldemo.c
 
 
-vainfo_LDADD = $(top_srcdir)/src/$(libvabackendlib)
-vainfo_DEPENDENCIES = $(top_srcdir)/src/$(libvabackendlib)
-vainfo_SOURCES = vainfo.c
-
-SUBDIRS = basic decode encode putsurface
-
-valgrind:	vainfo
-	valgrind --leak-check=full --show-reachable=yes .libs/vainfo; 
+valgrind:	$(bin_PROGRAMS)
+	for a in $(bin_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done
