@@ -175,3 +175,25 @@ AC_OUTPUT([
 	libva-tpi.pc
 ])
 
+# Print a small summary
+
+echo ""
+echo "libva - ${LIBVA_VERSION}"
+echo ""
+
+echo " • Global :"
+echo "     Prefix: ${prefix}"
+echo ""
+
+AS_IF([test x$enable_i965_driver = xyes], [DRIVERS="i965 $DRIVERS"]) 
+AS_IF([test x$enable_dummy_driver = xyes], [DRIVERS="dummy $DRIVERS"])
+
+echo " • Drivers: ${DRIVERS}"
+
+AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
+BACKENDS="x11 $BACKENDS"
+AS_IF([test x$enable_dummy_backend = xyes], [BACKENDS="dummy 
+$BACKENDS"])
+
+echo " • Winsys : ${BACKENDS}"
+
