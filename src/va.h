@@ -656,6 +656,7 @@ typedef struct _VAPictureParameterBufferMPEG4
             unsigned int quarter_sample			: 1; 
             unsigned int data_partitioned		: 1; 
             unsigned int reversible_vlc			: 1; 
+            unsigned int resync_marker_disable		: 1; 
         } bits;
         unsigned int value;
     } vol_fields;
@@ -676,6 +677,7 @@ typedef struct _VAPictureParameterBufferMPEG4
     } vop_fields;
     unsigned char vop_fcode_forward;
     unsigned char vop_fcode_backward;
+    unsigned short vop_time_increment_resolution;
     /* short header related */
     unsigned char num_gobs_in_vop;
     unsigned char num_macroblocks_in_gob;
