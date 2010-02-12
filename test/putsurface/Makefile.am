@@ -29,6 +29,8 @@ TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib) -lpthread
 putsurface_LDADD = $(TEST_LIBS)
 putsurface_SOURCES = putsurface.c
 
+EXTRA_DIST = loadsurface.h
+
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
