@@ -24,7 +24,7 @@ bin_PROGRAMS = putsurface
 
 AM_CFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/x11 -DIN_LIBVA
 
-TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib)
+TEST_LIBS = $(top_srcdir)/src/$(libvabackendlib) -lpthread
 
 putsurface_LDADD = $(TEST_LIBS)
 putsurface_SOURCES = putsurface.c
