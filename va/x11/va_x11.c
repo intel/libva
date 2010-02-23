@@ -136,18 +136,9 @@ static VAStatus va_DisplayContextGetDriverName (
 )
 {
     VAStatus vaStatus;
-    char *driver_name_env;
 
     if (driver_name)
 	*driver_name = NULL;
-
-    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
-        && geteuid() == getuid())
-    {
-        /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        *driver_name = strdup(driver_name_env);
-        return VA_STATUS_SUCCESS;
-    }
 
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
