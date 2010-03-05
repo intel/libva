@@ -247,7 +247,7 @@ static int do_h264_encoding(void)
     dst_surface = SURFACE_NUM - 1;
     ref_surface = SURFACE_NUM - 2;
     
-    for (i=0; i < (frame_count - 2); i++) {
+    for (i = 0; i < frame_count; i++) {
         va_status = vaBeginPicture(va_dpy, context_id, surface_id[src_surface]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
 
