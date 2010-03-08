@@ -371,6 +371,9 @@ struct VADriverVTable
 		VADriverContextP ctx,
                 VASurfaceID surface
         );
+
+        /* Optional: GLX support hooks */
+        struct VADriverVTableGLX *glx;
 };
 
 struct VADriverContext
@@ -394,6 +397,7 @@ struct VADriverContext
     void *handle;			/* dlopen handle */
     
     void *dri_state;
+    void *glx;                          /* opaque for GLX code */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
@@ -416,6 +420,8 @@ struct VADisplayContext
 	VADisplayContextP ctx,
 	char **driver_name
     );
+
+    void *opaque;                       /* opaque for display extensions (e.g. GLX) */
 };
 
 typedef VAStatus (*VADriverInit) (

@@ -60,6 +60,11 @@ LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION"
 AC_SUBST(LIBVA_LT_VERSION)
 AC_SUBST(LIBVA_LT_LDFLAGS)
 
+AC_ARG_ENABLE(glx,
+              [AC_HELP_STRING([--enable-glx],
+                              [build with OpenGL for X11 support])],
+              [], [enable_glx=yes])
+
 AC_ARG_ENABLE(dummy-driver,
               [AC_HELP_STRING([--enable-dummy-driver],
                               [build dummy video driver])],
@@ -113,6 +118,22 @@ if test x$libudev = xno; then
 fi
 AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 
+# Check for OpenGL (X11)
+USE_GLX="no"
+GL_DEPS_CFLAGS=""
+GL_DEPS_LIBS=""
+if test x$enable_glx = xyes; then
+    AC_CHECK_HEADERS([GL/gl.h])
+    AC_CHECK_HEADERS([GL/glx.h])
+    AC_CHECK_LIB(GL, glXCreateContext, [
+        USE_GLX="yes"
+        GL_DEPS_LIBS="-lX11 -lGL"
+    ])
+fi
+AC_SUBST(GL_DEPS_CFLAGS)
+AC_SUBST(GL_DEPS_LIBS)
+AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
+
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"
 AC_SUBST(LIBVA_CFLAGS)
@@ -146,5 +167,6 @@ AC_OUTPUT([
 	test/encode/Makefile
 	libva.pc
 	libva-x11.pc
+	libva-glx.pc
 ])
 

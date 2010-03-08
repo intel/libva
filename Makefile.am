@@ -32,10 +32,13 @@ endif
 
 pcfiles = libva.pc
 pcfiles += libva-x11.pc
+if USE_GLX
+pcfiles += libva-glx.pc
+endif
 
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = $(pcfiles)
 
-EXTRA_DIST = libva.pc.in libva-x11.pc.in
+EXTRA_DIST = libva.pc.in libva-x11.pc.in libva-glx.pc.in
 
 CLEANFILES = $(pcfiles)
