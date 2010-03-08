@@ -26,7 +26,7 @@
  * it is a real program to show how VAAPI encoding work,
  * It does H264 element stream level encoding on auto-generated YUV data
  *
- * gcc -o  h264encode  h264encode -lva -lva-x11 -I/usr/include/va
+ * gcc -o  h264encode  h264encode -lva -lva-x11
  * ./h264encode -w <width> -h <height> -n <frame_num>
  *
  */  
@@ -44,9 +44,8 @@
 
 #include <assert.h>
 
-#include "va.h"
-#include "va_x11.h"
-
+#include <va/va.h>
+#include <va/va_x11.h>
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \

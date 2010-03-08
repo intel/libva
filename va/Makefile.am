@@ -21,8 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 INCLUDES = \
-	$(LIBVA_CFLAGS) -I$(top_srcdir)/src/x11 \
-	-DIN_LIBVA \
+	$(LIBVA_CFLAGS) -I$(top_srcdir)/va/x11 \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 LDADD = \
@@ -46,7 +45,7 @@ SUBDIRS = x11
 libva_la_SOURCES = va.c
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_backend.h va_version.h
+libvainclude_HEADERS = va.h va_x11.h va_backend.h va_version.h
 
 DISTCLEANFILES = \
 	va_version.h

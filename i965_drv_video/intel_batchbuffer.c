@@ -28,7 +28,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "va_backend.h"
+#include <va/va_backend.h>
 
 #include "intel_batchbuffer.h"
 

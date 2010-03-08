@@ -22,7 +22,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = src test
+SUBDIRS = va test
 if BUILD_DUMMY_DRIVER
 SUBDIRS += dummy_drv_video
 endif

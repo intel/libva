@@ -7,7 +7,7 @@
 #include <drm.h>
 #include <drm_sarea.h>
 
-#include "va_backend.h"
+#include <va/va_backend.h>
 
 enum
 {
