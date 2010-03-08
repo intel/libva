@@ -30,8 +30,6 @@
 #define _VA_BACKEND_H_
 
 #include <va/va.h>
-#include <va/va_x11.h>
-
 #include <X11/Xlib.h>
 #include <linux/videodev2.h>
 
