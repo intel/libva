@@ -27,11 +27,11 @@
  *
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "va_backend.h"
-#include "va_dricommon.h"
+#include "va/x11/va_dricommon.h"
 
 #include "intel_driver.h"
 #include "intel_memman.h"

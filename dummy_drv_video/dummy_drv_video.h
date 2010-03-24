@@ -25,7 +25,7 @@
 #ifndef _DUMMY_DRV_VIDEO_H_
 #define _DUMMY_DRV_VIDEO_H_
 
-#include "va.h"
+#include <va/va.h>
 #include "object_heap.h"
 
 #define DUMMY_MAX_PROFILES			11

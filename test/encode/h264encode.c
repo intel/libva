@@ -26,7 +26,7 @@
  * it is a real program to show how VAAPI encoding work,
  * It does H264 element stream level encoding on auto-generated YUV data
  *
- * gcc -o  h264encode  h264encode -lva -lva-x11 -I/usr/include/va
+ * gcc -o  h264encode  h264encode -lva -lva-x11
  * ./h264encode -w <width> -h <height> -n <frame_num>
  *
  */  
@@ -44,9 +44,8 @@
 
 #include <assert.h>
 
-#include "va.h"
-#include "va_x11.h"
-
+#include <va/va.h>
+#include <va/va_x11.h>
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -212,10 +211,11 @@ static int do_h264_encoding(void)
     VAEncPictureParameterBufferH264 pic_h264;
     VAEncSliceParameterBuffer slice_h264;
     VAStatus va_status;
-    VABufferID coded_buf, seq_param_buf, pic_param_buf, slice_param_buf;
+    VABufferID seq_param_buf, pic_param_buf, slice_param_buf;
     int codedbuf_size;
     VASurfaceStatus surface_status;
     int src_surface, dst_surface, ref_surface;
+    int codedbuf_idx = 0;
     int frame_skipped = 0;
     int i;
 
@@ -229,12 +229,24 @@ static int do_h264_encoding(void)
     
     codedbuf_size = (frame_width * frame_height * 400) / (16*16);
 
+    for (i = 0; i < CODEDBUF_NUM; i++) {
+        /* create coded buffer once for all
+         * other VA buffers which won't be used again after vaRenderPicture.
+         * so APP can always vaCreateBuffer for every frame
+         * but coded buffer need to be mapped and accessed after vaRenderPicture/vaEndPicture
+         * so VA won't maintain the coded buffer
+         */
+        va_status = vaCreateBuffer(va_dpy,context_id,VAEncCodedBufferType,
+                                   codedbuf_size, 1, NULL, &coded_buf[i]);
+        CHECK_VASTATUS(va_status,"vaBeginPicture");
+    }
+
     src_surface = 0;
     /* the last two frames are reference/reconstructed frame */
     dst_surface = SURFACE_NUM - 1;
     ref_surface = SURFACE_NUM - 2;
     
-    for (i=0; i < frame_count; i++) {
+    for (i = 0; i < frame_count; i++) {
         va_status = vaBeginPicture(va_dpy, context_id, surface_id[src_surface]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
 
@@ -249,7 +261,7 @@ static int do_h264_encoding(void)
             seq_h264.frame_rate = frame_rate;
             seq_h264.initial_qp = initial_qp;
             seq_h264.min_qp = minimal_qp;
-            seq_h264.basic_unit_size = 6;
+            seq_h264.basic_unit_size = 0;
             seq_h264.intra_period = intra_count;
             
             va_status = vaCreateBuffer(va_dpy, context_id,
@@ -261,12 +273,10 @@ static int do_h264_encoding(void)
             CHECK_VASTATUS(va_status,"vaRenderPicture");;
         }
 
-        va_status = vaCreateBuffer(va_dpy,context_id,VAEncCodedBufferType,
-                                   codedbuf_size, 1, NULL, &coded_buf);
 
         pic_h264.reference_picture = surface_id[ref_surface];
         pic_h264.reconstructed_picture= surface_id[dst_surface];
-        pic_h264.coded_buf = coded_buf;
+        pic_h264.coded_buf = coded_buf[codedbuf_idx];
         pic_h264.picture_width = frame_width;
         pic_h264.picture_height = frame_height;
         pic_h264.last_picture = (i==frame_count);
@@ -300,7 +310,7 @@ static int do_h264_encoding(void)
         va_status = vaQuerySurfaceStatus(va_dpy, surface_id[src_surface],&surface_status);
         frame_skipped = (surface_status & VASurfaceSkipped);
 
-        save_coded_buf(coded_buf, i, frame_skipped);
+        save_coded_buf(coded_buf[codedbuf_idx], i, frame_skipped);
         
         /* should display reconstructed frame, but just diplay source frame */
         if (frame_display) {
@@ -316,6 +326,11 @@ static int do_h264_encoding(void)
         if (src_surface == (SURFACE_NUM - 2))
             src_surface = 0;
 
+        /* use next codedbuf */
+        codedbuf_idx++;
+        if (codedbuf_idx == (CODEDBUF_NUM - 1))
+            codedbuf_idx = 0;
+        
         /* if a frame is skipped, current frame still use last reference frame */
         if (frame_skipped == 0) {
             /* swap ref/dst */
@@ -375,7 +390,8 @@ int main(int argc,char **argv)
                 case '?':
                     printf("./h264encode <options>\n");
                     printf("   -w -h: resolution\n");
-                    printf("   -n frame number\n");
+                    printf("   -n frame number\n"); 
+                    printf("   -d display the source frame\n");
                     printf("   -p P frame count between two I frames\n");
                     printf("   -f frame rate\n");
                     printf("   -r bit rate\n");

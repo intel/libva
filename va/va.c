@@ -23,20 +23,17 @@
  */
 
 #define _GNU_SOURCE 1
+
 #include "va.h"
 #include "va_backend.h"
 
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
-
-#include <linux/videodev2.h>
-#include "va_dri.h"
-#include "va_dri2.h"
-#include "va_dricommon.h"
 
 
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"

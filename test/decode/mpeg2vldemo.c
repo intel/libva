@@ -47,8 +47,8 @@
 
 #include <assert.h>
 
-#include "va.h"
-#include "va_x11.h"
+#include <va/va.h>
+#include <va/va_x11.h>
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \

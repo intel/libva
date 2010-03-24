@@ -30,7 +30,9 @@
 #ifndef _I965_DRV_VIDEO_H_
 #define _I965_DRV_VIDEO_H_
 
-#include "va.h"
+#include <va/va.h>
+#include <va/va_backend.h>
+
 #include "object_heap.h"
 
 #include "intel_driver.h"

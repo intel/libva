@@ -32,11 +32,12 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "va_backend.h"
-#include "va_dricommon.h"
+#include <va/va_backend.h>
+#include "va/x11/va_dricommon.h"
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"

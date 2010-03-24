@@ -23,7 +23,7 @@
  */
 
 
-/* gcc -o putsurface putsurface.c -lva -lva-x11 -I/usr/include/va */
+/* gcc -o putsurface putsurface.c -lva -lva-x11 */
 
 #include <stdio.h>
 #include <string.h>
@@ -39,8 +39,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "va.h"
-#include "va_x11.h"
+#include <va/va.h>
+#include <va/va_x11.h>
 
 #include <assert.h>
 

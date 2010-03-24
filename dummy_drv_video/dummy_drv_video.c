@@ -22,12 +22,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "va_backend.h"
+#include <va/va_backend.h>
 
 #include "dummy_drv_video.h"
 
 #include "assert.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 

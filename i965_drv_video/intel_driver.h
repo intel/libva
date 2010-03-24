@@ -9,7 +9,7 @@
 #include <i915_drm.h>
 #include <intel_bufmgr.h>
 
-#include "va_backend.h"
+#include <va/va_backend.h>
 
 #if defined(__GNUC__)
 #define INLINE __inline__
