@@ -50,7 +50,6 @@ static int object_heap_expand( object_heap_p heap )
     {
         return -1; /* Out of memory */
     }
-    memset(new_heap_index + heap->heap_size*heap->object_size, 0, heap->heap_increment * new_heap_size);
     heap->heap_index = new_heap_index;
     next_free = heap->next_free;
     for(i = new_heap_size; i-- > heap->heap_size; )

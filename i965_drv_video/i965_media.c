@@ -38,6 +38,7 @@
 
 #include "i965_defines.h"
 #include "i965_media_mpeg2.h"
+#include "i965_media_h264.h"
 #include "i965_media.h"
 #include "i965_drv_video.h"
 
@@ -72,13 +73,21 @@ static void
 i965_media_state_base_address(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
+    struct i965_media_state *media_state = &i965->media_state;
 
-    if (IS_IGDNG(i965->intel.device_id)) {
+    if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(ctx, 8);
         OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        
+        if (media_state->indirect_object.bo) {
+            OUT_RELOC(ctx, media_state->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
+                      media_state->indirect_object.offset | BASE_ADDRESS_MODIFY);
+        } else {
+            OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        }
+
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
@@ -89,7 +98,14 @@ i965_media_state_base_address(VADriverContextP ctx)
         OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+
+        if (media_state->indirect_object.bo) {
+            OUT_RELOC(ctx, media_state->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
+                      media_state->indirect_object.offset | BASE_ADDRESS_MODIFY);
+        } else {
+            OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        }
+
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         ADVANCE_BATCH(ctx);
@@ -221,6 +237,12 @@ i965_media_decode_init(VADriverContextP ctx, VAProfile profile)
     case VAProfileMPEG2Main:
         i965_media_mpeg2_decode_init(ctx);
         break;
+        
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        i965_media_h264_decode_init(ctx);
+        break;
 
     default:
         assert(0);
@@ -237,8 +259,8 @@ i965_media_decode_picture(VADriverContextP ctx,
     struct i965_media_state *media_state = &i965->media_state;
 
     i965_media_decode_init(ctx, profile);
-    assert(media_state->states_setup);
-    media_state->states_setup(ctx, decode_state);
+    assert(media_state->media_states_setup);
+    media_state->media_states_setup(ctx, decode_state);
     i965_media_pipeline_setup(ctx, decode_state);
     intel_batchbuffer_flush(ctx);
 }
@@ -247,6 +269,7 @@ Bool
 i965_media_init(VADriverContextP ctx)
 {
     i965_media_mpeg2_init(ctx);
+    i965_media_h264_init(ctx);
     return True;
 }
 
@@ -277,7 +300,11 @@ i965_media_terminate(VADriverContextP ctx)
     dri_bo_unreference(media_state->curbe.bo);
     media_state->curbe.bo = NULL;
 
+    dri_bo_unreference(media_state->indirect_object.bo);
+    media_state->indirect_object.bo = NULL;
+
     i965_media_mpeg2_ternimate(ctx);
+    i965_media_h264_ternimate(ctx);
     return True;
 }
 

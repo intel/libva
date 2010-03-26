@@ -35,6 +35,9 @@ define(`dst_y_uw',  `g1.10<2,4,0>UW')
 define(`screen_x0', `g1.0<0,1,0>F')
 define(`screen_y0', `g1.4<0,1,0>F')
 
+/* UV flag */
+define(`interleaved_uv', `g2.0<0,1,0>UW')
+
 /* Source transformation parameters */
 define(`src_du_dx', `g3.0<0,1,0>F')
 define(`src_du_dy', `g3.4<0,1,0>F')

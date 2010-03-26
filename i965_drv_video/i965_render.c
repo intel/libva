@@ -75,7 +75,7 @@ static const unsigned int ps_subpic_kernel_static[][4] =
 #include "shaders/render/exa_wm_write.g4b"
 };
 
-/* On IGDNG */
+/* On IRONLAKE */
 static const unsigned int sf_kernel_static_gen5[][4] = 
 {
 #include "shaders/render/exa_sf.g4b.gen5"
@@ -183,8 +183,8 @@ static struct render_kernel *render_kernels = NULL;
 #define URB_SF_ENTRIES	      1
 #define URB_SF_ENTRY_SIZE     2
 
-#define URB_CS_ENTRIES	      0
-#define URB_CS_ENTRY_SIZE     0
+#define URB_CS_ENTRIES	      1
+#define URB_CS_ENTRY_SIZE     1
 
 static void
 i965_render_vs_unit(VADriverContextP ctx)
@@ -198,7 +198,7 @@ i965_render_vs_unit(VADriverContextP ctx)
     vs_state = render_state->vs.state->virtual;
     memset(vs_state, 0, sizeof(*vs_state));
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         vs_state->thread4.nr_urb_entries = URB_VS_ENTRIES >> 2;
     else
         vs_state->thread4.nr_urb_entries = URB_VS_ENTRIES;
@@ -312,7 +312,7 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         wm_state->thread1.binding_table_entry_count = 0; /* hardware requirement */
     else
         wm_state->thread1.binding_table_entry_count = 7;
@@ -329,7 +329,7 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         wm_state->wm4.sampler_count = 0;        /* hardware requirement */
     else
         wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
@@ -375,7 +375,7 @@ i965_render_wm_unit(VADriverContextP ctx)
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         wm_state->thread1.binding_table_entry_count = 0;        /* hardware requirement */
     else
         wm_state->thread1.binding_table_entry_count = 7;
@@ -383,8 +383,8 @@ i965_render_wm_unit(VADriverContextP ctx)
     wm_state->thread2.scratch_space_base_pointer = 0;
     wm_state->thread2.per_thread_scratch_space = 0; /* 1024 bytes */
 
-    wm_state->thread3.dispatch_grf_start_reg = 3; /* XXX */
-    wm_state->thread3.const_urb_entry_read_length = 0;
+    wm_state->thread3.dispatch_grf_start_reg = 2; /* XXX */
+    wm_state->thread3.const_urb_entry_read_length = 1;
     wm_state->thread3.const_urb_entry_read_offset = 0;
     wm_state->thread3.urb_entry_read_length = 1; /* XXX */
     wm_state->thread3.urb_entry_read_offset = 0; /* XXX */
@@ -392,7 +392,7 @@ i965_render_wm_unit(VADriverContextP ctx)
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         wm_state->wm4.sampler_count = 0;        /* hardware requirement */
     else 
         wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
@@ -532,7 +532,8 @@ i965_render_src_surface_state(VADriverContextP ctx,
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h)
+                              int w, int h,
+                              int pitch, int format)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
@@ -548,7 +549,7 @@ i965_render_src_surface_state(VADriverContextP ctx,
     ss = ss_bo->virtual;
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
-    ss->ss0.surface_format = I965_SURFACEFORMAT_R8_UNORM;
+    ss->ss0.surface_format = format;
     ss->ss0.writedisable_alpha = 0;
     ss->ss0.writedisable_red = 0;
     ss->ss0.writedisable_green = 0;
@@ -566,7 +567,7 @@ i965_render_src_surface_state(VADriverContextP ctx,
     ss->ss2.mip_count = 0;
     ss->ss2.render_target_rotation = 0;
 
-    ss->ss3.pitch = w - 1;
+    ss->ss3.pitch = pitch - 1;
 
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
@@ -642,6 +643,7 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
                               VASurfaceID surface)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_render_state *render_state = &i965->render_state;
     struct object_surface *obj_surface;
     int w, h;
     dri_bo *region;
@@ -653,12 +655,18 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
     h = obj_surface->height;
     region = obj_surface->bo;
 
-    i965_render_src_surface_state(ctx, 1, region, 0, w, h);     /* Y */
-    i965_render_src_surface_state(ctx, 2, region, 0, w, h);
-    i965_render_src_surface_state(ctx, 3, region, w * h + w * h / 4, w / 2, h / 2);     /* V */
-    i965_render_src_surface_state(ctx, 4, region, w * h + w * h / 4, w / 2, h / 2);
-    i965_render_src_surface_state(ctx, 5, region, w * h, w / 2, h / 2); /* U */
-    i965_render_src_surface_state(ctx, 6, region, w * h, w / 2, h / 2);
+    i965_render_src_surface_state(ctx, 1, region, 0, w, h, w, I965_SURFACEFORMAT_R8_UNORM);     /* Y */
+    i965_render_src_surface_state(ctx, 2, region, 0, w, h, w, I965_SURFACEFORMAT_R8_UNORM);
+
+    if (render_state->interleaved_uv) {
+        i965_render_src_surface_state(ctx, 3, region, w * h, w / 2, h / 2, w, I965_SURFACEFORMAT_R8G8_UNORM); /* UV */
+        i965_render_src_surface_state(ctx, 4, region, w * h, w / 2, h / 2, w, I965_SURFACEFORMAT_R8G8_UNORM);
+    } else {
+        i965_render_src_surface_state(ctx, 3, region, w * h, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM); /* U */
+        i965_render_src_surface_state(ctx, 4, region, w * h, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
+        i965_render_src_surface_state(ctx, 5, region, w * h + w * h / 4, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);     /* V */
+        i965_render_src_surface_state(ctx, 6, region, w * h + w * h / 4, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
+    }
 }
 
 static void
@@ -903,6 +911,25 @@ i965_render_upload_vertex(VADriverContextP ctx,
 }
 
 static void
+i965_render_upload_constants(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+    unsigned short *constant_buffer;
+
+    dri_bo_map(render_state->curbe.bo, 1);
+    assert(render_state->curbe.bo->virtual);
+    constant_buffer = render_state->curbe.bo->virtual;
+
+    if (render_state->interleaved_uv)
+        *constant_buffer = 1;
+    else
+        *constant_buffer = 0;
+
+    dri_bo_unmap(render_state->curbe.bo);
+}
+
+static void
 i965_surface_render_state_setup(VADriverContextP ctx,
                         VASurfaceID surface,
                         short srcx,
@@ -926,6 +953,7 @@ i965_surface_render_state_setup(VADriverContextP ctx,
     i965_render_upload_vertex(ctx, surface,
                               srcx, srcy, srcw, srch,
                               destx, desty, destw, desth);
+    i965_render_upload_constants(ctx);
 }
 static void
 i965_subpic_render_state_setup(VADriverContextP ctx,
@@ -980,7 +1008,7 @@ i965_render_state_base_address(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
-    if (IS_IGDNG(i965->intel.device_id)) {
+    if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(ctx, 8);
         OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
@@ -1099,6 +1127,20 @@ i965_render_cs_urb_layout(VADriverContextP ctx)
 }
 
 static void
+i965_render_constant_buffer(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+
+    BEGIN_BATCH(ctx, 2);
+    OUT_BATCH(ctx, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
+    OUT_RELOC(ctx, render_state->curbe.bo,
+              I915_GEM_DOMAIN_INSTRUCTION, 0,
+              URB_CS_ENTRY_SIZE - 1);
+    ADVANCE_BATCH(ctx);    
+}
+
+static void
 i965_render_drawing_rectangle(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
@@ -1118,7 +1160,7 @@ i965_render_vertex_elements(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
 
-    if (IS_IGDNG(i965->intel.device_id)) {
+    if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(ctx, 5);
         OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
         /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
@@ -1206,7 +1248,7 @@ i965_render_startup(VADriverContextP ctx)
               ((4 * 4) << VB0_BUFFER_PITCH_SHIFT));
     OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
     else
         OUT_BATCH(ctx, 3);
@@ -1282,6 +1324,7 @@ i965_surface_render_pipeline_setup(VADriverContextP ctx)
     i965_render_pipelined_pointers(ctx);
     i965_render_urb_layout(ctx);
     i965_render_cs_urb_layout(ctx);
+    i965_render_constant_buffer(ctx);
     i965_render_drawing_rectangle(ctx);
     i965_render_vertex_elements(ctx);
     i965_render_startup(ctx);
@@ -1445,13 +1488,14 @@ Bool
 i965_render_init(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
     int i;
 
     /* kernel */
     assert(NUM_RENDER_KERNEL == (sizeof(render_kernels_gen5) / 
                                  sizeof(render_kernels_gen5[0])));
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         render_kernels = render_kernels_gen5;
     else
         render_kernels = render_kernels_gen4;
@@ -1465,6 +1509,12 @@ i965_render_init(VADriverContextP ctx)
         dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
     }
 
+    /* constant buffer */
+    render_state->curbe.bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "constant buffer",
+                      4096, 64);
+    assert(render_state->curbe.bo);
+
     return True;
 }
 
@@ -1474,6 +1524,9 @@ i965_render_terminate(VADriverContextP ctx)
     int i;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
+
+    dri_bo_unreference(render_state->curbe.bo);
+    render_state->curbe.bo = NULL;
 
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
         struct render_kernel *kernel = &render_kernels[i];

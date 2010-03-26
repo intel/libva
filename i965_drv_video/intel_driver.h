@@ -17,7 +17,7 @@
 #define INLINE
 #endif
 
-#define BATCH_SIZE      0x10000
+#define BATCH_SIZE      0x100000
 #define BATCH_RESERVED  0x10
 
 #define CMD_MI                                  (0x0 << 29)
@@ -26,6 +26,7 @@
 #define MI_NOOP                                 (CMD_MI | 0)
 
 #define MI_BATCH_BUFFER_END                     (CMD_MI | (0xA << 23))
+#define MI_BATCH_BUFFER_START                   (CMD_MI | (0x31 << 23))
 
 #define MI_FLUSH                                (CMD_MI | (0x4 << 23))
 #define STATE_INSTRUCTION_CACHE_INVALIDATE      (0x1 << 0)
@@ -85,6 +86,7 @@ struct intel_driver_data
     int locked;
 
     struct intel_batchbuffer *batch;
+    struct intel_batchbuffer *batch_bcs;
     dri_bufmgr *bufmgr;
 };
 
@@ -118,8 +120,8 @@ struct intel_region
 #define PCI_CHIP_G45_G                  0x2E22
 #define PCI_CHIP_G41_G                  0x2E32
 
-#define PCI_CHIP_IGDNG_D_G              0x0042
-#define PCI_CHIP_IGDNG_M_G              0x0046
+#define PCI_CHIP_IRONLAKE_D_G           0x0042
+#define PCI_CHIP_IRONLAKE_M_G           0x0046
 
 #define IS_G45(devid)           (devid == PCI_CHIP_IGD_E_G || \
                                  devid == PCI_CHIP_Q45_G || \
@@ -128,8 +130,8 @@ struct intel_region
 #define IS_GM45(devid)          (devid == PCI_CHIP_GM45_GM)
 #define IS_G4X(devid)		(IS_G45(devid) || IS_GM45(devid))
 
-#define IS_IGDNG_D(devid)       (devid == PCI_CHIP_IGDNG_D_G)
-#define IS_IGDNG_M(devid)       (devid == PCI_CHIP_IGDNG_M_G)
-#define IS_IGDNG(devid)         (IS_IGDNG_D(devid) || IS_IGDNG_M(devid))
+#define IS_IRONLAKE_D(devid)    (devid == PCI_CHIP_IRONLAKE_D_G)
+#define IS_IRONLAKE_M(devid)    (devid == PCI_CHIP_IRONLAKE_M_G)
+#define IS_IRONLAKE(devid)      (IS_IRONLAKE_D(devid) || IS_IRONLAKE_M(devid))
 
 #endif /* _INTEL_DRIVER_H_ */

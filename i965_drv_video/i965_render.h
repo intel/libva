@@ -60,6 +60,11 @@ struct i965_render_state
         dri_bo *viewport;
     } cc;
 
+    struct {
+        dri_bo *bo;
+    } curbe;
+
+    int interleaved_uv;
     struct intel_region *draw_region;
 };
 

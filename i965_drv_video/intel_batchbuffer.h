@@ -16,10 +16,16 @@ struct intel_batchbuffer
     unsigned char *map;
     unsigned char *ptr;
     int atomic;
+    int flag;
+
+    int (*run)(drm_intel_bo *bo, int used,
+               drm_clip_rect_t *cliprects, int num_cliprects,
+               int DR4, int ring_flag);
 };
 
 Bool intel_batchbuffer_init(struct intel_driver_data *intel);
 Bool intel_batchbuffer_terminate(struct intel_driver_data *intel);
+
 void intel_batchbuffer_emit_dword(VADriverContextP ctx, unsigned int x);
 void intel_batchbuffer_emit_reloc(VADriverContextP ctx, dri_bo *bo, 
                                   uint32_t read_domains, uint32_t write_domains, 
@@ -30,6 +36,17 @@ void intel_batchbuffer_emit_mi_flush(VADriverContextP ctx);
 void intel_batchbuffer_start_atomic(VADriverContextP ctx, unsigned int size);
 void intel_batchbuffer_end_atomic(VADriverContextP ctx);
 Bool intel_batchbuffer_flush(VADriverContextP ctx);
+
+void intel_batchbuffer_emit_dword_bcs(VADriverContextP ctx, unsigned int x);
+void intel_batchbuffer_emit_reloc_bcs(VADriverContextP ctx, dri_bo *bo, 
+                                      uint32_t read_domains, uint32_t write_domains, 
+                                      uint32_t delta);
+void intel_batchbuffer_require_space_bcs(VADriverContextP ctx, unsigned int size);
+void intel_batchbuffer_data_bcs(VADriverContextP ctx, void *data, unsigned int size);
+void intel_batchbuffer_emit_mi_flush_bcs(VADriverContextP ctx);
+void intel_batchbuffer_start_atomic_bcs(VADriverContextP ctx, unsigned int size);
+void intel_batchbuffer_end_atomic_bcs(VADriverContextP ctx);
+Bool intel_batchbuffer_flush_bcs(VADriverContextP ctx);
 
 #define BEGIN_BATCH(ctx, n) do {                                \
    intel_batchbuffer_require_space(ctx, (n) * 4);               \
@@ -46,6 +63,23 @@ Bool intel_batchbuffer_flush(VADriverContextP ctx);
 } while (0)
 
 #define ADVANCE_BATCH(ctx) do {                                         \
+} while (0)
+
+#define BEGIN_BCS_BATCH(ctx, n) do {                                    \
+   intel_batchbuffer_require_space_bcs(ctx, (n) * 4);                   \
+} while (0)
+
+#define OUT_BCS_BATCH(ctx, d) do {                                      \
+   intel_batchbuffer_emit_dword_bcs(ctx, d);                            \
+} while (0)
+
+#define OUT_BCS_RELOC(ctx, bo, read_domains, write_domain, delta) do {  \
+   assert((delta) >= 0);                                                \
+   intel_batchbuffer_emit_reloc_bcs(ctx, bo,                            \
+                                    read_domains, write_domain, delta); \
+} while (0)
+
+#define ADVANCE_BCS_BATCH(ctx) do {                                     \
 } while (0)
 
 #endif /* _INTEL_BATCHBUFFER_H_ */

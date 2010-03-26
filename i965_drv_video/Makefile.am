@@ -32,21 +32,29 @@ i965_drv_video_la_LIBADD = ../va/libva-x11.la -lpthread
 i965_drv_video_la_SOURCES =	\
 	object_heap.c		\
 	intel_batchbuffer.c	\
+	intel_batchbuffer_dump.c\
 	intel_memman.c		\
 	intel_driver.c		\
 	i965_media.c		\
 	i965_media_mpeg2.c	\
+	i965_media_h264.c	\
 	i965_render.c		\
-	i965_drv_video.c
+	i965_drv_video.c	\
+	i965_avc_bsd.c		\
+	i965_avc_hw_scoreboard.c
 
 noinst_HEADERS =                \
 	object_heap.h           \
 	intel_batchbuffer.h     \
+	intel_batchbuffer_dump.h\
 	intel_memman.h          \
 	intel_driver.h          \
 	i965_media.h            \
 	i965_media_mpeg2.h      \
+	i965_media_h264.h	\
 	i965_render.h           \
 	i965_drv_video.h        \
 	i965_defines.h          \
-	i965_structs.h
+	i965_structs.h		\
+	i965_avc_bsd.h		\
+	i965_avc_hw_scoreboard.h

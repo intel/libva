@@ -99,6 +99,9 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
 
     profile_list[i++] = VAProfileMPEG2Simple;
     profile_list[i++] = VAProfileMPEG2Main;
+    profile_list[i++] = VAProfileH264Baseline;
+    profile_list[i++] = VAProfileH264Main;
+    profile_list[i++] = VAProfileH264High;
 
     /* If the assert fails then I965_MAX_PROFILES needs to be bigger */
     assert(i <= I965_MAX_PROFILES);
@@ -118,6 +121,13 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
+        *num_entrypoints = 1;
+        entrypoint_list[0] = VAEntrypointVLD;
+        break;
+
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
         *num_entrypoints = 1;
         entrypoint_list[0] = VAEntrypointVLD;
         break;
@@ -217,6 +227,17 @@ i965_CreateConfig(VADriverContextP ctx,
         }
         break;
 
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        if (VAEntrypointVLD == entrypoint) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+
+        break;
+
     default:
         vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
         break;
@@ -305,6 +326,10 @@ i965_destroy_surface(struct object_heap *heap, struct object_base *obj)
 
     dri_bo_unreference(obj_surface->bo);
     obj_surface->bo = NULL;
+    dri_bo_unreference(obj_surface->direct_mv_wr_top_bo);
+    obj_surface->direct_mv_wr_top_bo = NULL;
+    dri_bo_unreference(obj_surface->direct_mv_wr_bottom_bo);
+    obj_surface->direct_mv_wr_bottom_bo = NULL;
     object_heap_free(heap, obj);
 }
 
@@ -344,12 +369,17 @@ i965_CreateSurfaces(VADriverContextP ctx,
                                        "vaapi surface",
                                        obj_surface->size,
                                        64);
-
         assert(obj_surface->bo);
-        if (NULL == obj_surface->bo) {
-            vaStatus = VA_STATUS_ERROR_UNKNOWN;
-            break;
-        }
+        obj_surface->direct_mv_wr_top_bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                        "direct mv wr top",
+                                                        0x90000,
+                                                        64);
+        assert(obj_surface->direct_mv_wr_top_bo);
+        obj_surface->direct_mv_wr_bottom_bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                           "direct mv wr bottom",
+                                                           0x90000,
+                                                           64);
+        assert(obj_surface->direct_mv_wr_bottom_bo);
     }
 
     /* Error recovery */
@@ -881,6 +911,12 @@ i965_BeginPicture(VADriverContextP ctx,
         vaStatus = VA_STATUS_SUCCESS;
         break;
 
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        vaStatus = VA_STATUS_SUCCESS;
+        break;
+
     default:
         assert(0);
         vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
@@ -1014,6 +1050,7 @@ VAStatus
 i965_EndPicture(VADriverContextP ctx, VAContextID context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
+    struct i965_render_state *render_state = &i965->render_state;
     struct object_context *obj_context = CONTEXT(context);
     struct object_config *obj_config;
     VAContextID config;
@@ -1026,6 +1063,18 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
     config = obj_context->config_id;
     obj_config = CONFIG(config);
     assert(obj_config);
+
+    switch (obj_config->profile) {
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        render_state->interleaved_uv = 1;
+        break;
+
+    default:
+        render_state->interleaved_uv = 0;
+    }
+
     i965_media_decode_picture(ctx, obj_config->profile, &obj_context->decode_state);
     obj_context->decode_state.current_render_target = -1;
     obj_context->decode_state.num_slices = 0;
@@ -1131,7 +1180,7 @@ i965_Init(VADriverContextP ctx)
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (!IS_G4X(i965->intel.device_id) &&
-        !IS_IGDNG(i965->intel.device_id))
+        !IS_IRONLAKE(i965->intel.device_id))
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_media_init(ctx) == False)

@@ -280,7 +280,7 @@ static struct media_kernel  mpeg2_vld_kernels_gen4[] = {
     }
 };
 
-/* On IGDNG */
+/* On IRONLAKE */
 static uint32_t frame_intra_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_intra.g4b.gen5"
 };
@@ -886,6 +886,7 @@ i965_media_mpeg2_decode_init(VADriverContextP ctx)
     dri_bo *bo;
 
     media_state->extended_state.enabled = 1;
+    media_state->indirect_object.bo = NULL;
     dri_bo_unreference(media_state->extended_state.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "vld state", 
@@ -907,7 +908,7 @@ i965_media_mpeg2_decode_init(VADriverContextP ctx)
            media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
 
     /* hook functions */
-    media_state->states_setup = i965_media_mpeg2_states_setup;
+    media_state->media_states_setup = i965_media_mpeg2_states_setup;
     media_state->media_objects = i965_media_mpeg2_objects;
 
 }
@@ -923,7 +924,7 @@ i965_media_mpeg2_init(VADriverContextP ctx)
                                      sizeof(mpeg2_vld_kernels_gen5[0])));
     assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
 
-    if (IS_IGDNG(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id))
         mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
     else
         mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;

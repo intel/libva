@@ -38,7 +38,7 @@
 #include "i965_structs.h"
 
 #define MAX_INTERFACE_DESC      16
-#define MAX_MEDIA_SURFACES      32
+#define MAX_MEDIA_SURFACES      34
 
 #define MPEG_TOP_FIELD		1
 #define MPEG_BOTTOM_FIELD	2
@@ -83,6 +83,11 @@ struct i965_media_state
     } curbe;
 
     struct {
+        dri_bo *bo;
+        unsigned long offset;
+    } indirect_object;
+
+    struct {
         unsigned int vfe_start;
         unsigned int cs_start;
 
@@ -93,7 +98,8 @@ struct i965_media_state
         unsigned int size_cs_entry;
     } urb;
 
-    void (*states_setup)(VADriverContextP ctx, struct decode_state *decode_state);
+    void *private_context;
+    void (*media_states_setup)(VADriverContextP ctx, struct decode_state *decode_state);
     void (*media_objects)(VADriverContextP ctx, struct decode_state *decode_state);
 };
 
