@@ -227,7 +227,7 @@ typedef enum
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
     VAEntrypointEncSlice	= 6,	/* slice level encode */
-    VAEntrypointEncSlice	= 7	/* pictuer encode, JPEG, etc */
+    VAEntrypointEncPicture 	= 7	/* pictuer encode, JPEG, etc */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
