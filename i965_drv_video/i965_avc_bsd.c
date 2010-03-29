@@ -448,6 +448,7 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx, struct decode_state *decode_st
         }
     }
 
+    va_pic = &pic_param->CurrPic;
     OUT_BCS_BATCH(ctx, va_pic->TopFieldOrderCnt);
     OUT_BCS_BATCH(ctx, va_pic->BottomFieldOrderCnt);
 
