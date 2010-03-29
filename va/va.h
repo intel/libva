@@ -1645,6 +1645,24 @@ typedef struct _VARectangle
  * attributes are supported by the driver, and then set the appropriate attributes
  * before calling vaPutSurface()
  */
+/* PowerVR IEP Lite attributes */
+typedef enum
+{
+    VADISPLAYATTRIB_BLE_OFF              = 0x00,
+    VADISPLAYATTRIB_BLE_LOW,
+    VADISPLAYATTRIB_BLE_MEDIUM,
+    VADISPLAYATTRIB_BLE_HIGH,
+    VADISPLAYATTRIB_BLE_NONE,
+} VADisplayAttribBLEMode;
+
+typedef enum
+{ 
+    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT601 = 0x00,
+    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT709,
+    VADISPLAYATTRIB_CSC_FORMAT_YCC_SMPTE_240,
+    VADISPLAYATTRIB_CSC_FORMAT_RGB,
+    VADISPLAYATTRIB_CSC_FORMAT_NONE,
+} VADisplayAttribCSCFormat;
 
 /* Currently defined display attribute types */
 typedef enum
@@ -1664,6 +1682,19 @@ typedef enum
      * to PutSurface.
      */
     VADisplayAttribDirectSurface       = 5,
+    VADisplayAttribRotation            = 6,	
+    VADisplayAttribOutofLoopDeblock    = 7,
+
+    /* PowerVR IEP Lite specific attributes */
+    VADisplayAttribBLEBlackMode        = 8,
+    VADisplayAttribBLEWhiteMode        = 9,
+    VADisplayAttribBlueStretch         = 10,
+    VADisplayAttribSkinColorCorrection = 11,
+    VADisplayAttribCSCInputColorFormat = 12,
+    VADisplayAttribCSCHue              = 13,
+    VADisplayAttribCSCSaturation       = 14,
+    VADisplayAttribCSCBrightness       = 15,
+    VADisplayAttribCSCContrast         = 16,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
