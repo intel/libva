@@ -56,6 +56,8 @@
  * rev 0.31 (09/02/2009 Gwenole Beauchesne) - VC-1/H264 fields change for VDPAU and XvBA backend
  *                                       Application needs to relink with the new library.
  *
+ * rev 0.31.1 (03/29/2009) - Data structure for JPEG encode
+ *                                      
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
  *  Waldo Bastian (Intel), Matt Sottek (Intel),  Austin Yuan (Intel), and Gwenole Beauchesne (SDS)
@@ -210,7 +212,8 @@ typedef enum
     VAProfileVC1Simple			= 8,
     VAProfileVC1Main			= 9,
     VAProfileVC1Advanced		= 10,
-    VAProfileH263Baseline		= 11
+    VAProfileH263Baseline		= 11,
+    VAProfileJPEGBaseline               = 12
 } VAProfile;
 
 /* 
@@ -223,7 +226,7 @@ typedef enum
     VAEntrypointIDCT		= 3,
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
-    VAEntrypointEncSlice	= 6	/* slice level encode */
+    VAEntrypointEncSlice	= 6,	/* slice level encode */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -493,6 +496,7 @@ typedef enum
     VADeblockingParameterBufferType	= 8,
     VAImageBufferType			= 9,
     VAProtectedSliceDataBufferType	= 10,
+    VAQMatrixBufferType                 = 11,
 /* Following are encode buffer types */
     VAEncCodedBufferType		= 21,
     VAEncSequenceParameterBufferType	= 22,
@@ -523,6 +527,26 @@ typedef struct _VASliceParameterBufferBase
     unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
     unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
 } VASliceParameterBufferBase;
+
+
+/****************************
+ * JEPG data structure
+ ***************************/
+typedef struct _VAQMatrixBufferJPEG
+{
+    int load_lum_quantiser_matrix;
+    int load_chroma_quantiser_matrix;
+    unsigned char lum_quantiser_matrix[64];
+    unsigned char chroma_quantiser_matrix[64];
+} VAQMatrixBufferJPEG;
+
+typedef struct _VAEncPictureParameterBufferJPEG
+{
+    VASurfaceID reconstructed_picture;
+    unsigned short picture_width;
+    unsigned short picture_height;
+} VAEncPictureParameterBufferJPEG;
+
 
 /****************************
  * MPEG-2 data structures
@@ -1663,6 +1687,17 @@ typedef enum
     VADISPLAYATTRIB_CSC_FORMAT_RGB,
     VADISPLAYATTRIB_CSC_FORMAT_NONE,
 } VADisplayAttribCSCFormat;
+
+/* attribute value for VADisplayAttribRotation   */
+#define VA_ROTATION_NONE        0x00000000
+#define VA_ROTATION_90          0x00000001
+#define VA_ROTATION_180         0x00000002
+#define VA_ROTATION_270         0x00000004
+
+/* attribute value for VADisplayAttribOutOfLoopDeblock */
+#define VA_OOL_DEBLOCKING_FALSE 0x00000000
+#define VA_OOL_DEBLOCKING_TRUE  0x00000001
+
 
 /* Currently defined display attribute types */
 typedef enum
