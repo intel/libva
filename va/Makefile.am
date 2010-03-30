@@ -42,7 +42,7 @@ libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
 
 SUBDIRS = x11
 
-libva_la_SOURCES = va.c
+libva_la_SOURCES = va.c va_trace.c
 
 libvaincludedir = ${includedir}/va
 libvainclude_HEADERS = va.h va_x11.h va_backend.h va_version.h

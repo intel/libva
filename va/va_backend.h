@@ -352,6 +352,16 @@ struct VADriverVTable
                 struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
                 VASurfaceID *surface	           /* out */
         );
+
+        VAStatus (*vaBufferInfo) (
+                   VADriverContextP ctx,
+                   VAContextID context, /* in */
+                   VABufferID buf_id, /* in */
+                   VABufferType *type,    /* out */
+                   unsigned int *size,    /* out */
+                   unsigned int *num_elements /* out */
+        );
+
     
         VAStatus (*vaCopySurfaceToBuffer) (
 		VADriverContextP ctx,

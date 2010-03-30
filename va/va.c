@@ -23,7 +23,6 @@
  */
 
 #define _GNU_SOURCE 1
-
 #include "va.h"
 #include "va_backend.h"
 
@@ -48,9 +47,12 @@
 #define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 #define CHECK_STRING(s, ctx, var) if (!va_checkString(ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
-#define TRACE(func) if (va_debug_trace) va_infoMessage("[TR] %s\n", #func);
-
-static int va_debug_trace = 0;
+extern int trace_flag;
+#define VA_TRACE(trace_func,...)                \
+    if (trace_flag) {                           \
+        va_TraceMsg("========%s========\n", __func__);   \
+        trace_func(__VA_ARGS__);                \
+    }
 
 static int vaDisplayIsValid(VADisplay dpy)
 {
@@ -329,7 +331,7 @@ VAStatus vaInitialize (
   
   CHECK_DISPLAY(dpy);
 
-  va_debug_trace = (getenv("LIBVA_DEBUG_TRACE") != NULL);
+  va_TraceInit();
 
   va_infoMessage("libva version %s\n", VA_VERSION_S);
 
@@ -374,6 +376,9 @@ VAStatus vaTerminate (
 
   if (VA_STATUS_SUCCESS == vaStatus)
       pDisplayContext->vaDestroy(pDisplayContext);
+
+  va_TraceEnd();
+
   return vaStatus;
 }
 
@@ -441,7 +446,6 @@ VAStatus vaQueryConfigEntrypoints (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQueryConfigEntrypoints);
   return ctx->vtable.vaQueryConfigEntrypoints ( ctx, profile, entrypoints, num_entrypoints);
 }
 
@@ -457,7 +461,6 @@ VAStatus vaGetConfigAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaGetConfigAttributes);
   return ctx->vtable.vaGetConfigAttributes ( ctx, profile, entrypoint, attrib_list, num_attribs );
 }
 
@@ -471,7 +474,6 @@ VAStatus vaQueryConfigProfiles (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQueryConfigProfiles);
   return ctx->vtable.vaQueryConfigProfiles ( ctx, profile_list, num_profiles );
 }
 
@@ -488,7 +490,7 @@ VAStatus vaCreateConfig (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateConfig);
+  VA_TRACE(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
   return ctx->vtable.vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
 }
 
@@ -501,7 +503,6 @@ VAStatus vaDestroyConfig (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroyConfig);
   return ctx->vtable.vaDestroyConfig ( ctx, config_id );
 }
 
@@ -518,7 +519,6 @@ VAStatus vaQueryConfigAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQueryConfigAttributes);
   return ctx->vtable.vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
@@ -535,7 +535,7 @@ VAStatus vaCreateSurfaces (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateSurfaces);
+  VA_TRACE(va_TraceCreateSurface, dpy, width, height, format, num_surfaces, surfaces);
   return ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
 }
 
@@ -550,7 +550,6 @@ VAStatus vaDestroySurfaces (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroySurfaces);
   return ctx->vtable.vaDestroySurfaces( ctx, surface_list, num_surfaces );
 }
 
@@ -569,7 +568,7 @@ VAStatus vaCreateContext (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateContext);
+  VA_TRACE(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
   return ctx->vtable.vaCreateContext( ctx, config_id, picture_width, picture_height,
                                       flag, render_targets, num_render_targets, context );
 }
@@ -583,7 +582,6 @@ VAStatus vaDestroyContext (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroyContext);
   return ctx->vtable.vaDestroyContext( ctx, context );
 }
 
@@ -601,7 +599,6 @@ VAStatus vaCreateBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateBuffer);
   return ctx->vtable.vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
 }
 
@@ -615,7 +612,6 @@ VAStatus vaBufferSetNumElements (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaBufferSetNumElements);
   return ctx->vtable.vaBufferSetNumElements( ctx, buf_id, num_elements );
 }
 
@@ -630,7 +626,6 @@ VAStatus vaMapBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaMapBuffer);
   return ctx->vtable.vaMapBuffer( ctx, buf_id, pbuf );
 }
 
@@ -643,7 +638,6 @@ VAStatus vaUnmapBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaUnmapBuffer);
   return ctx->vtable.vaUnmapBuffer( ctx, buf_id );
 }
 
@@ -656,8 +650,26 @@ VAStatus vaDestroyBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroyBuffer);
   return ctx->vtable.vaDestroyBuffer( ctx, buffer_id );
+}
+
+VAStatus vaBufferInfo (
+    VADisplay dpy,
+    VAContextID context,	/* in */
+    VABufferID buf_id,		/* in */
+    VABufferType *type,		/* out */
+    unsigned int *size,		/* out */
+    unsigned int *num_elements	/* out */
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  if (ctx->vtable.vaBufferInfo)
+      return ctx->vtable.vaBufferInfo( ctx, context, buf_id, type, size, num_elements );
+  else
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus vaBeginPicture (
@@ -670,7 +682,7 @@ VAStatus vaBeginPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaBeginPicture);
+  VA_TRACE(va_TraceBeginPicture, ctx, context, render_target);
   return ctx->vtable.vaBeginPicture( ctx, context, render_target );
 }
 
@@ -685,7 +697,7 @@ VAStatus vaRenderPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaRenderPicture);
+  VA_TRACE(va_TraceRenderPicture, dpy, context, buffers, num_buffers);
   return ctx->vtable.vaRenderPicture( ctx, context, buffers, num_buffers );
 }
 
@@ -698,7 +710,7 @@ VAStatus vaEndPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaEndPicture);
+  VA_TRACE(va_TraceEndPicture, dpy, context);
   return ctx->vtable.vaEndPicture( ctx, context );
 }
 
@@ -711,7 +723,6 @@ VAStatus vaSyncSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSyncSurface);
   return ctx->vtable.vaSyncSurface( ctx, render_target );
 }
 
@@ -725,7 +736,6 @@ VAStatus vaQuerySurfaceStatus (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQuerySurfaceStatus);
   return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
 }
 
@@ -750,7 +760,6 @@ VAStatus vaPutSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaPutSurface);
   return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
@@ -777,7 +786,6 @@ VAStatus vaQueryImageFormats (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQueryImageFormats);
   return ctx->vtable.vaQueryImageFormats ( ctx, format_list, num_formats);
 }
 
@@ -801,7 +809,6 @@ VAStatus vaCreateImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateImage);
   return ctx->vtable.vaCreateImage ( ctx, format, width, height, image);
 }
 
@@ -817,7 +824,6 @@ VAStatus vaDestroyImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroyImage);
   return ctx->vtable.vaDestroyImage ( ctx, image);
 }
 
@@ -831,7 +837,6 @@ VAStatus vaSetImagePalette (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSetImagePalette);
   return ctx->vtable.vaSetImagePalette ( ctx, image, palette);
 }
 
@@ -853,7 +858,6 @@ VAStatus vaGetImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaGetImage);
   return ctx->vtable.vaGetImage ( ctx, surface, x, y, width, height, image);
 }
 
@@ -879,7 +883,6 @@ VAStatus vaPutImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaPutImage);
   return ctx->vtable.vaPutImage ( ctx, surface, image, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height );
 }
 
@@ -924,7 +927,6 @@ VAStatus vaDeriveImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDeriveImage);
   return ctx->vtable.vaDeriveImage ( ctx, surface, image );
 }
 
@@ -958,7 +960,6 @@ VAStatus vaQuerySubpictureFormats (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQuerySubpictureFormats);
   return ctx->vtable.vaQuerySubpictureFormats ( ctx, format_list, flags, num_formats);
 }
 
@@ -975,7 +976,6 @@ VAStatus vaCreateSubpicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateSubpicture);
   return ctx->vtable.vaCreateSubpicture ( ctx, image, subpicture );
 }
 
@@ -991,7 +991,6 @@ VAStatus vaDestroySubpicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDestroySubpicture);
   return ctx->vtable.vaDestroySubpicture ( ctx, subpicture);
 }
 
@@ -1005,7 +1004,6 @@ VAStatus vaSetSubpictureImage (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSetSubpictureImage);
   return ctx->vtable.vaSetSubpictureImage ( ctx, subpicture, image);
 }
 
@@ -1026,7 +1024,6 @@ VAStatus vaSetSubpictureChromakey (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSetSubpictureChromakey);
   return ctx->vtable.vaSetSubpictureChromakey ( ctx, subpicture, chromakey_min, chromakey_max, chromakey_mask );
 }
 
@@ -1046,7 +1043,6 @@ VAStatus vaSetSubpictureGlobalAlpha (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSetSubpictureGlobalAlpha);
   return ctx->vtable.vaSetSubpictureGlobalAlpha ( ctx, subpicture, global_alpha );
 }
 
@@ -1081,7 +1077,6 @@ VAStatus vaAssociateSubpicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaAssociateSubpicture);
   return ctx->vtable.vaAssociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces, src_x, src_y, src_width, src_height, dest_x, dest_y, dest_width, dest_height, flags );
 }
 
@@ -1099,7 +1094,6 @@ VAStatus vaDeassociateSubpicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaDeassociateSubpicture);
   return ctx->vtable.vaDeassociateSubpicture ( ctx, subpicture, target_surfaces, num_surfaces );
 }
 
@@ -1131,7 +1125,6 @@ VAStatus vaQueryDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaQueryDisplayAttributes);
   return ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
@@ -1151,7 +1144,6 @@ VAStatus vaGetDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaGetDisplayAttributes);
   return ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
@@ -1171,7 +1163,6 @@ VAStatus vaSetDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaSetDisplayAttributes);
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
@@ -1193,12 +1184,10 @@ VAStatus vaCreateSurfaceFromCIFrame (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCreateSurfacesFromCIFrame);
-
   if (ctx->vtable.vaCreateSurfaceFromCIFrame)
       return ctx->vtable.vaCreateSurfaceFromCIFrame( ctx, frame_id, surface );
   else
-      return VA_STATUS_ERROR_UNKNOWN;
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 
@@ -1225,8 +1214,6 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-
-  TRACE(vtable.vaCreateSurfaceFromV4L2Buf);
 
   if (ctx->vtable.vaCreateSurfaceFromV4L2Buf) 
       return ctx->vtable.vaCreateSurfaceFromV4L2Buf( ctx, v4l2_fd, v4l2_fmt, v4l2_buf, surface );
@@ -1255,9 +1242,8 @@ VAStatus vaCopySurfaceToBuffer(VADisplay dpy,
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  TRACE(vaCopySurfaceToBuffer);
   if (ctx->vtable.vaCopySurfaceToBuffer)
       return ctx->vtable.vaCopySurfaceToBuffer( ctx, surface, fourcc, luma_stride, chroma_u_stride, chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset, buffer);
   else
-      return VA_STATUS_ERROR_UNKNOWN;
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
