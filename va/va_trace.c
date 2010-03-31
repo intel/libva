@@ -28,6 +28,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
@@ -49,7 +50,7 @@ static unsigned int trace_height;
 
 int va_TraceInit(void)
 {
-    trace_file = getenv("LIBVA_TRACE");
+    trace_file = (const char *)getenv("LIBVA_TRACE");
     if (trace_file) {
 	trace_fp = fopen(trace_file, "w");
         if (trace_fp)
@@ -1109,5 +1110,5 @@ int va_TraceEndPicture(
             tmp = UV_data + i * chroma_u_stride;
         }
     }
-    free(buffer);
+    free((void *)buffer);
 }

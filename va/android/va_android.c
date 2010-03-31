@@ -26,11 +26,6 @@
 #include "config.h"
 #include "va.h"
 #include "va_backend.h"
-#include "va_x11.h"
-#include "va_dri.h"
-#include "va_dri2.h"
-#include "va_dricommon.h"
-#include "va_nvctrl.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -81,62 +76,20 @@ static void va_DisplayContextDestroy (
 }
 
 
-static VAStatus va_DRI2GetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    if (!isDRI2Connected(ctx, driver_name))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_DRIGetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    if (!isDRI1Connected(ctx, driver_name))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_NVCTRL_GetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-    int direct_capable, driver_major, driver_minor, driver_patch;
-    Bool result;
-
-    result = VA_NVCTRLQueryDirectRenderingCapable((Display *)ctx->native_dpy, ctx->x11_screen,
-                                                  &direct_capable);
-    if (!result || !direct_capable)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    result = VA_NVCTRLGetClientDriverName((Display *)ctx->native_dpy, ctx->x11_screen,
-                                          &driver_major, &driver_minor,
-                                          &driver_patch, driver_name);
-    if (!result)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
 )
 {
-    VAStatus vaStatus;
+    VAStatus vaStatus VA_STATUS_SUCCESS;
     char *driver_name_env;
+    struct {
+        unsigned int verndor_id;
+        unsigned int device_id;
+        char driver_name[64];
+    } devices[] = {
+        { 0x8086, 0x4100, "pvr" },
+    };
 
     if (driver_name)
 	*driver_name = NULL;
@@ -149,12 +102,8 @@ static VAStatus va_DisplayContextGetDriverName (
         return VA_STATUS_SUCCESS;
     }
 
-    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
-   
+    *driver_name = strdup(devices[0].driver_name);
+    
     return vaStatus;
 }
 
@@ -187,7 +136,6 @@ VADisplay vaGetDisplay (
       struct dri_state *dri_state;
       pDisplayContext = calloc(1, sizeof(*pDisplayContext));
       pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      dri_state       = calloc(1, sizeof(*dri_state));
       if (pDisplayContext && pDriverContext && dri_state)
       {
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
@@ -208,36 +156,8 @@ VADisplay vaGetDisplay (
 	      free(pDisplayContext);
 	  if (pDriverContext)
 	      free(pDriverContext);
-          if (dri_state)
-              free(dri_state);
       }
   }
   
   return dpy;
-}
-
-VAStatus vaPutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    Drawable draw, /* X Drawable */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth,
-                                   cliprects, number_cliprects, flags );
 }

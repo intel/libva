@@ -739,32 +739,6 @@ VAStatus vaQuerySurfaceStatus (
   return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
 }
 
-VAStatus vaPutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    Drawable draw, /* X Drawable */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-)
-{
-  VADriverContextP ctx;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth,
-                                   cliprects, number_cliprects, flags );
-}
-
 /* Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy
