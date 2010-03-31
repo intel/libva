@@ -382,7 +382,7 @@ struct VADriverContext
     void *pDriverData;
     struct VADriverVTable vtable;
 
-    Display *x11_dpy;
+    void *native_dpy;
     int x11_screen;
     int version_major;
     int version_minor;

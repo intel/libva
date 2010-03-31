@@ -116,12 +116,12 @@ static VAStatus va_NVCTRL_GetDriverName (
     int direct_capable, driver_major, driver_minor, driver_patch;
     Bool result;
 
-    result = VA_NVCTRLQueryDirectRenderingCapable(ctx->x11_dpy, ctx->x11_screen,
+    result = VA_NVCTRLQueryDirectRenderingCapable((Display *)ctx->native_dpy, ctx->x11_screen,
                                                   &direct_capable);
     if (!result || !direct_capable)
         return VA_STATUS_ERROR_UNKNOWN;
 
-    result = VA_NVCTRLGetClientDriverName(ctx->x11_dpy, ctx->x11_screen,
+    result = VA_NVCTRLGetClientDriverName((Display *)ctx->native_dpy, ctx->x11_screen,
                                           &driver_major, &driver_minor,
                                           &driver_patch, driver_name);
     if (!result)
@@ -172,7 +172,7 @@ VADisplay vaGetDisplay (
   while (pDisplayContext)
   {
       if (pDisplayContext->pDriverContext &&
-	  pDisplayContext->pDriverContext->x11_dpy == native_dpy)
+	  pDisplayContext->pDriverContext->native_dpy == (void *)native_dpy)
       {
           dpy = (VADisplay)pDisplayContext;
           break;
@@ -192,7 +192,7 @@ VADisplay vaGetDisplay (
       {
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
-	  pDriverContext->x11_dpy          = native_dpy;
+	  pDriverContext->native_dpy       = (void *)native_dpy;
 	  pDisplayContext->pNext           = pDisplayContexts;
 	  pDisplayContext->pDriverContext  = pDriverContext;
 	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;

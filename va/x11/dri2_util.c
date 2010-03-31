@@ -48,7 +48,7 @@ dri2CreateDrawable(VADriverContextP ctx, XID x_drawable)
     dri2_drawable->base.x_drawable = x_drawable;
     dri2_drawable->base.x = 0;
     dri2_drawable->base.y = 0;
-    VA_DRI2CreateDrawable(ctx->x11_dpy, x_drawable);
+    VA_DRI2CreateDrawable((Display *)ctx->native_dpy, x_drawable);
 
     return &dri2_drawable->base;
 }
@@ -56,7 +56,7 @@ dri2CreateDrawable(VADriverContextP ctx, XID x_drawable)
 static void 
 dri2DestroyDrawable(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
-    VA_DRI2DestroyDrawable(ctx->x11_dpy, dri_drawable->x_drawable);
+    VA_DRI2DestroyDrawable((Display *)ctx->native_dpy, dri_drawable->x_drawable);
     free(dri_drawable);
 }
 
@@ -73,10 +73,10 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
         xrect.width = dri2_drawable->width;
         xrect.height = dri2_drawable->height;
 
-        region = XFixesCreateRegion(ctx->x11_dpy, &xrect, 1);
-        VA_DRI2CopyRegion(ctx->x11_dpy, dri_drawable->x_drawable, region,
+        region = XFixesCreateRegion((Display *)ctx->native_dpy, &xrect, 1);
+        VA_DRI2CopyRegion((Display *)ctx->native_dpy, dri_drawable->x_drawable, region,
                        DRI2BufferFrontLeft, DRI2BufferBackLeft);
-        XFixesDestroyRegion(ctx->x11_dpy, region);
+        XFixesDestroyRegion((Display *)ctx->native_dpy, region);
     }
 }
 
@@ -92,7 +92,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     i = 0;
     attachments[i++] = __DRI_BUFFER_BACK_LEFT;
     attachments[i++] = __DRI_BUFFER_FRONT_LEFT;
-    buffers = VA_DRI2GetBuffers(ctx->x11_dpy, dri_drawable->x_drawable,
+    buffers = VA_DRI2GetBuffers((Display *)ctx->native_dpy, dri_drawable->x_drawable,
 			     &dri2_drawable->width, &dri2_drawable->height, 
                              attachments, i, &count);
     assert(buffers);
@@ -149,14 +149,14 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     *driver_name = NULL;
     dri_state->fd = -1;
     dri_state->driConnectedFlag = VA_NONE;
-    if (!VA_DRI2QueryExtension(ctx->x11_dpy, &event_base, &error_base))
+    if (!VA_DRI2QueryExtension((Display *)ctx->native_dpy, &event_base, &error_base))
         goto err_out;
 
-    if (!VA_DRI2QueryVersion(ctx->x11_dpy, &major, &minor))
+    if (!VA_DRI2QueryVersion((Display *)ctx->native_dpy, &major, &minor))
         goto err_out;
 
 
-    if (!VA_DRI2Connect(ctx->x11_dpy, RootWindow(ctx->x11_dpy, ctx->x11_screen),
+    if (!VA_DRI2Connect((Display *)ctx->native_dpy, RootWindow((Display *)ctx->native_dpy, ctx->x11_screen),
                      driver_name, &device_name))
         goto err_out;
 
@@ -169,7 +169,7 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     if (drmGetMagic(dri_state->fd, &magic))
         goto err_out;
 
-    if (!VA_DRI2Authenticate(ctx->x11_dpy, RootWindow(ctx->x11_dpy, ctx->x11_screen),
+    if (!VA_DRI2Authenticate((Display *)ctx->native_dpy, RootWindow((Display *)ctx->native_dpy, ctx->x11_screen),
                           magic))
         goto err_out;
 
