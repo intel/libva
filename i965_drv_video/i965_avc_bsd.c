@@ -26,6 +26,7 @@
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
@@ -39,6 +40,49 @@
 #include "i965_avc_bsd.h"
 #include "i965_media_h264.h"
 #include "i965_media.h"
+
+static void 
+i965_avc_bsd_free_private_surface_data(void **data)
+{
+    struct i965_avc_bsd_surface *avc_bsd_surface = *data;
+
+    if (!avc_bsd_surface)
+        return;
+
+    dri_bo_unreference(avc_bsd_surface->direct_mv_wr_top_bo);
+    avc_bsd_surface->direct_mv_wr_top_bo = NULL;
+    dri_bo_unreference(avc_bsd_surface->direct_mv_wr_bottom_bo);
+    avc_bsd_surface->direct_mv_wr_bottom_bo = NULL;
+    free(avc_bsd_surface);
+    *data = NULL;
+}
+
+static void
+i965_avc_bsd_initialize_private_surface_data(VADriverContextP ctx, struct object_surface *obj_surface)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_avc_bsd_surface *avc_bsd_surface = obj_surface->private_data;
+
+    obj_surface->free_private_data = i965_avc_bsd_free_private_surface_data;
+
+    if (!avc_bsd_surface) {
+        avc_bsd_surface = calloc(sizeof(struct i965_avc_bsd_surface), 1);
+
+        avc_bsd_surface->direct_mv_wr_top_bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                            "direct mv wr top",
+                                                            0x90000,
+                                                            64);
+        assert(avc_bsd_surface->direct_mv_wr_top_bo);
+        avc_bsd_surface->direct_mv_wr_bottom_bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                               "direct mv wr bottom",
+                                                               0x90000,
+                                                               64);
+        assert(avc_bsd_surface->direct_mv_wr_bottom_bo);
+        obj_surface->private_data = avc_bsd_surface;
+    }
+
+    avc_bsd_surface->direct_mv_flag = -1;
+}
 
 static void
 i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_state)
@@ -367,6 +411,7 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx, struct decode_state *decode_st
     VAPictureParameterBufferH264 *pic_param;
     VAPictureH264 *va_pic;
     struct object_surface *obj_surface;
+    struct i965_avc_bsd_surface *avc_bsd_surface;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
@@ -399,17 +444,20 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx, struct decode_state *decode_st
         if (!(va_pic->flags & VA_PICTURE_H264_INVALID)) {
             obj_surface = SURFACE(va_pic->picture_id);
             assert(obj_surface);
-            OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_top_bo,
+            avc_bsd_surface = obj_surface->private_data;
+            assert(avc_bsd_surface);
+            assert(avc_bsd_surface->direct_mv_flag != -1);
+
+            OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           0);
 
-            if (pic_param->pic_fields.bits.field_pic_flag && 
-                !pic_param->seq_fields.bits.direct_8x8_inference_flag)
-                OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_bottom_bo,
+            if (avc_bsd_surface->direct_mv_flag == 1)
+                OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_bottom_bo,
                               I915_GEM_DOMAIN_INSTRUCTION, 0,
                               0);
-            else 
-                OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_top_bo,
+            else
+                OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
                               I915_GEM_DOMAIN_INSTRUCTION, 0,
                               0);
         } else {
@@ -422,17 +470,21 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx, struct decode_state *decode_st
     assert(!(va_pic->flags & VA_PICTURE_H264_INVALID));
     obj_surface = SURFACE(va_pic->picture_id);
     assert(obj_surface);
-    OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_top_bo,
+    i965_avc_bsd_initialize_private_surface_data(ctx, obj_surface);
+    avc_bsd_surface = obj_surface->private_data;
+    avc_bsd_surface->direct_mv_flag = (pic_param->pic_fields.bits.field_pic_flag &&
+                                       !pic_param->seq_fields.bits.direct_8x8_inference_flag);
+
+    OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   0);
 
-    if (pic_param->pic_fields.bits.field_pic_flag && 
-        !pic_param->seq_fields.bits.direct_8x8_inference_flag)
-        OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_bottom_bo,
+    if (avc_bsd_surface->direct_mv_flag == 1)
+        OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_bottom_bo,
                       I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                       0);
     else
-        OUT_BCS_RELOC(ctx, obj_surface->direct_mv_wr_top_bo,
+        OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
                       I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                       0);
 

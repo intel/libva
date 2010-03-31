@@ -29,6 +29,13 @@
 #ifndef __I965_AVC_BSD_H__
 #define __I965_AVC_BSD_H__
 
+struct i965_avc_bsd_surface
+{
+    dri_bo *direct_mv_wr_top_bo;
+    dri_bo *direct_mv_wr_bottom_bo;
+    int direct_mv_flag;
+};
+
 struct i965_avc_bsd_context
 {
     struct {

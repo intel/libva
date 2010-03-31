@@ -326,10 +326,12 @@ i965_destroy_surface(struct object_heap *heap, struct object_base *obj)
 
     dri_bo_unreference(obj_surface->bo);
     obj_surface->bo = NULL;
-    dri_bo_unreference(obj_surface->direct_mv_wr_top_bo);
-    obj_surface->direct_mv_wr_top_bo = NULL;
-    dri_bo_unreference(obj_surface->direct_mv_wr_bottom_bo);
-    obj_surface->direct_mv_wr_bottom_bo = NULL;
+
+    if (obj_surface->free_private_data != NULL) {
+        obj_surface->free_private_data(&obj_surface->private_data);
+        obj_surface->private_data = NULL;
+    }
+
     object_heap_free(heap, obj);
 }
 
@@ -370,16 +372,8 @@ i965_CreateSurfaces(VADriverContextP ctx,
                                        obj_surface->size,
                                        64);
         assert(obj_surface->bo);
-        obj_surface->direct_mv_wr_top_bo = dri_bo_alloc(i965->intel.bufmgr,
-                                                        "direct mv wr top",
-                                                        0x90000,
-                                                        64);
-        assert(obj_surface->direct_mv_wr_top_bo);
-        obj_surface->direct_mv_wr_bottom_bo = dri_bo_alloc(i965->intel.bufmgr,
-                                                           "direct mv wr bottom",
-                                                           0x90000,
-                                                           64);
-        assert(obj_surface->direct_mv_wr_bottom_bo);
+        obj_surface->private_data = NULL;
+        obj_surface->free_private_data = NULL;
     }
 
     /* Error recovery */

@@ -97,9 +97,8 @@ struct object_surface
     int height;
     int size;
     dri_bo *bo;
-    /* FIXME: only for H.264 */
-    dri_bo *direct_mv_wr_top_bo;
-    dri_bo *direct_mv_wr_bottom_bo;
+    void (*free_private_data)(void **data);
+    void *private_data;
 };
 
 struct object_buffer 
