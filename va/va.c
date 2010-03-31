@@ -56,8 +56,8 @@ extern int trace_flag;
 
 static int vaDisplayIsValid(VADisplay dpy)
 {
-  VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-  return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
 }
 
 static void va_errorMessage(const char *msg, ...)

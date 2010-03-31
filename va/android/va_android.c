@@ -26,6 +26,7 @@
 #include "config.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_android.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -160,4 +161,41 @@ VADisplay vaGetDisplay (
   }
   
   return dpy;
+}
+
+
+#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
+#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
+
+static int vaDisplayIsValid(VADisplay dpy)
+{
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
+}
+
+VAStatus vaPutSurface (
+    VADisplay dpy,
+    VASurfaceID surface,
+    Surface *draw, /* Android Surface/Window */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+)
+{
+  VADriverContextP ctx;
+
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
+                                   destx, desty, destw, desth,
+                                   cliprects, number_cliprects, flags );
 }
