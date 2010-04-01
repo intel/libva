@@ -2,6 +2,8 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
+#include <ui/Surface.h>
+class Surface;
 
 #ifdef __cplusplus
 extern "C" {

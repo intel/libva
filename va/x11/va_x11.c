@@ -247,7 +247,7 @@ VAStatus vaPutSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
+  return ctx->vtable.vaPutSurface( ctx, surface, &draw, srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }
