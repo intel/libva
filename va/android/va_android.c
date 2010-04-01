@@ -23,10 +23,9 @@
  */
 
 #define _GNU_SOURCE 1
-#include "config.h"
-#include "va.h"
-#include "va_backend.h"
-#include "va_android.h"
+#include "../va.h"
+#include "../va_backend.h"
+#include "../va_android.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -43,15 +42,7 @@ static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
 )
 {
-    VADisplayContextP ctx = pDisplayContexts;
-
-    while (ctx)
-    {
-	if (ctx == pDisplayContext && pDisplayContext->pDriverContext)
-	    return 1;
-	ctx = ctx->pNext;
-    }
-    return 0;
+    return 1;
 }
 
 static void va_DisplayContextDestroy (
@@ -71,7 +62,6 @@ static void va_DisplayContextDestroy (
 	}
 	ctx = &((*ctx)->pNext);
     }
-    free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
@@ -81,31 +71,22 @@ static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
 )
-{
-    VAStatus vaStatus VA_STATUS_SUCCESS;
+{  
     char *driver_name_env;
     struct {
         unsigned int verndor_id;
         unsigned int device_id;
         char driver_name[64];
     } devices[] = {
-        { 0x8086, 0x4100, "pvr" },
+        { 0x8086, 0x4100, "android" },
     };
 
     if (driver_name)
 	*driver_name = NULL;
 
-    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
-        && geteuid() == getuid())
-    {
-        /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        *driver_name = strdup(driver_name_env);
-        return VA_STATUS_SUCCESS;
-    }
-
     *driver_name = strdup(devices[0].driver_name);
     
-    return vaStatus;
+    return VA_STATUS_SUCCESS;
 }
 
 
@@ -134,10 +115,9 @@ VADisplay vaGetDisplay (
   {
       /* create new entry */
       VADriverContextP pDriverContext;
-      struct dri_state *dri_state;
-      pDisplayContext = calloc(1, sizeof(*pDisplayContext));
-      pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      if (pDisplayContext && pDriverContext && dri_state)
+      pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
+      pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
+      if (pDisplayContext && pDriverContext)
       {
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
@@ -148,7 +128,6 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
 	  pDisplayContexts                 = pDisplayContext;
-	  pDriverContext->dri_state 	   = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else
@@ -195,7 +174,7 @@ VAStatus vaPutSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch,
+  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch, 
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }

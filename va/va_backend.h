@@ -32,7 +32,9 @@
 #include <va/va.h>
 #include <X11/Xlib.h>
 #include <linux/videodev2.h>
+#include <ui/Surface.h>
 
+class Surface;
 
 typedef struct VADriverContext *VADriverContextP;
 typedef struct VADisplayContext *VADisplayContextP;
@@ -180,7 +182,7 @@ struct VADriverVTable
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
-		Drawable draw, /* X Drawable */
+		Surface* draw, /* X Drawable */
 		short srcx,
 		short srcy,
 		unsigned short srcw,
