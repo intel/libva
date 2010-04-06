@@ -166,6 +166,19 @@ i965_media_constant_buffer(VADriverContextP ctx, struct decode_state *decode_sta
     ADVANCE_BATCH(ctx);    
 }
 
+static void 
+i965_media_depth_buffer(VADriverContextP ctx)
+{
+    BEGIN_BATCH(ctx, 6);
+    OUT_BATCH(ctx, CMD_DEPTH_BUFFER | 4);
+    OUT_BATCH(ctx, (I965_DEPTHFORMAT_D32_FLOAT << 18) | 
+              (I965_SURFACE_NULL << 29));
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    ADVANCE_BATCH();
+}
+
 static void
 i965_media_pipeline_setup(VADriverContextP ctx, struct decode_state *decode_state)
 {
@@ -174,6 +187,7 @@ i965_media_pipeline_setup(VADriverContextP ctx, struct decode_state *decode_stat
 
     intel_batchbuffer_start_atomic(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush(ctx);                       /* step 1 */
+    i965_media_depth_buffer(ctx);
     i965_media_pipeline_select(ctx);                            /* step 2 */
     i965_media_urb_layout(ctx);                                 /* step 3 */
     i965_media_pipeline_state(ctx);                             /* step 4 */

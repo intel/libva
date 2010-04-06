@@ -35,6 +35,9 @@
 #define CMD_CONSTANT_COLOR                      CMD(3, 1, 1)
 #define CMD_3DPRIMITIVE                         CMD(3, 3, 0)
 
+#define CMD_DEPTH_BUFFER                        CMD(3, 1, 5)
+#define I965_DEPTHFORMAT_D32_FLOAT              1
+
 #define BASE_ADDRESS_MODIFY             (1 << 0)
 
 #define PIPELINE_SELECT_3D              0
