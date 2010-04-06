@@ -546,6 +546,7 @@ typedef struct _VAEncPictureParameterBufferJPEG
     VASurfaceID reconstructed_picture;
     unsigned short picture_width;
     unsigned short picture_height;
+    VABufferID coded_buf;
 } VAEncPictureParameterBufferJPEG;
 
 
