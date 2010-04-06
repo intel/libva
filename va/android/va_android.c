@@ -23,9 +23,9 @@
  */
 
 #define _GNU_SOURCE 1
-#include "../va.h"
-#include "../va_backend.h"
-#include "../va_android.h"
+#include "va.h"
+#include "va_backend.h"
+#include "va_android.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -42,7 +42,15 @@ static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
 )
 {
-    return 1;
+    VADisplayContextP ctx = pDisplayContexts;
+
+    while (ctx)
+    {
+	if (ctx == pDisplayContext && pDisplayContext->pDriverContext)
+	    return 1;
+	ctx = ctx->pNext;
+    }
+    return 0;
 }
 
 static void va_DisplayContextDestroy (
@@ -78,7 +86,7 @@ static VAStatus va_DisplayContextGetDriverName (
         unsigned int device_id;
         char driver_name[64];
     } devices[] = {
-        { 0x8086, 0x4100, "android" },
+        { 0x8086, 0x4100, "pvr" },
     };
 
     if (driver_name)
