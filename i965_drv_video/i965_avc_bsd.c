@@ -85,9 +85,9 @@ i965_avc_bsd_initialize_private_surface_data(VADriverContextP ctx, struct object
 }
 
 static void
-i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_state)
+i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_state, int slice)
 {
-    dri_bo *ind_bo = decode_state->slice_data->bo;
+    dri_bo *ind_bo = decode_state->slice_datas[slice]->bo;
 
     BEGIN_BCS_BATCH(ctx, 3);
     OUT_BCS_BATCH(ctx, CMD_BSD_IND_OBJ_BASE_ADDR | (3 - 2));
@@ -401,20 +401,18 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
 }
 
 static void
-i965_avc_bsd_buf_base_state(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_bsd_buf_base_state(VADriverContextP ctx,
+                            VAPictureParameterBufferH264 *pic_param, 
+                            VASliceParameterBufferH264 *slice_param)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
     struct i965_avc_bsd_context *i965_avc_bsd_context;
     int i;
-    VAPictureParameterBufferH264 *pic_param;
     VAPictureH264 *va_pic;
     struct object_surface *obj_surface;
     struct i965_avc_bsd_surface *avc_bsd_surface;
-
-    assert(decode_state->pic_param && decode_state->pic_param->buffer);
-    pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
 
     assert(media_state->private_context);
     i965_h264_context = (struct i965_h264_context *)media_state->private_context;
@@ -770,34 +768,36 @@ i965_avc_bsd_phantom_slice(VADriverContextP ctx,
 void 
 i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
 {
-    int i;
+    int i, j;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-    assert(decode_state->slice_param && decode_state->slice_param->buffer);
-    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_param->buffer;
-
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
-    i965_bsd_ind_obj_base_address(ctx, decode_state);
 
-    assert(decode_state->num_slices == 1); /* FIXME: */
-    for (i = 0; i < decode_state->num_slices; i++) {
-        assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
-        assert((slice_param->slice_type == SLICE_TYPE_I) ||
-               (slice_param->slice_type == SLICE_TYPE_P) ||
-               (slice_param->slice_type == SLICE_TYPE_B)); /* hardware requirement */
+    i965_avc_bsd_img_state(ctx, decode_state);
+    i965_avc_bsd_qm_state(ctx, decode_state);
 
-        if (i == 0) {
-            i965_avc_bsd_img_state(ctx, decode_state);
-            i965_avc_bsd_qm_state(ctx, decode_state);
+    for (j = 0; j < decode_state->num_slice_params; j++) {
+        assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
+        slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
+
+        i965_bsd_ind_obj_base_address(ctx, decode_state, j);
+
+        assert(decode_state->slice_params[j]->num_elements == 1);  /* FIXME */
+        for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
+            assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
+            assert((slice_param->slice_type == SLICE_TYPE_I) ||
+                   (slice_param->slice_type == SLICE_TYPE_P) ||
+                   (slice_param->slice_type == SLICE_TYPE_B)); /* hardware requirement */
+
+            i965_avc_bsd_slice_state(ctx, pic_param, slice_param);
+            i965_avc_bsd_buf_base_state(ctx, pic_param, slice_param);
+            i965_avc_bsd_object(ctx, decode_state, pic_param, slice_param);
+            slice_param++;
         }
 
-        i965_avc_bsd_slice_state(ctx, pic_param, slice_param);
-        i965_avc_bsd_buf_base_state(ctx, decode_state);
-        i965_avc_bsd_object(ctx, decode_state, pic_param, slice_param);
-        slice_param++;
     }
 
     i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param);

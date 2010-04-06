@@ -53,6 +53,7 @@ struct buffer_store
     unsigned char *buffer;
     dri_bo *bo;
     int ref_count;
+    int num_elements;
 };
     
 struct object_config 
@@ -64,15 +65,20 @@ struct object_config
     int num_attribs;
 };
 
+#define NUM_SLICES     10
+
 struct decode_state
 {
     struct buffer_store *pic_param;
-    struct buffer_store *slice_param;
+    struct buffer_store **slice_params;
     struct buffer_store *iq_matrix;
     struct buffer_store *bit_plane;
-    struct buffer_store *slice_data;
+    struct buffer_store **slice_datas;
     VASurfaceID current_render_target;
-    int num_slices;
+    int max_slice_params;
+    int max_slice_datas;
+    int num_slice_params;
+    int num_slice_datas;
 };
 
 struct object_context 

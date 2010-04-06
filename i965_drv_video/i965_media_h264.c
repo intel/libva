@@ -517,8 +517,8 @@ i965_media_h264_vfe_state_extension(VADriverContextP ctx,
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
 
-    assert(decode_state->slice_param && decode_state->slice_param->buffer);
-    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_param->buffer;
+    assert(decode_state->slice_params[0] && decode_state->slice_params[0]->buffer);
+    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[0]->buffer;
 
     mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
                         !pic_param->pic_fields.bits.field_pic_flag);
@@ -651,8 +651,8 @@ i965_media_h264_upload_constants(VADriverContextP ctx, struct decode_state *deco
     assert(media_state->private_context);
     i965_h264_context = (struct i965_h264_context *)media_state->private_context;
 
-    assert(decode_state->slice_param && decode_state->slice_param->buffer);
-    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_param->buffer;
+    assert(decode_state->slice_params[0] && decode_state->slice_params[0]->buffer);
+    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[0]->buffer;
 
     dri_bo_map(media_state->curbe.bo, 1);
     assert(media_state->curbe.bo->virtual);

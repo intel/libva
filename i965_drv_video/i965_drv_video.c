@@ -632,12 +632,23 @@ static void
 i965_destroy_context(struct object_heap *heap, struct object_base *obj)
 {
     struct object_context *obj_context = (struct object_context *)obj;
+    int i;
+
+    assert(obj_context->decode_state.num_slice_params <= obj_context->decode_state.max_slice_params);
+    assert(obj_context->decode_state.num_slice_datas <= obj_context->decode_state.max_slice_datas);
 
     i965_release_buffer_store(&obj_context->decode_state.pic_param);
-    i965_release_buffer_store(&obj_context->decode_state.slice_param);
     i965_release_buffer_store(&obj_context->decode_state.iq_matrix);
     i965_release_buffer_store(&obj_context->decode_state.bit_plane);
-    i965_release_buffer_store(&obj_context->decode_state.slice_data);
+
+    for (i = 0; i < obj_context->decode_state.num_slice_params; i++)
+        i965_release_buffer_store(&obj_context->decode_state.slice_params[i]);
+
+    for (i = 0; i < obj_context->decode_state.num_slice_datas; i++)
+        i965_release_buffer_store(&obj_context->decode_state.slice_datas[i]);
+
+    free(obj_context->decode_state.slice_params);
+    free(obj_context->decode_state.slice_datas);
     free(obj_context->render_targets);
     object_heap_free(heap, obj);
 }
@@ -678,6 +689,12 @@ i965_CreateContext(VADriverContextP ctx,
     *context = contextID;
     memset(&obj_context->decode_state, 0, sizeof(obj_context->decode_state));
     obj_context->decode_state.current_render_target = -1;
+    obj_context->decode_state.max_slice_params = NUM_SLICES;
+    obj_context->decode_state.max_slice_datas = NUM_SLICES;
+    obj_context->decode_state.slice_params = calloc(obj_context->decode_state.max_slice_params,
+                                                    sizeof(*obj_context->decode_state.slice_params));
+    obj_context->decode_state.slice_datas = calloc(obj_context->decode_state.max_slice_datas,
+                                                   sizeof(*obj_context->decode_state.slice_datas));
     obj_context->config_id = config_id;
     obj_context->picture_width = picture_width;
     obj_context->picture_height = picture_height;
@@ -791,6 +808,7 @@ i965_CreateBuffer(VADriverContextP ctx,
             memcpy(buffer_store->buffer, data, size * num_elements);
     }
 
+    buffer_store->num_elements = obj_buffer->num_elements;
     i965_reference_buffer_store(&obj_buffer->buffer_store, buffer_store);
     i965_release_buffer_store(&buffer_store);
     *buf_id = bufferID;
@@ -971,10 +989,18 @@ i965_render_slice_parameter_buffer(VADriverContextP ctx,
 {
     assert(obj_buffer->buffer_store->bo == NULL);
     assert(obj_buffer->buffer_store->buffer);
-    i965_release_buffer_store(&obj_context->decode_state.slice_param);
-    i965_reference_buffer_store(&obj_context->decode_state.slice_param,
+    
+    if (obj_context->decode_state.num_slice_params == obj_context->decode_state.max_slice_params) {
+        obj_context->decode_state.slice_params = realloc(obj_context->decode_state.slice_params,
+                                                        (obj_context->decode_state.max_slice_params + NUM_SLICES) * sizeof(*obj_context->decode_state.slice_params));
+        memset(obj_context->decode_state.slice_params + obj_context->decode_state.max_slice_params, 0, NUM_SLICES * sizeof(*obj_context->decode_state.slice_params));
+        obj_context->decode_state.max_slice_params += NUM_SLICES;
+    }
+        
+    i965_release_buffer_store(&obj_context->decode_state.slice_params[obj_context->decode_state.num_slice_params]);
+    i965_reference_buffer_store(&obj_context->decode_state.slice_params[obj_context->decode_state.num_slice_params],
                                 obj_buffer->buffer_store);
-    obj_context->decode_state.num_slices = obj_buffer->num_elements;    
+    obj_context->decode_state.num_slice_params++;
     
     return VA_STATUS_SUCCESS;
 }
@@ -986,9 +1012,18 @@ i965_render_slice_data_buffer(VADriverContextP ctx,
 {
     assert(obj_buffer->buffer_store->buffer == NULL);
     assert(obj_buffer->buffer_store->bo);
-    i965_release_buffer_store(&obj_context->decode_state.slice_data);
-    i965_reference_buffer_store(&obj_context->decode_state.slice_data,
+
+    if (obj_context->decode_state.num_slice_datas == obj_context->decode_state.max_slice_datas) {
+        obj_context->decode_state.slice_datas = realloc(obj_context->decode_state.slice_datas,
+                                                        (obj_context->decode_state.max_slice_datas + NUM_SLICES) * sizeof(*obj_context->decode_state.slice_datas));
+        memset(obj_context->decode_state.slice_datas + obj_context->decode_state.max_slice_datas, 0, NUM_SLICES * sizeof(*obj_context->decode_state.slice_datas));
+        obj_context->decode_state.max_slice_datas += NUM_SLICES;
+    }
+        
+    i965_release_buffer_store(&obj_context->decode_state.slice_datas[obj_context->decode_state.num_slice_datas]);
+    i965_reference_buffer_store(&obj_context->decode_state.slice_datas[obj_context->decode_state.num_slice_datas],
                                 obj_buffer->buffer_store);
+    obj_context->decode_state.num_slice_datas++;
     
     return VA_STATUS_SUCCESS;
 }
@@ -1048,11 +1083,13 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
     struct object_context *obj_context = CONTEXT(context);
     struct object_config *obj_config;
     VAContextID config;
+    int i;
 
     assert(obj_context);
     assert(obj_context->decode_state.pic_param);
-    assert(obj_context->decode_state.slice_param);
-    assert(obj_context->decode_state.slice_data);
+    assert(obj_context->decode_state.num_slice_params >= 1);
+    assert(obj_context->decode_state.num_slice_datas >= 1);
+    assert(obj_context->decode_state.num_slice_params == obj_context->decode_state.num_slice_datas);
 
     config = obj_context->config_id;
     obj_config = CONFIG(config);
@@ -1071,12 +1108,16 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
 
     i965_media_decode_picture(ctx, obj_config->profile, &obj_context->decode_state);
     obj_context->decode_state.current_render_target = -1;
-    obj_context->decode_state.num_slices = 0;
+    obj_context->decode_state.num_slice_params = 0;
+    obj_context->decode_state.num_slice_datas = 0;
     i965_release_buffer_store(&obj_context->decode_state.pic_param);
-    i965_release_buffer_store(&obj_context->decode_state.slice_param);
     i965_release_buffer_store(&obj_context->decode_state.iq_matrix);
     i965_release_buffer_store(&obj_context->decode_state.bit_plane);
-    i965_release_buffer_store(&obj_context->decode_state.slice_data);
+
+    for (i = 0; i < obj_context->decode_state.num_slice_params; i++) {
+        i965_release_buffer_store(&obj_context->decode_state.slice_params[i]);
+        i965_release_buffer_store(&obj_context->decode_state.slice_datas[i]);
+    }
 
     return VA_STATUS_SUCCESS;
 }
