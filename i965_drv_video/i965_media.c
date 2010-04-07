@@ -176,6 +176,7 @@ i965_media_depth_buffer(VADriverContextP ctx)
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
     ADVANCE_BATCH();
 }
 
