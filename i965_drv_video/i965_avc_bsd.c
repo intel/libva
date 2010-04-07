@@ -443,21 +443,26 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
             obj_surface = SURFACE(va_pic->picture_id);
             assert(obj_surface);
             avc_bsd_surface = obj_surface->private_data;
-            assert(avc_bsd_surface);
-            assert(avc_bsd_surface->direct_mv_flag != -1);
+            
+            if (avc_bsd_surface == NULL) {
+                OUT_BCS_BATCH(ctx, 0);
+                OUT_BCS_BATCH(ctx, 0);
+            } else {
+                assert(avc_bsd_surface->direct_mv_flag != -1);
 
-            OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
-                          I915_GEM_DOMAIN_INSTRUCTION, 0,
-                          0);
-
-            if (avc_bsd_surface->direct_mv_flag == 1)
-                OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_bottom_bo,
-                              I915_GEM_DOMAIN_INSTRUCTION, 0,
-                              0);
-            else
                 OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
                               I915_GEM_DOMAIN_INSTRUCTION, 0,
                               0);
+
+                if (avc_bsd_surface->direct_mv_flag == 1)
+                    OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_bottom_bo,
+                                  I915_GEM_DOMAIN_INSTRUCTION, 0,
+                                  0);
+                else
+                    OUT_BCS_RELOC(ctx, avc_bsd_surface->direct_mv_wr_top_bo,
+                                  I915_GEM_DOMAIN_INSTRUCTION, 0,
+                                  0);
+            }
         } else {
             OUT_BCS_BATCH(ctx, 0);
             OUT_BCS_BATCH(ctx, 0);
