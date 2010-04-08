@@ -193,6 +193,25 @@ struct VADriverVTable
 		unsigned int flags /* de-interlacing flags */
 	);
 
+	VAStatus (*vaPutSurfaceBuf) (
+		VADriverContextP ctx,
+                VASurfaceID surface,
+                Drawable draw, /* X Drawable */
+                unsigned char* data,
+                int* data_len,
+                short srcx,
+                short srcy,
+                unsigned short srcw,
+                unsigned short srch,
+                short destx,
+                short desty,
+                unsigned short destw,
+                unsigned short desth,
+		VARectangle *cliprects, /* client supplied clip list */
+		unsigned int number_cliprects, /* number of clip rects in the clip list */
+                unsigned int flags /* de-interlacing flags */
+	);
+
 	VAStatus (*vaQueryImageFormats) (
 		VADriverContextP ctx,
 		VAImageFormat *format_list,        /* out */

@@ -186,3 +186,31 @@ VAStatus vaPutSurface (
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }
+
+VAStatus vaPutSurfaceBuf (
+    VADisplay dpy,
+    VASurfaceID surface,
+    Drawable draw, /* Android Surface/Window */
+    unsigned char* data,
+    int* data_len,
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+)
+{
+  VADriverContextP ctx;
+
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  return ctx->vtable.vaPutSurfaceBuf( ctx, surface, draw, data, data_len, srcx, srcy, srcw, srch,
+				      destx, desty, destw, desth, cliprects, number_cliprects, flags );
+}
