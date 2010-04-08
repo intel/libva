@@ -364,9 +364,9 @@ i965_CreateSurfaces(VADriverContextP ctx,
         surfaces[i] = surfaceID;
         obj_surface->status = VASurfaceReady;
         obj_surface->subpic = VA_INVALID_ID;
-        obj_surface->width = width;
-        obj_surface->height = height;
-        obj_surface->size = SIZE_YUV420(width, height);
+        obj_surface->width = ALIGN(width, 16);
+        obj_surface->height = ALIGN(height, 16);
+        obj_surface->size = SIZE_YUV420(obj_surface->width, obj_surface->height);
         obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
                                        "vaapi surface",
                                        obj_surface->size,
