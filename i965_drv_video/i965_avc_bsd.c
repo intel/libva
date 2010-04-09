@@ -248,12 +248,14 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
     char weightoffsets[32 * 6];
 
     /* don't issue SLICE_STATE for intra-prediction decoding */
-    if (slice_param->slice_type == SLICE_TYPE_I)
+    if (slice_param->slice_type == SLICE_TYPE_I ||
+        slice_param->slice_type == SLICE_TYPE_SI)
         return;
 
     cmd_len = 2;
 
-    if (slice_param->slice_type == SLICE_TYPE_P) {
+    if (slice_param->slice_type == SLICE_TYPE_P ||
+        slice_param->slice_type == SLICE_TYPE_SP) {
         present_flag = PRESENT_REF_LIST0;
         cmd_len += 8;
     } else { 
@@ -528,6 +530,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         int slice_data_bit_offset;
         int weighted_pred_idc = 0;
         int first_mb_in_slice = 0;
+        int slice_type;
 
         encrypted = 0; /* FIXME: which flag in VAAPI is used for encryption? */
 
@@ -542,12 +545,23 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         if (pic_param->pic_fields.bits.entropy_coding_mode_flag == ENTROPY_CABAC)
             slice_data_bit_offset = ALIGN(slice_data_bit_offset, 0x8);
 
-        if (slice_param->slice_type == SLICE_TYPE_I) {
+        if (slice_param->slice_type == SLICE_TYPE_I ||
+            slice_param->slice_type == SLICE_TYPE_SI)
+            slice_type = SLICE_TYPE_I;
+        else if (slice_param->slice_type == SLICE_TYPE_P ||
+                 slice_param->slice_type == SLICE_TYPE_SP)
+            slice_type = SLICE_TYPE_P;
+        else {
+            assert(slice_param->slice_type == SLICE_TYPE_B);
+            slice_type = SLICE_TYPE_B;
+        }
+
+        if (slice_type == SLICE_TYPE_I) {
             assert(slice_param->num_ref_idx_l0_active_minus1 == 0);
             assert(slice_param->num_ref_idx_l1_active_minus1 == 0);
             num_ref_idx_l0 = 0;
             num_ref_idx_l1 = 0;
-        } else if (slice_param->slice_type == SLICE_TYPE_P) {
+        } else if (slice_type == SLICE_TYPE_P) {
             assert(slice_param->num_ref_idx_l1_active_minus1 == 0);
             num_ref_idx_l0 = slice_param->num_ref_idx_l0_active_minus1 + 1;
             num_ref_idx_l1 = 0;
@@ -556,9 +570,9 @@ g4x_avc_bsd_object(VADriverContextP ctx,
             num_ref_idx_l1 = slice_param->num_ref_idx_l1_active_minus1 + 1;
         }
 
-        if (slice_param->slice_type == SLICE_TYPE_P)
+        if (slice_type == SLICE_TYPE_P)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_pred_flag;
-        else if (slice_param->slice_type == SLICE_TYPE_B)
+        else if (slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
         first_mb_in_slice = slice_param->first_mb_in_slice;
@@ -582,7 +596,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                       (0 << 12) | /* ignore MPR Error handling */
                       (0 << 10) | /* ignore Entropy Error handling */
                       (0 << 8)  | /* ignore MB Header Error handling */
-                      (slice_param->slice_type << 0));
+                      (slice_type << 0));
         OUT_BCS_BATCH(ctx, 
                       (num_ref_idx_l1 << 24) |
                       (num_ref_idx_l0 << 16) |
@@ -644,7 +658,7 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         int slice_data_bit_offset;
         int weighted_pred_idc = 0;
         int first_mb_in_slice;
-
+        int slice_type;
         encrypted = 0; /* FIXME: which flag in VAAPI is used for encryption? */
 
         if (encrypted) {
@@ -657,12 +671,23 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         if (pic_param->pic_fields.bits.entropy_coding_mode_flag == ENTROPY_CABAC)
             slice_data_bit_offset = ALIGN(slice_data_bit_offset, 0x8);
 
-        if (slice_param->slice_type == SLICE_TYPE_I) {
+        if (slice_param->slice_type == SLICE_TYPE_I ||
+            slice_param->slice_type == SLICE_TYPE_SI)
+            slice_type = SLICE_TYPE_I;
+        else if (slice_param->slice_type == SLICE_TYPE_P ||
+                 slice_param->slice_type == SLICE_TYPE_SP)
+            slice_type = SLICE_TYPE_P;
+        else {
+            assert(slice_param->slice_type == SLICE_TYPE_B);
+            slice_type = SLICE_TYPE_B;
+        }
+
+        if (slice_type == SLICE_TYPE_I) {
             assert(slice_param->num_ref_idx_l0_active_minus1 == 0);
             assert(slice_param->num_ref_idx_l1_active_minus1 == 0);
             num_ref_idx_l0 = 0;
             num_ref_idx_l1 = 0;
-        } else if (slice_param->slice_type == SLICE_TYPE_P) {
+        } else if (slice_type == SLICE_TYPE_P) {
             assert(slice_param->num_ref_idx_l1_active_minus1 == 0);
             num_ref_idx_l0 = slice_param->num_ref_idx_l0_active_minus1 + 1;
             num_ref_idx_l1 = 0;
@@ -671,9 +696,9 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
             num_ref_idx_l1 = slice_param->num_ref_idx_l1_active_minus1 + 1;
         }
 
-        if (slice_param->slice_type == SLICE_TYPE_P)
+        if (slice_type == SLICE_TYPE_P)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_pred_flag;
-        else if (slice_param->slice_type == SLICE_TYPE_B)
+        else if (slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
         first_mb_in_slice = slice_param->first_mb_in_slice;
@@ -699,7 +724,7 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                       (0 << 12) | /* ignore MPR Error handling */
                       (0 << 10) | /* ignore Entropy Error handling */
                       (0 << 8)  | /* ignore MB Header Error handling */
-                      (slice_param->slice_type << 0));
+                      (slice_type << 0));
         OUT_BCS_BATCH(ctx, 
                       (num_ref_idx_l1 << 24) |
                       (num_ref_idx_l0 << 16) |
@@ -800,8 +825,10 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
             assert((slice_param->slice_type == SLICE_TYPE_I) ||
+                   (slice_param->slice_type == SLICE_TYPE_SI) ||
                    (slice_param->slice_type == SLICE_TYPE_P) ||
-                   (slice_param->slice_type == SLICE_TYPE_B)); /* hardware requirement */
+                   (slice_param->slice_type == SLICE_TYPE_SP) ||
+                   (slice_param->slice_type == SLICE_TYPE_B));
 
             i965_avc_bsd_slice_state(ctx, pic_param, slice_param);
             i965_avc_bsd_buf_base_state(ctx, pic_param, slice_param);

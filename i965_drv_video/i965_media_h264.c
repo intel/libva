@@ -541,7 +541,8 @@ i965_media_h264_vfe_state_extension(VADriverContextP ctx,
     vfe_state_ex->vfex1.avc.residual_data_fix_offset_flag = !!RESIDUAL_DATA_OFFSET;
     vfe_state_ex->vfex1.avc.residual_data_offset = RESIDUAL_DATA_OFFSET;
 
-    if (slice_param->slice_type == SLICE_TYPE_I) 
+    if (slice_param->slice_type == SLICE_TYPE_I ||
+        slice_param->slice_type == SLICE_TYPE_SI) 
         vfe_state_ex->vfex1.avc.sub_field_present_flag = PRESENT_NOMV; /* NoMV */
     else 
         vfe_state_ex->vfex1.avc.sub_field_present_flag = PRESENT_MV_WO; /* Both MV and W/O */
@@ -662,7 +663,8 @@ i965_media_h264_upload_constants(VADriverContextP ctx, struct decode_state *deco
     if (i965_h264_context->use_hw_w128) {
         memcpy(constant_buffer, intra_kernel_header, sizeof(*intra_kernel_header));
     } else {
-        if (slice_param->slice_type == SLICE_TYPE_I) {
+        if (slice_param->slice_type == SLICE_TYPE_I ||
+            slice_param->slice_type == SLICE_TYPE_SI) {
             memcpy(constant_buffer, intra_kernel_header, sizeof(*intra_kernel_header));
         } else {
             /* FIXME: Need to upload CURBE data to inter kernel interface 
