@@ -523,10 +523,11 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         int encrypted, counter_value, cmd_len;
         int slice_hor_pos, slice_ver_pos;
         int num_ref_idx_l0, num_ref_idx_l1;
-        int field_or_mbaff_picture = (pic_param->pic_fields.bits.field_pic_flag ||
-                                      pic_param->seq_fields.bits.mb_adaptive_frame_field_flag);
+        int mbaff_picture = (!pic_param->pic_fields.bits.field_pic_flag &&
+                             pic_param->seq_fields.bits.mb_adaptive_frame_field_flag);
         int slice_data_bit_offset;
         int weighted_pred_idc = 0;
+        int first_mb_in_slice = 0;
 
         encrypted = 0; /* FIXME: which flag in VAAPI is used for encryption? */
 
@@ -560,9 +561,11 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         else if (slice_param->slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
-        slice_hor_pos = slice_param->first_mb_in_slice % width_in_mbs; 
-        slice_ver_pos = slice_param->first_mb_in_slice / width_in_mbs;
-        slice_ver_pos <<= (1 + field_or_mbaff_picture); /* FIXME: right ??? */
+        first_mb_in_slice = slice_param->first_mb_in_slice;
+        slice_hor_pos = first_mb_in_slice % width_in_mbs; 
+        slice_ver_pos = first_mb_in_slice / width_in_mbs;
+        first_mb_in_slice = (slice_ver_pos << mbaff_picture) * width_in_mbs + slice_hor_pos;
+        slice_hor_pos <<= mbaff_picture;
 
         BEGIN_BCS_BATCH(ctx, cmd_len);
         OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (cmd_len - 2));
@@ -596,7 +599,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         OUT_BCS_BATCH(ctx, 
                       (slice_ver_pos << 24) |
                       (slice_hor_pos << 16) | 
-                      (slice_param->first_mb_in_slice << 0));
+                      (first_mb_in_slice << 0));
         OUT_BCS_BATCH(ctx, 
                       (0 << 7) | /* FIXME: ??? */
                       ((0x7 - (slice_data_bit_offset & 0x7)) << 0));
@@ -636,10 +639,11 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         int encrypted, counter_value;
         int slice_hor_pos, slice_ver_pos;
         int num_ref_idx_l0, num_ref_idx_l1;
-        int field_or_mbaff_picture = (pic_param->pic_fields.bits.field_pic_flag ||
-                                      pic_param->seq_fields.bits.mb_adaptive_frame_field_flag);
+        int mbaff_picture = (!pic_param->pic_fields.bits.field_pic_flag &&
+                             pic_param->seq_fields.bits.mb_adaptive_frame_field_flag);
         int slice_data_bit_offset;
         int weighted_pred_idc = 0;
+        int first_mb_in_slice;
 
         encrypted = 0; /* FIXME: which flag in VAAPI is used for encryption? */
 
@@ -672,9 +676,11 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         else if (slice_param->slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
-        slice_hor_pos = slice_param->first_mb_in_slice % width_in_mbs; 
-        slice_ver_pos = slice_param->first_mb_in_slice / width_in_mbs;
-        slice_ver_pos <<= (1 + field_or_mbaff_picture); /* FIXME: right ??? */
+        first_mb_in_slice = slice_param->first_mb_in_slice;
+        slice_hor_pos = first_mb_in_slice % width_in_mbs; 
+        slice_ver_pos = first_mb_in_slice / width_in_mbs;
+        first_mb_in_slice = (slice_ver_pos << mbaff_picture) * width_in_mbs + slice_hor_pos;
+        slice_hor_pos <<= mbaff_picture;
 
         BEGIN_BCS_BATCH(ctx, 16);
         OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (16 - 2));
@@ -710,7 +716,7 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         OUT_BCS_BATCH(ctx, 
                       (slice_ver_pos << 24) |
                       (slice_hor_pos << 16) | 
-                      (slice_param->first_mb_in_slice << 0));
+                      (first_mb_in_slice << 0));
         OUT_BCS_BATCH(ctx, 
                       (0 << 7) | /* FIXME: ??? */
                       ((0x7 - (slice_data_bit_offset & 0x7)) << 0));
