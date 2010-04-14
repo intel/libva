@@ -43,6 +43,10 @@ struct i965_h264_context
 
     struct i965_avc_bsd_context i965_avc_bsd_context;
     struct i965_avc_hw_scoreboard_context avc_hw_scoreboard_context;
+    struct {
+        VASurfaceID surface_id;
+        int frame_store_id;
+    } fsid_list[16];
 };
 
 Bool i965_media_h264_init(VADriverContextP ctx);

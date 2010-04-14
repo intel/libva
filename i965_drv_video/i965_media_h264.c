@@ -344,11 +344,16 @@ i965_media_h264_surfaces_setup(VADriverContextP ctx,
                                struct decode_state *decode_state)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_media_state *media_state = &i965->media_state;
+    struct i965_h264_context *i965_h264_context;
     struct object_surface *obj_surface;
     VAPictureParameterBufferH264 *pic_param;
     VAPictureH264 *va_pic;
-    int i, w, h;
+    int i, j, w, h;
     int field_picture;
+
+    assert(media_state->private_context);
+    i965_h264_context = (struct i965_h264_context *)media_state->private_context;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
@@ -375,10 +380,23 @@ i965_media_h264_surfaces_setup(VADriverContextP ctx,
                                   I965_SURFACEFORMAT_R8G8_SINT);  /* INTERLEAVED U/V */
 
     /* Reference Pictures */
-    for (i = 0; i < 16; i++) {
-        va_pic = &pic_param->ReferenceFrames[i];
+    for (i = 0; i < ARRAY_ELEMS(i965_h264_context->fsid_list); i++) {
+        if (i965_h264_context->fsid_list[i].surface_id != VA_INVALID_ID) {
+            int found = 0;
+            for (j = 0; j < ARRAY_ELEMS(pic_param->ReferenceFrames); j++) {
+                va_pic = &pic_param->ReferenceFrames[j];
+                
+                if (va_pic->flags & VA_PICTURE_H264_INVALID)
+                    continue;
 
-        if (!(va_pic->flags & VA_PICTURE_H264_INVALID)) {
+                if (va_pic->picture_id == i965_h264_context->fsid_list[i].surface_id) {
+                    found = 1;
+                    break;
+                }
+            }
+
+            assert(found == 1);
+
             obj_surface = SURFACE(va_pic->picture_id);
             assert(obj_surface);
             w = obj_surface->width;
@@ -849,6 +867,11 @@ i965_media_h264_init(VADriverContextP ctx)
                                   kernel->size, 64);
         assert(kernel->bo);
         dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
+    }
+
+    for (i = 0; i < 16; i++) {
+        i965_h264_context->fsid_list[i].surface_id = VA_INVALID_ID;
+        i965_h264_context->fsid_list[i].frame_store_id = -1;
     }
 
     media_state->private_context = i965_h264_context;
