@@ -66,6 +66,11 @@ AC_ARG_ENABLE(dummy-driver,
               [], [enable_dummy_driver=yes])
 AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
 
+AC_ARG_ENABLE(dummy-backend,
+              [AC_HELP_STRING([--enable-dummy-backend],
+                              [build dummy libva backend])],
+              [], [enable_dummy_backend=no])
+
 AC_ARG_ENABLE(i965-driver,
               [AC_HELP_STRING([--enable-i965-driver],
                               [build i965 video driver])],
@@ -99,6 +104,14 @@ if test x$enable_i965_driver = xyes && ! $PKG_CONFIG --atleast-version=2.4 libdr
     enable_i965_driver=no
 fi
 AM_CONDITIONAL(BUILD_I965_DRIVER, test x$enable_i965_driver = xyes)
+
+if test x$enable_dummy_backend = xyes; then
+    PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
+fi
+if test x$libudev = xno; then
+   enable_dummy_backend=no
+fi
+AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"
