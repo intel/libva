@@ -29,7 +29,8 @@ LDADD = \
 
 lib_LTLIBRARIES = \
 	libva.la \
-	libva-x11.la
+	libva-x11.la \
+	libva-dummy.la
 
 libva_ladir = $(libdir)
 libva_la_LDFLAGS = $(LDADD) -no-undefined
@@ -39,6 +40,11 @@ libva_x11_la_SOURCES =
 libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
 libva_x11_la_LDFLAGS = $(LDADD)
 libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
+
+libva_dummy_la_SOURCES = 
+libva_dummy_la_LIBADD  = $(libvacorelib) android/libva_dummy.la $(LIBVA_LIBS) $(DRM_LIBS)
+libva_dummy_la_LDFLAGS = $(LDADD)
+libva_dummy_la_DEPENDENCIES = $(libvacorelib) android/libva_dummy.la
 
 SUBDIRS = x11 android
 
