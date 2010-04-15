@@ -263,18 +263,16 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
         cmd_len += 16;
     }
 
-    if (slice_param->luma_weight_l0_flag | slice_param->chroma_weight_l0_flag) {
+    if (pic_param->pic_fields.bits.weighted_pred_flag == 1 ||
+        pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
         present_flag |= PRESENT_WEIGHT_OFFSET_L0;
         cmd_len += 48;
-        assert((pic_param->pic_fields.bits.weighted_pred_flag == 1) || /* P slice */
-               (pic_param->pic_fields.bits.weighted_bipred_idc == 1)); /* B slice */
     }
 
-    if (slice_param->luma_weight_l1_flag | slice_param->chroma_weight_l1_flag) {
+    if (pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
         present_flag |= PRESENT_WEIGHT_OFFSET_L1;
         cmd_len += 48;
         assert(slice_param->slice_type == SLICE_TYPE_B);
-        assert(pic_param->pic_fields.bits.weighted_bipred_idc == 1);
     }
 
     BEGIN_BCS_BATCH(ctx, cmd_len);
