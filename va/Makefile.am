@@ -40,7 +40,7 @@ libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS
 libva_x11_la_LDFLAGS = $(LDADD)
 libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
 
-SUBDIRS = x11
+SUBDIRS = x11 android
 
 libva_la_SOURCES = va.c va_trace.c
 

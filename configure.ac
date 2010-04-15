@@ -119,6 +119,7 @@ AC_OUTPUT([
 	va/Makefile
 	va/va_version.h
 	va/x11/Makefile
+	va/android/Makefile
 	dummy_drv_video/Makefile
 	i965_drv_video/Makefile
 	i965_drv_video/shaders/Makefile
