@@ -97,8 +97,15 @@ static VAStatus va_DisplayContextGetDriverName (
 
     memset(dri_state, 0, sizeof(*dri_state));
     dri_state->fd = drm_open_any_master();
-    if (dri_state->fd < 0)
+    if (dri_state->fd < 0) {
+        fprintf(stderr, "open DRM device by udev failed, try /dev/dri/card0\n");
+        dri_state->fd = open("/dev/dri/card0", O_RDWR);
+    }
+    
+    if (dri_state->fd < 0) {
+        fprintf(stderr,"can't open DRM devices\n");
         return VA_STATUS_ERROR_UNKNOWN;
+    }
     
     if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
         && geteuid() == getuid())
@@ -110,7 +117,7 @@ static VAStatus va_DisplayContextGetDriverName (
         *driver_name = strdup(devices[0].driver_name);
 
     
-    dri_state->driConnectedFlag = VA_DRI2;
+    dri_state->driConnectedFlag = VA_DUMMY;
     
     return VA_STATUS_SUCCESS;
 }

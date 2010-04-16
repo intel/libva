@@ -13,7 +13,8 @@ enum
 {
     VA_NONE = 0,
     VA_DRI1 = 1,
-    VA_DRI2 = 2
+    VA_DRI2 = 2,
+    VA_DUMMY = 3
 };
 
 union dri_buffer 

@@ -107,7 +107,7 @@ int drm_open_any(void)
 
 	if (fd < 0) {
 		fprintf(stderr, "failed to open any drm device\n");
-		abort();
+		//abort();
 	}
 
 	return fd;
@@ -122,7 +122,7 @@ int drm_open_any_master(void)
 
 	if (fd < 0) {
 		fprintf(stderr, "failed to open any drm device\n");
-		abort();
+		//abort();
 	}
 
 	return fd;

@@ -57,7 +57,7 @@ endif
 libva_la_SOURCES = va.c va_trace.c
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_x11.h va_backend.h va_version.h
+libvainclude_HEADERS = va.h va_x11.h va_backend.h va_dummy.h va_version.h
 
 DISTCLEANFILES = \
 	va_version.h
