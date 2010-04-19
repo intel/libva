@@ -263,16 +263,17 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
         cmd_len += 16;
     }
 
-    if (pic_param->pic_fields.bits.weighted_pred_flag == 1 ||
-        pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
+    if ((slice_param->slice_type == SLICE_TYPE_P ||
+         slice_param->slice_type == SLICE_TYPE_SP) && 
+        (pic_param->pic_fields.bits.weighted_pred_flag == 1)) {
         present_flag |= PRESENT_WEIGHT_OFFSET_L0;
         cmd_len += 48;
     }
 
-    if (pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
-        present_flag |= PRESENT_WEIGHT_OFFSET_L1;
-        cmd_len += 48;
-        assert(slice_param->slice_type == SLICE_TYPE_B);
+    if ((slice_param->slice_type == SLICE_TYPE_B) &&
+        (pic_param->pic_fields.bits.weighted_bipred_idc == 1)) {
+        present_flag |= PRESENT_WEIGHT_OFFSET_L0 | PRESENT_WEIGHT_OFFSET_L1;
+        cmd_len += 96;
     }
 
     BEGIN_BCS_BATCH(ctx, cmd_len);
@@ -346,7 +347,8 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
             weightoffsets[j * 6 + 4] = slice_param->chroma_offset_l0[j][1];
             weightoffsets[j * 6 + 5] = slice_param->chroma_weight_l0[j][1];
 
-            if (pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
+            if (pic_param->pic_fields.bits.weighted_pred_flag == 1 ||
+                pic_param->pic_fields.bits.weighted_bipred_idc == 1) {
                 if (i965_h264_context->use_hw_w128) {
                     if (slice_param->luma_weight_l0[j] == 128)
                         i965_h264_context->weight128_luma_l0 |= (1 << j);
