@@ -54,10 +54,6 @@ struct i965_avc_bsd_context
         dri_bo *bo;
         long write_offset;
     } avc_it_data;
-
-    struct {
-        dri_bo *bo;
-    } ildb_data;
 };
 
 void i965_avc_bsd_pipeline(VADriverContextP, struct decode_state *);

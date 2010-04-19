@@ -792,6 +792,14 @@ i965_media_h264_decode_init(VADriverContextP ctx)
     dri_bo_reference(media_state->indirect_object.bo);
     media_state->indirect_object.offset = i965_h264_context->avc_it_data.write_offset;
 
+    dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "AVC-ILDB Data Buffer",
+                      0x100000, /* at least 1044480 bytes */
+                      64);
+    assert(bo);
+    i965_h264_context->avc_ildb_data.bo = bo;
+
     /* bsd pipeline */
     i965_avc_bsd_decode_init(ctx);
 
@@ -892,6 +900,7 @@ i965_media_h264_ternimate(VADriverContextP ctx)
         i965_avc_bsd_ternimate(&i965_h264_context->i965_avc_bsd_context);
         dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
         dri_bo_unreference(i965_h264_context->avc_it_data.bo);
+        dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
         free(i965_h264_context);
         media_state->private_context = NULL;
     }

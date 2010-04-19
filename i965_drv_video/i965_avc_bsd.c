@@ -433,7 +433,7 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
     OUT_BCS_RELOC(ctx, i965_h264_context->avc_it_data.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   (i965_h264_context->avc_it_data.write_offset << 6));
-    OUT_BCS_RELOC(ctx, i965_avc_bsd_context->ildb_data.bo,
+    OUT_BCS_RELOC(ctx, i965_h264_context->avc_ildb_data.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   0);
 
@@ -1002,14 +1002,6 @@ i965_avc_bsd_decode_init(VADriverContextP ctx)
                       64);
     assert(bo);
     i965_avc_bsd_context->mpr_row_store.bo = bo;
-
-    dri_bo_unreference(i965_avc_bsd_context->ildb_data.bo);
-    bo = dri_bo_alloc(i965->intel.bufmgr,
-                      "ildb data",
-                      0x100000, /* at least 1044480 bytes */
-                      64);
-    assert(bo);
-    i965_avc_bsd_context->ildb_data.bo = bo;
 }
 
 Bool 
@@ -1017,7 +1009,6 @@ i965_avc_bsd_ternimate(struct i965_avc_bsd_context *i965_avc_bsd_context)
 {
     dri_bo_unreference(i965_avc_bsd_context->bsd_raw_store.bo);
     dri_bo_unreference(i965_avc_bsd_context->mpr_row_store.bo);
-    dri_bo_unreference(i965_avc_bsd_context->ildb_data.bo);
 
     return True;
 }

@@ -26,6 +26,10 @@ struct i965_h264_context
     } avc_it_data;
 
     struct {
+        dri_bo *bo;
+    } avc_ildb_data;
+
+    struct {
         unsigned int width_in_mbs;
         unsigned int height_in_mbs;
         int mbaff_frame_flag;
