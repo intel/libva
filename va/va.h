@@ -1221,10 +1221,24 @@ VAStatus vaBufferSetNumElements (
     unsigned int num_elements /* in */
 );
 
+
+/*
+ * device independent data structure for codedbuffer
+ */
+typedef  struct _VACodedBufferSegment {
+    unsigned int size; /* size of the data buffer in the coded buffer segment, in bytes */
+    unsigned int bit_offset;/* bit offset into the data buffer where valid bitstream data begins */
+    void *buf; /* pointer to the beginning of the data buffer in the coded buffer segment */
+    void *next; /* pointer to the next VACodedBufferSegment */
+} VACodedBufferSegment;
+     
 /*
  * Map data store of the buffer into the client's address space
  * vaCreateBuffer() needs to be called with "data" set to NULL before
  * calling vaMapBuffer()
+ *
+ * if buffer type is VAEncCodedBufferType, pbuf points to link-list of
+ * VACodedBufferSegment, and the list is terminated if "next" is NULL
  */
 VAStatus vaMapBuffer (
     VADisplay dpy,
