@@ -23,9 +23,10 @@
  */
 
 #define _GNU_SOURCE 1
-#include "../va.h"
-#include "../va_backend.h"
-#include "../va_android.h"
+#include "va.h"
+#include "va_backend.h"
+#include "va_android.h"
+#include "x11/va_dricommon.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -34,9 +35,43 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dlfcn.h>
 #include <errno.h>
 
+#define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
+#define DEVICE_NAME "/dev/dri/card0"
+
 static VADisplayContextP pDisplayContexts = NULL;
+
+static int open_device (char *dev_name)
+{
+  struct stat st;
+  int fd;
+
+  if (-1 == stat (dev_name, &st))
+    {
+      printf ("Cannot identify '%s': %d, %s\n",
+               dev_name, errno, strerror (errno));
+      return -1;
+    }
+
+  if (!S_ISCHR (st.st_mode))
+    {
+      printf ("%s is no device\n", dev_name);
+      return -1;
+    }
+
+  fd = open (dev_name, O_RDWR /* required */  | O_NONBLOCK, 0);
+
+  if (-1 == fd)
+    {
+      fprintf (stderr, "Cannot open '%s': %d, %s\n",
+               dev_name, errno, strerror (errno));
+      return -1;
+    }
+
+  return fd;
+}
 
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
@@ -78,7 +113,7 @@ static VAStatus va_DisplayContextGetDriverName (
         unsigned int device_id;
         char driver_name[64];
     } devices[] = {
-        { 0x8086, 0x4100, "android" },
+        { 0x8086, 0x4100, "psb" },
     };
 
     if (driver_name)
@@ -111,13 +146,27 @@ VADisplay vaGetDisplay (
       pDisplayContext = pDisplayContext->pNext;
   }
 
+
   if (!dpy)
   {
       /* create new entry */
       VADriverContextP pDriverContext;
+      struct dri_state *dri_state;
+
       pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
       pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
-      if (pDisplayContext && pDriverContext)
+      dri_state       = (struct dri_state*)calloc(1, sizeof(*dri_state));
+
+      /* assgin necessary dri_state struct variable */
+      dri_state->driConnectedFlag = VA_DRI2;
+      dri_state->fd = open_device(DEVICE_NAME);
+      dri_state->createDrawable = NULL;
+      dri_state->destroyDrawable = NULL;
+      dri_state->swapBuffer = NULL;
+      dri_state->getRenderingBuffer = NULL;
+      dri_state->close = NULL;
+
+      if (pDisplayContext && pDriverContext && dri_state)
       {
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
@@ -128,6 +177,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
 	  pDisplayContexts                 = pDisplayContext;
+          pDriverContext->dri_state        = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else
@@ -136,12 +186,13 @@ VADisplay vaGetDisplay (
 	      free(pDisplayContext);
 	  if (pDriverContext)
 	      free(pDriverContext);
+	  if (dri_state)
+	      free(dri_state);
       }
   }
   
   return dpy;
 }
-
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
@@ -155,7 +206,8 @@ static int vaDisplayIsValid(VADisplay dpy)
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
-    Surface *draw, /* Android Surface/Window */
+    //Surface *draw, /* Android Surface/Window */
+    void *draw,
     short srcx,
     short srcy,
     unsigned short srcw,
@@ -178,3 +230,4 @@ VAStatus vaPutSurface (
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }
+

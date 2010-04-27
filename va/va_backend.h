@@ -30,14 +30,17 @@
 #define _VA_BACKEND_H_
 
 #include <va/va.h>
+#ifndef ANDROID
 #include <X11/Xlib.h>
+#endif
 #include <linux/videodev2.h>
-#include <ui/Surface.h>
-
-class Surface;
 
 typedef struct VADriverContext *VADriverContextP;
 typedef struct VADisplayContext *VADisplayContextP;
+
+#ifdef ANDROID
+#define Surface void
+#endif
 
 struct VADriverVTable
 {
@@ -182,7 +185,11 @@ struct VADriverVTable
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
+		#ifdef ANDROID
 		Surface* draw, /* X Drawable */
+		#else
+		Drawable draw,
+		#endif
 		short srcx,
 		short srcy,
 		unsigned short srcw,

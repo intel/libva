@@ -2,16 +2,16 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+//#define Surface void
 /*
  * Returns a suitable VADisplay for VA API
  */
 VADisplay vaGetDisplay (
-    void *dpy
+    Display *dpy
 );
 
 /*
@@ -25,7 +25,8 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    Surface *draw, /* Android Window/Surface */
+    //Surface *draw, /* Android Window/Surface */
+    void* draw,
     short srcx,
     short srcy,
     unsigned short srcw,
@@ -38,7 +39,6 @@ VAStatus vaPutSurface (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* PutSurface flags */
 );
-
 #ifdef __cplusplus
 }
 #endif
