@@ -1,8 +1,9 @@
 #ifndef _VA_DRICOMMON_H_
 #define _VA_DRICOMMON_H_
 
+#ifndef ANDROID
 #include <X11/Xlib.h>
-
+#endif
 #include <xf86drm.h>
 #include <drm.h>
 #include <drm_sarea.h>

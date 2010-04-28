@@ -36,5 +36,5 @@
 #define DRM_TEST_MASTER 0x01
 
 int drm_open_any(void);
-int drm_open_any_master(void);
-int drm_open_matching(const char *pci_glob, int flags);
+int drm_open_any_master(int *device_id);
+int drm_open_matching(const char *pci_glob, int flags, int *device_id);

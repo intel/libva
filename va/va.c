@@ -25,6 +25,7 @@
 #define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
+#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -53,6 +54,10 @@ extern int trace_flag;
         va_TraceMsg("========%s========\n", __func__);   \
         trace_func(__VA_ARGS__);                \
     }
+
+#define VA_MAJOR_VERSION (0)
+#define VA_MINOR_VERSION (31)
+#define VA_VERSION_S       "0.31.1"
 
 static int vaDisplayIsValid(VADisplay dpy)
 {
@@ -153,8 +158,11 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         strncat( driver_path, DRIVER_EXTENSION, strlen(DRIVER_EXTENSION) );
         
         va_infoMessage("Trying to open %s\n", driver_path);
-
+#ifndef ANDROID
         handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
+#else
+        handle = dlopen( driver_path, RTLD_NOW| RTLD_GLOBAL);
+#endif
         if (!handle)
         {
             /* Don't give errors for non-existing files */

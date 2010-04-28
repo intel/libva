@@ -2,22 +2,18 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    
 /*
  * Returns a suitable VADisplay for VA API
  */
 VADisplay vaGetDisplay (
-    void *dpy
+    void *android_dpy
 );
 
-#ifdef ANDROID
-
+#if ANDROID    
 #include <ui/Surface.h>
 class Surface;
     
@@ -45,26 +41,6 @@ VAStatus vaPutSurface (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* PutSurface flags */
 );
-
-VAStatus vaPutSurfaceBuf (
-    VADriverContextP ctx,
-    VASurfaceID surface,
-    Drawable draw, /* X Drawable */
-    unsigned char* data,
-    int* data_len,
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-);
-
 #endif
     
 #ifdef __cplusplus

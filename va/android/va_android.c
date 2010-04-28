@@ -26,7 +26,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_android.h"
-#include "va_dricommon.h"
+#include "va_dricommon.h" /* needs some helper functions from this file */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -35,10 +35,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <dlfcn.h>
 #include <errno.h>
 
+#define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
+#define DEVICE_NAME "/dev/dri/card0"
 
 static VADisplayContextP pDisplayContexts = NULL;
+
 
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
@@ -86,21 +90,20 @@ static VAStatus va_DisplayContextGetDriverName (
     VADriverContextP ctx = pDisplayContext->pDriverContext;
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
     char *driver_name_env;
+    int dev_id;
     
     struct {
-        unsigned int verndor_id;
-        unsigned int device_id;
+        int verndor_id;
+        int device_id;
         char driver_name[64];
     } devices[] = {
         { 0x8086, 0x4100, "pvr" },
+        { 0x8086, 0x0310, "pvr" },
+        { 0x0,    0x0,    "\0" },
     };
 
     memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->fd = drm_open_any_master();
-    if (dri_state->fd < 0) {
-        fprintf(stderr, "open DRM device by udev failed, try /dev/dri/card0\n");
-        dri_state->fd = open("/dev/dri/card0", O_RDWR);
-    }
+    dri_state->fd = drm_open_any_master(&dev_id);
     
     if (dri_state->fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");
@@ -108,14 +111,24 @@ static VAStatus va_DisplayContextGetDriverName (
     }
     
     if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
-        && geteuid() == getuid())
-    {
+        && geteuid() == getuid()) {
         /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
         *driver_name = strdup(driver_name_env);
         return VA_STATUS_SUCCESS;
-    } else /* TBD: other vendor driver names */
-        *driver_name = strdup(devices[0].driver_name);
+    } else { /* TBD: other vendor driver names */
+        int i=0;
 
+        while ((devices[i].device_id !=0) &&
+               (devices[i].device_id != dev_id))
+            i++;
+
+        if (devices[i].device_id != 0)
+            *driver_name = strdup(devices[0].driver_name);
+        else {
+            fprintf(stderr,"device (0x%04x) is not supported\n", dev_id);
+            return VA_STATUS_ERROR_UNKNOWN;
+        }            
+    }
     
     dri_state->driConnectedFlag = VA_DUMMY;
     
@@ -144,6 +157,7 @@ VADisplay vaGetDisplay (
       pDisplayContext = pDisplayContext->pNext;
   }
 
+
   if (!dpy)
   {
       /* create new entry */
@@ -152,7 +166,6 @@ VADisplay vaGetDisplay (
       pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
       pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
       dri_state       = calloc(1, sizeof(*dri_state));
-      
       if (pDisplayContext && pDriverContext && dri_state)
       {
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
@@ -180,7 +193,6 @@ VADisplay vaGetDisplay (
   
   return dpy;
 }
-
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
@@ -214,36 +226,9 @@ VAStatus vaPutSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaPutSurface( ctx, surface, draw, srcx, srcy, srcw, srch, 
+  return ctx->vtable.vaPutSurface( ctx, surface, (void *)draw, srcx, srcy, srcw, srch, 
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }
 
-VAStatus vaPutSurfaceBuf (
-    VADisplay dpy,
-    VASurfaceID surface,
-    Drawable draw, /* Android Surface/Window */
-    unsigned char* data,
-    int* data_len,
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-)
-{
-  VADriverContextP ctx;
-
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  return ctx->vtable.vaPutSurfaceBuf( ctx, surface, draw, data, data_len, srcx, srcy, srcw, srch,
-				      destx, desty, destw, desth, cliprects, number_cliprects, flags );
-}
 #endif
