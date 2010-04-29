@@ -90,20 +90,20 @@ static VAStatus va_DisplayContextGetDriverName (
     VADriverContextP ctx = pDisplayContext->pDriverContext;
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
     char *driver_name_env;
-    int dev_id;
+    int vendor_id, device_id;
     
     struct {
-        int verndor_id;
+        int vendor_id;
         int device_id;
         char driver_name[64];
     } devices[] = {
         { 0x8086, 0x4100, "pvr" },
-        { 0x8086, 0x0310, "pvr" },
+        { 0x8086, 0x0130, "pvr" },
         { 0x0,    0x0,    "\0" },
     };
 
     memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->fd = drm_open_any_master(&dev_id);
+    dri_state->fd = drm_open_any(&vendor_id, &device_id);
     
     if (dri_state->fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");
@@ -116,19 +116,27 @@ static VAStatus va_DisplayContextGetDriverName (
         *driver_name = strdup(driver_name_env);
         return VA_STATUS_SUCCESS;
     } else { /* TBD: other vendor driver names */
-        int i=0;
+        int i = 0;
 
-        while ((devices[i].device_id !=0) &&
-               (devices[i].device_id != dev_id))
+        while (devices[i].device_id != 0) {
+            if ((devices[i].vendor_id == vendor_id) &&
+                (devices[i].device_id == device_id))
+                break;
             i++;
+        }
 
         if (devices[i].device_id != 0)
-            *driver_name = strdup(devices[0].driver_name);
+            *driver_name = strdup(devices[i].driver_name);
         else {
-            fprintf(stderr,"device (0x%04x) is not supported\n", dev_id);
+            fprintf(stderr,"device (0x%04x:0x%04x) is not supported\n",
+                    vendor_id, device_id);
+            
             return VA_STATUS_ERROR_UNKNOWN;
         }            
     }
+
+    printf("DRM device is opened, loading driver %s for device 0x%04x:0x%04x\n",
+           driver_name, vendor_id, device_id);
     
     dri_state->driConnectedFlag = VA_DUMMY;
     

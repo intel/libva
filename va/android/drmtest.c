@@ -55,22 +55,24 @@ static int is_master(int fd)
 }
 
 /** Open the first DRM device matching the criteria */
-int drm_open_matching(const char *pci_glob, int flags, int *device_id)
+int drm_open_matching(const char *pci_glob, int flags, int *vendor_id, int *device_id)
 {
 	struct udev *udev;
 	struct udev_enumerate *e;
 	struct udev_device *device, *parent;
         struct udev_list_entry *entry;
 	const char *pci_id, *path;
+        char *tmp;
 	int fd;
 
-        *device_id = ~0;
+        *vendor_id = 0;
+        *device_id = 0;
         
 	udev = udev_new();
 	if (udev == NULL) {
 		fprintf(stderr, "failed to initialize udev context\n");
-		//abort();
                 return -1;
+		//abort();
 	}
 
 	fd = -1;
@@ -100,16 +102,16 @@ int drm_open_matching(const char *pci_glob, int flags, int *device_id)
 	}
         udev_enumerate_unref(e);
 	udev_unref(udev);
-        *device_id = pci_id;
+
+        *vendor_id = (int) strtol(pci_id, &tmp, 16);
+        *device_id = (int) strtol((tmp+1), NULL, 16);
         
 	return fd;
 }
 
-int drm_open_any(void)
+int drm_open_any(int *vendor_id, int *device_id)
 {
-	int dev_id;
-    
-	int fd = drm_open_matching("*:*", 0, &dev_id);
+        int fd = drm_open_matching("*:*", 0, vendor_id, device_id);
 
 	if (fd < 0) {
 		fprintf(stderr, "failed to open any drm device\n");
@@ -122,13 +124,14 @@ int drm_open_any(void)
 /**
  * Open the first DRM device we can find where we end up being the master.
  */
-int drm_open_any_master(int *device_id)
+int drm_open_any_master(void)
 {
-        int fd = drm_open_matching("*:*", DRM_TEST_MASTER, device_id);
+        int vendor_id, device_id;
+	int fd = drm_open_matching("*:*", DRM_TEST_MASTER, &vendor_id, &device_id);
 
 	if (fd < 0) {
 		fprintf(stderr, "failed to open any drm device\n");
-		//abort();
+		abort();
 	}
 
 	return fd;

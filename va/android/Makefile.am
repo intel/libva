@@ -22,6 +22,8 @@ AM_CFLAGS = -DLINUX -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 $(DRM_CFLAGS)
 
 noinst_LTLIBRARIES = libva_dummy.la	
 
+libva_dummy_la_LIBADD = $(LIBVA_LIBS) -ldl -ludev
+
 libva_dummyincludedir = ${includedir}/va
 
 libva_dummy_la_SOURCES = va_android.c drmtest.c
