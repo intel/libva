@@ -350,7 +350,7 @@ VAStatus vaInitialize (
   {
       vaStatus = va_openDriver(dpy, driver_name);
       va_infoMessage("va_openDriver() returns %d\n", vaStatus);
-      
+
       *major_version = VA_MAJOR_VERSION;
       *minor_version = VA_MINOR_VERSION;
   }

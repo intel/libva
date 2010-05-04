@@ -8,8 +8,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
    va.c \
    va_trace.c \
-   android/va_android.c \
-   android/drmtest.c \
+   android/va_android.c
 
 
 LOCAL_CFLAGS += -DHAVE_CONFIG_H \

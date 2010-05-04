@@ -14,8 +14,8 @@ VADisplay vaGetDisplay (
 );
 
 #if ANDROID    
-#include <ui/Surface.h>
-class Surface;
+//#include <ui/Surface.h>
+//class Surface;
     
 /*
  * Output rendering
@@ -28,7 +28,7 @@ class Surface;
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    Surface *draw, /* Android Window/Surface */
+    void *draw, /* Android Window/Surface */
     short srcx,
     short srcy,
     unsigned short srcw,
