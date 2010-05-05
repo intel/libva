@@ -185,7 +185,11 @@ struct VADriverVTable
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
-		void * draw, /* Drawable of window system */
+#ifdef ANDROID
+		Surface* draw, /* Drawable of window system */
+#else
+		Drawable draw,
+#endif
 		short srcx,
 		short srcy,
 		unsigned short srcw,
@@ -197,25 +201,6 @@ struct VADriverVTable
 		VARectangle *cliprects, /* client supplied clip list */
 		unsigned int number_cliprects, /* number of clip rects in the clip list */
 		unsigned int flags /* de-interlacing flags */
-	);
-
-	VAStatus (*vaPutSurfaceBuf) (
-		VADriverContextP ctx,
-                VASurfaceID surface,
-                Drawable draw, /* X Drawable */
-                unsigned char* data,
-                int* data_len,
-                short srcx,
-                short srcy,
-                unsigned short srcw,
-                unsigned short srch,
-                short destx,
-                short desty,
-                unsigned short destw,
-                unsigned short desth,
-		VARectangle *cliprects, /* client supplied clip list */
-		unsigned int number_cliprects, /* number of clip rects in the clip list */
-                unsigned int flags /* de-interlacing flags */
 	);
 
 	VAStatus (*vaQueryImageFormats) (

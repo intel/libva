@@ -17,6 +17,7 @@ LOCAL_CFLAGS += -DHAVE_CONFIG_H \
 LOCAL_C_INCLUDES += \
    $(TOPDIR)kernel/include \
    $(TARGET_OUT_HEADERS)/libva \
+   $(LOCAL_PATH)/x11 \
    $(TOPDIR)kernel/include/drm
 
 LOCAL_COPY_HEADERS_TO := libva/va

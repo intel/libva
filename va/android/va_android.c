@@ -26,7 +26,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_android.h"
-#include "x11/va_dricommon.h" /* needs some helper functions from this file */
+#include "va_dricommon.h" /* needs some helper functions from this file */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -37,6 +37,10 @@
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <errno.h>
+#ifndef ANDROID
+#include <libudev.h>
+#include "drm_test.h"
+#endif
 
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/dri/card0"
@@ -110,7 +114,7 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-
+#ifdef ANDROID
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
@@ -154,7 +158,51 @@ static VAStatus va_DisplayContextGetDriverName (
     
     return VA_STATUS_SUCCESS;
 }
+#else
+static VAStatus va_DisplayContextGetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    char *driver_name_env;
 
+    struct {
+        unsigned int vendor_id;
+        unsigned int device_id;
+        char driver_name[64];
+    } devices[] = {
+        { 0x8086, 0x4100, "pvr" },
+    };
+
+    memset(dri_state, 0, sizeof(*dri_state));
+    dri_state->fd = drm_open_any_master();
+    if (dri_state->fd < 0) {
+        fprintf(stderr, "open DRM device by udev failed, try /dev/dri/card0\n");
+        dri_state->fd = open("/dev/dri/card0", O_RDWR);
+    }
+
+    if (dri_state->fd < 0) {
+        fprintf(stderr,"can't open DRM devices\n");
+        return VA_STATUS_ERROR_UNKNOWN;
+    }
+
+    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
+        && geteuid() == getuid())
+    {
+        /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
+        *driver_name = strdup(driver_name_env);
+        return VA_STATUS_SUCCESS;
+    } else /* TBD: other vendor driver names */
+        *driver_name = strdup(devices[0].driver_name);
+
+
+    dri_state->driConnectedFlag = VA_DUMMY;
+
+    return VA_STATUS_SUCCESS;
+}
+#endif
 
 VADisplay vaGetDisplay (
     void *native_dpy /* implementation specific */
@@ -245,7 +293,6 @@ VAStatus vaPutSurface (
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-
   return ctx->vtable.vaPutSurface( ctx, surface, (void *)draw, srcx, srcy, srcw, srch, 
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );

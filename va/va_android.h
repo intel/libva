@@ -5,7 +5,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*
  * Returns a suitable VADisplay for VA API
  */
@@ -16,7 +15,7 @@ VADisplay vaGetDisplay (
 #if ANDROID    
 //#include <ui/Surface.h>
 //class Surface;
-    
+
 /*
  * Output rendering
  * Following is the rendering interface for X windows, 
