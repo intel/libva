@@ -185,11 +185,7 @@ struct VADriverVTable
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
-#ifdef ANDROID
 		Surface* draw, /* Drawable of window system */
-#else
-		Drawable draw,
-#endif
 		short srcx,
 		short srcy,
 		unsigned short srcw,

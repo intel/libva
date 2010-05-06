@@ -3,8 +3,6 @@
 
 #include <va/va.h>
 
-#define Surface void
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +28,7 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    Surface *draw, /* Android Window/Surface */
+    void *draw, /* Android Window/Surface */
     short srcx,
     short srcy,
     unsigned short srcw,
