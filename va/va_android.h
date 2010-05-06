@@ -2,6 +2,9 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
+
+#define Surface void
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,7 +30,7 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    void *draw, /* Android Window/Surface */
+    Surface *draw, /* Android Window/Surface */
     short srcx,
     short srcy,
     unsigned short srcw,
