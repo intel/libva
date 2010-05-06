@@ -3,10 +3,10 @@
 
 #ifndef ANDROID
 #include <X11/Xlib.h>
-#endif
 #include <xf86drm.h>
 #include <drm.h>
 #include <drm_sarea.h>
+#endif
 
 #include <va/va_backend.h>
 
@@ -47,6 +47,7 @@ struct dri_state
 {
     int fd;
     int driConnectedFlag; /* 0: disconnected, 1: DRI, 2: DRI2 */
+#ifndef ANDROID
     drm_handle_t hSAREA;
     drm_context_t hwContext;
     drmAddress pSAREA;
@@ -58,6 +59,7 @@ struct dri_state
     void (*swapBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     union dri_buffer *(*getRenderingBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     void (*close)(VADriverContextP ctx);
+#endif
 };
 
 Bool isDRI2Connected(VADriverContextP ctx, char **driver_name);

@@ -2,6 +2,15 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
+//FIXME: Surface conflict with va_backend.h
+#ifdef Surface
+#undef Surface
+#endif
+
+#ifdef ANDROID    
+#include <ui/Surface.h>
+using namespace android;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,9 +22,7 @@ VADisplay vaGetDisplay (
     void *android_dpy
 );
 
-#if ANDROID    
-//#include <ui/Surface.h>
-//class Surface;
+#ifdef ANDROID    
 
 /*
  * Output rendering
@@ -28,7 +35,7 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    void *draw, /* Android Window/Surface */
+    sp<Surface> draw, /* Android Window/Surface */
     short srcx,
     short srcy,
     unsigned short srcw,
@@ -46,5 +53,4 @@ VAStatus vaPutSurface (
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* _VA_ANDROID_H_ */
