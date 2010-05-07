@@ -1048,6 +1048,7 @@ int va_TraceEndPicture(
     unsigned int luma_offset;
     unsigned int chroma_u_offset;
     unsigned int chroma_v_offset;
+    unsigned int buffer_name;
     void *buffer;
     char *Y_data, *UV_data, *tmp;
     
@@ -1061,8 +1062,8 @@ int va_TraceEndPicture(
 
     va_TraceMsg("***dump surface data***\n", trace_rendertarget);
 
-    va_status = vaCopySurfaceToBuffer(dpy, trace_rendertarget, &fourcc, &luma_stride, &chroma_u_stride, &chroma_v_stride,
-                                      &luma_offset, &chroma_u_offset, &chroma_v_offset, &buffer);
+    va_status = vaLockSurface(dpy, trace_rendertarget, &fourcc, &luma_stride, &chroma_u_stride, &chroma_v_stride,
+                                      &luma_offset, &chroma_u_offset, &chroma_v_offset, &buffer_name, &buffer);
 
     if (va_status != VA_STATUS_SUCCESS)
         return va_status;
@@ -1110,5 +1111,4 @@ int va_TraceEndPicture(
             tmp = UV_data + i * chroma_u_stride;
         }
     }
-    free((void *)buffer);
 }

@@ -338,22 +338,7 @@ struct VADriverVTable
                 int num_attributes
         );
 
-        /* device specific */
-	VAStatus (*vaCreateSurfaceFromCIFrame) (
-		VADriverContextP ctx,
-		unsigned long frame_id,
-		VASurfaceID *surface		/* out */
-	);
-    
-    
-        VAStatus (*vaCreateSurfaceFromV4L2Buf) (
-		VADriverContextP ctx,
-                int v4l2_fd,         /* file descriptor of V4L2 device */
-                struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
-                struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
-                VASurfaceID *surface	           /* out */
-        );
-
+        /* used by va trace */        
         VAStatus (*vaBufferInfo) (
                    VADriverContextP ctx,
                    VAContextID context, /* in */
@@ -363,8 +348,8 @@ struct VADriverVTable
                    unsigned int *num_elements /* out */
         );
 
-    
-        VAStatus (*vaCopySurfaceToBuffer) (
+        /* lock/unlock surface for external access */    
+        VAStatus (*vaLockSurface) (
 		VADriverContextP ctx,
                 VASurfaceID surface,
                 unsigned int *fourcc, /* out  for follow argument */
@@ -374,7 +359,17 @@ struct VADriverVTable
                 unsigned int *luma_offset,
                 unsigned int *chroma_u_offset,
                 unsigned int *chroma_v_offset,
-                void **buffer
+                unsigned int *buffer_name, /* if it is not NULL, assign the low lever
+                                            * surface buffer name
+                                            */
+                void **buffer /* if it is not NULL, map the surface buffer for
+                                * CPU access
+                                */
+        );
+    
+        VAStatus (*vaUnlockSurface) (
+		VADriverContextP ctx,
+                VASurfaceID surface
         );
 };
 
@@ -382,6 +377,7 @@ struct VADriverContext
 {
     void *pDriverData;
     struct VADriverVTable vtable;
+    void *vtable_tpi; /* the structure is malloc-ed */
 
     void *native_dpy;
     int x11_screen;

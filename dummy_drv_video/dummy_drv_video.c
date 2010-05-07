@@ -1107,7 +1107,22 @@ VAStatus dummy_SetDisplayAttributes (
 }
 
 
-VAStatus dummy_CopySurfaceToBuffer(
+VAStatus dummy_BufferInfo(
+        VADriverContextP ctx,
+        VAContextID context,	/* in */
+        VABufferID buf_id,	/* in */
+        VABufferType *type,	/* out */
+        unsigned int *size,    	/* out */
+        unsigned int *num_elements /* out */
+    )
+{
+    /* TODO */
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
+
+    
+
+VAStatus dummy_LockSurface(
 		VADriverContextP ctx,
 		VASurfaceID surface,
                 unsigned int *fourcc, /* following are output argument */
@@ -1117,11 +1132,21 @@ VAStatus dummy_CopySurfaceToBuffer(
                 unsigned int *luma_offset,
                 unsigned int *chroma_u_offset,
                 unsigned int *chroma_v_offset,
+                unsigned int *buffer_name,
 		void **buffer
 	)
 {
     /* TODO */
-    return VA_STATUS_ERROR_UNKNOWN;
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
+
+VAStatus dummy_UnlockSurface(
+		VADriverContextP ctx,
+		VASurfaceID surface
+	)
+{
+    /* TODO */
+    return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus dummy_Terminate( VADriverContextP ctx )
@@ -1222,8 +1247,9 @@ VAStatus __vaDriverInit_0_31(  VADriverContextP ctx )
     ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
     ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;
     ctx->vtable.vaSetDisplayAttributes = dummy_SetDisplayAttributes;
-    
-    ctx->vtable.vaCopySurfaceToBuffer = dummy_CopySurfaceToBuffer;
+    ctx->vtable.vaLockSurface = dummy_LockSurface;
+    ctx->vtable.vaUnlockSurface = dummy_UnlockSurface;
+    ctx->vtable.vaBufferInfo = dummy_BufferInfo;
 
     driver_data = (struct dummy_driver_data *) malloc( sizeof(*driver_data) );
     ctx->pDriverData = (void *) driver_data;

@@ -411,20 +411,6 @@ VAStatus vaCreateSurfaces (
     VASurfaceID *surfaces	/* out */
 );
 
-/* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
- * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
- * of the frame, and to determine if the frame can be wrapped as a VA surface
- *
- * Application should make sure the frame is idle before the frame is passed into VA stack
- * and also a vaSyncSurface should be called before application tries to access the frame
- * from CI stack
- */
-VAStatus vaCreateSurfaceFromCIFrame (
-    VADisplay dpy,
-    unsigned long frame_id,
-    VASurfaceID *surface	/* out */
-);
-    
     
 /*
  * vaDestroySurfaces - Destroy resources associated with surfaces. 

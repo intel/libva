@@ -29,11 +29,16 @@ LDADD = \
 
 lib_LTLIBRARIES = \
 	libva.la \
+	libva-tpi.la \
 	libva-x11.la
 
 libva_ladir = $(libdir)
 libva_la_LDFLAGS = $(LDADD) -no-undefined
 libva_la_LIBADD = $(LIBVA_LIBS) -ldl
+
+libva_tpi_ladir = $(libdir)
+libva_tpi_la_LDFLAGS = $(LDADD) -no-undefined
+libva_tpi_la_LIBADD = $(libvacorelib) -ldl
 
 libva_x11_la_SOURCES = 
 libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
@@ -55,9 +60,10 @@ SUBDIRS += dummy
 endif
 
 libva_la_SOURCES = va.c va_trace.c
+libva_tpi_la_SOURCES = va_tpi.c
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_x11.h va_backend.h va_dummy.h va_version.h
+libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_backend_tpi.h va_dummy.h va_version.h
 
 DISTCLEANFILES = \
 	va_version.h

@@ -39,7 +39,7 @@
 #include <errno.h>
 #ifndef ANDROID
 #include <libudev.h>
-#include "drm_test.h"
+#include "drmtest.h"
 #endif
 
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
