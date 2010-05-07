@@ -34,9 +34,9 @@
 
 	// Pack Y    
 	mov	(16)	MSGPAYLOADD(0)<1>		SRC_YD(0)		// Compressed inst
-	mov (16)	MSGPAYLOADD(2)<1>		SRC_YD(2)
-	mov (16)	MSGPAYLOADD(4)<1>		SRC_YD(4)
-	mov (16)	MSGPAYLOADD(6)<1>		SRC_YD(6)
+	mov (16)	MSGPAYLOADD(2)<1>		SRC_YD(2)       
+	mov (16)	MSGPAYLOADD(4)<1>		SRC_YD(4)       
+	mov (16)	MSGPAYLOADD(6)<1>		SRC_YD(6)       
     
 
 #if defined(_PROGRESSIVE) 

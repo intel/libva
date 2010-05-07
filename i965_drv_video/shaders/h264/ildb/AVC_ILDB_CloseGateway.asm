@@ -19,4 +19,4 @@
 // 19:16	Response length	= 0
 // 1:0		SubFuncID = 01 for CloseGateway
 // Message descriptor: 0 000 0011 0001 0000 + 0 0 000000000000 01 ==> 0000 0011 0001 0000 0000 0000 0000 0001
-send (8)	null:ud 	m7	  r0.0:ud    MSG_GW	CGWMSGDSC
+send (8)	null:ud 	m7	  r0.0<0;1,0>:ud    MSG_GW	CGWMSGDSC 

@@ -36,4 +36,4 @@ shr (1)	MSGSRC.0:uw		URBOffsetC:uw	1:w	// divide by 2, because URB entry is coun
 	// Current MB offset is in URBOffset, use it as write origin
 	// Add 2 to offset to store data be be passed to the right MB
 
-send  null:uw 	m0	  MSGSRC:uw		URBWRITE	MSG_LEN(1)+URBWMSGDSC+0x20		// URB write
+send  null:uw 	m0	  MSGSRC<8;8,1>:uw		URBWRITE	MSG_LEN(1)+URBWMSGDSC+0x20 // URB write

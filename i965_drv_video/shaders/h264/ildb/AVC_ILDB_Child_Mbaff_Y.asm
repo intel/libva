@@ -39,7 +39,7 @@
 ILDB_LABEL(AVC_ILDB_CHILD_Y):
 #endif
 
-#include "setupVPKernel.asm"
+#include "SetupVPKernel.asm"
 #include "AVC_ILDB.inc"
 
 #if defined(_DEBUG) 
@@ -99,9 +99,9 @@ RE_ENTRY:	// for bootom field
 
 	// Load current MB control data
 #if defined(DEV_CL)
-	#include "load_ILDB_Cntrl_Data_64DW.asm"	// Crestline
+	#include "Load_ILDB_Cntrl_Data_64DW.asm"	// Crestline
 #else
-	#include "load_ILDB_Cntrl_Data_16DW.asm"	// Cantiga and beyond
+	#include "Load_ILDB_Cntrl_Data_16DW.asm"	// Cantiga and beyond
 #endif
 
 	// Init addr register for vertical control data

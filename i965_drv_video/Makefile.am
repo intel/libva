@@ -41,7 +41,8 @@ i965_drv_video_la_SOURCES =	\
 	i965_render.c		\
 	i965_drv_video.c	\
 	i965_avc_bsd.c		\
-	i965_avc_hw_scoreboard.c
+	i965_avc_hw_scoreboard.c\
+	i965_avc_ildb.c
 
 noinst_HEADERS =                \
 	object_heap.h           \
@@ -57,4 +58,5 @@ noinst_HEADERS =                \
 	i965_defines.h          \
 	i965_structs.h		\
 	i965_avc_bsd.h		\
-	i965_avc_hw_scoreboard.h
+	i965_avc_hw_scoreboard.h\
+	i965_avc_ildb.h

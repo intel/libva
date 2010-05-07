@@ -34,5 +34,5 @@ shr (1)	MSGSRC.0:uw		URBOffset:uw	1:w	// divide by 2, because URB entry is count
 
 //mov (1) MSGSRC.1:ud 	0:ud					// Reset Handle 1
 
-send  null:uw 	m0	  MSGSRC:uw		URBWRITE	URBWriteMsgDesc:ud		// URB write
+send  null:uw 	m0	  MSGSRC<8;8,1>:uw		URBWRITE	URBWriteMsgDesc:ud // URB write
 //send  null:ud 	MRF0	 null:ud	URBWriteMsgDesc:ud		// URB write	

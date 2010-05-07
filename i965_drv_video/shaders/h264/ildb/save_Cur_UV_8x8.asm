@@ -33,8 +33,8 @@
     asr (1)	MSGSRC.1:ud		ORIY_CUR:w			1:w		{ NoDDClr, NoDDChk }	// NV12 U+V block origin y = half of Y comp
     mov (1)	MSGSRC.2:ud		0x0007000F:ud				{ NoDDChk }		// NV12 U+V block width and height (16x8)
 
-	mov (16)	MSGPAYLOADD(0)<1>		SRC_UD(0)		// Compressed inst
-	mov (16)	MSGPAYLOADD(2)<1>		SRC_UD(2)
+	mov (16)	MSGPAYLOADD(0)<1>		SRC_UD(0) 		// Compressed inst
+	mov (16)	MSGPAYLOADD(2)<1>		SRC_UD(2) 
 	
 #if defined(_PROGRESSIVE) 
 	mov (1)		MSGDSC	MSG_LEN(4)+DWBWMSGDSC+BI_DEST_UV:ud

@@ -239,7 +239,7 @@
 #define FilterSampleFlag		r28.0	// :uw,
 
 .declare 	A   		Base=r28.0 ElementSize=2 SrcRegion=REGION(16,1) Type=w
-.declare 	B   		Base=r29.0 ElementSize=2 SrcRegion=REGION(16,1) Type=w
+.declare 	BB   		Base=r29.0 ElementSize=2 SrcRegion=REGION(16,1) Type=w
 
 .declare 	TempRow3   Base=r30.0 ElementSize=2 SrcRegion=REGION(8,1) Type=w
 .declare 	TempRow3B  Base=r30.0 ElementSize=1 SrcRegion=REGION(8,2) Type=ub

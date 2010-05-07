@@ -86,12 +86,12 @@
 
 #define RETURN_REG	r62		// Return pointer for all sub-routine calls (type DWORD)
 
-#define CALL(subFunc, skipInst)	add (1) RETURN_REG<1>:ud   ip:ud	1+skipInst*INST_SIZE \n\
+#define CALL(subFunc, skipInst)	add (1) RETURN_REG<1>:ud   ip:ud	(1+skipInst)*INST_SIZE \n\
 				jmpi (1) subFunc
 
 #define	RETURN		mov (1)	ip:ud	RETURN_REG<0;1,0>:ud		// Return to calling module
 
-#define PRED_CALL(flag, subFunc, skipInst)	add (1) RETURN_REG<1>:ud   ip:ud	1+skipInst*INST_SIZE \n\
+#define PRED_CALL(flag, subFunc, skipInst)	add (1) RETURN_REG<1>:ud   ip:ud	(1+skipInst)*INST_SIZE \n\
 			(flag)	jmpi (1) subFunc
 
 

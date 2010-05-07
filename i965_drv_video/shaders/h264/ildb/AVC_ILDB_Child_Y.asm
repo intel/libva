@@ -22,7 +22,7 @@
 ILDB_LABEL(AVC_ILDB_CHILD_Y):
 #endif
 
-#include "setupVPKernel.asm"
+#include "SetupVPKernel.asm"
 #include "AVC_ILDB.inc"
 
 #if defined(_DEBUG) 
@@ -58,12 +58,12 @@ ILDB_LABEL(AVC_ILDB_CHILD_Y):
 	// Load current MB control data
 #if defined(DEV_CL) 
 	#if defined(_APPLE)
-		#include "load_ILDB_Cntrl_Data_22DW.asm"	// Crestline for Apple, progressive only
+		#include "Load_ILDB_Cntrl_Data_22DW.asm"	// Crestline for Apple, progressive only
 	#else
-		#include "load_ILDB_Cntrl_Data_64DW.asm"	// Crestline
+		#include "Load_ILDB_Cntrl_Data_64DW.asm"	// Crestline
 	#endif	
 #else
-	#include "load_ILDB_Cntrl_Data_16DW.asm"	// Cantiga and beyond
+	#include "Load_ILDB_Cntrl_Data_16DW.asm"	// Cantiga and beyond
 #endif
 
 	// Check loaded control data

@@ -172,28 +172,28 @@ FILTER_Y:
 
 			// B =  p2 + (p1 + p0 + q0) + 4 = p2 + A + 4
 //			add (16)	acc0.0<1>:w		P2				4:w								// p2 + 4 
-//			add (16)	B(0)<1>			acc0.0<16;16,1>:w		A(0)					// B = p2 + A + 4
+//			add (16)	BB(0)<1>			acc0.0<16;16,1>:w		A(0)					// B = p2 + A + 4
 			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		4:w								// p2 + 4 
-			add (16)	B(0)<1>			acc0.0<16;16,1>:w		P2					// B = p2 + A + 4
+			add (16)	BB(0)<1>			acc0.0<16;16,1>:w		P2					// B = p2 + A + 4
 			
 			// Now acc0 = B
 
 			// p2' = (2*p3 +3*p2 + A + 4) >> 3 = (2*(p3+p2) + B) >> 3
-//			mov	(16)	acc0.0<1>:w		B(0)
+//			mov	(16)	acc0.0<1>:w		BB(0)
 			mac (16)	acc0.0<1>:w		P2_plus_P3(0)		2:w		
 			shr.sat (16) TempRow3B(0)<2>	acc0.0<16;16,1>:w		3:w
 			
 			// p1' = (p2 + A + 2) >> 2 = (B - 2) >> 2
-			add (16)	acc0.0<1>:w		B(0)			-2:w
+			add (16)	acc0.0<1>:w		BB(0)			-2:w
 			shr.sat (16) TempRow1B(0)<2>	acc0.0<16;16,1>:w		2:w
 	
 			// p0' = (p2 +2*A + q1 + 4) >> 3 = (B + A + q1) >> 3
 			add (16)	acc0.0<1>:w		Q1				A(0)							// B + A
-			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		B(0)							// B + A + q1
+			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		BB(0)							// B + A + q1
 			shr.sat (16) TempRow0B(0)<2>	acc0.0<16;16,1>:w		3:w								// (B + A + q1) >> 3
 
 			// p2' = (2*p3 +3*p2 + A + 4) >> 3 = (2*(p3+p2) + B) >> 3
-//			mov	(16)	acc0.0<1>:w		B(0)
+//			mov	(16)	acc0.0<1>:w		BB(0)
 //			mac (16)	acc0.0<1>:w		P2_plus_P3(0)		2:w		
 //			shr.sat (16) TempRow3B(0)<2>	acc0.0<16;16,1>:w		3:w
 
@@ -246,22 +246,22 @@ Y_ENDIF3:
 
 			// B =  q2 + q1 + q0 + p0 + 4 = q2 + A + 4
 			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		4:w							// q2 + 4 
-			add (16)	B(0)<1>			acc0.0<16;16,1>:w		Q2								// B = q2 + A + 4
+			add (16)	BB(0)<1>			acc0.0<16;16,1>:w		Q2								// B = q2 + A + 4
 
 			// Acc0 = B
 			
 			// q2' = (2*q3 +3*q2 + A + 4) >> 3 = (2*(q3+q2) + B) >> 3
-//			mov (16)	acc0.0<1>:w		B(0)	
+//			mov (16)	acc0.0<1>:w		BB(0)	
 			mac (16)	acc0.0<1>:w		Q2_plus_Q3(0)	2:w
 			shr.sat (16) TempRow3B(0)<2>	acc0.0<16;16,1>:w		3:w
 
 			// q1' = (q2 + A + 2) >> 2 = (B - 2) >> 2
-			add (16)	acc0.0<1>:w		B(0)			-2:w
+			add (16)	acc0.0<1>:w		BB(0)			-2:w
 			shr.sat (16) TempRow1B(0)<2>	acc0.0<16;16,1>:w	2:w
 			
 			// q0' = (q2 +2*A + p1 + 4) >> 3 = (B + A + p1) >> 3
 			add (16)	acc0.0<1>:w		p1(0)					A(0)
-			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		B(0)
+			add (16)	acc0.0<1>:w		acc0.0<16;16,1>:w		BB(0)
 			shr.sat (16) TempRow0B(0)<2>	acc0.0<16;16,1>:w	3:w
 			
 			mov (16) 	NewQ2		TempRow3B(0)						// q2'

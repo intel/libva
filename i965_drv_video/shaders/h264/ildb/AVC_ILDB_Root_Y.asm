@@ -24,7 +24,7 @@
 ILDB_LABEL(AVC_ILDB_ROOT_Y):
 #endif
 
-#include "setupVPKernel.asm"
+#include "SetupVPKernel.asm"
 #include "AVC_ILDB.inc"
 
 /////////////////////////////////////////////////////////////////////////////////////

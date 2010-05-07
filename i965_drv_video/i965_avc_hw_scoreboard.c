@@ -52,8 +52,8 @@ enum {
 };
 
 static unsigned long avc_hw_scoreboard_kernel_offset[] = {
-    SETHWSCOREBOARD_IP_GEN5,
-    SETHWSCOREBOARD_MBAFF_IP_GEN5
+    SETHWSCOREBOARD_IP_GEN5 * INST_UNIT_GEN5,
+    SETHWSCOREBOARD_MBAFF_IP_GEN5 * INST_UNIT_GEN5
 };
 
 static unsigned int avc_hw_scoreboard_constants[] = {
@@ -301,11 +301,9 @@ i965_avc_hw_scoreboard(VADriverContextP ctx, struct decode_state *decode_state)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
-    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context;
 
     if (i965_h264_context->use_avc_hw_scoreboard) {
-        assert(i965_h264_context != NULL);
-        avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+        struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
 
         avc_hw_scoreboard_context->inline_data.num_mb_cmds = i965_h264_context->avc_it_command_mb_info.mbs;
         avc_hw_scoreboard_context->inline_data.starting_mb_number = i965_h264_context->avc_it_command_mb_info.mbs;
@@ -333,12 +331,10 @@ i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
-    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context;
-    dri_bo *bo;
 
     if (i965_h264_context->use_avc_hw_scoreboard) {
-        assert(i965_h264_context != NULL);
-        avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+        struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+        dri_bo *bo;
 
         dri_bo_unreference(avc_hw_scoreboard_context->curbe.bo);
         bo = dri_bo_alloc(i965->intel.bufmgr,

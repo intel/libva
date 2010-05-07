@@ -3,6 +3,10 @@
 
 #include "i965_avc_bsd.h"
 #include "i965_avc_hw_scoreboard.h"
+#include "i965_avc_ildb.h"
+
+#define INST_UNIT_GEN4  16
+#define INST_UNIT_GEN5  8
 
 #define MB_CMD_IN_BYTES         64
 #define MB_CMD_IN_DWS           16
@@ -35,6 +39,7 @@ struct i965_h264_context
         int mbaff_frame_flag;
     } picture;
 
+    int enable_avc_ildb;
     int use_avc_hw_scoreboard;
 
     int use_hw_w128;
@@ -47,6 +52,8 @@ struct i965_h264_context
 
     struct i965_avc_bsd_context i965_avc_bsd_context;
     struct i965_avc_hw_scoreboard_context avc_hw_scoreboard_context;
+    struct i965_avc_ildb_context avc_ildb_context;
+
     struct {
         VASurfaceID surface_id;
         int frame_store_id;

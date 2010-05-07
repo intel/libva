@@ -24,7 +24,7 @@
 // ----------------------------------------------------
 
 #define	COMBINED_KERNEL
-//#define	ENABLE_ILDB
+#define	ENABLE_ILDB
 
 //	WA for *Stim tool issue, should be removed later
 

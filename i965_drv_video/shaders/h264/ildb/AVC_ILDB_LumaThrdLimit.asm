@@ -38,7 +38,7 @@ mov (1) 	GatewayPayloadKey:uw 	0x1212:uw							{ NoDDChk }	// Key
 // Write back one byte (value = 0xFF) to root thread GRF to indicate this child thread is finished
 // All lower 4 bytes must be assigned to the same byte value.
 add	(1)		Temp1_W:w				MaxThreads:uw	-OutstandingThreads:uw
-mov	(4)		GatewayPayload<1>:ub	Temp1_B:ub
+mov	(4)		GatewayPayload<1>:ub	Temp1_B<0;1,0>:ub 
 
 send (8)  	GatewayResponse:ud 		m0	  		GatewayPayload<8;8,1>:ud    MSG_GW	FWDMSGDSC
 
