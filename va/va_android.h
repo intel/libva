@@ -2,10 +2,6 @@
 #define _VA_ANDROID_H_
 
 #include <va/va.h>
-//FIXME: Surface conflict with va_backend.h
-#ifdef Surface
-#undef Surface
-#endif
 
 #ifdef ANDROID    
 #include <ui/Surface.h>
@@ -23,7 +19,6 @@ VADisplay vaGetDisplay (
 );
 
 #ifdef ANDROID    
-
 /*
  * Output rendering
  * Following is the rendering interface for X windows, 

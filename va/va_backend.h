@@ -38,10 +38,6 @@
 typedef struct VADriverContext *VADriverContextP;
 typedef struct VADisplayContext *VADisplayContextP;
 
-#ifdef ANDROID
-#define Surface void
-#endif
-
 struct VADriverVTable
 {
 	VAStatus (*vaTerminate) ( VADriverContextP ctx );
@@ -185,7 +181,7 @@ struct VADriverVTable
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
-		Surface* draw, /* Drawable of window system */
+		void* draw, /* Drawable of window system */
 		short srcx,
 		short srcy,
 		unsigned short srcw,
@@ -429,6 +425,5 @@ struct VADisplayContext
 typedef VAStatus (*VADriverInit) (
     VADriverContextP driver_context
 );
-
 
 #endif /* _VA_BACKEND_H_ */

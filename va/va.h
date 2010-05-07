@@ -1804,17 +1804,6 @@ VAStatus vaSetDisplayAttributes (
     int num_attributes
 );
 
-#ifdef ANDROID
-#define Display unsigned int
-#define Drawable unsigned int
-#define XID unsigned int
-#define Bool int
-#define Status int
-#define True 1
-#define False 0
-#define Xfree(ptr) free((ptr))
-#endif
-
 #ifdef __cplusplus
 }
 #endif

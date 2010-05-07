@@ -10,6 +10,11 @@
 
 #include <va/va_backend.h>
 
+#ifdef ANDROID
+#define XID unsigned int
+#define Bool int
+#endif
+
 enum
 {
     VA_NONE = 0,

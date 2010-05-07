@@ -43,7 +43,7 @@
 #endif
 
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
-#define DEVICE_NAME "/dev/dri/card0"
+#define DEVICE_NAME "/dev/card0"
 
 static VADisplayContextP pDisplayContexts = NULL;
 
@@ -282,7 +282,7 @@ VADisplay vaGetDisplay (
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-static int vaDisplayIsValid(VADisplay dpy)
+static int vaDisplayIsValid (VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
     return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
@@ -310,9 +310,8 @@ VAStatus vaPutSurface (
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-  return ctx->vtable.vaPutSurface( ctx, surface, static_cast<void *>(&draw), srcx, srcy, srcw, srch, 
+  return ctx->vtable.vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );
 }
-
 #endif

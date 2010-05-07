@@ -35,6 +35,11 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
+#ifdef ANDROID
+#define Bool int
+#define True 1
+#define False 0
+#endif
 
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
 
