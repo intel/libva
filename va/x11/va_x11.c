@@ -219,12 +219,6 @@ VADisplay vaGetDisplay (
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-static int vaDisplayIsValid(VADisplay dpy)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
-}
-
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,

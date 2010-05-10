@@ -64,7 +64,7 @@ extern int trace_flag;
 #define VA_MINOR_VERSION (31)
 #define VA_VERSION_S       "0.31.1"
 
-static int vaDisplayIsValid(VADisplay dpy)
+int vaDisplayIsValid(VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
     return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
