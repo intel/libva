@@ -47,6 +47,12 @@
 
 static VADisplayContextP pDisplayContexts = NULL;
 
+static int vaDisplayIsValid (VADisplay dpy)
+{
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
+}
+
 static int open_device (char *dev_name)
 {
   struct stat st;
