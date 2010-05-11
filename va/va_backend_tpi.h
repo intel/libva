@@ -50,6 +50,25 @@ struct VADriverVTableTPI
                 struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
                 VASurfaceID *surface	           /* out */
         );
+
+	VAStatus (*vaPutSurfaceBuf) (
+		VADisplay dpy,
+		VASurfaceID surface,
+		unsigned int draw, /* Android Surface/Window */
+		unsigned char* data,
+		int* data_len,
+		short srcx,
+		short srcy,
+		unsigned short srcw,
+		unsigned short srch,
+		short destx,
+		short desty,
+		unsigned short destw,
+		unsigned short desth,
+		VARectangle *cliprects, /* client supplied clip list */
+		unsigned int number_cliprects, /* number of clip rects in the clip list */
+		unsigned int flags /* de-interlacing flags */
+	);
 };
 
 

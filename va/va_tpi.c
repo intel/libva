@@ -39,6 +39,16 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
+#ifdef ANDROID
+#define Drawable unsigned int
+#endif
+
+static int vaDisplayIsValid (VADisplay dpy)
+{
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
+}
+
 /* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
  * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
  * of the frame, and to determine if the frame can be wrapped as a VA surface
@@ -94,6 +104,38 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
   tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
   if (tpi && tpi->vaCreateSurfaceFromV4L2Buf) {
       return tpi->vaCreateSurfaceFromV4L2Buf( ctx, v4l2_fd, v4l2_fmt, v4l2_buf, surface );
+  } else
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
+
+VAStatus vaPutSurfaceBuf (
+    VADisplay dpy,
+    VASurfaceID surface,
+    Drawable draw, /* Android Surface/Window */
+    unsigned char* data,
+    int* data_len,
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+)
+{
+  VADriverContextP ctx;
+  struct VADriverVTableTPI *tpi;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  
+  tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
+  if (tpi && tpi->vaPutSurfaceBuf) {
+      return tpi->vaPutSurfaceBuf( ctx, surface, draw, data, data_len, srcx, srcy, srcw, srch,
+                                      destx, desty, destw, desth, cliprects, number_cliprects, flags );
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

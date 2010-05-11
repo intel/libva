@@ -46,4 +46,21 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
     VASurfaceID *surface	/* out */
 );
 
-    
+VAStatus vaPutSurfaceBuf (
+    VADisplay dpy,
+    VASurfaceID surface,
+    Drawable draw, /* Android Surface/Window */
+    unsigned char* data,
+    int* data_len,
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+);
