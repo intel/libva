@@ -39,10 +39,6 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-#ifdef ANDROID
-#define Drawable unsigned int
-#endif
-
 static int vaDisplayIsValid (VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
@@ -111,7 +107,6 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
 VAStatus vaPutSurfaceBuf (
     VADisplay dpy,
     VASurfaceID surface,
-    Drawable draw, /* Android Surface/Window */
     unsigned char* data,
     int* data_len,
     short srcx,
@@ -134,7 +129,7 @@ VAStatus vaPutSurfaceBuf (
   
   tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
   if (tpi && tpi->vaPutSurfaceBuf) {
-      return tpi->vaPutSurfaceBuf( ctx, surface, draw, data, data_len, srcx, srcy, srcw, srch,
+      return tpi->vaPutSurfaceBuf( ctx, surface, data, data_len, srcx, srcy, srcw, srch,
                                       destx, desty, destw, desth, cliprects, number_cliprects, flags );
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;

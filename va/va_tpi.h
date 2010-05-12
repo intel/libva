@@ -30,14 +30,12 @@
  * and also a vaSyncSurface should be called before application tries to access the frame
  * from CI stack
  */
+#include <va/va.h>
 
-#ifdef ANDROID
-#define Drawable unsigned int
-#else
-#include <X11/Xlib.h>
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#include <va/va.h>
 VAStatus vaCreateSurfaceFromCIFrame (
     VADisplay dpy,
     unsigned long frame_id,
@@ -55,7 +53,6 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
 VAStatus vaPutSurfaceBuf (
     VADisplay dpy,
     VASurfaceID surface,
-    Drawable draw, /* Android Surface/Window */
     unsigned char* data,
     int* data_len,
     short srcx,
@@ -70,3 +67,7 @@ VAStatus vaPutSurfaceBuf (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* de-interlacing flags */
 );
+
+#ifdef __cplusplus
+}
+#endif

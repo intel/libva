@@ -54,7 +54,6 @@ struct VADriverVTableTPI
 	VAStatus (*vaPutSurfaceBuf) (
 		VADisplay dpy,
 		VASurfaceID surface,
-		unsigned int draw, /* Android Surface/Window */
 		unsigned char* data,
 		int* data_len,
 		short srcx,
