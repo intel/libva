@@ -47,6 +47,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
    va_tpi.c \
 
+LOCAL_CFLAGS += -DANDROID \
+
 LOCAL_C_INCLUDES += \
    $(TARGET_OUT_HEADERS)/libva \
 
@@ -55,6 +57,7 @@ LOCAL_COPY_HEADERS_TO := libva/va
 LOCAL_COPY_HEADERS := \
    va.h \
    va_backend.h \
+   va_tpi.h \
    va_backend_tpi.h
 
 

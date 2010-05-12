@@ -31,6 +31,12 @@
  * from CI stack
  */
 
+#ifdef ANDROID
+#define Drawable unsigned int
+#else
+#include <X11/Xlib.h>
+#endif
+
 #include <va/va.h>
 VAStatus vaCreateSurfaceFromCIFrame (
     VADisplay dpy,
