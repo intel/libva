@@ -397,7 +397,7 @@ struct VADriverContext
     void *handle;			/* dlopen handle */
     
     void *dri_state;
-    void *glx;                          /* opaque for GLX code */
+    void *glx;  /* opaque for GLX code */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
@@ -421,7 +421,7 @@ struct VADisplayContext
 	char **driver_name
     );
 
-    void *opaque;                       /* opaque for display extensions (e.g. GLX) */
+    void *opaque; /* opaque for display extensions (e.g. GLX) */
 };
 
 typedef VAStatus (*VADriverInit) (

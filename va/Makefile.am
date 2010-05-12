@@ -27,10 +27,8 @@ INCLUDES = \
 LDADD = \
 	$(LIBVA_LT_LDFLAGS)
 
-lib_LTLIBRARIES = \
-	libva.la \
-	libva-tpi.la \
-	libva-x11.la
+libva_x11_backend      = libva-x11.la
+libva_x11_backenddir   = x11
 
 libva_ladir = $(libdir)
 libva_la_LDFLAGS = $(LDADD) -no-undefined
@@ -40,27 +38,45 @@ libva_tpi_ladir = $(libdir)
 libva_tpi_la_LDFLAGS = $(LDADD) -no-undefined
 libva_tpi_la_LIBADD = $(libvacorelib) -ldl
 
-libva_x11_la_SOURCES = 
-libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
-libva_x11_la_LDFLAGS = $(LDADD)
-libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
-
-
-SUBDIRS = x11 
-
 if BUILD_DUMMY_BACKEND
-lib_LTLIBRARIES += libva-dummy.la
+libva_dummy_backend = libva-dummy.la
+libva_dummy_backenddir = dummy
 
 libva_dummy_la_SOURCES = 
 libva_dummy_la_LIBADD  = $(libvacorelib) dummy/libva_dummy.la $(LIBVA_LIBS) $(DRM_LIBS)
 libva_dummy_la_LDFLAGS = $(LDADD)
 libva_dummy_la_DEPENDENCIES = $(libvacorelib) dummy/libva_dummy.la
-
-SUBDIRS += dummy
+else
+libva_dummy_backend =
+libva_dummy_backenddir =
 endif
+
+if USE_GLX
+libva_glx_backend      = libva-glx.la
+libva_glx_backenddir   = glx
+
+libva_glx_la_SOURCES =
+libva_glx_la_LIBADD  = $(libvacorelib) glx/libva_glx.la libva-x11.la $(GL_DEPS_LIBS) -ldl
+libva_glx_la_LDFLAGS = $(LDADD)
+libva_glx_la_DEPENDENCIES = $(libvacorelib) glx/libva_glx.la libva-x11.la
+
+else
+libva_glx_backend      =
+libva_glx_backenddir   =
+endif
+
+libva_x11_la_SOURCES = 
+libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS)
+libva_x11_la_LDFLAGS = $(LDADD)
+libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
 
 libva_la_SOURCES = va.c va_trace.c
 libva_tpi_la_SOURCES = va_tpi.c
+
+lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend)
+
+
+SUBDIRS = $(libva_x11_backenddir) $(libva_dummy_backenddir) $(libva_glx_backenddir)
 
 libvaincludedir = ${includedir}/va
 libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_backend_tpi.h va_dummy.h va_version.h
