@@ -39,12 +39,6 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-static int vaDisplayIsValid (VADisplay dpy)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
-}
-
 /* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
  * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
  * of the frame, and to determine if the frame can be wrapped as a VA surface

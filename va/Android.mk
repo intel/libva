@@ -60,6 +60,7 @@ LOCAL_COPY_HEADERS := \
    va_tpi.h \
    va_backend_tpi.h
 
+LOCAL_SHARED_LIBRARIES := libva_android
 
 LOCAL_MODULE := libva_android_tpi
 
