@@ -759,6 +759,32 @@ i965_media_h264_objects(VADriverContextP ctx, struct decode_state *decode_state)
     i965_avc_ildb(ctx, decode_state);
 }
 
+static void 
+i965_media_h264_free_private_context(void **data)
+{
+    struct i965_h264_context *i965_h264_context = *data;
+    int i;
+
+    if (i965_h264_context == NULL)
+        return;
+
+    i965_avc_ildb_ternimate(&i965_h264_context->avc_ildb_context);
+    i965_avc_hw_scoreboard_ternimate(&i965_h264_context->avc_hw_scoreboard_context);
+    i965_avc_bsd_ternimate(&i965_h264_context->i965_avc_bsd_context);
+    dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
+    dri_bo_unreference(i965_h264_context->avc_it_data.bo);
+    dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
+    free(i965_h264_context);
+    *data = NULL;
+
+    for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
+        struct media_kernel *kernel = &h264_avc_kernels[i];
+
+        dri_bo_unreference(kernel->bo);
+        kernel->bo = NULL;
+    }
+}
+
 void
 i965_media_h264_decode_init(VADriverContextP ctx)
 {
@@ -766,9 +792,74 @@ i965_media_h264_decode_init(VADriverContextP ctx)
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
     dri_bo *bo;
+    int i;
 
-    assert(media_state->private_context);
     i965_h264_context = media_state->private_context;
+
+    if (i965_h264_context == NULL) {
+        /* kernel */
+        assert(NUM_H264_AVC_KERNELS == (sizeof(h264_avc_kernels_gen5) / 
+                                        sizeof(h264_avc_kernels_gen5[0])));
+        assert(NUM_AVC_MC_INTERFACES == (sizeof(avc_mc_kernel_offset_gen5) /
+                                         sizeof(avc_mc_kernel_offset_gen5[0])));
+
+        i965_h264_context = calloc(1, sizeof(struct i965_h264_context));
+
+        if (IS_IRONLAKE(i965->intel.device_id)) {
+            h264_avc_kernels = h264_avc_kernels_gen5;
+            avc_mc_kernel_offset = avc_mc_kernel_offset_gen5;
+            intra_kernel_header = &intra_kernel_header_gen5;
+            i965_h264_context->use_avc_hw_scoreboard = 1;
+            i965_h264_context->use_hw_w128 = 1;
+        } else {
+            h264_avc_kernels = h264_avc_kernels_gen4;
+            avc_mc_kernel_offset = avc_mc_kernel_offset_gen4;
+            intra_kernel_header = &intra_kernel_header_gen4;
+            i965_h264_context->use_avc_hw_scoreboard = 0;
+            i965_h264_context->use_hw_w128 = 0;
+        }
+
+        for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
+            struct media_kernel *kernel = &h264_avc_kernels[i];
+            kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
+                                      kernel->name, 
+                                      kernel->size, 64);
+            assert(kernel->bo);
+            dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
+        }
+
+        for (i = 0; i < 16; i++) {
+            i965_h264_context->fsid_list[i].surface_id = VA_INVALID_ID;
+            i965_h264_context->fsid_list[i].frame_store_id = -1;
+        }
+
+        media_state->private_context = i965_h264_context;
+        media_state->free_private_context = i965_media_h264_free_private_context;
+
+        /* URB */
+        if (IS_IRONLAKE(i965->intel.device_id)) {
+            media_state->urb.num_vfe_entries = 63;
+        } else {
+            media_state->urb.num_vfe_entries = 23;
+        }
+
+        media_state->urb.size_vfe_entry = 16;
+
+        media_state->urb.num_cs_entries = 1;
+        media_state->urb.size_cs_entry = 1;
+
+        media_state->urb.vfe_start = 0;
+        media_state->urb.cs_start = media_state->urb.vfe_start + 
+            media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
+        assert(media_state->urb.cs_start + 
+               media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
+
+        /* hook functions */
+        media_state->media_states_setup = i965_media_h264_states_setup;
+        media_state->media_objects = i965_media_h264_objects;
+    }
+
+    i965_h264_context->enable_avc_ildb = 0;
 
     dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
@@ -816,105 +907,4 @@ i965_media_h264_decode_init(VADriverContextP ctx)
                       sizeof(struct i965_vfe_state_ex), 32);
     assert(bo);
     media_state->extended_state.bo = bo;
-
-    /* URB */
-    if (IS_IRONLAKE(i965->intel.device_id)) {
-        media_state->urb.num_vfe_entries = 63;
-    } else {
-        media_state->urb.num_vfe_entries = 23;
-    }
-
-    media_state->urb.size_vfe_entry = 16;
-
-    media_state->urb.num_cs_entries = 1;
-    media_state->urb.size_cs_entry = 1;
-
-    media_state->urb.vfe_start = 0;
-    media_state->urb.cs_start = media_state->urb.vfe_start + 
-        media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
-    assert(media_state->urb.cs_start + 
-           media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
-
-    /* hook functions */
-    media_state->media_states_setup = i965_media_h264_states_setup;
-    media_state->media_objects = i965_media_h264_objects;
-}
-
-Bool 
-i965_media_h264_init(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context;
-    int i;
-
-    i965_h264_context = calloc(1, sizeof(struct i965_h264_context));
-
-    /* kernel */
-    assert(NUM_H264_AVC_KERNELS == (sizeof(h264_avc_kernels_gen5) / 
-                                    sizeof(h264_avc_kernels_gen5[0])));
-    assert(NUM_AVC_MC_INTERFACES == (sizeof(avc_mc_kernel_offset_gen5) /
-                                     sizeof(avc_mc_kernel_offset_gen5[0])));
-
-    if (IS_IRONLAKE(i965->intel.device_id)) {
-        h264_avc_kernels = h264_avc_kernels_gen5;
-        avc_mc_kernel_offset = avc_mc_kernel_offset_gen5;
-        intra_kernel_header = &intra_kernel_header_gen5;
-        i965_h264_context->use_avc_hw_scoreboard = 1;
-        i965_h264_context->use_hw_w128 = 1;
-    } else {
-        h264_avc_kernels = h264_avc_kernels_gen4;
-        avc_mc_kernel_offset = avc_mc_kernel_offset_gen4;
-        intra_kernel_header = &intra_kernel_header_gen4;
-        i965_h264_context->use_avc_hw_scoreboard = 0;
-        i965_h264_context->use_hw_w128 = 0;
-    }
-
-    for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-        struct media_kernel *kernel = &h264_avc_kernels[i];
-        kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
-                                  kernel->name, 
-                                  kernel->size, 64);
-        assert(kernel->bo);
-        dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
-    }
-
-    for (i = 0; i < 16; i++) {
-        i965_h264_context->fsid_list[i].surface_id = VA_INVALID_ID;
-        i965_h264_context->fsid_list[i].frame_store_id = -1;
-    }
-
-    i965_h264_context->enable_avc_ildb = 0;
-    media_state->private_context = i965_h264_context;
-    return True;
-}
-
-Bool 
-i965_media_h264_ternimate(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context;
-    int i;
-
-    if (media_state->private_context) {
-        i965_h264_context = (struct i965_h264_context *)media_state->private_context;
-        i965_avc_ildb_ternimate(&i965_h264_context->avc_ildb_context);
-        i965_avc_hw_scoreboard_ternimate(&i965_h264_context->avc_hw_scoreboard_context);
-        i965_avc_bsd_ternimate(&i965_h264_context->i965_avc_bsd_context);
-        dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
-        dri_bo_unreference(i965_h264_context->avc_it_data.bo);
-        dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
-        free(i965_h264_context);
-        media_state->private_context = NULL;
-    }
-
-    for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-        struct media_kernel *kernel = &h264_avc_kernels[i];
-
-        dri_bo_unreference(kernel->bo);
-        kernel->bo = NULL;
-    }
-
-    return True;
 }

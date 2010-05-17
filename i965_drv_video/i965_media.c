@@ -283,8 +283,6 @@ i965_media_decode_picture(VADriverContextP ctx,
 Bool 
 i965_media_init(VADriverContextP ctx)
 {
-    i965_media_mpeg2_init(ctx);
-    i965_media_h264_init(ctx);
     return True;
 }
 
@@ -294,6 +292,9 @@ i965_media_terminate(VADriverContextP ctx)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     int i;
+
+    assert(media_state->free_private_context);
+    media_state->free_private_context(&media_state->private_context);
 
     for (i = 0; i < MAX_MEDIA_SURFACES; i++) {
         dri_bo_unreference(media_state->surface_state[i].bo);
@@ -318,8 +319,6 @@ i965_media_terminate(VADriverContextP ctx)
     dri_bo_unreference(media_state->indirect_object.bo);
     media_state->indirect_object.bo = NULL;
 
-    i965_media_mpeg2_ternimate(ctx);
-    i965_media_h264_ternimate(ctx);
     return True;
 }
 

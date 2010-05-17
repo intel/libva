@@ -60,8 +60,6 @@ struct i965_h264_context
     } fsid_list[16];
 };
 
-Bool i965_media_h264_init(VADriverContextP ctx);
-Bool i965_media_h264_ternimate(VADriverContextP ctx);
 void i965_media_h264_decode_init(VADriverContextP ctx);
 
 #endif /* _I965_MEDIA_H264_H_ */

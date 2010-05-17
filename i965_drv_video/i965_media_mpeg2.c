@@ -881,71 +881,8 @@ i965_media_mpeg2_objects(VADriverContextP ctx, struct decode_state *decode_state
     }
 }
 
-void 
-i965_media_mpeg2_decode_init(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    dri_bo *bo;
-
-    media_state->extended_state.enabled = 1;
-    media_state->indirect_object.bo = NULL;
-    dri_bo_unreference(media_state->extended_state.bo);
-    bo = dri_bo_alloc(i965->intel.bufmgr, 
-                      "vld state", 
-                      sizeof(struct i965_vld_state), 32);
-    assert(bo);
-    media_state->extended_state.bo = bo;
-
-    /* URB */
-    media_state->urb.num_vfe_entries = 28;
-    media_state->urb.size_vfe_entry = 13;
-
-    media_state->urb.num_cs_entries = 1;
-    media_state->urb.size_cs_entry = 16;
-
-    media_state->urb.vfe_start = 0;
-    media_state->urb.cs_start = media_state->urb.vfe_start + 
-        media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
-    assert(media_state->urb.cs_start + 
-           media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
-
-    /* hook functions */
-    media_state->media_states_setup = i965_media_mpeg2_states_setup;
-    media_state->media_objects = i965_media_mpeg2_objects;
-
-}
-
-Bool 
-i965_media_mpeg2_init(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    int i;
-
-    /* kernel */
-    assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
-                                     sizeof(mpeg2_vld_kernels_gen5[0])));
-    assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
-
-    if (IS_IRONLAKE(i965->intel.device_id))
-        mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
-    else
-        mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
-
-    for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-        struct media_kernel *kernel = &mpeg2_vld_kernels[i];
-        kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
-                                  kernel->name, 
-                                  kernel->size, 64);
-        assert(kernel->bo);
-        dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
-    }
-
-    return True;
-}
-
-Bool 
-i965_media_mpeg2_ternimate(VADriverContextP ctx)
+static void
+i965_media_mpeg2_free_private_context(void **data)
 {
     int i;
 
@@ -956,6 +893,62 @@ i965_media_mpeg2_ternimate(VADriverContextP ctx)
         kernel->bo = NULL;
     }
 
-    return True;
+    mpeg2_vld_kernels = NULL;
+}
+
+void 
+i965_media_mpeg2_decode_init(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_media_state *media_state = &i965->media_state;
+    dri_bo *bo;
+    int i;
+    if (mpeg2_vld_kernels == NULL) {
+        /* kernel */
+        assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
+                                         sizeof(mpeg2_vld_kernels_gen5[0])));
+        assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
+
+        if (IS_IRONLAKE(i965->intel.device_id))
+            mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
+        else
+            mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
+
+        for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
+            struct media_kernel *kernel = &mpeg2_vld_kernels[i];
+            kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
+                                      kernel->name, 
+                                      kernel->size, 64);
+            assert(kernel->bo);
+            dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
+        }
+
+        /* URB */
+        media_state->urb.num_vfe_entries = 28;
+        media_state->urb.size_vfe_entry = 13;
+
+        media_state->urb.num_cs_entries = 1;
+        media_state->urb.size_cs_entry = 16;
+
+        media_state->urb.vfe_start = 0;
+        media_state->urb.cs_start = media_state->urb.vfe_start + 
+            media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
+        assert(media_state->urb.cs_start + 
+               media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
+
+        /* hook functions */
+        media_state->media_states_setup = i965_media_mpeg2_states_setup;
+        media_state->media_objects = i965_media_mpeg2_objects;
+        media_state->free_private_context = i965_media_mpeg2_free_private_context;
+    }
+
+    media_state->extended_state.enabled = 1;
+    media_state->indirect_object.bo = NULL;
+    dri_bo_unreference(media_state->extended_state.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "vld state", 
+                      sizeof(struct i965_vld_state), 32);
+    assert(bo);
+    media_state->extended_state.bo = bo;
 }
 

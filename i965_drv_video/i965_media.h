@@ -101,6 +101,7 @@ struct i965_media_state
     void *private_context;
     void (*media_states_setup)(VADriverContextP ctx, struct decode_state *decode_state);
     void (*media_objects)(VADriverContextP ctx, struct decode_state *decode_state);
+    void (*free_private_context)(void **data);
 };
 
 Bool i965_media_init(VADriverContextP ctx);
