@@ -24,7 +24,7 @@ bin_PROGRAMS = h264encode
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/src/x11
 
-TEST_LIBS = $(top_srcdir)/va/$(libvabackendlib)
+TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
 
 h264encode_LDADD = $(TEST_LIBS)
 h264encode_SOURCES = h264encode.c
