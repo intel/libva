@@ -329,12 +329,14 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
 
-    if (IS_IRONLAKE(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id)) {
         wm_state->wm4.sampler_count = 0;        /* hardware requirement */
-    else
+        wm_state->wm5.max_threads = 12 * 6 - 1;
+    } else {
         wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
+        wm_state->wm5.max_threads = 10 * 5 - 1;
+    }
 
-    wm_state->wm5.max_threads = PS_MAX_THREADS - 1;
     wm_state->wm5.thread_dispatch_enable = 1;
     wm_state->wm5.enable_16_pix = 1;
     wm_state->wm5.enable_8_pix = 0;
@@ -392,12 +394,14 @@ i965_render_wm_unit(VADriverContextP ctx)
     wm_state->wm4.stats_enable = 0;
     wm_state->wm4.sampler_state_pointer = render_state->wm.sampler->offset >> 5; 
 
-    if (IS_IRONLAKE(i965->intel.device_id))
+    if (IS_IRONLAKE(i965->intel.device_id)) {
         wm_state->wm4.sampler_count = 0;        /* hardware requirement */
-    else 
+        wm_state->wm5.max_threads = 12 * 6 - 1;
+    } else {
         wm_state->wm4.sampler_count = (render_state->wm.sampler_count + 3) / 4;
+        wm_state->wm5.max_threads = 10 * 5 - 1;
+    }
 
-    wm_state->wm5.max_threads = PS_MAX_THREADS - 1;
     wm_state->wm5.thread_dispatch_enable = 1;
     wm_state->wm5.enable_16_pix = 1;
     wm_state->wm5.enable_8_pix = 0;
