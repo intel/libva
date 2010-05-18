@@ -293,7 +293,7 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
-    sp<Surface> draw, /* Android Surface/Window */
+    sp<ISurface> draw, /* Android Surface/Window */
     short srcx,
     short srcy,
     unsigned short srcw,

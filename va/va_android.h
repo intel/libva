@@ -4,7 +4,7 @@
 #include <va/va.h>
 
 #ifdef ANDROID    
-#include <ui/Surface.h>
+#include <ui/ISurface.h>
 using namespace android;
 #endif
 
@@ -30,7 +30,7 @@ VADisplay vaGetDisplay (
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    sp<Surface> draw, /* Android Window/Surface */
+    sp<ISurface> draw, /* Android Window/Surface */
     short srcx,
     short srcy,
     unsigned short srcw,
