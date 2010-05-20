@@ -47,15 +47,6 @@
         status = vtable->va##func##GLX args;                    \
     } while (0)
 
-// Check VADisplay is valid
-static inline int vaDisplayIsValid(VADisplay dpy)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-
-    return (pDisplayContext &&
-            pDisplayContext->vaIsValid &&
-            pDisplayContext->vaIsValid(pDisplayContext));
-}
 
 // Destroy VA/GLX display context
 static void va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
