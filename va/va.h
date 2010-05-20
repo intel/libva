@@ -1093,6 +1093,7 @@ typedef struct _VAEncSequenceParameterBufferH264
     unsigned char seq_parameter_set_id;
     unsigned char level_idc;
     unsigned int intra_period;
+    unsigned int intra_idr_period;
     unsigned int picture_width_in_mbs;
     unsigned int picture_height_in_mbs;
     unsigned int bits_per_second;
