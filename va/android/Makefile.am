@@ -26,5 +26,5 @@ libva_dummy_la_LIBADD = $(LIBVA_LIBS) -ldl -ludev
 
 libva_dummyincludedir = ${includedir}/va
 
-libva_dummy_la_SOURCES = va_android.c drmtest.c
+libva_dummy_la_SOURCES = va_dummy.c drmtest.c
 
