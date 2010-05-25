@@ -71,7 +71,11 @@ libva_x11_la_LDFLAGS = $(LDADD)
 libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
 
 libva_la_SOURCES = va.c va_trace.c
+
 libva_tpi_la_SOURCES = va_tpi.c
+libva_tpi_la_LIBADD  = $(libvacorelib) -ldl 
+libva_tpi_la_LDFLAGS = $(LDADD)
+libva_tpi_la_DEPENDENCIES = $(libvacorelib) 
 
 lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend)
 
