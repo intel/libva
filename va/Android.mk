@@ -8,18 +8,21 @@ LIBVA_MAJOR_VERSION := 0
 
 include $(CLEAR_VARS)
 
+LIBVA_DRIVERS_PATH = /system/lib
+
 LOCAL_SRC_FILES := \
    va.c \
    va_trace.c \
    android/va_android.cpp
 
-
 LOCAL_CFLAGS += -DHAVE_CONFIG_H \
-       -DANDROID \
+	-DANDROID \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 LOCAL_C_INCLUDES += \
    $(TARGET_OUT_HEADERS)/libva \
-   $(LOCAL_PATH)/x11 
+   $(LOCAL_PATH)/x11 \
+   $(LOCAL_PATH)/..
 
 LOCAL_CXX := g++
 
@@ -51,6 +54,7 @@ LOCAL_CFLAGS += -DANDROID \
 
 LOCAL_C_INCLUDES += \
    $(TARGET_OUT_HEADERS)/libva \
+   $(LOCAL_PATH)/..
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
