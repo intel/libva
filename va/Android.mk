@@ -30,6 +30,7 @@ LOCAL_COPY_HEADERS_TO := libva/va
 
 LOCAL_COPY_HEADERS := \
    va.h	\
+   va_version.h	\
    va_backend.h \
    va_version.h.in \
    x11/va_dricommon.h \
