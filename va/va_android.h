@@ -3,26 +3,23 @@
 
 #include <va/va.h>
 
-#ifdef ANDROID    
-#include <ui/ISurface.h>
-using namespace android;
-#endif
-
 #ifdef __cplusplus
 extern "C" {
-#endif
 /*
  * Returns a suitable VADisplay for VA API
  */
 VADisplay vaGetDisplay (
     void *android_dpy
 );
+}
 
 #ifdef ANDROID    
+#include <ui/ISurface.h>
+using namespace android;
 /*
  * Output rendering
- * Following is the rendering interface for X windows, 
- * to get the decode output surface to a X drawable
+ * Following is the rendering interface for Android system, 
+ * to get the decode output surface to an ISurface object.
  * It basically performs a de-interlacing (if needed), 
  * color space conversion and scaling to the destination
  * rectangle
@@ -44,8 +41,5 @@ VAStatus vaPutSurface (
     unsigned int flags /* PutSurface flags */
 );
 #endif
-    
-#ifdef __cplusplus
-}
 #endif
 #endif /* _VA_ANDROID_H_ */
