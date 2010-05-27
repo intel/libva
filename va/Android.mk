@@ -66,7 +66,7 @@ LOCAL_MODULE := libva_android
 include $(BUILD_SHARED_LIBRARY)
 
 
-# For libva_android_tpi
+# For libva_tpi
 # =====================================================
 
 include $(CLEAR_VARS)
@@ -87,6 +87,6 @@ LOCAL_COPY_HEADERS := \
 
 LOCAL_SHARED_LIBRARIES := libva
 
-LOCAL_MODULE := libva_android_tpi
+LOCAL_MODULE := libva_tpi
 
 include $(BUILD_SHARED_LIBRARY)
