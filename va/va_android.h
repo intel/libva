@@ -5,17 +5,24 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
 /*
  * Returns a suitable VADisplay for VA API
  */
 VADisplay vaGetDisplay (
     void *android_dpy
 );
-}
 
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
 #ifdef ANDROID    
 #include <ui/ISurface.h>
 using namespace android;
+
 /*
  * Output rendering
  * Following is the rendering interface for Android system, 
@@ -40,6 +47,8 @@ VAStatus vaPutSurface (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* PutSurface flags */
 );
-#endif
-#endif
+
+#endif /* ANDROID */
+#endif /* __cplusplus */
+
 #endif /* _VA_ANDROID_H_ */

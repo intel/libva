@@ -14,7 +14,7 @@ LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
 
-LOCAL_CFLAGS += -DHAVE_CONFIG_H \
+LOCAL_CFLAGS += \
 	-DANDROID \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
@@ -39,7 +39,7 @@ LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils
 include $(BUILD_SHARED_LIBRARY)
 
 
-# For libva_android
+# For libva-android
 # =====================================================
 
 include $(CLEAR_VARS)
@@ -48,20 +48,17 @@ LOCAL_SRC_FILES := \
 	android/va_android.cpp
 
 LOCAL_CFLAGS += \
-	-DHAVE_CONFIG_H \
 	-DANDROID 
 
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_HEADERS)/libva \
 	$(LOCAL_PATH)/x11
 
-LOCAL_CXX := g++
-
 LOCAL_COPY_HEADERS_TO := libva/va
 
 LOCAL_COPY_HEADERS := va_android.h		
 
-LOCAL_MODULE := libva_android
+LOCAL_MODULE := libva-android
 
 include $(BUILD_SHARED_LIBRARY)
 
