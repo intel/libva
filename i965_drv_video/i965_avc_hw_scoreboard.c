@@ -269,15 +269,37 @@ i965_avc_hw_scoreboard_constant_buffer(VADriverContextP ctx, struct i965_avc_hw_
 static void
 i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
-    BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
-    OUT_BATCH(ctx, 0); /* interface descriptor offset: 0 */
-    OUT_BATCH(ctx, 0); /* no indirect data */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, ((avc_hw_scoreboard_context->inline_data.num_mb_cmds << 16) |
-                    (avc_hw_scoreboard_context->inline_data.starting_mb_number << 0)));
-    OUT_BATCH(ctx, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
-    ADVANCE_BATCH(ctx);
+    int number_mb_cmds = 512;
+    int starting_mb_number = avc_hw_scoreboard_context->inline_data.starting_mb_number;
+    int i;
+
+    for (i = 0; i < avc_hw_scoreboard_context->inline_data.num_mb_cmds / 512; i++) {
+        BEGIN_BATCH(ctx, 6);
+        OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
+        OUT_BATCH(ctx, 0); /* interface descriptor offset: 0 */
+        OUT_BATCH(ctx, 0); /* no indirect data */
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, ((number_mb_cmds << 16) |
+                        (starting_mb_number << 0)));
+        OUT_BATCH(ctx, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
+        ADVANCE_BATCH(ctx);
+
+        starting_mb_number += 512;
+    }
+
+    number_mb_cmds = avc_hw_scoreboard_context->inline_data.num_mb_cmds % 512;
+
+    if (number_mb_cmds) {
+        BEGIN_BATCH(ctx, 6);
+        OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
+        OUT_BATCH(ctx, 0); /* interface descriptor offset: 0 */
+        OUT_BATCH(ctx, 0); /* no indirect data */
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, ((number_mb_cmds << 16) |
+                        (starting_mb_number << 0)));
+        OUT_BATCH(ctx, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 static void
@@ -376,7 +398,7 @@ i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx)
         assert(bo);
         avc_hw_scoreboard_context->vfe_state.bo = bo;
 
-        avc_hw_scoreboard_context->urb.num_vfe_entries = 1;
+        avc_hw_scoreboard_context->urb.num_vfe_entries = 32;
         avc_hw_scoreboard_context->urb.size_vfe_entry = 2;
         avc_hw_scoreboard_context->urb.num_cs_entries = 1;
         avc_hw_scoreboard_context->urb.size_cs_entry = 1;
