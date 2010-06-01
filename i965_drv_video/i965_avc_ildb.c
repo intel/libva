@@ -357,7 +357,11 @@ i965_avc_ildb_upload_constants(VADriverContextP ctx, struct decode_state *decode
     assert(avc_ildb_context->curbe.bo->virtual);
     root_input = avc_ildb_context->curbe.bo->virtual;
 
-    root_input->max_concurrent_threads = 36; /* FIXME: ??? */
+    if (IS_IRONLAKE(i965->intel.device_id)) {
+        root_input->max_concurrent_threads = 76; /* 72 - 2 + 8 - 2 */
+    } else {
+        root_input->max_concurrent_threads = 54; /* 50 - 2 + 8 = 2 */
+    }
 
     if (pic_param->pic_fields.bits.field_pic_flag)
         root_input->picture_type = PICTURE_FIELD;
