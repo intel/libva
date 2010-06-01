@@ -76,6 +76,7 @@ libva_tpi_la_SOURCES = va_tpi.c
 
 lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend)
 
+DIST_SUBDIRS = x11 glx dummy
 
 SUBDIRS = $(libva_x11_backenddir) $(libva_dummy_backenddir) $(libva_glx_backenddir)
 
