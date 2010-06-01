@@ -37,6 +37,7 @@ libva_la_LIBADD = $(LIBVA_LIBS) -ldl
 libva_tpi_ladir = $(libdir)
 libva_tpi_la_LDFLAGS = $(LDADD) -no-undefined
 libva_tpi_la_LIBADD = $(libvacorelib) -ldl
+libva_tpi_la_DEPENDENCIES = libva.la
 
 if BUILD_DUMMY_BACKEND
 libva_dummy_backend = libva-dummy.la
