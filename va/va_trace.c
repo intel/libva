@@ -1078,13 +1078,14 @@ int va_TraceEndPicture(
     va_TraceMsg("\tchroma_u_offset=%d\n", chroma_u_offset);
     va_TraceMsg("\tchroma_v_offset=%d\n", chroma_v_offset);
 
-    va_TraceMsg("**Y data**\n");
+    if (!buffer)
+        return;
 
     Y_data = buffer;
     UV_data = buffer + luma_offset;
 
     tmp = Y_data;
-    
+    va_TraceMsg("**Y data**\n");
     for (i=0; i<trace_height; i++) {
         for (j=0; j<trace_width; j++) {
             if ((j%16) == 0)
