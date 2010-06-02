@@ -17,7 +17,7 @@
 #define INLINE
 #endif
 
-#define BATCH_SIZE      0x100000
+#define BATCH_SIZE      0x10000
 #define BATCH_RESERVED  0x10
 
 #define CMD_MI                                  (0x0 << 29)

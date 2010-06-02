@@ -703,7 +703,6 @@ i965_media_h264_states_setup(VADriverContextP ctx, struct decode_state *decode_s
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
     VAPictureParameterBufferH264 *pic_param;
-    unsigned int *object_command;
 
     assert(media_state->private_context);
     i965_h264_context = (struct i965_h264_context *)media_state->private_context;
@@ -721,14 +720,6 @@ i965_media_h264_states_setup(VADriverContextP ctx, struct decode_state *decode_s
 
     i965_avc_bsd_pipeline(ctx, decode_state);
 
-    dri_bo_map(i965_h264_context->avc_it_command_mb_info.bo, True);
-    assert(i965_h264_context->avc_it_command_mb_info.bo->virtual);
-    object_command = i965_h264_context->avc_it_command_mb_info.bo->virtual;
-    memset(object_command, 0, i965_h264_context->avc_it_command_mb_info.mbs * i965_h264_context->use_avc_hw_scoreboard * MB_CMD_IN_BYTES);
-    object_command += i965_h264_context->avc_it_command_mb_info.mbs * (1 + i965_h264_context->use_avc_hw_scoreboard) * MB_CMD_IN_DWS;
-    *object_command = MI_BATCH_BUFFER_END;
-    dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
-
     i965_avc_hw_scoreboard(ctx, decode_state);
 
     i965_media_h264_surfaces_setup(ctx, decode_state);
@@ -745,10 +736,19 @@ i965_media_h264_objects(VADriverContextP ctx, struct decode_state *decode_state)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
+    unsigned int *object_command;
 
     assert(media_state->private_context);
     i965_h264_context = (struct i965_h264_context *)media_state->private_context;
-    
+
+    dri_bo_map(i965_h264_context->avc_it_command_mb_info.bo, True);
+    assert(i965_h264_context->avc_it_command_mb_info.bo->virtual);
+    object_command = i965_h264_context->avc_it_command_mb_info.bo->virtual;
+    memset(object_command, 0, i965_h264_context->avc_it_command_mb_info.mbs * i965_h264_context->use_avc_hw_scoreboard * MB_CMD_IN_BYTES);
+    object_command += i965_h264_context->avc_it_command_mb_info.mbs * (1 + i965_h264_context->use_avc_hw_scoreboard) * MB_CMD_IN_DWS;
+    *object_command = MI_BATCH_BUFFER_END;
+    dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
+
     BEGIN_BATCH(ctx, 2);
     OUT_BATCH(ctx, MI_BATCH_BUFFER_START | (2 << 6));
     OUT_RELOC(ctx, i965_h264_context->avc_it_command_mb_info.bo, 
@@ -756,6 +756,12 @@ i965_media_h264_objects(VADriverContextP ctx, struct decode_state *decode_state)
               0);
     ADVANCE_BATCH(ctx);
 
+    /* Have to execute the batch buffer here becuase MI_BATCH_BUFFER_END
+     * will cause control to pass back to ring buffer 
+     */
+    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_flush(ctx);
+    intel_batchbuffer_start_atomic(ctx, 0x1000);
     i965_avc_ildb(ctx, decode_state);
 }
 

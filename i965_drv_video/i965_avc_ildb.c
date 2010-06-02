@@ -567,9 +567,6 @@ i965_avc_ildb(VADriverContextP ctx, struct decode_state *decode_state)
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
 
     if (i965_h264_context->enable_avc_ildb) {
-        intel_batchbuffer_end_atomic(ctx);
-        intel_batchbuffer_flush(ctx);
-        intel_batchbuffer_start_atomic(ctx, 0x1000);
         i965_avc_ildb_states_setup(ctx, decode_state);
         i965_avc_ildb_pipeline_setup(ctx);
     }

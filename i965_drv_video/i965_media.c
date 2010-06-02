@@ -277,7 +277,6 @@ i965_media_decode_picture(VADriverContextP ctx,
     assert(media_state->media_states_setup);
     media_state->media_states_setup(ctx, decode_state);
     i965_media_pipeline_setup(ctx, decode_state);
-    intel_batchbuffer_flush(ctx);
 }
 
 Bool 
