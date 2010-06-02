@@ -60,10 +60,6 @@ extern int trace_flag;
         trace_func(__VA_ARGS__);                \
     }
 
-#define VA_MAJOR_VERSION (0)
-#define VA_MINOR_VERSION (31)
-#define VA_VERSION_S       "0.31.1"
-
 int vaDisplayIsValid(VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;

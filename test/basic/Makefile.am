@@ -25,7 +25,7 @@ bin_PROGRAMS = test_01 test_02 test_03 test_04 test_05 test_06 \
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/src/x11
 
-TEST_LIBS = $(top_srcdir)/va/$(libvabackendlib)
+TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
 
 test_01_LDADD = $(TEST_LIBS)
 test_01_SOURCES = test_01.c
