@@ -43,7 +43,6 @@ struct i965_render_state
     
     struct {
         dri_bo *state;
-        dri_bo *prog;
     } sf;
 
     struct {
@@ -52,7 +51,6 @@ struct i965_render_state
         dri_bo *surface[MAX_RENDER_SURFACES];
         dri_bo *binding_table;
         dri_bo *state;
-        dri_bo *prog;
     } wm;
 
     struct {
@@ -62,6 +60,7 @@ struct i965_render_state
 
     struct {
         dri_bo *bo;
+        int upload;
     } curbe;
 
     int interleaved_uv;

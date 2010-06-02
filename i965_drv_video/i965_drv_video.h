@@ -94,6 +94,9 @@ struct object_context
     struct decode_state decode_state;
 };
 
+#define SURFACE_REFERENCED      (1 << 0)
+#define SURFACE_DISPLAYED       (1 << 1)
+
 struct object_surface 
 {
     struct object_base base;
@@ -102,6 +105,7 @@ struct object_surface
     int width;
     int height;
     int size;
+    int flags;
     dri_bo *bo;
     void (*free_private_data)(void **data);
     void *private_data;
@@ -136,8 +140,6 @@ struct object_subpic
     int height;
     dri_bo *bo;
 };
-
-
 
 struct i965_driver_data 
 {

@@ -57,6 +57,7 @@ struct i965_avc_hw_scoreboard_context
 
     struct {
         dri_bo *bo;
+        int upload;
     } curbe;
 
     struct {

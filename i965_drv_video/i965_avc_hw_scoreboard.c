@@ -176,11 +176,15 @@ i965_avc_hw_scoreboard_upload_constants(struct i965_avc_hw_scoreboard_context *a
 {
     unsigned char *constant_buffer;
 
+    if (avc_hw_scoreboard_context->curbe.upload)
+        return;
+
     dri_bo_map(avc_hw_scoreboard_context->curbe.bo, 1);
     assert(avc_hw_scoreboard_context->curbe.bo->virtual);
     constant_buffer = avc_hw_scoreboard_context->curbe.bo->virtual;
     memcpy(constant_buffer, avc_hw_scoreboard_constants, sizeof(avc_hw_scoreboard_constants));
     dri_bo_unmap(avc_hw_scoreboard_context->curbe.bo);
+    avc_hw_scoreboard_context->curbe.upload = 1;
 }
 
 static void
@@ -358,12 +362,14 @@ i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx)
         struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
         dri_bo *bo;
 
-        dri_bo_unreference(avc_hw_scoreboard_context->curbe.bo);
-        bo = dri_bo_alloc(i965->intel.bufmgr,
-                          "constant buffer",
-                          4096, 64);
-        assert(bo);
-        avc_hw_scoreboard_context->curbe.bo = bo;
+        if (avc_hw_scoreboard_context->curbe.bo == NULL) {
+            bo = dri_bo_alloc(i965->intel.bufmgr,
+                              "constant buffer",
+                              4096, 64);
+            assert(bo);
+            avc_hw_scoreboard_context->curbe.bo = bo;
+            avc_hw_scoreboard_context->curbe.upload = 0;
+        }
 
         dri_bo_unreference(avc_hw_scoreboard_context->surface.s_bo);
         avc_hw_scoreboard_context->surface.s_bo = i965_h264_context->avc_it_command_mb_info.bo;

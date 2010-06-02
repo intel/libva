@@ -921,6 +921,9 @@ i965_render_upload_constants(VADriverContextP ctx)
     struct i965_render_state *render_state = &i965->render_state;
     unsigned short *constant_buffer;
 
+    if (render_state->curbe.upload)
+        return;
+
     dri_bo_map(render_state->curbe.bo, 1);
     assert(render_state->curbe.bo->virtual);
     constant_buffer = render_state->curbe.bo->virtual;
@@ -931,6 +934,7 @@ i965_render_upload_constants(VADriverContextP ctx)
         *constant_buffer = 0;
 
     dri_bo_unmap(render_state->curbe.bo);
+    render_state->curbe.upload = 1;
 }
 
 static void
@@ -1508,7 +1512,7 @@ i965_render_init(VADriverContextP ctx)
         struct render_kernel *kernel = &render_kernels[i];
         kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                   kernel->name, 
-                                  kernel->size, 64);
+                                  kernel->size, 0x1000);
         assert(kernel->bo);
         dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
     }
@@ -1518,6 +1522,7 @@ i965_render_init(VADriverContextP ctx)
                       "constant buffer",
                       4096, 64);
     assert(render_state->curbe.bo);
+    render_state->curbe.upload = 0;
 
     return True;
 }

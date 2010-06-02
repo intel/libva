@@ -702,21 +702,9 @@ i965_media_h264_states_setup(VADriverContextP ctx, struct decode_state *decode_s
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
-    VAPictureParameterBufferH264 *pic_param;
 
     assert(media_state->private_context);
     i965_h264_context = (struct i965_h264_context *)media_state->private_context;
-    assert(decode_state->pic_param && decode_state->pic_param->buffer);
-    pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-
-    i965_h264_context->picture.width_in_mbs = ((pic_param->picture_width_in_mbs_minus1 + 1) & 0xff);
-    i965_h264_context->picture.height_in_mbs = ((pic_param->picture_height_in_mbs_minus1 + 1) & 0xff) / 
-        (1 + !!pic_param->pic_fields.bits.field_pic_flag); /* picture height */
-    i965_h264_context->picture.mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
-                                                   !pic_param->pic_fields.bits.field_pic_flag);
-
-    i965_h264_context->avc_it_command_mb_info.mbs = (i965_h264_context->picture.width_in_mbs * 
-                                                     i965_h264_context->picture.height_in_mbs);
 
     i965_avc_bsd_pipeline(ctx, decode_state);
 
@@ -792,13 +780,14 @@ i965_media_h264_free_private_context(void **data)
 }
 
 void
-i965_media_h264_decode_init(VADriverContextP ctx)
+i965_media_h264_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     struct i965_h264_context *i965_h264_context;
     dri_bo *bo;
     int i;
+    VAPictureParameterBufferH264 *pic_param;
 
     i965_h264_context = media_state->private_context;
 
@@ -829,7 +818,7 @@ i965_media_h264_decode_init(VADriverContextP ctx)
             struct media_kernel *kernel = &h264_avc_kernels[i];
             kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                       kernel->name, 
-                                      kernel->size, 64);
+                                      kernel->size, 0x1000);
             assert(kernel->bo);
             dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
         }
@@ -865,12 +854,20 @@ i965_media_h264_decode_init(VADriverContextP ctx)
         media_state->media_objects = i965_media_h264_objects;
     }
 
-    i965_h264_context->enable_avc_ildb = 0;
+    assert(decode_state->pic_param && decode_state->pic_param->buffer);
+    pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
+    i965_h264_context->picture.width_in_mbs = ((pic_param->picture_width_in_mbs_minus1 + 1) & 0xff);
+    i965_h264_context->picture.height_in_mbs = ((pic_param->picture_height_in_mbs_minus1 + 1) & 0xff) / 
+        (1 + !!pic_param->pic_fields.bits.field_pic_flag); /* picture height */
+    i965_h264_context->picture.mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
+                                                   !pic_param->pic_fields.bits.field_pic_flag);
+    i965_h264_context->avc_it_command_mb_info.mbs = (i965_h264_context->picture.width_in_mbs * 
+                                                     i965_h264_context->picture.height_in_mbs);
 
     dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "avc it command mb info",
-                      0x80000 * (1 + i965_h264_context->use_avc_hw_scoreboard),  /* at least 522240 bytes */
+                      i965_h264_context->avc_it_command_mb_info.mbs * MB_CMD_IN_BYTES * (1 + i965_h264_context->use_avc_hw_scoreboard) + 4,
                       0x1000);
     assert(bo);
     i965_h264_context->avc_it_command_mb_info.bo = bo;
@@ -878,8 +875,10 @@ i965_media_h264_decode_init(VADriverContextP ctx)
     dri_bo_unreference(i965_h264_context->avc_it_data.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "avc it data",
-                      0x1000000, /* at least 16711680 bytes */
-                      4096);
+                      i965_h264_context->avc_it_command_mb_info.mbs * 
+                      0x800 * 
+                      (1 + !!pic_param->pic_fields.bits.field_pic_flag),
+                      0x1000);
     assert(bo);
     i965_h264_context->avc_it_data.bo = bo;
     i965_h264_context->avc_it_data.write_offset = 0;
@@ -891,8 +890,8 @@ i965_media_h264_decode_init(VADriverContextP ctx)
     dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "AVC-ILDB Data Buffer",
-                      0x100000, /* at least 1044480 bytes */
-                      64);
+                      i965_h264_context->avc_it_command_mb_info.mbs * 64 * 2,
+                      0x1000);
     assert(bo);
     i965_h264_context->avc_ildb_data.bo = bo;
 

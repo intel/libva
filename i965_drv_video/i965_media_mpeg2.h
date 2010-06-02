@@ -39,6 +39,6 @@
 
 struct decode_state;
 
-void i965_media_mpeg2_decode_init(VADriverContextP ctx);
+void i965_media_mpeg2_decode_init(VADriverContextP ctx, struct decode_state * decode_state);
 
 #endif /* _I965_MEDIA_MPEG2_H_ */

@@ -199,7 +199,7 @@ i965_media_pipeline_setup(VADriverContextP ctx, struct decode_state *decode_stat
 }
 
 static void 
-i965_media_decode_init(VADriverContextP ctx, VAProfile profile)
+i965_media_decode_init(VADriverContextP ctx, VAProfile profile, struct decode_state *decode_state)
 {
     int i;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
@@ -250,13 +250,13 @@ i965_media_decode_init(VADriverContextP ctx, VAProfile profile)
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
-        i965_media_mpeg2_decode_init(ctx);
+        i965_media_mpeg2_decode_init(ctx, decode_state);
         break;
         
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
-        i965_media_h264_decode_init(ctx);
+        i965_media_h264_decode_init(ctx, decode_state);
         break;
 
     default:
@@ -273,7 +273,7 @@ i965_media_decode_picture(VADriverContextP ctx,
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
 
-    i965_media_decode_init(ctx, profile);
+    i965_media_decode_init(ctx, profile, decode_state);
     assert(media_state->media_states_setup);
     media_state->media_states_setup(ctx, decode_state);
     i965_media_pipeline_setup(ctx, decode_state);

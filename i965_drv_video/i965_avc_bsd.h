@@ -29,12 +29,7 @@
 #ifndef __I965_AVC_BSD_H__
 #define __I965_AVC_BSD_H__
 
-struct i965_avc_bsd_surface
-{
-    dri_bo *direct_mv_wr_top_bo;
-    dri_bo *direct_mv_wr_bottom_bo;
-    int direct_mv_flag;
-};
+#define DMV_SIZE        0x88000 /* 557056 bytes for a frame */
 
 struct i965_avc_bsd_context
 {
@@ -46,14 +41,15 @@ struct i965_avc_bsd_context
         dri_bo *bo;
     } mpr_row_store;
 
-    struct {
-        dri_bo *bo;
-    } avc_it_command_mb_info;
+    int init;
+};
 
-    struct {
-        dri_bo *bo;
-        long write_offset;
-    } avc_it_data;
+struct i965_avc_bsd_surface
+{
+    struct i965_avc_bsd_context *ctx;
+    dri_bo *dmv_top;
+    dri_bo *dmv_bottom;
+    int dmv_bottom_flag;
 };
 
 void i965_avc_bsd_pipeline(VADriverContextP, struct decode_state *);
