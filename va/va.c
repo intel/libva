@@ -712,12 +712,14 @@ VAStatus vaEndPicture (
     VAContextID context
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
+  va_status = ctx->vtable.vaEndPicture( ctx, context );
   VA_TRACE(va_TraceEndPicture, dpy, context);
-  return ctx->vtable.vaEndPicture( ctx, context );
+  return va_status;
 }
 
 VAStatus vaSyncSurface (
