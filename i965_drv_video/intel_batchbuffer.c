@@ -38,12 +38,12 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
 {
     struct intel_driver_data *intel = batch->intel; 
 
-    assert(batch->flag == ON_RENDER_RING ||
-           batch->flag == ON_BSD_RING);
+    assert(batch->flag == I915_EXEC_RENDER ||
+           batch->flag == I915_EXEC_BSD);
 
     dri_bo_unreference(batch->buffer);
     batch->buffer = dri_bo_alloc(intel->bufmgr, 
-                                 batch->flag == ON_RENDER_RING ? "render batch buffer" : "bsd batch buffer", 
+                                 batch->flag == I915_EXEC_RENDER ? "render batch buffer" : "bsd batch buffer", 
                                  BATCH_SIZE, 0x1000);
     assert(batch->buffer);
     dri_bo_map(batch->buffer, 1);
@@ -60,14 +60,14 @@ intel_batchbuffer_init(struct intel_driver_data *intel)
     intel->batch = calloc(1, sizeof(*(intel->batch)));
     assert(intel->batch);
     intel->batch->intel = intel;
-    intel->batch->flag = ON_RENDER_RING;
+    intel->batch->flag = I915_EXEC_RENDER;
     intel->batch->run = drm_intel_bo_mrb_exec;
     intel_batchbuffer_reset(intel->batch);
 
     intel->batch_bcs = calloc(1, sizeof(*(intel->batch_bcs)));
     assert(intel->batch_bcs);
     intel->batch_bcs->intel = intel;
-    intel->batch_bcs->flag = ON_BSD_RING;
+    intel->batch_bcs->flag = I915_EXEC_BSD;
     intel->batch_bcs->run = drm_intel_bo_mrb_exec;
     intel_batchbuffer_reset(intel->batch_bcs);
 
