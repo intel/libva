@@ -105,20 +105,16 @@ static int upload_source_YUV_once_for_all()
 static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_skipped)
 {    
     void *coded_p=NULL;
-    int coded_size,coded_offset,wrt_size;
+    VACodedBufferSegment *buf_list = NULL;
     VAStatus va_status;
-
-    va_status = vaMapBuffer(va_dpy,coded_buf,&coded_p);
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    unsigned int coded_size = 0;
     
-    coded_size = *((unsigned long *) coded_p); /* first DWord is the coded video size */
-    coded_offset = *((unsigned long *) (coded_p + 4)); /* second DWord is byte offset */
-
-    wrt_size = write(coded_fd,coded_p+coded_offset,coded_size);
-    if (wrt_size != coded_size) {
-        fprintf(stderr, "Trying to write %d bytes, but actual %d bytes\n",
-                coded_size, wrt_size);
-        exit(1);
+    va_status = vaMapBuffer(va_dpy,coded_buf,(void **)(&buf_list));
+    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    while (buf_list != NULL) {
+        printf("Write %d bytes\n", buf_list->size);
+        coded_size += write(coded_fd, buf_list->buf, buf_list->size);
+        buf_list = buf_list->next;
     }
     vaUnmapBuffer(va_dpy,coded_buf);
 

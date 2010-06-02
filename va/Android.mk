@@ -1,67 +1,89 @@
-# For libva_android
+# For libva
 # =====================================================
 
 LOCAL_PATH:= $(call my-dir)
 
-LIBVA_MINOR_VERSION := 31
-LIBVA_MAJOR_VERSION := 0 
+LIBVA_DRIVERS_PATH = /system/lib
 
 include $(CLEAR_VARS)
 
+#LIBVA_MINOR_VERSION := 31
+#LIBVA_MAJOR_VERSION := 0 
+
 LOCAL_SRC_FILES := \
-   va.c \
-   va_trace.c \
-   android/va_android.cpp
+	va.c \
+	va_trace.c \
 
-
-LOCAL_CFLAGS += -DHAVE_CONFIG_H \
-       -DANDROID \
+LOCAL_CFLAGS += \
+	-DANDROID \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 LOCAL_C_INCLUDES += \
-   $(TARGET_OUT_HEADERS)/libva \
-   $(LOCAL_PATH)/x11 
+	$(TARGET_OUT_HEADERS)/libva \
+	$(LOCAL_PATH)/x11 \
+	$(LOCAL_PATH)/..
 
-LOCAL_CXX := g++
+LOCAL_COPY_HEADERS := \
+	va.h \
+	va_version.h \
+	va_backend.h \
+	va_version.h.in \
+	x11/va_dricommon.h 
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
-LOCAL_COPY_HEADERS := \
-   va.h	\
-   va_backend.h \
-   va_version.h.in \
-   x11/va_dricommon.h \
-   va_android.h		
-
-LOCAL_MODULE := libva_android
+LOCAL_MODULE := libva
 
 LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils
 
 include $(BUILD_SHARED_LIBRARY)
 
 
-# For libva_android_tpi
+# For libva-android
 # =====================================================
 
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-   va_tpi.c \
+	android/va_android.cpp
 
-LOCAL_CFLAGS += -DANDROID \
+LOCAL_CFLAGS += \
+	-DANDROID 
 
 LOCAL_C_INCLUDES += \
-   $(TARGET_OUT_HEADERS)/libva \
+	$(TARGET_OUT_HEADERS)/libva \
+	$(LOCAL_PATH)/x11
+
+LOCAL_COPY_HEADERS_TO := libva/va
+
+LOCAL_COPY_HEADERS := va_android.h		
+
+LOCAL_MODULE := libva-android
+
+include $(BUILD_SHARED_LIBRARY)
+
+
+# For libva-tpi
+# =====================================================
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := va_tpi.c
+
+LOCAL_CFLAGS += -DANDROID
+
+LOCAL_C_INCLUDES += \
+	$(TARGET_OUT_HEADERS)/libva \
+	$(LOCAL_PATH)/..
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
 LOCAL_COPY_HEADERS := \
-   va.h \
-   va_backend.h \
-   va_tpi.h \
-   va_backend_tpi.h
+	va_tpi.h \
+	va_backend_tpi.h
 
-LOCAL_SHARED_LIBRARIES := libva_android
+LOCAL_SHARED_LIBRARIES := libva
 
-LOCAL_MODULE := libva_android_tpi
+LOCAL_MODULE := libva-tpi
 
 include $(BUILD_SHARED_LIBRARY)
