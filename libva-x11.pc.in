@@ -6,6 +6,7 @@ display=x11
 
 Name: libva-${display}
 Description: Userspace Video Acceleration (VA) ${display} interface
+Requires: libva
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lva-${display}
 Cflags: -I${includedir}
