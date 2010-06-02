@@ -195,14 +195,14 @@ static int va_TraceVABuffers(
                              )
 {
     int i;
-    char *p = pbuf;
+    unsigned char *p = pbuf;
     unsigned int *pi = (unsigned int *)pbuf;
 
     va_TraceMsg("***Buffer Data***");
     for (i=0; i<size; i++) {
         if ((i%16) == 0)
             va_TraceMsg("\n0x%08x:", i);
-        va_TraceMsg("%08x ", p[i]);
+        va_TraceMsg(" %02x", p[i]);
     }
 
     va_TraceMsg("\n");
@@ -1089,7 +1089,7 @@ int va_TraceEndPicture(
         for (j=0; j<trace_width; j++) {
             if ((j%16) == 0)
                 va_TraceMsg("\n0x%08x:", j + i*trace_width);
-            va_TraceMsg("%08x ", tmp[j]);
+            va_TraceMsg(" %02x", tmp[j]);
         }
 
         va_TraceMsg("\n");
@@ -1104,7 +1104,7 @@ int va_TraceEndPicture(
             for (j=0; j<trace_width; j++) {
                 if ((j%16) == 0)
                     va_TraceMsg("\n0x%08x:", j + i*trace_width);
-                va_TraceMsg("%08x ", tmp[j]);
+                va_TraceMsg(" %02x", tmp[j]);
             }
 
             va_TraceMsg("\n");
