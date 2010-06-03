@@ -64,6 +64,8 @@ static const i965_image_format_map_t
 i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
     { I965_SURFACETYPE_YUV,
       { VA_FOURCC('Y','V','1','2'), VA_LSB_FIRST, 12, } },
+    { I965_SURFACETYPE_YUV,
+      { VA_FOURCC('I','4','2','0'), VA_LSB_FIRST, 12, } },
 };
 
 /* List of supported subpicture formats */
@@ -1352,6 +1354,16 @@ i965_CreateImage(VADriverContextP ctx,
         image->offsets[2] = size;
         image->data_size  = size + 2 * size2;
         break;
+    case VA_FOURCC('I','4','2','0'):
+        image->num_planes = 3;
+        image->pitches[0] = width;
+        image->offsets[0] = 0;
+        image->pitches[1] = width2;
+        image->offsets[1] = size;
+        image->pitches[2] = width2;
+        image->offsets[2] = size + size2;
+        image->data_size  = size + 2 * size2;
+        break;
     default:
         goto error;
     }
@@ -1549,7 +1561,9 @@ i965_GetImage(VADriverContextP ctx,
     rect.height = height;
 
     switch (obj_image->image.format.fourcc) {
-    case VA_FOURCC('Y','V','1','2'): /* YV12 is native format here */
+    case VA_FOURCC('Y','V','1','2'):
+    case VA_FOURCC('I','4','2','0'):
+        /* I420 is native format for MPEG-2 decoded surfaces */
         if (render_state->interleaved_uv)
             goto operation_failed;
         get_image_yv12(obj_image, image_data, obj_surface, &rect);

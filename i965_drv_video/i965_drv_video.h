@@ -43,7 +43,7 @@
 #define I965_MAX_PROFILES                       11
 #define I965_MAX_ENTRYPOINTS                    5
 #define I965_MAX_CONFIG_ATTRIBUTES              10
-#define I965_MAX_IMAGE_FORMATS                  1
+#define I965_MAX_IMAGE_FORMATS                  2
 #define I965_MAX_SUBPIC_FORMATS                 4
 #define I965_MAX_DISPLAY_ATTRIBUTES             4
 #define I965_STR_VENDOR                         "i965 Driver 0.1"
