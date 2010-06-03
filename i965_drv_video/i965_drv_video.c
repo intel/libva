@@ -66,6 +66,8 @@ i965_image_formats_map[I965_MAX_IMAGE_FORMATS + 1] = {
       { VA_FOURCC('Y','V','1','2'), VA_LSB_FIRST, 12, } },
     { I965_SURFACETYPE_YUV,
       { VA_FOURCC('I','4','2','0'), VA_LSB_FIRST, 12, } },
+    { I965_SURFACETYPE_YUV,
+      { VA_FOURCC('N','V','1','2'), VA_LSB_FIRST, 12, } },
 };
 
 /* List of supported subpicture formats */
@@ -1363,6 +1365,14 @@ i965_CreateImage(VADriverContextP ctx,
         image->offsets[2] = size + size2;
         image->data_size  = size + 2 * size2;
         break;
+    case VA_FOURCC('N','V','1','2'):
+        image->num_planes = 2;
+        image->pitches[0] = width;
+        image->offsets[0] = 0;
+        image->pitches[1] = width;
+        image->offsets[1] = size;
+        image->data_size  = size + 2 * size2;
+        break;
     default:
         goto error;
     }
@@ -1519,6 +1529,50 @@ get_image_yv12(struct object_image *obj_image, uint8_t *image_data,
     dri_bo_unmap(obj_surface->bo);
 }
 
+static void
+get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
+               struct object_surface *obj_surface,
+               const VARectangle *rect)
+{
+    uint8_t *dst, *src;
+    int i, x, y, w, h;
+
+    if (!obj_surface->bo)
+        return;
+
+    dri_bo_map(obj_surface->bo, 0);
+
+    if (!obj_surface->bo->virtual)
+        return;
+
+    x = rect->x;
+    y = rect->y;
+    w = rect->width;
+    h = rect->height;
+
+    dst = image_data + obj_image->image.offsets[0] + y * obj_image->image.pitches[0] + x;
+    src = (uint8_t *)obj_surface->bo->virtual + y * obj_surface->width + x;
+    for (i = 0; i < h; i++) {
+        memcpy(dst, src, w);
+        dst += obj_image->image.pitches[0];
+        src += obj_surface->width;
+    }
+
+    x /= 2;
+    y /= 2;
+    h /= 2;
+
+    dst = image_data + obj_image->image.offsets[1] + y * obj_image->image.pitches[1] + x * 2;
+    src = (uint8_t *)obj_surface->bo->virtual + obj_surface->width * obj_surface->height + y * obj_surface->width + x * 2;
+    for (i = 0; i < h; i++) {
+        memcpy(dst, src, w);
+        dst += obj_image->image.pitches[1];
+        src += obj_surface->width;
+    }
+
+    dri_bo_unmap(obj_surface->bo);
+}
+
 VAStatus 
 i965_GetImage(VADriverContextP ctx,
               VASurfaceID surface,
@@ -1568,6 +1622,12 @@ i965_GetImage(VADriverContextP ctx,
         if (render_state->interleaved_uv)
             goto operation_failed;
         get_image_yv12(obj_image, image_data, obj_surface, &rect);
+        break;
+    case VA_FOURCC('N','V','1','2'):
+        /* NV12 is native format for H.264 decoded surfaces */
+        if (!render_state->interleaved_uv)
+            goto operation_failed;
+        get_image_nv12(obj_image, image_data, obj_surface, &rect);
         break;
     default:
     operation_failed:
