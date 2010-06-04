@@ -47,45 +47,39 @@
 
 static VADisplayContextP pDisplayContexts = NULL;
 
-static int vaDisplayIsValid (VADisplay dpy)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
-}
-
 static int open_device (char *dev_name)
 {
-  struct stat st;
-  int fd;
+    struct stat st;
+    int fd;
 
-  if (-1 == stat (dev_name, &st))
+    if (-1 == stat (dev_name, &st))
     {
-      printf ("Cannot identify '%s': %d, %s\n",
-               dev_name, errno, strerror (errno));
-      return -1;
+        printf ("Cannot identify '%s': %d, %s\n",
+                dev_name, errno, strerror (errno));
+        return -1;
     }
 
-  if (!S_ISCHR (st.st_mode))
+    if (!S_ISCHR (st.st_mode))
     {
-      printf ("%s is no device\n", dev_name);
-      return -1;
+        printf ("%s is no device\n", dev_name);
+        return -1;
     }
 
-  fd = open (dev_name, O_RDWR);
+    fd = open (dev_name, O_RDWR);
 
-  if (-1 == fd)
+    if (-1 == fd)
     {
-      fprintf (stderr, "Cannot open '%s': %d, %s\n",
-               dev_name, errno, strerror (errno));
-      return -1;
+        fprintf (stderr, "Cannot open '%s': %d, %s\n",
+                 dev_name, errno, strerror (errno));
+        return -1;
     }
 
-  return fd;
+    return fd;
 }
 
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
-)
+                                  )
 {
     VADisplayContextP ctx = pDisplayContexts;
 
@@ -149,17 +143,11 @@ static VAStatus va_DisplayContextGetDriverName (
         return VA_STATUS_ERROR_UNKNOWN;
     }
 
-    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
-        && geteuid() == getuid()) {
-        /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        *driver_name = strdup(driver_name_env);
-        return VA_STATUS_SUCCESS;
-    } else { /* TBD: other vendor driver names */
-	vendor_id = devices[0].vendor_id;
-	device_id = devices[0].device_id;
-	*driver_name = strdup(devices[0].driver_name);
-    }
-
+    /* TBD: other vendor driver names */
+    vendor_id = devices[0].vendor_id;
+    device_id = devices[0].device_id;
+    *driver_name = strdup(devices[0].driver_name);
+        
     dri_state->driConnectedFlag = VA_DUMMY;
     
     return VA_STATUS_SUCCESS;
@@ -174,6 +162,7 @@ static VAStatus va_DisplayContextGetDriverName (
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
     char *driver_name_env;
     int vendor_id, device_id;
+    int i = 0;
     
     struct {
         int vendor_id;
@@ -193,30 +182,23 @@ static VAStatus va_DisplayContextGetDriverName (
         return VA_STATUS_ERROR_UNKNOWN;
     }
     
-    if ((driver_name_env = getenv("LIBVA_DRIVER_NAME")) != NULL
-        && geteuid() == getuid()) {
-        /* don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        *driver_name = strdup(driver_name_env);
-        return VA_STATUS_SUCCESS;
-    } else { /* TBD: other vendor driver names */
-        int i = 0;
+    /* TBD: other vendor driver names */
 
-        while (devices[i].device_id != 0) {
-            if ((devices[i].vendor_id == vendor_id) &&
-                (devices[i].device_id == device_id))
-                break;
-            i++;
-        }
-
-        if (devices[i].device_id != 0)
-            *driver_name = strdup(devices[i].driver_name);
-        else {
-            fprintf(stderr,"device (0x%04x:0x%04x) is not supported\n",
-                    vendor_id, device_id);
-            
-            return VA_STATUS_ERROR_UNKNOWN;
-        }            
+    while (devices[i].device_id != 0) {
+        if ((devices[i].vendor_id == vendor_id) &&
+            (devices[i].device_id == device_id))
+            break;
+        i++;
     }
+
+    if (devices[i].device_id != 0)
+        *driver_name = strdup(devices[i].driver_name);
+    else {
+        fprintf(stderr,"device (0x%04x:0x%04x) is not supported\n",
+                vendor_id, device_id);
+        
+        return VA_STATUS_ERROR_UNKNOWN;
+    }            
 
     printf("DRM device is opened, loading driver %s for device 0x%04x:0x%04x\n",
            driver_name, vendor_id, device_id);
@@ -231,58 +213,58 @@ VADisplay vaGetDisplay (
     void *native_dpy /* implementation specific */
 )
 {
-  VADisplay dpy = NULL;
-  VADisplayContextP pDisplayContext = pDisplayContexts;
+    VADisplay dpy = NULL;
+    VADisplayContextP pDisplayContext = pDisplayContexts;
 
-  if (!native_dpy)
-      return NULL;
+    if (!native_dpy)
+        return NULL;
 
-  while (pDisplayContext)
-  {
-      if (pDisplayContext->pDriverContext &&
-	  pDisplayContext->pDriverContext->native_dpy == (void *)native_dpy)
-      {
-          dpy = (VADisplay)pDisplayContext;
-          break;
-      }
-      pDisplayContext = pDisplayContext->pNext;
-  }
+    while (pDisplayContext)
+    {
+        if (pDisplayContext->pDriverContext &&
+            pDisplayContext->pDriverContext->native_dpy == (void *)native_dpy)
+        {
+            dpy = (VADisplay)pDisplayContext;
+            break;
+        }
+        pDisplayContext = pDisplayContext->pNext;
+    }
 
 
-  if (!dpy)
-  {
-      /* create new entry */
-      VADriverContextP pDriverContext;
-      struct dri_state *dri_state;
-      pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
-      pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
-      dri_state       = (struct dri_state*)calloc(1, sizeof(*dri_state));
-      if (pDisplayContext && pDriverContext && dri_state)
-      {
-	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
+    if (!dpy)
+    {
+        /* create new entry */
+        VADriverContextP pDriverContext;
+        struct dri_state *dri_state;
+        pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
+        pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
+        dri_state       = (struct dri_state*)calloc(1, sizeof(*dri_state));
+        if (pDisplayContext && pDriverContext && dri_state)
+        {
+            pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
-	  pDriverContext->native_dpy       = (void *)native_dpy;
-	  pDisplayContext->pNext           = pDisplayContexts;
-	  pDisplayContext->pDriverContext  = pDriverContext;
-	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
-	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-	  pDisplayContexts                 = pDisplayContext;
-	  pDriverContext->dri_state 	   = dri_state;
-	  dpy                              = (VADisplay)pDisplayContext;
-      }
-      else
-      {
-	  if (pDisplayContext)
-	      free(pDisplayContext);
-	  if (pDriverContext)
-	      free(pDriverContext);
-          if (dri_state)
-              free(dri_state);
-      }
-  }
+            pDriverContext->native_dpy       = (void *)native_dpy;
+            pDisplayContext->pNext           = pDisplayContexts;
+            pDisplayContext->pDriverContext  = pDriverContext;
+            pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+            pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+            pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+            pDisplayContexts                 = pDisplayContext;
+            pDriverContext->dri_state 	   = dri_state;
+            dpy                              = (VADisplay)pDisplayContext;
+        }
+        else
+        {
+            if (pDisplayContext)
+                free(pDisplayContext);
+            if (pDriverContext)
+                free(pDriverContext);
+            if (dri_state)
+                free(dri_state);
+        }
+    }
   
-  return dpy;
+    return dpy;
 }
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
@@ -307,12 +289,12 @@ VAStatus vaPutSurface (
     unsigned int flags /* de-interlacing flags */
 )
 {
-  VADriverContextP ctx;
+    VADriverContextP ctx;
 
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-  return ctx->vtable.vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
-                                   destx, desty, destw, desth,
-                                   cliprects, number_cliprects, flags );
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    return ctx->vtable.vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
+                                     destx, desty, destw, desth,
+                                     cliprects, number_cliprects, flags );
 }
 #endif

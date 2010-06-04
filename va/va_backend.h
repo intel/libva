@@ -397,7 +397,7 @@ struct VADriverContext
     void *handle;			/* dlopen handle */
     
     void *dri_state;
-    void *glx;  /* opaque for GLX code */
+    void *glx;				/* opaque for GLX code */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */

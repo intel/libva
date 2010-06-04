@@ -25,9 +25,8 @@ bin_PROGRAMS = vainfo
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x11
 
-
-vainfo_LDADD = $(top_builddir)/va/libva.la $(top_srcdir)/va/$(libvabackendlib)
-vainfo_DEPENDENCIES =  $(top_builddir)/va/libva.la $(top_srcdir)/va/$(libvabackendlib)
+vainfo_LDADD = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
+vainfo_DEPENDENCIES =  $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
 vainfo_SOURCES = vainfo.c
 
 SUBDIRS = basic decode encode putsurface

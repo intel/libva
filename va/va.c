@@ -331,30 +331,42 @@ VAStatus vaInitialize (
     int *minor_version 	 /* out */
 )
 {
-  char *driver_name = NULL;
-  VAStatus vaStatus;
-  
-  CHECK_DISPLAY(dpy);
+    const char *driver_name_env = NULL;
+    char *driver_name = NULL;
+    VAStatus vaStatus;
 
-  va_TraceInit();
+    CHECK_DISPLAY(dpy);
 
-  va_infoMessage("libva version %s\n", VA_VERSION_S);
+    va_TraceInit();
 
-  vaStatus = va_getDriverName(dpy, &driver_name);
-  va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
-  
-  if (VA_STATUS_SUCCESS == vaStatus)
-  {
-      vaStatus = va_openDriver(dpy, driver_name);
-      va_infoMessage("va_openDriver() returns %d\n", vaStatus);
+    va_infoMessage("libva version %s\n", VA_VERSION_S);
 
-      *major_version = VA_MAJOR_VERSION;
-      *minor_version = VA_MINOR_VERSION;
-  }
+    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+    if (driver_name_env && geteuid() == getuid())
+    {
+        /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
+        driver_name = strdup(driver_name_env);
+        vaStatus = VA_STATUS_SUCCESS;
+        va_infoMessage("User requested driver '%s'\n", driver_name);
+    }
+    else
+    {
+        vaStatus = va_getDriverName(dpy, &driver_name);
+        va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
+    }
 
-  if (driver_name)
-      free(driver_name);
-  return vaStatus;
+    if (VA_STATUS_SUCCESS == vaStatus)
+    {
+        vaStatus = va_openDriver(dpy, driver_name);
+        va_infoMessage("va_openDriver() returns %d\n", vaStatus);
+
+        *major_version = VA_MAJOR_VERSION;
+        *minor_version = VA_MINOR_VERSION;
+    }
+
+    if (driver_name)
+        free(driver_name);
+    return vaStatus;
 }
 
 
