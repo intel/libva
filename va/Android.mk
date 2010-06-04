@@ -60,6 +60,8 @@ LOCAL_COPY_HEADERS := va_android.h
 
 LOCAL_MODULE := libva-android
 
+LOCAL_SHARED_LIBRARIES := libva
+
 include $(BUILD_SHARED_LIBRARY)
 
 
