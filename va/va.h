@@ -159,6 +159,8 @@ const char *vaErrorStr(VAStatus error_status);
  */
 typedef void* NativeDisplay;	/* window system dependent */
 
+int vaDisplayIsValid(VADisplay dpy);
+    
 /*
  * Initialize the library 
  */
