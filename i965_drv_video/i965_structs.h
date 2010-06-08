@@ -34,16 +34,20 @@ struct i965_vfe_state_ex
 	unsigned int obj_id:24;
     } vfex0;
 
-    struct {
-	unsigned int residual_grf_offset:5;
-	unsigned int pad0:3;
-	unsigned int weight_grf_offset:5;
-	unsigned int pad1:3;
-	unsigned int residual_data_offset:8;
-	unsigned int sub_field_present_flag:2;
-	unsigned int residual_data_fix_offset:1;
-	unsigned int pad2:5;
-    }vfex1;
+    union {
+        struct {
+            unsigned int residual_grf_offset:5;
+            unsigned int pad0:3;
+            unsigned int weight_grf_offset:5;
+            unsigned int pad1:3;
+            unsigned int residual_data_offset:8;
+            unsigned int sub_field_present_flag:2;
+            unsigned int residual_data_fix_offset_flag:1;
+            unsigned int pad2:5;
+        } avc;
+        
+        unsigned int vc1;
+    } vfex1;
 
     struct {
 	unsigned int remap_index_0:4;
@@ -68,18 +72,32 @@ struct i965_vfe_state_ex
     } remap_table1;
 
     struct {
-	unsigned int scoreboard_mask:8;
+	unsigned int mask:8;
 	unsigned int pad:22;
 	unsigned int type:1;
 	unsigned int enable:1;
     } scoreboard0;
 
     struct {
-	unsigned int ignore;
+        int delta_x0:4;
+        int delta_y0:4;
+        int delta_x1:4;
+        int delta_y1:4;
+        int delta_x2:4;
+        int delta_y2:4;
+        int delta_x3:4;
+        int delta_y3:4;
     } scoreboard1;
 
     struct {
-	unsigned int ignore;
+        int delta_x4:4;
+        int delta_y4:4;
+        int delta_x5:4;
+        int delta_y5:4;
+        int delta_x6:4;
+        int delta_y6:4;
+        int delta_x7:4;
+        int delta_y7:4;
     } scoreboard2;
 
     unsigned int pad;
@@ -177,8 +195,9 @@ struct i965_surface_state
 	unsigned int cube_neg_y:1;
 	unsigned int cube_pos_x:1;
 	unsigned int cube_neg_x:1;
-	unsigned int pad:3;
+	unsigned int pad:2;
 	unsigned int render_cache_read_mode:1;
+	unsigned int cube_map_corner_mode:1;
 	unsigned int mipmap_layout_mode:1;
 	unsigned int vert_line_stride_ofs:1;
 	unsigned int vert_line_stride:1;

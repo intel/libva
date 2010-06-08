@@ -35,6 +35,8 @@ struct dri2_drawable
     int front_index;
 };
 
+static int gsDRI2SwapAvailable;
+
 static struct dri_drawable * 
 dri2CreateDrawable(VADriverContextP ctx, XID x_drawable)
 {
@@ -68,15 +70,21 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     XserverRegion region;
 
     if (dri2_drawable->has_backbuffer) {
-        xrect.x = 0;
-        xrect.y = 0;
-        xrect.width = dri2_drawable->width;
-        xrect.height = dri2_drawable->height;
+        if (gsDRI2SwapAvailable) {
+            CARD64 ret;
+            VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable, 0, 0,
+                               0, &ret);
+        } else {
+            xrect.x = 0;
+            xrect.y = 0;
+            xrect.width = dri2_drawable->width;
+            xrect.height = dri2_drawable->height;
 
-        region = XFixesCreateRegion((Display *)ctx->native_dpy, &xrect, 1);
-        VA_DRI2CopyRegion((Display *)ctx->native_dpy, dri_drawable->x_drawable, region,
-                       DRI2BufferFrontLeft, DRI2BufferBackLeft);
-        XFixesDestroyRegion((Display *)ctx->native_dpy, region);
+            region = XFixesCreateRegion(ctx->native_dpy, &xrect, 1);
+            VA_DRI2CopyRegion(ctx->native_dpy, dri_drawable->x_drawable, region,
+                              DRI2BufferFrontLeft, DRI2BufferBackLeft);
+            XFixesDestroyRegion(ctx->native_dpy, region);
+        }
     }
 }
 
@@ -91,8 +99,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     
     i = 0;
     attachments[i++] = __DRI_BUFFER_BACK_LEFT;
-    attachments[i++] = __DRI_BUFFER_FRONT_LEFT;
-    buffers = VA_DRI2GetBuffers((Display *)ctx->native_dpy, dri_drawable->x_drawable,
+    buffers = VA_DRI2GetBuffers(ctx->native_dpy, dri_drawable->x_drawable,
 			     &dri2_drawable->width, &dri2_drawable->height, 
                              attachments, i, &count);
     assert(buffers);
@@ -179,6 +186,7 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     dri_state->swapBuffer = dri2SwapBuffer;
     dri_state->getRenderingBuffer = dri2GetRenderingBuffer;
     dri_state->close = dri2Close;
+    gsDRI2SwapAvailable = (minor >= 2);
 
     return True;
 
