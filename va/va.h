@@ -127,6 +127,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED 0x00000013
 #define VA_STATUS_ERROR_UNIMPLEMENTED           0x00000014
 #define VA_STATUS_ERROR_SURFACE_IN_DISPLAYING   0x00000015
+#define VA_STATUS_ERROR_INVALID_IMAGE_FORMAT    0x00000016
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
