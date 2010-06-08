@@ -280,7 +280,7 @@ static struct media_kernel  mpeg2_vld_kernels_gen4[] = {
     }
 };
 
-/* On IGDNG */
+/* On IRONLAKE */
 static uint32_t frame_intra_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_intra.g4b.gen5"
 };
@@ -517,6 +517,15 @@ i965_media_mpeg2_surface_setup(VADriverContextP ctx,
 {
     int w = obj_surface->width;
     int h = obj_surface->height;
+
+    if (obj_surface->bo == NULL) {
+        struct i965_driver_data *i965 = i965_driver_data(ctx);  
+        
+        obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
+                                       "vaapi surface",
+                                       obj_surface->size,
+                                       0x1000);
+    }
 
     if (picture_structure == MPEG_FRAME) {
 	i965_media_mpeg2_surface_state(ctx, base_index + 0, obj_surface,
@@ -851,97 +860,38 @@ i965_media_mpeg2_states_setup(VADriverContextP ctx, struct decode_state *decode_
 static void
 i965_media_mpeg2_objects(VADriverContextP ctx, struct decode_state *decode_state)
 {
-    int i;
+    int i, j;
     VASliceParameterBufferMPEG2 *slice_param;
 
-    assert(decode_state->slice_param && decode_state->slice_param->buffer);
-    slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_param->buffer;
+    for (j = 0; j < decode_state->num_slice_params; j++) {
+        assert(decode_state->slice_params[j] && decode_state->slice_params[j]->buffer);
+        assert(decode_state->slice_datas[j] && decode_state->slice_datas[j]->bo);
+        slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j]->buffer;
 
-    for (i = 0; i < decode_state->num_slices; i++) {
-        assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
+        for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
+            assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
 
-        BEGIN_BATCH(ctx, 6);
-        OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
-        OUT_BATCH(ctx, 0);
-        OUT_BATCH(ctx, slice_param->slice_data_size - (slice_param->macroblock_offset >> 3));
-        OUT_RELOC(ctx, decode_state->slice_data->bo, 
-                  I915_GEM_DOMAIN_SAMPLER, 0, 
-                  slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
-        OUT_BATCH(ctx, 
-                  ((slice_param->slice_horizontal_position << 24) |     
-                   (slice_param->slice_vertical_position << 16) |
-                   (127 << 8) | 
-                   (slice_param->macroblock_offset & 0x7)));
-        OUT_BATCH(ctx, slice_param->quantiser_scale_code << 24);
-        ADVANCE_BATCH(ctx);          
-        slice_param++;
+            BEGIN_BATCH(ctx, 6);
+            OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
+            OUT_BATCH(ctx, 0);
+            OUT_BATCH(ctx, slice_param->slice_data_size - (slice_param->macroblock_offset >> 3));
+            OUT_RELOC(ctx, decode_state->slice_datas[j]->bo, 
+                      I915_GEM_DOMAIN_SAMPLER, 0, 
+                      slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
+            OUT_BATCH(ctx, 
+                      ((slice_param->slice_horizontal_position << 24) |     
+                       (slice_param->slice_vertical_position << 16) |
+                       (127 << 8) | 
+                       (slice_param->macroblock_offset & 0x7)));
+            OUT_BATCH(ctx, slice_param->quantiser_scale_code << 24);
+            ADVANCE_BATCH(ctx);          
+            slice_param++;
+        }
     }
 }
 
-void 
-i965_media_mpeg2_decode_init(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    dri_bo *bo;
-
-    media_state->extended_state.enabled = 1;
-    dri_bo_unreference(media_state->extended_state.bo);
-    bo = dri_bo_alloc(i965->intel.bufmgr, 
-                      "vld state", 
-                      sizeof(struct i965_vld_state), 32);
-    assert(bo);
-    media_state->extended_state.bo = bo;
-
-    /* URB */
-    media_state->urb.num_vfe_entries = 28;
-    media_state->urb.size_vfe_entry = 13;
-
-    media_state->urb.num_cs_entries = 1;
-    media_state->urb.size_cs_entry = 16;
-
-    media_state->urb.vfe_start = 0;
-    media_state->urb.cs_start = media_state->urb.vfe_start + 
-        media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
-    assert(media_state->urb.cs_start + 
-           media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
-
-    /* hook functions */
-    media_state->states_setup = i965_media_mpeg2_states_setup;
-    media_state->media_objects = i965_media_mpeg2_objects;
-
-}
-
-Bool 
-i965_media_mpeg2_init(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    int i;
-
-    /* kernel */
-    assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
-                                     sizeof(mpeg2_vld_kernels_gen5[0])));
-    assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
-
-    if (IS_IGDNG(i965->intel.device_id))
-        mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
-    else
-        mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
-
-    for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-        struct media_kernel *kernel = &mpeg2_vld_kernels[i];
-        kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
-                                  kernel->name, 
-                                  kernel->size, 64);
-        assert(kernel->bo);
-        dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
-    }
-
-    return True;
-}
-
-Bool 
-i965_media_mpeg2_ternimate(VADriverContextP ctx)
+static void
+i965_media_mpeg2_free_private_context(void **data)
 {
     int i;
 
@@ -952,6 +902,62 @@ i965_media_mpeg2_ternimate(VADriverContextP ctx)
         kernel->bo = NULL;
     }
 
-    return True;
+    mpeg2_vld_kernels = NULL;
+}
+
+void 
+i965_media_mpeg2_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_media_state *media_state = &i965->media_state;
+    dri_bo *bo;
+    int i;
+    if (mpeg2_vld_kernels == NULL) {
+        /* kernel */
+        assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
+                                         sizeof(mpeg2_vld_kernels_gen5[0])));
+        assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
+
+        if (IS_IRONLAKE(i965->intel.device_id))
+            mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
+        else
+            mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
+
+        for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
+            struct media_kernel *kernel = &mpeg2_vld_kernels[i];
+            kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
+                                      kernel->name, 
+                                      kernel->size, 64);
+            assert(kernel->bo);
+            dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
+        }
+
+        /* URB */
+        media_state->urb.num_vfe_entries = 28;
+        media_state->urb.size_vfe_entry = 13;
+
+        media_state->urb.num_cs_entries = 1;
+        media_state->urb.size_cs_entry = 16;
+
+        media_state->urb.vfe_start = 0;
+        media_state->urb.cs_start = media_state->urb.vfe_start + 
+            media_state->urb.num_vfe_entries * media_state->urb.size_vfe_entry;
+        assert(media_state->urb.cs_start + 
+               media_state->urb.num_cs_entries * media_state->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
+
+        /* hook functions */
+        media_state->media_states_setup = i965_media_mpeg2_states_setup;
+        media_state->media_objects = i965_media_mpeg2_objects;
+        media_state->free_private_context = i965_media_mpeg2_free_private_context;
+    }
+
+    media_state->extended_state.enabled = 1;
+    media_state->indirect_object.bo = NULL;
+    dri_bo_unreference(media_state->extended_state.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "vld state", 
+                      sizeof(struct i965_vld_state), 32);
+    assert(bo);
+    media_state->extended_state.bo = bo;
 }
 

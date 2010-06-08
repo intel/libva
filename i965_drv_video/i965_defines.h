@@ -20,6 +20,13 @@
 #define CMD_MEDIA_OBJECT                        CMD(2, 1, 0)
 #define CMD_MEDIA_OBJECT_EX                     CMD(2, 1, 1)
 
+#define CMD_AVC_BSD_IMG_STATE                   CMD(2, 4, 0)
+#define CMD_AVC_BSD_QM_STATE                    CMD(2, 4, 1)
+#define CMD_AVC_BSD_SLICE_STATE                 CMD(2, 4, 2)
+#define CMD_AVC_BSD_BUF_BASE_STATE              CMD(2, 4, 3)
+#define CMD_BSD_IND_OBJ_BASE_ADDR               CMD(2, 4, 4)
+#define CMD_AVC_BSD_OBJECT                      CMD(2, 4, 8)
+
 #define CMD_PIPELINED_POINTERS                  CMD(3, 0, 0)
 #define CMD_BINDING_TABLE_POINTERS              CMD(3, 0, 1)
 #define CMD_VERTEX_BUFFERS                      CMD(3, 0, 8)
@@ -27,6 +34,9 @@
 #define CMD_DRAWING_RECTANGLE                   CMD(3, 1, 0)
 #define CMD_CONSTANT_COLOR                      CMD(3, 1, 1)
 #define CMD_3DPRIMITIVE                         CMD(3, 3, 0)
+
+#define CMD_DEPTH_BUFFER                        CMD(3, 1, 5)
+#define I965_DEPTHFORMAT_D32_FLOAT              1
 
 #define BASE_ADDRESS_MODIFY             (1 << 0)
 
@@ -321,6 +331,32 @@
 #define I965_TILEWALK_XMAJOR                 0
 #define I965_TILEWALK_YMAJOR                 1
 
-#define URB_SIZE(intel)         (IS_IGDNG(intel->device_id) ? 1024 : \
+#define SCAN_RASTER_ORDER       0
+#define SCAN_SPECIAL_ORDER      1
+
+#define ENTROPY_CAVLD           0
+#define ENTROPY_CABAC           1
+
+#define SLICE_TYPE_P            0
+#define SLICE_TYPE_B            1
+#define SLICE_TYPE_I            2
+#define SLICE_TYPE_SP           3
+#define SLICE_TYPE_SI           4
+
+#define PRESENT_REF_LIST0               (1 << 0)
+#define PRESENT_REF_LIST1               (1 << 1)
+#define PRESENT_WEIGHT_OFFSET_L0        (1 << 2)
+#define PRESENT_WEIGHT_OFFSET_L1        (1 << 3)
+
+#define RESIDUAL_DATA_OFFSET    48
+
+#define PRESENT_NOMV            0
+#define PRESENT_NOWO            1
+#define PRESENT_MV_WO           3
+
+#define SCOREBOARD_STALLING     0
+#define SCOREBOARD_NON_STALLING 1
+
+#define URB_SIZE(intel)         (IS_IRONLAKE(intel->device_id) ? 1024 : \
                                  IS_G4X(intel->device_id) ? 384 : 256)
 #endif /* _I965_DEFINES_H_ */

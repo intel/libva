@@ -34,23 +34,18 @@ include(`exa_wm.g4i')
 /* use simd16 sampler, param 0 is u, param 1 is v. */
 /* 'payload' loading, assuming tex coord start from g4 */
 
+and.nz (1) null interleaved_uv 0x01UW {align1};
+(f0) jmpi INTERLEAVED_UV;
+
 /* load r */
 mov (1) g0.8<1>UD	0x0000e000UD { align1 mask_disable };
 
 /* src_msg will be copied with g0, as it contains send desc */
 /* emit sampler 'send' cmd */
 
-/* sample Y */
-send (16) src_msg_ind		/* msg reg index */
-	src_sample_g<1>UW 	/* readback */
-	g0<8,8,1>UW		/* copy to msg start reg*/
-	sampler (1,0,F)		/* sampler message description, (binding_table,sampler_index,datatype)
-				/* here(src->dst) we should use src_sampler and src_surface */
-	mlen 5 rlen 2 { align1 };   /* required message len 5, readback len 8 */
-	
 /* sample U (Cr) */
 send (16) src_msg_ind		/* msg reg index */
-	src_sample_r<1>UW 	/* readback */
+	src_sample_g<1>UW 	/* readback */
 	g0<8,8,1>UW		/* copy to msg start reg*/
 	sampler (3,2,F)		/* sampler message description, (binding_table,sampler_index,datatype)
 				/* here(src->dst) we should use src_sampler and src_surface */
@@ -63,3 +58,30 @@ send (16) src_msg_ind		/* msg reg index */
 	sampler (5,4,F)		/* sampler message description, (binding_table,sampler_index,datatype)
 				/* here(src->dst) we should use src_sampler and src_surface */
 	mlen 5 rlen 2 { align1 };   /* required message len 5, readback len 8 */
+
+jmpi SAMPLE_Y;
+
+INTERLEAVED_UV:
+/* load r */
+mov (1) g0.8<1>UD	0x0000c000UD { align1 mask_disable };
+
+/* sample UV (CrCb) */
+send (16) src_msg_ind		/* msg reg index */
+	src_sample_g<1>UW 	/* readback */
+	g0<8,8,1>UW		/* copy to msg start reg*/
+	sampler (3,2,F)		/* sampler message description, (binding_table,sampler_index,datatype)
+				/* here(src->dst) we should use src_sampler and src_surface */
+	mlen 5 rlen 4 { align1 };   /* required message len 5, readback len 8 */
+
+/* load r */
+mov (1) g0.8<1>UD	0x0000e000UD { align1 mask_disable };
+
+SAMPLE_Y:
+/* sample Y */
+send (16) src_msg_ind		/* msg reg index */
+	src_sample_r<1>UW 	/* readback */
+	g0<8,8,1>UW		/* copy to msg start reg*/
+	sampler (1,0,F)		/* sampler message description, (binding_table,sampler_index,datatype)
+				/* here(src->dst) we should use src_sampler and src_surface */
+	mlen 5 rlen 2 { align1 };   /* required message len 5, readback len 8 */
+	

@@ -33,6 +33,7 @@
 #ifndef _VA_DRI2_H_
 #define _VA_DRI2_H_
 
+#include <X11/Xproto.h>
 #include <X11/extensions/Xfixes.h>
 #include <X11/Xfuncproto.h>
 #include <xf86drm.h>
@@ -63,9 +64,10 @@ VA_DRI2GetBuffers(Display *dpy, XID drawable,
 	       int *width, int *height,
 	       unsigned int *attachments, int count,
 	       int *outCount);
-#if 0
 extern void
 VA_DRI2CopyRegion(Display *dpy, XID drawable, XserverRegion region,
-	       CARD32 dest, CARD32 src);
-#endif
+                  CARD32 dest, CARD32 src);
+extern void
+VA_DRI2SwapBuffers(Display *dpy, XID drawable, CARD64 target_msc, CARD64 divisor,
+                   CARD64 remainder, CARD64 *count);
 #endif
