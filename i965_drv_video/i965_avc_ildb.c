@@ -517,7 +517,7 @@ i965_avc_ildb_objects(VADriverContextP ctx)
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
-    BEGIN_BATCH(ctx, 4);
+    BEGIN_BATCH(ctx, 6);
     OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
 
     switch (avc_ildb_context->picture_type) {

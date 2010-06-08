@@ -734,6 +734,7 @@ i965_media_h264_objects(VADriverContextP ctx, struct decode_state *decode_state)
     object_command = i965_h264_context->avc_it_command_mb_info.bo->virtual;
     memset(object_command, 0, i965_h264_context->avc_it_command_mb_info.mbs * i965_h264_context->use_avc_hw_scoreboard * MB_CMD_IN_BYTES);
     object_command += i965_h264_context->avc_it_command_mb_info.mbs * (1 + i965_h264_context->use_avc_hw_scoreboard) * MB_CMD_IN_DWS;
+    *object_command++ = 0;
     *object_command = MI_BATCH_BUFFER_END;
     dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
 
@@ -867,7 +868,7 @@ i965_media_h264_decode_init(VADriverContextP ctx, struct decode_state *decode_st
     dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "avc it command mb info",
-                      i965_h264_context->avc_it_command_mb_info.mbs * MB_CMD_IN_BYTES * (1 + i965_h264_context->use_avc_hw_scoreboard) + 4,
+                      i965_h264_context->avc_it_command_mb_info.mbs * MB_CMD_IN_BYTES * (1 + i965_h264_context->use_avc_hw_scoreboard) + 8,
                       0x1000);
     assert(bo);
     i965_h264_context->avc_it_command_mb_info.bo = bo;

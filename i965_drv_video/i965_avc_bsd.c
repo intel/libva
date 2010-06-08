@@ -986,7 +986,6 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
-    unsigned int *object_command;
     int i, j;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
@@ -1047,14 +1046,6 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
     intel_batchbuffer_emit_mi_flush_bcs(ctx);
     intel_batchbuffer_end_atomic_bcs(ctx);
     intel_batchbuffer_flush_bcs(ctx);
-
-    dri_bo_map(i965_h264_context->avc_it_command_mb_info.bo, True);
-    assert(i965_h264_context->avc_it_command_mb_info.bo->virtual);
-    object_command = i965_h264_context->avc_it_command_mb_info.bo->virtual;
-    memset(object_command, 0, i965_h264_context->avc_it_command_mb_info.mbs * i965_h264_context->use_avc_hw_scoreboard * MB_CMD_IN_BYTES);
-    object_command += i965_h264_context->avc_it_command_mb_info.mbs * (1 + i965_h264_context->use_avc_hw_scoreboard) * MB_CMD_IN_DWS;
-    *object_command = MI_BATCH_BUFFER_END;
-    dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
 }
 
 void 
