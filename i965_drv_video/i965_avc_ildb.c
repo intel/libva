@@ -283,7 +283,7 @@ i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx)
     for (i = 0; i < NUM_AVC_ILDB_INTERFACES; i++) {
         int kernel_offset = avc_ildb_kernel_offset[i];
         memset(desc, 0, sizeof(*desc));
-        desc->desc0.grf_reg_blocks = 9; 
+        desc->desc0.grf_reg_blocks = 7; 
         desc->desc0.kernel_start_pointer = (h264_avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
         desc->desc1.const_urb_entry_read_offset = 0;
         desc->desc1.const_urb_entry_read_len = ((i == AVC_ILDB_ROOT_Y_ILDB_FRAME ||
