@@ -210,7 +210,7 @@ INTRA_8X8_VERT_LEFT:
 	add (16)		acc0<1>:w		REF_TOP(0,2)REGION(16,1)	2:w		// p[x+2]+2
 	mac (16)		acc0<1>:w		REF_TOP(0,1)REGION(16,1)	2:w		// 2*p[x+1]+p[x+2]+2
 	mac (16)		acc0<1>:w		REF_TOP(0)REGION(16,1)		1:w		// p[x]+2*p[x+1]+p[x+2]+2
-	shr (16)		PRED_YW(15)<1>	acc0<1>:w	2:w		// (p[x]+2*p[x+1]+p[x+2]+2)>>2
+	shr (16)		PRED_YW(15)<1>	acc0<1;8,1>:w	2:w		// (p[x]+2*p[x+1]+p[x+2]+2)>>2
 
 	// Add error block
     $for(0,0; <4; 1,32) {
@@ -229,7 +229,7 @@ INTRA_8X8_HOR_UP:
 	add (16)	acc0<1>:w		REF_LEFT(0,2)REGION(16,1)	2:w		// p[y+2]+2
 	mac (16)	acc0<1>:w		REF_LEFT(0,1)REGION(16,1)	2:w		// 2*p[y+1]+p[y+2]+2
 	mac (16)	acc0<1>:w		REF_LEFT(0)REGION(16,1)		1:w		// p[y]+2*p[y+1]+p[y+2]+2
-	shr (16)	PRED_YW(15)<1>	acc0<1>:w	2:w		// (p[y]+2*p[y+1]+p[y+2]+2)>>2
+	shr (16)	PRED_YW(15)<1>	acc0<1;8,1>:w	2:w		// (p[y]+2*p[y+1]+p[y+2]+2)>>2
 
 	// Merge even/odd pixels
 	// The predicted data need to be stored in byte type (22 bytes are required)
