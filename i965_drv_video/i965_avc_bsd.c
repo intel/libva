@@ -177,8 +177,8 @@ i965_avc_bsd_img_state(VADriverContextP ctx, struct decode_state *decode_state)
                   (height_in_mbs << 16) | 
                   (width_in_mbs << 0));
     OUT_BCS_BATCH(ctx, 
-                  (pic_param->second_chroma_qp_index_offset << 24) |
-                  (pic_param->chroma_qp_index_offset << 16) | 
+                  ((pic_param->second_chroma_qp_index_offset & 0x1f) << 24) |
+                  ((pic_param->chroma_qp_index_offset & 0x1f) << 16) | 
                   (SCAN_RASTER_ORDER << 15) | /* AVC ILDB Data */
                   (SCAN_SPECIAL_ORDER << 14) | /* AVC IT Command */
                   (SCAN_RASTER_ORDER << 13) | /* AVC IT Data */
