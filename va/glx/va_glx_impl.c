@@ -1070,12 +1070,6 @@ VAStatus va_glx_init_context(VADriverContextP ctx)
 
         if (!glXQueryVersion((Display *)ctx->native_dpy, &glx_major, &glx_minor))
             return VA_STATUS_ERROR_UNIMPLEMENTED;
-        if (glx_major < 1 || (glx_major == 1 && glx_minor < 3)) { /* GLX 1.3 */
-            va_glx_error_message("GLX version 1.3 expected but only "
-                                 "version %d.%d is available\n",
-                                 glx_major, glx_minor);
-            return VA_STATUS_ERROR_UNIMPLEMENTED;
-        }
 
         if (!check_tfp_extensions(ctx) || !load_tfp_extensions(ctx))
             return VA_STATUS_ERROR_UNIMPLEMENTED;
