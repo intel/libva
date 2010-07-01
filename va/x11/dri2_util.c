@@ -98,7 +98,11 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     VA_DRI2Buffer *buffers;
     
     i = 0;
-    attachments[i++] = __DRI_BUFFER_BACK_LEFT;
+    if (dri_drawable->is_window)
+        attachments[i++] = __DRI_BUFFER_BACK_LEFT;
+    else
+        attachments[i++] = __DRI_BUFFER_FRONT_LEFT;
+
     buffers = VA_DRI2GetBuffers(ctx->native_dpy, dri_drawable->x_drawable,
 			     &dri2_drawable->width, &dri2_drawable->height, 
                              attachments, i, &count);
