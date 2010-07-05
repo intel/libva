@@ -629,11 +629,9 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         else if (slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
-        first_mb_in_slice = slice_param->first_mb_in_slice;
+        first_mb_in_slice = slice_param->first_mb_in_slice << mbaff_picture;
         slice_hor_pos = first_mb_in_slice % width_in_mbs; 
         slice_ver_pos = first_mb_in_slice / width_in_mbs;
-        first_mb_in_slice = (slice_ver_pos << mbaff_picture) * width_in_mbs + slice_hor_pos;
-        slice_hor_pos <<= mbaff_picture;
 
         BEGIN_BCS_BATCH(ctx, cmd_len);
         OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (cmd_len - 2));
@@ -755,11 +753,9 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         else if (slice_type == SLICE_TYPE_B)
             weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
 
-        first_mb_in_slice = slice_param->first_mb_in_slice;
+        first_mb_in_slice = slice_param->first_mb_in_slice << mbaff_picture;
         slice_hor_pos = first_mb_in_slice % width_in_mbs; 
         slice_ver_pos = first_mb_in_slice / width_in_mbs;
-        first_mb_in_slice = (slice_ver_pos << mbaff_picture) * width_in_mbs + slice_hor_pos;
-        slice_hor_pos <<= mbaff_picture;
 
         BEGIN_BCS_BATCH(ctx, 16);
         OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (16 - 2));
