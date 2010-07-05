@@ -37,6 +37,7 @@ static void
 intel_batchbuffer_reset(struct intel_batchbuffer *batch)
 {
     struct intel_driver_data *intel = batch->intel; 
+    int batch_size = batch->flag == I915_EXEC_RENDER ? BATCH_SIZE : (BATCH_SIZE * 8);
 
     assert(batch->flag == I915_EXEC_RENDER ||
            batch->flag == I915_EXEC_BSD);
@@ -44,12 +45,13 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
     dri_bo_unreference(batch->buffer);
     batch->buffer = dri_bo_alloc(intel->bufmgr, 
                                  batch->flag == I915_EXEC_RENDER ? "render batch buffer" : "bsd batch buffer", 
-                                 BATCH_SIZE, 0x1000);
+                                 batch_size,
+                                 0x1000);
     assert(batch->buffer);
     dri_bo_map(batch->buffer, 1);
     assert(batch->buffer->virtual);
     batch->map = batch->buffer->virtual;
-    batch->size = BATCH_SIZE;
+    batch->size = batch_size;
     batch->ptr = batch->map;
     batch->atomic = 0;
 }
