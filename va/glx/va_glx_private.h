@@ -31,15 +31,25 @@
 #include "va_x11.h"
 #include "va_glx.h"
 #include "va_backend_glx.h"
+#include <GL/glxext.h>
 
 #if GLX_GLXEXT_VERSION < 18
 typedef void (*PFNGLXBINDTEXIMAGEEXTPROC)(Display *, GLXDrawable, int, const int *);
 typedef void (*PFNGLXRELEASETEXIMAGEEXTPROC)(Display *, GLXDrawable, int);
 #endif
 
+#if GLX_GLXEXT_VERSION < 27
+/* XXX: this is not exactly that version but this is the only means to
+   make sure we have the correct <GL/glx.h> with those signatures */
+typedef GLXPixmap (*PFNGLXCREATEPIXMAPPROC)(Display *, GLXFBConfig, Pixmap, const int *);
+typedef void (*PFNGLXDESTROYPIXMAPPROC)(Display *, GLXPixmap);
+#endif
+
 typedef struct VAOpenGLVTable *VAOpenGLVTableP;
 
 struct VAOpenGLVTable {
+    PFNGLXCREATEPIXMAPPROC              glx_create_pixmap;
+    PFNGLXDESTROYPIXMAPPROC             glx_destroy_pixmap;
     PFNGLXBINDTEXIMAGEEXTPROC           glx_bind_tex_image;
     PFNGLXRELEASETEXIMAGEEXTPROC        glx_release_tex_image;
     PFNGLGENFRAMEBUFFERSEXTPROC         gl_gen_framebuffers;

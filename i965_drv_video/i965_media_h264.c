@@ -523,7 +523,6 @@ i965_media_h264_vfe_state_extension(VADriverContextP ctx,
     struct i965_h264_context *i965_h264_context;
     struct i965_vfe_state_ex *vfe_state_ex;
     VAPictureParameterBufferH264 *pic_param;
-    VASliceParameterBufferH264 *slice_param;
     int mbaff_frame_flag;
 
     assert(media_state->private_context);
@@ -531,10 +530,6 @@ i965_media_h264_vfe_state_extension(VADriverContextP ctx,
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-
-    assert(decode_state->slice_params[0] && decode_state->slice_params[0]->buffer);
-    slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[0]->buffer;
-
     mbaff_frame_flag = (pic_param->seq_fields.bits.mb_adaptive_frame_field_flag &&
                         !pic_param->pic_fields.bits.field_pic_flag);
 
@@ -556,16 +551,12 @@ i965_media_h264_vfe_state_extension(VADriverContextP ctx,
     vfe_state_ex->vfex1.avc.residual_data_fix_offset_flag = !!RESIDUAL_DATA_OFFSET;
     vfe_state_ex->vfex1.avc.residual_data_offset = RESIDUAL_DATA_OFFSET;
 
-    if (slice_param->slice_type == SLICE_TYPE_I ||
-        slice_param->slice_type == SLICE_TYPE_SI) 
+    if (i965_h264_context->picture.i_flag) {
         vfe_state_ex->vfex1.avc.sub_field_present_flag = PRESENT_NOMV; /* NoMV */
-    else 
-        vfe_state_ex->vfex1.avc.sub_field_present_flag = PRESENT_MV_WO; /* Both MV and W/O */
-
-    if (vfe_state_ex->vfex1.avc.sub_field_present_flag == 0) {
         vfe_state_ex->vfex1.avc.weight_grf_offset = 0;
         vfe_state_ex->vfex1.avc.residual_grf_offset = 0;
     } else {
+        vfe_state_ex->vfex1.avc.sub_field_present_flag = PRESENT_MV_WO; /* Both MV and W/O */
         vfe_state_ex->vfex1.avc.weight_grf_offset = 4;
         vfe_state_ex->vfex1.avc.residual_grf_offset = 6;
     }

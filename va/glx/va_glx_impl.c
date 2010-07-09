@@ -222,6 +222,14 @@ static int load_tfp_extensions(VADriverContextP ctx)
 {
     VAOpenGLVTableP pOpenGLVTable = gl_get_vtable(ctx);
 
+    pOpenGLVTable->glx_create_pixmap = (PFNGLXCREATEPIXMAPPROC)
+        get_proc_address("glXCreatePixmap");
+    if (!pOpenGLVTable->glx_create_pixmap)
+        return 0;
+    pOpenGLVTable->glx_destroy_pixmap = (PFNGLXDESTROYPIXMAPPROC)
+        get_proc_address("glXDestroyPixmap");
+    if (!pOpenGLVTable->glx_destroy_pixmap)
+        return 0;
     pOpenGLVTable->glx_bind_tex_image = (PFNGLXBINDTEXIMAGEEXTPROC)
         get_proc_address("glXBindTexImageEXT");
     if (!pOpenGLVTable->glx_bind_tex_image)
@@ -451,15 +459,16 @@ struct VASurfaceGLX {
 // Create Pixmaps for GLX texture-from-pixmap extension
 static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 {
-    const unsigned int  width      = pSurfaceGLX->width;
-    const unsigned int  height     = pSurfaceGLX->height;
-    Pixmap              pixmap     = None;
-    GLXFBConfig        *fbconfig   = NULL;
-    GLXPixmap           glx_pixmap = None;
-    Window              root_window;
-    XWindowAttributes   wattr;
-    int                *attrib;
-    int                 n_fbconfig_attrs;
+    VAOpenGLVTableP const pOpenGLVTable = gl_get_vtable(ctx);
+    const unsigned int    width         = pSurfaceGLX->width;
+    const unsigned int    height        = pSurfaceGLX->height;
+    Pixmap                pixmap        = None;
+    GLXFBConfig          *fbconfig      = NULL;
+    GLXPixmap             glx_pixmap    = None;
+    Window                root_window;
+    XWindowAttributes     wattr;
+    int                  *attrib;
+    int                   n_fbconfig_attrs;
 
     root_window = RootWindow((Display *)ctx->native_dpy, ctx->x11_screen);
     XGetWindowAttributes((Display *)ctx->native_dpy, root_window, &wattr);
@@ -523,7 +532,7 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     *attrib++ = GL_NONE;
 
     x11_trap_errors();
-    glx_pixmap = glXCreatePixmap(
+    glx_pixmap = pOpenGLVTable->glx_create_pixmap(
         (Display *)ctx->native_dpy,
         fbconfig[0],
         pixmap,
@@ -544,13 +553,15 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 // Destroy Pixmaps used for TFP
 static void destroy_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 {
+    VAOpenGLVTableP const pOpenGLVTable = gl_get_vtable(ctx);
+
     if (pSurfaceGLX->pix_texture) {
         glDeleteTextures(1, &pSurfaceGLX->pix_texture);
         pSurfaceGLX->pix_texture = 0;
     }
 
     if (pSurfaceGLX->glx_pixmap) {
-        glXDestroyPixmap((Display *)ctx->native_dpy, pSurfaceGLX->glx_pixmap);
+        pOpenGLVTable->glx_destroy_pixmap((Display *)ctx->native_dpy, pSurfaceGLX->glx_pixmap);
         pSurfaceGLX->glx_pixmap = None;
     }
 
@@ -1059,12 +1070,6 @@ VAStatus va_glx_init_context(VADriverContextP ctx)
 
         if (!glXQueryVersion((Display *)ctx->native_dpy, &glx_major, &glx_minor))
             return VA_STATUS_ERROR_UNIMPLEMENTED;
-        if (glx_major < 1 || (glx_major == 1 && glx_minor < 3)) { /* GLX 1.3 */
-            va_glx_error_message("GLX version 1.3 expected but only "
-                                 "version %d.%d is available\n",
-                                 glx_major, glx_minor);
-            return VA_STATUS_ERROR_UNIMPLEMENTED;
-        }
 
         if (!check_tfp_extensions(ctx) || !load_tfp_extensions(ctx))
             return VA_STATUS_ERROR_UNIMPLEMENTED;

@@ -40,6 +40,7 @@ union dri_buffer
 struct dri_drawable 
 {
     XID x_drawable;
+    int is_window;
     int x;
     int y;
     unsigned int width;

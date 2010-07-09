@@ -37,6 +37,7 @@ struct i965_h264_context
         unsigned int width_in_mbs;
         unsigned int height_in_mbs;
         int mbaff_frame_flag;
+        int i_flag;
     } picture;
 
     int enable_avc_ildb;

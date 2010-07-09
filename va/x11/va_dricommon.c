@@ -1,6 +1,41 @@
 #include "va_dricommon.h"
 
-static struct dri_drawable *                                                                                                                                                                                   
+// X error trap
+static int x11_error_code = 0;
+static int (*old_error_handler)(Display *, XErrorEvent *);
+
+static int 
+error_handler(Display *dpy, XErrorEvent *error)
+{
+    x11_error_code = error->error_code;
+    return 0;
+}
+
+static void 
+x11_trap_errors(void)
+{
+    x11_error_code    = 0;
+    old_error_handler = XSetErrorHandler(error_handler);
+}
+
+static int 
+x11_untrap_errors(void)
+{
+    XSetErrorHandler(old_error_handler);
+    return x11_error_code;
+}
+
+static int 
+is_window(Display *dpy, Drawable drawable)
+{
+    XWindowAttributes wattr;
+
+    x11_trap_errors();
+    XGetWindowAttributes(dpy, drawable, &wattr);
+    return x11_untrap_errors() == 0;
+}
+
+static struct dri_drawable *
 do_drawable_hash(VADriverContextP ctx, XID drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
@@ -15,6 +50,7 @@ do_drawable_hash(VADriverContextP ctx, XID drawable)
 
     dri_drawable = dri_state->createDrawable(ctx, drawable);
     dri_drawable->x_drawable = drawable;
+    dri_drawable->is_window = is_window((Display *)ctx->native_dpy, drawable);
     dri_drawable->next = dri_state->drawable_hash[index];
     dri_state->drawable_hash[index] = dri_drawable;
 
