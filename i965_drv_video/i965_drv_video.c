@@ -697,6 +697,7 @@ i965_CreateContext(VADriverContextP ctx,
                    VAContextID *context)                /* out */
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
     struct object_config *obj_config = CONFIG(config_id);
     struct object_context *obj_context = NULL;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -716,6 +717,16 @@ i965_CreateContext(VADriverContextP ctx,
     if (NULL == obj_context) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         return vaStatus;
+    }
+
+    switch (obj_config->profile) {
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        render_state->interleaved_uv = 1;
+        break;
+    default:
+        render_state->interleaved_uv = 0;
     }
 
     obj_context->context_id = contextID;
@@ -1112,7 +1123,6 @@ VAStatus
 i965_EndPicture(VADriverContextP ctx, VAContextID context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
-    struct i965_render_state *render_state = &i965->render_state;
     struct object_context *obj_context = CONTEXT(context);
     struct object_config *obj_config;
     VAContextID config;
@@ -1127,17 +1137,6 @@ i965_EndPicture(VADriverContextP ctx, VAContextID context)
     config = obj_context->config_id;
     obj_config = CONFIG(config);
     assert(obj_config);
-
-    switch (obj_config->profile) {
-    case VAProfileH264Baseline:
-    case VAProfileH264Main:
-    case VAProfileH264High:
-        render_state->interleaved_uv = 1;
-        break;
-
-    default:
-        render_state->interleaved_uv = 0;
-    }
 
     i965_media_decode_picture(ctx, obj_config->profile, &obj_context->decode_state);
     obj_context->decode_state.current_render_target = -1;
