@@ -1541,9 +1541,11 @@ i965_GetImage(VADriverContextP ctx,
 
     if (x < 0 || y < 0)
         return VA_STATUS_ERROR_INVALID_PARAMETER;
-    if (width > obj_surface->width || height > obj_surface->height)
+    if (x + width > obj_surface->orig_width ||
+        y + height > obj_surface->orig_height)
         return VA_STATUS_ERROR_INVALID_PARAMETER;
-    if (width > obj_image->image.width || height > obj_image->image.height)
+    if (x + width > obj_image->image.width ||
+        y + height > obj_image->image.height)
         return VA_STATUS_ERROR_INVALID_PARAMETER;
 
     VAStatus va_status;
