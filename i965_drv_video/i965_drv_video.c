@@ -1489,6 +1489,9 @@ get_image_i420(struct object_image *obj_image, uint8_t *image_data,
                const VARectangle *rect)
 {
     uint8_t *dst[3], *src[3];
+    const int Y = 0;
+    const int U = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 2 : 1;
+    const int V = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 1 : 2;
 
     if (!obj_surface->bo)
         return;
@@ -1500,31 +1503,31 @@ get_image_i420(struct object_image *obj_image, uint8_t *image_data,
 
     /* Dest VA image has either I420 or YV12 format.
        Source VA surface alway has I420 format */
-    dst[0] = image_data + obj_image->image.offsets[0];
+    dst[Y] = image_data + obj_image->image.offsets[Y];
     src[0] = (uint8_t *)obj_surface->bo->virtual;
-    dst[1] = image_data + obj_image->image.offsets[1];
+    dst[U] = image_data + obj_image->image.offsets[U];
     src[1] = src[0] + obj_surface->width * obj_surface->height;
-    dst[2] = image_data + obj_image->image.offsets[2];
+    dst[V] = image_data + obj_image->image.offsets[V];
     src[2] = src[1] + (obj_surface->width / 2) * (obj_surface->height / 2);
 
     /* Y plane */
-    dst[0] += rect->y * obj_image->image.pitches[0] + rect->x;
+    dst[Y] += rect->y * obj_image->image.pitches[Y] + rect->x;
     src[0] += rect->y * obj_surface->width + rect->x;
-    memcpy_pic(dst[0], obj_image->image.pitches[0],
+    memcpy_pic(dst[Y], obj_image->image.pitches[Y],
                src[0], obj_surface->width,
                rect->width, rect->height);
 
     /* U plane */
-    dst[1] += (rect->y / 2) * obj_image->image.pitches[1] + rect->x / 2;
+    dst[U] += (rect->y / 2) * obj_image->image.pitches[U] + rect->x / 2;
     src[1] += (rect->y / 2) * obj_surface->width / 2 + rect->x / 2;
-    memcpy_pic(dst[1], obj_image->image.pitches[1],
+    memcpy_pic(dst[U], obj_image->image.pitches[U],
                src[1], obj_surface->width / 2,
                rect->width / 2, rect->height / 2);
 
     /* V plane */
-    dst[2] += (rect->y / 2) * obj_image->image.pitches[2] + rect->x / 2;
+    dst[V] += (rect->y / 2) * obj_image->image.pitches[V] + rect->x / 2;
     src[2] += (rect->y / 2) * obj_surface->width / 2 + rect->x / 2;
-    memcpy_pic(dst[2], obj_image->image.pitches[2],
+    memcpy_pic(dst[V], obj_image->image.pitches[V],
                src[2], obj_surface->width / 2,
                rect->width / 2, rect->height / 2);
 
