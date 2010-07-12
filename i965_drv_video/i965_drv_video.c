@@ -1469,13 +1469,26 @@ i965_SetImagePalette(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
+static inline void
+memcpy_pic(uint8_t *dst, unsigned int dst_stride,
+           const uint8_t *src, unsigned int src_stride,
+           unsigned int len, unsigned int height)
+{
+    unsigned int i;
+
+    for (i = 0; i < height; i++) {
+        memcpy(dst, src, len);
+        dst += dst_stride;
+        src += src_stride;
+    }
+}
+
 static void
-get_image_yv12(struct object_image *obj_image, uint8_t *image_data,
+get_image_i420(struct object_image *obj_image, uint8_t *image_data,
                struct object_surface *obj_surface,
                const VARectangle *rect)
 {
     uint8_t *dst[3], *src[3];
-    int i, x, y, w, h;
 
     if (!obj_surface->bo)
         return;
@@ -1485,11 +1498,8 @@ get_image_yv12(struct object_image *obj_image, uint8_t *image_data,
     if (!obj_surface->bo->virtual)
         return;
 
-    x = rect->x;
-    y = rect->y;
-    w = rect->width;
-    h = rect->height;
-
+    /* Dest VA image has either I420 or YV12 format.
+       Source VA surface alway has I420 format */
     dst[0] = image_data + obj_image->image.offsets[0];
     src[0] = (uint8_t *)obj_surface->bo->virtual;
     dst[1] = image_data + obj_image->image.offsets[1];
@@ -1497,34 +1507,26 @@ get_image_yv12(struct object_image *obj_image, uint8_t *image_data,
     dst[2] = image_data + obj_image->image.offsets[2];
     src[2] = src[1] + (obj_surface->width / 2) * (obj_surface->height / 2);
 
-    dst[0] += y * obj_image->image.pitches[0] + x;
-    src[0] += y * obj_surface->width + x;
-    for (i = 0; i < h; i++) {
-        memcpy(dst[0], src[0], w);
-        dst[0] += obj_image->image.pitches[0];
-        src[0] += obj_surface->width;
-    }
+    /* Y plane */
+    dst[0] += rect->y * obj_image->image.pitches[0] + rect->x;
+    src[0] += rect->y * obj_surface->width + rect->x;
+    memcpy_pic(dst[0], obj_image->image.pitches[0],
+               src[0], obj_surface->width,
+               rect->width, rect->height);
 
-    x /= 2;
-    y /= 2;
-    w /= 2;
-    h /= 2;
+    /* U plane */
+    dst[1] += (rect->y / 2) * obj_image->image.pitches[1] + rect->x / 2;
+    src[1] += (rect->y / 2) * obj_surface->width / 2 + rect->x / 2;
+    memcpy_pic(dst[1], obj_image->image.pitches[1],
+               src[1], obj_surface->width / 2,
+               rect->width / 2, rect->height / 2);
 
-    dst[1] += y * obj_image->image.pitches[1] + x;
-    src[1] += y * obj_surface->width / 2 + x;
-    for (i = 0; i < h; i++) {
-        memcpy(dst[1], src[1], w);
-        dst[1] += obj_image->image.pitches[1];
-        src[1] += obj_surface->width / 2;
-    }
-
-    dst[2] += y * obj_image->image.pitches[2] + y;
-    src[2] += y * obj_surface->width / 2 + x;
-    for (i = 0; i < h; i++) {
-        memcpy(dst[2], src[2], w);
-        dst[2] += obj_image->image.pitches[2];
-        src[2] += obj_surface->width / 2;
-    }
+    /* V plane */
+    dst[2] += (rect->y / 2) * obj_image->image.pitches[2] + rect->x / 2;
+    src[2] += (rect->y / 2) * obj_surface->width / 2 + rect->x / 2;
+    memcpy_pic(dst[2], obj_image->image.pitches[2],
+               src[2], obj_surface->width / 2,
+               rect->width / 2, rect->height / 2);
 
     dri_bo_unmap(obj_surface->bo);
 }
@@ -1534,8 +1536,7 @@ get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
                struct object_surface *obj_surface,
                const VARectangle *rect)
 {
-    uint8_t *dst, *src;
-    int i, x, y, w, h;
+    uint8_t *dst[2], *src[2];
 
     if (!obj_surface->bo)
         return;
@@ -1545,30 +1546,25 @@ get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
     if (!obj_surface->bo->virtual)
         return;
 
-    x = rect->x;
-    y = rect->y;
-    w = rect->width;
-    h = rect->height;
+    /* Both dest VA image and source surface have NV12 format */
+    dst[0] = image_data + obj_image->image.offsets[0];
+    src[0] = (uint8_t *)obj_surface->bo->virtual;
+    dst[1] = image_data + obj_image->image.offsets[1];
+    src[1] = src[0] + obj_surface->width * obj_surface->height;
 
-    dst = image_data + obj_image->image.offsets[0] + y * obj_image->image.pitches[0] + x;
-    src = (uint8_t *)obj_surface->bo->virtual + y * obj_surface->width + x;
-    for (i = 0; i < h; i++) {
-        memcpy(dst, src, w);
-        dst += obj_image->image.pitches[0];
-        src += obj_surface->width;
-    }
+    /* Y plane */
+    dst[0] += rect->y * obj_image->image.pitches[0] + rect->x;
+    src[0] += rect->y * obj_surface->width + rect->x;
+    memcpy_pic(dst[0], obj_image->image.pitches[0],
+               src[0], obj_surface->width,
+               rect->width, rect->height);
 
-    x /= 2;
-    y /= 2;
-    h /= 2;
-
-    dst = image_data + obj_image->image.offsets[1] + y * obj_image->image.pitches[1] + x * 2;
-    src = (uint8_t *)obj_surface->bo->virtual + obj_surface->width * obj_surface->height + y * obj_surface->width + x * 2;
-    for (i = 0; i < h; i++) {
-        memcpy(dst, src, w);
-        dst += obj_image->image.pitches[1];
-        src += obj_surface->width;
-    }
+    /* UV plane */
+    dst[1] += (rect->y / 2) * obj_image->image.pitches[1] + (rect->x & -2);
+    src[1] += (rect->y / 2) * obj_surface->width + (rect->x & -2);
+    memcpy_pic(dst[1], obj_image->image.pitches[1],
+               src[1], obj_surface->width,
+               rect->width, rect->height / 2);
 
     dri_bo_unmap(obj_surface->bo);
 }
@@ -1624,7 +1620,7 @@ i965_GetImage(VADriverContextP ctx,
         /* I420 is native format for MPEG-2 decoded surfaces */
         if (render_state->interleaved_uv)
             goto operation_failed;
-        get_image_yv12(obj_image, image_data, obj_surface, &rect);
+        get_image_i420(obj_image, image_data, obj_surface, &rect);
         break;
     case VA_FOURCC('N','V','1','2'):
         /* NV12 is native format for H.264 decoded surfaces */
