@@ -105,6 +105,8 @@ struct object_surface
     int width;
     int height;
     int size;
+    int orig_width;
+    int orig_height;
     int flags;
     dri_bo *bo;
     void (*free_private_data)(void **data);
