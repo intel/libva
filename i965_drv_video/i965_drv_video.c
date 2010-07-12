@@ -1602,6 +1602,9 @@ i965_GetImage(VADriverContextP ctx,
         y + height > obj_image->image.height)
         return VA_STATUS_ERROR_INVALID_PARAMETER;
 
+    /* Commit pending operations to the HW */
+    intel_batchbuffer_flush(ctx);
+
     VAStatus va_status;
     void *image_data = NULL;
 
