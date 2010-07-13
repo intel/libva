@@ -813,12 +813,8 @@ i965_subpic_render_upload_vertex(VADriverContextP ctx,
     struct object_surface    *obj_surface  = SURFACE(surface);
     struct object_subpic     *obj_subpic   = SUBPIC(obj_surface->subpic);
 
-    const float psx = (float)obj_surface->width  / (float)obj_subpic->width;
-    const float psy = (float)obj_surface->height / (float)obj_subpic->height;
-    const float ssx = (float)output_rect->width  / (float)obj_surface->width;
-    const float ssy = (float)output_rect->height / (float)obj_surface->height;
-    const float sx  = psx * ssx;
-    const float sy  = psy * ssy;
+    const float sx = (float)output_rect->width  / (float)obj_surface->orig_width;
+    const float sy = (float)output_rect->height / (float)obj_surface->orig_height;
     float *vb, tx1, tx2, ty1, ty2, x1, x2, y1, y2;
     int i = 0;
 
