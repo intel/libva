@@ -25,6 +25,7 @@
 #define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
+#include "va_trace.h"
 #include "config.h"
 
 #include <assert.h>
