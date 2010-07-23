@@ -1086,8 +1086,10 @@ void va_TraceEndPicture(
     va_TraceMsg("\tchroma_u_offset=%d\n", chroma_u_offset);
     va_TraceMsg("\tchroma_v_offset=%d\n", chroma_v_offset);
 
-    if (!buffer)
+    if (!buffer) {
+        vaUnlockSurface(dpy, trace_rendertarget);
         return;
+    }
 
     Y_data = buffer;
     UV_data = buffer + luma_offset;
@@ -1120,4 +1122,6 @@ void va_TraceEndPicture(
             tmp = UV_data + i * chroma_u_stride;
         }
     }
+
+    vaUnlockSurface(dpy, trace_rendertarget);
 }
