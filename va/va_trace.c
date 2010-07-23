@@ -887,7 +887,7 @@ static void va_TraceH264Buf(
 {
     switch (type) {
     case VAPictureParameterBufferType:
-        va_TraceVAPictureParameterBufferMPEG2(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAIQMatrixBufferType:
         va_TraceVAIQMatrixBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
