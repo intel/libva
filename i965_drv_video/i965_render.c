@@ -592,7 +592,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
                               int index,
                               dri_bo *region,
                               unsigned long offset,
-                              int w, int h, int format)
+                              int w, int h, int p, int format)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
@@ -626,7 +626,7 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     ss->ss2.mip_count = 0;
     ss->ss2.render_target_rotation = 0;
 
-    ss->ss3.pitch = w - 1;
+    ss->ss3.pitch = p - 1;
 
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
@@ -650,6 +650,7 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
     struct i965_render_state *render_state = &i965->render_state;
     struct object_surface *obj_surface;
     int w, h;
+    int rw, rh;
     dri_bo *region;
 
     obj_surface = SURFACE(surface);
@@ -657,19 +658,21 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
     assert(obj_surface->bo);
     w = obj_surface->width;
     h = obj_surface->height;
+    rw = obj_surface->orig_width;
+    rh = obj_surface->orig_height;
     region = obj_surface->bo;
 
-    i965_render_src_surface_state(ctx, 1, region, 0, w, h, w, I965_SURFACEFORMAT_R8_UNORM);     /* Y */
-    i965_render_src_surface_state(ctx, 2, region, 0, w, h, w, I965_SURFACEFORMAT_R8_UNORM);
+    i965_render_src_surface_state(ctx, 1, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);     /* Y */
+    i965_render_src_surface_state(ctx, 2, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);
 
     if (render_state->interleaved_uv) {
-        i965_render_src_surface_state(ctx, 3, region, w * h, w / 2, h / 2, w, I965_SURFACEFORMAT_R8G8_UNORM); /* UV */
-        i965_render_src_surface_state(ctx, 4, region, w * h, w / 2, h / 2, w, I965_SURFACEFORMAT_R8G8_UNORM);
+        i965_render_src_surface_state(ctx, 3, region, w * h, rw / 2, rh / 2, w, I965_SURFACEFORMAT_R8G8_UNORM); /* UV */
+        i965_render_src_surface_state(ctx, 4, region, w * h, rw / 2, rh / 2, w, I965_SURFACEFORMAT_R8G8_UNORM);
     } else {
-        i965_render_src_surface_state(ctx, 3, region, w * h, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM); /* U */
-        i965_render_src_surface_state(ctx, 4, region, w * h, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
-        i965_render_src_surface_state(ctx, 5, region, w * h + w * h / 4, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);     /* V */
-        i965_render_src_surface_state(ctx, 6, region, w * h + w * h / 4, w / 2, h / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
+        i965_render_src_surface_state(ctx, 3, region, w * h, rw / 2, rh / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM); /* U */
+        i965_render_src_surface_state(ctx, 4, region, w * h, rw / 2, rh / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
+        i965_render_src_surface_state(ctx, 5, region, w * h + w * h / 4, rw / 2, rh / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);     /* V */
+        i965_render_src_surface_state(ctx, 6, region, w * h + w * h / 4, rw / 2, rh / 2, w / 2, I965_SURFACEFORMAT_R8_UNORM);
     }
 }
 
@@ -691,8 +694,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
+    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
 }
 
 static void
@@ -810,12 +813,8 @@ i965_subpic_render_upload_vertex(VADriverContextP ctx,
     struct object_surface    *obj_surface  = SURFACE(surface);
     struct object_subpic     *obj_subpic   = SUBPIC(obj_surface->subpic);
 
-    const float psx = (float)obj_surface->width  / (float)obj_subpic->width;
-    const float psy = (float)obj_surface->height / (float)obj_subpic->height;
-    const float ssx = (float)output_rect->width  / (float)obj_surface->width;
-    const float ssy = (float)output_rect->height / (float)obj_surface->height;
-    const float sx  = psx * ssx;
-    const float sy  = psy * ssy;
+    const float sx = (float)output_rect->width  / (float)obj_surface->orig_width;
+    const float sy = (float)output_rect->height / (float)obj_surface->orig_height;
     float *vb, tx1, tx2, ty1, ty2, x1, x2, y1, y2;
     int i = 0;
 
@@ -883,8 +882,8 @@ i965_render_upload_vertex(VADriverContextP ctx,
 
     obj_surface = SURFACE(surface);
     assert(surface);
-    width = obj_surface->width;
-    height = obj_surface->height;
+    width = obj_surface->orig_width;
+    height = obj_surface->orig_height;
 
     u1 = (float)srcx / width;
     v1 = (float)srcy / height;

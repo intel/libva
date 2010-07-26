@@ -29,7 +29,7 @@ m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
 
 # if the library source code has changed, increment revision
-m4_define([libva_lt_revision], [3])
+m4_define([libva_lt_revision], [4])
 # if any interface was added/removed/changed, then inc current, reset revision
 m4_define([libva_lt_current], [1])
 # if any interface was added since last public release, then increment age
@@ -103,9 +103,9 @@ PKG_CHECK_MODULES([DRM], [libdrm])
 PKG_CHECK_MODULES(GEN4ASM, [intel-gen4asm >= 1.0], [gen4asm=yes], [gen4asm=no])
 AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
 
-# Check for libdrm >= 2.4 (needed for i965_drv_video.so)
-if test x$enable_i965_driver = xyes && ! $PKG_CONFIG --atleast-version=2.4 libdrm; then
-    AC_MSG_WARN([libdrm < 2.4 found, disabling build of i965 video driver])
+# Check for libdrm >= 2.4.21 (needed for i965_drv_video.so)
+if test x$enable_i965_driver = xyes && ! $PKG_CONFIG --atleast-version=2.4.21 libdrm; then
+    AC_MSG_WARN([libdrm < 2.4.21 found, disabling build of i965 video driver])
     enable_i965_driver=no
 fi
 AM_CONDITIONAL(BUILD_I965_DRIVER, test x$enable_i965_driver = xyes)

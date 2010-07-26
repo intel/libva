@@ -1721,6 +1721,9 @@ typedef enum
      * then the value for this attribute will be set to 1 so that the client   
      * will not attempt to re-use the surface right after returning from a call
      * to PutSurface.
+     *
+     * Don't use it, use flag VASurfaceDisplaying of vaQuerySurfaceStatus since
+     * driver may use overlay or GPU alternatively
      */
     VADisplayAttribDirectSurface       = 5,
     VADisplayAttribRotation            = 6,	
@@ -1731,11 +1734,11 @@ typedef enum
     VADisplayAttribBLEWhiteMode        = 9,
     VADisplayAttribBlueStretch         = 10,
     VADisplayAttribSkinColorCorrection = 11,
-    VADisplayAttribCSCInputColorFormat = 12,
-    VADisplayAttribCSCHue              = 13,
-    VADisplayAttribCSCSaturation       = 14,
-    VADisplayAttribCSCBrightness       = 15,
-    VADisplayAttribCSCContrast         = 16,
+    /*
+     * For type VADisplayAttribCSCMatrix, "value" field is a pointer to the color
+     * conversion matrix. Each element in the matrix is float-point
+     */
+    VADisplayAttribCSCMatrix           = 12
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */

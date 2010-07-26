@@ -1040,7 +1040,7 @@ VAStatus dummy_QuerySurfaceStatus(
 VAStatus dummy_PutSurface(
    		VADriverContextP ctx,
 		VASurfaceID surface,
-		Drawable draw, /* X Drawable */
+		void *draw, /* X Drawable */
 		short srcx,
 		short srcy,
 		unsigned short srcw,
@@ -1055,6 +1055,10 @@ VAStatus dummy_PutSurface(
 	)
 {
     /* TODO */
+    Drawable drawable = (Drawable)draw;
+
+    (void)drawable;
+    
     return VA_STATUS_ERROR_UNKNOWN;
 }
 

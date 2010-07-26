@@ -31,6 +31,7 @@
 #include "va_dri2.h"
 #include "va_dricommon.h"
 #include "va_nvctrl.h"
+#include "va_fglrx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -130,6 +131,24 @@ static VAStatus va_NVCTRL_GetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
+static VAStatus va_FGLRX_GetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    int driver_major, driver_minor, driver_patch;
+    Bool result;
+
+    result = VA_FGLRXGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
+                                         &driver_major, &driver_minor,
+                                         &driver_patch, driver_name);
+    if (!result)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    return VA_STATUS_SUCCESS;
+}
+
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
@@ -145,7 +164,8 @@ static VAStatus va_DisplayContextGetDriverName (
         vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
-   
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name);
     return vaStatus;
 }
 

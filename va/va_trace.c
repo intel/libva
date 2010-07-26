@@ -25,6 +25,7 @@
 #define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
+#include "va_trace.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -48,7 +49,34 @@ static unsigned int trace_slice;
 static unsigned int trace_width;
 static unsigned int trace_height;
 
-int va_TraceInit(void)
+/* Prototypes (functions defined in va.c) */
+VAStatus vaBufferInfo (
+    VADisplay dpy,
+    VAContextID context,	/* in */
+    VABufferID buf_id,		/* in */
+    VABufferType *type,		/* out */
+    unsigned int *size,		/* out */
+    unsigned int *num_elements	/* out */
+);
+
+VAStatus vaLockSurface(VADisplay dpy,
+    VASurfaceID surface,
+    unsigned int *fourcc, /* following are output argument */
+    unsigned int *luma_stride,
+    unsigned int *chroma_u_stride,
+    unsigned int *chroma_v_stride,
+    unsigned int *luma_offset,
+    unsigned int *chroma_u_offset,
+    unsigned int *chroma_v_offset,
+    unsigned int *buffer_name,
+    void **buffer 
+);
+
+VAStatus vaUnlockSurface(VADisplay dpy,
+    VASurfaceID surface
+);
+
+void va_TraceInit(void)
 {
     trace_file = (const char *)getenv("LIBVA_TRACE");
     if (trace_file) {
@@ -58,7 +86,7 @@ int va_TraceInit(void)
     }
 }
 
-int va_TraceEnd(void)
+void va_TraceEnd(void)
 {
     if (trace_file && trace_fp) {
         fclose(trace_fp);
@@ -73,7 +101,7 @@ int va_TraceEnd(void)
     }
 }
 
-int va_TraceMsg(const char *msg, ...)
+void va_TraceMsg(const char *msg, ...)
 {
     va_list args;
     
@@ -87,7 +115,7 @@ int va_TraceMsg(const char *msg, ...)
 }
 
 
-int va_TraceCreateConfig(
+void va_TraceCreateConfig(
     VADisplay dpy,
     VAProfile profile, 
     VAEntrypoint entrypoint, 
@@ -110,7 +138,7 @@ int va_TraceCreateConfig(
 }
 
 
-int va_TraceCreateSurface(
+void va_TraceCreateSurface(
     VADisplay dpy,
     int width,
     int height,
@@ -131,7 +159,7 @@ int va_TraceCreateSurface(
 }
 
 
-int va_TraceCreateContext(
+void va_TraceCreateContext(
     VADisplay dpy,
     VAConfigID config_id,
     int picture_width,
@@ -721,7 +749,7 @@ static void va_TraceVASliceParameterBufferVC1(
     va_TraceMsg ("    slice_vertical_position       = %d\n", p->slice_vertical_position);
 }
 
-int va_TraceBeginPicture(
+void va_TraceBeginPicture(
     VADisplay dpy,
     VAContextID context,
     VASurfaceID render_target
@@ -738,16 +766,7 @@ int va_TraceBeginPicture(
     trace_slice = 0;
 }
 
-VAStatus vaBufferInfo (
-    VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferID buf_id,		/* in */
-    VABufferType *type,		/* out */
-    unsigned int *size,		/* out */
-    unsigned int *num_elements	/* out */
-);
-
-static int va_TraceMPEG2Buf(
+static void va_TraceMPEG2Buf(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
@@ -798,12 +817,9 @@ static int va_TraceMPEG2Buf(
     case VAEncH264SEIBufferType:
         break;
     }
-    
-    return 0;
 }
 
-
-static int va_TraceMPEG4Buf(
+static void va_TraceMPEG4Buf(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
@@ -856,13 +872,10 @@ static int va_TraceMPEG4Buf(
     default:
         break;
     }
-    
-    
-    return 0;
 }
 
 
-static int va_TraceH264Buf(
+static void va_TraceH264Buf(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
@@ -874,7 +887,7 @@ static int va_TraceH264Buf(
 {
     switch (type) {
     case VAPictureParameterBufferType:
-        va_TraceVAPictureParameterBufferMPEG2(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAIQMatrixBufferType:
         va_TraceVAIQMatrixBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -915,13 +928,10 @@ static int va_TraceH264Buf(
     default:
         break;
     }
-    
-    
-    return 0;
 }
 
 
-static int va_TraceVC1Buf(
+static void va_TraceVC1Buf(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
@@ -974,11 +984,9 @@ static int va_TraceVC1Buf(
     default:
         break;
     }
-    
-    return 0;
 }
 
-int va_TraceRenderPicture(
+void va_TraceRenderPicture(
     VADisplay dpy,
     VAContextID context,
     VABufferID *buffers,
@@ -1035,7 +1043,7 @@ int va_TraceRenderPicture(
 }
 
 
-int va_TraceEndPicture(
+void va_TraceEndPicture(
     VADisplay dpy,
     VAContextID context
 )
@@ -1066,7 +1074,7 @@ int va_TraceEndPicture(
                                       &luma_offset, &chroma_u_offset, &chroma_v_offset, &buffer_name, &buffer);
 
     if (va_status != VA_STATUS_SUCCESS)
-        return va_status;
+        return;
     
     va_TraceMsg("\tfourcc=0x%08x\n", fourcc);
     va_TraceMsg("\twidth=%d\n", trace_width);
@@ -1078,8 +1086,10 @@ int va_TraceEndPicture(
     va_TraceMsg("\tchroma_u_offset=%d\n", chroma_u_offset);
     va_TraceMsg("\tchroma_v_offset=%d\n", chroma_v_offset);
 
-    if (!buffer)
+    if (!buffer) {
+        vaUnlockSurface(dpy, trace_rendertarget);
         return;
+    }
 
     Y_data = buffer;
     UV_data = buffer + luma_offset;
@@ -1112,4 +1122,6 @@ int va_TraceEndPicture(
             tmp = UV_data + i * chroma_u_stride;
         }
     }
+
+    vaUnlockSurface(dpy, trace_rendertarget);
 }

@@ -292,8 +292,8 @@ i965_media_terminate(VADriverContextP ctx)
     struct i965_media_state *media_state = &i965->media_state;
     int i;
 
-    assert(media_state->free_private_context);
-    media_state->free_private_context(&media_state->private_context);
+    if (media_state->free_private_context)
+        media_state->free_private_context(&media_state->private_context);
 
     for (i = 0; i < MAX_MEDIA_SURFACES; i++) {
         dri_bo_unreference(media_state->surface_state[i].bo);
