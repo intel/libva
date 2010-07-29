@@ -4,7 +4,7 @@
 %define reldate 04282009
 
 Name:           libva
-Version:        1.0.3
+Version:        1.0.4
 Release:        0.0
 License:        MIT
 Source:         %{name}-%{version}.tar.bz2 
@@ -58,11 +58,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libva.so.1
-%{_libdir}/libva.so.1.0.3
+%{_libdir}/libva.so.1.0.4
 %{_libdir}/libva-tpi.so.1
-%{_libdir}/libva-tpi.so.1.0.3
+%{_libdir}/libva-tpi.so.1.0.4
 %{_libdir}/libva-x11.so.1
-%{_libdir}/libva-x11.so.1.0.3
+%{_libdir}/libva-x11.so.1.0.4
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
