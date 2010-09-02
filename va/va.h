@@ -146,6 +146,13 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
 
+/* Scaling flags for vaPutSurface() */
+#define VA_FILTER_SCALING_DEFAULT       0x00000000
+#define VA_FILTER_SCALING_FAST          0x00000100
+#define VA_FILTER_SCALING_HQ            0x00000200
+#define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
+#define VA_FILTER_SCALING_MASK          0x00000f00
+
 /*
  * Returns a short english description of error_status
  */
