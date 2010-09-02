@@ -109,6 +109,11 @@ struct object_surface
     int orig_height;
     int flags;
     dri_bo *bo;
+    int pp_out_width;
+    int pp_out_height;
+    int orig_pp_out_width;
+    int orig_pp_out_height;
+    dri_bo *pp_out_bo;
     void (*free_private_data)(void **data);
     void *private_data;
 };

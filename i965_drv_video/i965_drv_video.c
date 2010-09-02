@@ -350,6 +350,8 @@ i965_destroy_surface(struct object_heap *heap, struct object_base *obj)
 
     dri_bo_unreference(obj_surface->bo);
     obj_surface->bo = NULL;
+    dri_bo_unreference(obj_surface->pp_out_bo);
+    obj_surface->pp_out_bo = NULL;
 
     if (obj_surface->free_private_data != NULL) {
         obj_surface->free_private_data(&obj_surface->private_data);
@@ -395,6 +397,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->size = SIZE_YUV420(obj_surface->width, obj_surface->height);
         obj_surface->flags = SURFACE_REFERENCED;
         obj_surface->bo = NULL;
+        obj_surface->pp_out_bo = NULL;
         obj_surface->private_data = NULL;
         obj_surface->free_private_data = NULL;
     }
@@ -1644,7 +1647,7 @@ i965_GetImage(VADriverContextP ctx,
 VAStatus 
 i965_PutSurface(VADriverContextP ctx,
                 VASurfaceID surface,
-                Drawable draw, /* X Drawable */
+                void *draw, /* X Drawable */
                 short srcx,
                 short srcy,
                 unsigned short srcw,
@@ -1667,6 +1670,7 @@ i965_PutSurface(VADriverContextP ctx,
     int ret;
     uint32_t name;
     Bool new_region = False;
+    int pp_flag = 0;
     /* Currently don't support DRI1 */
     if (dri_state->driConnectedFlag != VA_DRI2)
         return VA_STATUS_ERROR_UNKNOWN;
@@ -1678,7 +1682,7 @@ i965_PutSurface(VADriverContextP ctx,
     if (obj_surface->bo == NULL)
         return VA_STATUS_SUCCESS;
 
-    dri_drawable = dri_get_drawable(ctx, draw);
+    dri_drawable = dri_get_drawable(ctx, (Drawable)draw);
     assert(dri_drawable);
 
     buffer = dri_get_rendering_buffer(ctx, dri_drawable);
@@ -1716,9 +1720,16 @@ i965_PutSurface(VADriverContextP ctx,
         assert(ret == 0);
     }
 
+    if ((flags & VA_FILTER_SCALING_MASK) == VA_FILTER_SCALING_NL_ANAMORPHIC)
+        pp_flag |= I965_PP_FLAG_AVS;
+
+    if (flags & (VA_BOTTOM_FIELD | VA_TOP_FIELD))
+        pp_flag |= I965_PP_FLAG_DEINTERLACING;
+
     i965_render_put_surface(ctx, surface,
                             srcx, srcy, srcw, srch,
-                            destx, desty, destw, desth);
+                            destx, desty, destw, desth,
+                            pp_flag);
 
     if(obj_surface->subpic != VA_INVALID_ID) {	
 	i965_render_put_subpic(ctx, surface,

@@ -655,12 +655,20 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
 
     obj_surface = SURFACE(surface);
     assert(obj_surface);
-    assert(obj_surface->bo);
-    w = obj_surface->width;
-    h = obj_surface->height;
-    rw = obj_surface->orig_width;
-    rh = obj_surface->orig_height;
-    region = obj_surface->bo;
+
+    if (obj_surface->pp_out_bo) {
+        w = obj_surface->pp_out_width;
+        h = obj_surface->pp_out_height;
+        rw = obj_surface->orig_pp_out_width;
+        rh = obj_surface->orig_pp_out_height;
+        region = obj_surface->pp_out_bo;
+    } else {
+        w = obj_surface->width;
+        h = obj_surface->height;
+        rw = obj_surface->orig_width;
+        rh = obj_surface->orig_height;
+        region = obj_surface->bo;
+    }
 
     i965_render_src_surface_state(ctx, 1, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);     /* Y */
     i965_render_src_surface_state(ctx, 2, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);
@@ -1454,8 +1462,14 @@ i965_render_put_surface(VADriverContextP ctx,
                         short destx,
                         short desty,
                         unsigned short destw,
-                        unsigned short desth)
+                        unsigned short desth,
+                        unsigned int flag)
 {
+    i965_post_processing(ctx, surface,
+                         srcx, srcy, srcw, srch,
+                         destx, desty, destw, desth,
+                         flag);
+
     i965_render_initialize(ctx);
     i965_surface_render_state_setup(ctx, surface,
                             srcx, srcy, srcw, srch,
@@ -1523,6 +1537,8 @@ i965_render_init(VADriverContextP ctx)
     assert(render_state->curbe.bo);
     render_state->curbe.upload = 0;
 
+    i965_post_processing_once_init(ctx);
+
     return True;
 }
 
@@ -1532,6 +1548,8 @@ i965_render_terminate(VADriverContextP ctx)
     int i;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
+
+    i965_post_processing_terminate(ctx);
 
     dri_bo_unreference(render_state->curbe.bo);
     render_state->curbe.bo = NULL;
