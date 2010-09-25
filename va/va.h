@@ -145,6 +145,7 @@ typedef int VAStatus;	/* Return status type from functions */
 /* Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
+#define VA_SRC_SMPTE_240        0x00000040
 
 /* Scaling flags for vaPutSurface() */
 #define VA_FILTER_SCALING_DEFAULT       0x00000000
@@ -1691,15 +1692,6 @@ typedef enum
     VADISPLAYATTRIB_BLE_HIGH,
     VADISPLAYATTRIB_BLE_NONE,
 } VADisplayAttribBLEMode;
-
-typedef enum
-{ 
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT601 = 0x00,
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT709,
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_SMPTE_240,
-    VADISPLAYATTRIB_CSC_FORMAT_RGB,
-    VADISPLAYATTRIB_CSC_FORMAT_NONE,
-} VADisplayAttribCSCFormat;
 
 /* attribute value for VADisplayAttribRotation   */
 #define VA_ROTATION_NONE        0x00000000
