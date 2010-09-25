@@ -172,5 +172,6 @@ AC_OUTPUT([
 	libva.pc
 	libva-x11.pc
 	libva-glx.pc
+	libva-tpi.pc
 ])
 
