@@ -1122,7 +1122,9 @@ typedef struct _VAEncPictureParameterBufferH264
     VABufferID coded_buf;
     unsigned short picture_width;
     unsigned short picture_height;
-    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence */
+    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence
+                                 * if set to 2 it indicates the last picture of the stream
+                                 */
 } VAEncPictureParameterBufferH264;
 
 /****************************
