@@ -31,6 +31,8 @@
 #define MAX_RENDER_SURFACES     16
 #define MAX_SAMPLERS            16
 
+#include "i965_post_processing.h"
+
 struct i965_render_state
 {
     struct {
@@ -65,6 +67,9 @@ struct i965_render_state
 
     int interleaved_uv;
     struct intel_region *draw_region;
+
+    int pp_flag; /* 0: disable, 1: enable */
+    struct i965_post_processing_context pp_context;
 };
 
 Bool i965_render_init(VADriverContextP ctx);
@@ -78,7 +83,8 @@ void i965_render_put_surface(VADriverContextP ctx,
                              short destx,
                              short desty,
                              unsigned short destw,
-                             unsigned short desth);
+                             unsigned short desth,
+                             unsigned int flag);
 
 
 void

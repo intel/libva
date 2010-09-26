@@ -1,0 +1,3 @@
+/* Just for test */
+
+send(16) 0 acc0<1>UW g0<8,8,1>UW thread_spawner(0, 0, 0) mlen 1 rlen 0 {align1 EOT};

@@ -145,6 +145,14 @@ typedef int VAStatus;	/* Return status type from functions */
 /* Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
+#define VA_SRC_SMPTE_240        0x00000040
+
+/* Scaling flags for vaPutSurface() */
+#define VA_FILTER_SCALING_DEFAULT       0x00000000
+#define VA_FILTER_SCALING_FAST          0x00000100
+#define VA_FILTER_SCALING_HQ            0x00000200
+#define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
+#define VA_FILTER_SCALING_MASK          0x00000f00
 
 /*
  * Returns a short english description of error_status
@@ -1114,7 +1122,9 @@ typedef struct _VAEncPictureParameterBufferH264
     VABufferID coded_buf;
     unsigned short picture_width;
     unsigned short picture_height;
-    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence */
+    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence
+                                 * if set to 2 it indicates the last picture of the stream
+                                 */
 } VAEncPictureParameterBufferH264;
 
 /****************************
@@ -1684,15 +1694,6 @@ typedef enum
     VADISPLAYATTRIB_BLE_HIGH,
     VADISPLAYATTRIB_BLE_NONE,
 } VADisplayAttribBLEMode;
-
-typedef enum
-{ 
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT601 = 0x00,
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_BT709,
-    VADISPLAYATTRIB_CSC_FORMAT_YCC_SMPTE_240,
-    VADISPLAYATTRIB_CSC_FORMAT_RGB,
-    VADISPLAYATTRIB_CSC_FORMAT_NONE,
-} VADisplayAttribCSCFormat;
 
 /* attribute value for VADisplayAttribRotation   */
 #define VA_ROTATION_NONE        0x00000000

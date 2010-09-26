@@ -357,6 +357,29 @@
 #define SCOREBOARD_STALLING     0
 #define SCOREBOARD_NON_STALLING 1
 
+#define SURFACE_FORMAT_YCRCB_NORMAL     0
+#define SURFACE_FORMAT_YCRCB_SWAPUVY    1
+#define SURFACE_FORMAT_YCRCB_SWAPUV     2
+#define SURFACE_FORMAT_YCRCB_SWAPY      3
+#define SURFACE_FORMAT_PLANAR_420_8     4
+#define SURFACE_FORMAT_PLANAR_411_8     5
+#define SURFACE_FORMAT_PLANAR_422_8     6
+#define SURFACE_FORMAT_STMM_DN_STATISTICS       7
+#define SURFACE_FORMAT_R10G10B10A2_UNORM        8
+#define SURFACE_FORMAT_R8G8B8A8_UNORM   9
+#define SURFACE_FORMAT_R8B8_UNORM       10
+#define SURFACE_FORMAT_R8_UNORM         11
+#define SURFACE_FORMAT_Y8_UNORM         12
+
+#define AVS_FILTER_ADAPTIVE_8_TAP       0
+#define AVS_FILTER_NEAREST              1
+
+#define IEF_FILTER_COMBO                0
+#define IEF_FILTER_DETAIL               1
+
+#define IEF_FILTER_SIZE_3X3             0
+#define IEF_FILTER_SIZE_5X5             1
+
 #define URB_SIZE(intel)         (IS_IRONLAKE(intel->device_id) ? 1024 : \
                                  IS_G4X(intel->device_id) ? 384 : 256)
 #endif /* _I965_DEFINES_H_ */
