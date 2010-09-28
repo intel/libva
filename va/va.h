@@ -1824,7 +1824,7 @@ typedef enum
      * Cd = Cv*Cc*Ac + Cb *(1 - Ac) C means the constant RGB
      *      d: the final color to overwrite into the frame buffer 
      *      v: decoded video after color conversion, 
-     *      c: video color specified by setTextureStreamVideoColor
+     *      c: video color specified by VADisplayAttribBlendColor
      *      b: background color of the drawable
      */
     VADisplayAttribBlendColor          = 13,
