@@ -513,7 +513,7 @@ typedef enum
 typedef enum
 {
     VAEncMiscParameterTypeFrameRate 	= 0,
-    VAEncMiscParameterTypeBitRate    	= 1,
+    VAEncMiscParameterTypeRateControl  	= 1,
     VAEncMiscParameterTypeMaxSliceSize	= 2,
     VAEncMiscParameterTypeAIR    	= 3,
 } VAEncMiscParameterType;
@@ -522,16 +522,16 @@ typedef enum
  *  For application, e.g. set a new bitrate
  *    VABufferID buf_id;
  *    VAEncMiscParameterBuffer *misc_param;
- *    VAEncMiscParameterBitRate *misc_bitrate;
+ *    VAEncMiscParameterRateControl *misc_rate_ctrl;
  * 
  *    vaCreateBuffer(dpy, context, VAEncMiscParameterBufferType,
- *              sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBitRate),
+ *              sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
  *              1, NULL, &buf_id);
  *
  *    vaMapBuffer(dpy,buf_id,(void **)&misc_param);
- *    misc_param->type = VAEncMiscParameterTypeAIR;
- *    misc_bitrate = (VAEncMiscParameterBitRate *)misc_param->data;
- *    misc_bitrate->bitrate = 6400000;
+ *    misc_param->type = VAEncMiscParameterTypeRateControl;
+ *    misc_rate_ctrl= (VAEncMiscParameterRateControl *)misc_param->data;
+ *    misc_rate_ctrl->bits_per_second = 6400000;
  *
  *    vaRenderPicture(dpy, context, &buf_id, 1);
  */
@@ -541,11 +541,17 @@ typedef struct _VAEncMiscParameterBuffer
     unsigned int data[0];
 } VAEncMiscParameterBuffer;
 
-
-typedef struct _VAEncMiscParameterBitRate
+typedef struct _VAEncMiscParameterRateControl
 {
-    unsigned int bitrate;
-} VAEncMiscParameterBitRate;
+    unsigned int bits_per_second; /* this is the maximum bit-rate to be constrained by the rate control implementation */
+    unsigned int target_percentage; /* this is the bit-rate the rate control is targeting, as a percentage of the maximum bit-rate */
+                                    /* for example if target_percentage is 95 then the rate control will target a bit-rate that is */
+                                    /* 95% of the maximum bit-rate */
+    unsigned int window_size; /* windows size in milliseconds. For example if this is set to 500, then the rate control will guarantee the */
+                              /* target bit-rate over a 500 ms window */
+    unsigned int initial_qp;  /* initial QP at I frames */
+    unsigned int min_qp;     
+} VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
 {
