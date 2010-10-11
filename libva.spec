@@ -7,13 +7,13 @@ Name:           libva
 Version:        1.0.4
 Release:        0.0
 License:        MIT
-Source:         %{name}-%{version}.tar.bz2 
+Source:         %{name}-%{version}.tar.bz2
 Group:          Development/Libraries
-Summary:        Video Acceleration (VA) API for Linux 
+Summary:        Video Acceleration (VA) API for Linux
 URL:            http://freedesktop.org/wiki/Software/vaapi
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
-Requires: xorg-x11-server-Xorg 
+Requires: xorg-x11-server-Xorg
 
 BuildRequires: libtool xorg-x11-server-devel pkgconfig(xv) pkgconfig(xrandr)
 BuildRequires: libdrm-devel libX11-devel libXext-devel libXdamage-devel libXfixes-devel xorg-x11-proto-dri2proto
@@ -32,7 +32,7 @@ Requires: pkgconfig
 %description devel
 The libva library implements the Video Acceleration (VA) API for Linux.
 The library loads a hardware dependendent driver.
- 
+
 This package provides the development environment for libva.
 
 %prep
@@ -42,7 +42,7 @@ This package provides the development environment for libva.
 unset LD_AS_NEEDED
 %autogen
 make
-    
+
 %install
 rm -rf $RPM_BUILD_ROOT
 %make_install
