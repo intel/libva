@@ -6,13 +6,13 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-	vainfo.c 
+	vainfo.c
 
 LOCAL_CFLAGS += \
-	-DANDROID 
+	-DANDROID
 
 LOCAL_C_INCLUDES += \
-	$(TARGET_OUT_HEADERS)/libva 
+	$(TARGET_OUT_HEADERS)/libva
 
 LOCAL_MODULE := vainfo
 

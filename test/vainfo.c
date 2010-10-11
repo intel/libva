@@ -96,7 +96,6 @@ int main(int argc, const char* argv[])
   dpy = XOpenDisplay(":0.0");
 #else
   dpy = (Display*)malloc(sizeof(Display));
-  *(dpy) = 0x18c34078;
 #endif
   if (NULL == dpy)
   {
