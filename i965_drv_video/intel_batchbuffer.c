@@ -37,7 +37,7 @@ static void
 intel_batchbuffer_reset(struct intel_batchbuffer *batch)
 {
     struct intel_driver_data *intel = batch->intel; 
-    int batch_size = batch->flag == I915_EXEC_RENDER ? BATCH_SIZE : (BATCH_SIZE * 8);
+    int batch_size = BATCH_SIZE;
 
     assert(batch->flag == I915_EXEC_RENDER ||
            batch->flag == I915_EXEC_BSD);
