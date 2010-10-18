@@ -137,6 +137,12 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
 
+/*
+ * Enabled the positioning/cropping/blending feature:
+ * 1, specify the video playback position in the isurface
+ * 2, specify the cropping info for video playback
+ * 3, encoded video will blend with background color
+ */
 #define VA_ENBLE_BLEND          0x00000004 /* video area blend with the constant color */ 
     
 /*
@@ -144,7 +150,7 @@ typedef int VAStatus;	/* Return status type from functions */
  * for hardware overlay based implementation this flag
  * can be used to turn off the overlay
  */
-#define VA_CLEAR_DRAWABLE       0x00000008 
+#define VA_CLEAR_DRAWABLE       0x00000008
 
 /* Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
@@ -1801,7 +1807,10 @@ typedef enum
     VADisplayAttribContrast		= 1,
     VADisplayAttribHue			= 2,
     VADisplayAttribSaturation		= 3,
-    /* client can specifiy a background color for the target window */
+    /* client can specifiy a background color for the target window
+     * the new feature of video conference,
+     * the uncovered area of the surface is filled by this color
+     * also it will blend with the decoded video color*/
     VADisplayAttribBackgroundColor      = 4,
     /*
      * this is a gettable only attribute. For some implementations that use the
