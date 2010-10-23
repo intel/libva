@@ -61,6 +61,55 @@ extern int trace_flag;
         trace_func(__VA_ARGS__);                \
     }
 
+/*
+ * read a config "env" for libva.conf or from environment setting
+ * liva.conf has higher priority
+ * return 0: the "env" is set, and the value is copied into env_value
+ *        1: the env is not set
+ */
+int psb_parse_config(char *env, char *env_value)
+{
+    char *token, *value, *saveptr;
+    char oneline[1024];
+    FILE *fp=NULL;
+
+
+    if (env == NULL)
+        return 1;
+    
+    fp = fopen("/etc/libva.conf", "r");
+    while (fp && (fgets(oneline, 1024, fp) != NULL)) {
+	if (strlen(oneline) == 1)
+	    continue;
+        token = strtok_r(oneline, "=\n", &saveptr);
+	value = strtok_r(NULL, "=\n", &saveptr);
+
+	if (NULL == token || NULL == value)
+	    continue;
+
+        if (strcmp(token, env) == 0) {
+            if (env_value)
+                strncpy(env_value,value, 1024);
+
+            fclose(fp);
+
+            return 0;
+        }
+    }
+    if (fp)
+        fclose(fp);
+
+    /* no setting in config file, use env setting */
+    if (getenv(env)) {
+        if (env_value)
+            strncpy(env_value, getenv(env), 1024);
+
+        return 0;
+    }
+    
+    return 1;
+}
+
 int vaDisplayIsValid(VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
