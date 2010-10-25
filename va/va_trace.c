@@ -242,7 +242,7 @@ void va_TraceMsg(int idx, const char *msg, ...)
         fflush(trace_context[idx].trace_fp_log);
 
     if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize)
-        truncate_file(trace_context[idx].trace_fp_log, 0);
+        truncate_file(trace_context[idx].trace_fp_log);
 }
 
 void va_TraceCodedBuf(VADisplay dpy)
@@ -255,7 +255,7 @@ void va_TraceCodedBuf(VADisplay dpy)
     /* can only truncate at a sequence boudary */
     if (((file_size(trace_context[idx].trace_fp_log) >= trace_logsize))
         && trace_context[idx].trace_sequence_start)
-        truncate_file(trace_context[idx].trace_fp_log, 0);
+        truncate_file(trace_context[idx].trace_fp_log);
 
     trace_context[idx].trace_sequence_start = 0; /* only truncate coded file when meet next new sequence */
     
