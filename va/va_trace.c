@@ -873,7 +873,7 @@ static void va_TraceVAEncSliceParameterBuffer(
     return;
 }
 
-static void va_TraceVAEncMiscParameterBufferType(
+static void va_TraceVAEncMiscParameterBuffer(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
