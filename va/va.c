@@ -67,11 +67,7 @@ extern int trace_flag;
  * return 0: the "env" is set, and the value is copied into env_value
  *        1: the env is not set
  */
-<<<<<<< HEAD:va/va.c
 int va_parseConfig(char *env, char *env_value)
-=======
-int psb_parse_config(char *env, char *env_value)
->>>>>>> 319fd55aa578fdf92e4516fb856326f6bf23d4eb:va/va.c
 {
     char *token, *value, *saveptr;
     char oneline[1024];
