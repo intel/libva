@@ -224,7 +224,7 @@ static unsigned int file_size(FILE *fp)
 }
 
 
-static void truncate_size(FILE *fp)
+static void truncate_file(FILE *fp)
 {
     ftruncate(fileno(fp), 0);
     rewind(fp);
