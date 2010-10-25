@@ -306,9 +306,12 @@ void va_TraceSurface(VADisplay dpy)
                               &luma_offset, &chroma_u_offset, &chroma_v_offset,
                               &buffer_name, &buffer);
 
-    if (va_status != VA_STATUS_SUCCESS)
+    if (va_status != VA_STATUS_SUCCESS) {
+        va_TraceMsg(idx, "Error:vaLockSurface failed\n");
+        
         return;
-    
+    }
+
     va_TraceMsg(idx, "\tfourcc = 0x%08x\n", fourcc);
     va_TraceMsg(idx, "\twidth = %d\n", trace_context[idx].trace_frame_width);
     va_TraceMsg(idx, "\theight = %d\n", trace_context[idx].trace_frame_height);
@@ -319,7 +322,9 @@ void va_TraceSurface(VADisplay dpy)
     va_TraceMsg(idx, "\tchroma_u_offset = %d\n", chroma_u_offset);
     va_TraceMsg(idx, "\tchroma_v_offset = %d\n", chroma_v_offset);
 
-    if (!buffer) {
+    if (*(unsigned int *)buffer == NULL) {
+        va_TraceMsg(idx, "Error:vaLockSurface return NULL buffer\n");
+        
         vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
         return;
     }

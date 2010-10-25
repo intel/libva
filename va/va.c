@@ -763,7 +763,7 @@ VAStatus vaBeginPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE(va_TraceBeginPicture, ctx, context, render_target);
+  VA_TRACE(va_TraceBeginPicture, dpy, context, render_target);
 
   if (va_FoolBeginPicture(dpy, context, render_target))
       return VA_STATUS_SUCCESS;
@@ -800,12 +800,13 @@ VAStatus vaEndPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  if (va_FoolEndPicture(dpy, context))
-  {
+  if (va_FoolEndPicture(dpy, context)) {
     VA_TRACE(va_TraceEndPicture, dpy, context);
     return VA_STATUS_SUCCESS;
   }
+  
   va_status = ctx->vtable.vaEndPicture( ctx, context );
+  
   VA_TRACE(va_TraceEndPicture, dpy, context);
 
   return va_status;
