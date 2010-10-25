@@ -513,7 +513,8 @@ typedef enum
     VAEncSliceParameterBufferType	= 24,
     VAEncH264VUIBufferType		= 25,
     VAEncH264SEIBufferType		= 26,
-    VAEncMiscParameterBufferType	= 27
+    VAEncMiscParameterBufferType	= 27,
+    VABufferTypeMax                     = 0xff
 } VABufferType;
 
 typedef enum
@@ -538,7 +539,7 @@ typedef enum
  *    misc_param->type = VAEncMiscParameterTypeRateControl;
  *    misc_rate_ctrl= (VAEncMiscParameterRateControl *)misc_param->data;
  *    misc_rate_ctrl->bits_per_second = 6400000;
- *
+ *    vaUnmapBuffer(dpy, buf_id);
  *    vaRenderPicture(dpy, context, &buf_id, 1);
  */
 typedef struct _VAEncMiscParameterBuffer

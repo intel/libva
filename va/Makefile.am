@@ -27,7 +27,7 @@ INCLUDES = \
 LDADD = \
 	$(LIBVA_LT_LDFLAGS)
 
-libva_la_SOURCES = va.c va_trace.c
+libva_la_SOURCES = va.c va_trace.c va_fool.c
 libva_ladir = $(libdir)
 libva_la_LDFLAGS = $(LDADD) -no-undefined
 libva_la_LIBADD = $(LIBVA_LIBS) -ldl

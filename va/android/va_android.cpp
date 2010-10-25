@@ -250,7 +250,7 @@ VADisplay vaGetDisplay (
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
             pDisplayContexts                 = pDisplayContext;
-            pDriverContext->dri_state 	   = dri_state;
+            pDriverContext->dri_state 	     = dri_state;
             dpy                              = (VADisplay)pDisplayContext;
         }
         else
