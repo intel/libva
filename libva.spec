@@ -1,13 +1,11 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
-%define driverdir %{_libdir}/dri
-
-%define reldate 04282009
 
 Name:           libva
-Version:        1.0.4
+Version:        1.0.5
 Release:        0.0
-License:        MIT
+License:        Intel Proprietary
 Source:         %{name}-%{version}.tar.bz2
+NoSource:	0
 Group:          Development/Libraries
 Summary:        Video Acceleration (VA) API for Linux
 URL:            http://freedesktop.org/wiki/Software/vaapi
@@ -44,10 +42,7 @@ unset LD_AS_NEEDED
 make
 
 %install
-rm -rf $RPM_BUILD_ROOT
 %make_install
-mkdir -p $RPM_BUILD_ROOT%{driverdir}
-install -m 755 ./dummy_drv_video/.libs/dummy_drv_video.so $RPM_BUILD_ROOT%{driverdir}/dummy_drv_video.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -58,17 +53,29 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libva.so.1
-%{_libdir}/libva.so.1.0.4
+%{_libdir}/libva.so.%{version}
 %{_libdir}/libva-tpi.so.1
-%{_libdir}/libva-tpi.so.1.0.4
+%{_libdir}/libva-tpi.so.%{version}
 %{_libdir}/libva-x11.so.1
-%{_libdir}/libva-x11.so.1.0.4
+%{_libdir}/libva-x11.so.%{version}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
 %{_bindir}/mpeg2vldemo
 %{_bindir}/putsurface
-%{driverdir}/dummy_drv_video.so
+
+%{_libdir}/dri/dummy_drv_video.so
+
+%{_includedir}/va/va_tpi.h
+%{_includedir}/va/va_x11.h
+%{_includedir}/va/va_version.h
+%{_includedir}/va/va_backend.h
+%{_includedir}/va/va_dri2.h
+%{_includedir}/va/va_dummy.h
+%{_includedir}/va/va_backend_tpi.h
+%{_includedir}/va/va.h
+%{_includedir}/va/va_dricommon.h
+%{_includedir}/va/va_dri.h
 
 %files devel
 %defattr(-,root,root,-)
@@ -78,6 +85,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva-tpi.so
 %{_libdir}/libva-x11.so
 %{_libdir}/pkgconfig/libva.pc
+%{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
 
 %changelog
