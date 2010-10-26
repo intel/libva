@@ -77,4 +77,42 @@ void va_TraceEndPicture(
     VAContextID context
 );
 
+
+void va_TraceMaxNumDisplayAttributes (
+    VADisplay dpy,
+    int number
+);
+
+void va_TraceQueryDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* out */
+    int *num_attributes			/* out */
+);
+
+void va_TraceSetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+);
+
+/* extern function called by display side */
+void va_TracePutSurface (
+    VADisplay dpy,
+    VASurfaceID surface,
+    void *draw, /* the target Drawable */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+);
+
+
+
 #endif /* VA_TRACE_H */

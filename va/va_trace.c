@@ -39,7 +39,7 @@
 #include <unistd.h>
 
 /*
- * Export env "VA_TRACE" to debug some corruptions issues
+ * Env. to debug some issue, e.g. the decode/encode issue in a video conference scenerio:
  * .LIBVA_TRACE=log_file: general VA parameters saved into log_file
  * .LIBVA_TRACE_BUFDATA: dump VA buffer data into log_file (if not set, just calculate a checksum)
  * .LIBVA_TRACE_CODEDBUF=coded_clip_file: save the coded clip into file coded_clip_file
@@ -63,7 +63,7 @@ static unsigned int trace_buffer_data; /* dump buffer data or not */
 #define TRACE_CONTEXT_MAX 4
 /* per context settings */
 static struct _trace_context {
-    VADisplay dpy;
+    VADisplay dpy; /* should use context as the key */
     
     /* LIBVA_TRACE */
     FILE *trace_fp_log; /* save the log into a file */
@@ -338,7 +338,7 @@ void va_TraceSurface(VADisplay dpy)
     va_TraceMsg(idx, "\tchroma_u_offset = %d\n", chroma_u_offset);
     va_TraceMsg(idx, "\tchroma_v_offset = %d\n", chroma_v_offset);
 
-    if (*(unsigned int *)buffer == NULL) {
+    if (*(unsigned int *)buffer == 0) {
         va_TraceMsg(idx, "Error:vaLockSurface return NULL buffer\n");
         
         vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
@@ -1448,4 +1448,94 @@ void va_TraceEndPicture(
         
         va_TraceSurface(dpy);
     }
+}
+
+
+void va_TraceMaxNumDisplayAttributes (
+    VADisplay dpy,
+    int number
+)
+{
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "\t>max_display_attributes = %d\n", number);
+}
+
+void va_TraceQueryDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* out */
+    int *num_attributes			/* out */
+)
+{
+    int i;
+    
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "\tnum_attributes = %d\n", *num_attributes);
+
+    for (i=0; i<*num_attributes; i++) {
+        va_TraceMsg(idx, "\tattr_list[%d] =\n");
+        va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
+        va_TraceMsg(idx, "\t  min_value = %d\n", attr_list[i].min_value);
+        va_TraceMsg(idx, "\t  max_value = %d\n", attr_list[i].max_value);
+        va_TraceMsg(idx, "\t  value = %d\n", attr_list[i].value);
+        va_TraceMsg(idx, "\t  flags = %d\n", attr_list[i].flags);
+    }
+}
+
+
+void va_TraceSetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+)
+{
+    int i;
+    
+    DPY2INDEX(dpy);
+
+    va_TraceMsg(idx, "\tnum_attributes = %d\n", num_attributes);
+    for (i=0; i<num_attributes; i++) {
+        va_TraceMsg(idx, "\tattr_list[%d] =\n");
+        va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
+        va_TraceMsg(idx, "\t  min_value = %d\n", attr_list[i].min_value);
+        va_TraceMsg(idx, "\t  max_value = %d\n", attr_list[i].max_value);
+        va_TraceMsg(idx, "\t  value = %d\n", attr_list[i].value);
+        va_TraceMsg(idx, "\t  flags = %d\n", attr_list[i].flags);
+    }
+}
+
+
+void va_TracePutSurface (
+    VADisplay dpy,
+    VASurfaceID surface,
+    void *draw, /* the target Drawable */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+)
+{
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "\tsurface = 0x%08x\n", surface);
+    va_TraceMsg(idx, "\tdraw = 0x%08x\n", draw);
+    va_TraceMsg(idx, "\tsrcx = %d\n", surface);
+    va_TraceMsg(idx, "\tsrcy = %d\n", surface);
+    va_TraceMsg(idx, "\tsrcw = %d\n", surface);
+    va_TraceMsg(idx, "\tsrch = %d\n", surface);
+    va_TraceMsg(idx, "\tdestx = %d\n", surface);
+    va_TraceMsg(idx, "\tdesty = %d\n", surface);
+    va_TraceMsg(idx, "\tdestw = %d\n", destw);
+    va_TraceMsg(idx, "\tdesth = %d\n", desth);
+    va_TraceMsg(idx, "\tcliprects = 0x%08x\n", cliprects);
+    va_TraceMsg(idx, "\tnumber_cliprects = %d\n", number_cliprects);
+    va_TraceMsg(idx, "\tflags = 0x%08x\n", flags);
 }

@@ -52,28 +52,31 @@
  * . if set, encode does nothing, but fill in a hard-coded 720P clip into coded buffer.
  * . VA CONTEXT/CONFIG/SURFACE will call into drivers, but VA Buffer creation is done in here
  * . Bypass all ~SvaBeginPic/vaRenderPic/vaEndPic~T
+ * LIBVA_FOOL_POSTP:
+ * . if set, do nothing for vaPutSurface
  */
 
 
 /* global settings */
 
-/* LIBVA_FOOL_DECODE/LIBVA_FOOL_ENCODE */
+/* LIBVA_FOOL_DECODE/LIBVA_FOOL_ENCODE/LIBVA_FOOL_POSTP */
 static int fool_decode = 0;
 static int fool_encode = 0;
+int fool_postp  = 0;
 
 #define FOOL_CONTEXT_MAX 4
 /* per context settings */
 static struct _fool_context {
-    VADisplay dpy;
+    VADisplay dpy; /* should use context as the key */
     
     VAProfile fool_profile; /* current profile for buffers */
     VAEntrypoint fool_entrypoint; /* current entrypoint */
 
     FILE *fool_fp_codedclip; /* load a clip from disk for fooling encode*/
     
-    /* all buffers with same type share one memory
+    /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
-     * the buffer memory can be find by fool_buf[bufferID & 0xff]
+     * the malloc-ed memory can be find by fool_buf[bufferID & 0xff]
      * the size is ignored here
      */
     char *fool_buf[VABufferTypeMax]; /* memory of fool buffers */
@@ -146,6 +149,9 @@ void va_FoolInit(VADisplay dpy)
     if (fool_index == FOOL_CONTEXT_MAX)
         return;
 
+    if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0)
+        fool_postp = 1;
+    
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0)
         fool_decode = 1;
     

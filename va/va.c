@@ -823,6 +823,7 @@ VAStatus vaSyncSurface (
 
   if (va_FoolSyncSurface( dpy, render_target))
     return VA_STATUS_SUCCESS;
+  
   return ctx->vtable.vaSyncSurface( ctx, render_target );
 }
 
@@ -1179,10 +1180,16 @@ int vaMaxNumDisplayAttributes (
     VADisplay dpy
 )
 {
+  int tmp;
+    
   if( !vaDisplayIsValid(dpy) )
       return 0;
   
-  return CTX(dpy)->max_display_attributes;
+  tmp = CTX(dpy)->max_display_attributes;
+
+  VA_TRACE(va_MaxNumDisplayAttributes, dpy, tmp);
+  
+  return tmp;
 }
 
 /* 
@@ -1201,7 +1208,14 @@ VAStatus vaQueryDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
+  VAStatus va_status;
+  
+  va_status = ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
+
+  VA_TRACE(va_QueryDisplayAttributes, dpy, attr_list, num_attributes);
+
+  return va_status;
+  
 }
 
 /* 
@@ -1220,7 +1234,13 @@ VAStatus vaGetDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
+  VAStatus va_status;
+  
+  va_status = ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
+
+  VA_TRACE(va_SetDisplayAttributes, dpy, attr_list, num_attributes);
+  
+  return va_status;
 }
 
 /* 
@@ -1239,6 +1259,9 @@ VAStatus vaSetDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
+  VA_TRACE(va_SetDisplayAttributes, dpy, attr_list, num_attributes);
+
+  
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
 }
 
