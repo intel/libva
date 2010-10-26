@@ -86,4 +86,14 @@ VAStatus va_FoolUnmapBuffer (
     VABufferID buf_id  /* in */
 );
 
+
+VAStatus va_FoolQuerySubpictureFormats (
+    VADisplay dpy,
+    VAImageFormat *format_list,
+    unsigned int *flags,
+    unsigned int *num_formats
+);
+
+
+
 #endif

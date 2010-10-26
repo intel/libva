@@ -40,7 +40,20 @@
 
 #include "va_fool_264.h"
 
-/* do dummy decode/encode, ignore the input data */
+
+/*
+ * Do dummy decode/encode, ignore the input data
+ * In order to debug memory leak or low performance issues, we need to isolate driver problems
+ * We export env "VA_FOOL", with which, we can do fake decode/encode:
+ *
+ * LIBVA_FOOL_DECODE:
+ * . if set, decode does nothing, but fill in some YUV data
+ * LIBVA_FOOL_ENCODE:
+ * . if set, encode does nothing, but fill in a hard-coded 720P clip into coded buffer.
+ * . VA CONTEXT/CONFIG/SURFACE will call into drivers, but VA Buffer creation is done in here
+ * . Bypass all ~SvaBeginPic/vaRenderPic/vaEndPic~T
+ */
+
 
 /* global settings */
 
@@ -274,7 +287,7 @@ int va_FoolCreateSurfaces(
     unsigned int chroma_v_offset;
     unsigned int buffer_name;
     void *buffer = NULL;
-    char *Y_data, *U_data, *V_data;
+    unsigned char *Y_data, *U_data, *V_data;
 
     int box_width = num_surfaces/2;
     int row_shift = 0;
@@ -320,9 +333,9 @@ int va_FoolCreateSurfaces(
 	    if (row_shift==(2*box_width))
 		row_shift= 0;
 	}
-	return;
+	return 0; /* the return value is ignored */
     }
-    return ;
+    return 0; /* the return value is ignored */
 }
 
 VAStatus va_FoolCreateBuffer (

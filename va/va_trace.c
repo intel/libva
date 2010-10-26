@@ -38,6 +38,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+/*
+ * Export env "VA_TRACE" to debug some corruptions issues
+ * .LIBVA_TRACE=log_file: general VA parameters saved into log_file
+ * .LIBVA_TRACE_BUFDATA: dump VA buffer data into log_file (if not set, just calculate a checksum)
+ * .LIBVA_TRACE_CODEDBUF=coded_clip_file: save the coded clip into file coded_clip_file
+ * .LIBVA_TRACE_SURFACE=decoded_yuv_file: save the decoded YUV file decoded_yuv_file
+ * .LIBVA_TRACE_LOGSIZE=numeric number: truncate the log_file or coded_clip_file, or decoded_yuv_file
+ *					when the size is bigger than the number
+ */
+
+
 /* global settings */
 
 /* LIBVA_TRACE */
