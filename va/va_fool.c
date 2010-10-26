@@ -102,7 +102,7 @@ static struct _fool_context {
             break;                                     \
                                                        \
     if (idx == FOOL_CONTEXT_MAX)                       \
-        return 0;                                        \
+        return 0;  /* let driver go */                 \
 
 /* Prototype declarations (functions defined in va.c) */
 

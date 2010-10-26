@@ -482,7 +482,7 @@ static char * buffer_type_to_string(int type)
 }
 
 
-static int va_TraceVABuffers(
+static void va_TraceVABuffers(
     VADisplay dpy,
     VAContextID context,
     VABufferID buffer,
