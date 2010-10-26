@@ -272,30 +272,32 @@ VADisplay vaGetDisplay (
 
 
 #ifdef ANDROID
-extern int fool_postp; /* do nothing for vaPutSurface if set */
-extern int trace_flag; /* trace vaPutSurface parameters */
+extern "C"  {
+    extern int fool_postp; /* do nothing for vaPutSurface if set */
+    extern int trace_flag; /* trace vaPutSurface parameters */
+
+    void va_TracePutSurface (
+        VADisplay dpy,
+        VASurfaceID surface,
+        void *draw, /* the target Drawable */
+        short srcx,
+        short srcy,
+        unsigned short srcw,
+        unsigned short srch,
+        short destx,
+        short desty,
+        unsigned short destw,
+        unsigned short desth,
+        VARectangle *cliprects, /* client supplied clip list */
+        unsigned int number_cliprects, /* number of clip rects in the clip list */
+        unsigned int flags /* de-interlacing flags */
+        );
+}
+
 #define VA_TRACE(trace_func,...)                \
     if (trace_flag) {                           \
         trace_func(__VA_ARGS__);                \
     }
-
-void va_TracePutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    void *draw, /* the target Drawable */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-);
-
 
 VAStatus vaPutSurface (
     VADisplay dpy,
