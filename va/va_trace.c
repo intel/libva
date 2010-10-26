@@ -229,6 +229,12 @@ static void truncate_file(FILE *fp)
 void va_TraceMsg(int idx, const char *msg, ...)
 {
     va_list args;
+
+    if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize) {
+        truncate_file(trace_context[idx].trace_fp_log);
+
+        va_TraceMsg(idx, "==========truncate file %s\n", trace_context[idx].trace_log_fn);
+    }
     
     if (msg)  {
         va_start(args, msg);
@@ -236,9 +242,6 @@ void va_TraceMsg(int idx, const char *msg, ...)
         va_end(args);
     } else
         fflush(trace_context[idx].trace_fp_log);
-
-    if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize)
-        truncate_file(trace_context[idx].trace_fp_log);
 }
 
 void va_TraceCodedBuf(VADisplay dpy)
@@ -250,8 +253,11 @@ void va_TraceCodedBuf(VADisplay dpy)
     
     /* can only truncate at a sequence boudary */
     if (((file_size(trace_context[idx].trace_fp_log) >= trace_logsize))
-        && trace_context[idx].trace_sequence_start)
+        && trace_context[idx].trace_sequence_start) {
+        va_TraceMsg(idx, "==========truncate file %s\n", trace_context[idx].trace_codedbuf_fn);
         truncate_file(trace_context[idx].trace_fp_log);
+    }
+    
 
     trace_context[idx].trace_sequence_start = 0; /* only truncate coded file when meet next new sequence */
     
@@ -298,8 +304,10 @@ void va_TraceSurface(VADisplay dpy)
     
     va_TraceMsg(idx, "==========dump surface data in file %s\n", trace_context[idx].trace_surface_fn);
 
-    if ((file_size(trace_context[idx].trace_fp_surface) >= trace_logsize))
+    if ((file_size(trace_context[idx].trace_fp_surface) >= trace_logsize)) {
+        va_TraceMsg(idx, "==========truncate file %s\n", trace_context[idx].trace_surface_fn);
         truncate_file(trace_context[idx].trace_fp_surface);
+    }
 
     va_status = vaLockSurface(dpy, trace_context[idx].trace_rendertarget, &fourcc,
                               &luma_stride, &chroma_u_stride, &chroma_v_stride,
