@@ -37,6 +37,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
+
 
 /*
  * Env. to debug some issue, e.g. the decode/encode issue in a video conference scenerio:
@@ -793,7 +795,8 @@ static void va_TraceVAIQMatrixBufferH264(
     DPY2INDEX(dpy);
 
     va_TraceMsg(idx, "==========VAIQMatrixBufferH264\n");
-    
+
+    va_TraceMsg(idx, "\tScalingList4x4[6][16]=\n");
     for (i = 0; i < 6; i++) {
         for (j = 0; j < 16; j++) {
             va_TraceMsg(idx, "\t%d\t", p->ScalingList4x4[i][j]);
@@ -802,6 +805,7 @@ static void va_TraceVAIQMatrixBufferH264(
         }
     }
 
+    va_TraceMsg(idx, "\tScalingList8x8[2][64]=\n");
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 64; j++) {
             va_TraceMsg(idx, "\t%d", p->ScalingList8x8[i][j]);

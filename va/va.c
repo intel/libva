@@ -1238,7 +1238,7 @@ VAStatus vaGetDisplayAttributes (
   
   va_status = ctx->vtable.vaGetDisplayAttributes ( ctx, attr_list, num_attributes );
 
-  VA_TRACE(va_SetDisplayAttributes, dpy, attr_list, num_attributes);
+  VA_TRACE(va_TraceSetDisplayAttributes, dpy, attr_list, num_attributes);
   
   return va_status;
 }
@@ -1259,7 +1259,7 @@ VAStatus vaSetDisplayAttributes (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE(va_SetDisplayAttributes, dpy, attr_list, num_attributes);
+  VA_TRACE(va_TraceSetDisplayAttributes, dpy, attr_list, num_attributes);
 
   
   return ctx->vtable.vaSetDisplayAttributes ( ctx, attr_list, num_attributes );
