@@ -245,7 +245,7 @@ void va_TraceCodedBuf(VADisplay dpy)
 {
     VACodedBufferSegment *buf_list = NULL;
     VAStatus va_status;
-    unsigned int check_sum = 0;
+    unsigned char check_sum = 0;
     DPY2INDEX(dpy);
     
     /* can only truncate at a sequence boudary */
@@ -294,9 +294,9 @@ void va_TraceSurface(VADisplay dpy)
     unsigned int chroma_v_offset;
     unsigned int buffer_name;
     void *buffer = NULL;
-    char *Y_data, *UV_data, *tmp;
+    unsigned char *Y_data, *UV_data, *tmp;
     VAStatus va_status;
-    unsigned int check_sum = 0;
+    unsigned char check_sum = 0;
     DPY2INDEX(dpy);
     
     va_TraceMsg(idx, "==========dump surface data in file %s\n", trace_context[idx].trace_surface_fn);
@@ -333,9 +333,10 @@ void va_TraceSurface(VADisplay dpy)
         vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
         return;
     }
+    va_TraceMsg(idx, "\tbuffer location = 0x%08x\n", buffer);
 
     Y_data = buffer;
-    UV_data = buffer + luma_offset;
+    UV_data = buffer + chroma_u_offset;
 
     tmp = Y_data;
     for (i=0; i<trace_context[idx].trace_frame_height; i++) {
@@ -363,7 +364,7 @@ void va_TraceSurface(VADisplay dpy)
 
     vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
 
-    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum);
+    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
 }
 
 void va_TraceCreateConfig(
@@ -481,13 +482,13 @@ static int va_TraceVABuffers(
     int i, j;
     unsigned char *p = pbuf;
     unsigned int *pi = (unsigned int *)pbuf;
-    unsigned int  check_sum = 0;
+    unsigned char  check_sum = 0;
     DPY2INDEX(dpy);
     
     va_TraceMsg(idx, "==========%s\n",  buffer_type_to_string(type));
 
     for (i=0; i<size; i++) {
-        int value =  p[i];
+        unsigned char value =  p[i];
             
         if ((trace_buffer_data) && ((i%16) == 0))
             va_TraceMsg(idx, "\n0x%08x:", i);
@@ -498,7 +499,7 @@ static int va_TraceVABuffers(
         check_sum ^= value;
     }
 
-    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum);
+    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
 
     return 0;
 }
@@ -587,7 +588,8 @@ static void va_TraceVAIQMatrixBufferMPEG4(
     void *data)
 {
     DPY2INDEX(dpy);
-    
+
+    /* todo: log VAIQMatrixBufferMPEG4 */
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
     return;
