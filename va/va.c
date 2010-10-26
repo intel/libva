@@ -703,12 +703,19 @@ VAStatus vaMapBuffer (
 )
 {
   VADriverContextP ctx;
+  VAStatus va_status;
+  
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-
+  
   if (va_FoolMapBuffer(dpy, buf_id, pbuf))
       return VA_STATUS_SUCCESS;
-  return ctx->vtable.vaMapBuffer( ctx, buf_id, pbuf );
+  va_status = ctx->vtable.vaMapBuffer( ctx, buf_id, pbuf );
+
+  if (va_status == VA_STATUS_SUCCESS)
+      VA_TRACE(va_TraceMapBuffer, dpy, buf_id, pbuf);
+  
+  return va_status;
 }
 
 VAStatus vaUnmapBuffer (

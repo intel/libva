@@ -59,6 +59,14 @@ void va_TraceCreateContext(
     VAContextID *context		/* out */
 );
 
+
+void va_TraceMapBuffer (
+    VADisplay dpy,
+    VABufferID buf_id,	/* in */
+    void **pbuf 	/* out */
+);
+
+
 void va_TraceBeginPicture(
     VADisplay dpy,
     VAContextID context,
