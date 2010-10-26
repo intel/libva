@@ -97,6 +97,12 @@ void va_TraceQueryDisplayAttributes (
     int *num_attributes			/* out */
 );
 
+void va_TraceGetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+);
+
 void va_TraceSetDisplayAttributes (
     VADisplay dpy,
     VADisplayAttribute *attr_list,

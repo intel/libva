@@ -1555,6 +1555,43 @@ void va_TraceQueryDisplayAttributes (
 }
 
 
+static void va_TraceDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+)
+{
+    int i;
+    
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "\tnum_attributes = %d\n", num_attributes);
+    for (i=0; i<num_attributes; i++) {
+        va_TraceMsg(idx, "\tattr_list[%d] =\n");
+        va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
+        va_TraceMsg(idx, "\t  min_value = %d\n", attr_list[i].min_value);
+        va_TraceMsg(idx, "\t  max_value = %d\n", attr_list[i].max_value);
+        va_TraceMsg(idx, "\t  value = %d\n", attr_list[i].value);
+        va_TraceMsg(idx, "\t  flags = %d\n", attr_list[i].flags);
+    }
+}
+
+
+void va_TraceGetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+)
+{
+    int i;
+    
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceDisplayAttributes (dpy, attr_list, num_attributes);
+}
+
 void va_TraceSetDisplayAttributes (
     VADisplay dpy,
     VADisplayAttribute *attr_list,
@@ -1566,16 +1603,8 @@ void va_TraceSetDisplayAttributes (
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
-    va_TraceMsg(idx, "\tnum_attributes = %d\n", num_attributes);
-    for (i=0; i<num_attributes; i++) {
-        va_TraceMsg(idx, "\tattr_list[%d] =\n");
-        va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
-        va_TraceMsg(idx, "\t  min_value = %d\n", attr_list[i].min_value);
-        va_TraceMsg(idx, "\t  max_value = %d\n", attr_list[i].max_value);
-        va_TraceMsg(idx, "\t  value = %d\n", attr_list[i].value);
-        va_TraceMsg(idx, "\t  flags = %d\n", attr_list[i].flags);
-    }
+
+    va_TraceDisplayAttributes (dpy, attr_list, num_attributes);
 }
 
 
