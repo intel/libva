@@ -230,11 +230,8 @@ void va_TraceMsg(int idx, const char *msg, ...)
 {
     va_list args;
 
-    if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize) {
+    if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize)
         truncate_file(trace_context[idx].trace_fp_log);
-
-        va_TraceMsg(idx, "==========truncate file %s\n", trace_context[idx].trace_log_fn);
-    }
     
     if (msg)  {
         va_start(args, msg);
