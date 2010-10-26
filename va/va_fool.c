@@ -37,6 +37,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "va_fool_264.h"
 
@@ -83,7 +84,7 @@ static struct _fool_context {
     unsigned int fool_buf_size[VABufferTypeMax]; /* size of memory of fool buffers */
     unsigned int fool_buf_count[VABufferTypeMax]; /* count of created buffers */
     VAContextID context;
-} fool_context[FOOL_CONTEXT_MAX] = { 0 }; /* trace five context at the same time */
+} fool_context[FOOL_CONTEXT_MAX] = { {0} }; /* trace five context at the same time */
 
 #define FOOL_DECODE(idx) (fool_decode && (fool_context[idx].fool_entrypoint == VAEntrypointVLD))
 #define FOOL_ENCODE(idx)                                                \
@@ -138,9 +139,7 @@ VAStatus vaUnlockSurface(VADisplay dpy,
 void va_FoolInit(VADisplay dpy)
 {
     char env_value[1024];
-    unsigned int suffix = 0xffff & ((unsigned int)time(NULL));
     int fool_index = 0;
-    FILE *tmp;    
 
     for (fool_index = 0; fool_index < FOOL_CONTEXT_MAX; fool_index++)
         if (fool_context[fool_index].dpy == 0)
@@ -283,7 +282,7 @@ int va_FoolCreateSurfaces(
     VASurfaceID *surfaces	/* out */
 )
 {
-    int i, j;
+    int i;
     unsigned int fourcc; /* following are output argument */
     unsigned int luma_stride;
     unsigned int chroma_u_stride;
@@ -313,11 +312,11 @@ int va_FoolCreateSurfaces(
 		    &buffer_name, &buffer);
 
 	    if (va_status != VA_STATUS_SUCCESS)
-		return;
+		return 0;
 
 	    if (!buffer) {
 		vaUnlockSurface(dpy, surfaces[i]);
-		return;
+		return 0;
 	    }
 
 	    Y_data = buffer;
@@ -358,7 +357,6 @@ VAStatus va_FoolCreateBuffer (
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
         int new_size = size * num_elements;
-        VABufferID bufid = type;
         
         if (type == VAEncCodedBufferType) /* only a VACodedBufferSegment */
             new_size = sizeof(VACodedBufferSegment);

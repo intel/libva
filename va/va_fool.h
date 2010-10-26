@@ -65,17 +65,20 @@ VAStatus va_FoolMapBuffer (
     VABufferID buf_id,	/* in */
     void **pbuf 	/* out */
 );
+
 int va_FoolBeginPicture(
     VADisplay dpy,
     VAContextID context,
     VASurfaceID render_target
 );
+
 int va_FoolRenderPicture(
     VADisplay dpy,
     VAContextID context,
     VABufferID *buffers,
     int num_buffers
 );
+
 int va_FoolEndPicture(
     VADisplay dpy,
     VAContextID context
@@ -92,6 +95,10 @@ VAStatus va_FoolQuerySubpictureFormats (
     VAImageFormat *format_list,
     unsigned int *flags,
     unsigned int *num_formats
+);
+int va_FoolSyncSurface(
+    VADisplay dpy, 
+    VASurfaceID render_target
 );
 
 

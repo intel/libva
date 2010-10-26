@@ -1187,7 +1187,7 @@ int vaMaxNumDisplayAttributes (
   
   tmp = CTX(dpy)->max_display_attributes;
 
-  VA_TRACE(va_MaxNumDisplayAttributes, dpy, tmp);
+  VA_TRACE(va_TraceMaxNumDisplayAttributes, dpy, tmp);
   
   return tmp;
 }
@@ -1212,7 +1212,7 @@ VAStatus vaQueryDisplayAttributes (
   
   va_status = ctx->vtable.vaQueryDisplayAttributes ( ctx, attr_list, num_attributes );
 
-  VA_TRACE(va_QueryDisplayAttributes, dpy, attr_list, num_attributes);
+  VA_TRACE(va_TraceQueryDisplayAttributes, dpy, attr_list, num_attributes);
 
   return va_status;
   

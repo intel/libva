@@ -91,7 +91,7 @@ static struct _trace_context {
     unsigned int trace_frame_width; /* current frame width */
     unsigned int trace_frame_height; /* current frame height */
     unsigned int trace_sequence_start; /* get a new sequence for encoding or not */
-} trace_context[TRACE_CONTEXT_MAX] = { 0 }; /* trace five context at the same time */
+} trace_context[TRACE_CONTEXT_MAX] = { {0} }; /* trace five context at the same time */
 
 #define DPY2INDEX(dpy)                                  \
     int idx;                                            \
@@ -278,7 +278,7 @@ void va_TraceCodedBuf(VADisplay dpy)
     va_TraceMsg(idx, "==========dump codedbuf into file %s\n", trace_context[idx].trace_codedbuf_fn);
     
     while (buf_list != NULL) {
-        int i;
+        unsigned int i;
         
         va_TraceMsg(idx, "\tsize = %d\n", buf_list->size);
         if (trace_context[idx].trace_fp_log)
@@ -297,7 +297,7 @@ void va_TraceCodedBuf(VADisplay dpy)
 
 void va_TraceSurface(VADisplay dpy)
 {
-    int i, j;
+    unsigned int i, j;
     unsigned int fourcc; /* following are output argument */
     unsigned int luma_stride;
     unsigned int chroma_u_stride;
@@ -492,9 +492,8 @@ static void va_TraceVABuffers(
     void *pbuf
 )
 {
-    int i, j;
+    unsigned int i;
     unsigned char *p = pbuf;
-    unsigned int *pi = (unsigned int *)pbuf;
     unsigned char  check_sum = 0;
     DPY2INDEX(dpy);
     
@@ -514,7 +513,7 @@ static void va_TraceVABuffers(
 
     va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
 
-    return 0;
+    return;
 }
 
 
@@ -1154,6 +1153,8 @@ static void va_TraceMPEG2Buf(
         break;
     case VAEncH264SEIBufferType:
         break;
+    default:
+        break;
     }
 }
 
@@ -1368,7 +1369,7 @@ void va_TraceRenderPicture(
     va_TraceMsg(idx, "\tnum_buffers = %d\n", num_buffers);
     for (i = 0; i < num_buffers; i++) {
         void *pbuf;
-        int j;
+        unsigned int j;
         
         /* get buffer type information */
         vaBufferInfo(dpy, context, buffers[i], &type, &size, &num_elements);
@@ -1418,6 +1419,8 @@ void va_TraceRenderPicture(
                 va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
+        default:
+            break;
         }
 
         vaUnmapBuffer(dpy, buffers[i]);
@@ -1438,8 +1441,8 @@ void va_TraceEndPicture(
 
     /* want to trace codedbuf, and it is encode */
     if (trace_context[idx].trace_fp_codedbuf &&
-        (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) ||
-        (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture)) {
+        ((trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) ||
+        (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture))) {
         /* force the pipleline finish rendering */
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
         va_TraceCodedBuf(dpy);
