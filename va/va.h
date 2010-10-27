@@ -143,7 +143,7 @@ typedef int VAStatus;	/* Return status type from functions */
  * 2, specify the cropping info for video playback
  * 3, encoded video will blend with background color
  */
-#define VA_ENBLE_BLEND          0x00000004 /* video area blend with the constant color */ 
+#define VA_ENABLE_BLEND         0x00000004 /* video area blend with the constant color */ 
     
 /*
  * Clears the drawable with background color.
