@@ -116,7 +116,7 @@ int vaDisplayIsValid(VADisplay dpy)
     return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
 }
 
-static void va_errorMessage(const char *msg, ...)
+void va_errorMessage(const char *msg, ...)
 {
     va_list args;
 
@@ -126,7 +126,7 @@ static void va_errorMessage(const char *msg, ...)
     va_end(args);
 }
 
-static void va_infoMessage(const char *msg, ...)
+void va_infoMessage(const char *msg, ...)
 {
     va_list args;
 

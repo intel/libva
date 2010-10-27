@@ -109,6 +109,9 @@ static struct _trace_context {
 
 /* Prototype declarations (functions defined in va.c) */
 
+void va_errorMessage(const char *msg, ...);
+void va_infoMessage(const char *msg, ...);
+
 int va_parseConfig(char *env, char *env_value);
 
 VAStatus vaBufferInfo(
@@ -165,17 +168,24 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_log = stderr;
             strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
         }
+        va_infoMessage("LIBVA_TRACE is on, save log into %s\n", trace_context[trace_index].trace_log_fn);
     }
 
     if (trace_flag == 0)
         return;
 
     /* may re-get the global settings for multiple context */
-    if (va_parseConfig("LIBVA_TRACE_LOGSIZE", &env_value[0]) == 0)
+    if (va_parseConfig("LIBVA_TRACE_LOGSIZE", &env_value[0]) == 0) {
         trace_logsize = atoi(env_value);
+        va_infoMessage("LIBVA_TRACE_LOGSIZE is on, size is %d\n", trace_logsize);
+    }
+    
 
-    if (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)
+    if (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0) {
         trace_buffer_data = 1; /* dump buffer data */
+        va_infoMessage("LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
+    }
+    
 
     /* per-context setting */
     if (va_parseConfig("LIBVA_TRACE_CODEDBUF", &env_value[0]) == 0) {
@@ -190,6 +200,8 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_codedbuf = stderr;
             strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
         }
+
+        va_infoMessage("LIBVA_TRACE_CODEDBUF is on, save coded clip into %s\n", trace_context[trace_index].trace_codedbuf_fn);
     }
 
     if (va_parseConfig("LIBVA_TRACE_SURFACE", &env_value[0]) == 0) {
@@ -204,6 +216,8 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_surface = stderr;
             strcpy(trace_context[trace_index].trace_surface_fn, "/dev/stderr");
         }
+
+        va_infoMessage("LIBVA_TRACE_SURFACE is on, save coded clip into %s\n", trace_context[trace_index].trace_surface_fn);
     }
 
     trace_context[trace_index].dpy = dpy;
@@ -1583,8 +1597,6 @@ void va_TraceGetDisplayAttributes (
     int num_attributes
 )
 {
-    int i;
-    
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
@@ -1598,8 +1610,6 @@ void va_TraceSetDisplayAttributes (
     int num_attributes
 )
 {
-    int i;
-    
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);

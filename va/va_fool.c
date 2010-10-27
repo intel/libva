@@ -107,6 +107,9 @@ static struct _fool_context {
 
 /* Prototype declarations (functions defined in va.c) */
 
+void va_errorMessage(const char *msg, ...);
+void va_infoMessage(const char *msg, ...);
+
 int va_parseConfig(char *env, char *env_value);
 
 VAStatus vaBufferInfo(
@@ -148,19 +151,27 @@ void va_FoolInit(VADisplay dpy)
     if (fool_index == FOOL_CONTEXT_MAX)
         return;
 
-    if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0)
+    if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
         fool_postp = 1;
+        va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
+    }
     
-    if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0)
+    
+    if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
         fool_decode = 1;
-    
+        va_infoMessage("LIBVA_FOOL_DECODE is on, dummy decode\n");
+    }
+
+                
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
         FILE *tmp = fopen(env_value, "r");
 
         if (tmp)
             fool_context[fool_index].fool_fp_codedclip = tmp;
         
-        fool_encode = 1;        
+        fool_encode = 1;
+
+        va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
     }
 
     if (fool_encode || fool_decode)
