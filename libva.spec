@@ -4,7 +4,7 @@
 %define reldate 04282009
 
 Name:           libva
-Version:        1.0.4
+Version:        1.0.6
 Release:        0.0
 License:        MIT
 Source:         %{name}-%{version}.tar.bz2
@@ -49,13 +49,13 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{driverdir}
 install -m 755 ./dummy_drv_video/.libs/dummy_drv_video.so $RPM_BUILD_ROOT%{driverdir}/dummy_drv_video.so
 install -m 755 ./va/.libs/libva.so.1 $RPM_BUILD_ROOT%{driverdir}/libva.so.1
-install -m 755 ./va/.libs/libva.so.1.0.4 $RPM_BUILD_ROOT%{driverdir}/libva.so.1.0.4
+install -m 755 ./va/.libs/libva.so.1.0.6 $RPM_BUILD_ROOT%{driverdir}/libva.so.1.0.6
 install -m 755 ./va/.libs/libva-tpi.so.1 $RPM_BUILD_ROOT%{driverdir}/libva-tpi.so.1
-install -m 755 ./va/.libs/libva-tpi.so.1.0.4 $RPM_BUILD_ROOT%{driverdir}/libva-tpi.so.1.0.4
+install -m 755 ./va/.libs/libva-tpi.so.1.0.6 $RPM_BUILD_ROOT%{driverdir}/libva-tpi.so.1.0.6
 install -m 755 ./va/.libs/libva-x11.so.1 $RPM_BUILD_ROOT%{driverdir}/libva-x11.so.1
-install -m 755 ./va/.libs/libva-x11.so.1.0.4 $RPM_BUILD_ROOT%{driverdir}/libva-x11.so.1.0.4
+install -m 755 ./va/.libs/libva-x11.so.1.0.6 $RPM_BUILD_ROOT%{driverdir}/libva-x11.so.1.0.6
 install -m 755 ./va/.libs/libva-glx.so.1 $RPM_BUILD_ROOT%{driverdir}/libva-glx.so.1
-install -m 755 ./va/.libs/libva-glx.so.1.0.4 $RPM_BUILD_ROOT%{driverdir}/libva-glx.so.1.0.4
+install -m 755 ./va/.libs/libva-glx.so.1.0.6 $RPM_BUILD_ROOT%{driverdir}/libva-glx.so.1.0.6
 
 install -m 555 ./test/vainfo $RPM_BUILD_ROOT%{_bindir}/vainfo
 install -m 555 ./test/basic/test_* $RPM_BUILD_ROOT%{_bindir}/
@@ -85,13 +85,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libva.so.1
-%{_libdir}/libva.so.1.0.4
+%{_libdir}/libva.so.1.0.6
 %{_libdir}/libva-tpi.so.1
-%{_libdir}/libva-tpi.so.1.0.4
+%{_libdir}/libva-tpi.so.1.0.6
 %{_libdir}/libva-x11.so.1
-%{_libdir}/libva-x11.so.1.0.4
+%{_libdir}/libva-x11.so.1.0.6
 %{_libdir}/libva-glx.so.1
-%{_libdir}/libva-glx.so.1.0.4
+%{_libdir}/libva-glx.so.1.0.6
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
