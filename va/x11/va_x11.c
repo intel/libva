@@ -231,6 +231,31 @@ VADisplay vaGetDisplay (
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
+extern int fool_postp; /* do nothing for vaPutSurface if set */
+extern int trace_flag; /* trace vaPutSurface parameters */
+#define VA_TRACE(trace_func,...)                \
+    if (trace_flag) {                           \
+        trace_func(__VA_ARGS__);                \
+    }
+
+void va_TracePutSurface (
+    VADisplay dpy,
+    VASurfaceID surface,
+    void *draw, /* the target Drawable */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+);
+
+
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
@@ -250,9 +275,16 @@ VAStatus vaPutSurface (
 {
   VADriverContextP ctx;
 
+  if (fool_postp)
+      return VA_STATUS_SUCCESS;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-
+  
+  VA_TRACE(va_TracePutSurface, dpy, surface, (void *)draw, srcx, srcy, srcw, srch,
+           destx, desty, destw, desth,
+           cliprects, number_cliprects, flags );
+  
   return ctx->vtable.vaPutSurface( ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth,
                                    cliprects, number_cliprects, flags );

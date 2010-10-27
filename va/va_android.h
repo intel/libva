@@ -19,8 +19,8 @@ VADisplay vaGetDisplay (
 #endif
 
 #ifdef __cplusplus
-#ifdef ANDROID    
-#include <ui/ISurface.h>
+#ifdef ANDROID
+#include <surfaceflinger/ISurface.h>
 using namespace android;
 
 /*

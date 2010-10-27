@@ -22,7 +22,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifndef ANDROID
 #include <va/va_x11.h>
+#else
+#include "va/va_android.h"
+#define Display unsigned int
+#endif
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -87,7 +92,11 @@ int main(int argc, const char* argv[])
   else
       name = argv[0];
 
+#ifndef ANDROID
   dpy = XOpenDisplay(":0.0");
+#else
+  dpy = (Display*)malloc(sizeof(Display));
+#endif
   if (NULL == dpy)
   {
       fprintf(stderr, "%s: Error, can't open display: '%s'\n", name, display ? display : "");

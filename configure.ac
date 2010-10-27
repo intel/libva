@@ -7,11 +7,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -29,7 +29,7 @@ m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
 
 # if the library source code has changed, increment revision
-m4_define([libva_lt_revision], [5])
+m4_define([libva_lt_revision], [6])
 # if any interface was added/removed/changed, then inc current, reset revision
 m4_define([libva_lt_current], [1])
 # if any interface was added since last public release, then increment age

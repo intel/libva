@@ -128,6 +128,8 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_UNIMPLEMENTED           0x00000014
 #define VA_STATUS_ERROR_SURFACE_IN_DISPLAYING   0x00000015
 #define VA_STATUS_ERROR_INVALID_IMAGE_FORMAT    0x00000016
+#define VA_STATUS_ERROR_DECODING_ERROR          0x00000017
+#define VA_STATUS_ERROR_ENCODING_ERROR          0x00000018
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
@@ -136,11 +138,19 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_BOTTOM_FIELD         0x00000002
 
 /*
+ * Enabled the positioning/cropping/blending feature:
+ * 1, specify the video playback position in the isurface
+ * 2, specify the cropping info for video playback
+ * 3, encoded video will blend with background color
+ */
+#define VA_ENABLE_BLEND         0x00000004 /* video area blend with the constant color */ 
+    
+/*
  * Clears the drawable with background color.
  * for hardware overlay based implementation this flag
  * can be used to turn off the overlay
  */
-#define VA_CLEAR_DRAWABLE       0x00000008 
+#define VA_CLEAR_DRAWABLE       0x00000008
 
 /* Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
@@ -273,6 +283,7 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_NONE	0x00000001	
 #define VA_RC_CBR	0x00000002	
 #define VA_RC_VBR	0x00000004	
+#define VA_RC_VCM	0x00000008 /* video conference mode */
 
 /*
  * if an attribute is not applicable for a given
@@ -502,7 +513,74 @@ typedef enum
     VAEncSliceParameterBufferType	= 24,
     VAEncH264VUIBufferType		= 25,
     VAEncH264SEIBufferType		= 26,
+    VAEncMiscParameterBufferType	= 27,
+    VABufferTypeMax                     = 0xff
 } VABufferType;
+
+typedef enum
+{
+    VAEncMiscParameterTypeFrameRate 	= 0,
+    VAEncMiscParameterTypeRateControl  	= 1,
+    VAEncMiscParameterTypeMaxSliceSize	= 2,
+    VAEncMiscParameterTypeAIR    	= 3,
+} VAEncMiscParameterType;
+
+/*
+ *  For application, e.g. set a new bitrate
+ *    VABufferID buf_id;
+ *    VAEncMiscParameterBuffer *misc_param;
+ *    VAEncMiscParameterRateControl *misc_rate_ctrl;
+ * 
+ *    vaCreateBuffer(dpy, context, VAEncMiscParameterBufferType,
+ *              sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterRateControl),
+ *              1, NULL, &buf_id);
+ *
+ *    vaMapBuffer(dpy,buf_id,(void **)&misc_param);
+ *    misc_param->type = VAEncMiscParameterTypeRateControl;
+ *    misc_rate_ctrl= (VAEncMiscParameterRateControl *)misc_param->data;
+ *    misc_rate_ctrl->bits_per_second = 6400000;
+ *    vaUnmapBuffer(dpy, buf_id);
+ *    vaRenderPicture(dpy, context, &buf_id, 1);
+ */
+typedef struct _VAEncMiscParameterBuffer
+{
+    VAEncMiscParameterType type;
+    unsigned int data[0];
+} VAEncMiscParameterBuffer;
+
+typedef struct _VAEncMiscParameterRateControl
+{
+    unsigned int bits_per_second; /* this is the maximum bit-rate to be constrained by the rate control implementation */
+    unsigned int target_percentage; /* this is the bit-rate the rate control is targeting, as a percentage of the maximum bit-rate */
+                                    /* for example if target_percentage is 95 then the rate control will target a bit-rate that is */
+                                    /* 95% of the maximum bit-rate */
+    unsigned int window_size; /* windows size in milliseconds. For example if this is set to 500, then the rate control will guarantee the */
+                              /* target bit-rate over a 500 ms window */
+    unsigned int initial_qp;  /* initial QP at I frames */
+    unsigned int min_qp;     
+} VAEncMiscParameterRateControl;
+
+typedef struct _VAEncMiscParameterFrameRate
+{
+    unsigned int framerate;
+} VAEncMiscParameterFrameRate;
+
+/*
+ * Allow a maximum slice size to be specified (in bits).
+ * The encoder will attempt to make sure that individual slices do not exceed this size
+ * Or to signal applicate if the slice size exceed this size, see "status" of VACodedBufferSegment
+ */
+typedef struct _VAEncMiscParameterMaxSliceSize
+{
+    unsigned int max_slice_size;
+} VAEncMiscParameterMaxSliceSize;
+
+typedef struct _VAEncMiscParameterAIR
+{
+    unsigned int air_num_mbs;
+    unsigned int air_threshold;
+    unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
+} VAEncMiscParameterAIR;
 
 
 /* 
@@ -1115,6 +1193,8 @@ typedef struct _VAEncSequenceParameterBufferH264
     unsigned char vui_flag;
 } VAEncSequenceParameterBufferH264;
 
+#define H264_LAST_PICTURE_EOSEQ     0x01 /* the last picture in the sequence */
+#define H264_LAST_PICTURE_EOSTREAM  0x02 /* the last picture in the stream */
 typedef struct _VAEncPictureParameterBufferH264
 {
     VASurfaceID reference_picture;
@@ -1122,9 +1202,7 @@ typedef struct _VAEncPictureParameterBufferH264
     VABufferID coded_buf;
     unsigned short picture_width;
     unsigned short picture_height;
-    unsigned char last_picture; /* if set to 1 it indicates the last picture in the sequence
-                                 * if set to 2 it indicates the last picture of the stream
-                                 */
+    unsigned char last_picture;
 } VAEncPictureParameterBufferH264;
 
 /****************************
@@ -1225,9 +1303,26 @@ VAStatus vaBufferSetNumElements (
 /*
  * device independent data structure for codedbuffer
  */
-typedef  struct _VACodedBufferSegment {
-    unsigned int size; /* size of the data buffer in the coded buffer segment, in bytes */
-    unsigned int bit_offset;/* bit offset into the data buffer where valid bitstream data begins */
+
+/* 
+ * FICTURE_AVE_QP(bit7-0): The average Qp value used during this frame
+ * LARGE_SLICE(bit8):At least one slice in the current frame was large
+ *              enough for the encoder to attempt to limit its size.
+ * SLICE_OVERFLOW(bit9): At least one slice in the current frame has
+ *              exceeded the maximum slice size specified.
+ */
+#define VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK         0xff
+#define VA_CODED_BUF_STATUS_LARGE_SLICE_MASK            0x100
+#define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
+
+/*
+ * device independent data structure for codedbuffer
+ */
+typedef  struct _VACodedBufferSegment  {
+    unsigned int size;/* size of the data buffer in the coded buffer segment, in bytes */
+    unsigned int bit_offset; /* bit offset into the data buffer where valid bitstream data begins */
+    unsigned int status; /* status set by the driver on the coded buffer*/
+    unsigned int reserved; /* for future use */
     void *buf; /* pointer to the beginning of the data buffer in the coded buffer segment */
     void *next; /* pointer to the next VACodedBufferSegment */
 } VACodedBufferSegment;
@@ -1713,7 +1808,10 @@ typedef enum
     VADisplayAttribContrast		= 1,
     VADisplayAttribHue			= 2,
     VADisplayAttribSaturation		= 3,
-    /* client can specifiy a background color for the target window */
+    /* client can specifiy a background color for the target window
+     * the new feature of video conference,
+     * the uncovered area of the surface is filled by this color
+     * also it will blend with the decoded video color*/
     VADisplayAttribBackgroundColor      = 4,
     /*
      * this is a gettable only attribute. For some implementations that use the
@@ -1739,7 +1837,15 @@ typedef enum
      * For type VADisplayAttribCSCMatrix, "value" field is a pointer to the color
      * conversion matrix. Each element in the matrix is float-point
      */
-    VADisplayAttribCSCMatrix           = 12
+    VADisplayAttribCSCMatrix           = 12,
+    /* specify the constant color used to blend with video surface
+     * Cd = Cv*Cc*Ac + Cb *(1 - Ac) C means the constant RGB
+     *      d: the final color to overwrite into the frame buffer 
+     *      v: decoded video after color conversion, 
+     *      c: video color specified by VADisplayAttribBlendColor
+     *      b: background color of the drawable
+     */
+    VADisplayAttribBlendColor          = 13,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */

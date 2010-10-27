@@ -25,10 +25,10 @@
 #ifndef VA_TRACE_H
 #define VA_TRACE_H
 
-void va_TraceInit(void);
-void va_TraceEnd(void);
+void va_TraceInit(VADisplay dpy);
+void va_TraceEnd(VADisplay dpy);
 
-void va_TraceMsg(const char *msg, ...);
+void va_TraceMsg(int idx, const char *msg, ...);
 
 void va_TraceCreateConfig(
     VADisplay dpy,
@@ -59,6 +59,14 @@ void va_TraceCreateContext(
     VAContextID *context		/* out */
 );
 
+
+void va_TraceMapBuffer (
+    VADisplay dpy,
+    VABufferID buf_id,	/* in */
+    void **pbuf 	/* out */
+);
+
+
 void va_TraceBeginPicture(
     VADisplay dpy,
     VAContextID context,
@@ -76,5 +84,49 @@ void va_TraceEndPicture(
     VADisplay dpy,
     VAContextID context
 );
+
+
+void va_TraceMaxNumDisplayAttributes (
+    VADisplay dpy,
+    int number
+);
+
+void va_TraceQueryDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,	/* out */
+    int *num_attributes			/* out */
+);
+
+void va_TraceGetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+);
+
+void va_TraceSetDisplayAttributes (
+    VADisplay dpy,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+);
+
+/* extern function called by display side */
+void va_TracePutSurface (
+    VADisplay dpy,
+    VASurfaceID surface,
+    void *draw, /* the target Drawable */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+);
+
+
 
 #endif /* VA_TRACE_H */

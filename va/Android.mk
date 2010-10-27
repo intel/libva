@@ -13,6 +13,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
+	va_fool.c 
 
 LOCAL_CFLAGS += \
 	-DANDROID \

@@ -250,7 +250,7 @@ VADisplay vaGetDisplay (
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
             pDisplayContexts                 = pDisplayContext;
-            pDriverContext->dri_state 	   = dri_state;
+            pDriverContext->dri_state 	     = dri_state;
             dpy                              = (VADisplay)pDisplayContext;
         }
         else
@@ -272,6 +272,33 @@ VADisplay vaGetDisplay (
 
 
 #ifdef ANDROID
+extern "C"  {
+    extern int fool_postp; /* do nothing for vaPutSurface if set */
+    extern int trace_flag; /* trace vaPutSurface parameters */
+
+    void va_TracePutSurface (
+        VADisplay dpy,
+        VASurfaceID surface,
+        void *draw, /* the target Drawable */
+        short srcx,
+        short srcy,
+        unsigned short srcw,
+        unsigned short srch,
+        short destx,
+        short desty,
+        unsigned short destw,
+        unsigned short desth,
+        VARectangle *cliprects, /* client supplied clip list */
+        unsigned int number_cliprects, /* number of clip rects in the clip list */
+        unsigned int flags /* de-interlacing flags */
+        );
+}
+
+#define VA_TRACE(trace_func,...)                \
+    if (trace_flag) {                           \
+        trace_func(__VA_ARGS__);                \
+    }
+
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
@@ -291,8 +318,16 @@ VAStatus vaPutSurface (
 {
     VADriverContextP ctx;
 
+    if (fool_postp)
+        return VA_STATUS_SUCCESS;
+
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
+
+    VA_TRACE(va_TracePutSurface, dpy, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
+             destx, desty, destw, desth,
+             cliprects, number_cliprects, flags );
+    
     return ctx->vtable.vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
                                      destx, desty, destw, desth,
                                      cliprects, number_cliprects, flags );
