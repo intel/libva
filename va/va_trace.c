@@ -1461,7 +1461,7 @@ void va_TraceRenderPicture(
         case VAProfileMPEG2Main:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t------------------", j);
-                va_TraceMsg(idx, "\t  element[%d] = ", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG2Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
@@ -1470,7 +1470,7 @@ void va_TraceRenderPicture(
         case VAProfileMPEG4Main:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t------------------", j);
-                va_TraceMsg(idx, "\t  element[%d] = ", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
@@ -1479,7 +1479,7 @@ void va_TraceRenderPicture(
         case VAProfileH264High:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t------------------", j);
-                va_TraceMsg(idx, "\t  element[%d] = ", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceH264Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
@@ -1489,7 +1489,7 @@ void va_TraceRenderPicture(
         case VAProfileVC1Advanced:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t------------------", j);
-                va_TraceMsg(idx, "\t element[%d] = ", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceVC1Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
@@ -1497,7 +1497,7 @@ void va_TraceRenderPicture(
         case VAProfileH263Baseline:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t------------------", j);
-                va_TraceMsg(idx, "\t element[%d] = ", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
