@@ -25,7 +25,7 @@
 #ifndef VA_GLX_PRIVATE_H
 #define VA_GLX_PRIVATE_H
 
-#include "config.h"
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_x11.h"

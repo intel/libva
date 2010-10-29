@@ -23,10 +23,10 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_backend_tpi.h"
-#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>

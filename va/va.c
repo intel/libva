@@ -23,11 +23,11 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_fool.h"
-#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -36,12 +36,6 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
-
-#ifdef ANDROID
-#define Bool int
-#define True 1
-#define False 0
-#endif
 
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
 
