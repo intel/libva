@@ -13,7 +13,16 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
-	va_fool.c 
+	va_fool.c
+
+intermediates := $(local-intermediates-dir)
+GEN := $(intermediates)/va_version.h
+$(GEN): PRIVATE_GEN_VERSION := $(LOCAL_PATH)/../build/gen_version.sh
+$(GEN): PRIVATE_INPUT_FILE := $(LOCAL_PATH)/va_version.h.in
+$(GEN): PRIVATE_CUSTOM_TOOL = sh $(PRIVATE_GEN_VERSION) $(LOCAL_PATH)/.. $(PRIVATE_INPUT_FILE) > $@
+$(GEN): $(LOCAL_PATH)/va_version.h $(PRIVATE_GEN_VERSION)
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN) 
 
 LOCAL_CFLAGS += \
 	-DANDROID \
