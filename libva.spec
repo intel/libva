@@ -1,7 +1,7 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
 
 Name:           libva
-Version:        1.0.5
+Version:        1.0.6
 Release:        0.0
 License:        Intel Proprietary
 Source:         %{name}-%{version}.tar.bz2
@@ -58,6 +58,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva-tpi.so.%{version}
 %{_libdir}/libva-x11.so.1
 %{_libdir}/libva-x11.so.%{version}
+%{_libdir}/libva-glx.so.1
+%{_libdir}/libva-glx.so.%{version}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
@@ -87,6 +89,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libva.pc
 %{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
+%{_libdir}/pkgconfig/libva-glx.pc
 
 %changelog
 * Wed Dec 23 2009 Prajwal Mohan <prajwal.karur.mohan@intel.com> 1.0.1

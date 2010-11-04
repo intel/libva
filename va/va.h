@@ -137,14 +137,20 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
 
-#define VA_ENBLE_BLEND          0x00000004 /* video area blend with the constant color */ 
+/*
+ * Enabled the positioning/cropping/blending feature:
+ * 1, specify the video playback position in the isurface
+ * 2, specify the cropping info for video playback
+ * 3, encoded video will blend with background color
+ */
+#define VA_ENABLE_BLEND         0x00000004 /* video area blend with the constant color */ 
     
 /*
  * Clears the drawable with background color.
  * for hardware overlay based implementation this flag
  * can be used to turn off the overlay
  */
-#define VA_CLEAR_DRAWABLE       0x00000008 
+#define VA_CLEAR_DRAWABLE       0x00000008
 
 /* Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
@@ -507,7 +513,8 @@ typedef enum
     VAEncSliceParameterBufferType	= 24,
     VAEncH264VUIBufferType		= 25,
     VAEncH264SEIBufferType		= 26,
-    VAEncMiscParameterBufferType	= 27
+    VAEncMiscParameterBufferType	= 27,
+    VABufferTypeMax                     = 0xff
 } VABufferType;
 
 typedef enum
@@ -532,7 +539,7 @@ typedef enum
  *    misc_param->type = VAEncMiscParameterTypeRateControl;
  *    misc_rate_ctrl= (VAEncMiscParameterRateControl *)misc_param->data;
  *    misc_rate_ctrl->bits_per_second = 6400000;
- *
+ *    vaUnmapBuffer(dpy, buf_id);
  *    vaRenderPicture(dpy, context, &buf_id, 1);
  */
 typedef struct _VAEncMiscParameterBuffer
@@ -1303,10 +1310,12 @@ VAStatus vaBufferSetNumElements (
  *              enough for the encoder to attempt to limit its size.
  * SLICE_OVERFLOW(bit9): At least one slice in the current frame has
  *              exceeded the maximum slice size specified.
+ * BITRATE_OVERFLOW(bit10): The peak bitrate was exceeded for this frame.
  */
 #define VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK         0xff
 #define VA_CODED_BUF_STATUS_LARGE_SLICE_MASK            0x100
 #define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
+#define VA_CODED_BUF_STATUS_BITRATE_OVERFLOW		0x400
 
 /*
  * device independent data structure for codedbuffer
@@ -1801,7 +1810,10 @@ typedef enum
     VADisplayAttribContrast		= 1,
     VADisplayAttribHue			= 2,
     VADisplayAttribSaturation		= 3,
-    /* client can specifiy a background color for the target window */
+    /* client can specifiy a background color for the target window
+     * the new feature of video conference,
+     * the uncovered area of the surface is filled by this color
+     * also it will blend with the decoded video color*/
     VADisplayAttribBackgroundColor      = 4,
     /*
      * this is a gettable only attribute. For some implementations that use the

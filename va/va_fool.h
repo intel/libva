@@ -22,15 +22,17 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef VA_TRACE_H
-#define VA_TRACE_H
 
-void va_TraceInit(VADisplay dpy);
-void va_TraceEnd(VADisplay dpy);
+#ifndef VA_FOOL_H
+#define VA_FOOL_H
 
-void va_TraceMsg(int idx, const char *msg, ...);
+void va_FoolInit(VADisplay dpy);
 
-void va_TraceCreateConfig(
+int va_FoolEnd(VADisplay dpy);
+
+
+int va_FoolCodedBuf(VADisplay dpy);
+int va_FoolCreateConfig(
     VADisplay dpy,
     VAProfile profile, 
     VAEntrypoint entrypoint, 
@@ -39,7 +41,7 @@ void va_TraceCreateConfig(
     VAConfigID *config_id /* out */
 );
 
-void va_TraceCreateSurface(
+int va_FoolCreateSurfaces(
     VADisplay dpy,
     int width,
     int height,
@@ -48,85 +50,57 @@ void va_TraceCreateSurface(
     VASurfaceID *surfaces	/* out */
 );
 
-void va_TraceCreateContext(
+VAStatus va_FoolCreateBuffer (
     VADisplay dpy,
-    VAConfigID config_id,
-    int picture_width,
-    int picture_height,
-    int flag,
-    VASurfaceID *render_targets,
-    int num_render_targets,
-    VAContextID *context		/* out */
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
 );
 
-
-void va_TraceMapBuffer (
+VAStatus va_FoolMapBuffer (
     VADisplay dpy,
     VABufferID buf_id,	/* in */
     void **pbuf 	/* out */
 );
 
-
-void va_TraceBeginPicture(
+int va_FoolBeginPicture(
     VADisplay dpy,
     VAContextID context,
     VASurfaceID render_target
 );
 
-void va_TraceRenderPicture(
+int va_FoolRenderPicture(
     VADisplay dpy,
     VAContextID context,
     VABufferID *buffers,
     int num_buffers
 );
 
-void va_TraceEndPicture(
+int va_FoolEndPicture(
     VADisplay dpy,
     VAContextID context
 );
 
-
-void va_TraceMaxNumDisplayAttributes (
+VAStatus va_FoolUnmapBuffer (
     VADisplay dpy,
-    int number
+    VABufferID buf_id  /* in */
 );
 
-void va_TraceQueryDisplayAttributes (
-    VADisplay dpy,
-    VADisplayAttribute *attr_list,	/* out */
-    int *num_attributes			/* out */
-);
 
-void va_TraceGetDisplayAttributes (
+VAStatus va_FoolQuerySubpictureFormats (
     VADisplay dpy,
-    VADisplayAttribute *attr_list,
-    int num_attributes
+    VAImageFormat *format_list,
+    unsigned int *flags,
+    unsigned int *num_formats
 );
-
-void va_TraceSetDisplayAttributes (
-    VADisplay dpy,
-    VADisplayAttribute *attr_list,
-    int num_attributes
-);
-
-/* extern function called by display side */
-void va_TracePutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    void *draw, /* the target Drawable */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
+int va_FoolSyncSurface(
+    VADisplay dpy, 
+    VASurfaceID render_target
 );
 
 
 
-#endif /* VA_TRACE_H */
+#endif
