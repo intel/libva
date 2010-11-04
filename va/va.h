@@ -1310,10 +1310,12 @@ VAStatus vaBufferSetNumElements (
  *              enough for the encoder to attempt to limit its size.
  * SLICE_OVERFLOW(bit9): At least one slice in the current frame has
  *              exceeded the maximum slice size specified.
+ * BITRATE_OVERFLOW(bit10): The peak bitrate was exceeded for this frame.
  */
 #define VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK         0xff
 #define VA_CODED_BUF_STATUS_LARGE_SLICE_MASK            0x100
 #define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
+#define VA_CODED_BUF_STATUS_BITRATE_OVERFLOW		0x400
 
 /*
  * device independent data structure for codedbuffer
