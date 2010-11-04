@@ -595,6 +595,7 @@ static void va_TraceVAPictureParameterBufferMPEG2(
 {
     DPY2INDEX(dpy);
     
+    /* todo: print VAPictureParameterBufferMPEG2 */
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
     return;
@@ -611,6 +612,8 @@ static void va_TraceVAIQMatrixBufferMPEG2(
     void *data)
 {
     DPY2INDEX(dpy);
+
+    /* todo: print VAIQMatrixBufferMPEG2 */
     
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
@@ -651,6 +654,7 @@ static void va_TraceVAPictureParameterBufferMPEG4(
 {
     DPY2INDEX(dpy);
     
+    /* todo: log VAPictureParameterBufferMPEG4 */
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
     return;
