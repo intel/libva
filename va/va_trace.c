@@ -725,13 +725,13 @@ static void va_TraceVAPictureParameterBufferMPEG4(
 	va_TraceMsg(idx,"\tsprite_trajectory_du =");
 	for(i=0;i<3;i++)
 	{
-		va_TraceMsg(idx,"\t%d\n", p->sprite_trajectory_du[i]);
+		va_TraceMsg(idx,"\t%d", p->sprite_trajectory_du[i]);
 	}
 	va_TraceMsg(idx,"\n");
 	va_TraceMsg(idx,"\tsprite_trajectory_dv =");
 	for(i=0;i<3;i++)
 	{
-		va_TraceMsg(idx,"\t%d\n", p->sprite_trajectory_dv[i]);
+		va_TraceMsg(idx,"\t%d", p->sprite_trajectory_dv[i]);
 	}
 	va_TraceMsg(idx,"\n");	
 	va_TraceMsg(idx,"\tvop_fields value = %d\n", p->vop_fields.value);
@@ -773,19 +773,16 @@ static void va_TraceVAIQMatrixBufferMPEG4(
 
 	va_TraceMsg(idx,"\tload_intra_quant_mat = %d\n", p->load_intra_quant_mat);
 	va_TraceMsg(idx,"\tload_non_intra_quant_mat = %d\n", p->load_non_intra_quant_mat);
-	va_TraceMsg(idx,"\tintra_quant_mat =");
+	va_TraceMsg(idx,"\tintra_quant_mat =\n");
 	for(i=0;i<64;i++)
 	{
-		va_TraceMsg(idx,"\t%d\n", p->intra_quant_mat[i]);
+		va_TraceMsg(idx,"\t\t%d\n", p->intra_quant_mat[i]);
 	}
-	va_TraceMsg(idx,"\n");
-	va_TraceMsg(idx,"\tnon_intra_quant_mat =");
+	va_TraceMsg(idx,"\tnon_intra_quant_mat =\n");
 	for(i=0;i<64;i++)
 	{
-		va_TraceMsg(idx,"\t%d\n", p->non_intra_quant_mat[i]);
+		va_TraceMsg(idx,"\t\t%d\n", p->non_intra_quant_mat[i]);
 	}
-	va_TraceMsg(idx,"\n");
-
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
