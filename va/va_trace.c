@@ -596,27 +596,27 @@ static void va_TraceVAPictureParameterBufferMPEG2(
     DPY2INDEX(dpy);
 	VAPictureParameterBufferMPEG2 *p=(VAPictureParameterBufferMPEG2 *)data;
     /* todo: print VAPictureParameterBufferMPEG2 */
-	va_TraceMsg(idx,"*************VAPictureParameterBufferH264****************\n");
+	va_TraceMsg(idx,"VAPictureParameterBufferH264\n");
 
-	va_TraceMsg(idx,"horizontal size: %d\n", p->horizontal_size);
-	va_TraceMsg(idx,"vertical size: %d\n", p->vertical_size);
-	va_TraceMsg(idx,"forward reference picture: %d\n", p->forward_reference_picture);
-	va_TraceMsg(idx,"backward reference picture: %d\n", p->backward_reference_picture);
-	va_TraceMsg(idx,"picture coding type: %d\n", p->picture_coding_type);
-	va_TraceMsg(idx,"f mode: %d\n", p->f_code);
+	va_TraceMsg(idx,"\thorizontal size= %d\n", p->horizontal_size);
+	va_TraceMsg(idx,"\tvertical size= %d\n", p->vertical_size);
+	va_TraceMsg(idx,"\tforward reference picture= %d\n", p->forward_reference_picture);
+	va_TraceMsg(idx,"\tbackward reference picture= %d\n", p->backward_reference_picture);
+	va_TraceMsg(idx,"\tpicture coding type= %d\n", p->picture_coding_type);
+	va_TraceMsg(idx,"\tf mode= %d\n", p->f_code);
 
-	va_TraceMsg(idx,"picture coding extension : %d\n", p->picture_coding_extension.value);
-	va_TraceMsg(idx,"\t intra_dc_precision: %d\n", p->picture_coding_extension.bits.intra_dc_precision);
-	va_TraceMsg(idx,"\t picture_structure: %d\n", p->picture_coding_extension.bits.picture_structure);
-	va_TraceMsg(idx,"\t top_field_first: %d\n", p->picture_coding_extension.bits.top_field_first);
-	va_TraceMsg(idx,"\t frame_pred_frame_dct: %d\n", p->picture_coding_extension.bits.frame_pred_frame_dct);
-	va_TraceMsg(idx,"\t concealment_motion_vectors: %d\n", p->picture_coding_extension.bits.concealment_motion_vectors);
-	va_TraceMsg(idx,"\t q_scale_type: %d\n", p->picture_coding_extension.bits.q_scale_type);
-	va_TraceMsg(idx,"\t intra_vlc_format: %d\n", p->picture_coding_extension.bits.intra_vlc_format);
-	va_TraceMsg(idx,"\t alternate_scan: %d\n", p->picture_coding_extension.bits.alternate_scan);
-	va_TraceMsg(idx,"\t repeat_first_field: %d\n", p->picture_coding_extension.bits.repeat_first_field);
-	va_TraceMsg(idx,"\t progressive_frame: %d\n", p->picture_coding_extension.bits.progressive_frame);
-	va_TraceMsg(idx,"\t is_first_field: %d\n", p->picture_coding_extension.bits.is_first_field);
+	va_TraceMsg(idx,"\tpicture coding extension = %d\n", p->picture_coding_extension.value);
+	va_TraceMsg(idx,"\tintra_dc_precision= %d\n", p->picture_coding_extension.bits.intra_dc_precision);
+	va_TraceMsg(idx,"\tpicture_structure= %d\n", p->picture_coding_extension.bits.picture_structure);
+	va_TraceMsg(idx,"\ttop_field_first= %d\n", p->picture_coding_extension.bits.top_field_first);
+	va_TraceMsg(idx,"\tframe_pred_frame_dct= %d\n", p->picture_coding_extension.bits.frame_pred_frame_dct);
+	va_TraceMsg(idx,"\tconcealment_motion_vectors= %d\n", p->picture_coding_extension.bits.concealment_motion_vectors);
+	va_TraceMsg(idx,"\tq_scale_type= %d\n", p->picture_coding_extension.bits.q_scale_type);
+	va_TraceMsg(idx,"\tintra_vlc_format= %d\n", p->picture_coding_extension.bits.intra_vlc_format);
+	va_TraceMsg(idx,"\talternate_scan= %d\n", p->picture_coding_extension.bits.alternate_scan);
+	va_TraceMsg(idx,"\trepeat_first_field= %d\n", p->picture_coding_extension.bits.repeat_first_field);
+	va_TraceMsg(idx,"\tprogressive_frame= %d\n", p->picture_coding_extension.bits.progressive_frame);
+	va_TraceMsg(idx,"\tis_first_field= %d\n", p->picture_coding_extension.bits.is_first_field);
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
@@ -638,17 +638,16 @@ static void va_TraceVAIQMatrixBufferMPEG2(
     /* todo: print VAIQMatrixBufferMPEG2 */
     VAIQMatrixBufferMPEG2 *p=(VAIQMatrixBufferMPEG2 *)data;
 
-	va_TraceMsg(idx,"*************VAIQMatrixBufferMPEG2****************\n");
+	va_TraceMsg(idx,"VAIQMatrixBufferMPEG2\n");
 
-	va_TraceMsg(idx,"load_intra_quantiser_matrix : %d\n", p->load_intra_quantiser_matrix);
-	va_TraceMsg(idx,"load_non_intra_quantiser_matrix : %d\n", p->load_non_intra_quantiser_matrix);
-	va_TraceMsg(idx,"load_chroma_intra_quantiser_matrix : %d\n", p->load_chroma_intra_quantiser_matrix);
-	va_TraceMsg(idx,"load_chroma_non_intra_quantiser_matrix : %d\n", p->load_chroma_non_intra_quantiser_matrix);
-	va_TraceMsg(idx,"intra_quantiser_matrix : %d\n", p->intra_quantiser_matrix);
-	va_TraceMsg(idx,"non_intra_quantiser_matrix : %d\n", p->non_intra_quantiser_matrix);
-	va_TraceMsg(idx,"chroma_intra_quantiser_matrix : %d\n", p->chroma_intra_quantiser_matrix);
-	va_TraceMsg(idx,"chroma_non_intra_quantiser_matrix : %d\n", p->chroma_non_intra_quantiser_matrix);
-
+	va_TraceMsg(idx,"\tload_intra_quantiser_matrix = %d\n", p->load_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tload_non_intra_quantiser_matrix = %d\n", p->load_non_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tload_chroma_intra_quantiser_matrix = %d\n", p->load_chroma_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tload_chroma_non_intra_quantiser_matrix = %d\n", p->load_chroma_non_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tintra_quantiser_matrix = %d\n", p->intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tnon_intra_quantiser_matrix = %d\n", p->non_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tchroma_intra_quantiser_matrix = %d\n", p->chroma_intra_quantiser_matrix);
+	va_TraceMsg(idx,"\tchroma_non_intra_quantiser_matrix = %d\n", p->chroma_non_intra_quantiser_matrix);
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
@@ -673,20 +672,18 @@ static void va_TraceVASliceParameterBufferMPEG2(
     /* trace_context[idx].trace_slice_size = p->slice_data_size; */
 	VASliceParameterBufferMPEG2 *p=(VASliceParameterBufferMPEG2 *)data;
 
-	va_TraceMsg(idx,"*************VASliceParameterBufferMPEG2****************\n");
+	va_TraceMsg(idx,"VASliceParameterBufferMPEG2\n");
 
-	va_TraceMsg(idx,"slice_data_size : %d\n", p->slice_data_size);
-	va_TraceMsg(idx,"slice_data_offset : %d\n", p->slice_data_offset);
-	va_TraceMsg(idx,"slice_data_flag : %d\n", p->slice_data_flag);
-	va_TraceMsg(idx,"macroblock_offset : %d\n", p->macroblock_offset);
-	va_TraceMsg(idx,"slice_horizontal_position : %d\n", p->slice_horizontal_position);
-	va_TraceMsg(idx,"slice_vertical_position : %d\n", p->slice_vertical_position);
-	va_TraceMsg(idx,"quantiser_scale_code : %d\n", p->quantiser_scale_code);
-	va_TraceMsg(idx,"intra_slice_flag : %d\n", p->intra_slice_flag);
-
+	va_TraceMsg(idx,"\tslice_data_size = %d\n", p->slice_data_size);
+	va_TraceMsg(idx,"\tslice_data_offset = %d\n", p->slice_data_offset);
+	va_TraceMsg(idx,"\tslice_data_flag = %d\n", p->slice_data_flag);
+	va_TraceMsg(idx,"\tmacroblock_offset = %d\n", p->macroblock_offset);
+	va_TraceMsg(idx,"\tslice_horizontal_position = %d\n", p->slice_horizontal_position);
+	va_TraceMsg(idx,"\tslice_vertical_position = %d\n", p->slice_vertical_position);
+	va_TraceMsg(idx,"\tquantiser_scale_code = %d\n", p->quantiser_scale_code);
+	va_TraceMsg(idx,"\tintra_slice_flag = %d\n", p->intra_slice_flag);
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
@@ -707,52 +704,49 @@ static void va_TraceVAPictureParameterBufferMPEG4(
     /* todo: log VAPictureParameterBufferMPEG4 */
 	VAPictureParameterBufferMPEG4 *p=(VAPictureParameterBufferMPEG4 *)data;
 
-	va_TraceMsg(idx,"*************VAPictureParameterBufferMPEG4****************\n");
-
-	va_TraceMsg(idx,"vop_width : %d\n", p->vop_width);
-	va_TraceMsg(idx,"vop_height : %d\n", p->vop_height);
-	va_TraceMsg(idx,"forward_reference_picture : %d\n", p->forward_reference_picture);
-	va_TraceMsg(idx,"backward_reference_picture : %d\n", p->backward_reference_picture);
-
-	va_TraceMsg(idx,"vol_fields value : %d\n", p->vol_fields.value);
-	va_TraceMsg(idx,"\t short_video_header: %d\n", p->vol_fields.bits.short_video_header);
-	va_TraceMsg(idx,"\t chroma_format: %d\n", p->vol_fields.bits.chroma_format);
-	va_TraceMsg(idx,"\t interlaced: %d\n", p->vol_fields.bits.interlaced);
-	va_TraceMsg(idx,"\t obmc_disable: %d\n", p->vol_fields.bits.obmc_disable);
-	va_TraceMsg(idx,"\t sprite_enable: %d\n", p->vol_fields.bits.sprite_enable);
-	va_TraceMsg(idx,"\t sprite_warping_accuracy: %d\n", p->vol_fields.bits.sprite_warping_accuracy);
-	va_TraceMsg(idx,"\t quant_type: %d\n", p->vol_fields.bits.quant_type);
-	va_TraceMsg(idx,"\t quarter_sample: %d\n", p->vol_fields.bits.quarter_sample);
-	va_TraceMsg(idx,"\t data_partitioned: %d\n", p->vol_fields.bits.data_partitioned);
-	va_TraceMsg(idx,"\t reversible_vlc: %d\n", p->vol_fields.bits.reversible_vlc);
-	va_TraceMsg(idx,"\t resync_marker_disable: %d\n", p->vol_fields.bits.resync_marker_disable);
-
-	va_TraceMsg(idx,"no_of_sprite_warping_points : %d\n", p->no_of_sprite_warping_points);
-	va_TraceMsg(idx,"sprite_trajectory_du :");
+	va_TraceMsg(idx,"*VAPictureParameterBufferMPEG4\n");
+	va_TraceMsg(idx,"\tvop_width = %d\n", p->vop_width);
+	va_TraceMsg(idx,"\tvop_height = %d\n", p->vop_height);
+	va_TraceMsg(idx,"\tforward_reference_picture = %d\n", p->forward_reference_picture);
+	va_TraceMsg(idx,"\tbackward_reference_picture = %d\n", p->backward_reference_picture);
+	va_TraceMsg(idx,"\tvol_fields value = %d\n", p->vol_fields.value);
+	va_TraceMsg(idx,"\tshort_video_header= %d\n", p->vol_fields.bits.short_video_header);
+	va_TraceMsg(idx,"\tchroma_format= %d\n", p->vol_fields.bits.chroma_format);
+	va_TraceMsg(idx,"\tinterlaced= %d\n", p->vol_fields.bits.interlaced);
+	va_TraceMsg(idx,"\tobmc_disable= %d\n", p->vol_fields.bits.obmc_disable);
+	va_TraceMsg(idx,"\tsprite_enable= %d\n", p->vol_fields.bits.sprite_enable);
+	va_TraceMsg(idx,"\tsprite_warping_accuracy= %d\n", p->vol_fields.bits.sprite_warping_accuracy);
+	va_TraceMsg(idx,"\tquant_type= %d\n", p->vol_fields.bits.quant_type);
+	va_TraceMsg(idx,"\tquarter_sample= %d\n", p->vol_fields.bits.quarter_sample);
+	va_TraceMsg(idx,"\tdata_partitioned= %d\n", p->vol_fields.bits.data_partitioned);
+	va_TraceMsg(idx,"\treversible_vlc= %d\n", p->vol_fields.bits.reversible_vlc);
+	va_TraceMsg(idx,"\tresync_marker_disable= %d\n", p->vol_fields.bits.resync_marker_disable);
+	va_TraceMsg(idx,"\tno_of_sprite_warping_points = %d\n", p->no_of_sprite_warping_points);
+	va_TraceMsg(idx,"\tsprite_trajectory_du =");
 	for(i=0;i<3;i++)
 	{
 		va_TraceMsg(idx,"\t%d\n", p->sprite_trajectory_du[i]);
 	}
 	va_TraceMsg(idx,"\n");
-	va_TraceMsg(idx,"sprite_trajectory_dv :");
+	va_TraceMsg(idx,"\tsprite_trajectory_dv =");
 	for(i=0;i<3;i++)
 	{
 		va_TraceMsg(idx,"\t%d\n", p->sprite_trajectory_dv[i]);
 	}
 	va_TraceMsg(idx,"\n");	
-	va_TraceMsg(idx,"vop_fields value : %d\n", p->vop_fields.value);
-	va_TraceMsg(idx,"\t vop_coding_type: %d\n", p->vop_fields.bits.vop_coding_type);
-	va_TraceMsg(idx,"\t backward_reference_vop_coding_type: %d\n", p->vop_fields.bits.backward_reference_vop_coding_type);
-	va_TraceMsg(idx,"\t vop_rounding_type: %d\n", p->vop_fields.bits.vop_rounding_type);
-	va_TraceMsg(idx,"\t intra_dc_vlc_thr: %d\n", p->vop_fields.bits.intra_dc_vlc_thr);
-	va_TraceMsg(idx,"\t top_field_first: %d\n", p->vop_fields.bits.top_field_first);
-	va_TraceMsg(idx,"\t alternate_vertical_scan_flag: %d\n", p->vop_fields.bits.alternate_vertical_scan_flag);
-	va_TraceMsg(idx,"vop_fcode_forward : %d\n", p->vop_fcode_forward);
-	va_TraceMsg(idx,"vop_fcode_backward : %d\n", p->vop_fcode_backward);
-	va_TraceMsg(idx,"num_gobs_in_vop : %d\n", p->num_gobs_in_vop);
-	va_TraceMsg(idx,"num_macroblocks_in_gob : %d\n", p->num_macroblocks_in_gob);
-	va_TraceMsg(idx,"TRB : %d\n", p->TRB);
-	va_TraceMsg(idx,"TRD : %d\n", p->TRD);
+	va_TraceMsg(idx,"\tvop_fields value = %d\n", p->vop_fields.value);
+	va_TraceMsg(idx,"\tvop_coding_type= %d\n", p->vop_fields.bits.vop_coding_type);
+	va_TraceMsg(idx,"\tbackward_reference_vop_coding_type= %d\n", p->vop_fields.bits.backward_reference_vop_coding_type);
+	va_TraceMsg(idx,"\tvop_rounding_type= %d\n", p->vop_fields.bits.vop_rounding_type);
+	va_TraceMsg(idx,"\tintra_dc_vlc_thr= %d\n", p->vop_fields.bits.intra_dc_vlc_thr);
+	va_TraceMsg(idx,"\ttop_field_first= %d\n", p->vop_fields.bits.top_field_first);
+	va_TraceMsg(idx,"\talternate_vertical_scan_flag= %d\n", p->vop_fields.bits.alternate_vertical_scan_flag);
+	va_TraceMsg(idx,"\tvop_fcode_forward = %d\n", p->vop_fcode_forward);
+	va_TraceMsg(idx,"\tvop_fcode_backward = %d\n", p->vop_fcode_backward);
+	va_TraceMsg(idx,"\tnum_gobs_in_vop = %d\n", p->num_gobs_in_vop);
+	va_TraceMsg(idx,"\tnum_macroblocks_in_gob = %d\n", p->num_macroblocks_in_gob);
+	va_TraceMsg(idx,"\tTRB = %d\n", p->TRB);
+	va_TraceMsg(idx,"\tTRD = %d\n", p->TRD);
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
@@ -775,17 +769,17 @@ static void va_TraceVAIQMatrixBufferMPEG4(
 	int i;
 	VAIQMatrixBufferMPEG4 *p=(VAIQMatrixBufferMPEG4 *)data;
 
-	va_TraceMsg(idx,"*************VAIQMatrixBufferMPEG4****************\n");
+	va_TraceMsg(idx,"VAIQMatrixBufferMPEG4\n");
 
-	va_TraceMsg(idx,"load_intra_quant_mat : %d\n", p->load_intra_quant_mat);
-	va_TraceMsg(idx,"load_non_intra_quant_mat : %d\n", p->load_non_intra_quant_mat);
-	va_TraceMsg(idx,"intra_quant_mat :");
+	va_TraceMsg(idx,"\tload_intra_quant_mat = %d\n", p->load_intra_quant_mat);
+	va_TraceMsg(idx,"\tload_non_intra_quant_mat = %d\n", p->load_non_intra_quant_mat);
+	va_TraceMsg(idx,"\tintra_quant_mat =");
 	for(i=0;i<64;i++)
 	{
 		va_TraceMsg(idx,"\t%d\n", p->intra_quant_mat[i]);
 	}
 	va_TraceMsg(idx,"\n");
-	va_TraceMsg(idx,"non_intra_quant_mat :");
+	va_TraceMsg(idx,"\tnon_intra_quant_mat =");
 	for(i=0;i<64;i++)
 	{
 		va_TraceMsg(idx,"\t%d\n", p->non_intra_quant_mat[i]);
@@ -816,15 +810,14 @@ static void va_TraceVASliceParameterBufferMPEG4(
     /* trace_context[idx].trace_slice_size = p->slice_data_size; */
 	VASliceParameterBufferMPEG4 *p=(VASliceParameterBufferMPEG4 *)data;
 
-	va_TraceMsg(idx,"*************VASliceParameterBufferMPEG4****************\n");
+	va_TraceMsg(idx,"VASliceParameterBufferMPEG4\n");
 
-	va_TraceMsg(idx,"slice_data_size : %d\n", p->slice_data_size);
-	va_TraceMsg(idx,"slice_data_offset : %d\n", p->slice_data_offset);
-	va_TraceMsg(idx,"slice_data_flag : %d\n", p->slice_data_flag);
-	va_TraceMsg(idx,"macroblock_offset : %d\n", p->macroblock_offset);
-	va_TraceMsg(idx,"macroblock_number : %d\n", p->macroblock_number);
-	va_TraceMsg(idx,"quant_scale : %d\n", p->quant_scale);
-
+	va_TraceMsg(idx,"\tslice_data_size = %d\n", p->slice_data_size);
+	va_TraceMsg(idx,"\tslice_data_offset = %d\n", p->slice_data_offset);
+	va_TraceMsg(idx,"\tslice_data_flag = %d\n", p->slice_data_flag);
+	va_TraceMsg(idx,"\tmacroblock_offset = %d\n", p->macroblock_offset);
+	va_TraceMsg(idx,"\tmacroblock_number = %d\n", p->macroblock_number);
+	va_TraceMsg(idx,"\tquant_scale = %d\n", p->quant_scale);
 
     va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     
