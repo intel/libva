@@ -611,55 +611,6 @@ i965_render_src_surface_state(VADriverContextP ctx,
 }
 
 static void
-i965_subpic_render_src_surface_state(VADriverContextP ctx, 
-                              int index,
-                              dri_bo *region,
-                              unsigned long offset,
-                              int w, int h, int p, int format)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);  
-    struct i965_render_state *render_state = &i965->render_state;
-    struct i965_surface_state *ss;
-    dri_bo *ss_bo = render_state->wm.surface_state_binding_table_bo;
-
-    assert(index < MAX_RENDER_SURFACES);
-    dri_bo_map(ss_bo, 1);
-    assert(ss_bo->virtual);
-    ss = (struct i965_surface_state *)((char *)ss_bo->virtual + SURFACE_STATE_OFFSET(index));
-    memset(ss, 0, sizeof(*ss));
-    ss->ss0.surface_type = I965_SURFACE_2D;
-    ss->ss0.surface_format = format;
-    ss->ss0.writedisable_alpha = 0;
-    ss->ss0.writedisable_red = 0;
-    ss->ss0.writedisable_green = 0;
-    ss->ss0.writedisable_blue = 0;
-    ss->ss0.color_blend = 1;
-    ss->ss0.vert_line_stride = 0;
-    ss->ss0.vert_line_stride_ofs = 0;
-    ss->ss0.mipmap_layout_mode = 0;
-    ss->ss0.render_cache_read_mode = 0;
-
-    ss->ss1.base_addr = region->offset + offset;
-
-    ss->ss2.width = w - 1;
-    ss->ss2.height = h - 1;
-    ss->ss2.mip_count = 0;
-    ss->ss2.render_target_rotation = 0;
-
-    ss->ss3.pitch = p - 1;
-
-    dri_bo_emit_reloc(ss_bo,
-                      I915_GEM_DOMAIN_SAMPLER, 0,
-                      offset,
-                      SURFACE_STATE_OFFSET(index) + offsetof(struct i965_surface_state, ss1),
-                      region);
-
-    ((unsigned int *)((char *)ss_bo->virtual + BINDING_TABLE_OFFSET))[index] = SURFACE_STATE_OFFSET(index);
-    dri_bo_unmap(ss_bo);
-    render_state->wm.sampler_count++;
-}
-
-static void
 i965_render_src_surfaces_state(VADriverContextP ctx,
                               VASurfaceID surface)
 {
@@ -719,8 +670,8 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     region = obj_surface->bo;
     subpic_region = obj_image->bo;
     /*subpicture surface*/
-    i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
-    i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
+    i965_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
+    i965_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
 }
 
 static void
