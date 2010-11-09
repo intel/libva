@@ -536,6 +536,25 @@ i965_render_cc_unit(VADriverContextP ctx)
 }
 
 static void
+i965_render_set_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
+{
+    switch (tiling) {
+    case I915_TILING_NONE:
+        ss->ss3.tiled_surface = 0;
+        ss->ss3.tile_walk = 0;
+        break;
+    case I915_TILING_X:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_XMAJOR;
+        break;
+    case I915_TILING_Y:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_YMAJOR;
+        break;
+    }
+}
+
+static void
 i965_render_src_surface_state(VADriverContextP ctx, 
                               int index,
                               dri_bo *region,
@@ -547,8 +566,11 @@ i965_render_src_surface_state(VADriverContextP ctx,
     struct i965_render_state *render_state = &i965->render_state;
     struct i965_surface_state *ss;
     dri_bo *ss_bo = render_state->wm.surface_state_binding_table_bo;
+    unsigned int tiling;
+    unsigned int swizzle;
 
     assert(index < MAX_RENDER_SURFACES);
+
     dri_bo_map(ss_bo, 1);
     assert(ss_bo->virtual);
     ss = (struct i965_surface_state *)((char *)ss_bo->virtual + SURFACE_STATE_OFFSET(index));
@@ -573,6 +595,9 @@ i965_render_src_surface_state(VADriverContextP ctx,
     ss->ss2.render_target_rotation = 0;
 
     ss->ss3.pitch = pitch - 1;
+
+    dri_bo_get_tiling(region, &tiling, &swizzle);
+    i965_render_set_surface_tiling(ss, tiling);
 
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
@@ -696,25 +721,6 @@ i965_subpic_render_src_surfaces_state(VADriverContextP ctx,
     /*subpicture surface*/
     i965_subpic_render_src_surface_state(ctx, 1, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
     i965_subpic_render_src_surface_state(ctx, 2, subpic_region, 0, obj_subpic->width, obj_subpic->height, obj_subpic->pitch, obj_subpic->format);     
-}
-
-static void
-i965_render_set_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
-{
-    switch (tiling) {
-    case I915_TILING_NONE:
-        ss->ss3.tiled_surface = 0;
-        ss->ss3.tile_walk = 0;
-        break;
-    case I915_TILING_X:
-        ss->ss3.tiled_surface = 1;
-        ss->ss3.tile_walk = I965_TILEWALK_XMAJOR;
-        break;
-    case I915_TILING_Y:
-        ss->ss3.tiled_surface = 1;
-        ss->ss3.tile_walk = I965_TILEWALK_YMAJOR;
-        break;
-    }
 }
 
 static void
