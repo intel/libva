@@ -356,3 +356,47 @@ intel_batchbuffer_end_atomic_bcs(VADriverContextP ctx)
     intel_batchbuffer_end_atomic_helper(intel->batch_bcs);
 }
 
+static void
+intel_batchbuffer_begin_batch_helper(struct intel_batchbuffer *batch, int total)
+{
+    batch->emit_total = total * 4;
+    batch->emit_start = batch->ptr;
+}
+
+void
+intel_batchbuffer_begin_batch(VADriverContextP ctx, int total)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_begin_batch_helper(intel->batch, total);
+}
+
+void
+intel_batchbuffer_begin_batch_bcs(VADriverContextP ctx, int total)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_begin_batch_helper(intel->batch_bcs, total);
+}
+
+static void
+intel_batchbuffer_advance_batch_helper(struct intel_batchbuffer *batch)
+{
+    assert(batch->emit_total == (batch->ptr - batch->emit_start));
+}
+
+void
+intel_batchbuffer_advance_batch(VADriverContextP ctx)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_advance_batch_helper(intel->batch);
+}
+
+void
+intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_advance_batch_helper(intel->batch_bcs);
+}
