@@ -417,8 +417,8 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->subpic = VA_INVALID_ID;
         obj_surface->orig_width = width;
         obj_surface->orig_height = height;
-        obj_surface->width = ALIGN(obj_surface->orig_width, 16);
-        obj_surface->height = ALIGN(obj_surface->orig_height, 16);
+        obj_surface->width = ALIGN(obj_surface->orig_width, 128);
+        obj_surface->height = ALIGN(obj_surface->orig_height, 32);
         obj_surface->size = SIZE_YUV420(obj_surface->width, obj_surface->height);
         obj_surface->flags = SURFACE_REFERENCED;
         obj_surface->bo = NULL;
