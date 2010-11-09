@@ -691,11 +691,11 @@ gen6_mfd_avc_slice_state(VADriverContextP ctx,
         assert(slice_param->num_ref_idx_l1_active_minus1 == 0);
         num_ref_idx_l0 = slice_param->num_ref_idx_l0_active_minus1 + 1;
         num_ref_idx_l1 = 0;
-        weighted_pred_idc = pic_param->pic_fields.bits.weighted_pred_flag;
+        weighted_pred_idc = (pic_param->pic_fields.bits.weighted_pred_flag == 1);
     } else {
         num_ref_idx_l0 = slice_param->num_ref_idx_l0_active_minus1 + 1;
         num_ref_idx_l1 = slice_param->num_ref_idx_l1_active_minus1 + 1;
-        weighted_pred_idc = pic_param->pic_fields.bits.weighted_bipred_idc;
+        weighted_pred_idc = (pic_param->pic_fields.bits.weighted_bipred_idc == 1);
     }
 
     first_mb_in_slice = slice_param->first_mb_in_slice << mbaff_picture;
@@ -870,21 +870,21 @@ gen6_mfd_avc_weightoffset_state(VADriverContextP ctx,
 
         if (i == 0) {
             for (j = 0; j < 32; j++) {
-                weightoffsets[j * 6 + 0] = slice_param->luma_offset_l0[j];
-                weightoffsets[j * 6 + 1] = slice_param->luma_weight_l0[j];
-                weightoffsets[j * 6 + 2] = slice_param->chroma_offset_l0[j][0];
-                weightoffsets[j * 6 + 3] = slice_param->chroma_weight_l0[j][0];
-                weightoffsets[j * 6 + 4] = slice_param->chroma_offset_l0[j][1];
-                weightoffsets[j * 6 + 5] = slice_param->chroma_weight_l0[j][1];
+                weightoffsets[j * 6 + 0] = slice_param->luma_weight_l0[j];
+                weightoffsets[j * 6 + 1] = slice_param->luma_offset_l0[j];
+                weightoffsets[j * 6 + 2] = slice_param->chroma_weight_l0[j][0];
+                weightoffsets[j * 6 + 3] = slice_param->chroma_offset_l0[j][0];
+                weightoffsets[j * 6 + 4] = slice_param->chroma_weight_l0[j][1];
+                weightoffsets[j * 6 + 5] = slice_param->chroma_offset_l0[j][1];
             }
         } else {
             for (j = 0; j < 32; j++) {
-                weightoffsets[j * 6 + 0] = slice_param->luma_offset_l1[j];
-                weightoffsets[j * 6 + 1] = slice_param->luma_weight_l1[j];
-                weightoffsets[j * 6 + 2] = slice_param->chroma_offset_l1[j][0];
-                weightoffsets[j * 6 + 3] = slice_param->chroma_weight_l1[j][0];
-                weightoffsets[j * 6 + 4] = slice_param->chroma_offset_l1[j][1];
-                weightoffsets[j * 6 + 5] = slice_param->chroma_weight_l1[j][1];
+                weightoffsets[j * 6 + 0] = slice_param->luma_weight_l1[j];
+                weightoffsets[j * 6 + 1] = slice_param->luma_offset_l1[j];
+                weightoffsets[j * 6 + 2] = slice_param->chroma_weight_l1[j][0];
+                weightoffsets[j * 6 + 3] = slice_param->chroma_offset_l1[j][0];
+                weightoffsets[j * 6 + 4] = slice_param->chroma_weight_l1[j][1];
+                weightoffsets[j * 6 + 5] = slice_param->chroma_offset_l1[j][1];
             }
         }
 
