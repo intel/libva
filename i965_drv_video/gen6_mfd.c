@@ -356,13 +356,15 @@ gen6_mfd_pipe_buf_addr_state(VADriverContextP ctx,
 
 static void
 gen6_mfd_ind_obj_base_addr_state(VADriverContextP ctx,
-                                 struct decode_state *decode_state,
+                                 dri_bo *slice_data_bo,
                                  int standard_select)
 {
-    BEGIN_BCS_BATCH(ctx, 9);
-    OUT_BCS_BATCH(ctx, MFX_IND_OBJ_BASE_ADDR_STATE | (9 - 2));
-    OUT_BCS_BATCH(ctx, 0); /* MFX Indirect Bitstream Object Base Address */
-    OUT_BCS_BATCH(ctx, 0); /* ignore upper Bound check */
+    BEGIN_BCS_BATCH(ctx, 11);
+    OUT_BCS_BATCH(ctx, MFX_IND_OBJ_BASE_ADDR_STATE | (11 - 2));
+    OUT_BCS_RELOC(ctx, slice_data_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0); /* MFX Indirect Bitstream Object Base Address */
+    OUT_BCS_BATCH(ctx, 0);
+    OUT_BCS_BATCH(ctx, 0); /* ignore for VLD mode */
+    OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0); /* ignore for VLD mode */
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0); /* ignore for VLD mode */
@@ -932,9 +934,7 @@ gen6_mfd_avc_bsd_object(VADriverContextP ctx,
     OUT_BCS_BATCH(ctx, MFD_AVC_BSD_OBJECT | (6 - 2));
     OUT_BCS_BATCH(ctx, 
                   ((slice_param->slice_data_size - (slice_data_bit_offset >> 3)) << 0));
-    OUT_BCS_RELOC(ctx, slice_data_bo,
-                  I915_GEM_DOMAIN_INSTRUCTION, 0,
-                  (slice_param->slice_data_offset + (slice_data_bit_offset >> 3)));
+    OUT_BCS_BATCH(ctx, slice_param->slice_data_offset + (slice_data_bit_offset >> 3));
     OUT_BCS_BATCH(ctx,
                   (0 << 31) |
                   (0 << 14) |
@@ -1109,7 +1109,6 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
     gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_AVC);
     gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_AVC);
     gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_AVC);
-    gen6_mfd_ind_obj_base_addr_state(ctx, decode_state, MFX_FORMAT_AVC);
     gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_AVC);
     gen6_mfd_avc_img_state(ctx, decode_state);
     gen6_mfd_avc_qm_state(ctx, decode_state);
@@ -1124,7 +1123,9 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
         else
             next_slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j + 1]->buffer;
 
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_AVC);
         assert(decode_state->slice_params[j]->num_elements == 1);
+
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
             assert((slice_param->slice_type == SLICE_TYPE_I) ||
