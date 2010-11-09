@@ -712,7 +712,7 @@ gen6_mfd_avc_slice_state(VADriverContextP ctx,
     }
 
     BEGIN_BCS_BATCH(ctx, 11); /* FIXME: is it 10??? */
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_SLICE_STATE | (11 - 2));
+    OUT_BCS_BATCH(ctx, MFX_AVC_SLICE_STATE | (11 - 2));
     OUT_BCS_BATCH(ctx, slice_type);
     OUT_BCS_BATCH(ctx, 
                   (num_ref_idx_l1 << 24) |
@@ -750,7 +750,7 @@ gen6_mfd_avc_phantom_slice_state(VADriverContextP ctx, VAPictureParameterBufferH
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
     BEGIN_BCS_BATCH(ctx, 11); /* FIXME: is it 10??? */
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_SLICE_STATE | (11 - 2));
+    OUT_BCS_BATCH(ctx, MFX_AVC_SLICE_STATE | (11 - 2));
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
