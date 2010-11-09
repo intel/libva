@@ -1762,15 +1762,15 @@ i965_PutSurface(VADriverContextP ctx,
     if (flags & (VA_BOTTOM_FIELD | VA_TOP_FIELD))
         pp_flag |= I965_PP_FLAG_DEINTERLACING;
 
-    i965_render_put_surface(ctx, surface,
+    intel_render_put_surface(ctx, surface,
                             srcx, srcy, srcw, srch,
                             destx, desty, destw, desth,
                             pp_flag);
 
     if(obj_surface->subpic != VA_INVALID_ID) {	
-	i965_render_put_subpic(ctx, surface,
-                               srcx, srcy, srcw, srch,
-                               destx, desty, destw, desth);
+	intel_render_put_subpicture(ctx, surface,
+                                    srcx, srcy, srcw, srch,
+                                    destx, desty, destw, desth);
     } 
 
     dri_swap_buffer(ctx, dri_drawable);

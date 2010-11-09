@@ -57,6 +57,8 @@ struct i965_render_state
     struct {
         dri_bo *state;
         dri_bo *viewport;
+        dri_bo *blend;
+        dri_bo *depth_stencil;
     } cc;
 
     struct {
@@ -73,7 +75,7 @@ struct i965_render_state
 
 Bool i965_render_init(VADriverContextP ctx);
 Bool i965_render_terminate(VADriverContextP ctx);
-void i965_render_put_surface(VADriverContextP ctx,
+void intel_render_put_surface(VADriverContextP ctx,
                              VASurfaceID surface,
                              short srcx,
                              short srcy,
@@ -87,7 +89,7 @@ void i965_render_put_surface(VADriverContextP ctx,
 
 
 void
-i965_render_put_subpic(VADriverContextP ctx,
+intel_render_put_subpicture(VADriverContextP ctx,
                         VASurfaceID surface,
                         short srcx,
                         short srcy,
