@@ -1,0 +1,98 @@
+/*
+ * Copyright © 2006 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ * Authors:
+ *    Keith Packard <keithp@keithp.com>
+ *    Eric Anholt <eric@anholt.net>
+ *
+ */
+
+include(`exa_wm.g4i')
+
+define(`YCbCr_base',	`src_sample_base')
+
+define(`Cr',		`src_sample_b')
+define(`Cr_01',		`src_sample_b_01')
+define(`Cr_23',		`src_sample_b_23')
+
+define(`Y',		`src_sample_r')
+define(`Y_01',		`src_sample_r_01')
+define(`Y_23',		`src_sample_r_23')
+
+define(`Cb',		`src_sample_g')
+define(`Cb_01',		`src_sample_g_01')
+define(`Cb_23',		`src_sample_g_23')
+
+define(`Crn',		`mask_sample_g')
+define(`Crn_01',	`mask_sample_g_01')
+define(`Crn_23',	`mask_sample_g_23')
+
+define(`Yn',		`mask_sample_r')
+define(`Yn_01',		`mask_sample_r_01')
+define(`Yn_23',		`mask_sample_r_23')
+
+define(`Cbn',		`mask_sample_b')
+define(`Cbn_01',	`mask_sample_b_01')
+define(`Cbn_23',	`mask_sample_b_23')
+
+    /* color space conversion function:
+     * R = Clamp ( 1.164(Y-16/255) + 1.596(Cr-128/255), 0, 1)
+     * G = Clamp ( 1.164(Y-16/255) - 0.813(Cr-128/255) - 0.392(Cb-128/255), 0, 1)
+     * B = Clamp ( 1.164(Y-16/255) + 2.017(Cb-128/255), 0, 1)
+     */
+
+    /* Normalize Y, Cb and Cr:
+     *
+     * Yn = (Y - 16/255) * 1.164
+     * Crn = Cr - 128 / 255
+     * Cbn = Cb - 128 / 255
+     */
+add (16)    Yn<1>F		Y<8,8,1>F	-0.0627451F { compr align1 };
+mul (16)    Yn<1>F		Yn<8,8,1>F	1.164F	    { compr align1 };
+
+add (16)    Crn<1>F		Cr<8,8,1>F	-0.501961F  { compr align1 };
+
+add (16)    Cbn<1>F		Cb<8,8,1>F	-0.501961F  { compr align1 };
+
+    /* 
+     * R = Y + Cr * 1.596
+     */
+mov (16)    acc0<1>F		Yn<8,8,1>F		    { compr align1 };
+mac.sat(16) src_sample_r<1>F	Crn<8,8,1>F	1.596F	    { compr align1 };
+     
+    /*
+     * G = Crn * -0.813 + Cbn * -0.392 + Y
+     */
+mov (16)    acc0<1>F		Yn<8,8,1>F		    { compr align1 };
+mac (16)    acc0<1>F		Crn<8,8,1>F    	-0.813F	    { compr align1 };
+mac.sat(16) src_sample_g<1>F	Cbn<8,8,1>F    	-0.392F	    { compr align1 };
+
+    /*
+     * B = Cbn * 2.017 + Y
+     */
+mov (16)    acc0<1>F	        Yn<8,8,1>F		    { compr align1 };
+mac.sat(16) src_sample_b<1>F	Cbn<8,8,1>F     2.017F	    { compr align1 };
+
+    /*
+     * A = 1.0
+     */
+//mov (16)    src_sample_a<1>F	1.0F			    { compr align1 };
