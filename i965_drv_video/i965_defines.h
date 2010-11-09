@@ -44,13 +44,14 @@
      (sub_opa) << 21 |                          \
      (sub_opb) << 16)
 
-#define MFX_STATE_PONTER                        MFX(2, 0, 0, 6)
 #define MFX_PIPE_MODE_SELECT                    MFX(2, 0, 0, 0)
-#define MFX_SURFACE_STATE                       MFX(0, 0, 0, 2) /* FIXME: right ? */
+#define MFX_SURFACE_STATE                       MFX(2, 0, 0, 1)
 #define MFX_PIPE_BUF_ADDR_STATE                 MFX(2, 0, 0, 2)
 #define MFX_IND_OBJ_BASE_ADDR_STATE             MFX(2, 0, 0, 3)
 #define MFX_BSP_BUF_BASE_ADDR_STATE             MFX(2, 0, 0, 4)
 #define MFX_AES_STATE                           MFX(2, 0, 0, 5)
+#define MFX_STATE_POINTER                       MFX(2, 0, 0, 6)
+
 #define MFX_WAIT                                MFX(1, 0, 0, 0)
 
 #define MFX_AVC_IMG_STATE                       MFX(2, 1, 0, 0)
