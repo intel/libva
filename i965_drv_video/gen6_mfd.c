@@ -1065,7 +1065,7 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     dri_bo_unreference(gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "deblocking filter row store",
-                      4 * 64,
+                      30720, /* 4 * 120 * 64 */
                       0x1000);
     assert(bo);
     gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = bo;
