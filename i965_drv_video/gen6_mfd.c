@@ -110,13 +110,20 @@ gen6_mfd_avc_frame_store_index(VADriverContextP ctx, VAPictureParameterBufferH26
             struct object_surface *obj_surface = SURFACE(ref_pic->picture_id);
             
             if (obj_surface->bo == NULL) {
-                /* Some broken sources such as conformance case FM2_SVA_C
-                 * will get here !!!. Allocating a BO for it to avoid SEGMENT FAULT
-                 */
-                obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                               "vaapi surface",
-                                               obj_surface->size,
-                                               0x1000);
+                uint32_t tiling_mode = I915_TILING_Y;
+                unsigned long pitch;
+        
+                obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
+                                                           "vaapi surface",
+                                                           obj_surface->width, 
+                                                           obj_surface->height + obj_surface->height / 2,
+                                                           1,
+                                                           &tiling_mode,
+                                                           &pitch,
+                                                           0);
+                assert(obj_surface->bo);
+                assert(tiling_mode == I915_TILING_Y);
+                assert(pitch == obj_surface->width);
             }
 
             for (frame_idx = 0; frame_idx < ARRAY_ELEMS(gen6_mfd_context->reference_surface); frame_idx++) {
@@ -278,7 +285,7 @@ gen6_mfd_surface_state(VADriverContextP ctx,
                   (0 << 22) | /* surface object control state, FIXME??? */
                   ((obj_surface->width - 1) << 3) | /* pitch */
                   (0 << 2)  | /* must be 0 for interleave U/V */
-                  (0 << 1)  | /* tiled flag, FIXME: must be 1 ??? */
+                  (1 << 1)  | /* must be y-tiled */
                   (I965_TILEWALK_YMAJOR << 0));  /* tile walk, FIXME: must be 1 ??? */
     OUT_BCS_BATCH(ctx,
                   (0 << 16) | /* must be 0 for interleave U/V */
@@ -1020,10 +1027,20 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     gen6_mfd_init_mfx_surface(ctx, pic_param, obj_surface);
 
     if (obj_surface->bo == NULL) {
-        obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                       "vaapi surface",
-                                       obj_surface->size,
-                                       0x1000);
+        uint32_t tiling_mode = I915_TILING_Y;
+        unsigned long pitch;
+        
+        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
+                                                   "vaapi surface",
+                                                   obj_surface->width, 
+                                                   obj_surface->height + obj_surface->height / 2,
+                                                   1,
+                                                   &tiling_mode,
+                                                   &pitch,
+                                                   0);
+        assert(obj_surface->bo);
+        assert(tiling_mode == I915_TILING_Y);
+        assert(pitch == obj_surface->width);
     }
     
     dri_bo_unreference(gen6_mfd_context->post_deblocking_output.bo);
