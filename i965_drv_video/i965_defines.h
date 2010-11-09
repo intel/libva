@@ -36,6 +36,32 @@
 #define CMD_3DPRIMITIVE                         CMD(3, 3, 0)
 
 #define CMD_DEPTH_BUFFER                        CMD(3, 1, 5)
+
+#define MFX(pipeline, op, sub_opa, sub_opb)     \
+    (3 << 29 |                                  \
+     (pipeline) << 27 |                         \
+     (op) << 24 |                               \
+     (sub_opa) << 21 |                          \
+     (sub_opb) << 16)
+
+#define MFX_STATE_PONTER                        MFX(2, 0, 0, 6)
+#define MFX_PIPE_MODE_SELECT                    MFX(2, 0, 0, 0)
+#define MFX_SURFACE_STATE                       MFX(0, 0, 0, 2) /* FIXME: right ? */
+#define MFX_PIPE_BUF_ADDR_STATE                 MFX(2, 0, 0, 2)
+#define MFX_IND_OBJ_BASE_ADDR_STATE             MFX(2, 0, 0, 3)
+#define MFX_BSP_BUF_BASE_ADDR_STATE             MFX(2, 0, 0, 4)
+#define MFX_AES_STATE                           MFX(2, 0, 0, 5)
+#define MFX_WAIT                                MFX(1, 0, 0, 0)
+
+#define MFX_AVC_IMG_STATE                       MFX(2, 1, 0, 0)
+#define MFX_AVC_QM_STATE                        MFX(2, 1, 0, 1)
+#define MFX_AVC_DIRECTMODE_STATE                MFX(2, 1, 0, 2)
+#define MFX_AVC_SLICE_STATE                     MFX(2, 1, 0, 3)
+#define MFX_AVC_REF_IDX_STATE                   MFX(2, 1, 0, 4)
+#define MFX_AVC_WEIGHTOFFSET_STATE              MFX(2, 1, 0, 5)
+
+#define MFD_AVC_BSD_OBJECT                      MFX(2, 1, 1, 8)
+
 #define I965_DEPTHFORMAT_D32_FLOAT              1
 
 #define BASE_ADDRESS_MODIFY             (1 << 0)
@@ -379,6 +405,19 @@
 
 #define IEF_FILTER_SIZE_3X3             0
 #define IEF_FILTER_SIZE_5X5             1
+
+#define MFX_FORMAT_MPEG2        0
+#define MFX_FORMAT_VC1          1
+#define MFX_FORMAT_AVC          2
+
+#define MFX_CODEC_DECODE        0
+#define MFX_CODEC_ENCODE        1
+
+#define MFD_MODE_VLD            0
+#define MFD_MODE_IT             1
+
+#define MFX_SURFACE_PLANAR_420_8        4
+#define MFX_SURFACE_MONOCHROME          12
 
 #define URB_SIZE(intel)         (IS_GEN6(intel->device_id) ? 1024 :     \
                                  IS_IRONLAKE(intel->device_id) ? 1024 : \
