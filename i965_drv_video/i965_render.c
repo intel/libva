@@ -97,6 +97,10 @@ static const unsigned int ps_subpic_kernel_static_gen5[][4] =
 #include "shaders/render/exa_wm_write.g4b.gen5"
 };
 
+#define SURFACE_STATE_PADDED_SIZE       ALIGN(sizeof(struct i965_surface_state), 32)
+#define SURFACE_STATE_OFFSET(index)     (SURFACE_STATE_PADDED_SIZE * index)
+#define BINDING_TABLE_OFFSET            SURFACE_STATE_OFFSET(MAX_RENDER_SURFACES)
+
 static uint32_t float_to_uint (float f) 
 {
     union {
@@ -542,15 +546,12 @@ i965_render_src_surface_state(VADriverContextP ctx,
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct i965_surface_state *ss;
-    dri_bo *ss_bo;
+    dri_bo *ss_bo = render_state->wm.surface_state_binding_table_bo;
 
-    ss_bo = dri_bo_alloc(i965->intel.bufmgr, 
-                      "surface state", 
-                      sizeof(struct i965_surface_state), 32);
-    assert(ss_bo);
+    assert(index < MAX_RENDER_SURFACES);
     dri_bo_map(ss_bo, 1);
     assert(ss_bo->virtual);
-    ss = ss_bo->virtual;
+    ss = (struct i965_surface_state *)((char *)ss_bo->virtual + SURFACE_STATE_OFFSET(index));
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
     ss->ss0.surface_format = format;
@@ -576,14 +577,11 @@ i965_render_src_surface_state(VADriverContextP ctx,
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
                       offset,
-                      offsetof(struct i965_surface_state, ss1),
+                      SURFACE_STATE_OFFSET(index) + offsetof(struct i965_surface_state, ss1),
                       region);
 
+    ((unsigned int *)((char *)ss_bo->virtual + BINDING_TABLE_OFFSET))[index] = SURFACE_STATE_OFFSET(index);
     dri_bo_unmap(ss_bo);
-
-    assert(index < MAX_RENDER_SURFACES);
-    assert(render_state->wm.surface[index] == NULL);
-    render_state->wm.surface[index] = ss_bo;
     render_state->wm.sampler_count++;
 }
 
@@ -597,15 +595,12 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct i965_surface_state *ss;
-    dri_bo *ss_bo;
+    dri_bo *ss_bo = render_state->wm.surface_state_binding_table_bo;
 
-    ss_bo = dri_bo_alloc(i965->intel.bufmgr, 
-                      "surface state", 
-                      sizeof(struct i965_surface_state), 32);
-    assert(ss_bo);
+    assert(index < MAX_RENDER_SURFACES);
     dri_bo_map(ss_bo, 1);
     assert(ss_bo->virtual);
-    ss = ss_bo->virtual;
+    ss = (struct i965_surface_state *)((char *)ss_bo->virtual + SURFACE_STATE_OFFSET(index));
     memset(ss, 0, sizeof(*ss));
     ss->ss0.surface_type = I965_SURFACE_2D;
     ss->ss0.surface_format = format;
@@ -631,14 +626,11 @@ i965_subpic_render_src_surface_state(VADriverContextP ctx,
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_SAMPLER, 0,
                       offset,
-                      offsetof(struct i965_surface_state, ss1),
+                      SURFACE_STATE_OFFSET(index) + offsetof(struct i965_surface_state, ss1),
                       region);
 
+    ((unsigned int *)((char *)ss_bo->virtual + BINDING_TABLE_OFFSET))[index] = SURFACE_STATE_OFFSET(index);
     dri_bo_unmap(ss_bo);
-
-    assert(index < MAX_RENDER_SURFACES);
-    assert(render_state->wm.surface[index] == NULL);
-    render_state->wm.surface[index] = ss_bo;
     render_state->wm.sampler_count++;
 }
 
@@ -732,15 +724,13 @@ i965_render_dest_surface_state(VADriverContextP ctx, int index)
     struct i965_render_state *render_state = &i965->render_state;
     struct intel_region *dest_region = render_state->draw_region;
     struct i965_surface_state *ss;
-    dri_bo *ss_bo;
+    dri_bo *ss_bo = render_state->wm.surface_state_binding_table_bo;
 
-    ss_bo = dri_bo_alloc(i965->intel.bufmgr, 
-                      "surface state", 
-                      sizeof(struct i965_surface_state), 32);
-    assert(ss_bo);
+    assert(index < MAX_RENDER_SURFACES);
+
     dri_bo_map(ss_bo, 1);
     assert(ss_bo->virtual);
-    ss = ss_bo->virtual;
+    ss = (struct i965_surface_state *)((char *)ss_bo->virtual + SURFACE_STATE_OFFSET(index));
     memset(ss, 0, sizeof(*ss));
 
     ss->ss0.surface_type = I965_SURFACE_2D;
@@ -774,41 +764,11 @@ i965_render_dest_surface_state(VADriverContextP ctx, int index)
     dri_bo_emit_reloc(ss_bo,
                       I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
                       0,
-                      offsetof(struct i965_surface_state, ss1),
+                      SURFACE_STATE_OFFSET(index) + offsetof(struct i965_surface_state, ss1),
                       dest_region->bo);
 
+    ((unsigned int *)((char *)ss_bo->virtual + BINDING_TABLE_OFFSET))[index] = SURFACE_STATE_OFFSET(index);
     dri_bo_unmap(ss_bo);
-
-    assert(index < MAX_RENDER_SURFACES);
-    assert(render_state->wm.surface[index] == NULL);
-    render_state->wm.surface[index] = ss_bo;
-}
-
-static void
-i965_render_binding_table(VADriverContextP ctx)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_render_state *render_state = &i965->render_state;
-    int i;
-    unsigned int *binding_table;
-
-    dri_bo_map(render_state->wm.binding_table, 1);
-    assert(render_state->wm.binding_table->virtual);
-    binding_table = render_state->wm.binding_table->virtual;
-    memset(binding_table, 0, render_state->wm.binding_table->size);
-
-    for (i = 0; i < MAX_RENDER_SURFACES; i++) {
-        if (render_state->wm.surface[i]) {
-            binding_table[i] = render_state->wm.surface[i]->offset;
-            dri_bo_emit_reloc(render_state->wm.binding_table,
-                              I915_GEM_DOMAIN_INSTRUCTION, 0,
-                              0,
-                              i * sizeof(*binding_table),
-                              render_state->wm.surface[i]);
-        }
-    }
-
-    dri_bo_unmap(render_state->wm.binding_table);
 }
 
 static void 
@@ -964,7 +924,6 @@ i965_surface_render_state_setup(VADriverContextP ctx,
     i965_render_wm_unit(ctx);
     i965_render_cc_viewport(ctx);
     i965_render_cc_unit(ctx);
-    i965_render_binding_table(ctx);
     i965_render_upload_vertex(ctx, surface,
                               srcx, srcy, srcw, srch,
                               destx, desty, destw, desth);
@@ -990,7 +949,6 @@ i965_subpic_render_state_setup(VADriverContextP ctx,
     i965_subpic_render_wm_unit(ctx);
     i965_render_cc_viewport(ctx);
     i965_subpic_render_cc_unit(ctx);
-    i965_render_binding_table(ctx);
 
     VARectangle output_rect;
     output_rect.x      = destx;
@@ -1022,12 +980,13 @@ static void
 i965_render_state_base_address(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(ctx, 8);
         OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_RELOC(ctx, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
@@ -1038,7 +997,7 @@ i965_render_state_base_address(VADriverContextP ctx)
         BEGIN_BATCH(ctx, 6);
         OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        OUT_RELOC(ctx, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
         OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
@@ -1049,16 +1008,13 @@ i965_render_state_base_address(VADriverContextP ctx)
 static void
 i965_render_binding_table_pointers(VADriverContextP ctx)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_render_state *render_state = &i965->render_state;
-
     BEGIN_BATCH(ctx, 6);
     OUT_BATCH(ctx, CMD_BINDING_TABLE_POINTERS | 4);
     OUT_BATCH(ctx, 0); /* vs */
     OUT_BATCH(ctx, 0); /* gs */
     OUT_BATCH(ctx, 0); /* clip */
     OUT_BATCH(ctx, 0); /* sf */
-    OUT_RELOC(ctx, render_state->wm.binding_table, I915_GEM_DOMAIN_INSTRUCTION, 0, 0); /* wm */
+    OUT_BATCH(ctx, BINDING_TABLE_OFFSET);
     ADVANCE_BATCH(ctx);
 }
 
@@ -1371,7 +1327,6 @@ i965_render_initialize(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
-    int i;
     dri_bo *bo;
 
     /* VERTEX BUFFER */
@@ -1404,18 +1359,13 @@ i965_render_initialize(VADriverContextP ctx)
     render_state->sf.state = bo;
 
     /* WM */
-    for (i = 0; i < MAX_RENDER_SURFACES; i++) {
-        dri_bo_unreference(render_state->wm.surface[i]);
-        render_state->wm.surface[i] = NULL;
-    }
-
-    dri_bo_unreference(render_state->wm.binding_table);
+    dri_bo_unreference(render_state->wm.surface_state_binding_table_bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
-                      "binding table",
-                      MAX_RENDER_SURFACES * sizeof(unsigned int),
-                      64);
+                      "surface state & binding table",
+                      (SURFACE_STATE_PADDED_SIZE + sizeof(unsigned int)) * MAX_RENDER_SURFACES,
+                      4096);
     assert(bo);
-    render_state->wm.binding_table = bo;
+    render_state->wm.surface_state_binding_table_bo = bo;
 
     dri_bo_unreference(render_state->wm.sampler);
     bo = dri_bo_alloc(i965->intel.bufmgr,
@@ -1567,18 +1517,11 @@ i965_render_terminate(VADriverContextP ctx)
     render_state->vs.state = NULL;
     dri_bo_unreference(render_state->sf.state);
     render_state->sf.state = NULL;
-    dri_bo_unreference(render_state->wm.binding_table);
-    render_state->wm.binding_table = NULL;
     dri_bo_unreference(render_state->wm.sampler);
     render_state->wm.sampler = NULL;
     dri_bo_unreference(render_state->wm.state);
     render_state->wm.state = NULL;
-
-    for (i = 0; i < MAX_RENDER_SURFACES; i++) {
-        dri_bo_unreference(render_state->wm.surface[i]);
-        render_state->wm.surface[i] = NULL;
-    }
-
+    dri_bo_unreference(render_state->wm.surface_state_binding_table_bo);
     dri_bo_unreference(render_state->cc.viewport);
     render_state->cc.viewport = NULL;
     dri_bo_unreference(render_state->cc.state);
