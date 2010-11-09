@@ -380,6 +380,8 @@
 #define IEF_FILTER_SIZE_3X3             0
 #define IEF_FILTER_SIZE_5X5             1
 
-#define URB_SIZE(intel)         (IS_IRONLAKE(intel->device_id) ? 1024 : \
+#define URB_SIZE(intel)         (IS_GEN6(intel->device_id) ? 1024 :     \
+                                 IS_IRONLAKE(intel->device_id) ? 1024 : \
                                  IS_G4X(intel->device_id) ? 384 : 256)
+
 #endif /* _I965_DEFINES_H_ */

@@ -281,21 +281,12 @@ intel_batchbuffer_data_bcs(VADriverContextP ctx, void *data, unsigned int size)
     intel_batchbuffer_data_helper(ctx, intel->batch_bcs, data, size);
 }
 
-static void
-intel_batchbuffer_emit_mi_flush_helper(VADriverContextP ctx,
-                                       struct intel_batchbuffer *batch)
-{
-    intel_batchbuffer_require_space_helper(ctx, batch, 4);
-    intel_batchbuffer_emit_dword_helper(batch, 
-                                        MI_FLUSH | STATE_INSTRUCTION_CACHE_INVALIDATE);
-}
-
 void
 intel_batchbuffer_emit_mi_flush(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_emit_mi_flush_helper(ctx, intel->batch);
+    BEGIN_BATCH(ctx, 1);
+    OUT_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+    ADVANCE_BATCH(ctx);
 }
 
 void
@@ -303,7 +294,18 @@ intel_batchbuffer_emit_mi_flush_bcs(VADriverContextP ctx)
 {
     struct intel_driver_data *intel = intel_driver_data(ctx);
 
-    intel_batchbuffer_emit_mi_flush_helper(ctx, intel->batch_bcs);
+    if (IS_GEN6(intel->device_id)) {
+        BEGIN_BCS_BATCH(ctx, 4);
+        OUT_BCS_BATCH(ctx, MI_FLUSH_DW | MI_FLUSH_DW_VIDEO_PIPELINE_CACHE_INVALIDATE);
+        OUT_BCS_BATCH(ctx, 0);
+        OUT_BCS_BATCH(ctx, 0);
+        OUT_BCS_BATCH(ctx, 0);
+        ADVANCE_BCS_BATCH(ctx);
+    } else {
+        BEGIN_BCS_BATCH(ctx, 1);
+        OUT_BCS_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+        ADVANCE_BCS_BATCH(ctx);
+    }
 }
 
 void

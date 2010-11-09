@@ -1252,7 +1252,8 @@ i965_Init(VADriverContextP ctx)
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (!IS_G4X(i965->intel.device_id) &&
-        !IS_IRONLAKE(i965->intel.device_id))
+        !IS_IRONLAKE(i965->intel.device_id) &&
+        !IS_GEN6(i965->intel.device_id))
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_media_init(ctx) == False)
