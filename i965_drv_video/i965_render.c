@@ -112,7 +112,6 @@ static const uint32_t ps_kernel_static_gen6[][4] = {
 static const uint32_t ps_subpic_kernel_static_gen6[][4] = {
 #include "shaders/render/exa_wm_src_affine.g6b"
 #include "shaders/render/exa_wm_src_sample_argb.g6b"
-#include "shaders/render/exa_wm_yuv_rgb.g6b"
 #include "shaders/render/exa_wm_write.g6b"
 };
 
@@ -1793,7 +1792,7 @@ gen6_emit_sf_state(VADriverContextP ctx)
 }
 
 static void 
-gen6_emit_wm_state(VADriverContextP ctx)
+gen6_emit_wm_state(VADriverContextP ctx, int kernel)
 {
     /* disable WM constant buffer */
     OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_PS | (5 - 2));
@@ -1803,7 +1802,7 @@ gen6_emit_wm_state(VADriverContextP ctx)
     OUT_BATCH(ctx, 0);
 
     OUT_BATCH(ctx, GEN6_3DSTATE_WM | (9 - 2));
-    OUT_RELOC(ctx, render_kernels[PS_KERNEL].bo,
+    OUT_RELOC(ctx, render_kernels[kernel].bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
     OUT_BATCH(ctx, (1 << GEN6_3DSTATE_WM_SAMPLER_COUNT_SHITF) |
@@ -1875,7 +1874,7 @@ gen6_emit_vertices(VADriverContextP ctx)
 }
 
 static void
-gen6_render_emit_states(VADriverContextP ctx)
+gen6_render_emit_states(VADriverContextP ctx, int kernel)
 {
     intel_batchbuffer_start_atomic(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush(ctx);
@@ -1889,7 +1888,7 @@ gen6_render_emit_states(VADriverContextP ctx)
     gen6_emit_gs_state(ctx);
     gen6_emit_clip_state(ctx);
     gen6_emit_sf_state(ctx);
-    gen6_emit_wm_state(ctx);
+    gen6_emit_wm_state(ctx, kernel);
     gen6_emit_binding_table(ctx);
     gen6_emit_depth_buffer_state(ctx);
     gen6_emit_drawing_rectangle(ctx);
@@ -1915,8 +1914,59 @@ gen6_render_put_surface(VADriverContextP ctx,
     gen6_render_setup_states(ctx, surface,
                              srcx, srcy, srcw, srch,
                              destx, desty, destw, desth);
-    gen6_render_emit_states(ctx);
+    gen6_render_emit_states(ctx, PS_KERNEL);
     intel_batchbuffer_flush(ctx);
+}
+
+static void
+gen6_subpicture_render_blend_state(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+    struct gen6_blend_state *blend_state;
+
+    dri_bo_unmap(render_state->cc.state);    
+    dri_bo_map(render_state->cc.blend, 1);
+    assert(render_state->cc.blend->virtual);
+    blend_state = render_state->cc.blend->virtual;
+    memset(blend_state, 0, sizeof(*blend_state));
+    blend_state->blend0.dest_blend_factor = I965_BLENDFACTOR_INV_SRC_ALPHA;
+    blend_state->blend0.source_blend_factor = I965_BLENDFACTOR_SRC_ALPHA;
+    blend_state->blend0.blend_func = I965_BLENDFUNCTION_ADD;
+    blend_state->blend0.blend_enable = 1;
+    blend_state->blend1.post_blend_clamp_enable = 1;
+    blend_state->blend1.pre_blend_clamp_enable = 1;
+    blend_state->blend1.clamp_range = 0; /* clamp range [0, 1] */
+    dri_bo_unmap(render_state->cc.blend);
+}
+
+static void
+gen6_subpicture_render_setup_states(VADriverContextP ctx,
+                                    VASurfaceID surface,
+                                    short srcx,
+                                    short srcy,
+                                    unsigned short srcw,
+                                    unsigned short srch,
+                                    short destx,
+                                    short desty,
+                                    unsigned short destw,
+                                    unsigned short desth)
+{
+    VARectangle output_rect;
+
+    output_rect.x      = destx;
+    output_rect.y      = desty;
+    output_rect.width  = destw;
+    output_rect.height = desth;
+
+    i965_render_dest_surface_state(ctx, 0);
+    i965_subpic_render_src_surfaces_state(ctx, surface);
+    i965_render_sampler(ctx);
+    i965_render_cc_viewport(ctx);
+    gen6_render_color_calc_state(ctx);
+    gen6_subpicture_render_blend_state(ctx);
+    gen6_render_depth_stencil_state(ctx);
+    i965_subpic_render_upload_vertex(ctx, surface, &output_rect);
 }
 
 static void
@@ -1931,7 +1981,17 @@ gen6_render_put_subpicture(VADriverContextP ctx,
                            unsigned short destw,
                            unsigned short desth)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_surface *obj_surface = SURFACE(surface);
+    struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
 
+    assert(obj_subpic);
+    gen6_render_initialize(ctx);
+    gen6_subpicture_render_setup_states(ctx, surface,
+                                        srcx, srcy, srcw, srch,
+                                        destx, desty, destw, desth);
+    gen6_render_emit_states(ctx, PS_SUBPIC_KERNEL);
+    intel_batchbuffer_flush(ctx);
 }
 
 /*
