@@ -154,6 +154,11 @@
 
 #define MFD_AVC_BSD_OBJECT                      MFX(2, 1, 1, 8)
 
+#define MFX_MPEG2_PIC_STATE                     MFX(2, 3, 0, 0)
+#define MFX_MPEG2_QM_STATE                      MFX(2, 3, 0, 1)
+
+#define MFD_MPEG2_BSD_OBJECT                    MFX(2, 3, 1, 8)
+
 #define I965_DEPTHFORMAT_D32_FLOAT              1
 
 #define BASE_ADDRESS_MODIFY             (1 << 0)

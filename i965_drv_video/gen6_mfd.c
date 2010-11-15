@@ -174,7 +174,7 @@ gen6_mfd_avc_frame_store_index(VADriverContextP ctx, VAPictureParameterBufferH26
 }
 
 static void 
-gen6_mfd_free_mfx_surface(void **data)
+gen6_mfd_free_avc_surface(void **data)
 {
     struct gen6_mfd_surface *gen6_mfd_surface = *data;
 
@@ -191,14 +191,14 @@ gen6_mfd_free_mfx_surface(void **data)
 }
 
 static void
-gen6_mfd_init_mfx_surface(VADriverContextP ctx, 
+gen6_mfd_init_avc_surface(VADriverContextP ctx, 
                           VAPictureParameterBufferH264 *pic_param,
                           struct object_surface *obj_surface)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_mfd_surface *gen6_mfd_surface = obj_surface->private_data;
 
-    obj_surface->free_private_data = gen6_mfd_free_mfx_surface;
+    obj_surface->free_private_data = gen6_mfd_free_avc_surface;
 
     if (!gen6_mfd_surface) {
         gen6_mfd_surface = calloc(sizeof(struct gen6_mfd_surface), 1);
@@ -330,9 +330,12 @@ gen6_mfd_pipe_buf_addr_state(VADriverContextP ctx,
     else
         OUT_BCS_BATCH(ctx, 0);
 
-    OUT_BCS_RELOC(ctx, gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo,
-                  I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-                  0);
+    if (gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.valid)
+        OUT_BCS_RELOC(ctx, gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo,
+                      I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
+                      0);
+    else
+        OUT_BCS_BATCH(ctx, 0);
 
     /* DW 7..22 */
     for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
@@ -1024,7 +1027,7 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     obj_surface = SURFACE(va_pic->picture_id);
     assert(obj_surface);
     obj_surface->flags = (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
-    gen6_mfd_init_mfx_surface(ctx, pic_param, obj_surface);
+    gen6_mfd_init_avc_surface(ctx, pic_param, obj_surface);
 
     if (obj_surface->bo == NULL) {
         uint32_t tiling_mode = I915_TILING_Y;
@@ -1089,6 +1092,7 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     gen6_mfd_context->mpr_row_store_scratch_buffer.bo = bo;
     gen6_mfd_context->mpr_row_store_scratch_buffer.valid = 1;
 
+    gen6_mfd_context->bitplane_read_buffer.valid = 0;
     gen6_mfd_avc_frame_store_index(ctx, pic_param);
 }
 
@@ -1152,9 +1156,225 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
 }
 
 static void
+gen6_mfd_mpeg2_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
+{
+    VAPictureParameterBufferMPEG2 *pic_param;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_media_state *media_state = &i965->media_state;
+    struct gen6_mfd_context *gen6_mfd_context;
+    struct object_surface *obj_surface;
+    int i;
+    dri_bo *bo;
+
+    assert(decode_state->pic_param && decode_state->pic_param->buffer);
+    pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
+    gen6_mfd_context = media_state->private_context;
+
+    if (gen6_mfd_context == NULL) {
+        gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
+        media_state->private_context = gen6_mfd_context;
+
+        for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
+            gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;
+            gen6_mfd_context->reference_surface[i].frame_store_id = -1;
+        }
+    }
+
+    /* reference picture */
+    gen6_mfd_context->reference_surface[0].surface_id = pic_param->forward_reference_picture;
+
+    if (pic_param->backward_reference_picture == VA_INVALID_ID)
+        gen6_mfd_context->reference_surface[1].surface_id = pic_param->forward_reference_picture;
+    else
+        gen6_mfd_context->reference_surface[1].surface_id = pic_param->backward_reference_picture;
+
+    /* must do so !!! */
+    for (i = 2; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++)
+        gen6_mfd_context->reference_surface[i].surface_id = gen6_mfd_context->reference_surface[i % 2].surface_id;
+
+    /* Current decoded picture */
+    obj_surface = SURFACE(decode_state->current_render_target);
+    assert(obj_surface);
+    if (obj_surface->bo == NULL) {
+        uint32_t tiling_mode = I915_TILING_Y;
+        unsigned long pitch;
+
+        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
+                                                   "vaapi surface",
+                                                   obj_surface->width, 
+                                                   obj_surface->height + obj_surface->height / 2,
+                                                   1,
+                                                   &tiling_mode,
+                                                   &pitch,
+                                                   0);
+        assert(obj_surface->bo);
+        assert(tiling_mode == I915_TILING_Y);
+        assert(pitch == obj_surface->width);
+    }
+
+    dri_bo_unreference(gen6_mfd_context->pre_deblocking_output.bo);
+    gen6_mfd_context->pre_deblocking_output.bo = obj_surface->bo;
+    dri_bo_reference(gen6_mfd_context->pre_deblocking_output.bo);
+    gen6_mfd_context->pre_deblocking_output.valid = 1;
+
+    dri_bo_unreference(gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "bsd mpc row store",
+                      11520, /* 1.5 * 120 * 64 */
+                      0x1000);
+    assert(bo);
+    gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = bo;
+    gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.valid = 1;
+
+    gen6_mfd_context->post_deblocking_output.valid = 0;
+    gen6_mfd_context->intra_row_store_scratch_buffer.valid = 0;
+    gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.valid = 0;
+    gen6_mfd_context->mpr_row_store_scratch_buffer.valid = 0;
+    gen6_mfd_context->bitplane_read_buffer.valid = 0;
+}
+
+static void
+gen6_mfd_mpeg2_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
+{
+    VAPictureParameterBufferMPEG2 *pic_param;
+
+    assert(decode_state->pic_param && decode_state->pic_param->buffer);
+    pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
+
+    BEGIN_BCS_BATCH(ctx, 4);
+    OUT_BCS_BATCH(ctx, MFX_MPEG2_PIC_STATE | (4 - 2));
+    OUT_BCS_BATCH(ctx,
+                  (pic_param->f_code & 0xf) << 28 | /* f_code[1][1] */
+                  ((pic_param->f_code >> 4) & 0xf) << 24 | /* f_code[1][0] */
+                  ((pic_param->f_code >> 8) & 0xf) << 20 | /* f_code[0][1] */
+                  ((pic_param->f_code >> 12) & 0xf) << 16 | /* f_code[0][0] */
+                  pic_param->picture_coding_extension.bits.intra_dc_precision << 14 |
+                  pic_param->picture_coding_extension.bits.picture_structure << 12 |
+                  pic_param->picture_coding_extension.bits.top_field_first << 11 |
+                  pic_param->picture_coding_extension.bits.frame_pred_frame_dct << 10 |
+                  pic_param->picture_coding_extension.bits.concealment_motion_vectors << 9 |
+                  pic_param->picture_coding_extension.bits.q_scale_type << 8 |
+                  pic_param->picture_coding_extension.bits.intra_vlc_format << 7 | 
+                  pic_param->picture_coding_extension.bits.alternate_scan << 6);
+    OUT_BCS_BATCH(ctx,
+                  pic_param->picture_coding_type << 9);
+    OUT_BCS_BATCH(ctx,
+                  (ALIGN(pic_param->vertical_size, 16) / 16) << 16 |
+                  (ALIGN(pic_param->horizontal_size, 16) / 16));
+    ADVANCE_BCS_BATCH(ctx);
+}
+
+static void
+gen6_mfd_mpeg2_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
+{
+    VAIQMatrixBufferMPEG2 *iq_matrix;
+    int i;
+
+    if (!decode_state->iq_matrix || !decode_state->iq_matrix->buffer)
+        return;
+
+    iq_matrix = (VAIQMatrixBufferMPEG2 *)decode_state->iq_matrix->buffer;
+
+    for (i = 0; i < 2; i++) {
+        unsigned char *qm = NULL;
+
+        if (i == 0) {
+            if (iq_matrix->load_intra_quantiser_matrix)
+                qm = iq_matrix->intra_quantiser_matrix;
+        } else {
+            if (iq_matrix->load_non_intra_quantiser_matrix)
+                qm = iq_matrix->non_intra_quantiser_matrix;
+        }
+
+        if (!qm)
+            continue;
+
+        BEGIN_BCS_BATCH(ctx, 18);
+        OUT_BCS_BATCH(ctx, MFX_MPEG2_QM_STATE | (18 - 2));
+        OUT_BCS_BATCH(ctx, i);
+        intel_batchbuffer_data_bcs(ctx, qm, 64);
+        ADVANCE_BCS_BATCH(ctx);
+    }
+}
+
+static void
+gen6_mfd_mpeg2_bsd_object(VADriverContextP ctx,
+                          VAPictureParameterBufferMPEG2 *pic_param,
+                          VASliceParameterBufferMPEG2 *slice_param,
+                          VASliceParameterBufferMPEG2 *next_slice_param)
+{
+    unsigned int width_in_mbs = ALIGN(pic_param->horizontal_size, 16) / 16;
+    unsigned int height_in_mbs = ALIGN(pic_param->vertical_size, 16) / 16;
+    int mb_count;
+
+    if (next_slice_param == NULL)
+        mb_count = width_in_mbs * height_in_mbs - 
+            (slice_param->slice_vertical_position * width_in_mbs + slice_param->slice_horizontal_position);
+    else
+        mb_count = (next_slice_param->slice_vertical_position * width_in_mbs + next_slice_param->slice_horizontal_position) - 
+            (slice_param->slice_vertical_position * width_in_mbs + slice_param->slice_horizontal_position);
+
+    BEGIN_BCS_BATCH(ctx, 5);
+    OUT_BCS_BATCH(ctx, MFD_MPEG2_BSD_OBJECT | (5 - 2));
+    OUT_BCS_BATCH(ctx, 
+                  slice_param->slice_data_size - (slice_param->macroblock_offset >> 3));
+    OUT_BCS_BATCH(ctx, 
+                  slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
+    OUT_BCS_BATCH(ctx,
+                  slice_param->slice_horizontal_position << 24 |
+                  slice_param->slice_vertical_position << 16 |
+                  mb_count << 8 |
+                  (next_slice_param == NULL) << 5 |
+                  (next_slice_param == NULL) << 3 |
+                  (slice_param->macroblock_offset & 0x7));
+    OUT_BCS_BATCH(ctx,
+                  slice_param->quantiser_scale_code << 24);
+    ADVANCE_BCS_BATCH(ctx);
+}
+
+static void
 gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx, struct decode_state *decode_state)
 {
+    VAPictureParameterBufferMPEG2 *pic_param;
+    VASliceParameterBufferMPEG2 *slice_param, *next_slice_param;
+    dri_bo *slice_data_bo;
+    int i, j;
 
+    assert(decode_state->pic_param && decode_state->pic_param->buffer);
+    pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
+
+    gen6_mfd_mpeg2_decode_init(ctx, decode_state);
+    intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
+    intel_batchbuffer_emit_mi_flush_bcs(ctx);
+    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_mpeg2_pic_state(ctx, decode_state);
+    gen6_mfd_mpeg2_qm_state(ctx, decode_state);
+
+    assert(decode_state->num_slice_params == 1);
+    for (j = 0; j < decode_state->num_slice_params; j++) {
+        assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
+        slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j]->buffer;
+        slice_data_bo = decode_state->slice_datas[j]->bo;
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_MPEG2);
+
+        for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
+            assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
+
+            if (i < decode_state->slice_params[j]->num_elements - 1)
+                next_slice_param = slice_param + 1;
+            else
+                next_slice_param = NULL;
+
+            gen6_mfd_mpeg2_bsd_object(ctx, pic_param, slice_param, next_slice_param);
+            slice_param++;
+        }
+    }
+
+    intel_batchbuffer_end_atomic_bcs(ctx);
+    intel_batchbuffer_flush_bcs(ctx);
 }
 
 static void
