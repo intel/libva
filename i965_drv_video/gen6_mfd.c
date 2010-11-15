@@ -1425,27 +1425,32 @@ gen6_mfd_terminate(VADriverContextP ctx)
     struct i965_media_state *media_state = &i965->media_state;
     struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
 
-    dri_bo_unreference(gen6_mfd_context->post_deblocking_output.bo);
-    gen6_mfd_context->post_deblocking_output.bo = NULL;
+    if (gen6_mfd_context) {
+        dri_bo_unreference(gen6_mfd_context->post_deblocking_output.bo);
+        gen6_mfd_context->post_deblocking_output.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->pre_deblocking_output.bo);
-    gen6_mfd_context->pre_deblocking_output.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->pre_deblocking_output.bo);
+        gen6_mfd_context->pre_deblocking_output.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->intra_row_store_scratch_buffer.bo);
-    gen6_mfd_context->intra_row_store_scratch_buffer.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->intra_row_store_scratch_buffer.bo);
+        gen6_mfd_context->intra_row_store_scratch_buffer.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
-    gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
+        gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
-    gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
+        gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->mpr_row_store_scratch_buffer.bo);
-    gen6_mfd_context->mpr_row_store_scratch_buffer.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->mpr_row_store_scratch_buffer.bo);
+        gen6_mfd_context->mpr_row_store_scratch_buffer.bo = NULL;
 
-    dri_bo_unreference(gen6_mfd_context->bitplane_read_buffer.bo);
-    gen6_mfd_context->bitplane_read_buffer.bo = NULL;
+        dri_bo_unreference(gen6_mfd_context->bitplane_read_buffer.bo);
+        gen6_mfd_context->bitplane_read_buffer.bo = NULL;
 
+        free(gen6_mfd_context);
+    }
+
+    media_state->private_context = NULL;
     return True;
 }
 
