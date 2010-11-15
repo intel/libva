@@ -13,9 +13,27 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 Requires: xorg-x11-server-Xorg
 
-BuildRequires: libtool xorg-x11-server-devel pkgconfig(xv) pkgconfig(xrandr)
-BuildRequires: libdrm-devel libX11-devel libXext-devel libXdamage-devel libXfixes-devel xorg-x11-proto-dri2proto
-BuildRequires: xorg-x11-proto-damageproto xorg-x11-proto-kbproto xorg-x11-proto-xproto xorg-x11-proto-xextproto xorg-x11-proto-fixesproto
+Requires: /sbin/ldconfig
+BuildRequires:  pkgconfig(xv)
+BuildRequires:  pkgconfig(xrandr)
+BuildRequires:  pkgconfig(xorg-server)
+BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  pkgconfig(x11)
+BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(xdamage)
+BuildRequires:  pkgconfig(xfixes)
+BuildRequires:  pkgconfig(dri2proto)
+BuildRequires:  pkgconfig(damageproto)
+BuildRequires:  pkgconfig(kbproto)
+BuildRequires:  pkgconfig(xextproto)
+BuildRequires:  pkgconfig(fixesproto)
+BuildRequires:  pkgconfig(xproto)
+BuildRequires:  pkgconfig(gl)
+BuildRequires:  libtool
+
+
+
+
 
 %description
 The libva library implements the Video Acceleration (VA) API for Linux.
@@ -86,6 +104,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva.so
 %{_libdir}/libva-tpi.so
 %{_libdir}/libva-x11.so
+%{_libdir}/libva-glx.so
 %{_libdir}/pkgconfig/libva.pc
 %{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
