@@ -616,8 +616,6 @@ static void va_TraceVAPictureParameterBufferMPEG2(
     va_TraceMsg(idx,"\tprogressive_frame= %d\n", p->picture_coding_extension.bits.progressive_frame);
     va_TraceMsg(idx,"\tis_first_field= %d\n", p->picture_coding_extension.bits.is_first_field);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
@@ -645,8 +643,6 @@ static void va_TraceVAIQMatrixBufferMPEG2(
     va_TraceMsg(idx,"\tchroma_intra_quantiser_matrix = %d\n", p->chroma_intra_quantiser_matrix);
     va_TraceMsg(idx,"\tchroma_non_intra_quantiser_matrix = %d\n", p->chroma_non_intra_quantiser_matrix);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
@@ -679,7 +675,6 @@ static void va_TraceVASliceParameterBufferMPEG2(
     va_TraceMsg(idx,"\tquantiser_scale_code = %d\n", p->quantiser_scale_code);
     va_TraceMsg(idx,"\tintra_slice_flag = %d\n", p->intra_slice_flag);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
     return;
 }
 
@@ -740,8 +735,6 @@ static void va_TraceVAPictureParameterBufferMPEG4(
     va_TraceMsg(idx,"\tTRB = %d\n", p->TRB);
     va_TraceMsg(idx,"\tTRD = %d\n", p->TRD);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
@@ -771,8 +764,6 @@ static void va_TraceVAIQMatrixBufferMPEG4(
     for(i=0;i<64;i++)
         va_TraceMsg(idx,"\t\t%d\n", p->non_intra_quant_mat[i]);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
@@ -803,8 +794,6 @@ static void va_TraceVASliceParameterBufferMPEG4(
     va_TraceMsg(idx,"\tmacroblock_number = %d\n", p->macroblock_number);
     va_TraceMsg(idx,"\tquant_scale = %d\n", p->quant_scale);
 
-    va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
-    
     return;
 }
 
