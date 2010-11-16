@@ -43,6 +43,17 @@
 
 #define DMV_SIZE        0x88000 /* 557056 bytes for a frame */
 
+static const uint32_t zigzag_direct[64] = {
+    0,   1,  8, 16,  9,  2,  3, 10,
+    17, 24, 32, 25, 18, 11,  4,  5,
+    12, 19, 26, 33, 40, 48, 41, 34,
+    27, 20, 13,  6,  7, 14, 21, 28,
+    35, 42, 49, 56, 57, 50, 43, 36,
+    29, 22, 15, 23, 30, 37, 44, 51,
+    58, 59, 52, 45, 38, 31, 39, 46,
+    53, 60, 61, 54, 47, 55, 62, 63
+};
+
 static void
 gen6_mfd_avc_frame_store_index(VADriverContextP ctx, VAPictureParameterBufferH264 *pic_param)
 {
@@ -1283,7 +1294,9 @@ gen6_mfd_mpeg2_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
     iq_matrix = (VAIQMatrixBufferMPEG2 *)decode_state->iq_matrix->buffer;
 
     for (i = 0; i < 2; i++) {
+        int k, m;
         unsigned char *qm = NULL;
+        unsigned char qmx[64];
 
         if (i == 0) {
             if (iq_matrix->load_intra_quantiser_matrix)
@@ -1296,10 +1309,18 @@ gen6_mfd_mpeg2_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
         if (!qm)
             continue;
 
+        /* Upload quantisation matrix in raster order. The mplayer vaapi
+         * patch passes quantisation matrix in zig-zag order to va library.
+         */
+        for (k = 0; k < 64; k++) {
+            m = zigzag_direct[k];
+            qmx[m] = qm[k];
+        }
+
         BEGIN_BCS_BATCH(ctx, 18);
         OUT_BCS_BATCH(ctx, MFX_MPEG2_QM_STATE | (18 - 2));
         OUT_BCS_BATCH(ctx, i);
-        intel_batchbuffer_data_bcs(ctx, qm, 64);
+        intel_batchbuffer_data_bcs(ctx, qmx, 64);
         ADVANCE_BCS_BATCH(ctx);
     }
 }
