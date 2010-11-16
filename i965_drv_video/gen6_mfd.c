@@ -1181,12 +1181,19 @@ gen6_mfd_mpeg2_decode_init(VADriverContextP ctx, struct decode_state *decode_sta
     }
 
     /* reference picture */
-    gen6_mfd_context->reference_surface[0].surface_id = pic_param->forward_reference_picture;
+    obj_surface = SURFACE(pic_param->forward_reference_picture);
 
-    if (pic_param->backward_reference_picture == VA_INVALID_ID)
-        gen6_mfd_context->reference_surface[1].surface_id = pic_param->forward_reference_picture;
+    if (obj_surface && obj_surface->bo)
+        gen6_mfd_context->reference_surface[0].surface_id = pic_param->forward_reference_picture;
     else
+        gen6_mfd_context->reference_surface[0].surface_id = VA_INVALID_ID;
+
+    obj_surface = SURFACE(pic_param->backward_reference_picture);
+
+    if (obj_surface && obj_surface->bo)
         gen6_mfd_context->reference_surface[1].surface_id = pic_param->backward_reference_picture;
+    else
+        gen6_mfd_context->reference_surface[1].surface_id = pic_param->forward_reference_picture;
 
     /* must do so !!! */
     for (i = 2; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++)
