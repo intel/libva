@@ -1265,7 +1265,10 @@ i965_clear_dest_region(VADriverContextP ctx)
 
     br13 |= pitch;
 
-    BEGIN_BATCH(ctx, 6);
+    if (IS_GEN6(i965->intel.device_id))
+        BEGIN_BLT_BATCH(ctx, 6);
+    else
+        BEGIN_BATCH(ctx, 6);
     OUT_BATCH(ctx, blt_cmd);
     OUT_BATCH(ctx, br13);
     OUT_BATCH(ctx, (dest_region->y << 16) | (dest_region->x));
@@ -1281,9 +1284,9 @@ i965_clear_dest_region(VADriverContextP ctx)
 static void
 i965_surface_render_pipeline_setup(VADriverContextP ctx)
 {
+    i965_clear_dest_region(ctx);
     intel_batchbuffer_start_atomic(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush(ctx);
-    i965_clear_dest_region(ctx);
     i965_render_pipeline_select(ctx);
     i965_render_state_sip(ctx);
     i965_render_state_base_address(ctx);
@@ -1914,6 +1917,7 @@ gen6_render_put_surface(VADriverContextP ctx,
     gen6_render_setup_states(ctx, surface,
                              srcx, srcy, srcw, srch,
                              destx, desty, destw, desth);
+    i965_clear_dest_region(ctx);
     gen6_render_emit_states(ctx, PS_KERNEL);
     intel_batchbuffer_flush(ctx);
 }

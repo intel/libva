@@ -40,6 +40,7 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
     int batch_size = BATCH_SIZE;
 
     assert(batch->flag == I915_EXEC_RENDER ||
+           batch->flag == I915_EXEC_BLT ||
            batch->flag == I915_EXEC_BSD);
 
     dri_bo_unreference(batch->buffer);
@@ -284,9 +285,20 @@ intel_batchbuffer_data_bcs(VADriverContextP ctx, void *data, unsigned int size)
 void
 intel_batchbuffer_emit_mi_flush(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+
+    if (intel->batch->flag == I915_EXEC_BLT) {
+        BEGIN_BLT_BATCH(ctx, 4);
+        OUT_BATCH(ctx, MI_FLUSH_DW);
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, 0);
+        ADVANCE_BATCH(ctx);
+    } else if (intel->batch->flag == I915_EXEC_RENDER) {
+        BEGIN_BATCH(ctx, 1);
+        OUT_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 void
@@ -322,7 +334,7 @@ void
 intel_batchbuffer_start_atomic(VADriverContextP ctx, unsigned int size)
 {
     struct intel_driver_data *intel = intel_driver_data(ctx);
-
+    intel_batchbuffer_check_batchbuffer_flag(ctx, I915_EXEC_RENDER);
     intel_batchbuffer_start_atomic_helper(ctx, intel->batch, size);
 }
 
@@ -399,4 +411,21 @@ intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx)
    struct intel_driver_data *intel = intel_driver_data(ctx);
 
    intel_batchbuffer_advance_batch_helper(intel->batch_bcs);
+}
+
+void
+intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag)
+{
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+
+    if (flag != I915_EXEC_RENDER &&
+        flag != I915_EXEC_BLT &&
+        flag != I915_EXEC_BSD)
+        return;
+
+    if (intel->batch->flag == flag)
+        return;
+
+    intel_batchbuffer_flush_helper(ctx, intel->batch);
+    intel->batch->flag = flag;
 }

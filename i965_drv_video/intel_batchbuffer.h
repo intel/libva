@@ -57,10 +57,16 @@ Bool intel_batchbuffer_flush_bcs(VADriverContextP ctx);
 void intel_batchbuffer_begin_batch_bcs(VADriverContextP ctx, int total);
 void intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx);
 
-#define BEGIN_BATCH(ctx, n) do {                                \
-   intel_batchbuffer_require_space(ctx, (n) * 4);               \
-   intel_batchbuffer_begin_batch(ctx, (n));                     \
-} while (0)
+void intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag);
+
+#define __BEGIN_BATCH(ctx, n, flag) do {                        \
+        intel_batchbuffer_check_batchbuffer_flag(ctx, flag);    \
+        intel_batchbuffer_require_space(ctx, (n) * 4);          \
+        intel_batchbuffer_begin_batch(ctx, (n));                \
+    } while (0)
+
+#define BEGIN_BATCH(ctx, n)             __BEGIN_BATCH(ctx, n, I915_EXEC_RENDER)
+#define BEGIN_BLT_BATCH(ctx, n)         __BEGIN_BATCH(ctx, n, I915_EXEC_BLT)
 
 #define OUT_BATCH(ctx, d) do {                                  \
    intel_batchbuffer_emit_dword(ctx, d);                        \
