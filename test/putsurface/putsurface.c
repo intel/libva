@@ -98,8 +98,8 @@ static Pixmap create_pixmap(int width, int height)
 
     XGetWindowAttributes (x11_display, root, &attr);
     
-    printf("Create a pixmap from ROOT window %dx%d\n\n", attr.width, attr.height);
-    pixmap = XCreatePixmap(x11_display, root, attr.width, attr.height,
+    printf("Create a pixmap from ROOT window %dx%d, pixmap size %dx%d\n\n", attr.width, attr.height, width, height);
+    pixmap = XCreatePixmap(x11_display, root, width, height,
                            DefaultDepth(x11_display, DefaultScreen(x11_display)));
 
     return pixmap;
