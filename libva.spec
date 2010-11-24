@@ -3,7 +3,7 @@
 Name:           libva
 Version:        1.0.6
 Release:        0.0
-License:        Intel Proprietary
+License:        MIT license
 Source:         %{name}-%{version}.tar.bz2
 NoSource:	0
 Group:          Development/Libraries

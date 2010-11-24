@@ -560,12 +560,17 @@ VAStatus vaCreateConfig (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus = VA_STATUS_SUCCESS;
+  
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
   va_FoolCreateConfig(dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
-  return ctx->vtable.vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
+  vaStatus =  ctx->vtable.vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
+
+  VA_TRACE(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
+  
+  return vaStatus;
 }
 
 VAStatus vaDestroyConfig (
@@ -606,15 +611,16 @@ VAStatus vaCreateSurfaces (
 )
 {
   VADriverContextP ctx;
-  VAStatus ret;
+  VAStatus vaStatus;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE(va_TraceCreateSurface, dpy, width, height, format, num_surfaces, surfaces);
+  vaStatus = ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
 
-  ret = ctx->vtable.vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
+  VA_TRACE(va_TraceCreateSurface, dpy, width, height, format, num_surfaces, surfaces);
   va_FoolCreateSurfaces(dpy, width, height, format, num_surfaces, surfaces);
-  return ret;
+  
+  return vaStatus;
 }
 
 
@@ -643,12 +649,17 @@ VAStatus vaCreateContext (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus;
+  
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
-  return ctx->vtable.vaCreateContext( ctx, config_id, picture_width, picture_height,
+  vaStatus = ctx->vtable.vaCreateContext( ctx, config_id, picture_width, picture_height,
                                       flag, render_targets, num_render_targets, context );
+
+  VA_TRACE(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
+
+  return vaStatus;
 }
 
 VAStatus vaDestroyContext (
