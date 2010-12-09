@@ -1,7 +1,7 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
 
 Name:           libva
-Version:        1.0.6
+Version:        1.0.6MFLD
 Release:        0.0
 License:        Intel Proprietary
 Source:         %{name}-%{version}.tar.bz2
