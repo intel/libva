@@ -1,4 +1,5 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
+%define libversion 1.0.6
 
 Name:           libva
 Version:        1.0.6MFLD
@@ -71,13 +72,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libva.so.1
-%{_libdir}/libva.so.%{version}
+%{_libdir}/libva.so.%{libversion}
 %{_libdir}/libva-tpi.so.1
-%{_libdir}/libva-tpi.so.%{version}
+%{_libdir}/libva-tpi.so.%{libversion}
 %{_libdir}/libva-x11.so.1
-%{_libdir}/libva-x11.so.%{version}
+%{_libdir}/libva-x11.so.%{libversion}
 %{_libdir}/libva-glx.so.1
-%{_libdir}/libva-glx.so.%{version}
+%{_libdir}/libva-glx.so.%{libversion}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
