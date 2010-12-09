@@ -87,17 +87,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_libdir}/dri/dummy_drv_video.so
 
-%{_includedir}/va/va_tpi.h
-%{_includedir}/va/va_x11.h
-%{_includedir}/va/va_version.h
-%{_includedir}/va/va_backend.h
-%{_includedir}/va/va_dri2.h
-%{_includedir}/va/va_dummy.h
-%{_includedir}/va/va_backend_tpi.h
-%{_includedir}/va/va.h
-%{_includedir}/va/va_dricommon.h
-%{_includedir}/va/va_dri.h
-
 %files devel
 %defattr(-,root,root,-)
 %dir %{_includedir}/va
