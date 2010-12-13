@@ -4,4 +4,6 @@
 LOCAL_PATH := $(my-dir)
 
 include $(LOCAL_PATH)/va/Android.mk
+include $(LOCAL_PATH)/../test/putsurface/Android.mk
+
 
