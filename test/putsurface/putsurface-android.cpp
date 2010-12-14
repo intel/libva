@@ -72,7 +72,7 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     exit(1);                                                            \
 }
 
-#include "loadsurface-android.h"
+#include "loadsurface.h"
 
 
 #define SURFACE_NUM 5
