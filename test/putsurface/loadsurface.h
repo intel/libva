@@ -21,7 +21,6 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-//test
 static int yuvgen_planar(int width, int height,
                          unsigned char *Y_start, int Y_pitch,
                          unsigned char *U_start, int U_pitch,
