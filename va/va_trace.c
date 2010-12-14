@@ -1032,7 +1032,7 @@ static void va_TraceVAEncPictureParameterBufferH264(
     VAEncPictureParameterBufferH264 *p = (VAEncPictureParameterBufferH264 *)data;
     DPY2INDEX(dpy);
     
-    va_TraceMsg(idx, "VAEncSequenceParameterBufferH264\n");
+    va_TraceMsg(idx, "VAEncPictureParameterBufferH264\n");
     va_TraceMsg(idx, "\treference_picture = 0x%08x\n", p->reference_picture);
     va_TraceMsg(idx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
     va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
