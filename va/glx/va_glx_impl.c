@@ -36,7 +36,7 @@ static void va_glx_error_message(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    fprintf(stderr, "[%s] ", PACKAGE_NAME);
+    fprintf(stderr, "libva-glx error: ");
     vfprintf(stderr, format, args);
     va_end(args);
 }

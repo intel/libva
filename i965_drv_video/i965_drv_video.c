@@ -119,6 +119,7 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
                          VAProfile *profile_list,       /* out */
                          int *num_profiles)             /* out */
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
     int i = 0;
 
     profile_list[i++] = VAProfileMPEG2Simple;
@@ -126,6 +127,12 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
     profile_list[i++] = VAProfileH264Baseline;
     profile_list[i++] = VAProfileH264Main;
     profile_list[i++] = VAProfileH264High;
+
+    if (IS_GEN6(i965->intel.device_id)) {
+        profile_list[i++] = VAProfileVC1Simple;
+        profile_list[i++] = VAProfileVC1Main;
+        profile_list[i++] = VAProfileVC1Advanced;
+    }
 
     /* If the assert fails then I965_MAX_PROFILES needs to be bigger */
     assert(i <= I965_MAX_PROFILES);
@@ -152,6 +159,13 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
+        *num_entrypoints = 1;
+        entrypoint_list[0] = VAEntrypointVLD;
+        break;
+
+    case VAProfileVC1Simple:
+    case VAProfileVC1Main:
+    case VAProfileVC1Advanced:
         *num_entrypoints = 1;
         entrypoint_list[0] = VAEntrypointVLD;
         break;
@@ -254,6 +268,17 @@ i965_CreateConfig(VADriverContextP ctx,
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
+        if (VAEntrypointVLD == entrypoint) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+
+        break;
+
+    case VAProfileVC1Simple:
+    case VAProfileVC1Main:
+    case VAProfileVC1Advanced:
         if (VAEntrypointVLD == entrypoint) {
             vaStatus = VA_STATUS_SUCCESS;
         } else {
@@ -392,8 +417,15 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->subpic = VA_INVALID_ID;
         obj_surface->orig_width = width;
         obj_surface->orig_height = height;
-        obj_surface->width = ALIGN(obj_surface->orig_width, 16);
-        obj_surface->height = ALIGN(obj_surface->orig_height, 16);
+
+        if (IS_GEN6(i965->intel.device_id)) {
+            obj_surface->width = ALIGN(obj_surface->orig_width, 128);
+            obj_surface->height = ALIGN(obj_surface->orig_height, 32);
+        } else {
+            obj_surface->width = ALIGN(obj_surface->orig_width, 16);
+            obj_surface->height = ALIGN(obj_surface->orig_height, 16);
+        }
+
         obj_surface->size = SIZE_YUV420(obj_surface->width, obj_surface->height);
         obj_surface->flags = SURFACE_REFERENCED;
         obj_surface->bo = NULL;
@@ -724,14 +756,18 @@ i965_CreateContext(VADriverContextP ctx,
         return vaStatus;
     }
 
-    switch (obj_config->profile) {
-    case VAProfileH264Baseline:
-    case VAProfileH264Main:
-    case VAProfileH264High:
+    if (IS_GEN6(i965->intel.device_id))
         render_state->interleaved_uv = 1;
-        break;
-    default:
-        render_state->interleaved_uv = 0;
+    else {
+        switch (obj_config->profile) {
+        case VAProfileH264Baseline:
+        case VAProfileH264Main:
+        case VAProfileH264High:
+            render_state->interleaved_uv = 1;
+            break;
+        default:
+            render_state->interleaved_uv = 0;
+        }
     }
 
     obj_context->context_id = contextID;
@@ -975,6 +1011,12 @@ i965_BeginPicture(VADriverContextP ctx,
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
+        vaStatus = VA_STATUS_SUCCESS;
+        break;
+
+    case VAProfileVC1Simple:
+    case VAProfileVC1Main:
+    case VAProfileVC1Advanced:
         vaStatus = VA_STATUS_SUCCESS;
         break;
 
@@ -1252,7 +1294,8 @@ i965_Init(VADriverContextP ctx)
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (!IS_G4X(i965->intel.device_id) &&
-        !IS_IRONLAKE(i965->intel.device_id))
+        !IS_IRONLAKE(i965->intel.device_id) &&
+        !IS_GEN6(i965->intel.device_id))
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_media_init(ctx) == False)
@@ -1726,15 +1769,15 @@ i965_PutSurface(VADriverContextP ctx,
     if (flags & (VA_BOTTOM_FIELD | VA_TOP_FIELD))
         pp_flag |= I965_PP_FLAG_DEINTERLACING;
 
-    i965_render_put_surface(ctx, surface,
+    intel_render_put_surface(ctx, surface,
                             srcx, srcy, srcw, srch,
                             destx, desty, destw, desth,
                             pp_flag);
 
     if(obj_surface->subpic != VA_INVALID_ID) {	
-	i965_render_put_subpic(ctx, surface,
-                               srcx, srcy, srcw, srch,
-                               destx, desty, destw, desth);
+	intel_render_put_subpicture(ctx, surface,
+                                    srcx, srcy, srcw, srch,
+                                    destx, desty, destw, desth);
     } 
 
     dri_swap_buffer(ctx, dri_drawable);

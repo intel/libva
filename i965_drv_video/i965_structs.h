@@ -964,4 +964,105 @@ struct i965_sampler_dndi
     } dw7;
 };
 
+
+struct gen6_blend_state
+{
+    struct {
+        unsigned int dest_blend_factor:5;
+        unsigned int source_blend_factor:5;
+        unsigned int pad3:1;
+        unsigned int blend_func:3;
+        unsigned int pad2:1;
+        unsigned int ia_dest_blend_factor:5;
+        unsigned int ia_source_blend_factor:5;
+        unsigned int pad1:1;
+        unsigned int ia_blend_func:3;
+        unsigned int pad0:1;
+        unsigned int ia_blend_enable:1;
+        unsigned int blend_enable:1;
+    } blend0;
+
+    struct {
+        unsigned int post_blend_clamp_enable:1;
+        unsigned int pre_blend_clamp_enable:1;
+        unsigned int clamp_range:2;
+        unsigned int pad0:4;
+        unsigned int x_dither_offset:2;
+        unsigned int y_dither_offset:2;
+        unsigned int dither_enable:1;
+        unsigned int alpha_test_func:3;
+        unsigned int alpha_test_enable:1;
+        unsigned int pad1:1;
+        unsigned int logic_op_func:4;
+        unsigned int logic_op_enable:1;
+        unsigned int pad2:1;
+        unsigned int write_disable_b:1;
+        unsigned int write_disable_g:1;
+        unsigned int write_disable_r:1;
+        unsigned int write_disable_a:1;
+        unsigned int pad3:1;
+        unsigned int alpha_to_coverage_dither:1;
+        unsigned int alpha_to_one:1;
+        unsigned int alpha_to_coverage:1;
+    } blend1;
+};
+
+struct gen6_color_calc_state
+{
+    struct {
+        unsigned int alpha_test_format:1;
+        unsigned int pad0:14;
+        unsigned int round_disable:1;
+        unsigned int bf_stencil_ref:8;
+        unsigned int stencil_ref:8;
+    } cc0;
+
+    union {
+        float alpha_ref_f;
+        struct {
+            unsigned int ui:8;
+            unsigned int pad0:24;
+        } alpha_ref_fi;
+    } cc1;
+
+    float constant_r;
+    float constant_g;
+    float constant_b;
+    float constant_a;
+};
+
+struct gen6_depth_stencil_state
+{
+    struct {
+        unsigned int pad0:3;
+        unsigned int bf_stencil_pass_depth_pass_op:3;
+        unsigned int bf_stencil_pass_depth_fail_op:3;
+        unsigned int bf_stencil_fail_op:3;
+        unsigned int bf_stencil_func:3;
+        unsigned int bf_stencil_enable:1;
+        unsigned int pad1:2;
+        unsigned int stencil_write_enable:1;
+        unsigned int stencil_pass_depth_pass_op:3;
+        unsigned int stencil_pass_depth_fail_op:3;
+        unsigned int stencil_fail_op:3;
+        unsigned int stencil_func:3;
+        unsigned int stencil_enable:1;
+    } ds0;
+
+    struct {
+        unsigned int bf_stencil_write_mask:8;
+        unsigned int bf_stencil_test_mask:8;
+        unsigned int stencil_write_mask:8;
+        unsigned int stencil_test_mask:8;
+    } ds1;
+
+    struct {
+        unsigned int pad0:26;
+        unsigned int depth_write_enable:1;
+        unsigned int depth_test_func:3;
+        unsigned int pad1:1;
+        unsigned int depth_test_enable:1;
+    } ds2;
+};
+
 #endif /* _I965_STRUCTS_H_ */

@@ -36,6 +36,12 @@
 #define SUBOPCODE_BSD_IND_OBJ   4
 #define SUBOPCODE_BSD_OBJECT    8
 
+/* MFX */
+#define OPCODE_MFX_COMMON       0
+#define OPCODE_MFX_AVC          1
+
+#define SUBOPCODE_MFX(A, B)     ((A) << 5 | (B))
+
 /* MI */
 #define MASK_MI_OPCODE          0x1F800000
 
