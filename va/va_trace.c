@@ -1646,6 +1646,56 @@ void va_TraceEndPicture(
     }
 }
 
+void va_TraceSyncSurface(
+    VADisplay dpy,
+    VASurfaceID render_target
+)
+{
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(idx, "\trender_target = 0x%08x\n", render_target);
+}
+
+
+void va_TraceQuerySurfaceStatus(
+    VADisplay dpy,
+    VASurfaceID render_target,
+    VASurfaceStatus *status	/* out */
+)
+{
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(idx, "\trender_target = 0x%08x\n", render_target);
+    va_TraceMsg(idx, "\tstatus = 0x%08x\n", *status);
+}
+
+
+void va_TraceQuerySurfaceError(
+	VADisplay dpy,
+	VASurfaceID surface,
+	VAStatus error_status,
+	void **error_info /*out*/
+)
+{
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(idx, "\tsurface = 0x%08x\n", surface);
+    va_TraceMsg(idx, "\terror_status = 0x%08x\n", error_status);
+    if (error_status == VA_STATUS_ERROR_DECODING_ERROR) {
+      VASurfaceDecodeMBErrors *p = *error_info;
+      while (p->status != -1) {
+	va_TraceMsg(idx, "\t\tstatus = %d\n", p->status);
+	va_TraceMsg(idx, "\t\tstart_mb = %d\n", p->start_mb);
+	va_TraceMsg(idx, "\t\tend_mb = %d\n", p->end_mb);
+	p++; /* next error record */
+      }
+    }
+}
 
 void va_TraceMaxNumDisplayAttributes (
     VADisplay dpy,
@@ -1656,7 +1706,7 @@ void va_TraceMaxNumDisplayAttributes (
 
     TRACE_FUNCNAME(idx);
     
-    va_TraceMsg(idx, "\t>max_display_attributes = %d\n", number);
+    va_TraceMsg(idx, "\tmax_display_attributes = %d\n", number);
 }
 
 void va_TraceQueryDisplayAttributes (

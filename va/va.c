@@ -830,6 +830,7 @@ VAStatus vaSyncSurface (
     VASurfaceID render_target
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -837,7 +838,10 @@ VAStatus vaSyncSurface (
   if (va_FoolSyncSurface( dpy, render_target))
     return VA_STATUS_SUCCESS;
   
-  return ctx->vtable.vaSyncSurface( ctx, render_target );
+  va_status = ctx->vtable.vaSyncSurface( ctx, render_target );
+  VA_TRACE(va_TraceSyncSurface, dpy, render_target);
+
+  return va_status;
 }
 
 VAStatus vaQuerySurfaceStatus (
@@ -846,11 +850,16 @@ VAStatus vaQuerySurfaceStatus (
     VASurfaceStatus *status	/* out */
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
+  va_status = ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
+
+  VA_TRACE(va_TraceQuerySurfaceStatus, dpy, render_target, status);
+
+  return va_status;
 }
 
 VAStatus vaQuerySurfaceError (
@@ -860,11 +869,16 @@ VAStatus vaQuerySurfaceError (
 	void **error_info /*out*/
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaQuerySurfaceError( ctx, surface, error_status, error_info );
+  va_status = ctx->vtable.vaQuerySurfaceError( ctx, surface, error_status, error_info );
+
+  VA_TRACE(va_TraceQuerySurfaceError, dpy, surface, error_status, error_info);
+
+  return va_status;
 }
 
 /* Get maximum number of image formats supported by the implementation */

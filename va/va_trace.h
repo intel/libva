@@ -85,6 +85,24 @@ void va_TraceEndPicture(
     VAContextID context
 );
 
+void va_TraceSyncSurface(
+    VADisplay dpy,
+    VASurfaceID render_target
+);
+
+void va_TraceQuerySurfaceStatus(
+    VADisplay dpy,
+    VASurfaceID render_target,
+    VASurfaceStatus *status	/* out */
+);
+
+void va_TraceQuerySurfaceError(
+	VADisplay dpy,
+	VASurfaceID surface,
+	VAStatus error_status,
+	void **error_info /*out*/
+);
+
 
 void va_TraceMaxNumDisplayAttributes (
     VADisplay dpy,
