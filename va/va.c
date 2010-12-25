@@ -853,6 +853,20 @@ VAStatus vaQuerySurfaceStatus (
   return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
 }
 
+VAStatus vaQuerySurfaceError (
+	VADisplay dpy,
+	VASurfaceID surface,
+	VAStatus error_status,
+	void **error_info /*out*/
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  return ctx->vtable.vaQuerySurfaceError( ctx, surface, error_status, error_info );
+}
+
 /* Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy

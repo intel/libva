@@ -130,6 +130,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_INVALID_IMAGE_FORMAT    0x00000016
 #define VA_STATUS_ERROR_DECODING_ERROR          0x00000017
 #define VA_STATUS_ERROR_ENCODING_ERROR          0x00000018
+#define VA_STATUS_ERROR_SURFACE_MB_ERRORS       0x00000019
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
@@ -1435,6 +1436,31 @@ VAStatus vaQuerySurfaceStatus (
     VADisplay dpy,
     VASurfaceID render_target,
     VASurfaceStatus *status	/* out */
+);
+
+/*
+ * MB error info returned to middleware.
+ */
+typedef struct _VASurfaceDecodeMBErrors
+{
+    int status; /* 1 if hardware has returned detailed info below, -1 means this record is invalid */
+    unsigned int start_mb; /* start mb address with errors */
+    unsigned int end_mb;  /* end mb address with errors */
+} VASurfaceDecodeMBErrors;
+
+/*
+ * After the application gets VA_STATUS_ERROR_DECODING_ERROR after calling vaSyncSurface(), 
+ * it can call vaQuerySurfaceError to find out further details on the particular error.
+ * VA_STATUS_ERROR_SURFACE_MB_ERRORS should be passed in as "error_status", 
+ * upon the return, error_info will point to an array of _VASurfaceDecodeMBErrors structure,
+ * which is allocated and filled by libVA with detailed information on the missing or error macroblocks. 
+ * The array is terminated if "status==-1" is detected. 
+ */
+VAStatus vaQuerySurfaceError(
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAStatus error_status,
+    void **error_info
 );
 
 /*
