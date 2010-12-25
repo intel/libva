@@ -1580,6 +1580,7 @@ void va_TraceRenderPicture(
         case VAProfileH264Baseline:
         case VAProfileH264Main:
         case VAProfileH264High:
+        case VAProfileH264ConstrainedBaseline:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);

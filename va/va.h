@@ -234,7 +234,8 @@ typedef enum
     VAProfileVC1Main			= 9,
     VAProfileVC1Advanced		= 10,
     VAProfileH263Baseline		= 11,
-    VAProfileJPEGBaseline               = 12
+    VAProfileJPEGBaseline               = 12,
+    VAProfileH264ConstrainedBaseline = 13
 } VAProfile;
 
 /* 
