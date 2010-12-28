@@ -1169,6 +1169,8 @@ typedef struct _VAEncSliceParameterBuffer
         struct {
             unsigned int is_intra	: 1;
             unsigned int disable_deblocking_filter_idc : 2;
+            unsigned int uses_long_term_ref		:1;
+            unsigned int is_long_term_ref		:1;
         } bits;
         unsigned int value;
     } slice_flags;
@@ -1184,6 +1186,7 @@ typedef struct _VAEncSequenceParameterBufferH264
     unsigned char level_idc;
     unsigned int intra_period;
     unsigned int intra_idr_period;
+    unsigned int max_num_ref_frames;
     unsigned int picture_width_in_mbs;
     unsigned int picture_height_in_mbs;
     unsigned int bits_per_second;
@@ -1312,11 +1315,13 @@ VAStatus vaBufferSetNumElements (
  * SLICE_OVERFLOW(bit9): At least one slice in the current frame has
  *              exceeded the maximum slice size specified.
  * BITRATE_OVERFLOW(bit10): The peak bitrate was exceeded for this frame.
+ * AIR_MB_OVER_THRESHOLD: the number of MBs adapted to Intra MB
  */
 #define VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK         0xff
 #define VA_CODED_BUF_STATUS_LARGE_SLICE_MASK            0x100
 #define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
 #define VA_CODED_BUF_STATUS_BITRATE_OVERFLOW		0x400
+#define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /*
  * device independent data structure for codedbuffer
