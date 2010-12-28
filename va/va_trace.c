@@ -1005,6 +1005,7 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     va_TraceMsg(idx, "\tlevel_idc = %d\n", p->level_idc);
     va_TraceMsg(idx, "\tintra_period = %d\n", p->intra_period);
     va_TraceMsg(idx, "\tintra_idr_period = %d\n", p->intra_idr_period);
+    va_TraceMsg(idx, "\tmax_num_ref_frames = %d\n", p->max_num_ref_frames);
     va_TraceMsg(idx, "\tpicture_width_in_mbs = %d\n", p->picture_width_in_mbs);
     va_TraceMsg(idx, "\tpicture_height_in_mbs = %d\n", p->picture_height_in_mbs);
     va_TraceMsg(idx, "\tbits_per_second = %d\n", p->bits_per_second);
@@ -1064,6 +1065,8 @@ static void va_TraceVAEncSliceParameterBuffer(
     va_TraceMsg(idx, "\tslice_height = %d\n", p->slice_height);
     va_TraceMsg(idx, "\tslice_flags.is_intra = %d\n", p->slice_flags.bits.is_intra);
     va_TraceMsg(idx, "\tslice_flags.disable_deblocking_filter_idc = %d\n", p->slice_flags.bits.disable_deblocking_filter_idc);
+    va_TraceMsg(idx, "\tslice_flags.uses_long_term_ref = %d\n", p->slice_flags.bits.uses_long_term_ref);
+    va_TraceMsg(idx, "\tslice_flags.is_long_term_ref = %d\n", p->slice_flags.bits.is_long_term_ref);
     
     return;
 }
