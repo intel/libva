@@ -157,8 +157,12 @@ void va_TraceInit(VADisplay dpy)
 
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         trace_flag = 1;
-        
-        sprintf(env_value+strlen(env_value), ".%d.%d", trace_index, suffix);
+
+        /*Check if there is still room for suffix .%d.%d*/
+	if (strnlen(env_value, 1024) < (1024 - 8)) 
+	    snprintf(env_value+strnlen(env_value, 1024), 
+		    (1025 - 8 - strnlen(env_value, 1024)), 
+		     ".%d.%d", trace_index, suffix);
 
         tmp = fopen(env_value, "w");
 	if (tmp) {
@@ -189,7 +193,10 @@ void va_TraceInit(VADisplay dpy)
 
     /* per-context setting */
     if (va_parseConfig("LIBVA_TRACE_CODEDBUF", &env_value[0]) == 0) {
-        sprintf(env_value+strlen(env_value), ".%d.%d", trace_index, suffix);
+	if (strnlen(env_value, 1024) < (1024 - 8)) 
+	    snprintf(env_value+strnlen(env_value, 1024), 
+		    (1025 - 8 - strnlen(env_value, 1024)), 
+		     ".%d.%d", trace_index, suffix);
 
         tmp = fopen(env_value, "w");
         
@@ -205,7 +212,7 @@ void va_TraceInit(VADisplay dpy)
     }
 
     if (va_parseConfig("LIBVA_TRACE_SURFACE", &env_value[0]) == 0) {
-        sprintf(env_value+strlen(env_value), ".%d.%d", trace_index, suffix);
+        sprintf(env_value+strnlen(env_value, 1024), ".%d.%d", trace_index, suffix);
 
         tmp = fopen(env_value, "w");
         
