@@ -67,8 +67,8 @@ struct VADriverVTableTPI
                 unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
                 unsigned int chroma_v_offset
         );
-    
-    
+
+
 	VAStatus (*vaPutSurfaceBuf) (
 		VADisplay dpy,
 		VASurfaceID surface,

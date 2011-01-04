@@ -104,7 +104,7 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
  * which has special requirements, e.g. stride alignment
  * This API is used to force libVA video surfaces are allocated
  * according to these external requirements
- * Special API for V4L2 user pointer support 
+ * Special API for V4L2 user pointer support
  */
 VAStatus vaCreateSurfacesForUserPtr(
     VADisplay dpy,
@@ -127,7 +127,7 @@ VAStatus vaCreateSurfacesForUserPtr(
   struct VADriverVTableTPI *tpi;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-  
+
   tpi = (struct VADriverVTableTPI *)ctx->vtable_tpi;
   if (tpi && tpi->vaCreateSurfacesForUserPtr) {
       return tpi->vaCreateSurfacesForUserPtr( ctx, width, height, format, num_surfaces,

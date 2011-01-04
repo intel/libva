@@ -159,7 +159,7 @@ void va_TraceInit(VADisplay dpy)
         trace_flag = 1;
 
         /*Check if there is still room for suffix .%d.%d*/
-	if (strnlen(env_value, 1024) < (1024 - 8)) 
+	if (strnlen(env_value, 1024) < (1024 - 8))
 	    snprintf(env_value+strnlen(env_value, 1024), 
 		    (1025 - 8 - strnlen(env_value, 1024)), 
 		     ".%d.%d", trace_index, suffix);
@@ -193,7 +193,7 @@ void va_TraceInit(VADisplay dpy)
 
     /* per-context setting */
     if (va_parseConfig("LIBVA_TRACE_CODEDBUF", &env_value[0]) == 0) {
-	if (strnlen(env_value, 1024) < (1024 - 8)) 
+	if (strnlen(env_value, 1024) < (1024 - 8))
 	    snprintf(env_value+strnlen(env_value, 1024), 
 		    (1025 - 8 - strnlen(env_value, 1024)), 
 		     ".%d.%d", trace_index, suffix);
