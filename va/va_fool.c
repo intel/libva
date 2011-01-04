@@ -26,6 +26,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_trace.h"
+#include "va_fool.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -40,6 +41,7 @@
 #include <time.h>
 
 #include "va_fool_264.h"
+#include "va_getframe.c"
 
 
 /*
@@ -64,7 +66,10 @@
 static int fool_decode = 0;
 static int fool_encode = 0;
 int fool_postp  = 0;
+static char clip[1024];
+static char *frame_buf;
 
+#define MAX_FRAME 16
 #define FOOL_CONTEXT_MAX 4
 /* per context settings */
 static struct _fool_context {
@@ -165,6 +170,8 @@ void va_FoolInit(VADisplay dpy)
                 
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
         FILE *tmp = fopen(env_value, "r");
+	memset(clip,0,sizeof(char)*1024);
+	memcpy(clip,env_value,sizeof(env_value));	
 
         if (tmp)
             fool_context[fool_index].fool_fp_codedclip = tmp;
@@ -395,7 +402,6 @@ VAStatus va_FoolCreateBuffer (
     return 0; /* let driver go ... */
 }
     
-
 VAStatus va_FoolMapBuffer (
     VADisplay dpy,
     VABufferID buf_id,	/* in */
@@ -424,12 +430,17 @@ VAStatus va_FoolMapBuffer (
         /* expect APP to MapBuffer when get the the coded data */
         if (*pbuf && (buf_idx == VAEncCodedBufferType)) { /* it is coded buffer */
             /* should read from a clip, here we use the hardcoded h264_720p_nal */
+#if 0
             memcpy(*pbuf, &h264_720p_nal[h264_720p_nal_idx], sizeof(VACodedBufferSegment));
             h264_720p_nal_idx++;
             if (h264_720p_nal_idx == H264_720P_NAL_NUMBER)
                 h264_720p_nal_idx = 0; /* reset to 0 */
+#endif
+	frame_buf=malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
+	memset(frame_buf,0,SLICE_NUM*NAL_BUF_SIZE);
+        va_FoolGetFrame( clip , 16, frame_buf);
+	*pbuf=frame_buf;
         }
-        
         return 1; /* don't call into driver */
     }
     
@@ -521,6 +532,7 @@ VAStatus va_FoolUnmapBuffer (
     DPY2INDEX(dpy);
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
+	free(frame_buf);
 	return 1;
     }
     return 0;
