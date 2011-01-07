@@ -25,11 +25,9 @@
 
 #ifndef VA_FOOL_H
 #define VA_FOOL_H
-#include "va_getframe.h"
 void va_FoolInit(VADisplay dpy);
 
 int va_FoolEnd(VADisplay dpy);
-
 
 int va_FoolCodedBuf(VADisplay dpy);
 int va_FoolCreateConfig(

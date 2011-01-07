@@ -39,10 +39,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
-
 #include "va_fool_264.h"
-#include "va_getframe.c"
-
+#include "va_getframe.h"
 
 /*
  * Do dummy decode/encode, ignore the input data
@@ -66,7 +64,7 @@
 static int fool_decode = 0;
 static int fool_encode = 0;
 int fool_postp  = 0;
-static char clip[1024];
+FILE *input_fd;
 static char *frame_buf;
 
 #define MAX_FRAME 16
@@ -74,12 +72,12 @@ static char *frame_buf;
 /* per context settings */
 static struct _fool_context {
     VADisplay dpy; /* should use context as the key */
-    
+
     VAProfile fool_profile; /* current profile for buffers */
     VAEntrypoint fool_entrypoint; /* current entrypoint */
 
     FILE *fool_fp_codedclip; /* load a clip from disk for fooling encode*/
-    
+
     /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
      * the malloc-ed memory can be find by fool_buf[bufferID & 0xff]
@@ -93,22 +91,22 @@ static struct _fool_context {
 
 #define FOOL_DECODE(idx) (fool_decode && (fool_context[idx].fool_entrypoint == VAEntrypointVLD))
 #define FOOL_ENCODE(idx)                                                \
-(fool_encode                                                            \
- && (fool_context[idx].fool_entrypoint == VAEntrypointEncSlice)        \
- && (fool_context[idx].fool_profile >= VAProfileH264Baseline)           \
- && (fool_context[idx].fool_profile <= VAProfileH264High))
+    (fool_encode                                                            \
+     && (fool_context[idx].fool_entrypoint == VAEntrypointEncSlice)        \
+     && (fool_context[idx].fool_profile >= VAProfileH264Baseline)           \
+     && (fool_context[idx].fool_profile <= VAProfileH264High))
 
 
 
 #define DPY2INDEX(dpy)                                 \
     int idx;                                           \
-                                                       \
-    for (idx = 0; idx < FOOL_CONTEXT_MAX; idx++)       \
-        if (fool_context[idx].dpy == dpy)              \
-            break;                                     \
-                                                       \
-    if (idx == FOOL_CONTEXT_MAX)                       \
-        return 0;  /* let driver go */                 \
+\
+for (idx = 0; idx < FOOL_CONTEXT_MAX; idx++)       \
+if (fool_context[idx].dpy == dpy)              \
+break;                                     \
+\
+if (idx == FOOL_CONTEXT_MAX)                       \
+return 0;  /* let driver go */                 \
 
 /* Prototype declarations (functions defined in va.c) */
 
@@ -118,30 +116,30 @@ void va_infoMessage(const char *msg, ...);
 int va_parseConfig(char *env, char *env_value);
 
 VAStatus vaBufferInfo(
-    VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferID buf_id,		/* in */
-    VABufferType *type,		/* out */
-    unsigned int *size,		/* out */
-    unsigned int *num_elements	/* out */
-);
+        VADisplay dpy,
+        VAContextID context,	/* in */
+        VABufferID buf_id,		/* in */
+        VABufferType *type,		/* out */
+        unsigned int *size,		/* out */
+        unsigned int *num_elements	/* out */
+        );
 
 VAStatus vaLockSurface(VADisplay dpy,
-    VASurfaceID surface,
-    unsigned int *fourcc, /* following are output argument */
-    unsigned int *luma_stride,
-    unsigned int *chroma_u_stride,
-    unsigned int *chroma_v_stride,
-    unsigned int *luma_offset,
-    unsigned int *chroma_u_offset,
-    unsigned int *chroma_v_offset,
-    unsigned int *buffer_name,
-    void **buffer 
-);
+        VASurfaceID surface,
+        unsigned int *fourcc, /* following are output argument */
+        unsigned int *luma_stride,
+        unsigned int *chroma_u_stride,
+        unsigned int *chroma_v_stride,
+        unsigned int *luma_offset,
+        unsigned int *chroma_u_offset,
+        unsigned int *chroma_v_offset,
+        unsigned int *buffer_name,
+        void **buffer 
+        );
 
 VAStatus vaUnlockSurface(VADisplay dpy,
-    VASurfaceID surface
-);
+        VASurfaceID surface
+        );
 
 
 void va_FoolInit(VADisplay dpy)
@@ -160,24 +158,20 @@ void va_FoolInit(VADisplay dpy)
         fool_postp = 1;
         va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
-    
-    
+
+
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
         fool_decode = 1;
         va_infoMessage("LIBVA_FOOL_DECODE is on, dummy decode\n");
     }
 
-                
+
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
-        FILE *tmp = fopen(env_value, "r");
-	memset(clip,0,sizeof(char)*1024);
-	memcpy(clip,env_value,sizeof(env_value));	
+        input_fd = fopen(env_value, "r");
 
-        if (tmp)
-            fool_context[fool_index].fool_fp_codedclip = tmp;
-        
+        if (input_fd)
+            fool_context[fool_index].fool_fp_codedclip = input_fd;
         fool_encode = 1;
-
         va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
     }
 
@@ -189,13 +183,13 @@ void va_FoolInit(VADisplay dpy)
 int va_FoolEnd(VADisplay dpy)
 {
     int i;
-    
+
     DPY2INDEX(dpy);
-    
+
     for (i = 0; i < VABufferTypeMax; i++) /* free memory */
         if (fool_context[idx].fool_buf[i])
             free(fool_context[idx].fool_buf[i]);
-    
+
     memset(&fool_context[idx], sizeof(struct _fool_context), 0);
     return 0;
 }
@@ -208,16 +202,16 @@ int va_FoolCodedBuf(VADisplay dpy)
 
 
 int va_FoolCreateConfig(
-    VADisplay dpy,
-    VAProfile profile, 
-    VAEntrypoint entrypoint, 
-    VAConfigAttrib *attrib_list,
-    int num_attribs,
-    VAConfigID *config_id /* out */
-)
+        VADisplay dpy,
+        VAProfile profile, 
+        VAEntrypoint entrypoint, 
+        VAConfigAttrib *attrib_list,
+        int num_attribs,
+        VAConfigID *config_id /* out */
+        )
 {
     DPY2INDEX(dpy);
-    
+
     /* call into driver level to allocate real context/surface/buffers, etc */
     fool_context[idx].fool_profile = profile;
     fool_context[idx].fool_entrypoint = entrypoint;
@@ -225,13 +219,13 @@ int va_FoolCreateConfig(
 }
 
 static int yuvgen_planar(
-    int width, int height,
-    unsigned char *Y_start, int Y_pitch,
-    unsigned char *U_start, int U_pitch,
-    unsigned char *V_start, int V_pitch,
-    int UV_interleave, int box_width, int row_shift,
-    int field
-)
+        int width, int height,
+        unsigned char *Y_start, int Y_pitch,
+        unsigned char *U_start, int U_pitch,
+        unsigned char *V_start, int V_pitch,
+        int UV_interleave, int box_width, int row_shift,
+        int field
+        )
 {
     int row;
 
@@ -244,33 +238,33 @@ static int yuvgen_planar(
 
         /* fill garbage data into the other field */
         if (((field == VA_TOP_FIELD) && (row &1))
-            || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) { 
+                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) { 
             memset(Y_row, 0xff, width);
             continue;
         }
-        
+
         for (jj=0; jj<width; jj++) {
             xpos = ((row_shift + jj) / box_width) & 0x1;
-                        
+
             if ((xpos == 0) && (ypos == 0))
                 Y_row[jj] = 0xeb;
             if ((xpos == 1) && (ypos == 1))
                 Y_row[jj] = 0xeb;
-                        
+
             if ((xpos == 1) && (ypos == 0))
                 Y_row[jj] = 0x10;
             if ((xpos == 0) && (ypos == 1))
                 Y_row[jj] = 0x10;
         }
     }
-  
+
     /* copy UV data */
     for( row =0; row < height/2; row++) {
         unsigned short value = 0x80;
 
         /* fill garbage data into the other field */
         if (((field == VA_TOP_FIELD) && (row &1))
-            || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
+                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
             value = 0xff;
         }
 
@@ -281,7 +275,7 @@ static int yuvgen_planar(
         } else {
             unsigned char *U_row = U_start + row * U_pitch;
             unsigned char *V_row = V_start + row * V_pitch;
-            
+
             memset (U_row,value,width/2);
             memset (V_row,value,width/2);
         }
@@ -292,13 +286,13 @@ static int yuvgen_planar(
 
 
 int va_FoolCreateSurfaces(
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    int num_surfaces,
-    VASurfaceID *surfaces	/* out */
-)
+        VADisplay dpy,
+        int width,
+        int height,
+        int format,
+        int num_surfaces,
+        VASurfaceID *surfaces	/* out */
+        )
 {
     int i;
     unsigned int fourcc; /* following are output argument */
@@ -315,73 +309,73 @@ int va_FoolCreateSurfaces(
     int box_width = num_surfaces/2;
     int row_shift = 0;
     VAStatus va_status;
-    
+
     DPY2INDEX(dpy);
 
     if (FOOL_DECODE(idx)) { 
-	/* call into driver level to allocate real context/surface/buffers, etc
-	 * fill in the YUV data, will be overwrite if it is encode context
-	 */
-	for (i = 0; i < num_surfaces; i++) {
-	    /* fool decoder: fill with auto-generated YUV data */
-	    va_status = vaLockSurface(dpy, surfaces[i], &fourcc,
-		    &luma_stride, &chroma_u_stride, &chroma_v_stride,
-		    &luma_offset, &chroma_u_offset, &chroma_v_offset,
-		    &buffer_name, &buffer);
+        /* call into driver level to allocate real context/surface/buffers, etc
+         * fill in the YUV data, will be overwrite if it is encode context
+         */
+        for (i = 0; i < num_surfaces; i++) {
+            /* fool decoder: fill with auto-generated YUV data */
+            va_status = vaLockSurface(dpy, surfaces[i], &fourcc,
+                    &luma_stride, &chroma_u_stride, &chroma_v_stride,
+                    &luma_offset, &chroma_u_offset, &chroma_v_offset,
+                    &buffer_name, &buffer);
 
-	    if (va_status != VA_STATUS_SUCCESS)
-		return 0;
+            if (va_status != VA_STATUS_SUCCESS)
+                return 0;
 
-	    if (!buffer) {
-		vaUnlockSurface(dpy, surfaces[i]);
-		return 0;
-	    }
+            if (!buffer) {
+                vaUnlockSurface(dpy, surfaces[i]);
+                return 0;
+            }
 
-	    Y_data = buffer;
+            Y_data = buffer;
 
-	    /* UV should be same for NV12 */
-	    U_data = buffer + chroma_u_offset;
-	    V_data = buffer + chroma_v_offset;
+            /* UV should be same for NV12 */
+            U_data = buffer + chroma_u_offset;
+            V_data = buffer + chroma_v_offset;
 
-	    yuvgen_planar(width, height,
-		    Y_data, luma_stride,
-		    U_data, chroma_v_stride,
-		    V_data, chroma_v_stride,
-		    (fourcc==VA_FOURCC_NV12),
-		    box_width, row_shift, 0);
+            yuvgen_planar(width, height,
+                    Y_data, luma_stride,
+                    U_data, chroma_v_stride,
+                    V_data, chroma_v_stride,
+                    (fourcc==VA_FOURCC_NV12),
+                    box_width, row_shift, 0);
 
-	    vaUnlockSurface(dpy, surfaces[i]);
+            vaUnlockSurface(dpy, surfaces[i]);
 
-	    row_shift++;
-	    if (row_shift==(2*box_width))
-		row_shift= 0;
-	}
-	return 0; /* the return value is ignored */
+            row_shift++;
+            if (row_shift==(2*box_width))
+                row_shift= 0;
+        }
+        return 0; /* the return value is ignored */
     }
     return 0; /* the return value is ignored */
 }
 
 VAStatus va_FoolCreateBuffer (
-    VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferType type,		/* in */
-    unsigned int size,		/* in */
-    unsigned int num_elements,	/* in */
-    void *data,			/* in */
-    VABufferID *buf_id		/* out */
-)
+        VADisplay dpy,
+        VAContextID context,	/* in */
+        VABufferType type,		/* in */
+        unsigned int size,		/* in */
+        unsigned int num_elements,	/* in */
+        void *data,			/* in */
+        VABufferID *buf_id		/* out */
+        )
 {
     DPY2INDEX(dpy);
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
         int new_size = size * num_elements;
-        
+
         if (type == VAEncCodedBufferType) /* only a VACodedBufferSegment */
             new_size = sizeof(VACodedBufferSegment);
-        
-	if (fool_context[idx].fool_buf_size[type] == 0)
-	    fool_context[idx].fool_buf[type] = calloc(1, new_size);
-	else if (fool_context[idx].fool_buf_size[type] <= new_size)
+
+        if (fool_context[idx].fool_buf_size[type] == 0)
+            fool_context[idx].fool_buf[type] = calloc(1, new_size);
+        else if (fool_context[idx].fool_buf_size[type] <= new_size)
             fool_context[idx].fool_buf[type] = realloc(fool_context[idx].fool_buf, new_size);
 
         if (fool_context[idx].fool_buf[type] == NULL) {
@@ -395,18 +389,18 @@ VAStatus va_FoolCreateBuffer (
          */
         fool_context[idx].fool_buf_count[type]++;
         *buf_id = (fool_context[idx].fool_buf_count[type] << 8) | type;
-        
+
         return 1; /* don't call into driver */
     }
-    
+
     return 0; /* let driver go ... */
 }
-    
+
 VAStatus va_FoolMapBuffer (
-    VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    void **pbuf 	/* out */
-)
+        VADisplay dpy,
+        VABufferID buf_id,	/* in */
+        void **pbuf 	/* out */
+        )
 {
     VABufferType type;
     unsigned int size;
@@ -415,11 +409,11 @@ VAStatus va_FoolMapBuffer (
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
         unsigned int buf_idx = buf_id & 0xff;
-        
-	/*Image buffer?*/
-	vaBufferInfo(dpy, fool_context[idx].context, buf_id, &type, &size, &num_elements);
-	if (type == VAImageBufferType  && FOOL_ENCODE(idx))
-	    return 0;
+
+        /*Image buffer?*/
+        vaBufferInfo(dpy, fool_context[idx].context, buf_id, &type, &size, &num_elements);
+        if (type == VAImageBufferType  && FOOL_ENCODE(idx))
+            return 0;
 
         /* buf_id is the buffer type */
         if (fool_context[idx].fool_buf[buf_idx] != NULL)
@@ -436,45 +430,45 @@ VAStatus va_FoolMapBuffer (
             if (h264_720p_nal_idx == H264_720P_NAL_NUMBER)
                 h264_720p_nal_idx = 0; /* reset to 0 */
 #endif
-	frame_buf=malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
-	memset(frame_buf,0,SLICE_NUM*NAL_BUF_SIZE);
-        va_FoolGetFrame( clip , 16, frame_buf);
-	*pbuf=frame_buf;
+            frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
+            memset(frame_buf,0,SLICE_NUM*NAL_BUF_SIZE);
+            va_FoolGetFrame(frame_buf);
+            *pbuf=frame_buf;
         }
         return 1; /* don't call into driver */
     }
-    
+
     return 0; /* let driver go ... */
 }
 
 
 int va_FoolBeginPicture(
-    VADisplay dpy,
-    VAContextID context,
-    VASurfaceID render_target
-)
+        VADisplay dpy,
+        VAContextID context,
+        VASurfaceID render_target
+        )
 {
     DPY2INDEX(dpy);
-    
+
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
     {
-	if (fool_context[idx].context == 0)
-	    fool_context[idx].context = context;
+        if (fool_context[idx].context == 0)
+            fool_context[idx].context = context;
         return 1; /* don't call into driver level */
     }
-    
+
     return 0; /* let driver go ... */
 }
 
 int va_FoolRenderPicture(
-    VADisplay dpy,
-    VAContextID context,
-    VABufferID *buffers,
-    int num_buffers
-)
+        VADisplay dpy,
+        VAContextID context,
+        VABufferID *buffers,
+        int num_buffers
+        )
 {
     DPY2INDEX(dpy);
-    
+
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
         return 1; /* don't call into driver level */
 
@@ -483,9 +477,9 @@ int va_FoolRenderPicture(
 
 
 int va_FoolEndPicture(
-    VADisplay dpy,
-    VAContextID context
-)
+        VADisplay dpy,
+        VAContextID context
+        )
 {
     DPY2INDEX(dpy);
 
@@ -510,14 +504,14 @@ int va_FoolEndPicture(
 }
 
 int va_FoolSyncSurface(
-    VADisplay dpy, 
-    VASurfaceID render_target)
+        VADisplay dpy, 
+        VASurfaceID render_target)
 {
     DPY2INDEX(dpy);
     /*Fill in black and white squares. */
     if (FOOL_DECODE(idx) || FOOL_DECODE(idx))
     {
-	return 1;
+        return 1;
     }
 
     return 0;
@@ -525,32 +519,32 @@ int va_FoolSyncSurface(
 }
 
 VAStatus va_FoolUnmapBuffer (
-    VADisplay dpy,
-    VABufferID buf_id	/* in */
-)
+        VADisplay dpy,
+        VABufferID buf_id	/* in */
+        )
 {
     DPY2INDEX(dpy);
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
-	free(frame_buf);
-	return 1;
+        free(frame_buf);
+        return 1;
     }
     return 0;
 }
 
 VAStatus va_FoolQuerySubpictureFormats (
-    VADisplay dpy,
-    VAImageFormat *format_list,
-    unsigned int *flags,
-    unsigned int *num_formats
-)
+        VADisplay dpy,
+        VAImageFormat *format_list,
+        unsigned int *flags,
+        unsigned int *num_formats
+        )
 {
     DPY2INDEX(dpy);
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { 
-	if (num_formats)
-	    *num_formats = 0;
-	return 1;
+        if (num_formats)
+            *num_formats = 0;
+        return 1;
     }
     return 0;
 }
