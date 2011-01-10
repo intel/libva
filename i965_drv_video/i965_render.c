@@ -1995,6 +1995,7 @@ gen6_render_put_subpicture(VADriverContextP ctx,
                                         srcx, srcy, srcw, srch,
                                         destx, desty, destw, desth);
     gen6_render_emit_states(ctx, PS_SUBPIC_KERNEL);
+    i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(ctx);
 }
 
