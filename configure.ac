@@ -170,6 +170,7 @@ AC_OUTPUT([
 	test/decode/Makefile
 	test/putsurface/Makefile
 	test/encode/Makefile
+	test/vainfo/Makefile
 	libva.pc
 	libva-x11.pc
 	libva-glx.pc
