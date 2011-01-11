@@ -40,7 +40,6 @@
 #include <unistd.h>
 #include <time.h>
 #include "va_fool_264.h"
-#include "va_getframe.h"
 
 /*
  * Do dummy decode/encode, ignore the input data
@@ -49,10 +48,10 @@
  *
  * LIBVA_FOOL_DECODE:
  * . if set, decode does nothing, but fill in some YUV data
- * LIBVA_FOOL_ENCODE:
- * . if set, encode does nothing, but fill in a hard-coded 720P clip into coded buffer.
+ * LIBVA_FOOL_ENCODE=<clip name>:
+ * . if set, encode does nothing, but fill in the coded buffer from a H264 clip.
  * . VA CONTEXT/CONFIG/SURFACE will call into drivers, but VA Buffer creation is done in here
- * . Bypass all ~SvaBeginPic/vaRenderPic/vaEndPic~T
+ * . Bypass all "vaBeginPic/vaRenderPic/vaEndPic"
  * LIBVA_FOOL_POSTP:
  * . if set, do nothing for vaPutSurface
  */
@@ -61,13 +60,18 @@
 /* global settings */
 
 /* LIBVA_FOOL_DECODE/LIBVA_FOOL_ENCODE/LIBVA_FOOL_POSTP */
-static int fool_decode = 0;
-static int fool_encode = 0;
+int fool_decode = 0;
+int fool_encode = 0;
 int fool_postp  = 0;
-FILE *input_fd;
+
 static char *frame_buf;
 
+
+#define NAL_BUF_SIZE  65536  // maximum NAL unit size
+#define RING_BUF_SIZE  8192  // input ring buffer size, MUST be a power of two!
 #define MAX_FRAME 16
+#define SLICE_NUM 4
+
 #define FOOL_CONTEXT_MAX 4
 /* per context settings */
 static struct _fool_context {
@@ -91,22 +95,23 @@ static struct _fool_context {
 
 #define FOOL_DECODE(idx) (fool_decode && (fool_context[idx].fool_entrypoint == VAEntrypointVLD))
 #define FOOL_ENCODE(idx)                                                \
-    (fool_encode                                                            \
-     && (fool_context[idx].fool_entrypoint == VAEntrypointEncSlice)        \
-     && (fool_context[idx].fool_profile >= VAProfileH264Baseline)           \
+    (fool_encode                                                        \
+     && (fool_context[idx].fool_entrypoint == VAEntrypointEncSlice)     \
+     && (fool_context[idx].fool_profile >= VAProfileH264Baseline)       \
      && (fool_context[idx].fool_profile <= VAProfileH264High))
 
 
 
-#define DPY2INDEX(dpy)                                 \
-    int idx;                                           \
-\
-for (idx = 0; idx < FOOL_CONTEXT_MAX; idx++)       \
-if (fool_context[idx].dpy == dpy)              \
-break;                                     \
-\
-if (idx == FOOL_CONTEXT_MAX)                       \
-return 0;  /* let driver go */                 \
+#define DPY2INDEX(dpy)                                  \
+    int idx;                                            \
+                                                        \
+    for (idx = 0; idx < FOOL_CONTEXT_MAX; idx++)        \
+        if (fool_context[idx].dpy == dpy)               \
+            break;                                      \
+                                                        \
+    if (idx == FOOL_CONTEXT_MAX)                        \
+        return 0;  /* let driver go */
+
 
 /* Prototype declarations (functions defined in va.c) */
 
@@ -122,7 +127,7 @@ VAStatus vaBufferInfo(
         VABufferType *type,		/* out */
         unsigned int *size,		/* out */
         unsigned int *num_elements	/* out */
-        );
+);
 
 VAStatus vaLockSurface(VADisplay dpy,
         VASurfaceID surface,
@@ -135,11 +140,11 @@ VAStatus vaLockSurface(VADisplay dpy,
         unsigned int *chroma_v_offset,
         unsigned int *buffer_name,
         void **buffer 
-        );
+);
 
 VAStatus vaUnlockSurface(VADisplay dpy,
         VASurfaceID surface
-        );
+);
 
 
 void va_FoolInit(VADisplay dpy)
@@ -167,12 +172,13 @@ void va_FoolInit(VADisplay dpy)
 
 
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
-        input_fd = fopen(env_value, "r");
+        fool_context[fool_index].fool_fp_codedclip = fopen(env_value, "r");
 
-        if (input_fd)
-            fool_context[fool_index].fool_fp_codedclip = input_fd;
-        fool_encode = 1;
-        va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
+        if (fool_context[fool_index].fool_fp_codedclip) {
+            fool_encode = 1;
+            va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");            
+        } else
+            fool_encode = 0;
     }
 
     if (fool_encode || fool_decode)
@@ -186,10 +192,13 @@ int va_FoolEnd(VADisplay dpy)
 
     DPY2INDEX(dpy);
 
-    for (i = 0; i < VABufferTypeMax; i++) /* free memory */
+    for (i = 0; i < VABufferTypeMax; i++) {/* free memory */
         if (fool_context[idx].fool_buf[i])
             free(fool_context[idx].fool_buf[i]);
-
+    }
+    if (fool_context[idx].fool_fp_codedclip)
+        fclose(fool_context[idx].fool_fp_codedclip);
+            
     memset(&fool_context[idx], sizeof(struct _fool_context), 0);
     return 0;
 }
@@ -208,7 +217,7 @@ int va_FoolCreateConfig(
         VAConfigAttrib *attrib_list,
         int num_attribs,
         VAConfigID *config_id /* out */
-        )
+)
 {
     DPY2INDEX(dpy);
 
@@ -225,7 +234,7 @@ static int yuvgen_planar(
         unsigned char *V_start, int V_pitch,
         int UV_interleave, int box_width, int row_shift,
         int field
-        )
+)
 {
     int row;
 
@@ -292,7 +301,7 @@ int va_FoolCreateSurfaces(
         int format,
         int num_surfaces,
         VASurfaceID *surfaces	/* out */
-        )
+)
 {
     int i;
     unsigned int fourcc; /* following are output argument */
@@ -363,7 +372,7 @@ VAStatus va_FoolCreateBuffer (
         unsigned int num_elements,	/* in */
         void *data,			/* in */
         VABufferID *buf_id		/* out */
-        )
+)
 {
     DPY2INDEX(dpy);
 
@@ -400,7 +409,7 @@ VAStatus va_FoolMapBuffer (
         VADisplay dpy,
         VABufferID buf_id,	/* in */
         void **pbuf 	/* out */
-        )
+)
 {
     VABufferType type;
     unsigned int size;
@@ -410,7 +419,7 @@ VAStatus va_FoolMapBuffer (
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
         unsigned int buf_idx = buf_id & 0xff;
 
-        /*Image buffer?*/
+        /* Image buffer? */
         vaBufferInfo(dpy, fool_context[idx].context, buf_id, &type, &size, &num_elements);
         if (type == VAImageBufferType  && FOOL_ENCODE(idx))
             return 0;
@@ -432,7 +441,7 @@ VAStatus va_FoolMapBuffer (
 #endif
             frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
             memset(frame_buf,0,SLICE_NUM*NAL_BUF_SIZE);
-            va_FoolGetFrame(frame_buf);
+            va_FoolGetFrame(fool_context[idx].fool_fp_codedclip, frame_buf);
             *pbuf=frame_buf;
         }
         return 1; /* don't call into driver */
@@ -446,12 +455,11 @@ int va_FoolBeginPicture(
         VADisplay dpy,
         VAContextID context,
         VASurfaceID render_target
-        )
+)
 {
     DPY2INDEX(dpy);
 
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
-    {
+    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) {
         if (fool_context[idx].context == 0)
             fool_context[idx].context = context;
         return 1; /* don't call into driver level */
@@ -465,7 +473,7 @@ int va_FoolRenderPicture(
         VAContextID context,
         VABufferID *buffers,
         int num_buffers
-        )
+)
 {
     DPY2INDEX(dpy);
 
@@ -479,7 +487,7 @@ int va_FoolRenderPicture(
 int va_FoolEndPicture(
         VADisplay dpy,
         VAContextID context
-        )
+)
 {
     DPY2INDEX(dpy);
 
@@ -505,23 +513,23 @@ int va_FoolEndPicture(
 
 int va_FoolSyncSurface(
         VADisplay dpy, 
-        VASurfaceID render_target)
+        VASurfaceID render_target
+)
 {
     DPY2INDEX(dpy);
+
     /*Fill in black and white squares. */
     if (FOOL_DECODE(idx) || FOOL_DECODE(idx))
-    {
         return 1;
-    }
 
     return 0;
 
 }
 
-VAStatus va_FoolUnmapBuffer (
+VAStatus va_FoolUnmapBuffer(
         VADisplay dpy,
         VABufferID buf_id	/* in */
-        )
+)
 {
     DPY2INDEX(dpy);
 
@@ -532,12 +540,12 @@ VAStatus va_FoolUnmapBuffer (
     return 0;
 }
 
-VAStatus va_FoolQuerySubpictureFormats (
+VAStatus va_FoolQuerySubpictureFormats(
         VADisplay dpy,
         VAImageFormat *format_list,
         unsigned int *flags,
         unsigned int *num_formats
-        )
+)
 {
     DPY2INDEX(dpy);
 
