@@ -56,6 +56,7 @@ static char * profile_string(VAProfile profile)
             case VAProfileVC1Main: return "VAProfileVC1Main";
             case VAProfileVC1Advanced: return "VAProfileVC1Advanced";
             case VAProfileH263Baseline: return "VAProfileH263Baseline";
+            case VAProfileH264ConstrainedBaseline: return "VAProfileH264ConstrainedBaseline";
     }
     return "<unknown profile>";
 }

@@ -23,11 +23,11 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_fool.h"
-#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -36,12 +36,6 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
-
-#ifdef ANDROID
-#define Bool int
-#define True 1
-#define False 0
-#endif
 
 #define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
 
@@ -612,6 +606,7 @@ VAStatus vaCreateSurfaces (
 {
   VADriverContextP ctx;
   VAStatus vaStatus;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -835,6 +830,7 @@ VAStatus vaSyncSurface (
     VASurfaceID render_target
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -842,7 +838,10 @@ VAStatus vaSyncSurface (
   if (va_FoolSyncSurface( dpy, render_target))
     return VA_STATUS_SUCCESS;
   
-  return ctx->vtable.vaSyncSurface( ctx, render_target );
+  va_status = ctx->vtable.vaSyncSurface( ctx, render_target );
+  VA_TRACE(va_TraceSyncSurface, dpy, render_target);
+
+  return va_status;
 }
 
 VAStatus vaQuerySurfaceStatus (
@@ -851,11 +850,35 @@ VAStatus vaQuerySurfaceStatus (
     VASurfaceStatus *status	/* out */
 )
 {
+  VAStatus va_status;
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
+  va_status = ctx->vtable.vaQuerySurfaceStatus( ctx, render_target, status );
+
+  VA_TRACE(va_TraceQuerySurfaceStatus, dpy, render_target, status);
+
+  return va_status;
+}
+
+VAStatus vaQuerySurfaceError (
+	VADisplay dpy,
+	VASurfaceID surface,
+	VAStatus error_status,
+	void **error_info /*out*/
+)
+{
+  VAStatus va_status;
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  va_status = ctx->vtable.vaQuerySurfaceError( ctx, surface, error_status, error_info );
+
+  VA_TRACE(va_TraceQuerySurfaceError, dpy, surface, error_status, error_info);
+
+  return va_status;
 }
 
 /* Get maximum number of image formats supported by the implementation */

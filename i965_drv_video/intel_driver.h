@@ -29,7 +29,10 @@
 #define MI_BATCH_BUFFER_START                   (CMD_MI | (0x31 << 23))
 
 #define MI_FLUSH                                (CMD_MI | (0x4 << 23))
-#define STATE_INSTRUCTION_CACHE_INVALIDATE      (0x1 << 0)
+#define   MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE   (0x1 << 0)
+
+#define MI_FLUSH_DW                             (CMD_MI | (0x26 << 23) | 0x2)
+#define   MI_FLUSH_DW_VIDEO_PIPELINE_CACHE_INVALIDATE   (0x1 << 7)
 
 #define XY_COLOR_BLT_CMD                        (CMD_2D | (0x50 << 22) | 0x04)
 #define XY_COLOR_BLT_WRITE_ALPHA                (1 << 21)
@@ -124,9 +127,20 @@ struct intel_region
 #define PCI_CHIP_IRONLAKE_D_G           0x0042
 #define PCI_CHIP_IRONLAKE_M_G           0x0046
 
-#define IS_G45(devid)           (devid == PCI_CHIP_IGD_E_G || \
-                                 devid == PCI_CHIP_Q45_G || \
-                                 devid == PCI_CHIP_G45_G || \
+#ifndef PCI_CHIP_SANDYBRIDGE_GT1
+#define PCI_CHIP_SANDYBRIDGE_GT1	0x0102  /* Desktop */
+#define PCI_CHIP_SANDYBRIDGE_GT2	0x0112
+#define PCI_CHIP_SANDYBRIDGE_GT2_PLUS	0x0122
+#define PCI_CHIP_SANDYBRIDGE_M_GT1	0x0106  /* Mobile */
+#define PCI_CHIP_SANDYBRIDGE_M_GT2	0x0116
+#define PCI_CHIP_SANDYBRIDGE_M_GT2_PLUS	0x0126
+#define PCI_CHIP_SANDYBRIDGE_S_GT	0x010A  /* Server */
+#endif
+
+
+#define IS_G45(devid)           (devid == PCI_CHIP_IGD_E_G ||   \
+                                 devid == PCI_CHIP_Q45_G ||     \
+                                 devid == PCI_CHIP_G45_G ||     \
                                  devid == PCI_CHIP_G41_G)
 #define IS_GM45(devid)          (devid == PCI_CHIP_GM45_GM)
 #define IS_G4X(devid)		(IS_G45(devid) || IS_GM45(devid))
@@ -134,5 +148,13 @@ struct intel_region
 #define IS_IRONLAKE_D(devid)    (devid == PCI_CHIP_IRONLAKE_D_G)
 #define IS_IRONLAKE_M(devid)    (devid == PCI_CHIP_IRONLAKE_M_G)
 #define IS_IRONLAKE(devid)      (IS_IRONLAKE_D(devid) || IS_IRONLAKE_M(devid))
+
+#define IS_GEN6(devid)          (devid == PCI_CHIP_SANDYBRIDGE_GT1 || \
+                                 devid == PCI_CHIP_SANDYBRIDGE_GT2 || \
+                                 devid == PCI_CHIP_SANDYBRIDGE_GT2_PLUS ||\
+                                 devid == PCI_CHIP_SANDYBRIDGE_M_GT1 || \
+                                 devid == PCI_CHIP_SANDYBRIDGE_M_GT2 || \
+                                 devid == PCI_CHIP_SANDYBRIDGE_M_GT2_PLUS || \
+                                 devid == PCI_CHIP_SANDYBRIDGE_S_GT)
 
 #endif /* _INTEL_DRIVER_H_ */

@@ -23,7 +23,7 @@
  */
 
 #define _GNU_SOURCE 1
-#include "config.h"
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_x11.h"

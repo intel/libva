@@ -51,6 +51,24 @@ struct VADriverVTableTPI
                 VASurfaceID *surface	           /* out */
         );
 
+        VAStatus (*vaCreateSurfacesForUserPtr)(
+                VADisplay dpy,
+                int width,
+                int height,
+                int format,
+                int num_surfaces,
+                VASurfaceID *surfaces,       /* out */
+                unsigned size, /* total buffer size need to be allocated */
+                unsigned int fourcc, /* expected fourcc */
+                unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+                unsigned int chroma_u_stride, /* chroma stride */
+                unsigned int chroma_v_stride,
+                unsigned int luma_offset, /* could be 0 */
+                unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+                unsigned int chroma_v_offset
+        );
+
+
 	VAStatus (*vaPutSurfaceBuf) (
 		VADisplay dpy,
 		VASurfaceID surface,

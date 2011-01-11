@@ -28,8 +28,8 @@
 #ifndef _I965_RENDER_H_
 #define _I965_RENDER_H_
 
-#define MAX_RENDER_SURFACES     16
 #define MAX_SAMPLERS            16
+#define MAX_RENDER_SURFACES     (MAX_SAMPLERS + 1)
 
 #include "i965_post_processing.h"
 
@@ -50,14 +50,15 @@ struct i965_render_state
     struct {
         int sampler_count;
         dri_bo *sampler;
-        dri_bo *surface[MAX_RENDER_SURFACES];
-        dri_bo *binding_table;
         dri_bo *state;
+        dri_bo *surface_state_binding_table_bo;
     } wm;
 
     struct {
         dri_bo *state;
         dri_bo *viewport;
+        dri_bo *blend;
+        dri_bo *depth_stencil;
     } cc;
 
     struct {
@@ -74,7 +75,7 @@ struct i965_render_state
 
 Bool i965_render_init(VADriverContextP ctx);
 Bool i965_render_terminate(VADriverContextP ctx);
-void i965_render_put_surface(VADriverContextP ctx,
+void intel_render_put_surface(VADriverContextP ctx,
                              VASurfaceID surface,
                              short srcx,
                              short srcy,
@@ -88,7 +89,7 @@ void i965_render_put_surface(VADriverContextP ctx,
 
 
 void
-i965_render_put_subpic(VADriverContextP ctx,
+intel_render_put_subpicture(VADriverContextP ctx,
                         VASurfaceID surface,
                         short srcx,
                         short srcy,

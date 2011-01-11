@@ -68,6 +68,31 @@ VAStatus vaPutSurfaceBuf (
     unsigned int flags /* de-interlacing flags */
 );
 
+
+/*
+ * The surfaces could be shared and accessed with extern devices
+ * which has special requirements, e.g. stride alignment
+ * This API is used to force libVA video surfaces are allocated
+ * according to these external requirements
+ * Special API for V4L2 user pointer support
+ */
+VAStatus vaCreateSurfacesForUserPtr(
+    VADisplay dpy,
+    int width,
+    int height,
+    int format,
+    int num_surfaces,
+    VASurfaceID *surfaces,       /* out */
+    unsigned size, /* total buffer size need to be allocated */
+    unsigned int fourcc, /* expected fourcc */
+    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+    unsigned int chroma_u_stride, /* chroma stride */
+    unsigned int chroma_v_stride,
+    unsigned int luma_offset, /* could be 0 */
+    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+    unsigned int chroma_v_offset
+);
+
 #ifdef __cplusplus
 }
 #endif

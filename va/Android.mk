@@ -39,6 +39,15 @@ LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils
 
 include $(BUILD_SHARED_LIBRARY)
 
+intermediates := $(local-intermediates-dir)
+GEN := $(intermediates)/va_version.h
+$(GEN): PRIVATE_GEN_VERSION := $(LOCAL_PATH)/../build/gen_version.sh
+$(GEN): PRIVATE_INPUT_FILE := $(LOCAL_PATH)/va_version.h.in
+$(GEN): PRIVATE_CUSTOM_TOOL = sh $(PRIVATE_GEN_VERSION) $(LOCAL_PATH)/.. $(PRIVATE_INPUT_FILE) > $@
+$(GEN): $(LOCAL_PATH)/va_version.h
+	$(transform-generated-source)
+
+LOCAL_GENERATED_SOURCES += $(GEN) 
 
 # For libva-android
 # =====================================================
