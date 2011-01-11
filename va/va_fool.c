@@ -39,7 +39,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
-#include "va_fool_264.h"
 
 /*
  * Do dummy decode/encode, ignore the input data
@@ -64,7 +63,6 @@ int fool_decode = 0;
 int fool_encode = 0;
 int fool_postp  = 0;
 
-static char *frame_buf;
 
 
 #define NAL_BUF_SIZE  65536  // maximum NAL unit size
@@ -81,6 +79,7 @@ static struct _fool_context {
     VAEntrypoint fool_entrypoint; /* current entrypoint */
 
     FILE *fool_fp_codedclip; /* load a clip from disk for fooling encode*/
+    char *frame_buf;
 
     /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
@@ -176,9 +175,17 @@ void va_FoolInit(VADisplay dpy)
 
         if (fool_context[fool_index].fool_fp_codedclip) {
             fool_encode = 1;
-            va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");            
         } else
             fool_encode = 0;
+
+        if (fool_encode) /* malloc the buffer for fake clip */
+            fool_context[fool_index].frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
+
+        if (fool_context[fool_index].frame_buf == NULL)
+            fool_encode = 0;
+
+        if (fool_encode)
+            va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
     }
 
     if (fool_encode || fool_decode)
@@ -198,7 +205,10 @@ int va_FoolEnd(VADisplay dpy)
     }
     if (fool_context[idx].fool_fp_codedclip)
         fclose(fool_context[idx].fool_fp_codedclip);
-            
+
+    if (fool_context[idx].frame_buf)
+        free(fool_context[idx].frame_buf);
+    
     memset(&fool_context[idx], sizeof(struct _fool_context), 0);
     return 0;
 }
@@ -432,17 +442,10 @@ VAStatus va_FoolMapBuffer (
 
         /* expect APP to MapBuffer when get the the coded data */
         if (*pbuf && (buf_idx == VAEncCodedBufferType)) { /* it is coded buffer */
-            /* should read from a clip, here we use the hardcoded h264_720p_nal */
-#if 0
-            memcpy(*pbuf, &h264_720p_nal[h264_720p_nal_idx], sizeof(VACodedBufferSegment));
-            h264_720p_nal_idx++;
-            if (h264_720p_nal_idx == H264_720P_NAL_NUMBER)
-                h264_720p_nal_idx = 0; /* reset to 0 */
-#endif
-            frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
-            memset(frame_buf,0,SLICE_NUM*NAL_BUF_SIZE);
-            va_FoolGetFrame(fool_context[idx].fool_fp_codedclip, frame_buf);
-            *pbuf=frame_buf;
+            /* read from a clip */
+            va_FoolGetFrame(fool_context[idx].fool_fp_codedclip,
+                            fool_context[idx].frame_buf);
+            *pbuf = fool_context[idx].frame_buf;
         }
         return 1; /* don't call into driver */
     }
@@ -533,10 +536,9 @@ VAStatus va_FoolUnmapBuffer(
 {
     DPY2INDEX(dpy);
 
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
-        free(frame_buf);
-        return 1;
-    }
+    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
+        return 1; /* fool buffer creation */
+    
     return 0;
 }
 
