@@ -14,6 +14,7 @@ LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
 	va_fool.c 
+	va_fool_getframe.c 
 
 LOCAL_CFLAGS += \
 	-DANDROID \
