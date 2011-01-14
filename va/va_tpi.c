@@ -23,10 +23,10 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_backend_tpi.h"
-#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -97,6 +97,48 @@ VAStatus vaCreateSurfaceFromV4L2Buf(
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
+
+
+/*
+ * The surfaces could be shared and accessed with extern devices
+ * which has special requirements, e.g. stride alignment
+ * This API is used to force libVA video surfaces are allocated
+ * according to these external requirements
+ * Special API for V4L2 user pointer support
+ */
+VAStatus vaCreateSurfacesForUserPtr(
+    VADisplay dpy,
+    int width,
+    int height,
+    int format,
+    int num_surfaces,
+    VASurfaceID *surfaces,       /* out */
+    unsigned size, /* total buffer size need to be allocated */
+    unsigned int fourcc, /* expected fourcc */
+    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+    unsigned int chroma_u_stride, /* chroma stride */
+    unsigned int chroma_v_stride,
+    unsigned int luma_offset, /* could be 0 */
+    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+    unsigned int chroma_v_offset
+)
+{
+  VADriverContextP ctx;
+  struct VADriverVTableTPI *tpi;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  tpi = (struct VADriverVTableTPI *)ctx->vtable_tpi;
+  if (tpi && tpi->vaCreateSurfacesForUserPtr) {
+      return tpi->vaCreateSurfacesForUserPtr( ctx, width, height, format, num_surfaces,
+                                              surfaces,size, fourcc, luma_stride, chroma_u_stride,
+                                              chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset );
+  } else
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
+
+
+
 
 VAStatus vaPutSurfaceBuf (
     VADisplay dpy,

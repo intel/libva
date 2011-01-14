@@ -1,0 +1,47 @@
+/*
+ * Copyright © 2010 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ */
+
+/*
+ * Fragment to compute src u/v values
+ */
+include(`exa_wm.g4i')
+
+define(`ul',    `src_u')
+define(`uh',    `m3')
+define(`vl',    `src_v')
+define(`vh',    `m5')
+
+define(`bl',    `g2.0<8,8,1>F')
+define(`bh',    `g4.0<8,8,1>F')
+
+define(`a0_a_x',`g6.0<0,1,0>F')
+define(`a0_a_y',`g6.16<0,1,0>F')
+
+/* U */
+pln (8) ul<1>F a0_a_x bl { align1 }; /* pixel 0-7 */
+pln (8) uh<1>F a0_a_x bh { align1 }; /* pixel 8-15 */
+
+/* V */
+pln (8) vl<1>F a0_a_y bl { align1 }; /* pixel 0-7 */
+pln (8) vh<1>F a0_a_y bh { align1 }; /* pixel 8-15 */

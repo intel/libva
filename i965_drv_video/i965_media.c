@@ -39,6 +39,7 @@
 #include "i965_defines.h"
 #include "i965_media_mpeg2.h"
 #include "i965_media_h264.h"
+#include "gen6_mfd.h"
 #include "i965_media.h"
 #include "i965_drv_video.h"
 
@@ -177,7 +178,7 @@ i965_media_depth_buffer(VADriverContextP ctx)
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
-    ADVANCE_BATCH();
+    ADVANCE_BATCH(ctx);
 }
 
 static void
@@ -273,6 +274,11 @@ i965_media_decode_picture(VADriverContextP ctx,
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
 
+    if (IS_GEN6(i965->intel.device_id)) {
+        gen6_mfd_decode_picture(ctx, profile, decode_state);
+        return;
+    }
+
     i965_media_decode_init(ctx, profile, decode_state);
     assert(media_state->media_states_setup);
     media_state->media_states_setup(ctx, decode_state);
@@ -282,6 +288,11 @@ i965_media_decode_picture(VADriverContextP ctx,
 Bool 
 i965_media_init(VADriverContextP ctx)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    if (IS_GEN6(i965->intel.device_id))
+        return gen6_mfd_init(ctx);
+
     return True;
 }
 
@@ -291,6 +302,9 @@ i965_media_terminate(VADriverContextP ctx)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_media_state *media_state = &i965->media_state;
     int i;
+
+    if (IS_GEN6(i965->intel.device_id))
+        return gen6_mfd_terminate(ctx);
 
     if (media_state->free_private_context)
         media_state->free_private_context(&media_state->private_context);

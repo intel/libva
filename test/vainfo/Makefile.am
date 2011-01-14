@@ -20,47 +20,14 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = shaders
 
-AM_CFLAGS = -Wall -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 @DRM_CFLAGS@
+bin_PROGRAMS = vainfo
 
-i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
-i965_drv_video_ladir = @LIBVA_DRIVERS_PATH@
-i965_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined @DRM_LIBS@ -ldrm_intel
-i965_drv_video_la_LIBADD = ../va/libva-x11.la -lpthread
+AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x11
 
-i965_drv_video_la_SOURCES =	\
-	object_heap.c		\
-	intel_batchbuffer.c	\
-	intel_batchbuffer_dump.c\
-	intel_memman.c		\
-	intel_driver.c		\
-	i965_media.c		\
-	i965_media_mpeg2.c	\
-	i965_media_h264.c	\
-	i965_render.c		\
-	i965_drv_video.c	\
-	i965_avc_bsd.c		\
-	i965_avc_hw_scoreboard.c\
-	i965_avc_ildb.c		\
-	i965_post_processing.c	\
-	gen6_mfd.c
+vainfo_LDADD = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
+vainfo_DEPENDENCIES =  $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
+vainfo_SOURCES = vainfo.c
 
-noinst_HEADERS =                \
-	object_heap.h           \
-	intel_batchbuffer.h     \
-	intel_batchbuffer_dump.h\
-	intel_memman.h          \
-	intel_driver.h          \
-	i965_media.h            \
-	i965_media_mpeg2.h      \
-	i965_media_h264.h	\
-	i965_render.h           \
-	i965_drv_video.h        \
-	i965_defines.h          \
-	i965_structs.h		\
-	i965_avc_bsd.h		\
-	i965_avc_hw_scoreboard.h\
-	i965_avc_ildb.h		\
-	i965_post_processing.h	\
-	gen6_mfd.h
+valgrind:	vainfo
+	valgrind --leak-check=full --show-reachable=yes .libs/vainfo; 

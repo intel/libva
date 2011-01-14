@@ -360,7 +360,7 @@ i965_avc_ildb_upload_constants(VADriverContextP ctx, struct decode_state *decode
     if (IS_IRONLAKE(i965->intel.device_id)) {
         root_input->max_concurrent_threads = 76; /* 72 - 2 + 8 - 2 */
     } else {
-        root_input->max_concurrent_threads = 54; /* 50 - 2 + 8 = 2 */
+        root_input->max_concurrent_threads = 54; /* 50 - 2 + 8 - 2 */
     }
 
     if (pic_param->pic_fields.bits.field_pic_flag)

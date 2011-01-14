@@ -29,6 +29,10 @@
 
 #define CMD_PIPELINED_POINTERS                  CMD(3, 0, 0)
 #define CMD_BINDING_TABLE_POINTERS              CMD(3, 0, 1)
+# define GEN6_BINDING_TABLE_MODIFY_PS           (1 << 12)/* for GEN6 */
+# define GEN6_BINDING_TABLE_MODIFY_GS           (1 << 9) /* for GEN6 */
+# define GEN6_BINDING_TABLE_MODIFY_VS           (1 << 8) /* for GEN6 */
+
 #define CMD_VERTEX_BUFFERS                      CMD(3, 0, 8)
 #define CMD_VERTEX_ELEMENTS                     CMD(3, 0, 9)
 #define CMD_DRAWING_RECTANGLE                   CMD(3, 1, 0)
@@ -36,6 +40,125 @@
 #define CMD_3DPRIMITIVE                         CMD(3, 3, 0)
 
 #define CMD_DEPTH_BUFFER                        CMD(3, 1, 5)
+# define CMD_DEPTH_BUFFER_TYPE_SHIFT            29
+# define CMD_DEPTH_BUFFER_FORMAT_SHIFT          18
+
+#define CMD_CLEAR_PARAMS                        CMD(3, 1, 0x10)
+/* DW1 */
+# define CMD_CLEAR_PARAMS_DEPTH_CLEAR_VALID     (1 << 15)
+
+/* for GEN6+ */
+#define GEN6_3DSTATE_SAMPLER_STATE_POINTERS	CMD(3, 0, 0x02)
+# define GEN6_3DSTATE_SAMPLER_STATE_MODIFY_PS	(1 << 12)
+# define GEN6_3DSTATE_SAMPLER_STATE_MODIFY_GS	(1 << 9)
+# define GEN6_3DSTATE_SAMPLER_STATE_MODIFY_VS	(1 << 8)
+
+#define GEN6_3DSTATE_URB			CMD(3, 0, 0x05)
+/* DW1 */
+# define GEN6_3DSTATE_URB_VS_SIZE_SHIFT		16
+# define GEN6_3DSTATE_URB_VS_ENTRIES_SHIFT	0
+/* DW2 */
+# define GEN6_3DSTATE_URB_GS_ENTRIES_SHIFT	8
+# define GEN6_3DSTATE_URB_GS_SIZE_SHIFT		0
+
+#define GEN6_3DSTATE_VIEWPORT_STATE_POINTERS	CMD(3, 0, 0x0d)
+# define GEN6_3DSTATE_VIEWPORT_STATE_MODIFY_CC		(1 << 12)
+# define GEN6_3DSTATE_VIEWPORT_STATE_MODIFY_SF		(1 << 11)
+# define GEN6_3DSTATE_VIEWPORT_STATE_MODIFY_CLIP	(1 << 10)
+
+#define GEN6_3DSTATE_CC_STATE_POINTERS		CMD(3, 0, 0x0e)
+
+#define GEN6_3DSTATE_VS				CMD(3, 0, 0x10)
+
+#define GEN6_3DSTATE_GS				CMD(3, 0, 0x11)
+/* DW4 */
+# define GEN6_3DSTATE_GS_DISPATCH_START_GRF_SHIFT	0
+
+#define GEN6_3DSTATE_CLIP			CMD(3, 0, 0x12)
+
+#define GEN6_3DSTATE_SF				CMD(3, 0, 0x13)
+/* DW1 */
+# define GEN6_3DSTATE_SF_NUM_OUTPUTS_SHIFT		22
+# define GEN6_3DSTATE_SF_URB_ENTRY_READ_LENGTH_SHIFT	11
+# define GEN6_3DSTATE_SF_URB_ENTRY_READ_OFFSET_SHIFT	4
+/* DW2 */
+/* DW3 */
+# define GEN6_3DSTATE_SF_CULL_BOTH			(0 << 29)
+# define GEN6_3DSTATE_SF_CULL_NONE			(1 << 29)
+# define GEN6_3DSTATE_SF_CULL_FRONT			(2 << 29)
+# define GEN6_3DSTATE_SF_CULL_BACK			(3 << 29)
+/* DW4 */
+# define GEN6_3DSTATE_SF_TRI_PROVOKE_SHIFT		29
+# define GEN6_3DSTATE_SF_LINE_PROVOKE_SHIFT		27
+# define GEN6_3DSTATE_SF_TRIFAN_PROVOKE_SHIFT		25
+
+
+#define GEN6_3DSTATE_WM				CMD(3, 0, 0x14)
+/* DW2 */
+# define GEN6_3DSTATE_WM_SAMPLER_COUNT_SHITF			27
+# define GEN6_3DSTATE_WM_BINDING_TABLE_ENTRY_COUNT_SHIFT	18
+/* DW4 */
+# define GEN6_3DSTATE_WM_DISPATCH_START_GRF_0_SHIFT		16
+/* DW5 */
+# define GEN6_3DSTATE_WM_MAX_THREADS_SHIFT			25
+# define GEN6_3DSTATE_WM_DISPATCH_ENABLE			(1 << 19)
+# define GEN6_3DSTATE_WM_16_DISPATCH_ENABLE			(1 << 1)
+# define GEN6_3DSTATE_WM_8_DISPATCH_ENABLE			(1 << 0)
+/* DW6 */
+# define GEN6_3DSTATE_WM_NUM_SF_OUTPUTS_SHIFT			20
+# define GEN6_3DSTATE_WM_NONPERSPECTIVE_SAMPLE_BARYCENTRIC	(1 << 15)
+# define GEN6_3DSTATE_WM_NONPERSPECTIVE_CENTROID_BARYCENTRIC	(1 << 14)
+# define GEN6_3DSTATE_WM_NONPERSPECTIVE_PIXEL_BARYCENTRIC	(1 << 13)
+# define GEN6_3DSTATE_WM_PERSPECTIVE_SAMPLE_BARYCENTRIC		(1 << 12)
+# define GEN6_3DSTATE_WM_PERSPECTIVE_CENTROID_BARYCENTRIC	(1 << 11)
+# define GEN6_3DSTATE_WM_PERSPECTIVE_PIXEL_BARYCENTRIC		(1 << 10)
+
+
+#define GEN6_3DSTATE_CONSTANT_VS		CMD(3, 0, 0x15)
+#define GEN6_3DSTATE_CONSTANT_GS          	CMD(3, 0, 0x16)
+#define GEN6_3DSTATE_CONSTANT_PS          	CMD(3, 0, 0x17)
+
+#define GEN6_3DSTATE_SAMPLE_MASK		CMD(3, 0, 0x18)
+
+#define GEN6_3DSTATE_MULTISAMPLE		CMD(3, 1, 0x0d)
+/* DW1 */
+# define GEN6_3DSTATE_MULTISAMPLE_PIXEL_LOCATION_CENTER         (0 << 4)
+# define GEN6_3DSTATE_MULTISAMPLE_PIXEL_LOCATION_UPPER_LEFT     (1 << 4)
+# define GEN6_3DSTATE_MULTISAMPLE_NUMSAMPLES_1                  (0 << 1)
+# define GEN6_3DSTATE_MULTISAMPLE_NUMSAMPLES_4                  (2 << 1)
+# define GEN6_3DSTATE_MULTISAMPLE_NUMSAMPLES_8                  (3 << 1)
+
+#define MFX(pipeline, op, sub_opa, sub_opb)     \
+    (3 << 29 |                                  \
+     (pipeline) << 27 |                         \
+     (op) << 24 |                               \
+     (sub_opa) << 21 |                          \
+     (sub_opb) << 16)
+
+#define MFX_PIPE_MODE_SELECT                    MFX(2, 0, 0, 0)
+#define MFX_SURFACE_STATE                       MFX(2, 0, 0, 1)
+#define MFX_PIPE_BUF_ADDR_STATE                 MFX(2, 0, 0, 2)
+#define MFX_IND_OBJ_BASE_ADDR_STATE             MFX(2, 0, 0, 3)
+#define MFX_BSP_BUF_BASE_ADDR_STATE             MFX(2, 0, 0, 4)
+#define MFX_AES_STATE                           MFX(2, 0, 0, 5)
+#define MFX_STATE_POINTER                       MFX(2, 0, 0, 6)
+
+#define MFX_WAIT                                MFX(1, 0, 0, 0)
+
+#define MFX_AVC_IMG_STATE                       MFX(2, 1, 0, 0)
+#define MFX_AVC_QM_STATE                        MFX(2, 1, 0, 1)
+#define MFX_AVC_DIRECTMODE_STATE                MFX(2, 1, 0, 2)
+#define MFX_AVC_SLICE_STATE                     MFX(2, 1, 0, 3)
+#define MFX_AVC_REF_IDX_STATE                   MFX(2, 1, 0, 4)
+#define MFX_AVC_WEIGHTOFFSET_STATE              MFX(2, 1, 0, 5)
+
+#define MFD_AVC_BSD_OBJECT                      MFX(2, 1, 1, 8)
+
+#define MFX_MPEG2_PIC_STATE                     MFX(2, 3, 0, 0)
+#define MFX_MPEG2_QM_STATE                      MFX(2, 3, 0, 1)
+
+#define MFD_MPEG2_BSD_OBJECT                    MFX(2, 3, 1, 8)
+
 #define I965_DEPTHFORMAT_D32_FLOAT              1
 
 #define BASE_ADDRESS_MODIFY             (1 << 0)
@@ -288,7 +411,9 @@
 #define I965_VFCOMPONENT_STORE_PID    7
 
 #define VE0_VERTEX_BUFFER_INDEX_SHIFT	27
+#define GEN6_VE0_VERTEX_BUFFER_INDEX_SHIFT      26 /* for GEN6 */
 #define VE0_VALID			(1 << 26)
+#define GEN6_VE0_VALID                  (1 << 25) /* for GEN6 */
 #define VE0_FORMAT_SHIFT		16
 #define VE0_OFFSET_SHIFT		0
 #define VE1_VFCOMPONENT_0_SHIFT		28
@@ -298,8 +423,11 @@
 #define VE1_DESTINATION_ELEMENT_OFFSET_SHIFT	0
 
 #define VB0_BUFFER_INDEX_SHIFT          27
+#define GEN6_VB0_BUFFER_INDEX_SHIFT     26
 #define VB0_VERTEXDATA                  (0 << 26)
 #define VB0_INSTANCEDATA                (1 << 26)
+#define GEN6_VB0_VERTEXDATA             (0 << 20)
+#define GEN6_VB0_INSTANCEDATA           (1 << 20)
 #define VB0_BUFFER_PITCH_SHIFT          0
 
 #define _3DPRIMITIVE_VERTEX_SEQUENTIAL  (0 << 15)
@@ -380,6 +508,21 @@
 #define IEF_FILTER_SIZE_3X3             0
 #define IEF_FILTER_SIZE_5X5             1
 
-#define URB_SIZE(intel)         (IS_IRONLAKE(intel->device_id) ? 1024 : \
+#define MFX_FORMAT_MPEG2        0
+#define MFX_FORMAT_VC1          1
+#define MFX_FORMAT_AVC          2
+
+#define MFX_CODEC_DECODE        0
+#define MFX_CODEC_ENCODE        1
+
+#define MFD_MODE_VLD            0
+#define MFD_MODE_IT             1
+
+#define MFX_SURFACE_PLANAR_420_8        4
+#define MFX_SURFACE_MONOCHROME          12
+
+#define URB_SIZE(intel)         (IS_GEN6(intel->device_id) ? 1024 :     \
+                                 IS_IRONLAKE(intel->device_id) ? 1024 : \
                                  IS_G4X(intel->device_id) ? 384 : 256)
+
 #endif /* _I965_DEFINES_H_ */

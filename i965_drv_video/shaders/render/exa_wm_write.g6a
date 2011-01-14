@@ -1,0 +1,77 @@
+/*
+ * Copyright © 2010 Intel Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice (including the next
+ * paragraph) shall be included in all copies or substantial portions of the
+ * Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ */
+
+include(`exa_wm.g4i')
+
+/*
+ * Prepare data in m2-m3 for Red channel, m4-m5 for Green channel,
+ * m6-m7 for Blue and m8-m9 for Alpha channel
+ */
+define(`slot_r_00',     `m2')
+define(`slot_r_01',     `m3')
+define(`slot_g_00',     `m4')
+define(`slot_g_01',     `m5')
+define(`slot_b_00',     `m6')
+define(`slot_b_01',     `m7')
+define(`slot_a_00',     `m8')
+define(`slot_a_01',     `m9')
+define(`data_port_msg_2_ind',	`2')
+
+mov (8) slot_r_00<1>F     src_sample_r_01<8,8,1>F { align1 };
+mov (8) slot_r_01<1>F     src_sample_r_23<8,8,1>F { align1 };
+
+mov (8) slot_g_00<1>F     src_sample_g_01<8,8,1>F { align1 };
+mov (8) slot_g_01<1>F     src_sample_g_23<8,8,1>F { align1 };
+
+mov (8) slot_b_00<1>F     src_sample_b_01<8,8,1>F { align1 };
+mov (8) slot_b_01<1>F     src_sample_b_23<8,8,1>F { align1 };
+
+mov (8) slot_a_00<1>F     src_sample_a_01<8,8,1>F { align1 };
+mov (8) slot_a_01<1>F     src_sample_a_23<8,8,1>F { align1 };
+
+/* write */
+send (16) 
+	data_port_msg_2_ind 
+	acc0<1>UW 
+	null
+	write (
+	       0,  /* binding_table */
+	       16,  /* pixel scordboard clear, msg type simd16 single source */
+	       12,  /* render target write */
+	       0,   /* no write commit message */
+	       0  /* headerless render target write */
+	) 
+	mlen 8
+	rlen 0
+	{ align1 EOT };
+
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+nop;
+

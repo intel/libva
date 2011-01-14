@@ -40,6 +40,7 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
     int batch_size = BATCH_SIZE;
 
     assert(batch->flag == I915_EXEC_RENDER ||
+           batch->flag == I915_EXEC_BLT ||
            batch->flag == I915_EXEC_BSD);
 
     dri_bo_unreference(batch->buffer);
@@ -281,21 +282,23 @@ intel_batchbuffer_data_bcs(VADriverContextP ctx, void *data, unsigned int size)
     intel_batchbuffer_data_helper(ctx, intel->batch_bcs, data, size);
 }
 
-static void
-intel_batchbuffer_emit_mi_flush_helper(VADriverContextP ctx,
-                                       struct intel_batchbuffer *batch)
-{
-    intel_batchbuffer_require_space_helper(ctx, batch, 4);
-    intel_batchbuffer_emit_dword_helper(batch, 
-                                        MI_FLUSH | STATE_INSTRUCTION_CACHE_INVALIDATE);
-}
-
 void
 intel_batchbuffer_emit_mi_flush(VADriverContextP ctx)
 {
     struct intel_driver_data *intel = intel_driver_data(ctx);
 
-    intel_batchbuffer_emit_mi_flush_helper(ctx, intel->batch);
+    if (intel->batch->flag == I915_EXEC_BLT) {
+        BEGIN_BLT_BATCH(ctx, 4);
+        OUT_BATCH(ctx, MI_FLUSH_DW);
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, 0);
+        OUT_BATCH(ctx, 0);
+        ADVANCE_BATCH(ctx);
+    } else if (intel->batch->flag == I915_EXEC_RENDER) {
+        BEGIN_BATCH(ctx, 1);
+        OUT_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+        ADVANCE_BATCH(ctx);
+    }
 }
 
 void
@@ -303,7 +306,18 @@ intel_batchbuffer_emit_mi_flush_bcs(VADriverContextP ctx)
 {
     struct intel_driver_data *intel = intel_driver_data(ctx);
 
-    intel_batchbuffer_emit_mi_flush_helper(ctx, intel->batch_bcs);
+    if (IS_GEN6(intel->device_id)) {
+        BEGIN_BCS_BATCH(ctx, 4);
+        OUT_BCS_BATCH(ctx, MI_FLUSH_DW | MI_FLUSH_DW_VIDEO_PIPELINE_CACHE_INVALIDATE);
+        OUT_BCS_BATCH(ctx, 0);
+        OUT_BCS_BATCH(ctx, 0);
+        OUT_BCS_BATCH(ctx, 0);
+        ADVANCE_BCS_BATCH(ctx);
+    } else {
+        BEGIN_BCS_BATCH(ctx, 1);
+        OUT_BCS_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+        ADVANCE_BCS_BATCH(ctx);
+    }
 }
 
 void
@@ -320,7 +334,7 @@ void
 intel_batchbuffer_start_atomic(VADriverContextP ctx, unsigned int size)
 {
     struct intel_driver_data *intel = intel_driver_data(ctx);
-
+    intel_batchbuffer_check_batchbuffer_flag(ctx, I915_EXEC_RENDER);
     intel_batchbuffer_start_atomic_helper(ctx, intel->batch, size);
 }
 
@@ -354,3 +368,64 @@ intel_batchbuffer_end_atomic_bcs(VADriverContextP ctx)
     intel_batchbuffer_end_atomic_helper(intel->batch_bcs);
 }
 
+static void
+intel_batchbuffer_begin_batch_helper(struct intel_batchbuffer *batch, int total)
+{
+    batch->emit_total = total * 4;
+    batch->emit_start = batch->ptr;
+}
+
+void
+intel_batchbuffer_begin_batch(VADriverContextP ctx, int total)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_begin_batch_helper(intel->batch, total);
+}
+
+void
+intel_batchbuffer_begin_batch_bcs(VADriverContextP ctx, int total)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_begin_batch_helper(intel->batch_bcs, total);
+}
+
+static void
+intel_batchbuffer_advance_batch_helper(struct intel_batchbuffer *batch)
+{
+    assert(batch->emit_total == (batch->ptr - batch->emit_start));
+}
+
+void
+intel_batchbuffer_advance_batch(VADriverContextP ctx)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_advance_batch_helper(intel->batch);
+}
+
+void
+intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx)
+{
+   struct intel_driver_data *intel = intel_driver_data(ctx);
+
+   intel_batchbuffer_advance_batch_helper(intel->batch_bcs);
+}
+
+void
+intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag)
+{
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+
+    if (flag != I915_EXEC_RENDER &&
+        flag != I915_EXEC_BLT &&
+        flag != I915_EXEC_BSD)
+        return;
+
+    if (intel->batch->flag == flag)
+        return;
+
+    intel_batchbuffer_flush_helper(ctx, intel->batch);
+    intel->batch->flag = flag;
+}

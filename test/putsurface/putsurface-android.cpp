@@ -23,14 +23,12 @@
  */
 
 
-/* gcc -o putsurface putsurface.c -lva -lva-x11 */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
+
 #include <sys/time.h>
 
 #include <unistd.h>
@@ -40,7 +38,18 @@
 #include <fcntl.h>
 
 #include <va/va.h>
-#include <va/va_x11.h>
+#include <va/va_android.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+#include <utils/Log.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+#include <binder/MemoryHeapBase.h>
+#define Display unsigned int
+
 
 #include <assert.h>
 
@@ -68,98 +77,98 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
 
 #define SURFACE_NUM 5
 static  VASurfaceID surface_id[SURFACE_NUM];
-static  int surface_width=352, surface_height=288;
+static  int surface_width = 352, surface_height = 288;
 static  int win_width=352, win_height=288;
-static  Window win_thread0, win_thread1;
-static  Pixmap pixmap_thread0, pixmap_thread1;
-static  GC context_thread0, context_thread1;
+static  int win_thread0 = 0, win_thread1 = 0;
 static  Display *x11_display;
-static  VADisplay *va_dpy;
-static  int multi_thread=0;
-static  int put_pixmap = 0;
+static  VADisplay va_dpy;
+static  int multi_thread = 0;
 static  int test_clip = 0;
 static  int display_field = VA_FRAME_PICTURE;
-static  int check_event = 1;
-static  int verbose=0;
+static  int verbose = 0;
 static  pthread_mutex_t surface_mutex[SURFACE_NUM];
 
-static pthread_mutex_t gmutex;
+//static pthread_mutex_t gmutex;
 
-static  int box_width=32;
+static  int box_width = 32;
 
-static Pixmap create_pixmap(int width, int height)
-{
-    int screen = DefaultScreen(x11_display);
-    Window root;
-    Pixmap pixmap;
-    XWindowAttributes attr;
-    
-    root = RootWindow(x11_display, screen);
 
-    XGetWindowAttributes (x11_display, root, &attr);
-    
-    printf("Create a pixmap from ROOT window %dx%d, pixmap size %dx%d\n\n", attr.width, attr.height, width, height);
-    pixmap = XCreatePixmap(x11_display, root, width, height,
-                           DefaultDepth(x11_display, DefaultScreen(x11_display)));
+using namespace android;
 
-    return pixmap;
-}
+sp<SurfaceComposerClient> client;
+sp<Surface> android_surface;
+sp<ISurface> android_isurface;
+sp<SurfaceControl> surface_ctrl;
+
+sp<SurfaceComposerClient> client1;
+sp<Surface> android_surface1;
+sp<ISurface> android_isurface1;
+sp<SurfaceControl> surface_ctrl1;
+
+namespace android {
+class Test {
+public:
+    static const sp<ISurface>& getISurface(const sp<Surface>& s) {
+        return s->getISurface();
+    }
+};
+};
+
+
+
+
 
 static int create_window(int width, int height)
 {
-    int screen = DefaultScreen(x11_display);
-    Window root, win;
-
-    root = RootWindow(x11_display, screen);
+    sp<ProcessState> proc(ProcessState::self());
+    ProcessState::self()->startThreadPool();
 
     printf("Create window0 for thread0\n");
-    win_thread0 = win = XCreateSimpleWindow(x11_display, root, 0, 0, width, height,
-                                            0, 0, WhitePixel(x11_display, 0));
-    if (win) {
-        XSizeHints sizehints;
-        sizehints.width  = width;
-        sizehints.height = height;
-        sizehints.flags = USSize;
-        XSetNormalHints(x11_display, win, &sizehints);
-        XSetStandardProperties(x11_display, win, "Thread 0", "Thread 0",
-                               None, (char **)NULL, 0, &sizehints);
+    client = new SurfaceComposerClient();
+    surface_ctrl = client->createSurface(getpid(), 0, width, height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);
+    android_surface = surface_ctrl->getSurface();
+    android_isurface = Test::getISurface(android_surface);
 
-        XMapWindow(x11_display, win);
-    }
-    context_thread0 = XCreateGC(x11_display, win, 0, 0);
-    XSelectInput(x11_display, win, KeyPressMask | StructureNotifyMask);
-    XSync(x11_display, False);
+    client->openTransaction();
+    surface_ctrl->setPosition(0, 0);
+    client->closeTransaction();
 
-    if (put_pixmap)
-        pixmap_thread0 = create_pixmap(width, height);
-    
+    client->openTransaction();
+    surface_ctrl->setSize(width, height);
+    client->closeTransaction();
+
+    client->openTransaction();
+    surface_ctrl->setLayer(0x100000);
+    client->closeTransaction();
+
+    win_thread0 = 1;
     if (multi_thread == 0)
         return 0;
 
     printf("Create window1 for thread1\n");
-    
-    win_thread1 = win = XCreateSimpleWindow(x11_display, root, width, 0, width, height,
-                                            0, 0, WhitePixel(x11_display, 0));
-    if (win) {
-        XSizeHints sizehints;
-        sizehints.width  = width;
-        sizehints.height = height;
-        sizehints.flags = USSize;
-        XSetNormalHints(x11_display, win, &sizehints);
-        XSetStandardProperties(x11_display, win, "Thread 1", "Thread 1",
-                               None, (char **)NULL, 0, &sizehints);
+    client1 = new SurfaceComposerClient();
+    surface_ctrl1 = client1->createSurface(getpid(), 0, width, height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);
+    android_surface1 = surface_ctrl1->getSurface();
+    android_isurface1 = Test::getISurface(android_surface1);
 
-        XMapWindow(x11_display, win);
-    }
-    if (put_pixmap)
-        pixmap_thread1 = create_pixmap(width, height);
+    client1->openTransaction();
+    surface_ctrl1->setPosition(width, 0);
+    client1->closeTransaction();
 
-    context_thread1 = XCreateGC(x11_display, win, 0, 0);
-    XSelectInput(x11_display, win, KeyPressMask | StructureNotifyMask);
-    XSync(x11_display, False);
-    
+    client1->openTransaction();
+    surface_ctrl1->setSize(width, height);
+    client1->closeTransaction();
+
+    client1->openTransaction();
+    surface_ctrl1->setLayer(0x100000);
+    client1->closeTransaction();
+
+    win_thread1 = 2;
     return 0;
+
 }
+
+
 
 static VASurfaceID get_next_free_surface(int *index)
 {
@@ -169,7 +178,7 @@ static VASurfaceID get_next_free_surface(int *index)
     assert(index);
 
     for (i=0; i<SURFACE_NUM; i++) {
-        surface_status = 0;
+        surface_status = (VASurfaceStatus)0;
         vaQuerySurfaceStatus(va_dpy, surface_id[i], &surface_status);
         if (surface_status == VASurfaceReady)
         {
@@ -198,41 +207,27 @@ static unsigned long get_tick_count(void)
     return tv.tv_usec/1000+tv.tv_sec*1000;
 }
 
-static int putsurface_thread(void *data)
+static void* putsurface_thread(void *data)
 {
     int width=win_width, height=win_height;
-    Drawable draw;
-    Window win = (Window)data;
-    Pixmap pixmap = 0;
-    GC context = NULL;
+    int win = (int)data;
     int quit = 0;
     VAStatus vaStatus;
     int row_shift = 0;
     int index = 0;
-    Bool is_event; 
-    XEvent event;
     unsigned int frame_num=0, start_time, putsurface_time;
     VARectangle cliprects[2]; /* client supplied clip list */
-    
+    sp<ISurface> win_isurface;
     if (win == win_thread0) {
         printf("Enter into thread0\n\n");
-        pixmap = pixmap_thread0;
-        context = context_thread0;
+        win_isurface = android_isurface;    
     }
     
     if (win == win_thread1) {
         printf("Enter into thread1\n\n");
-        pixmap = pixmap_thread1;
-        context = context_thread1;
-    }
-    
-    if (put_pixmap) {
-        printf("vaPutSurface into a Pixmap, then copy into the Window\n\n");
-        draw = pixmap;
-    } else {
-        printf("vaPutSurface into a Window directly\n\n");
-        draw = win;
-    }
+        win_isurface = android_isurface1;  
+    }   
+    printf("vaPutSurface into a Window directly\n\n");
 
     putsurface_time = 0;
     while (!quit) {
@@ -246,13 +241,16 @@ static int putsurface_thread(void *data)
         upload_surface(va_dpy, surface_id, box_width, row_shift, display_field);
 
         start_time = get_tick_count();
-        vaStatus = vaPutSurface(va_dpy, surface_id, draw,
-                                0,0,surface_width,surface_height,
-                                0,0,width,height,
-                                (test_clip==0)?NULL:&cliprects[0],
-                                (test_clip==0)?0:2,
-                                display_field);
+
+            vaStatus = vaPutSurface(va_dpy, surface_id, win_isurface,
+                                    0,0,surface_width,surface_height,
+                                    0,0,width,height,
+                                    (test_clip==0)?NULL:&cliprects[0],
+                                    (test_clip==0)?0:2,
+                                    display_field);
+
         CHECK_VASTATUS(vaStatus,"vaPutSurface");
+
         putsurface_time += (get_tick_count() - start_time);
         
         if ((frame_num % 0xff) == 0) {
@@ -277,38 +275,21 @@ static int putsurface_thread(void *data)
             }
         }
         
-        if (put_pixmap)
-            XCopyArea(x11_display, pixmap, win,  context, 0, 0, width, height, 0, 0);
         
         pthread_mutex_unlock(&surface_mutex[index]);
-
-        if (check_event) {
-            pthread_mutex_lock(&gmutex);
-            is_event = XCheckWindowEvent(x11_display, win, StructureNotifyMask|KeyPressMask,&event);
-            pthread_mutex_unlock(&gmutex);
-            if (is_event) {
-                /* bail on any focused key press */
-                if(event.type == KeyPress) {  
-                    quit = 1;
-                    break;
-                }
-
-                /* rescale the video to fit the window */
-                if(event.type == ConfigureNotify) { 
-                    width = event.xconfigure.width;
-                    height = event.xconfigure.height;
-                    printf("Scale window to %dx%d\n", width, height);
-                }	
-            }
-        }
-        
+    
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
 
         frame_num++;
-    }
 
-    pthread_exit(NULL);
+        if( frame_num == 0x200 )
+            quit = 1;
+
+    }
+    if(win == win_thread1)    
+        pthread_exit(NULL);
+    return 0;
 }
 
 
@@ -325,10 +306,8 @@ int main(int argc,char **argv)
         switch (c) {
             case '?':
                 printf("putsurface <options>\n");
-                printf("           -p output to pixmap\n");
                 printf("           -d the dimension of black/write square box, default is 32\n");
                 printf("           -t multi-threads\n");
-                printf("           -e don't check X11 event\n");
                 printf("           -c test clipbox\n");
                 printf("           -f <1/2> top field, or bottom field\n");
                 printf("           -v verbose output\n");
@@ -346,12 +325,6 @@ int main(int argc,char **argv)
             case 't':
                 multi_thread = 1;
                 printf("Two threads to do vaPutSurface\n");
-                break;
-            case 'e':
-                check_event = 0;
-                break;
-            case 'p':
-                put_pixmap = 1;
                 break;
             case 'c':
                 test_clip = 1;
@@ -372,8 +345,10 @@ int main(int argc,char **argv)
                 break;
         }
     }
-    
-    x11_display = XOpenDisplay(":0.0");
+
+    x11_display = (Display*)malloc(sizeof(Display));
+    *(x11_display) = 0x18c34078;
+
     if (x11_display == NULL) {
         fprintf(stderr, "Can't connect X server!\n");
         exit(-1);
@@ -390,21 +365,21 @@ int main(int argc,char **argv)
     va_status = vaCreateSurfaces(va_dpy,surface_width, surface_height,
                                 VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-
+/*
     if (check_event)
         pthread_mutex_init(&gmutex, NULL);
-    
+*/   
     for(i = 0; i< SURFACE_NUM; i++)
         pthread_mutex_init(&surface_mutex[i], NULL);
     
     if (multi_thread == 1) 
-        ret = pthread_create(&thread1, NULL, (void *)putsurface_thread, (void*)win_thread1);
+        ret = pthread_create(&thread1, NULL, putsurface_thread, (void*)win_thread1);
 
     putsurface_thread((void *)win_thread0);
 
     if (multi_thread == 1) 
         pthread_join(thread1, (void **)&ret);
-
+     printf("thread1 is free\n");
     vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);    
     vaTerminate(va_dpy);
     
