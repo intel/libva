@@ -24,7 +24,7 @@ static int get_unsigned_exp_golomb();
 static void decode_slice_header(slice_header *sh);
 static void input_read(FILE *input_fp, unsigned char *dest, int size);
 static int input_get_bits(int bit_count);
-int va_FoolGetFrame(FILE *input_fp, char *frame_buf); 
+
 
 static unsigned char nal_buf[NAL_BUF_SIZE];
 static unsigned char ring_buf[RING_BUF_SIZE];
