@@ -1,9 +1,10 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
+%define libversion 1.0.7
 
 Name:           libva
-Version:        1.0.6
+Version:        %{libversion}MFLD
 Release:        0.0
-License:        MIT license
+License:        Intel Proprietary
 Source:         %{name}-%{version}.tar.bz2
 NoSource:	0
 Group:          Development/Libraries
@@ -13,9 +14,27 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 
 Requires: xorg-x11-server-Xorg
 
-BuildRequires: libtool xorg-x11-server-devel pkgconfig(xv) pkgconfig(xrandr)
-BuildRequires: libdrm-devel libX11-devel libXext-devel libXdamage-devel libXfixes-devel xorg-x11-proto-dri2proto
-BuildRequires: xorg-x11-proto-damageproto xorg-x11-proto-kbproto xorg-x11-proto-xproto xorg-x11-proto-xextproto xorg-x11-proto-fixesproto
+Requires: /sbin/ldconfig
+BuildRequires:  pkgconfig(xv)
+BuildRequires:  pkgconfig(xrandr)
+BuildRequires:  pkgconfig(xorg-server)
+BuildRequires:  pkgconfig(libdrm)
+BuildRequires:  pkgconfig(x11)
+BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(xdamage)
+BuildRequires:  pkgconfig(xfixes)
+BuildRequires:  pkgconfig(dri2proto)
+BuildRequires:  pkgconfig(damageproto)
+BuildRequires:  pkgconfig(kbproto)
+BuildRequires:  pkgconfig(xextproto)
+BuildRequires:  pkgconfig(fixesproto)
+BuildRequires:  pkgconfig(xproto)
+BuildRequires:  pkgconfig(gl)
+BuildRequires:  libtool
+
+
+
+
 
 %description
 The libva library implements the Video Acceleration (VA) API for Linux.
@@ -53,13 +72,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %{_libdir}/libva.so.1
-%{_libdir}/libva.so.%{version}
+%{_libdir}/libva.so.%{libversion}
 %{_libdir}/libva-tpi.so.1
-%{_libdir}/libva-tpi.so.%{version}
+%{_libdir}/libva-tpi.so.%{libversion}
 %{_libdir}/libva-x11.so.1
-%{_libdir}/libva-x11.so.%{version}
+%{_libdir}/libva-x11.so.%{libversion}
 %{_libdir}/libva-glx.so.1
-%{_libdir}/libva-glx.so.%{version}
+%{_libdir}/libva-glx.so.%{libversion}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
@@ -68,17 +87,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %{_libdir}/dri/dummy_drv_video.so
 
-%{_includedir}/va/va_tpi.h
-%{_includedir}/va/va_x11.h
-%{_includedir}/va/va_version.h
-%{_includedir}/va/va_backend.h
-%{_includedir}/va/va_dri2.h
-%{_includedir}/va/va_dummy.h
-%{_includedir}/va/va_backend_tpi.h
-%{_includedir}/va/va.h
-%{_includedir}/va/va_dricommon.h
-%{_includedir}/va/va_dri.h
-
 %files devel
 %defattr(-,root,root,-)
 %dir %{_includedir}/va
@@ -86,6 +94,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva.so
 %{_libdir}/libva-tpi.so
 %{_libdir}/libva-x11.so
+%{_libdir}/libva-glx.so
 %{_libdir}/pkgconfig/libva.pc
 %{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
