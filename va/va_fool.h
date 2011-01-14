@@ -26,12 +26,18 @@
 #ifndef VA_FOOL_H
 #define VA_FOOL_H
 
+#include <stdio.h>
+
 void va_FoolInit(VADisplay dpy);
 
 int va_FoolEnd(VADisplay dpy);
 
 
+int va_FoolGetFrame(FILE *input_fp, char *frame_buf);
+
 int va_FoolCodedBuf(VADisplay dpy);
+
+
 int va_FoolCreateConfig(
     VADisplay dpy,
     VAProfile profile, 

@@ -112,7 +112,7 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
     va_status = vaMapBuffer(va_dpy,coded_buf,(void **)(&buf_list));
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     while (buf_list != NULL) {
-        printf("Write %d bytes\n", buf_list->size);
+        printf("Write %d bytes", buf_list->size);
         coded_size += write(coded_fd, buf_list->buf, buf_list->size);
         buf_list = buf_list->next;
     }

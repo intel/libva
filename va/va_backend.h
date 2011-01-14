@@ -178,6 +178,13 @@ struct VADriverVTable
 		VASurfaceStatus *status	/* out */
 	);
 
+	VAStatus (*vaQuerySurfaceError) (
+		VADriverContextP ctx,
+		VASurfaceID render_target,
+        VAStatus error_status,
+        void **error_info /*out*/
+	);
+
 	VAStatus (*vaPutSurface) (
     		VADriverContextP ctx,
 		VASurfaceID surface,
