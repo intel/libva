@@ -422,7 +422,7 @@ VAStatus va_FoolMapBuffer (
 )
 {
     VABufferType type;
-    unsigned int size;
+    unsigned int size,frame_size = 0;
     unsigned int num_elements;
     DPY2INDEX(dpy);
 
@@ -443,9 +443,19 @@ VAStatus va_FoolMapBuffer (
         /* expect APP to MapBuffer when get the the coded data */
         if (*pbuf && (buf_idx == VAEncCodedBufferType)) { /* it is coded buffer */
             /* read from a clip */
-            va_FoolGetFrame(fool_context[idx].fool_fp_codedclip,
-                            fool_context[idx].frame_buf);
-            *pbuf = fool_context[idx].frame_buf;
+            frame_size = va_FoolGetFrame(fool_context[idx].fool_fp_codedclip,
+                    fool_context[idx].frame_buf);
+
+            VACodedBufferSegment *codebuf;
+            codebuf = malloc(sizeof(VACodedBufferSegment));
+            memset(codebuf,0,sizeof(VACodedBufferSegment));
+            codebuf->size = frame_size;
+            codebuf->bit_offset = 0;
+            codebuf->status = 0;
+            codebuf->reserved = 0;
+            codebuf->buf = fool_context[idx].frame_buf;
+            codebuf->next = NULL;
+            *pbuf = codebuf;
         }
         return 1; /* don't call into driver */
     }
