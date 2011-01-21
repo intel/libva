@@ -80,6 +80,7 @@ static struct _fool_context {
 
     FILE *fool_fp_codedclip; /* load a clip from disk for fooling encode*/
     char *frame_buf;
+    VACodedBufferSegment *codebuf;
 
     /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
@@ -179,13 +180,17 @@ void va_FoolInit(VADisplay dpy)
             fool_encode = 0;
 
         if (fool_encode) /* malloc the buffer for fake clip */
+        {
             fool_context[fool_index].frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
+            fool_context[fool_index].codebuf = malloc(sizeof(VACodedBufferSegment));
+        }
 
         if (fool_context[fool_index].frame_buf == NULL)
             fool_encode = 0;
 
         if (fool_encode)
             va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
+
     }
 
     if (fool_encode || fool_decode)
@@ -209,6 +214,9 @@ int va_FoolEnd(VADisplay dpy)
     if (fool_context[idx].frame_buf)
         free(fool_context[idx].frame_buf);
     
+    if (fool_context[idx].codebuf)
+        free(fool_context[idx].codebuf);
+
     memset(&fool_context[idx], sizeof(struct _fool_context), 0);
     return 0;
 }
@@ -446,16 +454,14 @@ VAStatus va_FoolMapBuffer (
             frame_size = va_FoolGetFrame(fool_context[idx].fool_fp_codedclip,
                     fool_context[idx].frame_buf);
 
-            VACodedBufferSegment *codebuf;
-            codebuf = malloc(sizeof(VACodedBufferSegment));
-            memset(codebuf,0,sizeof(VACodedBufferSegment));
-            codebuf->size = frame_size;
-            codebuf->bit_offset = 0;
-            codebuf->status = 0;
-            codebuf->reserved = 0;
-            codebuf->buf = fool_context[idx].frame_buf;
-            codebuf->next = NULL;
-            *pbuf = codebuf;
+            memset(fool_context[idx].codebuf,0,sizeof(VACodedBufferSegment));
+            fool_context[idx].codebuf->size = frame_size;
+            fool_context[idx].codebuf->bit_offset = 0;
+            fool_context[idx].codebuf->status = 0;
+            fool_context[idx].codebuf->reserved = 0;
+            fool_context[idx].codebuf->buf = fool_context[idx].frame_buf;
+            fool_context[idx].codebuf->next = NULL;
+            *pbuf = fool_context[idx].codebuf;
         }
         return 1; /* don't call into driver */
     }
