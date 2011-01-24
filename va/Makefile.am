@@ -74,14 +74,20 @@ libva_glx_backend      =
 libva_glx_backenddir   =
 endif
 
-lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend)
+libva_egl_la_SOURCES = va_egl.c
+libva_egl_ladir = $(libdir)
+libva_egl_la_LDFLAGS = $(LDADD) -no-undefined
+libva_egl_la_LIBADD = $(libvacorelib) -ldl
+libva_egl_la_DEPENDENCIES = $(libvacorelib) 
+
+lib_LTLIBRARIES = libva.la libva-tpi.la libva-egl.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend)
 
 DIST_SUBDIRS = x11 glx dummy
 
 SUBDIRS = $(libva_x11_backenddir) $(libva_dummy_backenddir) $(libva_glx_backenddir)
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_backend_tpi.h va_dummy.h va_version.h
+libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_backend_tpi.h va_dummy.h va_version.h va_egl.h
 
 DISTCLEANFILES = \
 	va_version.h

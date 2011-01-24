@@ -175,6 +175,7 @@ AC_OUTPUT([
 	libva-x11.pc
 	libva-glx.pc
 	libva-tpi.pc
+	libva-egl.pc
 ])
 
 # Print a small summary

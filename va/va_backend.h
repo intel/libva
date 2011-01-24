@@ -379,6 +379,12 @@ struct VADriverVTable
                 VASurfaceID surface
         );
 
+        VAStatus (*vaGetEGLClientBufferFromSurface) (
+                VADriverContextP ctx,
+                VASurfaceID surface,
+                void **buffer
+        );
+
         /* Optional: GLX support hooks */
         struct VADriverVTableGLX *glx;
 };

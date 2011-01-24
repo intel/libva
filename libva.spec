@@ -60,6 +60,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva-x11.so.%{version}
 %{_libdir}/libva-glx.so.1
 %{_libdir}/libva-glx.so.%{version}
+%{_libdir}/libva-egl.so.1
+%{_libdir}/libva-egl.so.%{version}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
@@ -78,6 +80,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/va/va.h
 %{_includedir}/va/va_dricommon.h
 %{_includedir}/va/va_dri.h
+%{_includedir}/va/va_egl.h
 
 %files devel
 %defattr(-,root,root,-)
@@ -86,10 +89,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva.so
 %{_libdir}/libva-tpi.so
 %{_libdir}/libva-x11.so
+%{_libdir}/libva-egl.so
 %{_libdir}/pkgconfig/libva.pc
 %{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
 %{_libdir}/pkgconfig/libva-glx.pc
+%{_libdir}/pkgconfig/libva-egl.pc
 
 %changelog
 * Wed Dec 23 2009 Prajwal Mohan <prajwal.karur.mohan@intel.com> 1.0.1
