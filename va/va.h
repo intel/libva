@@ -868,6 +868,7 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned int syncmarker	: 1; /* METADATA::SYNCMARKER */
             unsigned int rangered	: 1; /* METADATA::RANGERED */
             unsigned int max_b_frames	: 3; /* METADATA::MAXBFRAMES */
+            unsigned int profile	: 2; /* SEQUENCE_LAYER::PROFILE or The MSB of METADATA::PROFILE */
         } bits;
         unsigned int value;
     } sequence_fields;
