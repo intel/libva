@@ -27,6 +27,7 @@
  *
  */
 
+#include "config.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -1836,7 +1837,7 @@ i965_Terminate(VADriverContextP ctx)
 }
 
 VAStatus 
-__vaDriverInit_0_31(  VADriverContextP ctx )
+VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
 {
     struct i965_driver_data *i965;
     int result;

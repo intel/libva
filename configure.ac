@@ -23,7 +23,7 @@
 # libva package version number, (as distinct from shared library version)
 m4_define([libva_major_version], [0])
 m4_define([libva_minor_version], [32])
-m4_define([libva_micro_version], [1])
+m4_define([libva_micro_version], [0])
 
 m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
@@ -134,6 +134,13 @@ fi
 AC_SUBST(GL_DEPS_CFLAGS)
 AC_SUBST(GL_DEPS_LIBS)
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
+
+# Make sure drivers use the correctly versioned __vaDriverInit*() function name
+VA_DRIVER_INIT_FUNC="__vaDriverInit_${LIBVA_MAJOR_VERSION}_${LIBVA_MINOR_VERSION}"
+AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC], [$VA_DRIVER_INIT_FUNC],
+    [Defined to the versioned __vaDriverInit function name])
+AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC_S], ["$VA_DRIVER_INIT_FUNC"],
+    [Defined to the versioned __vaDriverInit function name (in string form)])
 
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"

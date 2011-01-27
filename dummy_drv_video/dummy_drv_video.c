@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "config.h"
 #include <va/va_backend.h>
 
 #include "dummy_drv_video.h"
@@ -1193,7 +1194,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_31(  VADriverContextP ctx )
+VAStatus VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
 {
     object_base_p obj;
     int result;

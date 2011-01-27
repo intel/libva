@@ -37,8 +37,6 @@
 #include <dlfcn.h>
 #include <unistd.h>
 
-#define DRIVER_INIT_FUNC	"__vaDriverInit_0_31"
-
 #define DRIVER_EXTENSION	"_drv_video.so"
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
@@ -222,10 +220,10 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         else
         {
             VADriverInit init_func;
-            init_func = (VADriverInit) dlsym(handle, DRIVER_INIT_FUNC);
+            init_func = (VADriverInit) dlsym(handle, VA_DRIVER_INIT_FUNC_S);
             if (!init_func)
             {
-                va_errorMessage("%s has no function %s\n", driver_path, DRIVER_INIT_FUNC);
+                va_errorMessage("%s has no function %s\n", driver_path, VA_DRIVER_INIT_FUNC_S);
                 dlclose(handle);
             }
             else
