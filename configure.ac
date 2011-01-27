@@ -22,7 +22,7 @@
 
 # libva package version number, (as distinct from shared library version)
 m4_define([libva_major_version], [0])
-m4_define([libva_minor_version], [31])
+m4_define([libva_minor_version], [32])
 m4_define([libva_micro_version], [1])
 
 m4_define([libva_version],
