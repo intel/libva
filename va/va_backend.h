@@ -378,15 +378,28 @@ struct VADriverVTable
 		VADriverContextP ctx,
                 VASurfaceID surface
         );
-
-        /* Optional: GLX support hooks */
-        struct VADriverVTableGLX *glx;
 };
 
 struct VADriverContext
 {
     void *pDriverData;
-    struct VADriverVTable vtable;
+
+    /**
+     * The core VA implementation hooks.
+     *
+     * This structure is allocated from libva with calloc().
+     */
+    struct VADriverVTable *vtable;
+
+    /**
+     * The VA/GLX implementation hooks.
+     *
+     * This structure is intended for drivers that implement the
+     * VA/GLX API. The driver implementation is responsible for the
+     * allocation and deallocation of this structure.
+     */
+    struct VADriverVTableGLX *vtable_glx;
+
     void *vtable_tpi; /* the structure is malloc-ed */
 
     void *native_dpy;
