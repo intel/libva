@@ -48,6 +48,8 @@
 #define IMAGE_ID_OFFSET                 0x0a000000
 #define SUBPIC_ID_OFFSET                0x10000000
 
+#define HAS_VC1(ctx)    (IS_GEN6((ctx)->intel.device_id))
+
 enum {
     I965_SURFACETYPE_RGBA = 1,
     I965_SURFACETYPE_YUV,
@@ -119,7 +121,7 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
                          VAProfile *profile_list,       /* out */
                          int *num_profiles)             /* out */
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_driver_data * const i965 = i965_driver_data(ctx);
     int i = 0;
 
     profile_list[i++] = VAProfileMPEG2Simple;
@@ -128,7 +130,7 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
     profile_list[i++] = VAProfileH264Main;
     profile_list[i++] = VAProfileH264High;
 
-    if (IS_GEN6(i965->intel.device_id)) {
+    if (HAS_VC1(i965)) {
         profile_list[i++] = VAProfileVC1Simple;
         profile_list[i++] = VAProfileVC1Main;
         profile_list[i++] = VAProfileVC1Advanced;
@@ -147,39 +149,36 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
                             VAEntrypoint *entrypoint_list,      /* out */
                             int *num_entrypoints)               /* out */
 {
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
+    struct i965_driver_data * const i965 = i965_driver_data(ctx);
+    int n = 0;
 
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
-        *num_entrypoints = 1;
-        entrypoint_list[0] = VAEntrypointVLD;
+        entrypoint_list[n++] = VAEntrypointVLD;
         break;
 
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
-        *num_entrypoints = 1;
-        entrypoint_list[0] = VAEntrypointVLD;
+        entrypoint_list[n++] = VAEntrypointVLD;
         break;
 
     case VAProfileVC1Simple:
     case VAProfileVC1Main:
     case VAProfileVC1Advanced:
-        *num_entrypoints = 1;
-        entrypoint_list[0] = VAEntrypointVLD;
+        if (HAS_VC1(i965))
+            entrypoint_list[n++] = VAEntrypointVLD;
         break;
 
     default:
-        vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
-        *num_entrypoints = 0;
         break;
     }
 
     /* If the assert fails then I965_MAX_ENTRYPOINTS needs to be bigger */
-    assert(*num_entrypoints <= I965_MAX_ENTRYPOINTS);
-
-    return vaStatus;
+    assert(n <= I965_MAX_ENTRYPOINTS);
+    *num_entrypoints = n;
+    return n > 0 ? VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
 }
 
 VAStatus 
@@ -248,7 +247,7 @@ i965_CreateConfig(VADriverContextP ctx,
                   int num_attribs,
                   VAConfigID *config_id)		/* out */
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_driver_data * const i965 = i965_driver_data(ctx);
     struct object_config *obj_config;
     int configID;
     int i;
@@ -279,7 +278,7 @@ i965_CreateConfig(VADriverContextP ctx,
     case VAProfileVC1Simple:
     case VAProfileVC1Main:
     case VAProfileVC1Advanced:
-        if (VAEntrypointVLD == entrypoint) {
+        if (HAS_VC1(i965) && VAEntrypointVLD == entrypoint) {
             vaStatus = VA_STATUS_SUCCESS;
         } else {
             vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
