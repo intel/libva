@@ -92,6 +92,10 @@ struct intel_driver_data
     struct intel_batchbuffer *batch;
     struct intel_batchbuffer *batch_bcs;
     dri_bufmgr *bufmgr;
+
+    unsigned int has_exec2  : 1; /* Flag: has execbuffer2? */
+    unsigned int has_bsd    : 1; /* Flag: has bitstream decoder for H.264? */
+    unsigned int has_blt    : 1; /* Flag: has BLT unit? */
 };
 
 Bool intel_driver_init(VADriverContextP ctx);
