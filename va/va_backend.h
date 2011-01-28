@@ -379,12 +379,6 @@ struct VADriverVTable
                 VASurfaceID surface
         );
 
-        VAStatus (*vaGetEGLClientBufferFromSurface) (
-                VADriverContextP ctx,
-                VASurfaceID surface,
-                void **buffer
-        );
-
         /* Optional: GLX support hooks */
         struct VADriverVTableGLX *glx;
 };
@@ -394,6 +388,7 @@ struct VADriverContext
     void *pDriverData;
     struct VADriverVTable vtable;
     void *vtable_tpi; /* the structure is malloc-ed */
+    void *vtable_egl;
 
     void *native_dpy;
     int x11_screen;

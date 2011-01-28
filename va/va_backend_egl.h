@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+ * Copyright (C) 2009 Splitted-Desktop Systems. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -22,29 +22,19 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "va.h"
-#include "va_backend_egl.h"
-#include "va_egl.h"
+#ifndef VA_BACKEND_EGL_H
+#define VA_BACKEND_EGL_H
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
+#include <va/va.h>
+#include <va/va_backend.h>
 
-VAStatus vaGetEGLClientBufferFromSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    EGLClientBuffer *buffer /* out*/
-)
-{
-  VADriverContextP ctx;
-  struct VADriverVTableEGL *va_egl;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
+struct VADriverVTableEGL {
+    /* Get EGL ClientBufer buffer index and device id from surface id*/
+    VAStatus (*vaGetEGLClientBufferFromSurface) (
+        VADriverContextP ctx,
+        VASurfaceID surface,
+        void **buffer
+    );
+};
 
-  va_egl = ( struct VADriverVTableEGL *)ctx->vtable_egl;
-  if (va_egl && va_egl->vaGetEGLClientBufferFromSurface) {
-      return va_egl->vaGetEGLClientBufferFromSurface( ctx, surface, buffer);
-  } else
-      return VA_STATUS_ERROR_UNIMPLEMENTED;
-}
-  
-  
+#endif /* VA_BACKEND_EGL_H */
