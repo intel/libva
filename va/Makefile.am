@@ -74,7 +74,7 @@ libva_glx_backend      =
 libva_glx_backenddir   =
 endif
 
-libva_egl_la_SOURCES = va_egl.c
+libva_egl_la_SOURCES = egl/va_egl.c
 libva_egl_ladir = $(libdir)
 libva_egl_la_LDFLAGS = $(LDADD) -no-undefined
 libva_egl_la_LIBADD = $(libvacorelib) -ldl
