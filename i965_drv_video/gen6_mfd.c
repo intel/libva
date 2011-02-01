@@ -1032,6 +1032,8 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
         }
     }
 
+    gen6_mfd_avc_frame_store_index(ctx, pic_param);
+
     /* Current decoded picture */
     va_pic = &pic_param->CurrPic;
     assert(!(va_pic->flags & VA_PICTURE_H264_INVALID));
@@ -1104,7 +1106,6 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     gen6_mfd_context->mpr_row_store_scratch_buffer.valid = 1;
 
     gen6_mfd_context->bitplane_read_buffer.valid = 0;
-    gen6_mfd_avc_frame_store_index(ctx, pic_param);
 }
 
 static void
