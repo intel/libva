@@ -1,5 +1,5 @@
 #%define moduledir %(pkg-config xorg-server --variable=moduledir)
-%define libversion 1.0.9
+%define libversion 1.0.10
 
 Name:           libva
 Version:        %{libversion}

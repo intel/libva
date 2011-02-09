@@ -29,7 +29,7 @@ m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
 
 # if the library source code has changed, increment revision
-m4_define([libva_lt_revision], [9])
+m4_define([libva_lt_revision], [10])
 # if any interface was added/removed/changed, then inc current, reset revision
 m4_define([libva_lt_current], [1])
 # if any interface was added since last public release, then increment age
@@ -134,10 +134,10 @@ fi
 AC_SUBST(GL_DEPS_CFLAGS)
 AC_SUBST(GL_DEPS_LIBS)
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
-AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
 # TBD: Check for EGL
 USE_EGL="yes"
+AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
 
 # Make sure drivers use the correctly versioned __vaDriverInit*() function name
