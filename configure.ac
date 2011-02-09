@@ -134,6 +134,11 @@ fi
 AC_SUBST(GL_DEPS_CFLAGS)
 AC_SUBST(GL_DEPS_LIBS)
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
+AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
+
+# TBD: Check for EGL
+USE_EGL="yes"
+
 
 # Make sure drivers use the correctly versioned __vaDriverInit*() function name
 VA_DRIVER_INIT_FUNC="__vaDriverInit_${LIBVA_MAJOR_VERSION}_${LIBVA_MINOR_VERSION}"
@@ -202,6 +207,8 @@ AS_IF([test x$enable_dummy_driver = xyes], [DRIVERS="dummy $DRIVERS"])
 echo " • Drivers: ${DRIVERS}"
 
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
+AS_IF([test x$USE_EGL = xyes], [BACKENDS="egl $BACKENDS"])
+
 BACKENDS="x11 $BACKENDS"
 AS_IF([test x$enable_dummy_backend = xyes], [BACKENDS="dummy 
 $BACKENDS"])

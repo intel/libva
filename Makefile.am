@@ -30,10 +30,14 @@ if BUILD_I965_DRIVER
 SUBDIRS += i965_drv_video
 endif
 
-pcfiles = libva.pc libva-tpi.pc libva-egl.pc
+pcfiles = libva.pc libva-tpi.pc
 pcfiles += libva-x11.pc
 if USE_GLX
 pcfiles += libva-glx.pc
+endif
+
+if USE_EGL
+pcfiles += libva-egl.pc
 endif
 
 pkgconfigdir = @pkgconfigdir@

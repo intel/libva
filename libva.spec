@@ -2,7 +2,7 @@
 %define libversion 1.0.8
 
 Name:           libva
-Version:        %{libversion}
+Version:        %{libversion}MFLD
 Release:        0.0
 License:        MIT
 Source:         %{name}-%{version}.tar.bz2

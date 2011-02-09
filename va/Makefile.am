@@ -74,13 +74,17 @@ libva_glx_backend      =
 libva_glx_backenddir   =
 endif
 
-# tbd: make it configurable?
+if USE_EGL
 libva_egl_backend      = libva-egl.la
 libva_egl_backenddir   = egl
 libva_egl_la_SOURCES =
 libva_egl_la_LIBADD  = $(libvacorelib) egl/libva_egl.la libva-x11.la $(GL_DEPS_LIBS) -ldl
 libva_egl_la_LDFLAGS = $(LDADD)
 libva_egl_la_DEPENDENCIES = $(libvacorelib) egl/libva_egl.la libva-x11.la
+else
+libva_egl_backend      =
+libva_egl_backenddir   =
+endif
 
 lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend) $(libva_egl_backend)
 
