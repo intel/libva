@@ -15,6 +15,7 @@ typedef struct _nal_unit {
   int nal_unit_type;
   unsigned char *last_rbsp_byte;
 } nal_unit;
+
  typedef struct _slice_header {
   int first_mb_in_slice;
 } slice_header;
@@ -32,9 +33,8 @@ static int input_remain = 0;
 static int ring_pos = 0;
 static int nal_pos;
 static int nal_bit;
-static int frame_no = 0, cur_frame_no = 0;
+static int frame_no = 0;
 
-#define SLICE_NUM 4 
 #define RING_MOD  ((RING_BUF_SIZE)-1)
 #define HALF_RING ((RING_BUF_SIZE)/2)
 
@@ -178,10 +178,8 @@ int va_FoolGetFrame(FILE *input_fp, char *frame_buf)
     int i = 0, frame_pos = 0;
     static slice_header sh; 
     static nal_unit nalu;
+    char nal_head[4] = {0x00,0x00,0x00,0x01};
 
-    /* save the current frame number */
-    cur_frame_no = frame_no;
-    
     /* read the clip , here is the first frame,
      * &let the clip go on frame by frame
      */
@@ -189,18 +187,24 @@ int va_FoolGetFrame(FILE *input_fp, char *frame_buf)
         input_read(input_fp, ring_buf,RING_BUF_SIZE);
 
     while (get_next_nal_unit(input_fp, &nalu)) {
-        if (nalu.nal_unit_type == 1 || nalu.nal_unit_type == 5) {
+        if (nalu.nal_unit_type == 7 || nalu.nal_unit_type == 8) {
+            memcpy(frame_buf+frame_pos, nal_head, sizeof(char)*4);
+		    frame_pos = frame_pos + 4;
+            memcpy(frame_buf+frame_pos, nal_buf, sizeof(char)*(nalu.NumBytesInNALunit));
+            frame_pos += nalu.NumBytesInNALunit;
+        }
+        else if (nalu.nal_unit_type == 1 || nalu.nal_unit_type == 5) {
             decode_slice_header(&sh);
             if (0 == sh.first_mb_in_slice) {
                 ++frame_no;
-                frame_pos = 0;
             }
-            if (frame_no > (cur_frame_no+1))
-                break;
-            memcpy(frame_buf+frame_pos, nal_buf+1, sizeof(char)*(nalu.NumBytesInNALunit-1));
+            memcpy(frame_buf+frame_pos, nal_head, sizeof(char)*4);
+		    frame_pos = frame_pos + 4;
+            memcpy(frame_buf+frame_pos, nal_buf, sizeof(char)*(nalu.NumBytesInNALunit));
             frame_pos += nalu.NumBytesInNALunit;
+		    break;
         }
     }
     
-    return 1; 
+    return frame_pos; 
 }

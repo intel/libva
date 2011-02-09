@@ -56,8 +56,12 @@
  * rev 0.31 (09/02/2009 Gwenole Beauchesne) - VC-1/H264 fields change for VDPAU and XvBA backend
  *                                       Application needs to relink with the new library.
  *
- * rev 0.31.1 (03/29/2009) - Data structure for JPEG encode
- *                                      
+ * rev 0.31.1 (03/29/2009)              - Data structure for JPEG encode
+ * rev 0.31.2 (01/13/2011 Anthony Pabon)- Added a flag to indicate Subpicture coordinates are screen
+ *                                        screen relative rather than source video relative.
+ * rev 0.32.0 (01/13/2011 Xiang Haihao) - Add profile into VAPictureParameterBufferVC1
+ *                                        update VAAPI to 0.32.0 
+ *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
  *  Waldo Bastian (Intel), Matt Sottek (Intel),  Austin Yuan (Intel), and Gwenole Beauchesne (SDS)
@@ -1689,8 +1693,9 @@ int vaMaxNumSubpictureFormats (
 );
 
 /* flags for subpictures */
-#define VA_SUBPICTURE_CHROMA_KEYING	0x0001
-#define VA_SUBPICTURE_GLOBAL_ALPHA	0x0002
+#define VA_SUBPICTURE_CHROMA_KEYING			0x0001
+#define VA_SUBPICTURE_GLOBAL_ALPHA			0x0002
+#define VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD	0x0004
 /* 
  * Query supported subpicture formats 
  * The caller must provide a "format_list" array that can hold at
@@ -1699,8 +1704,10 @@ int vaMaxNumSubpictureFormats (
  * number of formats returned in "format_list" is returned in "num_formats".
  *  flags: returned value to indicate addtional capabilities
  *         VA_SUBPICTURE_CHROMA_KEYING - supports chroma-keying
- *         VA_SUBPICTURE_GLOBAL_ALPHA - supports global alpha  
+ *         VA_SUBPICTURE_GLOBAL_ALPHA - supports global alpha
+ * 	   VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD - supports unscaled screen relative subpictures for On Screen Display
  */
+
 VAStatus vaQuerySubpictureFormats (
     VADisplay dpy,
     VAImageFormat *format_list,	/* out */
@@ -1784,7 +1791,7 @@ VAStatus vaAssociateSubpicture (
     unsigned short dest_width,
     unsigned short dest_height,
     /*
-     * whether to enable chroma-keying or global-alpha
+     * whether to enable chroma-keying, global-alpha, or screen relative mode
      * see VA_SUBPICTURE_XXX values
      */
     unsigned int flags

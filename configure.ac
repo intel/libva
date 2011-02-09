@@ -162,6 +162,7 @@ AC_OUTPUT([
 	va/va_version.h
 	va/x11/Makefile
 	va/glx/Makefile
+	va/egl/Makefile
 	va/dummy/Makefile
 	dummy_drv_video/Makefile
 	i965_drv_video/Makefile
@@ -181,6 +182,7 @@ AC_OUTPUT([
 	libva.pc
 	libva-x11.pc
 	libva-glx.pc
+	libva-egl.pc
 	libva-tpi.pc
 ])
 
