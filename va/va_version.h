@@ -37,21 +37,21 @@
  *
  * The minor version of the VA library (2, if %VA_VERSION is 1.2.3)
  */
-#define VA_MINOR_VERSION   (31)
+#define VA_MINOR_VERSION   (32)
 
 /**
  * VA_MICRO_VERSION:
  *
  * The micro version of the VA library (3, if %VA_VERSION is 1.2.3)
  */
-#define VA_MICRO_VERSION   (2)
+#define VA_MICRO_VERSION   (0)
 
 /**
  * VA_VERSION:
  *
  * The full version of the VA library, like 1.2.3
  */
-#define VA_VERSION         0.31.2
+#define VA_VERSION         0.32.0
 
 /**
  * VA_VERSION_S:
@@ -59,7 +59,7 @@
  * The full version of the VA library, in string form (suited for
  * string concatenation)
  */
-#define VA_VERSION_S       "0.31.2"
+#define VA_VERSION_S       "0.32.0"
 
 /**
  * VA_VERSION_HEX:

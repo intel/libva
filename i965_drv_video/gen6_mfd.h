@@ -34,11 +34,28 @@
 #include <i915_drm.h>
 #include <intel_bufmgr.h>
 
-struct gen6_mfd_surface
+struct gen6_avc_surface
 {
     dri_bo *dmv_top;
     dri_bo *dmv_bottom;
     int dmv_bottom_flag;
+};
+
+#define GEN6_VC1_I_PICTURE              0
+#define GEN6_VC1_P_PICTURE              1
+#define GEN6_VC1_B_PICTURE              2
+#define GEN6_VC1_BI_PICTURE             3
+#define GEN6_VC1_SKIPPED_PICTURE        4
+
+#define GEN6_VC1_SIMPLE_PROFILE         0
+#define GEN6_VC1_MAIN_PROFILE           1
+#define GEN6_VC1_ADVANCED_PROFILE       2
+#define GEN6_VC1_RESERVED_PROFILE       3
+
+struct gen6_vc1_surface
+{
+    dri_bo *dmv;
+    int picture_type;
 };
 
 #define MAX_MFX_REFERENCE_SURFACES        16

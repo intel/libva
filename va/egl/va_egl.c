@@ -22,6 +22,38 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+/*
+ * Initial EGL backend, and subject to change
+ *
+ * Gstreamer gst-gltexture has a framework to support associating a buffer
+ * to a texture via EGL_KHR_image_base and GL_OES_EGL_image_external.
+ *
+ * EGL_KHR_image_base:
+ *   EGLImageKHR eglCreateImageKHR(
+ *                           EGLDisplay dpy,
+ *                           EGLContext ctx,
+ *                           EGLenum target,
+ *                           EGLClientBuffer buffer,
+ *                           const EGLint *attrib_list)
+ *
+ * GL_OES_EGL_image_external:
+ * This extension provides a mechanism for creating EGLImage texture targets
+ * from EGLImages.  This extension defines a new texture target TEXTURE_EXTERNAL_OES.
+ * This texture target can only be specified using an EGLImage.
+ * The first eglCreateImageKHR will create an EGLImage from an EGLClientBufferm, and with
+ * an EGLImage, gst-gltexture can use GL_OES_EGL_image_external extension to create textures.
+ *
+ * eglCreateImageKHR and GL_OES_EGL_image_external are all called directly from gst-gltexture,
+ * thus the simplest way to support gst-gltexture is defining a new API to pass EGLClientBuffer
+ * to gst-gltexture.
+ *
+ * EGLClientBuffer is gfx/video driver implementation specific (?). It means we need to pass up
+ * the low-level buffer ID (or handle) of the decoded surface to gst-gltexture, and gst-gltexture
+ * then pass down it to gfx driver.  
+ *
+ * Bellow API vaGetEGLClientBufferFromSurface is for this purpose
+ */
+
 #include "va.h"
 #include "va_backend_egl.h"
 #include "va_egl.h"
@@ -40,9 +72,9 @@ VAStatus vaGetEGLClientBufferFromSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  va_egl = ( struct VADriverVTableEGL *)ctx->vtable_egl;
+  va_egl = (struct VADriverVTableEGL *)ctx->vtable_egl;
   if (va_egl && va_egl->vaGetEGLClientBufferFromSurface) {
-      return va_egl->vaGetEGLClientBufferFromSurface( ctx, surface, buffer);
+      return va_egl->vaGetEGLClientBufferFromSurface(ctx, surface, buffer);
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

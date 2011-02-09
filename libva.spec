@@ -4,7 +4,7 @@
 Name:           libva
 Version:        %{libversion}MFLD
 Release:        0.0
-License:        Intel Proprietary
+License:        MIT
 Source:         %{name}-%{version}.tar.bz2
 NoSource:	0
 Group:          Development/Libraries

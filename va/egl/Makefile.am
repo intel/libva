@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (C) 2009 Splitted-Desktop Systems. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,29 +20,19 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AUTOMAKE_OPTIONS = foreign
+AM_CFLAGS = -DLINUX -I$(top_srcdir)/va -I$(top_srcdir)/va/x11
 
-SUBDIRS = va test
-if BUILD_DUMMY_DRIVER
-SUBDIRS += dummy_drv_video
-endif
-if BUILD_I965_DRIVER
-SUBDIRS += i965_drv_video
-endif
+source_c = \
+	va_egl.c		
 
-pcfiles = libva.pc libva-tpi.pc
-pcfiles += libva-x11.pc
-if USE_GLX
-pcfiles += libva-glx.pc
-endif
+source_h = \
+	va_egl.h		\
+	va_backend_egl.h
 
-if USE_EGL
-pcfiles += libva-egl.pc
-endif
+source_h_priv = 
 
-pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = $(pcfiles)
-
-EXTRA_DIST = libva.pc.in libva-tpi.pc.in libva-x11.pc.in libva-glx.pc.in libva-egl.pc.in
-
-CLEANFILES = $(pcfiles)
+noinst_LTLIBRARIES	 = libva_egl.la
+libva_eglincludedir	 = ${includedir}/va
+libva_eglinclude_HEADERS = $(source_h)
+libva_egl_la_SOURCES	 = $(source_c)
+noinst_HEADERS		 = $(source_h_priv)

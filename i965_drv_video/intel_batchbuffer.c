@@ -67,12 +67,14 @@ intel_batchbuffer_init(struct intel_driver_data *intel)
     intel->batch->run = drm_intel_bo_mrb_exec;
     intel_batchbuffer_reset(intel->batch);
 
-    intel->batch_bcs = calloc(1, sizeof(*(intel->batch_bcs)));
-    assert(intel->batch_bcs);
-    intel->batch_bcs->intel = intel;
-    intel->batch_bcs->flag = I915_EXEC_BSD;
-    intel->batch_bcs->run = drm_intel_bo_mrb_exec;
-    intel_batchbuffer_reset(intel->batch_bcs);
+    if (intel->has_bsd) {
+        intel->batch_bcs = calloc(1, sizeof(*(intel->batch_bcs)));
+        assert(intel->batch_bcs);
+        intel->batch_bcs->intel = intel;
+        intel->batch_bcs->flag = I915_EXEC_BSD;
+        intel->batch_bcs->run = drm_intel_bo_mrb_exec;
+        intel_batchbuffer_reset(intel->batch_bcs);
+    }
 
     return True;
 }

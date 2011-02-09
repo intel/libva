@@ -181,8 +181,8 @@ struct VADriverVTable
 	VAStatus (*vaQuerySurfaceError) (
 		VADriverContextP ctx,
 		VASurfaceID render_target,
-        VAStatus error_status,
-        void **error_info /*out*/
+                VAStatus error_status,
+                void **error_info /*out*/
 	);
 
 	VAStatus (*vaPutSurface) (
@@ -378,17 +378,45 @@ struct VADriverVTable
 		VADriverContextP ctx,
                 VASurfaceID surface
         );
-
-        /* Optional: GLX support hooks */
-        struct VADriverVTableGLX *glx;
 };
 
 struct VADriverContext
 {
     void *pDriverData;
-    struct VADriverVTable vtable;
-    void *vtable_tpi; /* the structure is malloc-ed */
-    void *vtable_egl;
+
+    /**
+     * The core VA implementation hooks.
+     *
+     * This structure is allocated from libva with calloc().
+     */
+    struct VADriverVTable *vtable;
+
+    /**
+     * The VA/GLX implementation hooks.
+     *
+     * This structure is intended for drivers that implement the
+     * VA/GLX API. The driver implementation is responsible for the
+     * allocation and deallocation of this structure.
+     */
+    struct VADriverVTableGLX *vtable_glx;
+
+    /**
+     * The VA/EGL implementation hooks.
+     *
+     * This structure is intended for drivers that implement the
+     * VA/EGL API. The driver implementation is responsible for the
+     * allocation and deallocation of this structure.
+     */
+    struct VADriverVTableEGL *vtable_egl;
+
+    /**
+     * The third-party/private implementation hooks.
+     *
+     * This structure is intended for drivers that implement the
+     * private API. The driver implementation is responsible for the
+     * allocation and deallocation of this structure.
+     */
+    void *vtable_tpi; 
 
     void *native_dpy;
     int x11_screen;
@@ -406,6 +434,8 @@ struct VADriverContext
     
     void *dri_state;
     void *glx;				/* opaque for GLX code */
+    
+    unsigned long reserved[45];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */

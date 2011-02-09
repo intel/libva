@@ -803,7 +803,7 @@ end:
 /* ========================================================================= */
 
 #define INVOKE(ctx, func, args) do {                    \
-        VADriverVTableGLXP vtable = (ctx)->vtable.glx;  \
+        VADriverVTableGLXP vtable = (ctx)->vtable_glx;  \
         if (!vtable->va##func##GLX)                     \
             return VA_STATUS_ERROR_UNIMPLEMENTED;       \
                                                         \
@@ -937,7 +937,7 @@ associate_surface(
         return status;
 
     x11_trap_errors();
-    status = ctx->vtable.vaPutSurface(
+    status = ctx->vtable->vaPutSurface(
         ctx,
         surface,
         (void *)pSurfaceGLX->pixmap,
@@ -962,7 +962,7 @@ sync_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     if (pSurfaceGLX->surface == VA_INVALID_SURFACE)
         return VA_STATUS_ERROR_INVALID_SURFACE;
 
-    return ctx->vtable.vaSyncSurface(ctx, pSurfaceGLX->surface);
+    return ctx->vtable->vaSyncSurface(ctx, pSurfaceGLX->surface);
 }
 
 static inline VAStatus
@@ -1058,7 +1058,7 @@ VAStatus va_glx_init_context(VADriverContextP ctx)
     if (glx_ctx->is_initialized)
         return VA_STATUS_SUCCESS;
 
-    if (ctx->vtable.glx && ctx->vtable.glx->vaCopySurfaceGLX) {
+    if (ctx->vtable_glx && ctx->vtable_glx->vaCopySurfaceGLX) {
         vtable->vaCreateSurfaceGLX      = vaCreateSurfaceGLX_impl_driver;
         vtable->vaDestroySurfaceGLX     = vaDestroySurfaceGLX_impl_driver;
         vtable->vaCopySurfaceGLX        = vaCopySurfaceGLX_impl_driver;

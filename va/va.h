@@ -59,7 +59,9 @@
  * rev 0.31.1 (03/29/2009)              - Data structure for JPEG encode
  * rev 0.31.2 (01/13/2011 Anthony Pabon)- Added a flag to indicate Subpicture coordinates are screen
  *                                        screen relative rather than source video relative.
- *                                      
+ * rev 0.32.0 (01/13/2011 Xiang Haihao) - Add profile into VAPictureParameterBufferVC1
+ *                                        update VAAPI to 0.32.0 
+ *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
  *  Waldo Bastian (Intel), Matt Sottek (Intel),  Austin Yuan (Intel), and Gwenole Beauchesne (SDS)
@@ -870,6 +872,7 @@ typedef struct _VAPictureParameterBufferVC1
             unsigned int syncmarker	: 1; /* METADATA::SYNCMARKER */
             unsigned int rangered	: 1; /* METADATA::RANGERED */
             unsigned int max_b_frames	: 3; /* METADATA::MAXBFRAMES */
+            unsigned int profile	: 2; /* SEQUENCE_LAYER::PROFILE or The MSB of METADATA::PROFILE */
         } bits;
         unsigned int value;
     } sequence_fields;

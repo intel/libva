@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "config.h"
 #include <va/va_backend.h>
 
 #include "dummy_drv_video.h"
@@ -1193,8 +1194,9 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus __vaDriverInit_0_31(  VADriverContextP ctx )
+VAStatus VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
 {
+    struct VADriverVTable * const vtable = ctx->vtable;
     object_base_p obj;
     int result;
     struct dummy_driver_data *driver_data;
@@ -1210,50 +1212,50 @@ VAStatus __vaDriverInit_0_31(  VADriverContextP ctx )
     ctx->max_display_attributes = DUMMY_MAX_DISPLAY_ATTRIBUTES;
     ctx->str_vendor = DUMMY_STR_VENDOR;
 
-    ctx->vtable.vaTerminate = dummy_Terminate;
-    ctx->vtable.vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
-    ctx->vtable.vaQueryConfigProfiles = dummy_QueryConfigProfiles;
-    ctx->vtable.vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
-    ctx->vtable.vaQueryConfigAttributes = dummy_QueryConfigAttributes;
-    ctx->vtable.vaCreateConfig = dummy_CreateConfig;
-    ctx->vtable.vaDestroyConfig = dummy_DestroyConfig;
-    ctx->vtable.vaGetConfigAttributes = dummy_GetConfigAttributes;
-    ctx->vtable.vaCreateSurfaces = dummy_CreateSurfaces;
-    ctx->vtable.vaDestroySurfaces = dummy_DestroySurfaces;
-    ctx->vtable.vaCreateContext = dummy_CreateContext;
-    ctx->vtable.vaDestroyContext = dummy_DestroyContext;
-    ctx->vtable.vaCreateBuffer = dummy_CreateBuffer;
-    ctx->vtable.vaBufferSetNumElements = dummy_BufferSetNumElements;
-    ctx->vtable.vaMapBuffer = dummy_MapBuffer;
-    ctx->vtable.vaUnmapBuffer = dummy_UnmapBuffer;
-    ctx->vtable.vaDestroyBuffer = dummy_DestroyBuffer;
-    ctx->vtable.vaBeginPicture = dummy_BeginPicture;
-    ctx->vtable.vaRenderPicture = dummy_RenderPicture;
-    ctx->vtable.vaEndPicture = dummy_EndPicture;
-    ctx->vtable.vaSyncSurface = dummy_SyncSurface;
-    ctx->vtable.vaQuerySurfaceStatus = dummy_QuerySurfaceStatus;
-    ctx->vtable.vaPutSurface = dummy_PutSurface;
-    ctx->vtable.vaQueryImageFormats = dummy_QueryImageFormats;
-    ctx->vtable.vaCreateImage = dummy_CreateImage;
-    ctx->vtable.vaDeriveImage = dummy_DeriveImage;
-    ctx->vtable.vaDestroyImage = dummy_DestroyImage;
-    ctx->vtable.vaSetImagePalette = dummy_SetImagePalette;
-    ctx->vtable.vaGetImage = dummy_GetImage;
-    ctx->vtable.vaPutImage = dummy_PutImage;
-    ctx->vtable.vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
-    ctx->vtable.vaCreateSubpicture = dummy_CreateSubpicture;
-    ctx->vtable.vaDestroySubpicture = dummy_DestroySubpicture;
-    ctx->vtable.vaSetSubpictureImage = dummy_SetSubpictureImage;
-    ctx->vtable.vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
-    ctx->vtable.vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
-    ctx->vtable.vaAssociateSubpicture = dummy_AssociateSubpicture;
-    ctx->vtable.vaDeassociateSubpicture = dummy_DeassociateSubpicture;
-    ctx->vtable.vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
-    ctx->vtable.vaGetDisplayAttributes = dummy_GetDisplayAttributes;
-    ctx->vtable.vaSetDisplayAttributes = dummy_SetDisplayAttributes;
-    ctx->vtable.vaLockSurface = dummy_LockSurface;
-    ctx->vtable.vaUnlockSurface = dummy_UnlockSurface;
-    ctx->vtable.vaBufferInfo = dummy_BufferInfo;
+    vtable->vaTerminate = dummy_Terminate;
+    vtable->vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
+    vtable->vaQueryConfigProfiles = dummy_QueryConfigProfiles;
+    vtable->vaQueryConfigEntrypoints = dummy_QueryConfigEntrypoints;
+    vtable->vaQueryConfigAttributes = dummy_QueryConfigAttributes;
+    vtable->vaCreateConfig = dummy_CreateConfig;
+    vtable->vaDestroyConfig = dummy_DestroyConfig;
+    vtable->vaGetConfigAttributes = dummy_GetConfigAttributes;
+    vtable->vaCreateSurfaces = dummy_CreateSurfaces;
+    vtable->vaDestroySurfaces = dummy_DestroySurfaces;
+    vtable->vaCreateContext = dummy_CreateContext;
+    vtable->vaDestroyContext = dummy_DestroyContext;
+    vtable->vaCreateBuffer = dummy_CreateBuffer;
+    vtable->vaBufferSetNumElements = dummy_BufferSetNumElements;
+    vtable->vaMapBuffer = dummy_MapBuffer;
+    vtable->vaUnmapBuffer = dummy_UnmapBuffer;
+    vtable->vaDestroyBuffer = dummy_DestroyBuffer;
+    vtable->vaBeginPicture = dummy_BeginPicture;
+    vtable->vaRenderPicture = dummy_RenderPicture;
+    vtable->vaEndPicture = dummy_EndPicture;
+    vtable->vaSyncSurface = dummy_SyncSurface;
+    vtable->vaQuerySurfaceStatus = dummy_QuerySurfaceStatus;
+    vtable->vaPutSurface = dummy_PutSurface;
+    vtable->vaQueryImageFormats = dummy_QueryImageFormats;
+    vtable->vaCreateImage = dummy_CreateImage;
+    vtable->vaDeriveImage = dummy_DeriveImage;
+    vtable->vaDestroyImage = dummy_DestroyImage;
+    vtable->vaSetImagePalette = dummy_SetImagePalette;
+    vtable->vaGetImage = dummy_GetImage;
+    vtable->vaPutImage = dummy_PutImage;
+    vtable->vaQuerySubpictureFormats = dummy_QuerySubpictureFormats;
+    vtable->vaCreateSubpicture = dummy_CreateSubpicture;
+    vtable->vaDestroySubpicture = dummy_DestroySubpicture;
+    vtable->vaSetSubpictureImage = dummy_SetSubpictureImage;
+    vtable->vaSetSubpictureChromakey = dummy_SetSubpictureChromakey;
+    vtable->vaSetSubpictureGlobalAlpha = dummy_SetSubpictureGlobalAlpha;
+    vtable->vaAssociateSubpicture = dummy_AssociateSubpicture;
+    vtable->vaDeassociateSubpicture = dummy_DeassociateSubpicture;
+    vtable->vaQueryDisplayAttributes = dummy_QueryDisplayAttributes;
+    vtable->vaGetDisplayAttributes = dummy_GetDisplayAttributes;
+    vtable->vaSetDisplayAttributes = dummy_SetDisplayAttributes;
+    vtable->vaLockSurface = dummy_LockSurface;
+    vtable->vaUnlockSurface = dummy_UnlockSurface;
+    vtable->vaBufferInfo = dummy_BufferInfo;
 
     driver_data = (struct dummy_driver_data *) malloc( sizeof(*driver_data) );
     ctx->pDriverData = (void *) driver_data;
