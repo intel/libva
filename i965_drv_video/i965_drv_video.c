@@ -927,6 +927,9 @@ i965_BufferSetNumElements(VADriverContextP ctx,
         vaStatus = VA_STATUS_ERROR_UNKNOWN;
     } else {
         obj_buffer->num_elements = num_elements;
+        if (obj_buffer->buffer_store != NULL) {
+            obj_buffer->buffer_store->num_elements = num_elements; 
+        }
     }
 
     return vaStatus;
