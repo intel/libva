@@ -167,6 +167,7 @@ struct i965_driver_data
     struct object_heap subpic_heap;
     struct i965_media_state media_state;
     struct i965_render_state render_state;
+    void *pp_context;
 };
 
 #define NEW_CONFIG_ID() object_heap_allocate(&i965->config_heap);

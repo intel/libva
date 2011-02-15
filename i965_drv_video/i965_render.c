@@ -2099,8 +2099,6 @@ i965_render_init(VADriverContextP ctx)
     assert(render_state->curbe.bo);
     render_state->curbe.upload = 0;
 
-    i965_post_processing_once_init(ctx);
-
     return True;
 }
 
@@ -2110,8 +2108,6 @@ i965_render_terminate(VADriverContextP ctx)
     int i;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
-
-    i965_post_processing_terminate(ctx);
 
     dri_bo_unreference(render_state->curbe.bo);
     render_state->curbe.bo = NULL;

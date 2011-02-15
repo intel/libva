@@ -1369,6 +1369,9 @@ i965_Init(VADriverContextP ctx)
     if (i965_media_init(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
 
+    if (i965_post_processing_init(ctx) == False)
+        return VA_STATUS_ERROR_UNKNOWN;
+
     if (i965_render_init(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
 
@@ -2015,6 +2018,9 @@ i965_Terminate(VADriverContextP ctx)
 
     if (i965_render_terminate(ctx) == False)
 	return VA_STATUS_ERROR_UNKNOWN;
+
+    if (i965_post_processing_terminate(ctx) == False)
+        return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_media_terminate(ctx) == False)
 	return VA_STATUS_ERROR_UNKNOWN;

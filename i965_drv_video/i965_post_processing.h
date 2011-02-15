@@ -142,9 +142,9 @@ i965_post_processing(VADriverContextP ctx,
                      unsigned short destw,
                      unsigned short desth,
                      unsigned int pp_index);
-void
-i965_post_processing_once_init(VADriverContextP ctx);
 Bool
 i965_post_processing_terminate(VADriverContextP ctx);
+Bool
+i965_post_processing_init(VADriverContextP ctx);
 
 #endif /* __I965_POST_PROCESSING_H__ */
