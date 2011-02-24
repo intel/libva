@@ -1736,7 +1736,7 @@ i965_PutSurface(VADriverContextP ctx,
      * will get here
      */
     obj_surface = SURFACE(surface);
-    if (obj_surface->bo == NULL)
+    if (!obj_surface || !obj_surface->bo)
         return VA_STATUS_SUCCESS;
 
     dri_drawable = dri_get_drawable(ctx, (Drawable)draw);
