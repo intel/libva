@@ -950,7 +950,15 @@ i965_MapBuffer(VADriverContextP ctx,
     assert(!(obj_buffer->buffer_store->bo && obj_buffer->buffer_store->buffer));
 
     if (NULL != obj_buffer->buffer_store->bo) {
-        dri_bo_map(obj_buffer->buffer_store->bo, 1);
+        unsigned int tiling, swizzle;
+
+        dri_bo_get_tiling(obj_buffer->buffer_store->bo, &tiling, &swizzle);
+
+        if (tiling != I915_TILING_NONE)
+            drm_intel_gem_bo_map_gtt(obj_buffer->buffer_store->bo);
+        else
+            dri_bo_map(obj_buffer->buffer_store->bo, 1);
+
         assert(obj_buffer->buffer_store->bo->virtual);
         *pbuf = obj_buffer->buffer_store->bo->virtual;
         vaStatus = VA_STATUS_SUCCESS;
@@ -974,7 +982,15 @@ i965_UnmapBuffer(VADriverContextP ctx, VABufferID buf_id)
     assert(!(obj_buffer->buffer_store->bo && obj_buffer->buffer_store->buffer));
 
     if (NULL != obj_buffer->buffer_store->bo) {
-        dri_bo_unmap(obj_buffer->buffer_store->bo);
+        unsigned int tiling, swizzle;
+
+        dri_bo_get_tiling(obj_buffer->buffer_store->bo, &tiling, &swizzle);
+
+        if (tiling != I915_TILING_NONE)
+            drm_intel_gem_bo_unmap_gtt(obj_buffer->buffer_store->bo);
+        else
+            dri_bo_unmap(obj_buffer->buffer_store->bo);
+
         vaStatus = VA_STATUS_SUCCESS;
     } else if (NULL != obj_buffer->buffer_store->buffer) {
         /* Do nothing */
@@ -1552,11 +1568,17 @@ get_image_i420(struct object_image *obj_image, uint8_t *image_data,
     const int Y = 0;
     const int U = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 2 : 1;
     const int V = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 1 : 2;
+    unsigned int tiling, swizzle;
 
     if (!obj_surface->bo)
         return;
 
-    dri_bo_map(obj_surface->bo, 0);
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+
+    if (tiling != I915_TILING_NONE)
+        drm_intel_gem_bo_map_gtt(obj_surface->bo);
+    else
+        dri_bo_map(obj_surface->bo, 0);
 
     if (!obj_surface->bo->virtual)
         return;
@@ -1591,7 +1613,10 @@ get_image_i420(struct object_image *obj_image, uint8_t *image_data,
                src[2], obj_surface->width / 2,
                rect->width / 2, rect->height / 2);
 
-    dri_bo_unmap(obj_surface->bo);
+    if (tiling != I915_TILING_NONE)
+        drm_intel_gem_bo_unmap_gtt(obj_surface->bo);
+    else
+        dri_bo_unmap(obj_surface->bo);
 }
 
 static void
@@ -1600,11 +1625,17 @@ get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
                const VARectangle *rect)
 {
     uint8_t *dst[2], *src[2];
+    unsigned int tiling, swizzle;
 
     if (!obj_surface->bo)
         return;
 
-    dri_bo_map(obj_surface->bo, 0);
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+
+    if (tiling != I915_TILING_NONE)
+        drm_intel_gem_bo_map_gtt(obj_surface->bo);
+    else
+        dri_bo_map(obj_surface->bo, 0);
 
     if (!obj_surface->bo->virtual)
         return;
@@ -1629,7 +1660,10 @@ get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
                src[1], obj_surface->width,
                rect->width, rect->height / 2);
 
-    dri_bo_unmap(obj_surface->bo);
+    if (tiling != I915_TILING_NONE)
+        drm_intel_gem_bo_unmap_gtt(obj_surface->bo);
+    else
+        dri_bo_unmap(obj_surface->bo);
 }
 
 VAStatus 
