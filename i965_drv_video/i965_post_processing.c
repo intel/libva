@@ -41,6 +41,9 @@
 #include "i965_render.h"
 #include "i965_drv_video.h"
 
+#define HAS_PP(ctx) (IS_IRONLAKE((ctx)->intel.device_id) ||     \
+                     IS_GEN6((ctx)->intel.device_id))
+
 struct pp_module
 {
     /* kernel */
@@ -76,21 +79,21 @@ static uint32_t pp_nv12_dndi_gen5[][4] = {
 #include "shaders/post_processing/nv12_dndi_nv12.g4b.gen5"
 };
 
-static void ironlake_pp_null_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                        unsigned short srcw, unsigned short srch,
-                                        unsigned short destw, unsigned short desth);
-static void ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                            unsigned short srcw, unsigned short srch,
-                                            unsigned short destw, unsigned short desth);
-static void ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                                unsigned short srcw, unsigned short srch,
-                                                unsigned short destw, unsigned short desth);
-static void ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                                  unsigned short srcw, unsigned short srch,
-                                                  unsigned short destw, unsigned short desth);
-static void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                             unsigned short srcw, unsigned short srch,
-                                             unsigned short destw, unsigned short desth);
+static void pp_null_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                               unsigned short srcw, unsigned short srch,
+                               unsigned short destw, unsigned short desth);
+static void pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                                   unsigned short srcw, unsigned short srch,
+                                   unsigned short destw, unsigned short desth);
+static void pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                                       unsigned short srcw, unsigned short srch,
+                                       unsigned short destw, unsigned short desth);
+static void pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                                         unsigned short srcw, unsigned short srch,
+                                         unsigned short destw, unsigned short desth);
+static void pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                                    unsigned short srcw, unsigned short srch,
+                                    unsigned short destw, unsigned short desth);
 
 static struct pp_module pp_modules_gen5[] = {
     {
@@ -99,7 +102,7 @@ static struct pp_module pp_modules_gen5[] = {
         pp_null_gen5,
         sizeof(pp_null_gen5),
         NULL,
-        ironlake_pp_null_initialize,
+        pp_null_initialize,
     },
 
     {
@@ -108,7 +111,7 @@ static struct pp_module pp_modules_gen5[] = {
         pp_nv12_load_save_gen5,
         sizeof(pp_nv12_load_save_gen5),
         NULL,
-        ironlake_pp_nv12_load_save_initialize,
+        pp_nv12_load_save_initialize,
     },
 
     {
@@ -117,7 +120,7 @@ static struct pp_module pp_modules_gen5[] = {
         pp_nv12_scaling_gen5,
         sizeof(pp_nv12_scaling_gen5),
         NULL,
-        ironlake_pp_nv12_scaling_initialize,
+        pp_nv12_scaling_initialize,
     },
 
     {
@@ -126,7 +129,7 @@ static struct pp_module pp_modules_gen5[] = {
         pp_nv12_avs_gen5,
         sizeof(pp_nv12_avs_gen5),
         NULL,
-        ironlake_pp_nv12_avs_initialize,
+        pp_nv12_avs_initialize,
     },
 
     {
@@ -135,7 +138,74 @@ static struct pp_module pp_modules_gen5[] = {
         pp_nv12_dndi_gen5,
         sizeof(pp_nv12_dndi_gen5),
         NULL,
-        ironlake_pp_nv12_dndi_initialize,
+        pp_nv12_dndi_initialize,
+    },
+};
+
+static uint32_t pp_null_gen6[][4] = {
+#include "shaders/post_processing/null.g6b"
+};
+
+static uint32_t pp_nv12_load_save_gen6[][4] = {
+#include "shaders/post_processing/nv12_load_save_nv12.g6b"
+};
+
+static uint32_t pp_nv12_scaling_gen6[][4] = {
+#include "shaders/post_processing/nv12_scaling_nv12.g6b"
+};
+
+static uint32_t pp_nv12_avs_gen6[][4] = {
+#include "shaders/post_processing/nv12_avs_nv12.g6b"
+};
+
+static uint32_t pp_nv12_dndi_gen6[][4] = {
+#include "shaders/post_processing/nv12_dndi_nv12.g6b"
+};
+
+static struct pp_module pp_modules_gen6[] = {
+    {
+        "NULL module (for testing)",
+        PP_NULL,
+        pp_null_gen6,
+        sizeof(pp_null_gen6),
+        NULL,
+        pp_null_initialize,
+    },
+
+    {
+        "NV12 Load & Save module",
+        PP_NV12_LOAD_SAVE,
+        pp_nv12_load_save_gen6,
+        sizeof(pp_nv12_load_save_gen6),
+        NULL,
+        pp_nv12_load_save_initialize,
+    },
+
+    {
+        "NV12 Scaling module",
+        PP_NV12_SCALING,
+        pp_nv12_scaling_gen6,
+        sizeof(pp_nv12_scaling_gen6),
+        NULL,
+        pp_nv12_scaling_initialize,
+    },
+
+    {
+        "NV12 AVS module",
+        PP_NV12_AVS,
+        pp_nv12_avs_gen6,
+        sizeof(pp_nv12_avs_gen6),
+        NULL,
+        pp_nv12_avs_initialize,
+    },
+
+    {
+        "NV12 DNDI module",
+        PP_NV12_DNDI,
+        pp_nv12_dndi_gen6,
+        sizeof(pp_nv12_dndi_gen6),
+        NULL,
+        pp_nv12_dndi_initialize,
     },
 };
 
@@ -143,7 +213,7 @@ static struct pp_module pp_modules_gen5[] = {
 
 static struct pp_module *pp_modules = NULL;
 
-struct ironlake_pp_static_parameter
+struct pp_static_parameter
 {
     struct {
         /* Procamp r1.0 */
@@ -296,7 +366,7 @@ struct ironlake_pp_static_parameter
     } grf4;
 };
 
-struct ironlake_pp_inline_parameter
+struct pp_inline_parameter
 {
     struct {
         /* ALL r5.0 */
@@ -347,8 +417,46 @@ struct ironlake_pp_inline_parameter
     } grf6;
 };
 
-static struct ironlake_pp_static_parameter ironlake_pp_static_parameter;
-static struct ironlake_pp_inline_parameter ironlake_pp_inline_parameter;
+static struct pp_static_parameter pp_static_parameter;
+static struct pp_inline_parameter pp_inline_parameter;
+
+static void
+pp_set_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
+{
+    switch (tiling) {
+    case I915_TILING_NONE:
+        ss->ss3.tiled_surface = 0;
+        ss->ss3.tile_walk = 0;
+        break;
+    case I915_TILING_X:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_XMAJOR;
+        break;
+    case I915_TILING_Y:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_YMAJOR;
+        break;
+    }
+}
+
+static void
+pp_set_surface2_tiling(struct i965_surface_state2 *ss, unsigned int tiling)
+{
+    switch (tiling) {
+    case I915_TILING_NONE:
+        ss->ss2.tiled_surface = 0;
+        ss->ss2.tile_walk = 0;
+        break;
+    case I915_TILING_X:
+        ss->ss2.tiled_surface = 1;
+        ss->ss2.tile_walk = I965_TILEWALK_XMAJOR;
+        break;
+    case I915_TILING_Y:
+        ss->ss2.tiled_surface = 1;
+        ss->ss2.tile_walk = I965_TILEWALK_YMAJOR;
+        break;
+    }
+}
 
 static void
 ironlake_pp_surface_state(struct i965_post_processing_context *pp_context)
@@ -397,6 +505,7 @@ ironlake_pp_interface_descriptor_table(struct i965_post_processing_context *pp_c
                       pp_context->binding_table.bo);
 
     dri_bo_unmap(bo);
+    pp_context->idrt.num_interface_descriptors++;
 }
 
 static void
@@ -459,11 +568,11 @@ ironlake_pp_upload_constants(struct i965_post_processing_context *pp_context)
 {
     unsigned char *constant_buffer;
 
-    assert(sizeof(ironlake_pp_static_parameter) == 128);
+    assert(sizeof(pp_static_parameter) == 128);
     dri_bo_map(pp_context->curbe.bo, 1);
     assert(pp_context->curbe.bo->virtual);
     constant_buffer = pp_context->curbe.bo->virtual;
-    memcpy(constant_buffer, &ironlake_pp_static_parameter, sizeof(ironlake_pp_static_parameter));
+    memcpy(constant_buffer, &pp_static_parameter, sizeof(pp_static_parameter));
     dri_bo_unmap(pp_context->curbe.bo);
 }
 
@@ -570,8 +679,8 @@ ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_cont
                 OUT_BATCH(ctx, 0);
 
                 /* inline data grf 5-6 */
-                assert(sizeof(ironlake_pp_inline_parameter) == 64);
-                intel_batchbuffer_data(ctx, &ironlake_pp_inline_parameter, sizeof(ironlake_pp_inline_parameter));
+                assert(sizeof(pp_inline_parameter) == 64);
+                intel_batchbuffer_data(ctx, &pp_inline_parameter, sizeof(pp_inline_parameter));
 
                 ADVANCE_BATCH(ctx);
             }
@@ -616,9 +725,9 @@ pp_null_set_block_parameter(void *private_context, int x, int y)
 }
 
 static void
-ironlake_pp_null_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                            unsigned short srcw, unsigned short srch,
-                            unsigned short destw, unsigned short desth)
+pp_null_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                   unsigned short srcw, unsigned short srch,
+                   unsigned short destw, unsigned short desth)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -658,18 +767,18 @@ pp_load_save_y_steps(void *private_context)
 static int
 pp_load_save_set_block_parameter(void *private_context, int x, int y)
 {
-    ironlake_pp_inline_parameter.grf5.block_vertical_mask = 0xff;
-    ironlake_pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
-    ironlake_pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
-    ironlake_pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
+    pp_inline_parameter.grf5.block_vertical_mask = 0xff;
+    pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
+    pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
+    pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
 
     return 0;
 }
 
 static void
-ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                      unsigned short srcw, unsigned short srch,
-                                      unsigned short destw, unsigned short desth)
+pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                             unsigned short srcw, unsigned short srch,
+                             unsigned short destw, unsigned short desth)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -679,6 +788,7 @@ ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface,
     dri_bo *bo;
     int index, w, h;
     int orig_w, orig_h;
+    unsigned int tiling, swizzle;
 
     /* surface */
     obj_surface = SURFACE(surface);
@@ -699,6 +809,8 @@ ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface,
     obj_surface->orig_pp_out_height = obj_surface->orig_height;
 
     /* source Y surface index 1 */
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+
     index = 1;
     pp_context->surfaces[index].s_bo = obj_surface->bo;
     dri_bo_reference(pp_context->surfaces[index].s_bo);
@@ -718,6 +830,7 @@ ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface,
     ss->ss2.width = orig_w / 4 - 1;
     ss->ss2.height = orig_h - 1;
     ss->ss3.pitch = w - 1;
+    pp_set_surface_tiling(ss, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -746,6 +859,7 @@ ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface,
     ss->ss2.width = orig_w / 4 - 1;
     ss->ss2.height = orig_h / 2 - 1;
     ss->ss3.pitch = w - 1;
+    pp_set_surface_tiling(ss, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -817,8 +931,8 @@ ironlake_pp_nv12_load_save_initialize(VADriverContextP ctx, VASurfaceID surface,
     pp_load_save_context->dest_h = h;
     pp_load_save_context->dest_w = w;
 
-    ironlake_pp_inline_parameter.grf5.block_count_x = w / 16;   /* 1 x N */
-    ironlake_pp_inline_parameter.grf5.number_blocks = w / 16;
+    pp_inline_parameter.grf5.block_count_x = w / 16;   /* 1 x N */
+    pp_inline_parameter.grf5.number_blocks = w / 16;
 }
 
 static int
@@ -838,21 +952,21 @@ pp_scaling_y_steps(void *private_context)
 static int
 pp_scaling_set_block_parameter(void *private_context, int x, int y)
 {
-    float src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-    float src_y_steping = ironlake_pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step;
+    float src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+    float src_y_steping = pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step;
 
-    ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = src_x_steping * x * 16;
-    ironlake_pp_inline_parameter.grf5.source_surface_block_normalized_vertical_origin = src_y_steping * y * 8;
-    ironlake_pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
-    ironlake_pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
+    pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = src_x_steping * x * 16;
+    pp_inline_parameter.grf5.source_surface_block_normalized_vertical_origin = src_y_steping * y * 8;
+    pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
+    pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
     
     return 0;
 }
 
 static void
-ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                    unsigned short srcw, unsigned short srch,
-                                    unsigned short destw, unsigned short desth)
+pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                           unsigned short srcw, unsigned short srch,
+                           unsigned short destw, unsigned short desth)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -866,6 +980,7 @@ ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, i
     int orig_w, orig_h;
     int pp_out_w, pp_out_h;
     int orig_pp_out_w, orig_pp_out_h;
+    unsigned int tiling, swizzle;
 
     /* surface */
     obj_surface = SURFACE(surface);
@@ -890,6 +1005,8 @@ ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, i
     obj_surface->pp_out_height = pp_out_h;
 
     /* source Y surface index 1 */
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+
     index = 1;
     pp_context->surfaces[index].s_bo = obj_surface->bo;
     dri_bo_reference(pp_context->surfaces[index].s_bo);
@@ -909,6 +1026,7 @@ ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, i
     ss->ss2.width = orig_w - 1;
     ss->ss2.height = orig_h - 1;
     ss->ss3.pitch = w - 1;
+    pp_set_surface_tiling(ss, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -937,6 +1055,7 @@ ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, i
     ss->ss2.width = orig_w / 2 - 1;
     ss->ss2.height = orig_h / 2 - 1;
     ss->ss3.pitch = w - 1;
+    pp_set_surface_tiling(ss, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -1030,12 +1149,12 @@ ironlake_pp_nv12_scaling_initialize(VADriverContextP ctx, VASurfaceID surface, i
     pp_scaling_context->dest_w = pp_out_w;
     pp_scaling_context->dest_h = pp_out_h;
 
-    ironlake_pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step = (float) 1.0 / pp_out_h;
-    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = (float) 1.0 / pp_out_w;
-    ironlake_pp_inline_parameter.grf5.block_count_x = pp_out_w / 16;   /* 1 x N */
-    ironlake_pp_inline_parameter.grf5.number_blocks = pp_out_w / 16;
-    ironlake_pp_inline_parameter.grf5.block_vertical_mask = 0xff;
-    ironlake_pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
+    pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step = (float) 1.0 / pp_out_h;
+    pp_inline_parameter.grf5.normalized_video_x_scaling_step = (float) 1.0 / pp_out_w;
+    pp_inline_parameter.grf5.block_count_x = pp_out_w / 16;   /* 1 x N */
+    pp_inline_parameter.grf5.number_blocks = pp_out_w / 16;
+    pp_inline_parameter.grf5.block_vertical_mask = 0xff;
+    pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
 }
 
 static int
@@ -1060,15 +1179,15 @@ pp_avs_set_block_parameter(void *private_context, int x, int y)
     int tmp_w = ALIGN(pp_avs_context->dest_h * pp_avs_context->src_w / pp_avs_context->src_h, 16);
 
     if (tmp_w >= pp_avs_context->dest_w) {
-        ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / tmp_w;
-        ironlake_pp_inline_parameter.grf6.video_step_delta = 0;
+        pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / tmp_w;
+        pp_inline_parameter.grf6.video_step_delta = 0;
         
         if (x == 0) {
-            ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = (float)(tmp_w - pp_avs_context->dest_w) / tmp_w / 2;
+            pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = (float)(tmp_w - pp_avs_context->dest_w) / tmp_w / 2;
         } else {
-            src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-            video_step_delta = ironlake_pp_inline_parameter.grf6.video_step_delta;
-            ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
+            src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+            video_step_delta = pp_inline_parameter.grf6.video_step_delta;
+            pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
                 16 * 15 * video_step_delta / 2;
         }
     } else {
@@ -1084,15 +1203,15 @@ pp_avs_set_block_parameter(void *private_context, int x, int y)
         f = (float) n2 * 16 / tmp_w;
         
         if (n0 < 5) {
-            ironlake_pp_inline_parameter.grf6.video_step_delta = 0.0;
+            pp_inline_parameter.grf6.video_step_delta = 0.0;
 
             if (x == 0) {
-                ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / pp_avs_context->dest_w;
-                ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = 0.0;
+                pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / pp_avs_context->dest_w;
+                pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = 0.0;
             } else {
-                src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-                video_step_delta = ironlake_pp_inline_parameter.grf6.video_step_delta;
-                ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
+                src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+                video_step_delta = pp_inline_parameter.grf6.video_step_delta;
+                pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
                     16 * 15 * video_step_delta / 2;
             }
         } else {
@@ -1101,56 +1220,56 @@ pp_avs_set_block_parameter(void *private_context, int x, int y)
                 float a = f / (nls_left * 16 * factor_b);
                 float b = (f - nls_left * 16 * a) * 2 / (nls_left * 16 * (nls_left * 16 - 1));
                 
-                ironlake_pp_inline_parameter.grf6.video_step_delta = b;
+                pp_inline_parameter.grf6.video_step_delta = b;
 
                 if (x == 0) {
-                    ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = 0.0;
-                    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = a;
+                    pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin = 0.0;
+                    pp_inline_parameter.grf5.normalized_video_x_scaling_step = a;
                 } else {
-                    src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-                    video_step_delta = ironlake_pp_inline_parameter.grf6.video_step_delta;
-                    ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
+                    src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+                    video_step_delta = pp_inline_parameter.grf6.video_step_delta;
+                    pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
                         16 * 15 * video_step_delta / 2;
-                    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step += 16 * b;
+                    pp_inline_parameter.grf5.normalized_video_x_scaling_step += 16 * b;
                 }
             } else if (x < (pp_avs_context->dest_w / 16 - nls_right)) {
                 /* scale the center linearly */
-                src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-                video_step_delta = ironlake_pp_inline_parameter.grf6.video_step_delta;
-                ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
+                src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+                video_step_delta = pp_inline_parameter.grf6.video_step_delta;
+                pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
                     16 * 15 * video_step_delta / 2;
-                ironlake_pp_inline_parameter.grf6.video_step_delta = 0.0;
-                ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / tmp_w;
+                pp_inline_parameter.grf6.video_step_delta = 0.0;
+                pp_inline_parameter.grf5.normalized_video_x_scaling_step = 1.0 / tmp_w;
             } else {
                 float a = f / (nls_right * 16 * factor_b);
                 float b = (f - nls_right * 16 * a) * 2 / (nls_right * 16 * (nls_right * 16 - 1));
 
-                src_x_steping = ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step;
-                video_step_delta = ironlake_pp_inline_parameter.grf6.video_step_delta;
-                ironlake_pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
+                src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
+                video_step_delta = pp_inline_parameter.grf6.video_step_delta;
+                pp_inline_parameter.grf5.r5_1.source_surface_block_normalized_horizontal_origin += src_x_steping * 16 +
                     16 * 15 * video_step_delta / 2;
-                ironlake_pp_inline_parameter.grf6.video_step_delta = -b;
+                pp_inline_parameter.grf6.video_step_delta = -b;
 
                 if (x == (pp_avs_context->dest_w / 16 - nls_right))
-                    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = a + (nls_right * 16  - 1) * b;
+                    pp_inline_parameter.grf5.normalized_video_x_scaling_step = a + (nls_right * 16  - 1) * b;
                 else
-                    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step -= b * 16;
+                    pp_inline_parameter.grf5.normalized_video_x_scaling_step -= b * 16;
             }
         }
     }
 
-    src_y_steping = ironlake_pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step;
-    ironlake_pp_inline_parameter.grf5.source_surface_block_normalized_vertical_origin = src_y_steping * y * 8;
-    ironlake_pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
-    ironlake_pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
+    src_y_steping = pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step;
+    pp_inline_parameter.grf5.source_surface_block_normalized_vertical_origin = src_y_steping * y * 8;
+    pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
+    pp_inline_parameter.grf5.destination_block_vertical_origin = y * 8;
 
     return 0;
 }
 
 static void
-ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                unsigned short srcw, unsigned short srch,
-                                unsigned short destw, unsigned short desth)
+pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                       unsigned short srcw, unsigned short srch,
+                       unsigned short destw, unsigned short desth)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -1160,31 +1279,37 @@ ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int i
     struct i965_sampler_8x8 *sampler_8x8;
     struct i965_sampler_8x8_state *sampler_8x8_state;
     struct i965_surface_state2 *ss_8x8;
-    dri_bo *bo;
+    dri_bo *bo, *src_bo;
     int index;
     int w, h;
     int orig_w, orig_h;
     int pp_out_w, pp_out_h;
     int orig_pp_out_w, orig_pp_out_h;
+    unsigned int tiling, swizzle;
 
     /* surface */
     obj_surface = SURFACE(surface);
     
     if (input == 1) {
-        assert(obj_surface->pp_out_bo);
         orig_w = obj_surface->orig_pp_out_width;
         orig_h = obj_surface->orig_pp_out_height;
         w = obj_surface->pp_out_width;
         h = obj_surface->pp_out_height;
+        src_bo = obj_surface->pp_out_bo;
     } else {
         orig_w = obj_surface->orig_width;
         orig_h = obj_surface->orig_height;
         w = obj_surface->width;
         h = obj_surface->height;
-    } 
+        src_bo = obj_surface->bo;
+    }
+
+    assert(src_bo);
+    dri_bo_get_tiling(src_bo, &tiling, &swizzle);
+
     /* source Y surface index 1 */
     index = 1;
-    pp_context->surfaces[index].s_bo = (input == 1 ? obj_surface->pp_out_bo : obj_surface->bo);
+    pp_context->surfaces[index].s_bo = src_bo;
     dri_bo_reference(pp_context->surfaces[index].s_bo);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "Y surface state for sample_8x8", 
@@ -1206,6 +1331,7 @@ ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int i
     ss_8x8->ss2.surface_format = SURFACE_FORMAT_Y8_UNORM;
     ss_8x8->ss3.x_offset_for_cb = 0;
     ss_8x8->ss3.y_offset_for_cb = 0;
+    pp_set_surface2_tiling(ss_8x8, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -1216,7 +1342,7 @@ ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int i
 
     /* source UV surface index 2 */
     index = 2;
-    pp_context->surfaces[index].s_bo = (input == 1 ? obj_surface->pp_out_bo : obj_surface->bo);
+    pp_context->surfaces[index].s_bo = src_bo;
     dri_bo_reference(pp_context->surfaces[index].s_bo);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "UV surface state for sample_8x8", 
@@ -1230,14 +1356,15 @@ ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int i
     memset(ss_8x8, 0, sizeof(*ss_8x8));
     ss_8x8->ss0.surface_base_address = pp_context->surfaces[index].s_bo->offset + w * h;
     ss_8x8->ss1.cbcr_pixel_offset_v_direction = 0;
-    ss_8x8->ss1.width = orig_w / 2 - 1;
-    ss_8x8->ss1.height = orig_h / 2 - 1;
+    ss_8x8->ss1.width = orig_w - 1;
+    ss_8x8->ss1.height = orig_h - 1;
     ss_8x8->ss2.half_pitch_for_chroma = 0;
     ss_8x8->ss2.pitch = w - 1;
-    ss_8x8->ss2.interleave_chroma = 0;
-    ss_8x8->ss2.surface_format = SURFACE_FORMAT_R8B8_UNORM;
+    ss_8x8->ss2.interleave_chroma = 1;
+    ss_8x8->ss2.surface_format = SURFACE_FORMAT_PLANAR_420_8;
     ss_8x8->ss3.x_offset_for_cb = 0;
     ss_8x8->ss3.y_offset_for_cb = 0;
+    pp_set_surface2_tiling(ss_8x8, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -1486,14 +1613,14 @@ ironlake_pp_nv12_avs_initialize(VADriverContextP ctx, VASurfaceID surface, int i
     pp_avs_context->src_w = w;
     pp_avs_context->src_h = h;
 
-    ironlake_pp_static_parameter.grf4.r4_2.avs.nlas = 1;
-    ironlake_pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step = (float) 1.0 / pp_out_h;
-    ironlake_pp_inline_parameter.grf5.normalized_video_x_scaling_step = (float) 1.0 / pp_out_w;
-    ironlake_pp_inline_parameter.grf5.block_count_x = 1;        /* M x 1 */
-    ironlake_pp_inline_parameter.grf5.number_blocks = pp_out_h / 8;
-    ironlake_pp_inline_parameter.grf5.block_vertical_mask = 0xff;
-    ironlake_pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
-    ironlake_pp_inline_parameter.grf6.video_step_delta = 0.0;
+    pp_static_parameter.grf4.r4_2.avs.nlas = 1;
+    pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step = (float) 1.0 / pp_out_h;
+    pp_inline_parameter.grf5.normalized_video_x_scaling_step = (float) 1.0 / pp_out_w;
+    pp_inline_parameter.grf5.block_count_x = 1;        /* M x 1 */
+    pp_inline_parameter.grf5.number_blocks = pp_out_h / 8;
+    pp_inline_parameter.grf5.block_vertical_mask = 0xff;
+    pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
+    pp_inline_parameter.grf6.video_step_delta = 0.0;
 }
 
 static int
@@ -1513,16 +1640,16 @@ pp_dndi_y_steps(void *private_context)
 static int
 pp_dndi_set_block_parameter(void *private_context, int x, int y)
 {
-    ironlake_pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
-    ironlake_pp_inline_parameter.grf5.destination_block_vertical_origin = y * 4;
+    pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
+    pp_inline_parameter.grf5.destination_block_vertical_origin = y * 4;
 
     return 0;
 }
 
 static 
-void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
-                                      unsigned short srcw, unsigned short srch,
-                                      unsigned short destw, unsigned short desth)
+void pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, int input,
+                             unsigned short srcw, unsigned short srch,
+                             unsigned short destw, unsigned short desth)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -1535,6 +1662,7 @@ void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface,
     int index;
     int w, h;
     int orig_w, orig_h;
+    unsigned int tiling, swizzle;
 
     /* surface */
     obj_surface = SURFACE(surface);
@@ -1562,6 +1690,7 @@ void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface,
     obj_surface->pp_out_width = w;
     obj_surface->pp_out_height = h;
 
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
     /* source UV surface index 2 */
     index = 2;
     pp_context->surfaces[index].s_bo = obj_surface->bo;
@@ -1582,6 +1711,7 @@ void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface,
     ss->ss2.width = orig_w / 4 - 1;
     ss->ss2.height = orig_h / 2 - 1;
     ss->ss3.pitch = w - 1;
+    pp_set_surface_tiling(ss, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -1617,6 +1747,7 @@ void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface,
     ss_dndi->ss2.tiled_surface = 0;
     ss_dndi->ss3.x_offset_for_cb = 0;
     ss_dndi->ss3.y_offset_for_cb = h;
+    pp_set_surface2_tiling(ss_dndi, tiling);
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_RENDER, 
                       0,
@@ -1774,15 +1905,15 @@ void ironlake_pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface,
     pp_context->pp_y_steps = pp_dndi_y_steps;
     pp_context->pp_set_block_parameter = pp_dndi_set_block_parameter;
 
-    ironlake_pp_static_parameter.grf1.statistics_surface_picth = w / 2;
-    ironlake_pp_static_parameter.grf1.r1_6.di.top_field_first = 0;
-    ironlake_pp_static_parameter.grf4.r4_2.di.motion_history_coefficient_m2 = 64;
-    ironlake_pp_static_parameter.grf4.r4_2.di.motion_history_coefficient_m1 = 192;
+    pp_static_parameter.grf1.statistics_surface_picth = w / 2;
+    pp_static_parameter.grf1.r1_6.di.top_field_first = 0;
+    pp_static_parameter.grf4.r4_2.di.motion_history_coefficient_m2 = 64;
+    pp_static_parameter.grf4.r4_2.di.motion_history_coefficient_m1 = 192;
 
-    ironlake_pp_inline_parameter.grf5.block_count_x = w / 16;   /* 1 x N */
-    ironlake_pp_inline_parameter.grf5.number_blocks = w / 16;
-    ironlake_pp_inline_parameter.grf5.block_vertical_mask = 0xff;
-    ironlake_pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
+    pp_inline_parameter.grf5.block_count_x = w / 16;   /* 1 x N */
+    pp_inline_parameter.grf5.number_blocks = w / 16;
+    pp_inline_parameter.grf5.block_vertical_mask = 0xff;
+    pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
 
     pp_dndi_context->dest_w = w;
     pp_dndi_context->dest_h = h;
@@ -1831,6 +1962,7 @@ ironlake_pp_initialize(VADriverContextP ctx,
                       4096);
     assert(bo);
     pp_context->idrt.bo = bo;
+    pp_context->idrt.num_interface_descriptors = 0;
 
     dri_bo_unreference(pp_context->sampler_state_table.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
@@ -1875,8 +2007,8 @@ ironlake_pp_initialize(VADriverContextP ctx,
         pp_context->surfaces[i].s_bo = NULL;
     }
 
-    memset(&ironlake_pp_static_parameter, 0, sizeof(ironlake_pp_static_parameter));
-    memset(&ironlake_pp_inline_parameter, 0, sizeof(ironlake_pp_inline_parameter));
+    memset(&pp_static_parameter, 0, sizeof(pp_static_parameter));
+    memset(&pp_inline_parameter, 0, sizeof(pp_inline_parameter));
     assert(pp_index >= PP_NULL && pp_index < NUM_PP_MODULES);
     assert(pp_modules);
     pp_context->current_pp = pp_index;
@@ -1884,6 +2016,371 @@ ironlake_pp_initialize(VADriverContextP ctx,
     
     if (pp_module->initialize)
         pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
+}
+
+static void
+ironlake_post_processing(VADriverContextP ctx,
+                         VASurfaceID surface,
+                         int input,
+                         short srcx,
+                         short srcy,
+                         unsigned short srcw,
+                         unsigned short srch,
+                         short destx,
+                         short desty,
+                         unsigned short destw,
+                         unsigned short desth,
+                         int pp_index)
+{
+    ironlake_pp_initialize(ctx, surface, input,
+                           srcx, srcy, srcw, srch,
+                           destx, desty, destw, desth,
+                           pp_index);
+    ironlake_pp_states_setup(ctx);
+    ironlake_pp_pipeline_setup(ctx);
+}
+
+static void
+gen6_pp_initialize(VADriverContextP ctx,
+                   VASurfaceID surface,
+                   int input,
+                   short srcx,
+                   short srcy,
+                   unsigned short srcw,
+                   unsigned short srch,
+                   short destx,
+                   short desty,
+                   unsigned short destw,
+                   unsigned short desth,
+                   int pp_index)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_post_processing_context *pp_context = i965->pp_context;
+    struct pp_module *pp_module;
+    dri_bo *bo;
+    int i;
+
+    dri_bo_unreference(pp_context->curbe.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "constant buffer",
+                      4096, 
+                      4096);
+    assert(bo);
+    pp_context->curbe.bo = bo;
+
+    dri_bo_unreference(pp_context->binding_table.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "binding table",
+                      sizeof(unsigned int), 
+                      4096);
+    assert(bo);
+    pp_context->binding_table.bo = bo;
+
+    dri_bo_unreference(pp_context->idrt.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "interface discriptor", 
+                      sizeof(struct gen6_interface_descriptor_data), 
+                      4096);
+    assert(bo);
+    pp_context->idrt.bo = bo;
+    pp_context->idrt.num_interface_descriptors = 0;
+
+    dri_bo_unreference(pp_context->sampler_state_table.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "sampler state table", 
+                      4096,
+                      4096);
+    assert(bo);
+    dri_bo_map(bo, True);
+    memset(bo->virtual, 0, bo->size);
+    dri_bo_unmap(bo);
+    pp_context->sampler_state_table.bo = bo;
+
+    dri_bo_unreference(pp_context->sampler_state_table.bo_8x8);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "sampler 8x8 state ",
+                      4096,
+                      4096);
+    assert(bo);
+    pp_context->sampler_state_table.bo_8x8 = bo;
+
+    dri_bo_unreference(pp_context->sampler_state_table.bo_8x8_uv);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "sampler 8x8 state ",
+                      4096,
+                      4096);
+    assert(bo);
+    pp_context->sampler_state_table.bo_8x8_uv = bo;
+
+    dri_bo_unreference(pp_context->vfe_state.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "vfe state", 
+                      sizeof(struct i965_vfe_state), 
+                      4096);
+    assert(bo);
+    pp_context->vfe_state.bo = bo;
+    
+    for (i = 0; i < MAX_PP_SURFACES; i++) {
+        dri_bo_unreference(pp_context->surfaces[i].ss_bo);
+        pp_context->surfaces[i].ss_bo = NULL;
+
+        dri_bo_unreference(pp_context->surfaces[i].s_bo);
+        pp_context->surfaces[i].s_bo = NULL;
+    }
+
+    memset(&pp_static_parameter, 0, sizeof(pp_static_parameter));
+    memset(&pp_inline_parameter, 0, sizeof(pp_inline_parameter));
+    assert(pp_index >= PP_NULL && pp_index < NUM_PP_MODULES);
+    assert(pp_modules);
+    pp_context->current_pp = pp_index;
+    pp_module = &pp_modules[pp_index];
+    
+    if (pp_module->initialize)
+        pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
+}
+
+static void
+gen6_pp_binding_table(struct i965_post_processing_context *pp_context)
+{
+    unsigned int *binding_table;
+    dri_bo *bo = pp_context->binding_table.bo;
+    int i;
+
+    dri_bo_map(bo, 1);
+    assert(bo->virtual);
+    binding_table = bo->virtual;
+    memset(binding_table, 0, bo->size);
+
+    for (i = 0; i < MAX_PP_SURFACES; i++) {
+        if (pp_context->surfaces[i].ss_bo) {
+            assert(pp_context->surfaces[i].s_bo);
+
+            binding_table[i] = pp_context->surfaces[i].ss_bo->offset;
+            dri_bo_emit_reloc(bo,
+                              I915_GEM_DOMAIN_INSTRUCTION, 0,
+                              0,
+                              i * sizeof(*binding_table),
+                              pp_context->surfaces[i].ss_bo);
+        }
+    
+    }
+
+    dri_bo_unmap(bo);
+}
+
+static void
+gen6_pp_interface_descriptor_table(struct i965_post_processing_context *pp_context)
+{
+    struct gen6_interface_descriptor_data *desc;
+    dri_bo *bo;
+    int pp_index = pp_context->current_pp;
+
+    bo = pp_context->idrt.bo;
+    dri_bo_map(bo, True);
+    assert(bo->virtual);
+    desc = bo->virtual;
+    memset(desc, 0, sizeof(*desc));
+    desc->desc0.kernel_start_pointer = 
+        pp_modules[pp_index].bo->offset >> 6; /* reloc */
+    desc->desc1.single_program_flow = 1;
+    desc->desc1.floating_point_mode = FLOATING_POINT_IEEE_754;
+    desc->desc2.sampler_count = 1;      /* 1 - 4 samplers used */
+    desc->desc2.sampler_state_pointer = 
+        pp_context->sampler_state_table.bo->offset >> 5;
+    desc->desc3.binding_table_entry_count = 0;
+    desc->desc3.binding_table_pointer = 
+        pp_context->binding_table.bo->offset >> 5; /*reloc */
+    desc->desc4.constant_urb_entry_read_offset = 0;
+    desc->desc4.constant_urb_entry_read_length = 4; /* grf 1-4 */
+
+    dri_bo_emit_reloc(bo,
+                      I915_GEM_DOMAIN_INSTRUCTION, 0,
+                      0,
+                      offsetof(struct gen6_interface_descriptor_data, desc0),
+                      pp_modules[pp_index].bo);
+
+    dri_bo_emit_reloc(bo,
+                      I915_GEM_DOMAIN_INSTRUCTION, 0,
+                      desc->desc2.sampler_count << 2,
+                      offsetof(struct gen6_interface_descriptor_data, desc2),
+                      pp_context->sampler_state_table.bo);
+
+    dri_bo_emit_reloc(bo,
+                      I915_GEM_DOMAIN_INSTRUCTION, 0,
+                      desc->desc3.binding_table_entry_count,
+                      offsetof(struct gen6_interface_descriptor_data, desc3),
+                      pp_context->binding_table.bo);
+
+    dri_bo_unmap(bo);
+    pp_context->idrt.num_interface_descriptors++;
+}
+
+static void
+gen6_pp_upload_constants(struct i965_post_processing_context *pp_context)
+{
+    unsigned char *constant_buffer;
+
+    assert(sizeof(pp_static_parameter) == 128);
+    dri_bo_map(pp_context->curbe.bo, 1);
+    assert(pp_context->curbe.bo->virtual);
+    constant_buffer = pp_context->curbe.bo->virtual;
+    memcpy(constant_buffer, &pp_static_parameter, sizeof(pp_static_parameter));
+    dri_bo_unmap(pp_context->curbe.bo);
+}
+
+static void
+gen6_pp_states_setup(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_post_processing_context *pp_context = i965->pp_context;
+
+    gen6_pp_binding_table(pp_context);
+    gen6_pp_interface_descriptor_table(pp_context);
+    gen6_pp_upload_constants(pp_context);
+}
+
+static void
+gen6_pp_pipeline_select(VADriverContextP ctx)
+{
+    BEGIN_BATCH(ctx, 1);
+    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(ctx);
+}
+
+static void
+gen6_pp_state_base_address(VADriverContextP ctx)
+{
+    BEGIN_BATCH(ctx, 10);
+    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | (10 - 2));
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+    ADVANCE_BATCH(ctx);
+}
+
+static void
+gen6_pp_vfe_state(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
+{
+    BEGIN_BATCH(ctx, 8);
+    OUT_BATCH(ctx, CMD_MEDIA_VFE_STATE | (8 - 2));
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx,
+              (pp_context->urb.num_vfe_entries - 1) << 16 |
+              pp_context->urb.num_vfe_entries << 8);
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx,
+              (pp_context->urb.size_vfe_entry * 2) << 16 |  /* in 256 bits unit */
+              (pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 2 - 1));            /* in 256 bits unit */
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    ADVANCE_BATCH(ctx);
+}
+
+static void
+gen6_pp_curbe_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
+{
+    assert(pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 512 <= pp_context->curbe.bo->size);
+
+    BEGIN_BATCH(ctx, 4);
+    OUT_BATCH(ctx, CMD_MEDIA_CURBE_LOAD | (4 - 2));
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx,
+              pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 512);
+    OUT_RELOC(ctx, 
+              pp_context->curbe.bo,
+              I915_GEM_DOMAIN_INSTRUCTION, 0,
+              0);
+    ADVANCE_BATCH(ctx);
+}
+
+static void
+gen6_interface_descriptor_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
+{
+    BEGIN_BATCH(ctx, 4);
+    OUT_BATCH(ctx, CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD | (4 - 2));
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx,
+              pp_context->idrt.num_interface_descriptors * sizeof(struct gen6_interface_descriptor_data));
+    OUT_RELOC(ctx, 
+              pp_context->idrt.bo,
+              I915_GEM_DOMAIN_INSTRUCTION, 0,
+              0);
+    ADVANCE_BATCH(ctx);
+}
+
+static void
+gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
+{
+    int x, x_steps, y, y_steps;
+
+    x_steps = pp_context->pp_x_steps(&pp_context->private_context);
+    y_steps = pp_context->pp_y_steps(&pp_context->private_context);
+
+    for (y = 0; y < y_steps; y++) {
+        for (x = 0; x < x_steps; x++) {
+            if (!pp_context->pp_set_block_parameter(&pp_context->private_context, x, y)) {
+                BEGIN_BATCH(ctx, 22);
+                OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 20);
+                OUT_BATCH(ctx, 0);
+                OUT_BATCH(ctx, 0); /* no indirect data */
+                OUT_BATCH(ctx, 0);
+                OUT_BATCH(ctx, 0); /* scoreboard */
+                OUT_BATCH(ctx, 0);
+
+                /* inline data grf 5-6 */
+                assert(sizeof(pp_inline_parameter) == 64);
+                intel_batchbuffer_data(ctx, &pp_inline_parameter, sizeof(pp_inline_parameter));
+
+                ADVANCE_BATCH(ctx);
+            }
+        }
+    }
+}
+
+static void
+gen6_pp_pipeline_setup(VADriverContextP ctx)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_post_processing_context *pp_context = i965->pp_context;
+
+    intel_batchbuffer_start_atomic(ctx, 0x1000);
+    intel_batchbuffer_emit_mi_flush(ctx);
+    gen6_pp_pipeline_select(ctx);
+    gen6_pp_curbe_load(ctx, pp_context);
+    gen6_interface_descriptor_load(ctx, pp_context);
+    gen6_pp_state_base_address(ctx);
+    gen6_pp_vfe_state(ctx, pp_context);
+    gen6_pp_object_walker(ctx, pp_context);
+    intel_batchbuffer_end_atomic(ctx);
+}
+
+static void
+gen6_post_processing(VADriverContextP ctx,
+                     VASurfaceID surface,
+                     int input,
+                     short srcx,
+                     short srcy,
+                     unsigned short srcw,
+                     unsigned short srch,
+                     short destx,
+                     short desty,
+                     unsigned short destw,
+                     unsigned short desth,
+                     int pp_index)
+{
+    gen6_pp_initialize(ctx, surface, input,
+                       srcx, srcy, srcw, srch,
+                       destx, desty, destw, desth,
+                       pp_index);
+    gen6_pp_states_setup(ctx);
+    gen6_pp_pipeline_setup(ctx);
 }
 
 static void
@@ -1900,12 +2397,18 @@ i965_post_processing_internal(VADriverContextP ctx,
                               unsigned short desth,
                               int pp_index)
 {
-    ironlake_pp_initialize(ctx, surface, input,
-                           srcx, srcy, srcw, srch,
-                           destx, desty, destw, desth,
-                           pp_index);
-    ironlake_pp_states_setup(ctx);
-    ironlake_pp_pipeline_setup(ctx);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    if (IS_GEN6(i965->intel.device_id))
+        gen6_post_processing(ctx, surface, input,
+                             srcx, srcy, srcw, srch,
+                             destx, desty, destw, desth,
+                             pp_index);
+    else
+        ironlake_post_processing(ctx, surface, input,
+                                 srcx, srcy, srcw, srch,
+                                 destx, desty, destw, desth,
+                                 pp_index);
 }
 
 void
@@ -1923,21 +2426,21 @@ i965_post_processing(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
-    if (IS_IRONLAKE(i965->intel.device_id)) {
+    if (HAS_PP(i965)) {
         /* Currently only support post processing for NV12 surface */
         if (i965->render_state.interleaved_uv) {
-            int input = 0;
+            int internal_input = 0;
 
             if (flag & I965_PP_FLAG_DEINTERLACING) {
-                i965_post_processing_internal(ctx, surface, input,
+                i965_post_processing_internal(ctx, surface, internal_input,
                                               srcx, srcy, srcw, srch,
                                               destx, desty, destw, desth,
                                               PP_NV12_DNDI);
-                input = 1;
+                internal_input = 1;
             }
 
             if (flag & I965_PP_FLAG_AVS) {
-                i965_post_processing_internal(ctx, surface, input,
+                i965_post_processing_internal(ctx, surface, internal_input,
                                               srcx, srcy, srcw, srch,
                                               destx, desty, destw, desth,
                                               PP_NV12_AVS);
@@ -1953,49 +2456,52 @@ i965_post_processing_terminate(VADriverContextP ctx)
     struct i965_post_processing_context *pp_context = i965->pp_context;
     int i;
 
-    if (pp_context) {
-        dri_bo_unreference(pp_context->curbe.bo);
-        pp_context->curbe.bo = NULL;
+    if (HAS_PP(i965)) {
+        if (pp_context) {
+            dri_bo_unreference(pp_context->curbe.bo);
+            pp_context->curbe.bo = NULL;
 
-        for (i = 0; i < MAX_PP_SURFACES; i++) {
-            dri_bo_unreference(pp_context->surfaces[i].ss_bo);
-            pp_context->surfaces[i].ss_bo = NULL;
+            for (i = 0; i < MAX_PP_SURFACES; i++) {
+                dri_bo_unreference(pp_context->surfaces[i].ss_bo);
+                pp_context->surfaces[i].ss_bo = NULL;
 
-            dri_bo_unreference(pp_context->surfaces[i].s_bo);
-            pp_context->surfaces[i].s_bo = NULL;
+                dri_bo_unreference(pp_context->surfaces[i].s_bo);
+                pp_context->surfaces[i].s_bo = NULL;
+            }
+
+            dri_bo_unreference(pp_context->sampler_state_table.bo);
+            pp_context->sampler_state_table.bo = NULL;
+
+            dri_bo_unreference(pp_context->sampler_state_table.bo_8x8);
+            pp_context->sampler_state_table.bo_8x8 = NULL;
+
+            dri_bo_unreference(pp_context->sampler_state_table.bo_8x8_uv);
+            pp_context->sampler_state_table.bo_8x8_uv = NULL;
+
+            dri_bo_unreference(pp_context->binding_table.bo);
+            pp_context->binding_table.bo = NULL;
+
+            dri_bo_unreference(pp_context->idrt.bo);
+            pp_context->idrt.bo = NULL;
+            pp_context->idrt.num_interface_descriptors = 0;
+
+            dri_bo_unreference(pp_context->vfe_state.bo);
+            pp_context->vfe_state.bo = NULL;
+
+            dri_bo_unreference(pp_context->stmm.bo);
+            pp_context->stmm.bo = NULL;
+
+            free(pp_context);
         }
 
-        dri_bo_unreference(pp_context->sampler_state_table.bo);
-        pp_context->sampler_state_table.bo = NULL;
+        i965->pp_context = NULL;
 
-        dri_bo_unreference(pp_context->sampler_state_table.bo_8x8);
-        pp_context->sampler_state_table.bo_8x8 = NULL;
+        for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
+            struct pp_module *pp_module = &pp_modules[i];
 
-        dri_bo_unreference(pp_context->sampler_state_table.bo_8x8_uv);
-        pp_context->sampler_state_table.bo_8x8_uv = NULL;
-
-        dri_bo_unreference(pp_context->binding_table.bo);
-        pp_context->binding_table.bo = NULL;
-
-        dri_bo_unreference(pp_context->idrt.bo);
-        pp_context->idrt.bo = NULL;
-
-        dri_bo_unreference(pp_context->vfe_state.bo);
-        pp_context->vfe_state.bo = NULL;
-
-        dri_bo_unreference(pp_context->stmm.bo);
-        pp_context->stmm.bo = NULL;
-
-        free(pp_context);
-    }
-
-    i965->pp_context = NULL;
-
-    for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
-        struct pp_module *pp_module = &pp_modules[i];
-
-        dri_bo_unreference(pp_module->bo);
-        pp_module->bo = NULL;
+            dri_bo_unreference(pp_module->bo);
+            pp_module->bo = NULL;
+        }
     }
 
     return True;
@@ -2008,35 +2514,41 @@ i965_post_processing_init(VADriverContextP ctx)
     struct i965_post_processing_context *pp_context = i965->pp_context;
     int i;
 
-    if (pp_context == NULL) {
-        pp_context = calloc(1, sizeof(*pp_context));
-        i965->pp_context = pp_context;
-    }
+    if (HAS_PP(i965)) {
+        if (pp_context == NULL) {
+            pp_context = calloc(1, sizeof(*pp_context));
+            i965->pp_context = pp_context;
+        }
 
-    pp_context->urb.size = URB_SIZE((&i965->intel));
-    pp_context->urb.num_vfe_entries = 32;
-    pp_context->urb.size_vfe_entry = 1;
-    pp_context->urb.num_cs_entries = 1;
-    pp_context->urb.size_cs_entry = 2;
-    pp_context->urb.vfe_start = 0;
-    pp_context->urb.cs_start = pp_context->urb.vfe_start + 
-        pp_context->urb.num_vfe_entries * pp_context->urb.size_vfe_entry;
-    assert(pp_context->urb.cs_start + 
-           pp_context->urb.num_cs_entries * pp_context->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
+        pp_context->urb.size = URB_SIZE((&i965->intel));
+        pp_context->urb.num_vfe_entries = 32;
+        pp_context->urb.size_vfe_entry = 1;     /* in 512 bits unit */
+        pp_context->urb.num_cs_entries = 1;
+        pp_context->urb.size_cs_entry = 2;      /* in 512 bits unit */
+        pp_context->urb.vfe_start = 0;
+        pp_context->urb.cs_start = pp_context->urb.vfe_start + 
+            pp_context->urb.num_vfe_entries * pp_context->urb.size_vfe_entry;
+        assert(pp_context->urb.cs_start + 
+               pp_context->urb.num_cs_entries * pp_context->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
 
-    if (IS_IRONLAKE(i965->intel.device_id)) {
-        pp_modules = pp_modules_gen5;
-    }
+        assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen6));
 
-    for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
-        struct pp_module *pp_module = &pp_modules[i];
-        dri_bo_unreference(pp_module->bo);
-        pp_module->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                     pp_module->name,
-                                     pp_module->size,
-                                     4096);
-        assert(pp_module->bo);
-        dri_bo_subdata(pp_module->bo, 0, pp_module->size, pp_module->bin);
+        if (IS_GEN6(i965->intel.device_id))
+            pp_modules = pp_modules_gen6;
+        else if (IS_IRONLAKE(i965->intel.device_id)) {
+            pp_modules = pp_modules_gen5;
+        }
+
+        for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
+            struct pp_module *pp_module = &pp_modules[i];
+            dri_bo_unreference(pp_module->bo);
+            pp_module->bo = dri_bo_alloc(i965->intel.bufmgr,
+                                         pp_module->name,
+                                         pp_module->size,
+                                         4096);
+            assert(pp_module->bo);
+            dri_bo_subdata(pp_module->bo, 0, pp_module->size, pp_module->bin);
+        }
     }
 
     return True;

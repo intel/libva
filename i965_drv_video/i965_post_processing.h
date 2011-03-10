@@ -89,6 +89,7 @@ struct i965_post_processing_context
 
     struct {
         dri_bo *bo;
+        int num_interface_descriptors;
     } idrt;
 
     struct {

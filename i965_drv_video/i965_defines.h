@@ -27,6 +27,13 @@
 #define CMD_BSD_IND_OBJ_BASE_ADDR               CMD(2, 4, 4)
 #define CMD_AVC_BSD_OBJECT                      CMD(2, 4, 8)
 
+#define CMD_MEDIA_VFE_STATE                     CMD(2, 0, 0)
+#define CMD_MEDIA_CURBE_LOAD                    CMD(2, 0, 1)
+#define CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD     CMD(2, 0, 2)
+#define CMD_MEDIA_GATEWAY_STATE                 CMD(2, 0, 3)
+#define CMD_MEDIA_STATE_FLUSH                   CMD(2, 0, 4)
+#define CMD_MEDIA_OBJECT_WALKER                 CMD(2, 1, 3)
+
 #define CMD_PIPELINED_POINTERS                  CMD(3, 0, 0)
 #define CMD_BINDING_TABLE_POINTERS              CMD(3, 0, 1)
 # define GEN6_BINDING_TABLE_MODIFY_PS           (1 << 12)/* for GEN6 */

@@ -1065,4 +1065,67 @@ struct gen6_depth_stencil_state
     } ds2;
 };
 
+struct gen6_interface_descriptor_data
+{
+    struct {
+        unsigned int pad0:6;
+        unsigned int kernel_start_pointer:26;
+    } desc0;
+    
+    struct {
+        unsigned int pad0:7;
+        unsigned int software_exception_enable:1;
+        unsigned int pad1:3;
+        unsigned int maskstack_exception_enable:1;
+        unsigned int pad2:1;
+        unsigned int illegal_opcode_exception_enable:1;
+        unsigned int pad3:2;
+        unsigned int floating_point_mode:1;
+        unsigned int thread_priority:1;
+        unsigned int single_program_flow:1;
+        unsigned int pad4:13;
+    } desc1;
+
+    struct {
+        unsigned int pad0:2;
+        unsigned int sampler_count:3;
+        unsigned int sampler_state_pointer:27;
+    } desc2;
+
+    struct {
+        unsigned int binding_table_entry_count:5;
+        unsigned int binding_table_pointer:27;
+    } desc3;
+
+    struct {
+        unsigned int constant_urb_entry_read_offset:16;
+        unsigned int constant_urb_entry_read_length:16;
+    } desc4;
+    
+    union {
+        struct {
+            unsigned int num_threads:8;
+            unsigned int barrier_return_byte:8;
+            unsigned int shared_local_memory_size:5;
+            unsigned int barrier_enable:1;
+            unsigned int rounding_mode:2;
+            unsigned int barrier_return_grf_offset:8;
+        } gen7;
+
+        struct {
+            unsigned int barrier_id:4;
+            unsigned int pad0:28;
+        } gen6;
+    } desc5;
+
+    struct {
+        unsigned int cross_thread_constant_data_read_length:8;
+        unsigned int pad0:24;
+    } desc6;
+
+    struct {
+        unsigned int pad0;
+    } desc7;
+};
+
 #endif /* _I965_STRUCTS_H_ */

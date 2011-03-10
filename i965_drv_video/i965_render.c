@@ -1421,11 +1421,6 @@ i965_render_put_surface(VADriverContextP ctx,
                         unsigned short desth,
                         unsigned int flag)
 {
-    i965_post_processing(ctx, surface,
-                         srcx, srcy, srcw, srch,
-                         destx, desty, destw, desth,
-                         flag);
-
     i965_render_initialize(ctx);
     i965_surface_render_state_setup(ctx, surface,
                             srcx, srcy, srcw, srch,
@@ -2022,6 +2017,11 @@ intel_render_put_surface(VADriverContextP ctx,
                         unsigned int flag)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    i965_post_processing(ctx, surface,
+                         srcx, srcy, srcw, srch,
+                         destx, desty, destw, desth,
+                         flag);
 
     if (IS_GEN6(i965->intel.device_id))
         gen6_render_put_surface(ctx, surface,
