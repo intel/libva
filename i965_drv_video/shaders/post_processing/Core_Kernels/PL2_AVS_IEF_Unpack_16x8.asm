@@ -216,24 +216,24 @@
     } 
 
     // Move 1st 8x8 words of U to dest GRF  (Copy high byte in a word)
-    mov (8) uwDEST_U(0)<1>           ubAVS_RESPONSE(4,1)<16;4,2>      
-    mov (8) uwDEST_U(1)<1>           ubAVS_RESPONSE(4,8+1)<16;4,2>    
-    mov (8) uwDEST_U(2)<1>           ubAVS_RESPONSE(5,1)<16;4,2>      
-    mov (8) uwDEST_U(3)<1>           ubAVS_RESPONSE(5,8+1)<16;4,2>    
-    mov (8) uwDEST_U(4)<1>           ubAVS_RESPONSE(8,1)<16;4,2>      
-    mov (8) uwDEST_U(5)<1>           ubAVS_RESPONSE(8,8+1)<16;4,2>    
-    mov (8) uwDEST_U(6)<1>           ubAVS_RESPONSE(9,1)<16;4,2>      
-    mov (8) uwDEST_U(7)<1>           ubAVS_RESPONSE(9,8+1)<16;4,2>    
+    mov (8) uwDEST_V(0)<1>           ubAVS_RESPONSE(4,1)<16;4,2>      
+    mov (8) uwDEST_V(1)<1>           ubAVS_RESPONSE(4,8+1)<16;4,2>    
+    mov (8) uwDEST_V(2)<1>           ubAVS_RESPONSE(5,1)<16;4,2>      
+    mov (8) uwDEST_V(3)<1>           ubAVS_RESPONSE(5,8+1)<16;4,2>    
+    mov (8) uwDEST_V(4)<1>           ubAVS_RESPONSE(8,1)<16;4,2>      
+    mov (8) uwDEST_V(5)<1>           ubAVS_RESPONSE(8,8+1)<16;4,2>    
+    mov (8) uwDEST_V(6)<1>           ubAVS_RESPONSE(9,1)<16;4,2>      
+    mov (8) uwDEST_V(7)<1>           ubAVS_RESPONSE(9,8+1)<16;4,2>    
 
     // Move 1st 8x8 words of V to dest GRF  
-    mov (8) uwDEST_V(0)<1>           ubAVS_RESPONSE(6,1)<16;4,2>      
-    mov (8) uwDEST_V(1)<1>           ubAVS_RESPONSE(6,8+1)<16;4,2>    
-    mov (8) uwDEST_V(2)<1>           ubAVS_RESPONSE(7,1)<16;4,2>      
-    mov (8) uwDEST_V(3)<1>           ubAVS_RESPONSE(7,8+1)<16;4,2>    
-    mov (8) uwDEST_V(4)<1>           ubAVS_RESPONSE(10,1)<16;4,2>     
-    mov (8) uwDEST_V(5)<1>           ubAVS_RESPONSE(10,8+1)<16;4,2>   
-    mov (8) uwDEST_V(6)<1>           ubAVS_RESPONSE(11,1)<16;4,2>     
-    mov (8) uwDEST_V(7)<1>           ubAVS_RESPONSE(11,8+1)<16;4,2>   
+    mov (8) uwDEST_U(0)<1>           ubAVS_RESPONSE(6,1)<16;4,2>      
+    mov (8) uwDEST_U(1)<1>           ubAVS_RESPONSE(6,8+1)<16;4,2>    
+    mov (8) uwDEST_U(2)<1>           ubAVS_RESPONSE(7,1)<16;4,2>      
+    mov (8) uwDEST_U(3)<1>           ubAVS_RESPONSE(7,8+1)<16;4,2>    
+    mov (8) uwDEST_U(4)<1>           ubAVS_RESPONSE(10,1)<16;4,2>     
+    mov (8) uwDEST_U(5)<1>           ubAVS_RESPONSE(10,8+1)<16;4,2>   
+    mov (8) uwDEST_U(6)<1>           ubAVS_RESPONSE(11,1)<16;4,2>     
+    mov (8) uwDEST_U(7)<1>           ubAVS_RESPONSE(11,8+1)<16;4,2>   
 
     // Move 2nd 8x8 words of Y to dest GRF at higher 8 words of each GRF.
     $for(0; <8/2; 1) {
@@ -242,24 +242,24 @@
     } 
 
     // Move 2st 8x8 words of U to dest GRF  (Copy high byte in a word)
-    mov (8) uwDEST_U(0,8)<1>         ubAVS_RESPONSE_2(4,1)<16;4,2>      
-    mov (8) uwDEST_U(1,8)<1>         ubAVS_RESPONSE_2(4,8+1)<16;4,2>    
-    mov (8) uwDEST_U(2,8)<1>         ubAVS_RESPONSE_2(5,1)<16;4,2>      
-    mov (8) uwDEST_U(3,8)<1>         ubAVS_RESPONSE_2(5,8+1)<16;4,2>    
-    mov (8) uwDEST_U(4,8)<1>         ubAVS_RESPONSE_2(8,1)<16;4,2>      
-    mov (8) uwDEST_U(5,8)<1>         ubAVS_RESPONSE_2(8,8+1)<16;4,2>    
-    mov (8) uwDEST_U(6,8)<1>         ubAVS_RESPONSE_2(9,1)<16;4,2>      
-    mov (8) uwDEST_U(7,8)<1>         ubAVS_RESPONSE_2(9,8+1)<16;4,2>    
+    mov (8) uwDEST_V(0,8)<1>         ubAVS_RESPONSE_2(4,1)<16;4,2>      
+    mov (8) uwDEST_V(1,8)<1>         ubAVS_RESPONSE_2(4,8+1)<16;4,2>    
+    mov (8) uwDEST_V(2,8)<1>         ubAVS_RESPONSE_2(5,1)<16;4,2>      
+    mov (8) uwDEST_V(3,8)<1>         ubAVS_RESPONSE_2(5,8+1)<16;4,2>    
+    mov (8) uwDEST_V(4,8)<1>         ubAVS_RESPONSE_2(8,1)<16;4,2>      
+    mov (8) uwDEST_V(5,8)<1>         ubAVS_RESPONSE_2(8,8+1)<16;4,2>    
+    mov (8) uwDEST_V(6,8)<1>         ubAVS_RESPONSE_2(9,1)<16;4,2>      
+    mov (8) uwDEST_V(7,8)<1>         ubAVS_RESPONSE_2(9,8+1)<16;4,2>    
 
     // Move 2st 8x8 words of V to dest GRF  
-    mov (8) uwDEST_V(0,8)<1>         ubAVS_RESPONSE_2(6,1)<16;4,2>      
-    mov (8) uwDEST_V(1,8)<1>         ubAVS_RESPONSE_2(6,8+1)<16;4,2>    
-    mov (8) uwDEST_V(2,8)<1>         ubAVS_RESPONSE_2(7,1)<16;4,2>      
-    mov (8) uwDEST_V(3,8)<1>         ubAVS_RESPONSE_2(7,8+1)<16;4,2>    
-    mov (8) uwDEST_V(4,8)<1>         ubAVS_RESPONSE_2(10,1)<16;4,2>     
-    mov (8) uwDEST_V(5,8)<1>         ubAVS_RESPONSE_2(10,8+1)<16;4,2>   
-    mov (8) uwDEST_V(6,8)<1>         ubAVS_RESPONSE_2(11,1)<16;4,2>     
-    mov (8) uwDEST_V(7,8)<1>         ubAVS_RESPONSE_2(11,8+1)<16;4,2>   
+    mov (8) uwDEST_U(0,8)<1>         ubAVS_RESPONSE_2(6,1)<16;4,2>      
+    mov (8) uwDEST_U(1,8)<1>         ubAVS_RESPONSE_2(6,8+1)<16;4,2>    
+    mov (8) uwDEST_U(2,8)<1>         ubAVS_RESPONSE_2(7,1)<16;4,2>      
+    mov (8) uwDEST_U(3,8)<1>         ubAVS_RESPONSE_2(7,8+1)<16;4,2>    
+    mov (8) uwDEST_U(4,8)<1>         ubAVS_RESPONSE_2(10,1)<16;4,2>     
+    mov (8) uwDEST_U(5,8)<1>         ubAVS_RESPONSE_2(10,8+1)<16;4,2>   
+    mov (8) uwDEST_U(6,8)<1>         ubAVS_RESPONSE_2(11,1)<16;4,2>     
+    mov (8) uwDEST_U(7,8)<1>         ubAVS_RESPONSE_2(11,8+1)<16;4,2>   
 #endif
 
        // Re-define new # of lines

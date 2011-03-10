@@ -39,7 +39,7 @@ VIDEO_PROCESSING_LOOP:
 
 	// Reached multi-block width?
 	add			(1)	wORIX:w		wORIX:w		16:w
-	cmp.l.f0.1	(1)	null:w		acc0.0:w	wFRAME_ENDX:w	// acc0.0 has wORIX
+	cmp.l.f0.1	(1)	null:w		wORIX:w	wFRAME_ENDX:w	// acc0.0 has wORIX
 
 	#if defined(INC_SCALING)
 	// Update SRC_VID_H_ORI for scaling
