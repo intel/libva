@@ -49,13 +49,15 @@
 #define IMAGE_ID_OFFSET                 0x0a000000
 #define SUBPIC_ID_OFFSET                0x10000000
 
-#define HAS_VC1(ctx)    (IS_GEN6((ctx)->intel.device_id))
+#define HAS_MPEG2(ctx)  (IS_G4X((ctx)->intel.device_id) || \
+                         IS_IRONLAKE((ctx)->intel.device_id) ||         \
+                         (IS_GEN6((ctx)->intel.device_id) && (ctx)->intel.has_bsd))
 
-/* Defined to 1 if GPU supports H.264 decoding */
-/* XXX: drop IS_IRONLAKE(ctx) check once G4X support is available */
-#define HAS_H264(ctx)   (IS_GEN6((ctx)->intel.device_id) || \
-                         (IS_IRONLAKE((ctx)->intel.device_id) && \
-                          (ctx)->intel.has_bsd))
+#define HAS_H264(ctx)   ((IS_GEN6((ctx)->intel.device_id) ||            \
+                          IS_IRONLAKE((ctx)->intel.device_id)) &&       \
+                          (ctx)->intel.has_bsd)
+
+#define HAS_VC1(ctx)    (IS_GEN6((ctx)->intel.device_id) && (ctx)->intel.has_bsd)
 
 #define HAS_TILED_SURFACE(ctx) (IS_GEN6((ctx)->intel.device_id))
 
@@ -133,8 +135,10 @@ i965_QueryConfigProfiles(VADriverContextP ctx,
     struct i965_driver_data * const i965 = i965_driver_data(ctx);
     int i = 0;
 
-    profile_list[i++] = VAProfileMPEG2Simple;
-    profile_list[i++] = VAProfileMPEG2Main;
+    if (HAS_MPEG2(i965)) {
+        profile_list[i++] = VAProfileMPEG2Simple;
+        profile_list[i++] = VAProfileMPEG2Main;
+    }
 
     if (HAS_H264(i965)) {
         profile_list[i++] = VAProfileH264Baseline;
@@ -167,7 +171,8 @@ i965_QueryConfigEntrypoints(VADriverContextP ctx,
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
-        entrypoint_list[n++] = VAEntrypointVLD;
+        if (HAS_MPEG2(i965))
+            entrypoint_list[n++] = VAEntrypointVLD;
         break;
 
     case VAProfileH264Baseline:
@@ -270,7 +275,7 @@ i965_CreateConfig(VADriverContextP ctx,
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
-        if (VAEntrypointVLD == entrypoint) {
+        if (HAS_MPEG2(i965) && VAEntrypointVLD == entrypoint) {
             vaStatus = VA_STATUS_SUCCESS;
         } else {
             vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
