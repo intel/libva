@@ -57,6 +57,8 @@
                          (IS_IRONLAKE((ctx)->intel.device_id) && \
                           (ctx)->intel.has_bsd))
 
+#define HAS_TILED_SURFACE(ctx) (IS_GEN6((ctx)->intel.device_id))
+
 enum {
     I965_SURFACETYPE_RGBA = 1,
     I965_SURFACETYPE_YUV,
@@ -838,14 +840,15 @@ i965_destroy_buffer(struct object_heap *heap, struct object_base *obj)
     object_heap_free(heap, obj);
 }
 
-VAStatus 
-i965_CreateBuffer(VADriverContextP ctx,
-                  VAContextID context,          /* in */
-                  VABufferType type,            /* in */
-                  unsigned int size,            /* in */
-                  unsigned int num_elements,    /* in */
-                  void *data,                   /* in */
-                  VABufferID *buf_id)           /* out */
+static VAStatus
+i965_create_buffer_internal(VADriverContextP ctx,
+                            VAContextID context,
+                            VABufferType type,
+                            unsigned int size,
+                            unsigned int num_elements,
+                            void *data,
+                            dri_bo *store_bo,
+                            VABufferID *buf_id)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_buffer *obj_buffer = NULL;
@@ -887,7 +890,13 @@ i965_CreateBuffer(VADriverContextP ctx,
     assert(buffer_store);
     buffer_store->ref_count = 1;
 
-    if (type == VASliceDataBufferType || type == VAImageBufferType) {
+    if (store_bo != NULL) {
+        buffer_store->bo = store_bo;
+        dri_bo_reference(buffer_store->bo);
+        
+        if (data)
+            dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+    } else if (type == VASliceDataBufferType || type == VAImageBufferType) {
         buffer_store->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                         "Buffer", 
                                         size * num_elements, 64);
@@ -909,6 +918,18 @@ i965_CreateBuffer(VADriverContextP ctx,
     *buf_id = bufferID;
 
     return VA_STATUS_SUCCESS;
+}
+
+VAStatus 
+i965_CreateBuffer(VADriverContextP ctx,
+                  VAContextID context,          /* in */
+                  VABufferType type,            /* in */
+                  unsigned int size,            /* in */
+                  unsigned int num_elements,    /* in */
+                  void *data,                   /* in */
+                  VABufferID *buf_id)           /* out */
+{
+    return i965_create_buffer_internal(ctx, context, type, size, num_elements, data, NULL, buf_id);
 }
 
 
@@ -1252,6 +1273,18 @@ i965_QuerySurfaceStatus(VADriverContextP ctx,
     struct object_surface *obj_surface = SURFACE(render_target);
 
     assert(obj_surface);
+
+    /* Commit pending operations to the HW */
+    intel_batchbuffer_flush(ctx);
+
+    /* Usually GEM will handle synchronization with the graphics hardware */
+#if 0
+    if (obj_surface->bo) {
+        dri_bo_map(obj_surface->bo, 0);
+        dri_bo_unmap(obj_surface->bo);
+    }
+#endif
+    
     *status = obj_surface->status;
 
     return VA_STATUS_SUCCESS;
@@ -1385,6 +1418,7 @@ i965_CreateImage(VADriverContextP ctx,
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
     obj_image->bo         = NULL;
     obj_image->palette    = NULL;
+    obj_image->derived_surface = VA_INVALID_ID;
 
     VAImage * const image = &obj_image->image;
     image->image_id       = image_id;
@@ -1459,6 +1493,7 @@ i965_CreateImage(VADriverContextP ctx,
         goto error;
 
     obj_image->bo = BUFFER(image->buf)->buffer_store->bo;
+    dri_bo_reference(obj_image->bo);
 
     if (image->num_palette_entries > 0 && image->entry_bytes > 0) {
         obj_image->palette = malloc(image->num_palette_entries * sizeof(obj_image->palette));
@@ -1481,10 +1516,125 @@ error:
 
 VAStatus i965_DeriveImage(VADriverContextP ctx,
                           VASurfaceID surface,
-                          VAImage *image)        /* out */
+                          VAImage *out_image)        /* out */
 {
-    /* TODO */
-    return VA_STATUS_ERROR_OPERATION_FAILED;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+    struct object_image *obj_image;
+    struct object_surface *obj_surface; 
+    VAImageID image_id;
+    unsigned int w_pitch, h_pitch;
+    unsigned int data_size;
+    VAStatus va_status;
+
+    out_image->image_id = VA_INVALID_ID;
+    obj_surface = SURFACE(surface);
+
+    if (!obj_surface)
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+
+    w_pitch = obj_surface->width;
+    h_pitch = obj_surface->height;
+    data_size = obj_surface->orig_width * obj_surface->orig_height +
+        2 * (((obj_surface->orig_width + 1) / 2) * ((obj_surface->orig_height + 1) / 2));
+
+    image_id = NEW_IMAGE_ID();
+
+    if (image_id == VA_INVALID_ID)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
+    obj_image = IMAGE(image_id);
+    
+    if (!obj_image)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+
+    obj_image->bo = NULL;
+    obj_image->palette = NULL;
+    obj_image->derived_surface = VA_INVALID_ID;
+
+    VAImage * const image = &obj_image->image;
+    
+    memset(image, 0, sizeof(*image));
+    image->image_id = image_id;
+    image->buf = VA_INVALID_ID;
+    image->num_palette_entries = 0;
+    image->entry_bytes = 0;
+    image->width = obj_surface->orig_width;
+    image->height = obj_surface->orig_height;
+    image->data_size = data_size;
+
+    if (render_state->interleaved_uv) {
+        image->format.fourcc = VA_FOURCC('N','V','1','2');
+        image->format.byte_order = VA_LSB_FIRST;
+        image->format.bits_per_pixel = 12;
+        image->num_planes = 2;
+        image->pitches[0] = w_pitch;
+        image->offsets[0] = 0;
+        image->pitches[1] = w_pitch;
+        image->offsets[1] = w_pitch * h_pitch;
+    } else {
+        image->format.fourcc = VA_FOURCC('Y','V','1','2');
+        image->format.byte_order = VA_LSB_FIRST;
+        image->format.bits_per_pixel = 12;
+        image->num_planes = 3;
+        image->pitches[0] = w_pitch;
+        image->offsets[0] = 0;
+        image->pitches[1] = w_pitch / 2;
+        image->offsets[1] = w_pitch * h_pitch;
+        image->pitches[2] = w_pitch / 2;
+        image->offsets[2] = w_pitch * h_pitch + (w_pitch / 2) * (h_pitch / 2);
+    }
+
+    if (obj_surface->bo == NULL) {
+        if (HAS_TILED_SURFACE(i965)) {
+        
+            uint32_t tiling_mode = I915_TILING_Y;
+            unsigned long pitch;
+
+            obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
+                                                       "vaapi surface",
+                                                       obj_surface->width, 
+                                                       obj_surface->height + obj_surface->height / 2,
+                                                       1,
+                                                       &tiling_mode,
+                                                       &pitch,
+                                                       0);
+            assert(obj_surface->bo);
+            assert(tiling_mode == I915_TILING_Y);
+            assert(pitch == obj_surface->width);
+        } else {
+            obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
+                                           "vaapi surface",
+                                           obj_surface->size,
+                                           0x1000);
+        }
+    }
+
+    assert(obj_surface->bo);
+    va_status = i965_create_buffer_internal(ctx, 0, VAImageBufferType,
+                                            obj_surface->size, 1, NULL, obj_surface->bo, &image->buf);
+    if (va_status != VA_STATUS_SUCCESS)
+        goto error;
+
+    obj_image->bo = BUFFER(image->buf)->buffer_store->bo;
+    dri_bo_reference(obj_image->bo);
+
+    if (image->num_palette_entries > 0 && image->entry_bytes > 0) {
+        obj_image->palette = malloc(image->num_palette_entries * sizeof(obj_image->palette));
+        if (!obj_image->palette) {
+            va_status = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            goto error;
+        }
+    }
+
+    *out_image = *image;
+    obj_surface->flags |= SURFACE_DERIVED;
+
+    return VA_STATUS_SUCCESS;
+
+error:
+    i965_DestroyImage(ctx, image_id);
+    return va_status;
 }
 
 static void 
@@ -1499,9 +1649,13 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_image *obj_image = IMAGE(image); 
+    struct object_surface *obj_surface; 
 
     if (!obj_image)
         return VA_STATUS_SUCCESS;
+
+    dri_bo_unreference(obj_image->bo);
+    obj_image->bo = NULL;
 
     if (obj_image->image.buf != VA_INVALID_ID) {
         i965_DestroyBuffer(ctx, obj_image->image.buf);
@@ -1511,6 +1665,12 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     if (obj_image->palette) {
         free(obj_image->palette);
         obj_image->palette = NULL;
+    }
+
+    obj_surface = SURFACE(obj_image->derived_surface);
+
+    if (obj_surface) {
+        obj_surface->flags &= ~SURFACE_DERIVED;
     }
 
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
@@ -1831,10 +1991,10 @@ i965_PutSurface(VADriverContextP ctx,
     dri_swap_buffer(ctx, dri_drawable);
     obj_surface->flags |= SURFACE_DISPLAYED;
 
-    if (!(obj_surface->flags & SURFACE_REFERENCED)) {
+    if ((obj_surface->flags & SURFACE_ALL_MASK) == SURFACE_DISPLAYED) {
         dri_bo_unreference(obj_surface->bo);
         obj_surface->bo = NULL;
-        obj_surface->flags = 0;
+        obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
 
         if (obj_surface->free_private_data)
             obj_surface->free_private_data(&obj_surface->private_data);

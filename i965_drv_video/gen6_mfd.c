@@ -85,10 +85,10 @@ gen6_mfd_avc_frame_store_index(VADriverContextP ctx, VAPictureParameterBufferH26
             struct object_surface *obj_surface = SURFACE(gen6_mfd_context->reference_surface[i].surface_id);
             obj_surface->flags &= ~SURFACE_REFERENCED;
 
-            if (obj_surface->flags & SURFACE_DISPLAYED) {
+            if ((obj_surface->flags & SURFACE_ALL_MASK) == SURFACE_DISPLAYED) {
                 dri_bo_unreference(obj_surface->bo);
                 obj_surface->bo = NULL;
-                obj_surface->flags = 0;
+                obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
             }
 
             if (obj_surface->free_private_data)
@@ -1039,7 +1039,8 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
     assert(!(va_pic->flags & VA_PICTURE_H264_INVALID));
     obj_surface = SURFACE(va_pic->picture_id);
     assert(obj_surface);
-    obj_surface->flags = (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
+    obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
+    obj_surface->flags |= (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
     gen6_mfd_init_avc_surface(ctx, pic_param, obj_surface);
 
     if (obj_surface->bo == NULL) {
