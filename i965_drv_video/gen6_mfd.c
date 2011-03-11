@@ -1408,7 +1408,7 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx, struct decode_state *decode_
 }
 
 static const int va_to_gen6_vc1_pic_type[5] = {
-    GEN6_VC1_BI_PICTURE,        /* FIXME */
+    GEN6_VC1_I_PICTURE,
     GEN6_VC1_P_PICTURE,
     GEN6_VC1_B_PICTURE,
     GEN6_VC1_BI_PICTURE,
@@ -1655,7 +1655,6 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface;
     int alt_pquant_config = 0, alt_pquant_edge_mask = 0, alt_pq;
-
     int dquant, dquantfrm, dqprofile, dqdbedge, dqsbedge, dqbilevel;
     int unified_mv_mode;
     int ref_field_pic_polarity = 0;
@@ -1665,10 +1664,13 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
     int brfd = 0;
     int fcm = 0;
     int picture_type;
+    int profile;
+    int overlap;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
 
+    profile = va_to_gen6_vc1_profile[pic_param->sequence_fields.bits.profile];
     dquant = pic_param->pic_quantizer_fields.bits.dquant;
     dquantfrm = pic_param->pic_quantizer_fields.bits.dq_frame;
     dqprofile = pic_param->pic_quantizer_fields.bits.dq_profile;
@@ -1746,6 +1748,10 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
         scale_factor = b_picture_scale_factor[pic_param->b_picture_fraction];
 
     picture_type = va_to_gen6_vc1_pic_type[pic_param->picture_fields.bits.picture_type];
+    
+    if (profile == GEN6_VC1_ADVANCED_PROFILE && 
+        picture_type == GEN6_VC1_I_PICTURE)
+        picture_type = GEN6_VC1_BI_PICTURE;
 
     if (picture_type == GEN6_VC1_I_PICTURE || picture_type == GEN6_VC1_BI_PICTURE) /* I picture */
         trans_ac_y = pic_param->transform_fields.bits.transform_ac_codingset_idx2;
@@ -1788,6 +1794,10 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
             brfd = 0;
     }
 
+    overlap = pic_param->sequence_fields.bits.overlap;
+    if (profile != GEN6_VC1_ADVANCED_PROFILE && pic_param->pic_quantizer_fields.bits.pic_quantizer_scale < 9)
+        overlap = 0;
+
     assert(pic_param->conditional_overlap_flag < 3);
     assert(pic_param->mv_fields.bits.mv_table < 4); /* FIXME: interlace mode */
 
@@ -1801,7 +1811,7 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
                   1 << 29 | /* concealment */
                   alt_pq << 24 |
                   pic_param->entrypoint_fields.bits.loopfilter << 23 |
-                  pic_param->sequence_fields.bits.overlap << 22 |
+                  overlap << 22 |
                   (pic_param->pic_quantizer_fields.bits.quantizer == 0) << 21 | /* implicit quantizer */
                   pic_param->pic_quantizer_fields.bits.pic_quantizer_scale << 16 |
                   alt_pquant_edge_mask << 12 |
