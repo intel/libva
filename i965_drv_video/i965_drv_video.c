@@ -59,7 +59,8 @@
 
 #define HAS_VC1(ctx)    (IS_GEN6((ctx)->intel.device_id) && (ctx)->intel.has_bsd)
 
-#define HAS_TILED_SURFACE(ctx) (IS_GEN6((ctx)->intel.device_id))
+#define HAS_TILED_SURFACE(ctx) (IS_GEN6((ctx)->intel.device_id) && \
+                                (ctx)->render_state.interleaved_uv)
 
 enum {
     I965_SURFACETYPE_RGBA = 1,
@@ -436,7 +437,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->orig_width = width;
         obj_surface->orig_height = height;
 
-        if (IS_GEN6(i965->intel.device_id)) {
+        if (HAS_TILED_SURFACE(i965)) {
             obj_surface->width = ALIGN(obj_surface->orig_width, 128);
             obj_surface->height = ALIGN(obj_surface->orig_height, 32);
         } else {
