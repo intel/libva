@@ -1596,6 +1596,7 @@ gen6_render_setup_states(VADriverContextP ctx,
     gen6_render_color_calc_state(ctx);
     gen6_render_blend_state(ctx);
     gen6_render_depth_stencil_state(ctx);
+    i965_render_upload_constants(ctx);
     i965_render_upload_vertex(ctx, surface,
                               srcx, srcy, srcw, srch,
                               destx, desty, destw, desth);
@@ -1798,9 +1799,16 @@ gen6_emit_sf_state(VADriverContextP ctx)
 static void 
 gen6_emit_wm_state(VADriverContextP ctx, int kernel)
 {
-    /* disable WM constant buffer */
-    OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_PS | (5 - 2));
-    OUT_BATCH(ctx, 0);
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_render_state *render_state = &i965->render_state;
+
+    OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_PS |
+              GEN6_3DSTATE_CONSTANT_BUFFER_0_ENABLE |
+              (5 - 2));
+    OUT_RELOC(ctx, 
+              render_state->curbe.bo,
+              I915_GEM_DOMAIN_INSTRUCTION, 0,
+              0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
