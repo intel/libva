@@ -437,7 +437,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->orig_width = width;
         obj_surface->orig_height = height;
 
-        if (HAS_TILED_SURFACE(i965)) {
+        if (IS_GEN6(i965->intel.device_id)) {
             obj_surface->width = ALIGN(obj_surface->orig_width, 128);
             obj_surface->height = ALIGN(obj_surface->orig_height, 32);
         } else {
