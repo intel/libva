@@ -1863,6 +1863,7 @@ gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx, struct decode_state *decode_s
 {
     VAPictureParameterBufferVC1 *pic_param;
     int interpolation_mode = 0;
+    int intensitycomp_single;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
@@ -1880,6 +1881,7 @@ gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx, struct decode_state *decode_s
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
+    intensitycomp_single = (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation);
 
     BEGIN_BCS_BATCH(ctx, 7);
     OUT_BCS_BATCH(ctx, MFX_VC1_PRED_PIPE_STATE | (7 - 2));
@@ -1898,10 +1900,10 @@ gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx, struct decode_state *decode_s
                   pic_param->fast_uvmc_flag << 18 |
                   0 << 17 | /* FIXME: scale up or down ??? */
                   pic_param->range_reduction_frame << 16 |
-                  0 << 6 |
+                  0 << 6 | /* FIXME: double ??? */
                   0 << 4 |
-                  0 << 2 | /* FIXME: Intensity Compensation */
-                  0 << 0);
+                  intensitycomp_single << 2 |
+                  intensitycomp_single << 0);
     ADVANCE_BCS_BATCH(ctx);
 }
 
