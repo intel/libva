@@ -1950,19 +1950,23 @@ gen6_mfd_vc1_directmode_state(VADriverContextP ctx, struct decode_state *decode_
 }
 
 static int
-gen6_mfd_vc1_get_macroblock_bit_offset(uint8_t *buf, int in_slice_data_bit_offset)
+gen6_mfd_vc1_get_macroblock_bit_offset(uint8_t *buf, int in_slice_data_bit_offset, int profile)
 {
     int out_slice_data_bit_offset;
     int slice_header_size = in_slice_data_bit_offset / 8;
     int i, j;
 
-    for (i = 0, j = 0; i < slice_header_size; i++, j++) {
-        if (!buf[j] && !buf[j + 1] && buf[j + 2] == 3 && buf[j + 3] < 4) {
-            i++, j += 2;
+    if (profile != 3)
+        out_slice_data_bit_offset = in_slice_data_bit_offset;
+    else {
+        for (i = 0, j = 0; i < slice_header_size; i++, j++) {
+            if (!buf[j] && !buf[j + 1] && buf[j + 2] == 3 && buf[j + 3] < 4) {
+                i++, j += 2;
+            }
         }
-    }
 
-    out_slice_data_bit_offset = 8 * j + in_slice_data_bit_offset % 8;
+        out_slice_data_bit_offset = 8 * j + in_slice_data_bit_offset % 8;
+    }
 
     return out_slice_data_bit_offset;
 }
@@ -1980,7 +1984,9 @@ gen6_mfd_vc1_bsd_object(VADriverContextP ctx,
 
     dri_bo_map(slice_data_bo, 0);
     slice_data = (uint8_t *)(slice_data_bo->virtual + slice_param->slice_data_offset);
-    macroblock_offset = gen6_mfd_vc1_get_macroblock_bit_offset(slice_data, slice_param->macroblock_offset);
+    macroblock_offset = gen6_mfd_vc1_get_macroblock_bit_offset(slice_data, 
+                                                               slice_param->macroblock_offset,
+                                                               pic_param->sequence_fields.bits.profile);
     dri_bo_unmap(slice_data_bo);
 
     if (next_slice_param)
