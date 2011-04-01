@@ -1852,22 +1852,16 @@ typedef enum
 #define VA_OOL_DEBLOCKING_TRUE  0x00000001
 
 /* Render mode */
-typedef enum
-{
-    VARenderModeUndefined          = 0,
-    VARenderModeLocalOverlay       = 1,
-    VARenderModeLocalGPU           = 2,
-    VARenderModeExternalOverlay    = 4,
-    VARenderModeExternalGPU        = 8
-} VARenderMode;
+#define VA_RENDER_MODE_UNDEFINED           0
+#define VA_RENDER_MODE_LOCAL_OVERLAY       1
+#define VA_RENDER_MODE_LOCAL_GPU           2
+#define VA_RENDER_MODE_EXTERNAL_OVERLAY    4
+#define VA_RENDER_MODE_EXTERNAL_GPU        8
 
 /* Render device */
-typedef enum
-{
-    VARenderDeviceUndefined     = 0,
-    VARenderDeviceLocal         = 1,
-    VARenderDeviceExternal      = 2
-} VARenderDevice;
+#define VA_RENDER_DEVICE_UNDEFINED  0
+#define VA_RENDER_DEVICE_LOCAL      1
+#define VA_RENDER_DEVICE_EXTERNAL   2
 
 /* Currently defined display attribute types */
 typedef enum
