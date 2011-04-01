@@ -432,7 +432,7 @@ VAStatus vaInitialize (
     if (driver_name)
         free(driver_name);
     
-    VA_TRACE(va_Initialize, dpy, major_version, minor_version);
+    VA_TRACE(va_TraceInitialize, dpy, major_version, minor_version);
 
     return vaStatus;
 }
@@ -463,7 +463,7 @@ VAStatus vaTerminate (
   if (VA_STATUS_SUCCESS == vaStatus)
       pDisplayContext->vaDestroy(pDisplayContext);
 
-  VA_TRACE(va_Terminate, dpy);
+  VA_TRACE(va_TraceTerminate, dpy);
 
   va_TraceEnd(dpy);
 
