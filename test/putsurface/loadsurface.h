@@ -99,8 +99,8 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
     vaMapBuffer(va_dpy,surface_image.buf,&surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
         
-    U_start = surface_p + surface_image.offsets[1];
-    V_start = surface_p + surface_image.offsets[2];
+    U_start = (char *)surface_p + surface_image.offsets[1];
+    V_start = (char *)surface_p + surface_image.offsets[2];
 
     /* assume surface is planar format */
     yuvgen_planar(surface_image.width, surface_image.height,

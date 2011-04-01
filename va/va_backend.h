@@ -416,7 +416,7 @@ struct VADriverContext
      * private API. The driver implementation is responsible for the
      * allocation and deallocation of this structure.
      */
-    void *vtable_tpi; 
+    void *vtable_tpi;
 
     void *native_dpy;
     int x11_screen;
@@ -434,7 +434,7 @@ struct VADriverContext
     
     void *dri_state;
     void *glx;				/* opaque for GLX code */
-    
+
     unsigned long reserved[45];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 

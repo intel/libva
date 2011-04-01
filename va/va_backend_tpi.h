@@ -52,7 +52,7 @@ struct VADriverVTableTPI
         );
 
         VAStatus (*vaCreateSurfacesForUserPtr)(
-                VADisplay dpy,
+		VADriverContextP ctx,
                 int width,
                 int height,
                 int format,
@@ -70,7 +70,7 @@ struct VADriverVTableTPI
 
 
 	VAStatus (*vaPutSurfaceBuf) (
-		VADisplay dpy,
+		VADriverContextP ctx,
 		VASurfaceID surface,
 		unsigned char* data,
 		int* data_len,

@@ -79,6 +79,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva-x11.so.%{libversion}
 %{_libdir}/libva-glx.so.1
 %{_libdir}/libva-glx.so.%{libversion}
+%{_libdir}/libva-egl.so.1
+%{_libdir}/libva-egl.so.%{libversion}
 %{_bindir}/vainfo
 %{_bindir}/test_*
 %{_bindir}/h264encode
@@ -95,10 +97,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libva-tpi.so
 %{_libdir}/libva-x11.so
 %{_libdir}/libva-glx.so
+%{_libdir}/libva-egl.so
 %{_libdir}/pkgconfig/libva.pc
 %{_libdir}/pkgconfig/libva-tpi.pc
 %{_libdir}/pkgconfig/libva-x11.pc
 %{_libdir}/pkgconfig/libva-glx.pc
+%{_libdir}/pkgconfig/libva-egl.pc
 
 %changelog
 * Tue Jan 25 2011 Austin Yuan <shengquan.yuan@intel.com> 1.0.1

@@ -956,7 +956,7 @@ i965_BufferSetNumElements(VADriverContextP ctx,
     } else {
         obj_buffer->num_elements = num_elements;
         if (obj_buffer->buffer_store != NULL) {
-            obj_buffer->buffer_store->num_elements = num_elements; 
+            obj_buffer->buffer_store->num_elements = num_elements;
         }
     }
 

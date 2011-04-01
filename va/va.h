@@ -60,7 +60,7 @@
  * rev 0.31.2 (01/13/2011 Anthony Pabon)- Added a flag to indicate Subpicture coordinates are screen
  *                                        screen relative rather than source video relative.
  * rev 0.32.0 (01/13/2011 Xiang Haihao) - Add profile into VAPictureParameterBufferVC1
- *                                        update VAAPI to 0.32.0 
+ *                                        update VAAPI to 0.32.0
  *
  * Acknowledgements:
  *  Some concepts borrowed from XvMC and XvImage.
@@ -1320,12 +1320,14 @@ VAStatus vaBufferSetNumElements (
  * SLICE_OVERFLOW(bit9): At least one slice in the current frame has
  *              exceeded the maximum slice size specified.
  * BITRATE_OVERFLOW(bit10): The peak bitrate was exceeded for this frame.
+ * BITRATE_HIGH(bit11): The frame size got within the safety margin of the maximum size (VCM only)
  * AIR_MB_OVER_THRESHOLD: the number of MBs adapted to Intra MB
  */
 #define VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK         0xff
 #define VA_CODED_BUF_STATUS_LARGE_SLICE_MASK            0x100
 #define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
 #define VA_CODED_BUF_STATUS_BITRATE_OVERFLOW		0x400
+#define VA_CODED_BUF_STATUS_BITRATE_HIGH		0x800
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /*
@@ -1447,6 +1449,12 @@ VAStatus vaQuerySurfaceStatus (
     VASurfaceStatus *status	/* out */
 );
 
+typedef enum
+{
+    VA_DECODE_SLICE_MISSING            = 0,
+    VA_DECODE_MB_ERROR                 = 1,
+} VA_DECODE_ERROR_TYPE;
+
 /*
  * Client calls vaQuerySurfaceError with VA_STATUS_ERROR_DECODING_ERROR, server side returns
  * an array of structure VASurfaceDecodeMBErrors, and the array is terminated by setting status=-1
@@ -1456,6 +1464,7 @@ typedef struct _VASurfaceDecodeMBErrors
     int status; /* 1 if hardware has returned detailed info below, -1 means this record is invalid */
     unsigned int start_mb; /* start mb address with errors */
     unsigned int end_mb;  /* end mb address with errors */
+    VA_DECODE_ERROR_TYPE decode_error_type;
 } VASurfaceDecodeMBErrors;
 
 /*
@@ -1842,6 +1851,23 @@ typedef enum
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000
 #define VA_OOL_DEBLOCKING_TRUE  0x00000001
 
+/* Render mode */
+typedef enum
+{
+    VARenderModeUndefined          = 0,
+    VARenderModeLocalOverlay       = 1,
+    VARenderModeLocalGPU           = 2,
+    VARenderModeExternalOverlay    = 4,
+    VARenderModeExternalGPU        = 8
+} VARenderMode;
+
+/* Render device */
+typedef enum
+{
+    VARenderDeviceUndefined     = 0,
+    VARenderDeviceLocal         = 1,
+    VARenderDeviceExternal      = 2
+} VARenderDevice;
 
 /* Currently defined display attribute types */
 typedef enum
@@ -1853,7 +1879,8 @@ typedef enum
     /* client can specifiy a background color for the target window
      * the new feature of video conference,
      * the uncovered area of the surface is filled by this color
-     * also it will blend with the decoded video color*/
+     * also it will blend with the decoded video color
+     */
     VADisplayAttribBackgroundColor      = 4,
     /*
      * this is a gettable only attribute. For some implementations that use the
@@ -1888,6 +1915,32 @@ typedef enum
      *      b: background color of the drawable
      */
     VADisplayAttribBlendColor          = 13,
+    /*
+     * Indicate driver to skip painting color key or not.
+     * only applicable if the render is overlay
+     */
+    VADisplayAttribOverlayAutoPaintColorKey   = 14,
+    /*
+     * customized overlay color key, the format is RGB888
+     * [23:16] = Red, [15:08] = Green, [07:00] = Blue.
+     */
+    VADisplayAttribOverlayColorKey	= 15,
+    /*
+     * The hint for the implementation of vaPutSurface
+     * normally, the driver could use an overlay or GPU to render the surface on the screen
+     * this flag provides APP the flexibity to switch the render dynamically
+     */
+    VADisplayAttribRenderMode           = 16,
+    /*
+     * specify if vaPutSurface needs to render into specified monitors
+     * one example is that one external monitor (e.g. HDMI) is enabled, 
+     * but the window manager is not aware of it, and there is no associated drawable
+     */
+    VADisplayAttribRenderDevice        = 17,
+    /*
+     * specify vaPutSurface render area if there is no drawable on the monitor
+     */
+    VADisplayAttribRenderRect          = 18,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */

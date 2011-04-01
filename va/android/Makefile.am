@@ -10,8 +10,8 @@
 # secret laws and treaty provisions. No part of the Material may be used,
 # copied, reproduced, modified, published, uploaded, posted, transmitted,
 # distributed, or disclosed in any way without Intel's prior express written
-# permission. 
-# 
+# permission.
+#
 # No license under any patent, copyright, trade secret or other intellectual
 # property right is granted to or conferred upon you by disclosure or delivery
 # of the Materials, either expressly, by implication, inducement, estoppel or

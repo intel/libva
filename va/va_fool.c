@@ -139,7 +139,7 @@ VAStatus vaLockSurface(VADisplay dpy,
         unsigned int *chroma_u_offset,
         unsigned int *chroma_v_offset,
         unsigned int *buffer_name,
-        void **buffer 
+        void **buffer
 );
 
 VAStatus vaUnlockSurface(VADisplay dpy,
@@ -265,7 +265,7 @@ static int yuvgen_planar(
 
         /* fill garbage data into the other field */
         if (((field == VA_TOP_FIELD) && (row &1))
-                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) { 
+                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
             memset(Y_row, 0xff, width);
             continue;
         }
@@ -554,7 +554,7 @@ VAStatus va_FoolUnmapBuffer(
 
     if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
         return 1; /* fool buffer creation */
-    
+
     return 0;
 }
 

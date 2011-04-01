@@ -28,6 +28,7 @@
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_fool.h"
+#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -191,7 +192,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
 
     search_path = strdup((const char *)search_path);
-    driver_dir = strtok_r((const char *)search_path, ":", &saveptr);
+    gdriver_dir = strtok_r((const char *)search_path, ":", &saveptr);
     while(driver_dir)
     {
         void *handle = NULL;
@@ -430,6 +431,9 @@ VAStatus vaInitialize (
 
     if (driver_name)
         free(driver_name);
+    
+    VA_TRACE(va_Initialize, dpy, major_version, minor_version);
+
     return vaStatus;
 }
 
@@ -458,6 +462,8 @@ VAStatus vaTerminate (
 
   if (VA_STATUS_SUCCESS == vaStatus)
       pDisplayContext->vaDestroy(pDisplayContext);
+
+  VA_TRACE(va_Terminate, dpy);
 
   va_TraceEnd(dpy);
 
@@ -578,7 +584,7 @@ VAStatus vaCreateConfig (
   ctx = CTX(dpy);
 
   VA_FOOL(va_FoolCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
-  
+
   vaStatus =  ctx->vtable->vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
 
   VA_TRACE(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
@@ -626,7 +632,7 @@ VAStatus vaCreateSurfaces (
   VADriverContextP ctx;
   VAStatus vaStatus;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -704,11 +710,11 @@ VAStatus vaCreateBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
   int ret = 0;
-  
+
   VA_FOOL(va_FoolCreateBuffer, dpy, context, type, size, num_elements, data, buf_id);
   if (ret)
       return VA_STATUS_SUCCESS;
-  
+
   return ctx->vtable->vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
 }
 
@@ -742,7 +748,7 @@ VAStatus vaMapBuffer (
   VA_FOOL(va_FoolMapBuffer, dpy, buf_id, pbuf);
   if (ret)
       return VA_STATUS_SUCCESS;
-  
+
   va_status = ctx->vtable->vaMapBuffer( ctx, buf_id, pbuf );
 
   if (va_status == VA_STATUS_SUCCESS)
@@ -760,11 +766,11 @@ VAStatus vaUnmapBuffer (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
   int ret = 0;
-  
+
   VA_FOOL(va_FoolUnmapBuffer, dpy, buf_id);
   if (ret)
       return VA_STATUS_SUCCESS;
-  
+
   return ctx->vtable->vaUnmapBuffer( ctx, buf_id );
 }
 
@@ -804,7 +810,7 @@ VAStatus vaBeginPicture (
 {
   VADriverContextP ctx;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -826,7 +832,7 @@ VAStatus vaRenderPicture (
 {
   VADriverContextP ctx;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -847,7 +853,7 @@ VAStatus vaEndPicture (
   VAStatus va_status;
   VADriverContextP ctx;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -872,7 +878,7 @@ VAStatus vaSyncSurface (
   VAStatus va_status;
   VADriverContextP ctx;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
@@ -1116,14 +1122,14 @@ VAStatus vaQuerySubpictureFormats (
 {
   VADriverContextP ctx;
   int ret = 0;
-  
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-  
+
   VA_FOOL(va_FoolQuerySubpictureFormats, dpy, format_list, flags, num_formats);
   if (ret)
       return VA_STATUS_SUCCESS;
-  
+
   return ctx->vtable->vaQuerySubpictureFormats ( ctx, format_list, flags, num_formats);
 }
 

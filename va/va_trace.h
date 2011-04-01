@@ -30,6 +30,16 @@ void va_TraceEnd(VADisplay dpy);
 
 void va_TraceMsg(int idx, const char *msg, ...);
 
+VAStatus va_TraceInitialize (
+    VADisplay dpy,
+    int *major_version,	 /* out */
+    int *minor_version 	 /* out */
+);
+
+VAStatus va_TraceTerminate (
+    VADisplay dpy
+);
+
 void va_TraceCreateConfig(
     VADisplay dpy,
     VAProfile profile, 

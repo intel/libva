@@ -93,7 +93,7 @@ DIST_SUBDIRS = x11 glx egl dummy
 SUBDIRS = $(libva_x11_backenddir) $(libva_dummy_backenddir) $(libva_glx_backenddir) $(libva_egl_backenddir)
 
 libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_dummy.h va_version.h va_backend_tpi.h 
+libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_dummy.h va_version.h va_backend_tpi.h
 
 DISTCLEANFILES = \
 	va_version.h

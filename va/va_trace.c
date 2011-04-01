@@ -404,6 +404,30 @@ void va_TraceSurface(VADisplay dpy)
     va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
 }
 
+
+VAStatus va_TraceInitialize (
+    VADisplay dpy,
+    int *major_version,	 /* out */
+    int *minor_version 	 /* out */
+)
+{
+    int i;
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+}
+
+VAStatus va_TraceTerminate (
+    VADisplay dpy
+)
+{
+    int i;
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+}
+
+
 void va_TraceCreateConfig(
     VADisplay dpy,
     VAProfile profile, 
@@ -1273,9 +1297,10 @@ void va_TraceBeginPicture(
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(idx, "\trender_targets = 0x%08x\n", render_target);
+    va_TraceMsg(idx, "\tframe_count  = #%d\n", trace_context[idx].trace_frame_no);
 
     trace_context[idx].trace_rendertarget = render_target; /* for surface data dump after vaEndPicture */
 
