@@ -17,6 +17,9 @@
 #define CMD_SAMPLER_PALETTE_LOAD                CMD(3, 1, 2)
 
 #define CMD_MEDIA_STATE_POINTERS                CMD(2, 0, 0)
+#define CMD_MEDIA_VFE_STATE                     CMD(2, 0, 0)
+#define CMD_MEDIA_CURBE_LOAD                    CMD(2, 0, 1)
+#define CMD_MEDIA_INTERFACE_LOAD                CMD(2, 0, 2)
 #define CMD_MEDIA_OBJECT                        CMD(2, 1, 0)
 #define CMD_MEDIA_OBJECT_EX                     CMD(2, 1, 1)
 
@@ -53,6 +56,8 @@
 #define CMD_CLEAR_PARAMS                        CMD(3, 1, 0x10)
 /* DW1 */
 # define CMD_CLEAR_PARAMS_DEPTH_CLEAR_VALID     (1 << 15)
+
+#define CMD_PIPE_CONTROL                        CMD(3, 2, 0)
 
 /* for GEN6+ */
 #define GEN6_3DSTATE_SAMPLER_STATE_POINTERS	CMD(3, 0, 0x02)
@@ -165,6 +170,10 @@
 #define MFX_AVC_WEIGHTOFFSET_STATE              MFX(2, 1, 0, 5)
 
 #define MFD_AVC_BSD_OBJECT                      MFX(2, 1, 1, 8)
+
+#define MFC_AVC_FQM_STATE                       MFX(2, 1, 2, 2)
+#define MFC_AVC_INSERT_OBJECT                   MFX(2, 1, 2, 8)
+#define MFC_AVC_PAK_OBJECT                      MFX(2, 1, 2, 9)
 
 #define MFX_MPEG2_PIC_STATE                     MFX(2, 3, 0, 0)
 #define MFX_MPEG2_QM_STATE                      MFX(2, 3, 0, 1)

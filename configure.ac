@@ -178,6 +178,7 @@ AC_OUTPUT([
 	i965_drv_video/shaders/mpeg2/vld/Makefile
 	i965_drv_video/shaders/render/Makefile
 	i965_drv_video/shaders/post_processing/Makefile
+	i965_drv_video/shaders/vme/Makefile
 	test/Makefile
 	test/basic/Makefile
 	test/decode/Makefile
