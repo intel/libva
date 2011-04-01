@@ -192,7 +192,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
 
     search_path = strdup((const char *)search_path);
-    gdriver_dir = strtok_r((const char *)search_path, ":", &saveptr);
+    driver_dir = strtok_r((const char *)search_path, ":", &saveptr);
     while(driver_dir)
     {
         void *handle = NULL;
