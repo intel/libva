@@ -424,7 +424,7 @@ static void gen6_vme_idrt(VADriverContextP ctx)
     ADVANCE_BATCH(ctx);
 }
 
-static void gen6_vme_media_object(VADriverContextP ctx, 
+static int gen6_vme_media_object(VADriverContextP ctx, 
                                   VAContextID context, 
                                   struct mfc_encode_state *encode_state,
                                   int mb_x, int mb_y)
@@ -435,10 +435,11 @@ static void gen6_vme_media_object(VADriverContextP ctx,
     unsigned char *pPixel[17];	
     int pitch = obj_surface->width;
     int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
+    int len_in_dowrds = 6 + 32 + 8;
 
-    BEGIN_BATCH(ctx, 6 + 32 + 8);
+    BEGIN_BATCH(ctx, len_in_dowrds);
     
-    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 44);
+    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
     OUT_BATCH(ctx, VME_INTRA_SHADER);		/*Interface Descriptor Offset*/	
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
@@ -552,6 +553,8 @@ static void gen6_vme_media_object(VADriverContextP ctx,
     drm_intel_gem_bo_unmap_gtt( obj_surface->bo );
 
     ADVANCE_BATCH(ctx);
+
+    return len_in_dowrds * 4;
 }
 
 static void gen6_vme_media_init(VADriverContextP ctx)
@@ -616,34 +619,46 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
     struct object_context *obj_context = CONTEXT(context);
-
     int width_in_mbs = (obj_context->picture_width + 15) / 16;
     int height_in_mbs = (obj_context->picture_height + 15) / 16;
-    int x,y;
+    int x, y;
+    int emit_new_state = 1, object_len_in_bytes;
 
     intel_batchbuffer_start_atomic(ctx, 0x1000);
-	
-    /*Step1: MI_FLUSH/PIPE_CONTROL*/
-    BEGIN_BATCH(ctx, 4);
-    OUT_BATCH(ctx, CMD_PIPE_CONTROL | 0x02);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    ADVANCE_BATCH(ctx);
-
-    /*Step2: State command PIPELINE_SELECT*/
-    gen6_vme_pipeline_select(ctx);                           
-
-    /*Step3: State commands configuring pipeline states*/
-    gen6_vme_state_base_address(ctx);
-    gen6_vme_vfe_state(ctx);
-    gen6_vme_curbe_load(ctx);
-    gen6_vme_idrt(ctx);
 
     for(y = 0; y < height_in_mbs; y++){
         for(x = 0; x < width_in_mbs; x++){	
+
+            if (emit_new_state) {
+                /*Step1: MI_FLUSH/PIPE_CONTROL*/
+                BEGIN_BATCH(ctx, 4);
+                OUT_BATCH(ctx, CMD_PIPE_CONTROL | 0x02);
+                OUT_BATCH(ctx, 0);
+                OUT_BATCH(ctx, 0);
+                OUT_BATCH(ctx, 0);
+                ADVANCE_BATCH(ctx);
+
+                /*Step2: State command PIPELINE_SELECT*/
+                gen6_vme_pipeline_select(ctx);                           
+
+                /*Step3: State commands configuring pipeline states*/
+                gen6_vme_state_base_address(ctx);
+                gen6_vme_vfe_state(ctx);
+                gen6_vme_curbe_load(ctx);
+                gen6_vme_idrt(ctx);
+
+                emit_new_state = 0;
+            }
+
             /*Step4: Primitive commands*/
-            gen6_vme_media_object(ctx, context, encode_state, x, y);
+            object_len_in_bytes = gen6_vme_media_object(ctx, context, encode_state, x, y);
+
+            if (intel_batchbuffer_check_free_space(ctx, object_len_in_bytes) == 0) {
+                intel_batchbuffer_end_atomic(ctx);	
+                intel_batchbuffer_flush(ctx);
+                emit_new_state = 1;
+                intel_batchbuffer_start_atomic(ctx, 0x1000);
+            }
         }
     }
 

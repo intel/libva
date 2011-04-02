@@ -409,13 +409,14 @@ gen6_mfc_avc_insert_object(VADriverContextP ctx, int flush_data)
     ADVANCE_BCS_BATCH(ctx);
 }
 
-static void
+static int
 gen6_mfc_avc_pak_object(VADriverContextP ctx, int x, int y, int end_mb, int qp,unsigned int *msg)
 {
-    BEGIN_BCS_BATCH(ctx, 11);
+    int len_in_dowrds = 11;
 
-    OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (11 -2 ) );
+    BEGIN_BCS_BATCH(ctx, len_in_dowrds);
 
+    OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dowrds - 2));
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 
@@ -439,6 +440,7 @@ gen6_mfc_avc_pak_object(VADriverContextP ctx, int x, int y, int end_mb, int qp,u
 
     ADVANCE_BCS_BATCH(ctx);
 
+    return len_in_dowrds * 4;
 }
 
 static void gen6_mfc_init(VADriverContextP ctx)
@@ -506,30 +508,44 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
     struct gen6_media_state *media_state = &i965->gen6_media_state;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
     unsigned int *msg;
+    int emit_new_state = 1, object_len_in_bytes;
 
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000); 
-    intel_batchbuffer_emit_mi_flush_bcs(ctx);
-    gen6_mfc_pipe_mode_select(ctx);
-    gen6_mfc_surface_state(ctx);
-    gen6_mfc_pipe_buf_addr_state(ctx);
-    gen6_mfc_ind_obj_base_addr_state(ctx);
-    gen6_mfc_bsp_buf_base_addr_state(ctx);
-    gen6_mfc_avc_img_state(ctx);
-    gen6_mfc_avc_qm_state(ctx);
-    gen6_mfc_avc_directmode_state(ctx);
-    gen6_mfc_avc_slice_state(ctx);
-    gen6_mfc_avc_fqm_state(ctx);
-    /*gen6_mfc_avc_ref_idx_state(ctx);*/
-    /*gen6_mfc_avc_insert_object(ctx, 0);*/
 
     dri_bo_map(media_state->vme_output.bo , 1);
     msg = (unsigned int *)media_state->vme_output.bo->virtual;
-    for( y = 0; y < height_in_mbs; y++) {
-        for( x = 0; x < width_in_mbs; x++) { 
+
+    for (y = 0; y < height_in_mbs; y++) {
+        for (x = 0; x < width_in_mbs; x++) { 
             int last_mb = (y == (height_in_mbs-1)) && ( x == (width_in_mbs-1) );
             int qp = pSequenceParameter->initial_qp;
-            gen6_mfc_avc_pak_object(ctx, x, y, last_mb, qp, msg);
+
+            if (emit_new_state) {
+                intel_batchbuffer_emit_mi_flush_bcs(ctx);
+                gen6_mfc_pipe_mode_select(ctx);
+                gen6_mfc_surface_state(ctx);
+                gen6_mfc_pipe_buf_addr_state(ctx);
+                gen6_mfc_ind_obj_base_addr_state(ctx);
+                gen6_mfc_bsp_buf_base_addr_state(ctx);
+                gen6_mfc_avc_img_state(ctx);
+                gen6_mfc_avc_qm_state(ctx);
+                gen6_mfc_avc_directmode_state(ctx);
+                gen6_mfc_avc_slice_state(ctx);
+                gen6_mfc_avc_fqm_state(ctx);
+                /*gen6_mfc_avc_ref_idx_state(ctx);*/
+                /*gen6_mfc_avc_insert_object(ctx, 0);*/
+                emit_new_state = 0;
+            }
+
+            object_len_in_bytes = gen6_mfc_avc_pak_object(ctx, x, y, last_mb, qp, msg);
             msg += 4;
+
+            if (intel_batchbuffer_check_free_space_bcs(ctx, object_len_in_bytes) == 0) {
+                intel_batchbuffer_end_atomic_bcs(ctx);
+                intel_batchbuffer_flush_bcs(ctx);
+                emit_new_state = 1;
+                intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
+            }
         }
     }
 

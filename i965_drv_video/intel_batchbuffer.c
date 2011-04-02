@@ -431,3 +431,19 @@ intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag)
     intel_batchbuffer_flush_helper(ctx, intel->batch);
     intel->batch->flag = flag;
 }
+
+int
+intel_batchbuffer_check_free_space(VADriverContextP ctx, int size)
+{
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+
+    return intel_batchbuffer_space_helper(intel->batch) >= size;
+}
+
+int
+intel_batchbuffer_check_free_space_bcs(VADriverContextP ctx, int size)
+{
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+
+    return intel_batchbuffer_space_helper(intel->batch_bcs) >= size;
+}
