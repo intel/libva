@@ -328,9 +328,12 @@ Bool i965_encoder_terminate(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_media_state *media_state = &i965->gen6_media_state;
+    struct gen6_mfc_bcs_state *bcs_state = &i965->gen6_mfc_bcs_state;
     int i;
 
-    gen6_vme_terminate(ctx);
+    if (IS_GEN6(i965->intel.device_id)) {
+        gen6_vme_terminate(ctx);
+    }
 
     for (i = 0; i < MAX_MEDIA_SURFACES_GEN6; i++) {
         dri_bo_unreference(media_state->surface_state[i].bo);
@@ -351,6 +354,32 @@ Bool i965_encoder_terminate(VADriverContextP ctx)
 
     dri_bo_unreference(media_state->vme_state.bo);
     media_state->vme_state.bo = NULL;
+
+    dri_bo_unreference(bcs_state->post_deblocking_output.bo);
+    bcs_state->post_deblocking_output.bo = NULL;
+
+    dri_bo_unreference(bcs_state->pre_deblocking_output.bo);
+    bcs_state->pre_deblocking_output.bo = NULL;
+
+    dri_bo_unreference(bcs_state->uncompressed_picture_source.bo);
+    bcs_state->uncompressed_picture_source.bo = NULL;
+
+    dri_bo_unreference(bcs_state->mfc_indirect_pak_bse_object.bo); 
+    bcs_state->mfc_indirect_pak_bse_object.bo = NULL;
+
+    for (i = 0; i < NUM_MFC_DMV_BUFFERS; i++){
+        dri_bo_unreference(bcs_state->direct_mv_buffers[i].bo);
+        bcs_state->direct_mv_buffers[i].bo = NULL;
+    }
+
+    dri_bo_unreference(bcs_state->intra_row_store_scratch_buffer.bo);
+    bcs_state->intra_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(bcs_state->deblocking_filter_row_store_scratch_buffer.bo);
+    bcs_state->deblocking_filter_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(bcs_state->bsd_mpc_row_store_scratch_buffer.bo);
+    bcs_state->bsd_mpc_row_store_scratch_buffer.bo = NULL;
 
     return True;
 }

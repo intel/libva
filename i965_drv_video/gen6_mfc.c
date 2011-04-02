@@ -462,45 +462,37 @@ static void gen6_mfc_init(VADriverContextP ctx)
     bcs_state->mfc_indirect_pak_bse_object.bo = NULL;
 
     for (i = 0; i < NUM_MFC_DMV_BUFFERS; i++){
+        dri_bo_unreference(bcs_state->direct_mv_buffers[i].bo);
         bcs_state->direct_mv_buffers[i].bo = NULL;
-    }		
+    }
+
     for (i = 0; i < MAX_MFC_REFERENCE_SURFACES; i++){
         bcs_state->reference_surfaces[i].surface_id = VA_INVALID_SURFACE;  
     }
 
-    if ( bcs_state->intra_row_store_scratch_buffer.bo == 0) {
-        //bo = bcs_state->intra_row_store_scratch_buffer.bo;
-        //dri_bo_unreference(bo);
-        bo = dri_bo_alloc(i965->intel.bufmgr,
-                          "Buffer",
-                          128 * 64,
-                          64);
-        assert(bo);
-        bcs_state->intra_row_store_scratch_buffer.bo = bo;
-    }
+    dri_bo_unreference(bcs_state->intra_row_store_scratch_buffer.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "Buffer",
+                      128 * 64,
+                      64);
+    assert(bo);
+    bcs_state->intra_row_store_scratch_buffer.bo = bo;
 
-    if ( bcs_state->deblocking_filter_row_store_scratch_buffer.bo == 0) { 		
-        //bo = bcs_state->deblocking_filter_row_store_scratch_buffer.bo;
-        //dri_bo_unreference(bo);
-        bo = dri_bo_alloc(i965->intel.bufmgr,
-                          "Buffer",
-                          49152,  /* 6 * 128 * 64 */
-                          64);
-        assert(bo);
-        bcs_state->deblocking_filter_row_store_scratch_buffer.bo = bo;
-    }
+    dri_bo_unreference(bcs_state->deblocking_filter_row_store_scratch_buffer.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "Buffer",
+                      49152,  /* 6 * 128 * 64 */
+                      64);
+    assert(bo);
+    bcs_state->deblocking_filter_row_store_scratch_buffer.bo = bo;
 
-    if ( bcs_state->bsd_mpc_row_store_scratch_buffer.bo == 0) { 	
-        //bo = bcs_state->bsd_mpc_row_store_scratch_buffer.bo;
-        //dri_bo_unreference(bo);
-        bo = dri_bo_alloc(i965->intel.bufmgr,
-                          "Buffer",
-                          12288, /* 1.5 * 128 * 64 */
-                          0x1000);
-        assert(bo);
-        bcs_state->bsd_mpc_row_store_scratch_buffer.bo = bo;
-    }
-
+    dri_bo_unreference(bcs_state->bsd_mpc_row_store_scratch_buffer.bo);
+    bo = dri_bo_alloc(i965->intel.bufmgr,
+                      "Buffer",
+                      12288, /* 1.5 * 128 * 64 */
+                      0x1000);
+    assert(bo);
+    bcs_state->bsd_mpc_row_store_scratch_buffer.bo = bo;
 }
 
 void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
