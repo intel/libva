@@ -484,7 +484,7 @@ static void gen6_mfc_init(VADriverContextP ctx)
         //dri_bo_unreference(bo);
         bo = dri_bo_alloc(i965->intel.bufmgr,
                           "Buffer",
-                          6 * 64,
+                          49152,  /* 6 * 128 * 64 */
                           64);
         assert(bo);
         bcs_state->deblocking_filter_row_store_scratch_buffer.bo = bo;
@@ -495,7 +495,7 @@ static void gen6_mfc_init(VADriverContextP ctx)
         //dri_bo_unreference(bo);
         bo = dri_bo_alloc(i965->intel.bufmgr,
                           "Buffer",
-                          11520, /* 1.5 * 120 * 64 */
+                          12288, /* 1.5 * 128 * 64 */
                           0x1000);
         assert(bo);
         bcs_state->bsd_mpc_row_store_scratch_buffer.bo = bo;
