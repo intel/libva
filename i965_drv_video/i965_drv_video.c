@@ -922,6 +922,10 @@ i965_create_buffer_internal(VADriverContextP ctx,
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
     }
 
+    if (type == VAEncCodedBufferType) {
+        size += ALIGN(sizeof(VACodedBufferSegment), 64);
+    }
+
     obj_buffer->max_num_elements = num_elements;
     obj_buffer->num_elements = num_elements;
     obj_buffer->size_element = size;
@@ -943,8 +947,20 @@ i965_create_buffer_internal(VADriverContextP ctx,
                                         size * num_elements, 64);
         assert(buffer_store->bo);
 
-        if (data)
+        if (type == VAEncCodedBufferType) {
+            VACodedBufferSegment *coded_buffer_segment;
+            dri_bo_map(buffer_store->bo, 1);
+            coded_buffer_segment = (VACodedBufferSegment *)buffer_store->bo->virtual;
+            coded_buffer_segment->size = size - ALIGN(sizeof(VACodedBufferSegment), 64);
+            coded_buffer_segment->bit_offset = 0;
+            coded_buffer_segment->status = 0;
+            coded_buffer_segment->buf = NULL;
+            coded_buffer_segment->next = NULL;
+            dri_bo_unmap(buffer_store->bo);
+        } else if (data) {
             dri_bo_subdata(buffer_store->bo, 0, size * num_elements, data);
+        }
+
     } else {
         buffer_store->buffer = malloc(size * num_elements);
         assert(buffer_store->buffer);
@@ -1023,6 +1039,12 @@ i965_MapBuffer(VADriverContextP ctx,
 
         assert(obj_buffer->buffer_store->bo->virtual);
         *pbuf = obj_buffer->buffer_store->bo->virtual;
+
+        if (obj_buffer->type == VAEncCodedBufferType) {
+            VACodedBufferSegment *coded_buffer_segment = (VACodedBufferSegment *)(obj_buffer->buffer_store->bo->virtual);
+            coded_buffer_segment->buf = (unsigned char *)(obj_buffer->buffer_store->bo->virtual) + ALIGN(sizeof(VACodedBufferSegment), 64);
+        }
+
         vaStatus = VA_STATUS_SUCCESS;
     } else if (NULL != obj_buffer->buffer_store->buffer) {
         *pbuf = obj_buffer->buffer_store->buffer;

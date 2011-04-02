@@ -294,7 +294,7 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx)
 	
     OUT_BCS_RELOC(ctx, bcs_state->mfc_indirect_pak_bse_object.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-                  0);
+                  ALIGN(sizeof(VACodedBufferSegment), 64));
 
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
