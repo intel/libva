@@ -70,7 +70,7 @@ struct gen6_mfc_bcs_state
     } deblocking_filter_row_store_scratch_buffer;		//INTERNAL:
 
     struct {                                    
-        VASurfaceID surface_id;                                  
+       dri_bo *bo; 
     } reference_surfaces[MAX_MFC_REFERENCE_SURFACES];	//INTERNAL: refrence surfaces
 
     //MFX_IND_OBJ_BASE_ADDR_STATE

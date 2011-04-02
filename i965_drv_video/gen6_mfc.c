@@ -125,9 +125,13 @@ gen6_mfc_pipe_buf_addr_state(VADriverContextP ctx)
                   0);
     /* 7..22 Reference pictures*/
     for (i = 0; i < ARRAY_ELEMS(bcs_state->reference_surfaces); i++) {
-        OUT_BCS_RELOC(ctx, bcs_state->post_deblocking_output.bo,
-                      I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-                      0);			
+		if ( bcs_state->reference_surfaces[i].bo != NULL) {
+			OUT_BCS_RELOC(ctx, bcs_state->reference_surfaces[i].bo,
+					I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
+					0);			
+		} else {
+			OUT_BCS_BATCH(ctx, 0);
+		}
     }
     OUT_BCS_BATCH(ctx, 0);   											/* no block status  */
 
@@ -192,7 +196,7 @@ gen6_mfc_avc_img_state(VADriverContextP ctx)
     OUT_BCS_BATCH(ctx, 
                   (0 << 24) |	  /*Second Chroma QP Offset*/
                   (0 << 16) |	  /*Chroma QP Offset*/
-                  (1 << 14) |   /*Max-bit conformance Intra flag*/
+                  (0 << 14) |   /*Max-bit conformance Intra flag*/
                   (0 << 13) |   /*Max Macroblock size conformance Inter flag*/
                   (1 << 12) |   /*Should always be written as "1" */
                   (0 << 10) |   /*QM Preset FLag */
@@ -201,13 +205,13 @@ gen6_mfc_avc_img_state(VADriverContextP ctx)
     OUT_BCS_BATCH(ctx,
                   (0 << 16) |   /*Mininum Frame size*/	
                   (0 << 15) |	  /*Disable reading of Macroblock Status Buffer*/
-                  (1 << 14) |   /*Load BitStream Pointer only once, 1 slic 1 frame*/
-                  (0 << 13) |   /*CABAC 0 word insertion test enable*/
+                  (0 << 14) |   /*Load BitStream Pointer only once, 1 slic 1 frame*/
+                  (1 << 13) |   /*CABAC 0 word insertion test enable*/
                   (1 << 12) |   /*MVUnpackedEnable,compliant to DXVA*/
                   (1 << 10) |   /*Chroma Format IDC, 4:2:0*/
                   (1 << 7)  |   /*0:CAVLC encoding mode,1:CABAC*/
                   (0 << 6)  |   /*Only valid for VLD decoding mode*/
-                  (1 << 5)  |   /*Constrained Intra Predition Flag, from PPS*/
+                  (0 << 5)  |   /*Constrained Intra Predition Flag, from PPS*/
                   (0 << 4)  |   /*Direct 8x8 inference flag*/
                   (0 << 3)  |   /*Only 8x8 IDCT Transform Mode Flag*/
                   (1 << 2)  |   /*Frame MB only flag*/
@@ -215,18 +219,13 @@ gen6_mfc_avc_img_state(VADriverContextP ctx)
                   (0 << 0) );   /*Field picture flag*/
     OUT_BCS_BATCH(ctx, 0);		/*Mainly about MB rate control and debug, just ignoring*/
     OUT_BCS_BATCH(ctx, 			/*Inter and Intra Conformance Max size limit*/
-                  (0x60 << 16) |		/*InterMbMaxSz*/
-                  (0xC0) );			/*IntraMbMaxSz*/
+                  (0xBB8 << 16) |		/*InterMbMaxSz*/
+                  (0xBB8) );			/*IntraMbMaxSz*/
     OUT_BCS_BATCH(ctx, 0);		/*Reserved*/
     OUT_BCS_BATCH(ctx, 0);		/*Slice QP Delta for bitrate control*/
     OUT_BCS_BATCH(ctx, 0);		/*Slice QP Delta for bitrate control*/	
-    OUT_BCS_BATCH(ctx, 
-                  (1 << 31) |			/*The maximum for FrameBitrate is 256K B*/
-                  (0x30 << 16) |
-                  (1 << 15)	|	
-                  (3 << 0) );   		/*The minimum for FraemBitrate is 1K B*/
-    OUT_BCS_BATCH(ctx, (0x01 << 16) |
-                  (1 <<0) );
+    OUT_BCS_BATCH(ctx, 0x80200000);
+	OUT_BCS_BATCH(ctx, 0x00010000);
     OUT_BCS_BATCH(ctx, 0);
 
     ADVANCE_BCS_BATCH(ctx);
@@ -268,7 +267,7 @@ static void gen6_mfc_avc_directmode_state(VADriverContextP ctx)
     ADVANCE_BCS_BATCH(ctx);
 }
 
-static void gen6_mfc_avc_slice_state(VADriverContextP ctx)
+static void gen6_mfc_avc_slice_state(VADriverContextP ctx, int intra_slice)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_mfc_bcs_state *bcs_state = &i965->gen6_mfc_bcs_state;
@@ -276,21 +275,34 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx)
     BEGIN_BCS_BATCH(ctx, 11);;
 
     OUT_BCS_BATCH(ctx, MFX_AVC_SLICE_STATE | (11 - 2) );
-    OUT_BCS_BATCH(ctx, 2);			/*Slice Type: I Slice*/
-    OUT_BCS_BATCH(ctx, 0);			/*no reference frames and pred_weight_table*/
-    OUT_BCS_BATCH(ctx, (0<<27) |				/*Enable deblocking operation*/
-                  (26<<16) );				/*Slice Quantization Parameter*/
+
+	if ( intra_slice )
+        OUT_BCS_BATCH(ctx, 2);			/*Slice Type: I Slice*/
+	else
+		OUT_BCS_BATCH(ctx, 0);			/*Slice Type: P Slice*/
+
+	if ( intra_slice )
+        OUT_BCS_BATCH(ctx, 0);			/*no reference frames and pred_weight_table*/
+	else 
+		OUT_BCS_BATCH(ctx, 0x00010000);	/*1 reference frame*/
+
+	OUT_BCS_BATCH(ctx, (0<<24) |				/*Enable deblocking operation*/
+                  (26<<16) | 				/*Slice Quantization Parameter*/
+				  0x0202 );
     OUT_BCS_BATCH(ctx, 0);			/*First MB X&Y , the postion of current slice*/
     OUT_BCS_BATCH(ctx, ( ((bcs_state->surface_state.height+15)/16) << 16) );
 
-    OUT_BCS_BATCH(ctx, (1<<31) |
-                  (1<<19) | 	/*IsLastSlice*/	
+    OUT_BCS_BATCH(ctx, 
+			      (0<<31) |		/*RateControlCounterEnable = disable*/
+				  (1<<30) |		/*ResetRateControlCounter*/
+				  (2<<28) |		/*RC Triggle Mode = Loose Rate Control*/
+                  (1<<19) | 	/*IsLastSlice*/
                   (0<<18) | 	/*BitstreamOutputFlag Compressed BitStream Output Disable Flag 0:enable 1:disable*/
                   (0<<17) |	/*HeaderPresentFlag*/	
                   (1<<16) |	/*SliceData PresentFlag*/
                   (0<<15) |	/*TailPresentFlag*/
                   (1<<13) |	/*RBSP NAL TYPE*/	
-                  (0<<12) );	/*CabacZeroWordInsertionEnable*/
+                  (1<<12) );	/*CabacZeroWordInsertionEnable*/
 	
     OUT_BCS_RELOC(ctx, bcs_state->mfc_indirect_pak_bse_object.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
@@ -302,96 +314,53 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx)
 
     ADVANCE_BCS_BATCH(ctx);
 }
-static uint8_t default_scaling4[2][16]={
-    {   6,13,20,28,
-        13,20,28,32,
-        20,28,32,37,
-        28,32,37,42
-    },{
-        10,14,20,24,
-        14,20,24,27,
-        20,24,27,30,
-        24,27,30,34
-    }};
-
-static uint8_t default_scaling8[2][64]={
-    {   6,10,13,16,18,23,25,27,
-        10,11,16,18,23,25,27,29,
-        13,16,18,23,25,27,29,31,
-        16,18,23,25,27,29,31,33,
-        18,23,25,27,29,31,33,36,
-        23,25,27,29,31,33,36,38,
-        25,27,29,31,33,36,38,40,
-        27,29,31,33,36,38,40,42
-    },{
-        9,13,15,17,19,21,22,24,
-        13,13,17,19,21,22,24,25,
-        15,17,19,21,22,24,25,27,
-        17,19,21,22,24,25,27,28,
-        19,21,22,24,25,27,28,30,
-        21,22,24,25,27,28,30,32,
-        22,24,25,27,28,30,32,33,
-        24,25,27,28,30,32,33,35
-    }};
-
-
 static void gen6_mfc_avc_qm_state(VADriverContextP ctx)
 {
-    int i,j;
+	int i;
 
-#if 1
-    for ( i = 0; i < 16; i++)
-        default_scaling4[0][i] = 16;
-#endif
+    BEGIN_BCS_BATCH(ctx, 58);
 
-    BEGIN_BCS_BATCH(ctx, 14);
+	OUT_BCS_BATCH(ctx, MFX_AVC_QM_STATE | 56);
+	OUT_BCS_BATCH(ctx, 0xFF ) ; 
+	for( i = 0; i < 56; i++) {
+		OUT_BCS_BATCH(ctx, 0x10101010); 
+	}   
 
-    OUT_BCS_BATCH(ctx, MFX_AVC_QM_STATE | 12);
-    OUT_BCS_BATCH(ctx, (0x00<<8) | 0xFF ) ;
-    for( i = 0; i < 3; i++) {
-        for ( j = 0; j < 16; j+=4){
-            OUT_BCS_BATCH(ctx, (default_scaling4[0][0+j]<<0) | 
-                          (default_scaling4[0][1+j]<<8) |
-                          (default_scaling4[0][2+j]<<16)  |
-                          (default_scaling4[0][3+j]<<24) );
-        }
-    }
-
-    ADVANCE_BCS_BATCH(ctx);
+	ADVANCE_BCS_BATCH(ctx);
 }
 
 static void gen6_mfc_avc_fqm_state(VADriverContextP ctx)
 {
-    int i;
-    unsigned int default_4x4[16];
+	int i;
 
-    BEGIN_BCS_BATCH(ctx, 113);
-    OUT_BCS_BATCH(ctx, MFC_AVC_FQM_STATE | (113 - 2));
+	BEGIN_BCS_BATCH(ctx, 113);
+	OUT_BCS_BATCH(ctx, MFC_AVC_FQM_STATE | (113 - 2));
 
-    for(i = 0; i < 16; i++)
-        default_4x4[i] = 65536 / default_scaling4[0][i];
+	for(i = 0; i < 112;i++) {
+			OUT_BCS_BATCH(ctx, 0x10001000);
+	}   
 
-    for(i = 0; i < 3; i++) {		
-        OUT_BCS_BATCH(ctx, (default_4x4[0] << 16) + default_4x4[1]);
-        OUT_BCS_BATCH(ctx, (default_4x4[2] << 16) + default_4x4[3]);
-
-        OUT_BCS_BATCH(ctx, (default_4x4[4] << 16) + default_4x4[5]);
-        OUT_BCS_BATCH(ctx, (default_4x4[6] << 16) + default_4x4[7]);
-
-        OUT_BCS_BATCH(ctx, (default_4x4[8] << 16) + default_4x4[9]);
-        OUT_BCS_BATCH(ctx, (default_4x4[10] << 16) + default_4x4[11]);
-
-        OUT_BCS_BATCH(ctx, (default_4x4[12] << 16) + default_4x4[13]);
-        OUT_BCS_BATCH(ctx, (default_4x4[14] << 16) + default_4x4[15]);
-    }
-
-    for(i = 0; i < 88 ;i++) {
-        OUT_BCS_BATCH(ctx, 0x10001000);
-    }
-
-    ADVANCE_BCS_BATCH(ctx);
+	ADVANCE_BCS_BATCH(ctx);	
 }
 
+static void gen6_mfc_avc_ref_idx_state(VADriverContextP ctx)
+{
+	int i;
+
+	BEGIN_BCS_BATCH(ctx, 10);
+
+	OUT_BCS_BATCH(ctx, MFX_AVC_REF_IDX_STATE | 8);
+	OUT_BCS_BATCH(ctx, 0);                  //Select L0
+
+	OUT_BCS_BATCH(ctx, 0x80808000);         //Only 1 reference
+	for(i = 0; i < 7; i++) {
+		OUT_BCS_BATCH(ctx, 0x80808080);
+	}
+
+	ADVANCE_BCS_BATCH(ctx);
+}
+	
+	
 static void
 gen6_mfc_avc_insert_object(VADriverContextP ctx, int flush_data)
 {
@@ -410,13 +379,13 @@ gen6_mfc_avc_insert_object(VADriverContextP ctx, int flush_data)
 }
 
 static int
-gen6_mfc_avc_pak_object(VADriverContextP ctx, int x, int y, int end_mb, int qp,unsigned int *msg)
+gen6_mfc_avc_pak_object_intra(VADriverContextP ctx, int x, int y, int end_mb, int qp,unsigned int *msg)
 {
-    int len_in_dowrds = 11;
+    int len_in_dwords = 11;
 
-    BEGIN_BCS_BATCH(ctx, len_in_dowrds);
+    BEGIN_BCS_BATCH(ctx, len_in_dwords);
 
-    OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dowrds - 2));
+    OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dwords - 2));
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 
@@ -440,7 +409,53 @@ gen6_mfc_avc_pak_object(VADriverContextP ctx, int x, int y, int end_mb, int qp,u
 
     ADVANCE_BCS_BATCH(ctx);
 
-    return len_in_dowrds * 4;
+	return len_in_dwords;
+}
+
+static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int end_mb, int qp, dri_bo *bo)
+{
+	 int len_in_dwords = 11;
+
+    BEGIN_BCS_BATCH(ctx, len_in_dwords);
+
+    OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dwords - 2));
+
+	OUT_BCS_BATCH(ctx, 32);         /* 1 MV : SKIP*/
+	OUT_BCS_RELOC(ctx, bo,
+			I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
+			0);
+
+	OUT_BCS_BATCH(ctx, 
+			(1 << 24) |     /* PackedMvNum, Debug*/
+			(4 << 20) |     /* 8 MV*/
+			(1 << 19) |     /* CbpDcY */
+			(1 << 18) |     /* CbpDcU */
+			(1 << 17) |     /* CbpDcV */
+			(0 << 15) |     /* Transform8x8Flag = 0*/
+			(0 << 14) |     /* Frame based*/
+			(0 << 13) |     /* Inter MB */
+			(1 << 8)  |     /* MbType = P_L0_16x16 */   
+			(0 << 7)  |     /* MBZ for frame */
+			(0 << 6)  |     /* MBZ */
+			(2 << 4)  |     /* MBZ for inter*/
+			(0 << 3)  |     /* MBZ */
+			(0 << 2)  |     /* SkipMbFlag */
+			(0 << 0));      /* InterMbMode */
+
+	OUT_BCS_BATCH(ctx, (0xFFFF<<16) | (y << 8) | x);        /* Code Block Pattern for Y*/
+	OUT_BCS_BATCH(ctx, 0x000F000F);                         /* Code Block Pattern */    
+	OUT_BCS_BATCH(ctx, (0 << 27) | (end_mb << 26) | qp);    /* Last MB */
+
+	/*Stuff for Inter MB*/
+	OUT_BCS_BATCH(ctx, 0x0);        
+	OUT_BCS_BATCH(ctx, 0x0);    
+	OUT_BCS_BATCH(ctx, 0x0);        
+
+	OUT_BCS_BATCH(ctx, 0xF0020000); /*MaxSizeInWord and TargetSzieInWord*/
+
+	ADVANCE_BCS_BATCH(ctx);
+
+	return len_in_dwords;
 }
 
 static void gen6_mfc_init(VADriverContextP ctx)
@@ -469,7 +484,9 @@ static void gen6_mfc_init(VADriverContextP ctx)
     }
 
     for (i = 0; i < MAX_MFC_REFERENCE_SURFACES; i++){
-        bcs_state->reference_surfaces[i].surface_id = VA_INVALID_SURFACE;  
+       if ( bcs_state->reference_surfaces[i].bo != NULL)
+			dri_bo_unreference( bcs_state->reference_surfaces[i].bo );
+        bcs_state->reference_surfaces[i].bo = NULL;  
     }
 
     dri_bo_unreference(bcs_state->intra_row_store_scratch_buffer.bo);
@@ -507,13 +524,20 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
     int x,y;
     struct gen6_media_state *media_state = &i965->gen6_media_state;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
+	VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
     unsigned int *msg;
     int emit_new_state = 1, object_len_in_bytes;
+	int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000); 
 
     dri_bo_map(media_state->vme_output.bo , 1);
     msg = (unsigned int *)media_state->vme_output.bo->virtual;
+
+	if ( is_intra == 0) {										/*TODO: simulate VME result, [0,0] MVs*/
+		memset(media_state->vme_output.bo->virtual, 0, 128);
+		dri_bo_unmap(media_state->vme_output.bo);
+	}
 
     for (y = 0; y < height_in_mbs; y++) {
         for (x = 0; x < width_in_mbs; x++) { 
@@ -529,15 +553,19 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
                 gen6_mfc_bsp_buf_base_addr_state(ctx);
                 gen6_mfc_avc_img_state(ctx);
                 gen6_mfc_avc_qm_state(ctx);
-                gen6_mfc_avc_directmode_state(ctx);
-                gen6_mfc_avc_slice_state(ctx);
                 gen6_mfc_avc_fqm_state(ctx);
-                /*gen6_mfc_avc_ref_idx_state(ctx);*/
+                gen6_mfc_avc_ref_idx_state(ctx);
+				/*gen6_mfc_avc_directmode_state(ctx);*/
+				gen6_mfc_avc_slice_state(ctx, is_intra);
                 /*gen6_mfc_avc_insert_object(ctx, 0);*/
                 emit_new_state = 0;
             }
-
-            object_len_in_bytes = gen6_mfc_avc_pak_object(ctx, x, y, last_mb, qp, msg);
+			
+			if ( is_intra ) {
+				object_len_in_bytes = gen6_mfc_avc_pak_object_intra(ctx, x, y, last_mb, qp, msg);
+			} else {
+				object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo);
+			}
             msg += 4;
 
             if (intel_batchbuffer_check_free_space_bcs(ctx, object_len_in_bytes) == 0) {
@@ -548,8 +576,8 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
             }
         }
     }
-
-    dri_bo_unmap(media_state->vme_output.bo);
+	if ( is_intra )
+		dri_bo_unmap(media_state->vme_output.bo);
 	
     intel_batchbuffer_end_atomic_bcs(ctx);
 }
@@ -595,8 +623,12 @@ static VAStatus gen6_mfc_avc_prepare(VADriverContextP ctx,
     bcs_state->surface_state.w_pitch = obj_surface->width;
     bcs_state->surface_state.h_pitch = obj_surface->height;
 
-    // obj_surface = SURFACE(pPicParameter->reference_picture); /* FIXME: fix this later */
-    // bcs_state->pre_deblocking_output.bo = obj_surface->bo;
+    obj_surface = SURFACE(pPicParameter->reference_picture);
+	assert(obj_surface);
+	if ( obj_surface->bo != NULL) {
+		bcs_state->reference_surfaces[0].bo = obj_surface->bo;
+		dri_bo_reference(obj_surface->bo);
+	}
 	
     obj_surface = SURFACE(encode_state->current_render_target);
     assert(obj_surface && obj_surface->bo);
