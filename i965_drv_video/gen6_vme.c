@@ -587,7 +587,7 @@ static void gen6_vme_media_init(VADriverContextP ctx)
     dri_bo_unreference(media_state->idrt.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
                       "Buffer", 
-                      MAX_INTERFACE_DESC_GEN6 * sizeof(struct i965_interface_descriptor), 16);
+                      MAX_INTERFACE_DESC_GEN6 * sizeof(struct gen6_interface_descriptor_data), 16);
     assert(bo);
     media_state->idrt.bo = bo;
 
