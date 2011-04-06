@@ -206,7 +206,7 @@ gen6_mfc_avc_img_state(VADriverContextP ctx)
                   (0 << 16) |   /*Mininum Frame size*/	
                   (0 << 15) |	  /*Disable reading of Macroblock Status Buffer*/
                   (0 << 14) |   /*Load BitStream Pointer only once, 1 slic 1 frame*/
-                  (1 << 13) |   /*CABAC 0 word insertion test enable*/
+                  (0 << 13) |   /*CABAC 0 word insertion test enable*/
                   (1 << 12) |   /*MVUnpackedEnable,compliant to DXVA*/
                   (1 << 10) |   /*Chroma Format IDC, 4:2:0*/
                   (1 << 7)  |   /*0:CAVLC encoding mode,1:CABAC*/
@@ -302,7 +302,7 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx, int intra_slice)
                   (1<<16) |	/*SliceData PresentFlag*/
                   (0<<15) |	/*TailPresentFlag*/
                   (1<<13) |	/*RBSP NAL TYPE*/	
-                  (1<<12) );	/*CabacZeroWordInsertionEnable*/
+                  (0<<12) );	/*CabacZeroWordInsertionEnable*/
 	
     OUT_BCS_RELOC(ctx, bcs_state->mfc_indirect_pak_bse_object.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
