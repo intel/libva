@@ -775,6 +775,8 @@ i965_CreateContext(VADriverContextP ctx,
         return vaStatus;
     }
 
+    render_state->inited = 1;
+
     switch (obj_config->profile) {
     case VAProfileH264Baseline:
     case VAProfileH264Main:
@@ -1572,26 +1574,39 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
     image->height = obj_surface->orig_height;
     image->data_size = data_size;
 
-    if (render_state->interleaved_uv) {
-        image->format.fourcc = VA_FOURCC('N','V','1','2');
-        image->format.byte_order = VA_LSB_FIRST;
-        image->format.bits_per_pixel = 12;
-        image->num_planes = 2;
-        image->pitches[0] = w_pitch;
-        image->offsets[0] = 0;
-        image->pitches[1] = w_pitch;
-        image->offsets[1] = w_pitch * h_pitch;
+    if (!render_state->inited) {
+            image->format.fourcc = VA_FOURCC('Y','V','1','2');
+            image->format.byte_order = VA_LSB_FIRST;
+            image->format.bits_per_pixel = 12;
+            image->num_planes = 3;
+            image->pitches[0] = w_pitch;
+            image->offsets[0] = 0;
+            image->pitches[1] = w_pitch / 2;
+            image->offsets[1] = w_pitch * h_pitch;
+            image->pitches[2] = w_pitch / 2;
+            image->offsets[2] = w_pitch * h_pitch + (w_pitch / 2) * (h_pitch / 2);
     } else {
-        image->format.fourcc = VA_FOURCC('Y','V','1','2');
-        image->format.byte_order = VA_LSB_FIRST;
-        image->format.bits_per_pixel = 12;
-        image->num_planes = 3;
-        image->pitches[0] = w_pitch;
-        image->offsets[0] = 0;
-        image->pitches[1] = w_pitch / 2;
-        image->offsets[1] = w_pitch * h_pitch;
-        image->pitches[2] = w_pitch / 2;
-        image->offsets[2] = w_pitch * h_pitch + (w_pitch / 2) * (h_pitch / 2);
+        if (render_state->interleaved_uv) {
+            image->format.fourcc = VA_FOURCC('N','V','1','2');
+            image->format.byte_order = VA_LSB_FIRST;
+            image->format.bits_per_pixel = 12;
+            image->num_planes = 2;
+            image->pitches[0] = w_pitch;
+            image->offsets[0] = 0;
+            image->pitches[1] = w_pitch;
+            image->offsets[1] = w_pitch * h_pitch;
+        } else {
+            image->format.fourcc = VA_FOURCC('I','4','2','0');
+            image->format.byte_order = VA_LSB_FIRST;
+            image->format.bits_per_pixel = 12;
+            image->num_planes = 3;
+            image->pitches[0] = w_pitch;
+            image->offsets[0] = 0;
+            image->pitches[1] = w_pitch / 2;
+            image->offsets[1] = w_pitch * h_pitch;
+            image->pitches[2] = w_pitch / 2;
+            image->offsets[2] = w_pitch * h_pitch + (w_pitch / 2) * (h_pitch / 2);
+        }
     }
 
     if (obj_surface->bo == NULL) {

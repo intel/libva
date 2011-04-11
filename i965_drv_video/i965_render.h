@@ -66,7 +66,8 @@ struct i965_render_state
         int upload;
     } curbe;
 
-    int interleaved_uv;
+    unsigned short interleaved_uv;
+    unsigned short inited;
     struct intel_region *draw_region;
 
     int pp_flag; /* 0: disable, 1: enable */
