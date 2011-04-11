@@ -1638,6 +1638,7 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
 
     *out_image = *image;
     obj_surface->flags |= SURFACE_DERIVED;
+    obj_image->derived_surface = surface;
 
     return VA_STATUS_SUCCESS;
 
