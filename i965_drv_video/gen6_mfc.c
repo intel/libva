@@ -220,11 +220,11 @@ gen6_mfc_avc_img_state(VADriverContextP ctx)
     OUT_BCS_BATCH(ctx, 0);		/*Mainly about MB rate control and debug, just ignoring*/
     OUT_BCS_BATCH(ctx, 			/*Inter and Intra Conformance Max size limit*/
                   (0xBB8 << 16) |		/*InterMbMaxSz*/
-                  (0xBB8) );			/*IntraMbMaxSz*/
+                  (0xEE8) );			/*IntraMbMaxSz*/
     OUT_BCS_BATCH(ctx, 0);		/*Reserved*/
     OUT_BCS_BATCH(ctx, 0);		/*Slice QP Delta for bitrate control*/
     OUT_BCS_BATCH(ctx, 0);		/*Slice QP Delta for bitrate control*/	
-    OUT_BCS_BATCH(ctx, 0x80200000);
+    OUT_BCS_BATCH(ctx, 0x8C000000);
 	OUT_BCS_BATCH(ctx, 0x00010000);
     OUT_BCS_BATCH(ctx, 0);
 
@@ -412,7 +412,7 @@ gen6_mfc_avc_pak_object_intra(VADriverContextP ctx, int x, int y, int end_mb, in
 	return len_in_dwords;
 }
 
-static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int end_mb, int qp, dri_bo *bo)
+static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int end_mb, int qp, dri_bo *bo, unsigned int offset)
 {
 	 int len_in_dwords = 11;
 
@@ -420,14 +420,14 @@ static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int
 
     OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dwords - 2));
 
-	OUT_BCS_BATCH(ctx, 32);         /* 1 MV : SKIP*/
+	OUT_BCS_BATCH(ctx, 32);         /* 32 MV*/
 	OUT_BCS_RELOC(ctx, bo,
 			I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-			0);
+			offset);
 
 	OUT_BCS_BATCH(ctx, 
 			(1 << 24) |     /* PackedMvNum, Debug*/
-			(4 << 20) |     /* 8 MV*/
+			(4 << 20) |     /* 8 MV, SNB don't use it*/
 			(1 << 19) |     /* CbpDcY */
 			(1 << 18) |     /* CbpDcU */
 			(1 << 17) |     /* CbpDcV */
@@ -525,7 +525,7 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
     struct gen6_media_state *media_state = &i965->gen6_media_state;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
 	VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
-    unsigned int *msg;
+    unsigned int *msg, offset;
     int emit_new_state = 1, object_len_in_bytes;
 	int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 
@@ -535,8 +535,10 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
     msg = (unsigned int *)media_state->vme_output.bo->virtual;
 
 	if ( is_intra == 0) {										/*TODO: simulate VME result, [0,0] MVs*/
-		memset(media_state->vme_output.bo->virtual, 0, 128);
+		//memset(media_state->vme_output.bo->virtual, 0, 128);
+        //printf("msgs = %08x, %08x, %08x, %08x \n", msg[0], msg[1], msg[2], msg[3]);
 		dri_bo_unmap(media_state->vme_output.bo);
+        offset = 0;
 	}
 
     for (y = 0; y < height_in_mbs; y++) {
@@ -564,7 +566,8 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
 			if ( is_intra ) {
 				object_len_in_bytes = gen6_mfc_avc_pak_object_intra(ctx, x, y, last_mb, qp, msg);
 			} else {
-				object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo);
+				object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo,offset);
+                offset += 64;
 			}
             msg += 4;
 

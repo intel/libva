@@ -1,4 +1,4 @@
-INTEL_G6B = intra_frame.g6b
+INTEL_G6B = intra_frame.g6b inter_frame.g6b
 
 EXTRA_DIST = $(INTEL_G6B)
 

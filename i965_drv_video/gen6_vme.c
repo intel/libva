@@ -51,6 +51,11 @@ static uint32_t gen6_vme_intra_frame[][4] = {
     {0,0,0,0}
 };
 
+static uint32_t gen6_vme_inter_frame[][4] = {
+#include "shaders/vme/inter_frame.g6b"
+    {0,0,0,0}
+};
+
 static struct media_kernel gen6_vme_kernels[] = {
     {
         "VME Intra Frame",
@@ -58,10 +63,17 @@ static struct media_kernel gen6_vme_kernels[] = {
         gen6_vme_intra_frame, 			
         sizeof(gen6_vme_intra_frame),		
         NULL
+    },
+    {
+        "VME inter Frame",
+        VME_INTER_SHADER,
+        gen6_vme_inter_frame,
+        sizeof(gen6_vme_inter_frame),
+        NULL
     }
 };
 
-#define	GEN6_VME_KERNEL_NUMBER ARRAY_ELEMS(gen6_vme_kernels)
+#define	GEN6_VME_KERNEL_NUMBER 2
 
 static void
 gen6_vme_set_source_surface_tiling(struct i965_surface_state2 *ss, unsigned int tiling)
@@ -114,6 +126,7 @@ static void gen6_vme_source_surface_state(VADriverContextP ctx,
 
     ss->ss0.surface_base_address = obj_surface->bo->offset;
 
+    ss->ss1.cbcr_pixel_offset_v_direction = 2;
     ss->ss1.width = w - 1;
     ss->ss1.height = h - 1;
 
@@ -121,6 +134,7 @@ static void gen6_vme_source_surface_state(VADriverContextP ctx,
     ss->ss2.interleave_chroma = 1;
     ss->ss2.pitch = w_pitch - 1;
     ss->ss2.half_pitch_for_chroma = 0;
+
     gen6_vme_set_source_surface_tiling(ss, tiling);
 
     /* UV offset for interleave mode */
@@ -154,8 +168,14 @@ gen6_vme_output_buffer_setup(VADriverContextP ctx,
     int width_in_mbs = ALIGN(obj_context->picture_width, 16) / 16;
     int height_in_mbs = ALIGN(obj_context->picture_height, 16) / 16;
     int num_entries;
+    VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
+    int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 
-    media_state->vme_output.num_blocks = width_in_mbs * height_in_mbs;
+    if ( is_intra ) {
+        media_state->vme_output.num_blocks = width_in_mbs * height_in_mbs;
+    } else {
+        media_state->vme_output.num_blocks = width_in_mbs * height_in_mbs * 4;
+    }
     media_state->vme_output.size_block = 16; /* an OWORD */
     media_state->vme_output.pitch = ALIGN(media_state->vme_output.size_block, 16);
     bo = dri_bo_alloc(i965->intel.bufmgr, 
@@ -199,7 +219,8 @@ gen6_vme_output_buffer_setup(VADriverContextP ctx,
 
 static VAStatus gen6_vme_surface_setup(VADriverContextP ctx, 
                                        VAContextID context,                              
-                                       struct mfc_encode_state *encode_state)
+                                       struct mfc_encode_state *encode_state,
+                                       int is_intra)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_media_state *media_state = &i965->gen6_media_state;
@@ -214,14 +235,16 @@ static VAStatus gen6_vme_surface_setup(VADriverContextP ctx,
     obj_surface = SURFACE(encode_state->current_render_target);
     assert(obj_surface);
     gen6_vme_source_surface_state(ctx, 0, obj_surface);
-    /* reference 0, FIXME: must check it is valid or not */
-    obj_surface = SURFACE(pPicParameter->reference_picture);
-    assert(obj_surface);
-    // gen6_vme_source_surface_state(ctx, 1, obj_surface)
-    /* reference 1, FIXME: */
-    // obj_surface = SURFACE(pPicParameter->reference_picture);
-    // assert(obj_surface);
-    // gen6_vme_source_surface_state(ctx, 2, obj_surface);
+    if ( ! is_intra ) {
+        /* reference 0 */
+        obj_surface = SURFACE(pPicParameter->reference_picture);
+        assert(obj_surface);
+        gen6_vme_source_surface_state(ctx, 1, obj_surface);
+        /* reference 1, FIXME: */
+        // obj_surface = SURFACE(pPicParameter->reference_picture);
+        // assert(obj_surface);
+        //gen6_vme_source_surface_state(ctx, 2, obj_surface);
+    }
 
     /* VME output */
     gen6_vme_output_buffer_setup(ctx, context, encode_state, 3);
@@ -250,7 +273,8 @@ static VAStatus gen6_vme_surface_setup(VADriverContextP ctx,
 
 static VAStatus gen6_vme_interface_setup(VADriverContextP ctx, 
                                          VAContextID context,                              
-                                         struct mfc_encode_state *encode_state)
+                                         struct mfc_encode_state *encode_state,
+                                         int is_intra)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_media_state *media_state = &i965->gen6_media_state;
@@ -263,9 +287,14 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
     assert(bo->virtual);
     desc = bo->virtual;
 
-    for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
-        /*Load kernel into GPU memory*/	
-        struct media_kernel *kernel = &gen6_vme_kernels[i];
+    for (i = 0; i < 1; i++) {
+        /*Load kernel into GPU memory*/
+        struct media_kernel *kernel;
+        if ( is_intra) {
+            kernel = &gen6_vme_kernels[0];
+        } else {
+            kernel = &gen6_vme_kernels[1];
+        }
 
         /*Setup the descritor table*/
         memset(desc, 0, sizeof(*desc));
@@ -292,7 +321,7 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
         /*binding table*/
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
-                          1,									//One Entry
+                          4,									//One Entry
                           offsetof(struct gen6_interface_descriptor_data, desc3),
                           media_state->binding_table.bo);
         desc++;
@@ -321,7 +350,7 @@ static VAStatus gen6_vme_constant_setup(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx, VAContextID context, struct mfc_encode_state *encode_state)
+static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx, VAContextID context, struct mfc_encode_state *encode_state, int is_intra)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_media_state *media_state = &i965->gen6_media_state;
@@ -334,7 +363,7 @@ static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx, VAContextID conte
     vme_state_message = (unsigned int *)media_state->vme_state.bo->virtual;
 	
     for(i = 0;i < 32; i++) {
-        vme_state_message[i] = 0x00;
+        vme_state_message[i] = 0x11;
     }		
     vme_state_message[16] = 0x42424242;			//cost function LUT set 0 for Intra
 
@@ -428,7 +457,7 @@ static void gen6_vme_idrt(VADriverContextP ctx)
     ADVANCE_BATCH(ctx);
 }
 
-static int gen6_vme_media_object(VADriverContextP ctx, 
+static int gen6_vme_media_object_intra(VADriverContextP ctx, 
                                   VAContextID context, 
                                   struct mfc_encode_state *encode_state,
                                   int mb_x, int mb_y)
@@ -561,6 +590,139 @@ static int gen6_vme_media_object(VADriverContextP ctx,
     return len_in_dowrds * 4;
 }
 
+static int gen6_vme_media_object_inter(VADriverContextP ctx, 
+                                  VAContextID context, 
+                                  struct mfc_encode_state *encode_state,
+                                  int mb_x, int mb_y)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_surface *obj_surface = SURFACE( encode_state->current_render_target);
+    int i;
+    unsigned char *pPixel[17];	
+    int pitch = obj_surface->width;
+    int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
+    int len_in_dowrds = 6 + 32 + 8;
+
+    BEGIN_BATCH(ctx, len_in_dowrds);
+    
+    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
+    OUT_BATCH(ctx, VME_INTRA_SHADER);		/*Interface Descriptor Offset*/	
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+    OUT_BATCH(ctx, 0);
+   
+    /*inline data */
+    OUT_BATCH(ctx, ((mb_y << 20)) | ((mb_x<<4)) );			/*M0.0 Refrence0 X,Y*/
+    OUT_BATCH(ctx, 0x00000000);			/*M0.1 Refrence1 X,Y, not used in P frame*/
+    OUT_BATCH(ctx, (mb_y<<20) |
+              (mb_x<<4));			    /*M0.2 Source X,Y*/
+    OUT_BATCH(ctx, 0x00A03000);			/*M0.3 16x16 Source, 1/4 pixel, harr*/
+    OUT_BATCH(ctx, 0x00000000);			/*M0.4 Ignored*/
+    OUT_BATCH(ctx, 0x20200000);			/*M0.5 Reference Width&Height, 32x32*/
+    OUT_BATCH(ctx, 0x00000000);			/*M0.6 Debug*/
+    OUT_BATCH(ctx, 0x00000000);			/*M0.7 Debug*/
+										
+    OUT_BATCH(ctx, 0x00000000);			/*M1.0 Default value*/
+    OUT_BATCH(ctx, 0x0C000020);			/*M1.1 Default value MAX 32 MVs*/
+    OUT_BATCH(ctx, 0x00000000);			/*M1.2 Default value*/
+    OUT_BATCH(ctx, 0x00000000);			/*M1.3 Default value*/
+    OUT_BATCH(ctx, 0x00000000);			/*M1.4 Default value*/
+    OUT_BATCH(ctx, 0x00000000);			/*M1.5 Default value*/
+    OUT_BATCH(ctx, 0x00000000);			/*M1.6 Default value*/
+
+    i = 0;
+    if ( mb_x > 0)
+        i |= 0x60;
+    if ( mb_y > 0)
+        i |= 0x10;
+    if ( mb_x > 0 && mb_y > 0)
+        i |= 0x08;
+    if ( mb_x > 0 && mb_y > 0 && mb_x < (mb_width - 1) )
+        i |= 0x04;
+    OUT_BATCH(ctx, (i << 8) | 6 );		/*M1.7 Neighbor MBS and Intra mode masks*/
+
+    drm_intel_gem_bo_map_gtt( obj_surface->bo );
+    for(i = 0; i < 17; i++){
+        pPixel[i] = (unsigned char *) ( obj_surface->bo->virtual + mb_x * 16 - 1  + ( mb_y * 16 - 1 + i) * pitch);
+    }
+
+    OUT_BATCH(ctx, 0);							/*M2.0 MBZ*/
+    OUT_BATCH(ctx, pPixel[0][0] << 24);			/*M2.1 Corner Neighbor*/
+	
+    OUT_BATCH(ctx, ( (pPixel[0][4] << 24) 
+                     | (pPixel[0][3] << 16)
+                     | (pPixel[0][2] << 8)
+                     | (pPixel[0][1] ) ));		/*M2.2 */
+	
+    OUT_BATCH(ctx, ( (pPixel[0][8]	<< 24) 
+                     | (pPixel[0][7] << 16)
+                     | (pPixel[0][6] << 8)
+                     | (pPixel[0][5] ) ));		/*M2.3 */
+
+    OUT_BATCH(ctx, ( (pPixel[0][12]	<< 24) 
+                     | (pPixel[0][11] << 16)
+                     | (pPixel[0][10] << 8)		
+                     | (pPixel[0][9] ) ));		/*M2.4 */
+
+    OUT_BATCH(ctx, ( (pPixel[0][16]	<< 24) 
+                     | (pPixel[0][15] << 16)
+                     | (pPixel[0][14] << 8)	
+                     | (pPixel[0][13] ) ));		/*M2.5 */
+
+    OUT_BATCH(ctx, ( (pPixel[0][20]	<< 24) 
+                     | (pPixel[0][19] << 16)
+                     | (pPixel[0][18] << 8)		
+                     | (pPixel[0][17] ) ));		/*M2.6 */
+
+    OUT_BATCH(ctx, ( (pPixel[0][24]	<< 24) 
+                     | (pPixel[0][23] << 16)
+                     | (pPixel[0][22] << 8)		
+                     | (pPixel[0][21] ) ));		/*M2.7 */
+
+    OUT_BATCH(ctx, ( (pPixel[4][0]	<< 24) 
+                     | (pPixel[3][0] << 16)
+                     | (pPixel[2][0] << 8)		
+                     | (pPixel[1][0] ) ));		/*M3.0 */
+
+    OUT_BATCH(ctx, ( (pPixel[8][0]	<< 24) 
+                     | (pPixel[7][0] << 16)
+                     | (pPixel[6][0] << 8)		
+                     | (pPixel[5][0] ) ));		/*M3.1 */
+
+    OUT_BATCH(ctx, ( (pPixel[12][0]	<< 24) 
+                     | (pPixel[11][0] << 16)
+                     | (pPixel[10][0] << 8)		
+                     | (pPixel[9][0] ) ));		/*M3.2 */
+
+    OUT_BATCH(ctx, ( (pPixel[0][0]	<< 24) 
+                     | (pPixel[15][0] << 16)
+                     | (pPixel[14][0] << 8)		
+                     | (pPixel[13][0] ) ));		/*M3.3 */
+
+    OUT_BATCH(ctx, 0x11111111);			/*M3.4*/    
+    OUT_BATCH(ctx, 0x00000000);			/*M3.5*/
+    OUT_BATCH(ctx, 0x00000000);			/*M3.6*/
+    OUT_BATCH(ctx, 0x00000000);			/*M3.7*/
+
+    OUT_BATCH(ctx, 0);                      /*Write Message Header M0.0*/
+    OUT_BATCH(ctx, 0);                      /*Write Message Header M0.1*/
+
+    OUT_BATCH(ctx, (mb_y * mb_width + mb_x) * 4); /*Write Message Header M0.2*/
+    OUT_BATCH(ctx, 0x00000000);				/*Write Message Header M0.3*/
+
+    OUT_BATCH(ctx, 0x00000000);
+    OUT_BATCH(ctx, 0x00000000);
+    OUT_BATCH(ctx, 0x00000000);
+    OUT_BATCH(ctx, 0x00000000);	
+
+    drm_intel_gem_bo_unmap_gtt( obj_surface->bo );
+
+    ADVANCE_BATCH(ctx);
+
+    return len_in_dowrds * 4;
+}
+
 static void gen6_vme_media_init(VADriverContextP ctx)
 {
     int i;
@@ -627,6 +789,8 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
     int height_in_mbs = (obj_context->picture_height + 15) / 16;
     int x, y;
     int emit_new_state = 1, object_len_in_bytes;
+    VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
+    int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 
     intel_batchbuffer_start_atomic(ctx, 0x1000);
 
@@ -643,7 +807,7 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
                 ADVANCE_BATCH(ctx);
 
                 /*Step2: State command PIPELINE_SELECT*/
-                gen6_vme_pipeline_select(ctx);                           
+                gen6_vme_pipeline_select(ctx);
 
                 /*Step3: State commands configuring pipeline states*/
                 gen6_vme_state_base_address(ctx);
@@ -655,7 +819,11 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
             }
 
             /*Step4: Primitive commands*/
-            object_len_in_bytes = gen6_vme_media_object(ctx, context, encode_state, x, y);
+            if ( is_intra ) {
+                object_len_in_bytes = gen6_vme_media_object_intra(ctx, context, encode_state, x, y);
+            } else {
+                object_len_in_bytes = gen6_vme_media_object_inter(ctx, context, encode_state, x, y);
+            }
 
             if (intel_batchbuffer_check_free_space(ctx, object_len_in_bytes) == 0) {
                 intel_batchbuffer_end_atomic(ctx);	
@@ -674,12 +842,14 @@ static VAStatus gen6_vme_prepare(VADriverContextP ctx,
                                  struct mfc_encode_state *encode_state)
 {
     VAStatus vaStatus = VA_STATUS_SUCCESS;
+    VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
+    int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 	
     /*Setup all the memory object*/
-    gen6_vme_surface_setup(ctx, context, encode_state);
-    gen6_vme_interface_setup(ctx, context, encode_state);
+    gen6_vme_surface_setup(ctx, context, encode_state, is_intra);
+    gen6_vme_interface_setup(ctx, context, encode_state, is_intra);
     gen6_vme_constant_setup(ctx, context, encode_state);
-    gen6_vme_vme_state_setup(ctx, context, encode_state);
+    gen6_vme_vme_state_setup(ctx, context, encode_state, is_intra);
 
     /*Programing media pipeline*/
     gen6_vme_pipeline_programing(ctx, context, encode_state);
