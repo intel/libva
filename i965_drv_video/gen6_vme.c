@@ -73,7 +73,7 @@ static struct media_kernel gen6_vme_kernels[] = {
     }
 };
 
-#define	GEN6_VME_KERNEL_NUMBER 2
+#define	GEN6_VME_KERNEL_NUMBER ARRAY_ELEMS(gen6_vme_kernels)
 
 static void
 gen6_vme_set_source_surface_tiling(struct i965_surface_state2 *ss, unsigned int tiling)
@@ -273,8 +273,7 @@ static VAStatus gen6_vme_surface_setup(VADriverContextP ctx,
 
 static VAStatus gen6_vme_interface_setup(VADriverContextP ctx, 
                                          VAContextID context,                              
-                                         struct mfc_encode_state *encode_state,
-                                         int is_intra)
+                                         struct mfc_encode_state *encode_state)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct gen6_media_state *media_state = &i965->gen6_media_state;
@@ -287,15 +286,10 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
     assert(bo->virtual);
     desc = bo->virtual;
 
-    for (i = 0; i < 1; i++) {
-        /*Load kernel into GPU memory*/
+    for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         struct media_kernel *kernel;
-        if ( is_intra) {
-            kernel = &gen6_vme_kernels[0];
-        } else {
-            kernel = &gen6_vme_kernels[1];
-        }
-
+        kernel = &gen6_vme_kernels[i];
+        assert(sizeof(*desc) == 32);
         /*Setup the descritor table*/
         memset(desc, 0, sizeof(*desc));
         desc->desc0.kernel_start_pointer = (kernel->bo->offset >> 6);
@@ -310,19 +304,19 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
         dri_bo_emit_reloc(bo,	
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           0,
-                          offsetof(struct gen6_interface_descriptor_data, desc0),
+                          i * sizeof(*desc) + offsetof(struct gen6_interface_descriptor_data, desc0),
                           kernel->bo);
         /*Sampler State(VME state pointer)*/
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           (1 << 2),									//
-                          offsetof(struct gen6_interface_descriptor_data, desc2),
+                          i * sizeof(*desc) + offsetof(struct gen6_interface_descriptor_data, desc2),
                           media_state->vme_state.bo);
         /*binding table*/
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           4,									//One Entry
-                          offsetof(struct gen6_interface_descriptor_data, desc3),
+                          i * sizeof(*desc) + offsetof(struct gen6_interface_descriptor_data, desc3),
                           media_state->binding_table.bo);
         desc++;
     }
@@ -451,7 +445,7 @@ static void gen6_vme_idrt(VADriverContextP ctx)
 
     OUT_BATCH(ctx, CMD_MEDIA_INTERFACE_LOAD | 2);	
     OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 32);
+    OUT_BATCH(ctx, GEN6_VME_KERNEL_NUMBER * sizeof(struct gen6_interface_descriptor_data));
     OUT_RELOC(ctx, media_state->idrt.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 
     ADVANCE_BATCH(ctx);
@@ -606,7 +600,7 @@ static int gen6_vme_media_object_inter(VADriverContextP ctx,
     BEGIN_BATCH(ctx, len_in_dowrds);
     
     OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
-    OUT_BATCH(ctx, VME_INTRA_SHADER);		/*Interface Descriptor Offset*/	
+    OUT_BATCH(ctx, VME_INTER_SHADER);		/*Interface Descriptor Offset*/	
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
@@ -847,7 +841,7 @@ static VAStatus gen6_vme_prepare(VADriverContextP ctx,
 	
     /*Setup all the memory object*/
     gen6_vme_surface_setup(ctx, context, encode_state, is_intra);
-    gen6_vme_interface_setup(ctx, context, encode_state, is_intra);
+    gen6_vme_interface_setup(ctx, context, encode_state);
     gen6_vme_constant_setup(ctx, context, encode_state);
     gen6_vme_vme_state_setup(ctx, context, encode_state, is_intra);
 
