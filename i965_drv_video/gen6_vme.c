@@ -42,6 +42,10 @@
 #define VME_INTRA_SHADER	0	
 #define VME_INTER_SHADER	1
 
+#define CURBE_ALLOCATION_SIZE   37              /* in 256-bit */
+#define CURBE_TOTAL_DATA_LENGTH (4 * 32)        /* in byte, it should be less than or equal to CURBE_ALLOCATION_SIZE * 32 */
+#define CURBE_URB_ENTRY_LENGTH  4               /* in 256-bit, it should be less than or equal to CURBE_TOTAL_DATA_LENGTH / 32 */
+  
 static uint32_t gen6_vme_intra_frame[][4] = {
 #include "shaders/vme/intra_frame.g6b"
     {0,0,0,0}
@@ -271,7 +275,7 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
         desc->desc3.binding_table_entry_count = 1; /* FIXME: */
         desc->desc3.binding_table_pointer = (media_state->binding_table.bo->offset >> 5);
         desc->desc4.constant_urb_entry_read_offset = 0;
-        desc->desc4.constant_urb_entry_read_length = 4;
+        desc->desc4.constant_urb_entry_read_length = CURBE_URB_ENTRY_LENGTH;
  		
         /*kernel start*/
         dri_bo_emit_reloc(bo,	
@@ -384,7 +388,7 @@ static void gen6_vme_vfe_state(VADriverContextP ctx)
               | (media_state->vfe_state.gpgpu_mode << 2) );	/*Maximum Number of Threads , Number of URB Entries, MEDIA Mode*/
     OUT_BATCH(ctx, 0);												/*Debug: Object ID*/
     OUT_BATCH(ctx, (media_state->vfe_state.urb_entry_size << 16) 
-              | media_state->vfe_state.curb_size);				/*URB Entry Allocation Size , CURBE Allocation Size*/
+              | media_state->vfe_state.curbe_allocation_size);				/*URB Entry Allocation Size , CURBE Allocation Size*/
     OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
     OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
     OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
@@ -403,7 +407,7 @@ static void gen6_vme_curbe_load(VADriverContextP ctx)
     OUT_BATCH(ctx, CMD_MEDIA_CURBE_LOAD | 2);
     OUT_BATCH(ctx, 0);
 
-    OUT_BATCH(ctx, media_state->curbe.bo->size);
+    OUT_BATCH(ctx, CURBE_TOTAL_DATA_LENGTH);
     OUT_RELOC(ctx, media_state->curbe.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 
     ADVANCE_BATCH(ctx);
@@ -568,7 +572,7 @@ static void gen6_vme_media_init(VADriverContextP ctx)
     dri_bo_unreference(media_state->curbe.bo);
     bo = dri_bo_alloc(i965->intel.bufmgr,
                       "Buffer",
-                      1024*16, 64);
+                      CURBE_TOTAL_DATA_LENGTH, 64);
     assert(bo);
     media_state->curbe.bo = bo;
 
@@ -610,7 +614,7 @@ static void gen6_vme_media_init(VADriverContextP ctx)
     media_state->vfe_state.num_urb_entries = 16;
     media_state->vfe_state.gpgpu_mode = 0;
     media_state->vfe_state.urb_entry_size = 59 - 1;
-    media_state->vfe_state.curb_size = 37 - 1;
+    media_state->vfe_state.curbe_allocation_size = CURBE_ALLOCATION_SIZE - 1;
 }
 
 static void gen6_vme_pipeline_programing(VADriverContextP ctx, 

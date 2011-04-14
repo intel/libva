@@ -63,7 +63,7 @@ struct gen6_media_state
         unsigned int max_num_threads:16;
         unsigned int num_urb_entries:8;
         unsigned int urb_entry_size:16;
-        unsigned int curb_size:16;
+        unsigned int curbe_allocation_size:16;
     } vfe_state;
 
     struct {
