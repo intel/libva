@@ -76,6 +76,25 @@ static struct media_kernel gen6_vme_kernels[] = {
 #define	GEN6_VME_KERNEL_NUMBER ARRAY_ELEMS(gen6_vme_kernels)
 
 static void
+gen6_vme_set_common_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
+{
+    switch (tiling) {
+    case I915_TILING_NONE:
+        ss->ss3.tiled_surface = 0;
+        ss->ss3.tile_walk = 0;
+        break;
+    case I915_TILING_X:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_XMAJOR;
+        break;
+    case I915_TILING_Y:
+        ss->ss3.tiled_surface = 1;
+        ss->ss3.tile_walk = I965_TILEWALK_YMAJOR;
+        break;
+    }
+}
+
+static void
 gen6_vme_set_source_surface_tiling(struct i965_surface_state2 *ss, unsigned int tiling)
 {
     switch (tiling) {
@@ -148,6 +167,53 @@ static void gen6_vme_source_surface_state(VADriverContextP ctx,
                       0,
                       offsetof(struct i965_surface_state2, ss0),
                       obj_surface->bo);
+
+    assert(index < MAX_MEDIA_SURFACES_GEN6);
+    media_state->surface_state[index].bo = bo;
+}
+
+static void
+gen6_vme_media_source_surface_state(VADriverContextP ctx,
+                                    int index,
+                                    struct object_surface *obj_surface)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct gen6_media_state *media_state = &i965->gen6_media_state;
+    struct i965_surface_state *ss;
+    dri_bo *bo;
+    int w, h, w_pitch;
+    unsigned int tiling, swizzle;
+
+    w = obj_surface->orig_width;
+    h = obj_surface->orig_height;
+    w_pitch = obj_surface->width;
+
+    /* Y plane */
+    dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
+    bo = dri_bo_alloc(i965->intel.bufmgr, 
+                      "surface state", 
+                      sizeof(struct i965_surface_state), 
+                      0x1000);
+    assert(bo);
+
+    dri_bo_map(bo, True);
+    assert(bo->virtual);
+    ss = bo->virtual;
+    memset(ss, 0, sizeof(*ss));
+    ss->ss0.surface_type = I965_SURFACE_2D;
+    ss->ss0.surface_format = I965_SURFACEFORMAT_R8_UNORM;
+    ss->ss1.base_addr = obj_surface->bo->offset;
+    ss->ss2.width = w / 4 - 1;
+    ss->ss2.height = h - 1;
+    ss->ss3.pitch = w_pitch - 1;
+    gen6_vme_set_common_surface_tiling(ss, tiling);
+    dri_bo_emit_reloc(bo,
+                      I915_GEM_DOMAIN_RENDER, 
+                      0,
+                      0,
+                      offsetof(struct i965_surface_state, ss1),
+                      obj_surface->bo);
+    dri_bo_unmap(bo);
 
     assert(index < MAX_MEDIA_SURFACES_GEN6);
     media_state->surface_state[index].bo = bo;
@@ -235,6 +301,8 @@ static VAStatus gen6_vme_surface_setup(VADriverContextP ctx,
     obj_surface = SURFACE(encode_state->current_render_target);
     assert(obj_surface);
     gen6_vme_source_surface_state(ctx, 0, obj_surface);
+    gen6_vme_media_source_surface_state(ctx, 4, obj_surface);
+
     if ( ! is_intra ) {
         /* reference 0 */
         obj_surface = SURFACE(pPicParameter->reference_picture);
@@ -474,7 +542,7 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
     OUT_BATCH(ctx, 0);
    
     /*inline data */
-    OUT_BATCH(ctx, 0x00000000);			/*M0.0 Refrence0 X,Y, not used in Intra*/
+    OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);			/*M0.0 Refrence0 X,Y, not used in Intra*/
     OUT_BATCH(ctx, 0x00000000);			/*M0.1 Refrence1 X,Y, not used in Intra*/
     OUT_BATCH(ctx, (mb_y<<20) |
               (mb_x<<4));			/*M0.2 Source X,y*/
