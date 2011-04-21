@@ -498,9 +498,9 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
     if ( mb_y > 0)
         i |= 0x10;
     if ( mb_x > 0 && mb_y > 0)
-        i |= 0x08;
-    if ( mb_x > 0 && mb_y > 0 && mb_x < (mb_width - 1) )
         i |= 0x04;
+    if ( mb_y > 0 && mb_x < (mb_width - 1) )
+        i |= 0x08;
     OUT_BATCH(ctx, (i << 8) | 6 );		/*M1.7 Neighbor MBS and Intra mode masks*/
 
     drm_intel_gem_bo_map_gtt( obj_surface->bo );
@@ -631,9 +631,9 @@ static int gen6_vme_media_object_inter(VADriverContextP ctx,
     if ( mb_y > 0)
         i |= 0x10;
     if ( mb_x > 0 && mb_y > 0)
-        i |= 0x08;
-    if ( mb_x > 0 && mb_y > 0 && mb_x < (mb_width - 1) )
         i |= 0x04;
+    if ( mb_y > 0 && mb_x < (mb_width - 1) )
+        i |= 0x08;
     OUT_BATCH(ctx, (i << 8) | 6 );		/*M1.7 Neighbor MBS and Intra mode masks*/
 
     drm_intel_gem_bo_map_gtt( obj_surface->bo );
