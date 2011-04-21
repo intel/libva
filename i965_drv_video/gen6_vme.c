@@ -526,11 +526,8 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE( encode_state->current_render_target);
-    int i;
-    unsigned char *pPixel[17];	
-    int pitch = obj_surface->width;
     int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
-    int len_in_dowrds = 6 + 32 + 8;
+    int len_in_dowrds = 6 + 1;
 
     BEGIN_BATCH(ctx, len_in_dowrds);
     
@@ -543,110 +540,6 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
    
     /*inline data */
     OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);			/*M0.0 Refrence0 X,Y, not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.1 Refrence1 X,Y, not used in Intra*/
-    OUT_BATCH(ctx, (mb_y<<20) |
-              (mb_x<<4));			/*M0.2 Source X,y*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.3 16x16 Source*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.4 Ignored*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.5 Reference Width&Height, not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.6 Debug*/
-    OUT_BATCH(ctx, 0x00000000);			/*M0.7 Debug*/
-										
-    OUT_BATCH(ctx, 0x00000000);			/*M1.0 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.1 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.2 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.3 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.4 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.5 Not used in Intra*/
-    OUT_BATCH(ctx, 0x00000000);			/*M1.6 Not used in Intra*/
-
-    i = 0;
-    if ( mb_x > 0)
-        i |= 0x60;
-    if ( mb_y > 0)
-        i |= 0x10;
-    if ( mb_x > 0 && mb_y > 0)
-        i |= 0x04;
-    if ( mb_y > 0 && mb_x < (mb_width - 1) )
-        i |= 0x08;
-    OUT_BATCH(ctx, (i << 8) | 6 );		/*M1.7 Neighbor MBS and Intra mode masks*/
-
-    drm_intel_gem_bo_map_gtt( obj_surface->bo );
-    for(i = 0; i < 17; i++){
-        pPixel[i] = (unsigned char *) ( obj_surface->bo->virtual + mb_x * 16 - 1  + ( mb_y * 16 - 1 + i) * pitch);
-    }
-
-    OUT_BATCH(ctx, 0);							/*M2.0 MBZ*/
-    OUT_BATCH(ctx, pPixel[0][0] << 24);			/*M2.1 Corner Neighbor*/
-	
-    OUT_BATCH(ctx, ( (pPixel[0][4] << 24) 
-                     | (pPixel[0][3] << 16)
-                     | (pPixel[0][2] << 8)
-                     | (pPixel[0][1] ) ));		/*M2.2 */
-	
-    OUT_BATCH(ctx, ( (pPixel[0][8]	<< 24) 
-                     | (pPixel[0][7] << 16)
-                     | (pPixel[0][6] << 8)
-                     | (pPixel[0][5] ) ));		/*M2.3 */
-
-    OUT_BATCH(ctx, ( (pPixel[0][12]	<< 24) 
-                     | (pPixel[0][11] << 16)
-                     | (pPixel[0][10] << 8)		
-                     | (pPixel[0][9] ) ));		/*M2.4 */
-
-    OUT_BATCH(ctx, ( (pPixel[0][16]	<< 24) 
-                     | (pPixel[0][15] << 16)
-                     | (pPixel[0][14] << 8)	
-                     | (pPixel[0][13] ) ));		/*M2.5 */
-
-    OUT_BATCH(ctx, ( (pPixel[0][20]	<< 24) 
-                     | (pPixel[0][19] << 16)
-                     | (pPixel[0][18] << 8)		
-                     | (pPixel[0][17] ) ));		/*M2.6 */
-
-    OUT_BATCH(ctx, ( (pPixel[0][24]	<< 24) 
-                     | (pPixel[0][23] << 16)
-                     | (pPixel[0][22] << 8)		
-                     | (pPixel[0][21] ) ));		/*M2.7 */
-
-    OUT_BATCH(ctx, ( (pPixel[4][0]	<< 24) 
-                     | (pPixel[3][0] << 16)
-                     | (pPixel[2][0] << 8)		
-                     | (pPixel[1][0] ) ));		/*M3.0 */
-
-    OUT_BATCH(ctx, ( (pPixel[8][0]	<< 24) 
-                     | (pPixel[7][0] << 16)
-                     | (pPixel[6][0] << 8)		
-                     | (pPixel[5][0] ) ));		/*M3.1 */
-
-    OUT_BATCH(ctx, ( (pPixel[12][0]	<< 24) 
-                     | (pPixel[11][0] << 16)
-                     | (pPixel[10][0] << 8)		
-                     | (pPixel[9][0] ) ));		/*M3.2 */
-
-    OUT_BATCH(ctx, ( (pPixel[16][0]	<< 24) 
-                     | (pPixel[15][0] << 16)
-                     | (pPixel[14][0] << 8)		
-                     | (pPixel[13][0] ) ));		/*M3.3 */
-
-    OUT_BATCH(ctx, 0x11111111);			/*M3.4*/
-    OUT_BATCH(ctx, 0x00000000);			/*M3.5*/
-    OUT_BATCH(ctx, 0x00000000);			/*M3.6*/
-    OUT_BATCH(ctx, 0x00000000);			/*M3.7*/
-
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-
-    OUT_BATCH(ctx, mb_y * mb_width + mb_x);
-    OUT_BATCH(ctx, 0x00000000);				/*Write Message Header M0.3*/
-
-    OUT_BATCH(ctx, 0x00000000);
-    OUT_BATCH(ctx, 0x00000000);
-    OUT_BATCH(ctx, 0x00000000);
-    OUT_BATCH(ctx, 0x00000000);	
-
-    drm_intel_gem_bo_unmap_gtt( obj_surface->bo );
-
     ADVANCE_BATCH(ctx);
 
     return len_in_dowrds * 4;

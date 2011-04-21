@@ -39,11 +39,12 @@ define(`BIND_IDX_OUTPUT',               `3')
 define(`BIND_IDX_INEP',                 `4')
 
 define(`INTRA_PREDICTORE_MODE',         `0x11111111:UD')
+        
 /* GRF registers
  * r0 header
- * r1~r4 constant buffer
- * r5~r8 inline data for VME message
- * r9 inline data for Oword Block Write message
+ * r1~r4 constant buffer (reserved)
+ * r5 inline data
+ * r6~r11 reserved        
  * r12 write back of VME message
  * r13 write back of Oword Block Write        
  */
@@ -53,6 +54,10 @@ define(`INTRA_PREDICTORE_MODE',         `0x11111111:UD')
 define(`thread_id_ub',          `r0.20<0,1,0>:UB')  /* thread id in payload */
 
 /*
+ * GRF 1~4 -- Constant Buffer (reserved)
+ */
+        
+/*
  * GRF 5 -- inline data
  */        
 define(`inline_reg0',           `r5')
@@ -60,31 +65,28 @@ define(`w_in_mb_uw',            `inline_reg0.2')
 define(`orig_xy_ub',            `inline_reg0.0')
 define(`orig_x_ub',             `inline_reg0.0')    /* in macroblock */    
 define(`orig_y_ub',             `inline_reg0.1')
-        
-define(`msg_reg0',              `m0')               /* m0 */
-define(`msg_reg1',              `m1')               /* m1 */
-define(`msg_reg2',              `m2')               /* m2 */
-define(`msg_reg3',              `m3')               /* m3 */
-define(`vme_inline0',           `r5')
-define(`vme_inline1',           `r6')
-define(`vme_inline2',           `r7')
-define(`vme_inline3',           `r8')        
-define(`vme_wb',                `r12')              /* write back for VME */
-        
-define(`obw_m0_8ud',            `m0.0<1>:UD')       /* m0 */
-define(`obw_m1_0_1ud',          `m1.0<1>:UD')       /* m1.0 */
-define(`obw_m1_4_1ud',          `m1.4<1>:UD')       /* m1.4 */       
-define(`obw_m1_8_1ud',          `m1.8<1>:UD')       /* m1.8 */
-define(`obw_m1_12_1ud',         `m1.12<1>:UD')      /* m1.12 */
-define(`obw_inline0',           `r9')        
-define(`obw_wb',                `r13')              /* used for write commit in Oword Block Write */
 
 /*
- * Intra Neighbor Edge Pixels
+ * GRF 6~11 -- reserved
+ */
+
+/*
+ * GRF 12 -- write back for VME message 
+ */        
+define(`vme_wb',                `r12')
+
+/*
+ * GRF 13 -- write back for Oword Block Write message with write commit bit
+ */        
+define(`obw_wb',                `r13')
+
+/*
+ * GRF 14~17 -- Intra Neighbor Edge Pixels
  */
 define(`INEP_ROW',              `r14')
 define(`INEP_COL0',             `r16')
 define(`INEP_COL1',             `r17')
+        
 /*
  * temporary registers
  */
@@ -96,6 +98,14 @@ define(`tmp_reg2',              `r34')
 define(`tmp_x_w',               `tmp_reg2.0')
 define(`tmp_reg3',              `r35')
 
+/*
+ * MRF registers
+ */        
+define(`msg_reg0',              `m0')               /* m0 */
+define(`msg_reg1',              `m1')               /* m1 */
+define(`msg_reg2',              `m2')               /* m2 */
+define(`msg_reg3',              `m3')               /* m3 */
+        
 /*
  * __START
  */
