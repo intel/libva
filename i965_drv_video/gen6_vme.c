@@ -556,7 +556,7 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
                      | (pPixel[10][0] << 8)		
                      | (pPixel[9][0] ) ));		/*M3.2 */
 
-    OUT_BATCH(ctx, ( (pPixel[0][0]	<< 24) 
+    OUT_BATCH(ctx, ( (pPixel[16][0]	<< 24) 
                      | (pPixel[15][0] << 16)
                      | (pPixel[14][0] << 8)		
                      | (pPixel[13][0] ) ));		/*M3.3 */
@@ -689,7 +689,7 @@ static int gen6_vme_media_object_inter(VADriverContextP ctx,
                      | (pPixel[10][0] << 8)		
                      | (pPixel[9][0] ) ));		/*M3.2 */
 
-    OUT_BATCH(ctx, ( (pPixel[0][0]	<< 24) 
+    OUT_BATCH(ctx, ( (pPixel[16][0]	<< 24) 
                      | (pPixel[15][0] << 16)
                      | (pPixel[14][0] << 8)		
                      | (pPixel[13][0] ) ));		/*M3.3 */
