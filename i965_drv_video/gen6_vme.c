@@ -519,10 +519,11 @@ static void gen6_vme_idrt(VADriverContextP ctx)
     ADVANCE_BATCH(ctx);
 }
 
-static int gen6_vme_media_object_intra(VADriverContextP ctx, 
-                                  VAContextID context, 
-                                  struct mfc_encode_state *encode_state,
-                                  int mb_x, int mb_y)
+static int gen6_vme_media_object(VADriverContextP ctx, 
+                                 VAContextID context, 
+                                 struct mfc_encode_state *encode_state,
+                                 int mb_x, int mb_y,
+                                 int kernel)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE( encode_state->current_render_target);
@@ -532,7 +533,7 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
     BEGIN_BATCH(ctx, len_in_dowrds);
     
     OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
-    OUT_BATCH(ctx, VME_INTRA_SHADER);		/*Interface Descriptor Offset*/	
+    OUT_BATCH(ctx, kernel);		/*Interface Descriptor Offset*/	
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
     OUT_BATCH(ctx, 0);
@@ -540,32 +541,6 @@ static int gen6_vme_media_object_intra(VADriverContextP ctx,
    
     /*inline data */
     OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);			/*M0.0 Refrence0 X,Y, not used in Intra*/
-    ADVANCE_BATCH(ctx);
-
-    return len_in_dowrds * 4;
-}
-
-static int gen6_vme_media_object_inter(VADriverContextP ctx, 
-                                  VAContextID context, 
-                                  struct mfc_encode_state *encode_state,
-                                  int mb_x, int mb_y)
-{
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct object_surface *obj_surface = SURFACE( encode_state->current_render_target);
-    int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
-    int len_in_dowrds = 6 + 1;
-
-    BEGIN_BATCH(ctx, len_in_dowrds);
-    
-    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
-    OUT_BATCH(ctx, VME_INTER_SHADER);		/*Interface Descriptor Offset*/	
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-   
-    /*inline data */
-    OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);
     ADVANCE_BATCH(ctx);
 
     return len_in_dowrds * 4;
@@ -667,11 +642,7 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
             }
 
             /*Step4: Primitive commands*/
-            if ( is_intra ) {
-                object_len_in_bytes = gen6_vme_media_object_intra(ctx, context, encode_state, x, y);
-            } else {
-                object_len_in_bytes = gen6_vme_media_object_inter(ctx, context, encode_state, x, y);
-            }
+            object_len_in_bytes = gen6_vme_media_object(ctx, context, encode_state, x, y, is_intra ? VME_INTRA_SHADER : VME_INTER_SHADER);
 
             if (intel_batchbuffer_check_free_space(ctx, object_len_in_bytes) == 0) {
                 intel_batchbuffer_end_atomic(ctx);	
