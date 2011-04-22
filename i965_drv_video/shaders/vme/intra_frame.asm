@@ -18,98 +18,9 @@
 include(`vme_header.inc')
 
 /*
- * Constant
- */
-define(`BLOCK_32X1',                    `0x0000001F')
-define(`BLOCK_4X16',                    `0x000F0003')
-        
-define(`LUMA_INTRA_16x16_DISABLE',      `0x1')
-define(`LUMA_INTRA_8x8_DISABLE',        `0x2')
-define(`LUMA_INTRA_4x4_DISABLE',        `0x4')
-
-define(`INTRA_PRED_AVAIL_FLAG_AE',      `0x60')
-define(`INTRA_PRED_AVAIL_FLAG_B',       `0x10')
-define(`INTRA_PRED_AVAIL_FLAG_C',       `0x8')
-define(`INTRA_PRED_AVAIL_FLAG_D',       `0x4')
-
-define(`BIND_IDX_VME',                  `0')
-define(`BIND_IDX_VME_REF0',             `1')
-define(`BIND_IDX_VME_REF1',             `2')
-define(`BIND_IDX_OUTPUT',               `3')
-define(`BIND_IDX_INEP',                 `4')
-
-define(`INTRA_PREDICTORE_MODE',         `0x11111111:UD')
-        
-/* GRF registers
- * r0 header
- * r1~r4 constant buffer (reserved)
- * r5 inline data
- * r6~r11 reserved        
- * r12 write back of VME message
- * r13 write back of Oword Block Write        
- */
-/*
- * GRF 0 -- header       
- */        
-define(`thread_id_ub',          `r0.20<0,1,0>:UB')  /* thread id in payload */
-
-/*
- * GRF 1~4 -- Constant Buffer (reserved)
- */
-        
-/*
- * GRF 5 -- inline data
- */        
-define(`inline_reg0',           `r5')
-define(`w_in_mb_uw',            `inline_reg0.2')
-define(`orig_xy_ub',            `inline_reg0.0')
-define(`orig_x_ub',             `inline_reg0.0')    /* in macroblock */    
-define(`orig_y_ub',             `inline_reg0.1')
-
-/*
- * GRF 6~11 -- reserved
- */
-
-/*
- * GRF 12 -- write back for VME message 
- */        
-define(`vme_wb',                `r12')
-
-/*
- * GRF 13 -- write back for Oword Block Write message with write commit bit
- */        
-define(`obw_wb',                `r13')
-
-/*
- * GRF 14~17 -- Intra Neighbor Edge Pixels
- */
-define(`INEP_ROW',              `r14')
-define(`INEP_COL0',             `r16')
-define(`INEP_COL1',             `r17')
-        
-/*
- * temporary registers
- */
-define(`tmp_reg0',              `r32')
-define(`tmp_reg1',              `r33')
-define(`intra_part_mask_ub',    `tmp_reg1.28')        
-define(`mb_intra_struct_ub',    `tmp_reg1.29')
-define(`tmp_reg2',              `r34')
-define(`tmp_x_w',               `tmp_reg2.0')
-define(`tmp_reg3',              `r35')
-
-/*
- * MRF registers
- */        
-define(`msg_reg0',              `m0')               /* m0 */
-define(`msg_reg1',              `m1')               /* m1 */
-define(`msg_reg2',              `m2')               /* m2 */
-define(`msg_reg3',              `m3')               /* m3 */
-        
-/*
  * __START
  */
-__START:
+__INTRA_START:
 mov  (16) tmp_reg0.0<1>:UD      0x0:UD {align1};
 mov  (16) tmp_reg2.0<1>:UD      0x0:UD {align1};
        
@@ -167,7 +78,7 @@ mov  (8) msg_reg2<1>:UD         INEP_ROW.0<8,8,1>:UD {align1};
 mov  (8) msg_reg3<1>:UD         0x0 {align1};
 mov (16) msg_reg3.0<1>:UB       INEP_COL0.3<32,8,4>:UB {align1};
 mov  (1) msg_reg3.16<1>:UD      INTRA_PREDICTORE_MODE {align1};
-send (8) 0 vme_wb null vme(BIND_IDX_VME,0,0,2) mlen 4 rlen 1 {align1};
+send (8) 0 vme_wb null vme(BIND_IDX_VME,0,0,VME_MESSAGE_TYPE_INTRA) mlen 4 rlen 1 {align1};
 
 /*
  * Oword Block Write message
