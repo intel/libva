@@ -568,7 +568,7 @@ static int gen6_vme_media_object_inter(VADriverContextP ctx,
     OUT_BATCH(ctx, 0);
    
     /*inline data */
-    OUT_BATCH(ctx, ((mb_y << 20)) | ((mb_x<<4)) );			/*M0.0 Refrence0 X,Y*/
+    OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);
     OUT_BATCH(ctx, 0x00000000);			/*M0.1 Refrence1 X,Y, not used in P frame*/
     OUT_BATCH(ctx, (mb_y<<20) |
               (mb_x<<4));			    /*M0.2 Source X,Y*/
