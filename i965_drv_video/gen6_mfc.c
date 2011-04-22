@@ -524,22 +524,17 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
     int x,y;
     struct gen6_media_state *media_state = &i965->gen6_media_state;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
-	VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
-    unsigned int *msg, offset;
+    VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
+    unsigned int *msg = NULL, offset = 0;
     int emit_new_state = 1, object_len_in_bytes;
-	int is_intra = pSliceParameter->slice_flags.bits.is_intra;
+    int is_intra = pSliceParameter->slice_flags.bits.is_intra;
 
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000); 
 
-    dri_bo_map(media_state->vme_output.bo , 1);
-    msg = (unsigned int *)media_state->vme_output.bo->virtual;
-
-	if ( is_intra == 0) {										/*TODO: simulate VME result, [0,0] MVs*/
-		//memset(media_state->vme_output.bo->virtual, 0, 128);
-        //printf("msgs = %08x, %08x, %08x, %08x \n", msg[0], msg[1], msg[2], msg[3]);
-		dri_bo_unmap(media_state->vme_output.bo);
-        offset = 0;
-	}
+    if (is_intra) {
+        dri_bo_map(media_state->vme_output.bo , 1);
+        msg = (unsigned int *)media_state->vme_output.bo->virtual;
+    }
 
     for (y = 0; y < height_in_mbs; y++) {
         for (x = 0; x < width_in_mbs; x++) { 
@@ -557,19 +552,20 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
                 gen6_mfc_avc_qm_state(ctx);
                 gen6_mfc_avc_fqm_state(ctx);
                 gen6_mfc_avc_ref_idx_state(ctx);
-				/*gen6_mfc_avc_directmode_state(ctx);*/
-				gen6_mfc_avc_slice_state(ctx, is_intra);
+                /*gen6_mfc_avc_directmode_state(ctx);*/
+                gen6_mfc_avc_slice_state(ctx, is_intra);
                 /*gen6_mfc_avc_insert_object(ctx, 0);*/
                 emit_new_state = 0;
             }
 			
-			if ( is_intra ) {
-				object_len_in_bytes = gen6_mfc_avc_pak_object_intra(ctx, x, y, last_mb, qp, msg);
-			} else {
-				object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo,offset);
+            if (is_intra) {
+                assert(msg);
+                object_len_in_bytes = gen6_mfc_avc_pak_object_intra(ctx, x, y, last_mb, qp, msg);
+                msg += 4;
+            } else {
+                object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo, offset);
                 offset += 64;
-			}
-            msg += 4;
+            }
 
             if (intel_batchbuffer_check_free_space_bcs(ctx, object_len_in_bytes) == 0) {
                 intel_batchbuffer_end_atomic_bcs(ctx);
@@ -579,8 +575,9 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
             }
         }
     }
-	if ( is_intra )
-		dri_bo_unmap(media_state->vme_output.bo);
+
+    if (is_intra)
+        dri_bo_unmap(media_state->vme_output.bo);
 	
     intel_batchbuffer_end_atomic_bcs(ctx);
 }
