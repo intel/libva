@@ -141,12 +141,16 @@ gen6_mfc_pipe_buf_addr_state(VADriverContextP ctx)
 static void
 gen6_mfc_ind_obj_base_addr_state(VADriverContextP ctx)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct gen6_media_state *media_state = &i965->gen6_media_state;
+
     BEGIN_BCS_BATCH(ctx, 11);
 
     OUT_BCS_BATCH(ctx, MFX_IND_OBJ_BASE_ADDR_STATE | (11 - 2));
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
-    OUT_BCS_BATCH(ctx, 0);
+    /* MFX Indirect MV Object Base Address */
+    OUT_BCS_RELOC(ctx, media_state->vme_output.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
     OUT_BCS_BATCH(ctx, 0);	
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
@@ -412,7 +416,7 @@ gen6_mfc_avc_pak_object_intra(VADriverContextP ctx, int x, int y, int end_mb, in
 	return len_in_dwords;
 }
 
-static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int end_mb, int qp, dri_bo *bo, unsigned int offset)
+static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int end_mb, int qp, unsigned int offset)
 {
 	 int len_in_dwords = 11;
 
@@ -421,9 +425,7 @@ static int gen6_mfc_avc_pak_object_inter(VADriverContextP ctx, int x, int y, int
     OUT_BCS_BATCH(ctx, MFC_AVC_PAK_OBJECT | (len_in_dwords - 2));
 
 	OUT_BCS_BATCH(ctx, 32);         /* 32 MV*/
-	OUT_BCS_RELOC(ctx, bo,
-			I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-			offset);
+	OUT_BCS_BATCH(ctx, offset);
 
 	OUT_BCS_BATCH(ctx, 
 			(1 << 24) |     /* PackedMvNum, Debug*/
@@ -563,7 +565,7 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx, void *obj)
                 object_len_in_bytes = gen6_mfc_avc_pak_object_intra(ctx, x, y, last_mb, qp, msg);
                 msg += 4;
             } else {
-                object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, media_state->vme_output.bo, offset);
+                object_len_in_bytes = gen6_mfc_avc_pak_object_inter(ctx, x, y, last_mb, qp, offset);
                 offset += 64;
             }
 
