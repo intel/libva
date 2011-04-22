@@ -280,33 +280,33 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx, int intra_slice)
 
     OUT_BCS_BATCH(ctx, MFX_AVC_SLICE_STATE | (11 - 2) );
 
-	if ( intra_slice )
+    if ( intra_slice )
         OUT_BCS_BATCH(ctx, 2);			/*Slice Type: I Slice*/
-	else
-		OUT_BCS_BATCH(ctx, 0);			/*Slice Type: P Slice*/
+    else
+        OUT_BCS_BATCH(ctx, 0);			/*Slice Type: P Slice*/
 
-	if ( intra_slice )
+    if ( intra_slice )
         OUT_BCS_BATCH(ctx, 0);			/*no reference frames and pred_weight_table*/
-	else 
-		OUT_BCS_BATCH(ctx, 0x00010000);	/*1 reference frame*/
+    else 
+        OUT_BCS_BATCH(ctx, 0x00010000); 	/*1 reference frame*/
 
-	OUT_BCS_BATCH(ctx, (0<<24) |				/*Enable deblocking operation*/
-                  (26<<16) | 				/*Slice Quantization Parameter*/
-				  0x0202 );
+    OUT_BCS_BATCH(ctx, (0<<24) |                /*Enable deblocking operation*/
+                  (26<<16) | 			/*Slice Quantization Parameter*/
+                  0x0202 );
     OUT_BCS_BATCH(ctx, 0);			/*First MB X&Y , the postion of current slice*/
     OUT_BCS_BATCH(ctx, ( ((bcs_state->surface_state.height+15)/16) << 16) );
 
     OUT_BCS_BATCH(ctx, 
-			      (0<<31) |		/*RateControlCounterEnable = disable*/
-				  (1<<30) |		/*ResetRateControlCounter*/
-				  (2<<28) |		/*RC Triggle Mode = Loose Rate Control*/
-                  (1<<19) | 	/*IsLastSlice*/
-                  (0<<18) | 	/*BitstreamOutputFlag Compressed BitStream Output Disable Flag 0:enable 1:disable*/
-                  (0<<17) |	/*HeaderPresentFlag*/	
-                  (1<<16) |	/*SliceData PresentFlag*/
-                  (0<<15) |	/*TailPresentFlag*/
-                  (1<<13) |	/*RBSP NAL TYPE*/	
-                  (0<<12) );	/*CabacZeroWordInsertionEnable*/
+                  (0<<31) |		/*RateControlCounterEnable = disable*/
+                  (1<<30) |		/*ResetRateControlCounter*/
+                  (2<<28) |		/*RC Triggle Mode = Loose Rate Control*/
+                  (1<<19) | 	        /*IsLastSlice*/
+                  (0<<18) | 	        /*BitstreamOutputFlag Compressed BitStream Output Disable Flag 0:enable 1:disable*/
+                  (0<<17) |	        /*HeaderPresentFlag*/	
+                  (1<<16) |	        /*SliceData PresentFlag*/
+                  (0<<15) |	        /*TailPresentFlag*/
+                  (1<<13) |	        /*RBSP NAL TYPE*/	
+                  (0<<12) );	        /*CabacZeroWordInsertionEnable*/
 	
     OUT_BCS_RELOC(ctx, bcs_state->mfc_indirect_pak_bse_object.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
