@@ -310,7 +310,7 @@ static void gen6_mfc_avc_slice_state(VADriverContextP ctx, int intra_slice)
 	
     OUT_BCS_RELOC(ctx, bcs_state->mfc_indirect_pak_bse_object.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
-                  ALIGN(sizeof(VACodedBufferSegment), 64));
+                  bcs_state->mfc_indirect_pak_bse_object.offset);
 
     OUT_BCS_BATCH(ctx, 0);
     OUT_BCS_BATCH(ctx, 0);
@@ -641,6 +641,7 @@ static VAStatus gen6_mfc_avc_prepare(VADriverContextP ctx,
     bo = obj_buffer->buffer_store->bo;
     assert(bo);
     bcs_state->mfc_indirect_pak_bse_object.bo = bo;
+    bcs_state->mfc_indirect_pak_bse_object.offset = ALIGN(sizeof(VACodedBufferSegment), 64);
     dri_bo_reference(bcs_state->mfc_indirect_pak_bse_object.bo);
 
     /*Programing bcs pipeline*/

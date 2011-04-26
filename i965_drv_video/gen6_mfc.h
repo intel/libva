@@ -80,6 +80,7 @@ struct gen6_mfc_bcs_state
 
     struct {
         dri_bo *bo;
+        int offset;
     } mfc_indirect_pak_bse_object;						//OUTPUT: the compressed bitstream 
 
     //MFX_BSP_BUF_BASE_ADDR_STATE
