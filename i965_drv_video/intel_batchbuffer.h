@@ -59,6 +59,9 @@ void intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx);
 
 void intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag);
 
+int intel_batchbuffer_check_free_space(VADriverContextP ctx, int size);
+int intel_batchbuffer_check_free_space_bcs(VADriverContextP ctx, int size);
+
 #define __BEGIN_BATCH(ctx, n, flag) do {                        \
         intel_batchbuffer_check_batchbuffer_flag(ctx, flag);    \
         intel_batchbuffer_require_space(ctx, (n) * 4);          \

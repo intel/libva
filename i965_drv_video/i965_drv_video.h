@@ -40,6 +40,9 @@
 #include "i965_media.h"
 #include "i965_render.h"
 
+#include "gen6_vme.h"
+#include "gen6_mfc.h"
+
 #define I965_MAX_PROFILES                       11
 #define I965_MAX_ENTRYPOINTS                    5
 #define I965_MAX_CONFIG_ATTRIBUTES              10
@@ -81,17 +84,32 @@ struct decode_state
     int num_slice_datas;
 };
 
+//keeping mfc encoder's stuff here
+struct mfc_encode_state
+{
+    struct buffer_store *seq_param;
+    struct buffer_store *pic_param;
+    struct buffer_store *pic_control;
+    struct buffer_store *iq_matrix;
+    struct buffer_store *q_matrix;
+    struct buffer_store **slice_params;
+    VASurfaceID current_render_target;
+    int max_slice_params;
+    int num_slice_params;
+};
+
 struct object_context 
 {
     struct object_base base;
     VAContextID context_id;
     VAConfigID config_id;
-    VASurfaceID *render_targets;
+    VASurfaceID *render_targets;		//input->encode, output->decode
     int num_render_targets;
     int picture_width;
     int picture_height;
     int flags;
     struct decode_state decode_state;
+    struct mfc_encode_state encode_state;
 };
 
 #define SURFACE_REFERENCED      (1 << 0)
@@ -168,6 +186,8 @@ struct i965_driver_data
     struct i965_media_state media_state;
     struct i965_render_state render_state;
     void *pp_context;
+    struct gen6_media_state gen6_media_state;
+    struct gen6_mfc_bcs_state gen6_mfc_bcs_state;
 };
 
 #define NEW_CONFIG_ID() object_heap_allocate(&i965->config_heap);

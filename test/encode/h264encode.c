@@ -461,8 +461,8 @@ int main(int argc,char **argv)
     printf("\n\n");
     
     vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);
-    vaDestroyConfig(va_dpy,config_id);
     vaDestroyContext(va_dpy,context_id);
+    vaDestroyConfig(va_dpy,config_id);
     
     vaTerminate(va_dpy);
     
