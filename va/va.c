@@ -799,7 +799,7 @@ VAStatus vaBufferInfo (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaBufferInfo( ctx, context, buf_id, type, size, num_elements );
+  return ctx->vtable->vaBufferInfo( ctx, buf_id, type, size, num_elements );
 }
 
 VAStatus vaBeginPicture (
