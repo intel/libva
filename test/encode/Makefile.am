@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = h264encode
+bin_PROGRAMS = h264encode avcenc
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/src/x11
 
@@ -29,6 +29,8 @@ TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
 h264encode_LDADD = $(TEST_LIBS)
 h264encode_SOURCES = h264encode.c
 
+avcenc_LDADD= $(TEST_LIBS)
+avcenc_SOURCES= avcenc.c
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
