@@ -276,7 +276,7 @@ i965_CreateConfig(VADriverContextP ctx,
                   VAEntrypoint entrypoint,
                   VAConfigAttrib *attrib_list,
                   int num_attribs,
-                  VAConfigID *config_id)		/* out */
+                  VAConfigID *config_id)        /* out */
 {
     struct i965_driver_data * const i965 = i965_driver_data(ctx);
     struct object_config *obj_config;
@@ -462,6 +462,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->flags = SURFACE_REFERENCED;
         obj_surface->bo = NULL;
         obj_surface->pp_out_bo = NULL;
+        obj_surface->locked_image_id = VA_INVALID_ID;
         obj_surface->private_data = NULL;
         obj_surface->free_private_data = NULL;
     }
@@ -571,8 +572,8 @@ i965_CreateSubpicture(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     VASubpictureID subpicID = NEW_SUBPIC_ID()
-	
-        struct object_subpic *obj_subpic = SUBPIC(subpicID);
+    struct object_subpic *obj_subpic = SUBPIC(subpicID);
+
     if (!obj_subpic)
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
@@ -598,7 +599,6 @@ VAStatus
 i965_DestroySubpicture(VADriverContextP ctx,
                        VASubpictureID subpicture)
 {
-	
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_subpic *obj_subpic = SUBPIC(subpicture);
     i965_destroy_subpic(&i965->subpic_heap, (struct object_base *)obj_subpic);
@@ -1384,8 +1384,8 @@ i965_QuerySurfaceStatus(VADriverContextP ctx,
  */
 VAStatus 
 i965_QueryDisplayAttributes(VADriverContextP ctx,
-                            VADisplayAttribute *attr_list,	/* out */
-                            int *num_attributes)		/* out */
+                            VADisplayAttribute *attr_list,    /* out */
+                            int *num_attributes)              /* out */
 {
     if (num_attributes)
         *num_attributes = 0;
@@ -1401,7 +1401,7 @@ i965_QueryDisplayAttributes(VADriverContextP ctx,
  */
 VAStatus 
 i965_GetDisplayAttributes(VADriverContextP ctx,
-                          VADisplayAttribute *attr_list,	/* in/out */
+                          VADisplayAttribute *attr_list,    /* in/out */
                           int num_attributes)
 {
     /* TODO */
@@ -1779,7 +1779,7 @@ i965_DestroyImage(VADriverContextP ctx, VAImageID image)
     }
 
     i965_destroy_image(&i965->image_heap, (struct object_base *)obj_image);
-	
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -2087,8 +2087,8 @@ i965_PutSurface(VADriverContextP ctx,
                              destx, desty, destw, desth,
                              pp_flag);
 
-    if(obj_surface->subpic != VA_INVALID_ID) {	
-	intel_render_put_subpicture(ctx, surface,
+    if(obj_surface->subpic != VA_INVALID_ID) {
+        intel_render_put_subpicture(ctx, surface,
                                     srcx, srcy, srcw, srch,
                                     destx, desty, destw, desth);
     } 
@@ -2117,16 +2117,16 @@ i965_Terminate(VADriverContextP ctx)
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_render_terminate(ctx) == False)
-	return VA_STATUS_ERROR_UNKNOWN;
+        return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_post_processing_terminate(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
 
     if (i965_media_terminate(ctx) == False)
-	return VA_STATUS_ERROR_UNKNOWN;
+        return VA_STATUS_ERROR_UNKNOWN;
 
     if (intel_driver_terminate(ctx) == False)
-	return VA_STATUS_ERROR_UNKNOWN;
+        return VA_STATUS_ERROR_UNKNOWN;
 
     i965_destroy_heap(&i965->buffer_heap, i965_destroy_buffer);
     i965_destroy_heap(&i965->image_heap, i965_destroy_image);
@@ -2139,6 +2139,158 @@ i965_Terminate(VADriverContextP ctx)
     ctx->pDriverData = NULL;
 
     return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+i965_BufferInfo(
+    VADriverContextP ctx,       /* in */
+    VABufferID buf_id,          /* in */
+    VABufferType *type,         /* out */
+    unsigned int *size,         /* out */
+    unsigned int *num_elements  /* out */
+)
+{
+    struct i965_driver_data *i965 = NULL;
+    struct object_buffer *obj_buffer = NULL;
+
+    i965 = i965_driver_data(ctx);
+    obj_buffer = BUFFER(buf_id);
+
+    *type = obj_buffer->type;
+    *size = obj_buffer->size_element;
+    *num_elements = obj_buffer->num_elements;
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+i965_LockSurface(
+    VADriverContextP ctx,           /* in */
+    VASurfaceID surface,            /* in */
+    unsigned int *fourcc,           /* out */
+    unsigned int *luma_stride,      /* out */
+    unsigned int *chroma_u_stride,  /* out */
+    unsigned int *chroma_v_stride,  /* out */
+    unsigned int *luma_offset,      /* out */
+    unsigned int *chroma_u_offset,  /* out */
+    unsigned int *chroma_v_offset,  /* out */
+    unsigned int *buffer_name,      /* out */
+    void **buffer                   /* out */
+)
+{
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_surface *obj_surface = NULL;
+    VAImage tmpImage;
+
+    assert(fourcc);
+    assert(luma_stride);
+    assert(chroma_u_stride);
+    assert(chroma_v_stride);
+    assert(luma_offset);
+    assert(chroma_u_offset);
+    assert(chroma_v_offset);
+    assert(buffer_name);
+    assert(buffer);
+
+    tmpImage.image_id = VA_INVALID_ID;
+
+    obj_surface = SURFACE(surface);
+    if (obj_surface == NULL) {
+        // Surface is absent.
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        goto error;
+    }
+
+    // Lock functionality is absent now.
+    if (obj_surface->locked_image_id != VA_INVALID_ID) {
+        // Surface is locked already.
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        goto error;
+    }
+
+    vaStatus = i965_DeriveImage(
+        ctx,
+        surface,
+        &tmpImage);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        goto error;
+    }
+
+    obj_surface->locked_image_id = tmpImage.image_id;
+
+    vaStatus = i965_MapBuffer(
+        ctx,
+        tmpImage.buf,
+        buffer);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        goto error;
+    }
+
+    *fourcc = tmpImage.format.fourcc;
+    *luma_offset = tmpImage.offsets[0];
+    *luma_stride = tmpImage.pitches[0];
+    *chroma_u_offset = tmpImage.offsets[1];
+    *chroma_u_stride = tmpImage.pitches[1];
+    *chroma_v_offset = tmpImage.offsets[2];
+    *chroma_v_stride = tmpImage.pitches[2];
+    *buffer_name = tmpImage.buf;
+
+error:
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        buffer = NULL;
+    }
+
+    return vaStatus;
+}
+
+static VAStatus
+i965_UnlockSurface(
+    VADriverContextP ctx,   /* in */
+    VASurfaceID surface     /* in */
+)
+{
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct object_image *locked_img = NULL;
+    struct object_surface *obj_surface = NULL;
+
+    obj_surface = SURFACE(surface);
+
+    if (obj_surface == NULL) {
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;   // Surface is absent
+        goto error;
+    }
+    if (obj_surface->locked_image_id == VA_INVALID_ID) {
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;   // Surface is not locked
+        goto error;
+    }
+
+    locked_img = IMAGE(obj_surface->locked_image_id);
+    if (locked_img == NULL || (locked_img->image.image_id == VA_INVALID_ID)) {
+        // Work image was deallocated before i965_UnlockSurface()
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        goto error;
+    }
+
+    vaStatus = i965_UnmapBuffer(
+        ctx,
+        locked_img->image.buf);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        goto error;
+    }
+
+    vaStatus = i965_DestroyImage(
+        ctx,
+        locked_img->image.image_id);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        goto error;
+    }
+
+    locked_img->image.image_id = VA_INVALID_ID;
+
+ error:
+    return vaStatus;
 }
 
 VAStatus 
@@ -2199,6 +2351,9 @@ VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
     vtable->vaQueryDisplayAttributes = i965_QueryDisplayAttributes;
     vtable->vaGetDisplayAttributes = i965_GetDisplayAttributes;
     vtable->vaSetDisplayAttributes = i965_SetDisplayAttributes;
+    vtable->vaBufferInfo = i965_BufferInfo;
+    vtable->vaLockSurface = i965_LockSurface;
+    vtable->vaUnlockSurface = i965_UnlockSurface;
     //    vtable->vaDbgCopySurfaceToBuffer = i965_DbgCopySurfaceToBuffer;
 
     i965 = (struct i965_driver_data *)calloc(1, sizeof(*i965));
@@ -2229,7 +2384,7 @@ VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
                               sizeof(struct object_image), 
                               IMAGE_ID_OFFSET);
     assert(result == 0);
-	
+
     result = object_heap_init(&i965->subpic_heap, 
                               sizeof(struct object_subpic), 
                               SUBPIC_ID_OFFSET);
