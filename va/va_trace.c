@@ -343,14 +343,16 @@ void va_TraceSurface(VADisplay dpy)
         truncate_file(trace_context[idx].trace_fp_surface);
     }
 
-    va_status = vaLockSurface(dpy, trace_context[idx].trace_rendertarget, &fourcc,
-                              &luma_stride, &chroma_u_stride, &chroma_v_stride,
-                              &luma_offset, &chroma_u_offset, &chroma_v_offset,
-                              &buffer_name, &buffer);
+    va_status = vaLockSurface(
+        dpy,
+        trace_context[idx].trace_rendertarget,
+        &fourcc,
+        &luma_stride, &chroma_u_stride, &chroma_v_stride,
+        &luma_offset, &chroma_u_offset, &chroma_v_offset,
+        &buffer_name, &buffer);
 
     if (va_status != VA_STATUS_SUCCESS) {
         va_TraceMsg(idx, "Error:vaLockSurface failed\n");
-        
         return;
     }
 
@@ -364,7 +366,7 @@ void va_TraceSurface(VADisplay dpy)
     va_TraceMsg(idx, "\tchroma_u_offset = %d\n", chroma_u_offset);
     va_TraceMsg(idx, "\tchroma_v_offset = %d\n", chroma_v_offset);
 
-    if (*(unsigned int *)buffer == 0) {
+    if (buffer == NULL) {
         va_TraceMsg(idx, "Error:vaLockSurface return NULL buffer\n");
         
         vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
@@ -372,8 +374,8 @@ void va_TraceSurface(VADisplay dpy)
     }
     va_TraceMsg(idx, "\tbuffer location = 0x%08x\n", buffer);
 
-    Y_data = buffer;
-    UV_data = buffer + chroma_u_offset;
+    Y_data = (unsigned char*)buffer;
+    UV_data = (unsigned char*)buffer + chroma_u_offset;
 
     tmp = Y_data;
     for (i=0; i<trace_context[idx].trace_frame_height; i++) {
