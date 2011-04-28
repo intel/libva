@@ -347,11 +347,10 @@ struct VADriverVTable
 
         /* used by va trace */        
         VAStatus (*vaBufferInfo) (
-                   VADriverContextP ctx,
-                   VAContextID context, /* in */
-                   VABufferID buf_id, /* in */
-                   VABufferType *type,    /* out */
-                   unsigned int *size,    /* out */
+                   VADriverContextP ctx,      /* in */
+                   VABufferID buf_id,         /* in */
+                   VABufferType *type,        /* out */
+                   unsigned int *size,        /* out */
                    unsigned int *num_elements /* out */
         );
 
