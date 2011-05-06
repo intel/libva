@@ -34,18 +34,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <X11/Xlib.h>
-
 #include <unistd.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <assert.h>
-
 #include <va/va.h>
+#ifdef ANDROID
+#include <va/va_android.h>
+#else
 #include <va/va_x11.h>
+#endif
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -54,31 +53,27 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
 }
 
 #include "loadsurface.h"
-
 #define SURFACE_NUM 18 /* 16 surfaces for src, 2 surface for reconstructed/reference */
-
-static  Display *x11_display;
+#define CODEDBUF_NUM 5
 static  VADisplay va_dpy;
-static  VAContextID context_id;
 static  VASurfaceID surface_id[SURFACE_NUM];
-static  Window display_win = 0;
-static  int win_width;
-static  int win_height;
-
+static  VABufferID coded_buf[CODEDBUF_NUM];
+static  VAContextID context_id;
+static  Display *x11_display;
 static  int coded_fd;
 static  char coded_file[256];
-
-#define CODEDBUF_NUM 5
-static  VABufferID coded_buf[CODEDBUF_NUM];
-
+static  int frame_width,  frame_height;
+static  int win_width;
+static  int win_height;
 static  int frame_display = 0; /* display the frame during encoding */
-static  int frame_width=352, frame_height=288;
 static  int frame_rate = 30;
 static  int frame_count = 400;
 static  int intra_count = 30;
 static  int frame_bitrate = 8000000; /* 8M */
 static  int initial_qp = 15;
 static  int minimal_qp = 0;
+
+static int display_surface(int frame_id, int *exit_encode);
 
 static int upload_source_YUV_once_for_all()
 {
@@ -96,7 +91,7 @@ static int upload_source_YUV_once_for_all()
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
     }
-    printf("\n", i);
+    printf("\n");
 
     return 0;
 }
@@ -114,7 +109,7 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
     while (buf_list != NULL) {
         printf("Write %d bytes", buf_list->size);
         coded_size += write(coded_fd, buf_list->buf, buf_list->size);
-        buf_list = buf_list->next;
+        buf_list = (VACodedBufferSegment *) buf_list->next;
     }
     vaUnmapBuffer(va_dpy,coded_buf);
 
@@ -144,52 +139,9 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
         printf("(SKipped)");
     printf("                                    ");
 
-    return;
+    return 0;
 }
 
-
-static int display_surface(int frame_id, int *exit_encode)
-{
-    Window win = display_win;
-    XEvent event;
-    VAStatus va_status;
-    
-    if (win == 0) { /* display reconstructed surface */
-        win_width = frame_width;
-        win_height = frame_height;
-        
-        win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
-                                  frame_width, frame_height, 0, 0, WhitePixel(x11_display, 0));
-        XMapWindow(x11_display, win);
-        XSync(x11_display, False);
-
-        display_win = win;
-    }
-
-    va_status = vaPutSurface(va_dpy, surface_id[frame_id], win,
-                             0,0, frame_width, frame_height,
-                             0,0, win_width, win_height,
-                             NULL,0,0);
-
-    *exit_encode = 0;
-    while(XPending(x11_display)) {
-        XNextEvent(x11_display, &event);
-            
-        /* bail on any focused key press */
-        if(event.type == KeyPress) {  
-            *exit_encode = 1;
-            break;
-        }
-            
-        /* rescale the video to fit the window */
-        if(event.type == ConfigureNotify) { 
-            win_width = event.xconfigure.width;
-            win_height = event.xconfigure.height;
-        }	
-    }	
-
-    return;
-}
 
 enum {
     SH_LEVEL_1=10,
@@ -302,7 +254,7 @@ static int do_h264_encoding(void)
         va_status = vaSyncSurface(va_dpy, surface_id[src_surface]);
         CHECK_VASTATUS(va_status,"vaSyncSurface");
 
-        surface_status = 0;
+        surface_status = (VASurfaceStatus) 0;
         va_status = vaQuerySurfaceStatus(va_dpy, surface_id[src_surface],&surface_status);
         frame_skipped = (surface_status & VASurfaceSkipped);
 
@@ -398,9 +350,14 @@ int main(int argc,char **argv)
         }
     }
     
+#ifdef ANDROID
+    x11_display = (Display*)malloc(sizeof(Display));
+    *(x11_display) = 0x18c34078;
+#else
     x11_display = XOpenDisplay(":0.0");
+#endif
     assert(x11_display);
-    
+
     va_dpy = vaGetDisplay(x11_display);
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
@@ -466,7 +423,11 @@ int main(int argc,char **argv)
     
     vaTerminate(va_dpy);
     
+#ifdef ANDROID
+    free(x11_display);
+#else
     XCloseDisplay(x11_display);
+#endif
     
     return 0;
 }

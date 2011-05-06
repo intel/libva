@@ -407,25 +407,21 @@ void va_TraceSurface(VADisplay dpy)
 }
 
 
-VAStatus va_TraceInitialize (
+void va_TraceInitialize (
     VADisplay dpy,
     int *major_version,	 /* out */
     int *minor_version 	 /* out */
 )
 {
-    int i;
-    DPY2INDEX(dpy);
-
+    DPY2INDEX(dpy);    
     TRACE_FUNCNAME(idx);
 }
 
-VAStatus va_TraceTerminate (
+void va_TraceTerminate (
     VADisplay dpy
 )
 {
-    int i;
-    DPY2INDEX(dpy);
-
+    DPY2INDEX(dpy);    
     TRACE_FUNCNAME(idx);
 }
 
@@ -1841,12 +1837,12 @@ void va_TracePutSurface (
     
     va_TraceMsg(idx, "\tsurface = 0x%08x\n", surface);
     va_TraceMsg(idx, "\tdraw = 0x%08x\n", draw);
-    va_TraceMsg(idx, "\tsrcx = %d\n", surface);
-    va_TraceMsg(idx, "\tsrcy = %d\n", surface);
-    va_TraceMsg(idx, "\tsrcw = %d\n", surface);
-    va_TraceMsg(idx, "\tsrch = %d\n", surface);
-    va_TraceMsg(idx, "\tdestx = %d\n", surface);
-    va_TraceMsg(idx, "\tdesty = %d\n", surface);
+    va_TraceMsg(idx, "\tsrcx = %d\n", srcx);
+    va_TraceMsg(idx, "\tsrcy = %d\n", srcy);
+    va_TraceMsg(idx, "\tsrcw = %d\n", srcw);
+    va_TraceMsg(idx, "\tsrch = %d\n", srch);
+    va_TraceMsg(idx, "\tdestx = %d\n", destx);
+    va_TraceMsg(idx, "\tdesty = %d\n", desty);
     va_TraceMsg(idx, "\tdestw = %d\n", destw);
     va_TraceMsg(idx, "\tdesth = %d\n", desth);
     va_TraceMsg(idx, "\tcliprects = 0x%08x\n", cliprects);

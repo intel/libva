@@ -37,18 +37,36 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <X11/Xlib.h>
-
 #include <unistd.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
 #include <assert.h>
-
 #include <va/va.h>
+
+#ifdef ANDROID
+#include <va/va_android.h>
+#include <binder/IPCThreadState.h>
+#include <binder/ProcessState.h>
+#include <binder/IServiceManager.h>
+#include <utils/Log.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/Surface.h>
+#include <surfaceflinger/ISurface.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
+#include <binder/MemoryHeapBase.h>
+#define Display unsigned int
+
+using namespace android;
+sp<SurfaceComposerClient> client;
+sp<Surface> android_surface;
+sp<ISurface> android_isurface;
+sp<SurfaceControl> surface_ctrl;
+#include "../android_winsys.cpp"
+#else
 #include <va/va_x11.h>
+#include <X11/Xlib.h>
+#endif
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -122,15 +140,18 @@ static VAIQMatrixBufferMPEG2 iq_matrix = {
   chroma_non_intra_quantiser_matrix:{0}
 };
 
+#if 1
 static VASliceParameterBufferMPEG2 slice_param={
   slice_data_size:150,
   slice_data_offset:0,
   slice_data_flag:0,
-  macroblock_offset:38,/* 4byte + 6bits=38bits */
+  macroblock_offset:38, /* 4byte + 6bits=38bits */
+  slice_horizontal_position:0,
   slice_vertical_position:0,
   quantiser_scale_code:2,
   intra_slice_flag:0
 };
+#endif
 
 #define CLIP_WIDTH  16
 #define CLIP_HEIGHT 16
@@ -155,8 +176,12 @@ int main(int argc,char **argv)
 
     if (argc > 1)
         putsurface=1;
- 
+#ifdef ANDROID 
+    x11_display = (Display*)malloc(sizeof(Display));
+    *(x11_display ) = 0x18c34078;
+#else
     x11_display = XOpenDisplay(":0.0");
+#endif
 
     if (x11_display == NULL) {
       fprintf(stderr, "Can't connect X server!\n");
@@ -222,7 +247,7 @@ int main(int argc,char **argv)
                               1, &iq_matrix,
                               &iqmatrix_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
-                
+
     va_status = vaCreateBuffer(va_dpy, context_id,
                               VASliceParameterBufferType,
                               sizeof(VASliceParameterBufferMPEG2),
@@ -258,20 +283,32 @@ int main(int argc,char **argv)
 
     va_status = vaSyncSurface(va_dpy, surface_id);
     CHECK_VASTATUS(va_status, "vaSyncSurface");
-    
+
     if (putsurface) {
+#ifdef ANDROID 
+        sp<ProcessState> proc(ProcessState::self());
+        ProcessState::self()->startThreadPool();
+
+        printf("Create window0 for thread0\n");
+        SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, WIN_WIDTH, WIN_HEIGHT);
+
+        va_status = vaPutSurface(va_dpy, surface_id, android_isurface,
+                0,0,CLIP_WIDTH,CLIP_HEIGHT,
+                0,0,WIN_WIDTH,WIN_HEIGHT,
+                NULL,0,0);
+#else
         Window  win;
         win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
-                              WIN_WIDTH,WIN_HEIGHT, 0, 0, WhitePixel(x11_display, 0));
+                WIN_WIDTH,WIN_HEIGHT, 0, 0, WhitePixel(x11_display, 0));
         XMapWindow(x11_display, win);
         XSync(x11_display, False);
         va_status = vaPutSurface(va_dpy, surface_id, win,
                                 0,0,CLIP_WIDTH,CLIP_HEIGHT,
                                 0,0,WIN_WIDTH,WIN_HEIGHT,
                                 NULL,0,0);
-        CHECK_VASTATUS(va_status, "vaPutSurface");
+#endif
+       CHECK_VASTATUS(va_status, "vaPutSurface");
     }
-
     printf("press any key to exit\n");
     getchar();
 
@@ -280,7 +317,11 @@ int main(int argc,char **argv)
     vaDestroyContext(va_dpy,context_id);
 
     vaTerminate(va_dpy);
+#ifdef ANDROID
+    free(x11_display);
+#else
     XCloseDisplay(x11_display);
+#endif
     
     return 0;
 }
