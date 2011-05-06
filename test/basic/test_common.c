@@ -22,8 +22,12 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <va/va.h>
+#ifdef ANDROID
+#include <va/va_android.h>
+#else
 #include <va/va_x11.h>
-
+#endif
 #include "assert.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -33,6 +37,13 @@
 #include <dlfcn.h>
 
 #define ASSERT	assert
+
+void status(const char *msg, ...);
+#ifdef ANDROID
+#include "test_android.c"
+#else
+#include "test_x11.c"
+#endif
 
 Display *dpy;
 VADisplay va_dpy;
@@ -72,37 +83,6 @@ int main(int argc, const char* argv[])
   post();
   printf("*** %s: Finished\n", name);
   return 0;
-}
-
-void test_init()
-{
-  dpy = XOpenDisplay(NULL);
-  ASSERT( dpy );
-  status("XOpenDisplay: dpy = %08x\n", dpy);
-  
-  va_dpy = vaGetDisplay(dpy);
-  ASSERT( va_dpy );  
-  status("vaGetDisplay: va_dpy = %08x\n", va_dpy);
-  
-  va_status = vaInitialize(va_dpy, &major_version, &minor_version);
-  ASSERT( VA_STATUS_SUCCESS == va_status );
-  status("vaInitialize: major = %d minor = %d\n", major_version, minor_version);
-}
-
-void test_terminate()
-{
-  va_status = vaTerminate(va_dpy);
-  ASSERT( VA_STATUS_SUCCESS == va_status );
-  status("vaTerminate\n");
-
-  XCloseDisplay(dpy);
-  status("XCloseDisplay\n");
-
-  if (profiles)
-  {
-      free(profiles);
-      profiles = NULL;
-  }
 }
 
 #define PROFILE(profile)	case VAProfile##profile:	return("VAProfile" #profile);

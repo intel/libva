@@ -27,7 +27,7 @@ AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/src/x11
 TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) -lpthread
 
 putsurface_LDADD = $(TEST_LIBS)
-putsurface_SOURCES = putsurface.c
+putsurface_SOURCES = putsurface_x11.c
 
 EXTRA_DIST = loadsurface.h
 

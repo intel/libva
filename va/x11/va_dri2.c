@@ -340,9 +340,9 @@ void VA_DRI2SwapBuffers(Display *dpy, XID drawable, CARD64 target_msc,
     req->drawable = drawable;
     load_swap_req(req, target_msc, divisor, remainder);
 
-    _XReply(dpy, (xReply *)&rep, 0, xFalse);
+    _XSend(dpy, NULL, 0);
 
-    *count = vals_to_card64(rep.swap_lo, rep.swap_hi);
+    *count = 0;
 
     UnlockDisplay(dpy);
     SyncHandle();

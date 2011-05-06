@@ -38,21 +38,12 @@
 #include <fcntl.h>
 
 #include <va/va.h>
+#ifdef ANDROID
 #include <va/va_android.h>
-#include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <utils/Log.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <binder/MemoryHeapBase.h>
-#define Display unsigned int
-
-
+#else
+#include <va/va_x11.h>
+#endif
 #include <assert.h>
-
 #include <pthread.h>
 
 /*currently, if XCheckWindowEvent was called  in more than one thread, it would cause
@@ -71,104 +62,27 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
     exit(1);                                                            \
 }
-
 #include "loadsurface.h"
-
 
 #define SURFACE_NUM 5
 static  VASurfaceID surface_id[SURFACE_NUM];
 static  int surface_width = 352, surface_height = 288;
 static  int win_width=352, win_height=288;
-static  int win_thread0 = 0, win_thread1 = 0;
 static  Display *x11_display;
 static  VADisplay va_dpy;
-static  int multi_thread = 0;
+static  int check_event = 1;
+static  int put_pixmap = 0;
 static  int test_clip = 0;
 static  int display_field = VA_FRAME_PICTURE;
 static  int verbose = 0;
 static  pthread_mutex_t surface_mutex[SURFACE_NUM];
-
-//static pthread_mutex_t gmutex;
-
+static pthread_mutex_t gmutex;
 static  int box_width = 32;
 
-
-using namespace android;
-
-sp<SurfaceComposerClient> client;
-sp<Surface> android_surface;
-sp<ISurface> android_isurface;
-sp<SurfaceControl> surface_ctrl;
-
-sp<SurfaceComposerClient> client1;
-sp<Surface> android_surface1;
-sp<ISurface> android_isurface1;
-sp<SurfaceControl> surface_ctrl1;
-
-namespace android {
-class Test {
-public:
-    static const sp<ISurface>& getISurface(const sp<Surface>& s) {
-        return s->getISurface();
-    }
-};
-};
-
-
-
-
-
-static int create_window(int width, int height)
-{
-    sp<ProcessState> proc(ProcessState::self());
-    ProcessState::self()->startThreadPool();
-
-    printf("Create window0 for thread0\n");
-    client = new SurfaceComposerClient();
-    surface_ctrl = client->createSurface(getpid(), 0, width, height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);
-    android_surface = surface_ctrl->getSurface();
-    android_isurface = Test::getISurface(android_surface);
-
-    client->openTransaction();
-    surface_ctrl->setPosition(0, 0);
-    client->closeTransaction();
-
-    client->openTransaction();
-    surface_ctrl->setSize(width, height);
-    client->closeTransaction();
-
-    client->openTransaction();
-    surface_ctrl->setLayer(0x100000);
-    client->closeTransaction();
-
-    win_thread0 = 1;
-    if (multi_thread == 0)
-        return 0;
-
-    printf("Create window1 for thread1\n");
-    client1 = new SurfaceComposerClient();
-    surface_ctrl1 = client1->createSurface(getpid(), 0, width, height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);
-    android_surface1 = surface_ctrl1->getSurface();
-    android_isurface1 = Test::getISurface(android_surface1);
-
-    client1->openTransaction();
-    surface_ctrl1->setPosition(width, 0);
-    client1->closeTransaction();
-
-    client1->openTransaction();
-    surface_ctrl1->setSize(width, height);
-    client1->closeTransaction();
-
-    client1->openTransaction();
-    surface_ctrl1->setLayer(0x100000);
-    client1->closeTransaction();
-
-    win_thread1 = 2;
-    return 0;
-
-}
-
-
+#ifndef ANDROID
+static Pixmap create_pixmap(int width, int height);
+#endif
+static int create_window(int width, int height);
 
 static VASurfaceID get_next_free_surface(int *index)
 {
@@ -210,13 +124,23 @@ static unsigned long get_tick_count(void)
 static void* putsurface_thread(void *data)
 {
     int width=win_width, height=win_height;
+#ifdef ANDROID
     int win = (int)data;
+#else 
+    Window win = (Window)data;
+    Pixmap pixmap = 0;
+    GC context = NULL;
+    Bool is_event; 
+    XEvent event;
+    Drawable draw;
+#endif
     int quit = 0;
     VAStatus vaStatus;
     int row_shift = 0;
     int index = 0;
     unsigned int frame_num=0, start_time, putsurface_time;
     VARectangle cliprects[2]; /* client supplied clip list */
+#ifdef ANDROID
     sp<ISurface> win_isurface;
     if (win == win_thread0) {
         printf("Enter into thread0\n\n");
@@ -227,6 +151,20 @@ static void* putsurface_thread(void *data)
         printf("Enter into thread1\n\n");
         win_isurface = android_isurface1;  
     }   
+#else
+    if (win == win_thread0) {
+        printf("Enter into thread0\n\n");
+        pixmap = pixmap_thread0;
+        context = context_thread0;
+    }
+    
+    if (win == win_thread1) {
+        printf("Enter into thread1\n\n");
+        pixmap = pixmap_thread1;
+        context = context_thread1;
+    }
+#endif
+ 
     printf("vaPutSurface into a Window directly\n\n");
 
     putsurface_time = 0;
@@ -242,12 +180,21 @@ static void* putsurface_thread(void *data)
 
         start_time = get_tick_count();
 
+#ifdef ANDROID
             vaStatus = vaPutSurface(va_dpy, surface_id, win_isurface,
                                     0,0,surface_width,surface_height,
                                     0,0,width,height,
                                     (test_clip==0)?NULL:&cliprects[0],
                                     (test_clip==0)?0:2,
                                     display_field);
+#else
+        vaStatus = vaPutSurface(va_dpy, surface_id, draw,
+                                0,0,surface_width,surface_height,
+                                0,0,width,height,
+                                (test_clip==0)?NULL:&cliprects[0],
+                                (test_clip==0)?0:2,
+                                display_field);
+#endif 
 
         CHECK_VASTATUS(vaStatus,"vaPutSurface");
 
@@ -274,10 +221,31 @@ static void* putsurface_thread(void *data)
                        cliprects[1].x, cliprects[1].y, cliprects[1].width, cliprects[1].height);
             }
         }
-        
-        
+
+
         pthread_mutex_unlock(&surface_mutex[index]);
-    
+#ifndef ANDROID
+        if (check_event) {
+            pthread_mutex_lock(&gmutex);
+            is_event = XCheckWindowEvent(x11_display, win, StructureNotifyMask|KeyPressMask,&event);
+            pthread_mutex_unlock(&gmutex);
+            if (is_event) {
+                /* bail on any focused key press */
+                if(event.type == KeyPress) {  
+                    quit = 1;
+                    break;
+                }
+#if 0
+                /* rescale the video to fit the window */
+                if(event.type == ConfigureNotify) { 
+                    width = event.xconfigure.width;
+                    height = event.xconfigure.height;
+                    printf("Scale window to %dx%d\n", width, height);
+                }	
+#endif
+            }
+        }
+#endif
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
 
@@ -326,6 +294,14 @@ int main(int argc,char **argv)
                 multi_thread = 1;
                 printf("Two threads to do vaPutSurface\n");
                 break;
+#ifndef ANDROID
+            case 'e':
+                check_event = 0;
+                break;
+            case 'p':
+                put_pixmap = 1;
+                break;
+#endif 
             case 'c':
                 test_clip = 1;
                 break;
@@ -346,8 +322,12 @@ int main(int argc,char **argv)
         }
     }
 
+#ifdef ANDROID
     x11_display = (Display*)malloc(sizeof(Display));
     *(x11_display) = 0x18c34078;
+#else
+    x11_display = XOpenDisplay(":0.0");
+#endif
 
     if (x11_display == NULL) {
         fprintf(stderr, "Can't connect X server!\n");
@@ -365,10 +345,10 @@ int main(int argc,char **argv)
     va_status = vaCreateSurfaces(va_dpy,surface_width, surface_height,
                                 VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-/*
+
     if (check_event)
         pthread_mutex_init(&gmutex, NULL);
-*/   
+   
     for(i = 0; i< SURFACE_NUM; i++)
         pthread_mutex_init(&surface_mutex[i], NULL);
     
