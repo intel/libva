@@ -55,8 +55,8 @@ static VADisplay va_dpy;
 static VAContextID context_id;
 static VAConfigID config_id;
 
-static int picture_width;
-static int picture_height;
+static int picture_width, picture_width_in_mbs;
+static int picture_height, picture_height_in_mbs;
 static int frame_size;
 static unsigned char *newImageBuffer = 0;
 static int codedbuf_size;
@@ -171,8 +171,9 @@ static void alloc_encode_resource()
         VAEncSequenceParameterBufferH264 seq_h264 = {0};
 
         seq_h264.level_idc = 30;
-        seq_h264.picture_width_in_mbs = picture_width / 16;
-        seq_h264.picture_height_in_mbs = picture_height / 16;
+        seq_h264.picture_width_in_mbs = picture_width_in_mbs;
+        seq_h264.picture_height_in_mbs = picture_height_in_mbs;
+
         seq_h264.bits_per_second = 384*1000;
         seq_h264.initial_qp = qp_value;
         seq_h264.min_qp = 3;
@@ -508,8 +509,8 @@ static void sps_rbsp(bitstream *bs)
     int frame_crop_bottom_offset = 0;
     int profile_idc = PROFILE_IDC_MAIN;
 
-    mb_width = (picture_width + 15) / 16;
-    mb_height = (picture_height + 15) / 16;
+    mb_width = picture_width_in_mbs;
+    mb_height = picture_height_in_mbs;
 
     if (mb_height * 16 - picture_height) {
         frame_cropping_flag = 1;
@@ -757,6 +758,8 @@ int main(int argc, char *argv[])
 
     picture_width = atoi(argv[1]);
     picture_height = atoi(argv[2]);
+    picture_width_in_mbs = (picture_width + 15) / 16;
+    picture_height_in_mbs = (picture_height + 15) / 16;
 
     if (argc == 6)
         qp_value = atoi(argv[5]);
