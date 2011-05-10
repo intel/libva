@@ -61,11 +61,10 @@ i965_avc_bsd_free_avc_bsd_surface(void **data)
 static void
 i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx, 
                                   struct object_surface *obj_surface,
-                                  VAPictureParameterBufferH264 *pic_param)
+                                  VAPictureParameterBufferH264 *pic_param,
+                                  struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_bsd_context *i965_avc_bsd_context = &i965_h264_context->i965_avc_bsd_context;
     struct i965_avc_bsd_surface *avc_bsd_surface = obj_surface->private_data;
 
@@ -112,11 +111,10 @@ i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_
 }
 
 static void
-i965_avc_bsd_img_state(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_bsd_img_state(VADriverContextP ctx,
+                       struct decode_state *decode_state,
+                       struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     int qm_present_flag;
     int img_struct;
     int mbaff_frame_flag;
@@ -248,11 +246,9 @@ i965_avc_bsd_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
 static void
 i965_avc_bsd_slice_state(VADriverContextP ctx, 
                          VAPictureParameterBufferH264 *pic_param, 
-                         VASliceParameterBufferH264 *slice_param)
+                         VASliceParameterBufferH264 *slice_param,
+                         struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     int present_flag, cmd_len, list, j;
     struct {
         unsigned char bottom_idc:1;
@@ -420,19 +416,16 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
 static void
 i965_avc_bsd_buf_base_state(VADriverContextP ctx,
                             VAPictureParameterBufferH264 *pic_param, 
-                            VASliceParameterBufferH264 *slice_param)
+                            VASliceParameterBufferH264 *slice_param,
+                            struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context;
     struct i965_avc_bsd_context *i965_avc_bsd_context;
     int i, j;
     VAPictureH264 *va_pic;
     struct object_surface *obj_surface;
     struct i965_avc_bsd_surface *avc_bsd_surface;
 
-    assert(media_state->private_context);
-    i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     i965_avc_bsd_context = &i965_h264_context->i965_avc_bsd_context;
 
     BEGIN_BCS_BATCH(ctx, 74);
@@ -509,7 +502,7 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
     assert(obj_surface);
     obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
     obj_surface->flags |= (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
-    i965_avc_bsd_init_avc_bsd_surface(ctx, obj_surface, pic_param);
+    i965_avc_bsd_init_avc_bsd_surface(ctx, obj_surface, pic_param, i965_h264_context);
     avc_bsd_surface = obj_surface->private_data;
 
     if (obj_surface->bo == NULL) {
@@ -601,7 +594,8 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                    struct decode_state *decode_state,
                    VAPictureParameterBufferH264 *pic_param,
                    VASliceParameterBufferH264 *slice_param,
-                   int slice_index)
+                   int slice_index,
+                   struct i965_h264_context *i965_h264_context)
 {
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
@@ -728,15 +722,13 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                         struct decode_state *decode_state,
                         VAPictureParameterBufferH264 *pic_param,
                         VASliceParameterBufferH264 *slice_param,
-                        int slice_index)
+                        int slice_index,
+                        struct i965_h264_context *i965_h264_context)
 {
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
     if (slice_param) {
-        struct i965_driver_data *i965 = i965_driver_data(ctx);
-        struct i965_media_state *media_state = &i965->media_state;
-        struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
         int encrypted, counter_value;
         int slice_hor_pos, slice_ver_pos;
         int num_ref_idx_l0, num_ref_idx_l1;
@@ -873,31 +865,32 @@ i965_avc_bsd_object(VADriverContextP ctx,
                     struct decode_state *decode_state,
                     VAPictureParameterBufferH264 *pic_param,
                     VASliceParameterBufferH264 *slice_param,
-                    int slice_index)
+                    int slice_index,
+                    struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
     if (IS_IRONLAKE(i965->intel.device_id))
-        ironlake_avc_bsd_object(ctx, decode_state, pic_param, slice_param, slice_index);
+        ironlake_avc_bsd_object(ctx, decode_state, pic_param, slice_param, slice_index, i965_h264_context);
     else
-        g4x_avc_bsd_object(ctx, decode_state, pic_param, slice_param, slice_index);
+        g4x_avc_bsd_object(ctx, decode_state, pic_param, slice_param, slice_index, i965_h264_context);
 }
 
 static void
 i965_avc_bsd_phantom_slice(VADriverContextP ctx, 
                            struct decode_state *decode_state,
-                           VAPictureParameterBufferH264 *pic_param)
+                           VAPictureParameterBufferH264 *pic_param,
+                           struct i965_h264_context *i965_h264_context)
 {
-    i965_avc_bsd_object(ctx, decode_state, pic_param, NULL, 0);
+    i965_avc_bsd_object(ctx, decode_state, pic_param, NULL, 0, i965_h264_context);
 }
 
 static void
 i965_avc_bsd_frame_store_index(VADriverContextP ctx,
-                               VAPictureParameterBufferH264 *pic_param)
+                               VAPictureParameterBufferH264 *pic_param,
+                               struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     int i, j;
 
     assert(ARRAY_ELEMS(i965_h264_context->fsid_list) == ARRAY_ELEMS(pic_param->ReferenceFrames));
@@ -1015,18 +1008,16 @@ i965_avc_bsd_frame_store_index(VADriverContextP ctx,
 }
 
 void 
-i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
     int i, j;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-    i965_avc_bsd_frame_store_index(ctx, pic_param);
+    i965_avc_bsd_frame_store_index(ctx, pic_param, i965_h264_context);
 
     i965_h264_context->enable_avc_ildb = 0;
     i965_h264_context->picture.i_flag = 1;
@@ -1055,7 +1046,7 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
 
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
 
-    i965_avc_bsd_img_state(ctx, decode_state);
+    i965_avc_bsd_img_state(ctx, decode_state, i965_h264_context);
     i965_avc_bsd_qm_state(ctx, decode_state);
 
     for (j = 0; j < decode_state->num_slice_params; j++) {
@@ -1078,25 +1069,24 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state)
                  slice_param->slice_type != SLICE_TYPE_SI))
                 i965_h264_context->picture.i_flag = 0;
 
-            i965_avc_bsd_slice_state(ctx, pic_param, slice_param);
-            i965_avc_bsd_buf_base_state(ctx, pic_param, slice_param);
-            i965_avc_bsd_object(ctx, decode_state, pic_param, slice_param, j);
+            i965_avc_bsd_slice_state(ctx, pic_param, slice_param, i965_h264_context);
+            i965_avc_bsd_buf_base_state(ctx, pic_param, slice_param, i965_h264_context);
+            i965_avc_bsd_object(ctx, decode_state, pic_param, slice_param, j, i965_h264_context);
             slice_param++;
         }
     }
 
-    i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param);
+    i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param, i965_h264_context);
     intel_batchbuffer_emit_mi_flush_bcs(ctx);
     intel_batchbuffer_end_atomic_bcs(ctx);
     intel_batchbuffer_flush_bcs(ctx);
 }
 
 void 
-i965_avc_bsd_decode_init(VADriverContextP ctx)
+i965_avc_bsd_decode_init(VADriverContextP ctx, void *h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
     struct i965_avc_bsd_context *i965_avc_bsd_context;
     dri_bo *bo;
 
@@ -1118,10 +1108,6 @@ i965_avc_bsd_decode_init(VADriverContextP ctx)
                       64);
     assert(bo);
     i965_avc_bsd_context->mpr_row_store.bo = bo;
-
-    if (!i965_avc_bsd_context->init) {
-        i965_avc_bsd_context->init = 1;
-    }
 }
 
 Bool 

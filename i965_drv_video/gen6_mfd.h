@@ -59,8 +59,12 @@ struct gen6_vc1_surface
 };
 
 #define MAX_MFX_REFERENCE_SURFACES        16
+struct hw_context;
+
 struct gen6_mfd_context
 {
+    struct hw_context base;
+
     struct {
         VASurfaceID surface_id;
         int frame_store_id;
@@ -102,11 +106,4 @@ struct gen6_mfd_context
     } bitplane_read_buffer;
 };
 
-struct decode_state;
-
-Bool gen6_mfd_init(VADriverContextP ctx);
-Bool gen6_mfd_terminate(VADriverContextP ctx);
-void gen6_mfd_decode_picture(VADriverContextP ctx, 
-                             VAProfile profile, 
-                             struct decode_state *decode_state);
 #endif /* _GEN6_MFD_H_ */

@@ -40,8 +40,6 @@ struct i965_avc_bsd_context
     struct {
         dri_bo *bo;
     } mpr_row_store;
-
-    int init;
 };
 
 struct i965_avc_bsd_surface
@@ -52,8 +50,8 @@ struct i965_avc_bsd_surface
     int dmv_bottom_flag;
 };
 
-void i965_avc_bsd_pipeline(VADriverContextP, struct decode_state *);
-void i965_avc_bsd_decode_init(VADriverContextP);
+void i965_avc_bsd_pipeline(VADriverContextP, struct decode_state *, void *h264_context);
+void i965_avc_bsd_decode_init(VADriverContextP, void *h264_context);
 Bool i965_avc_bsd_ternimate(struct i965_avc_bsd_context *);
 
 #endif /* __I965_AVC_BSD_H__ */

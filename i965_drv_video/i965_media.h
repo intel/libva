@@ -46,17 +46,10 @@
 
 struct decode_state;
 
-struct media_kernel 
+struct i965_media_context
 {
-    char *name;
-    int interface;
-    unsigned int (*bin)[4];
-    int size;
-    dri_bo *bo;
-};
+    struct hw_context base;
 
-struct i965_media_state 
-{
     struct {
         dri_bo *bo;
     } surface_state[MAX_MEDIA_SURFACES];
@@ -99,14 +92,9 @@ struct i965_media_state
     } urb;
 
     void *private_context;
-    void (*media_states_setup)(VADriverContextP ctx, struct decode_state *decode_state);
-    void (*media_objects)(VADriverContextP ctx, struct decode_state *decode_state);
+    void (*media_states_setup)(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context);
+    void (*media_objects)(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context);
     void (*free_private_context)(void **data);
 };
 
-Bool i965_media_init(VADriverContextP ctx);
-Bool i965_media_terminate(VADriverContextP ctx);
-void i965_media_decode_picture(VADriverContextP ctx, 
-                               VAProfile profile, 
-                               struct decode_state *decode_state);
 #endif /* _I965_MEDIA_H_ */

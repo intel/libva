@@ -26,8 +26,8 @@
  *
  */
 
-#ifndef _GEN6_MEDIA_H_
-#define _GEN6_MEDIA_H_
+#ifndef _GEN6_VME_H_
+#define _GEN6_VME_H_
 
 #include <xf86drm.h>
 #include <drm.h>
@@ -38,9 +38,10 @@
 #define MAX_INTERFACE_DESC_GEN6      32
 #define MAX_MEDIA_SURFACES_GEN6      34
 
-struct mfc_encode_state;
+struct encode_state;
+struct gen6_encoder_context;
 
-struct gen6_media_state 
+struct gen6_vme_context
 {
     struct {
         dri_bo *bo;
@@ -78,10 +79,11 @@ struct gen6_media_state
     } vme_output;
 };
 
-VAStatus gen6_vme_media_pipeline(VADriverContextP ctx,
-                                 VAContextID context,                              
-                                 struct mfc_encode_state *encode_state);
-Bool gen6_vme_init(VADriverContextP ctx);
-Bool gen6_vme_terminate(VADriverContextP ctx);
+VAStatus gen6_vme_pipeline(VADriverContextP ctx,
+                           VAProfile profile,
+                           struct encode_state *encode_state,
+                           struct gen6_encoder_context *gen6_encoder_context);
+Bool gen6_vme_context_init(VADriverContextP ctx, struct gen6_vme_context *vme_context);
+Bool gen6_vme_context_destroy(struct gen6_vme_context *vme_context);
 
-#endif /* _GEN6_MEDIA_H_ */
+#endif /* _GEN6_VME_H_ */

@@ -35,8 +35,9 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
-
 #include "i965_defines.h"
+#include "i965_structs.h"
+
 #include "i965_post_processing.h"
 #include "i965_render.h"
 #include "i965_drv_video.h"

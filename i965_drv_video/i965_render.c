@@ -41,10 +41,11 @@
 
 #include "intel_batchbuffer.h"
 #include "intel_driver.h"
-
 #include "i965_defines.h"
-#include "i965_render.h"
 #include "i965_drv_video.h"
+#include "i965_structs.h"
+
+#include "i965_render.h"
 
 #define SF_KERNEL_NUM_GRF       16
 #define SF_MAX_THREADS          1

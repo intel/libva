@@ -88,8 +88,8 @@ struct i965_avc_ildb_context
     int mbs_per_picture;
 };
 
-void i965_avc_ildb(VADriverContextP, struct decode_state *);
-void i965_avc_ildb_decode_init(VADriverContextP);
+void i965_avc_ildb(VADriverContextP, struct decode_state *, void *h264_context);
+void i965_avc_ildb_decode_init(VADriverContextP, void *h264_context);
 Bool i965_avc_ildb_ternimate(struct i965_avc_ildb_context *);
 
 #endif /* __I965_AVC_ILDB_H__ */

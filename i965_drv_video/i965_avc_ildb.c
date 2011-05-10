@@ -129,11 +129,11 @@ extern struct media_kernel *h264_avc_kernels;
 static unsigned long *avc_ildb_kernel_offset = NULL;
 
 static void
-i965_avc_ildb_surface_state(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_ildb_surface_state(VADriverContextP ctx,
+                            struct decode_state *decode_state,
+                            struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
     struct i965_surface_state *ss;
     struct object_surface *obj_surface;
@@ -237,11 +237,8 @@ i965_avc_ildb_surface_state(VADriverContextP ctx, struct decode_state *decode_st
 }
 
 static void
-i965_avc_ildb_binding_table(VADriverContextP ctx)
+i965_avc_ildb_binding_table(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
     unsigned int *binding_table;
     dri_bo *bo = avc_ildb_context->binding_table.bo;
@@ -265,11 +262,8 @@ i965_avc_ildb_binding_table(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx)
+i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
     struct i965_interface_descriptor *desc;
     dri_bo *bo;
@@ -311,11 +305,8 @@ i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_vfe_state(VADriverContextP ctx)
+i965_avc_ildb_vfe_state(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
     struct i965_vfe_state *vfe_state;
     dri_bo *bo;
@@ -341,11 +332,11 @@ i965_avc_ildb_vfe_state(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_upload_constants(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_ildb_upload_constants(VADriverContextP ctx,
+                               struct decode_state *decode_state,
+                               struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
     VAPictureParameterBufferH264 *pic_param;
     struct avc_ildb_root_input *root_input;
@@ -395,13 +386,15 @@ i965_avc_ildb_upload_constants(VADriverContextP ctx, struct decode_state *decode
 }
 
 static void
-i965_avc_ildb_states_setup(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_ildb_states_setup(VADriverContextP ctx,
+                           struct decode_state *decode_state,
+                           struct i965_h264_context *i965_h264_context)
 {
-    i965_avc_ildb_surface_state(ctx, decode_state);
-    i965_avc_ildb_binding_table(ctx);
-    i965_avc_ildb_interface_descriptor_table(ctx);
-    i965_avc_ildb_vfe_state(ctx);
-    i965_avc_ildb_upload_constants(ctx, decode_state);
+    i965_avc_ildb_surface_state(ctx, decode_state, i965_h264_context);
+    i965_avc_ildb_binding_table(ctx, i965_h264_context);
+    i965_avc_ildb_interface_descriptor_table(ctx, i965_h264_context);
+    i965_avc_ildb_vfe_state(ctx, i965_h264_context);
+    i965_avc_ildb_upload_constants(ctx, decode_state, i965_h264_context);
 }
 
 static void
@@ -413,11 +406,9 @@ i965_avc_ildb_pipeline_select(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_urb_layout(VADriverContextP ctx)
+i965_avc_ildb_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
     unsigned int vfe_fence, cs_fence;
@@ -463,11 +454,8 @@ i965_avc_ildb_state_base_address(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_state_pointers(VADriverContextP ctx)
+i965_avc_ildb_state_pointers(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
     BEGIN_BATCH(ctx, 3);
@@ -478,11 +466,8 @@ i965_avc_ildb_state_pointers(VADriverContextP ctx)
 }
 
 static void 
-i965_avc_ildb_cs_urb_layout(VADriverContextP ctx)
+i965_avc_ildb_cs_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
     BEGIN_BATCH(ctx, 2);
@@ -494,11 +479,8 @@ i965_avc_ildb_cs_urb_layout(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_constant_buffer(VADriverContextP ctx)
+i965_avc_ildb_constant_buffer(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
     BEGIN_BATCH(ctx, 2);
@@ -510,11 +492,8 @@ i965_avc_ildb_constant_buffer(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_objects(VADriverContextP ctx)
+i965_avc_ildb_objects(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
 
     BEGIN_BATCH(ctx, 6);
@@ -547,37 +526,34 @@ i965_avc_ildb_objects(VADriverContextP ctx)
 }
 
 static void
-i965_avc_ildb_pipeline_setup(VADriverContextP ctx)
+i965_avc_ildb_pipeline_setup(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
     intel_batchbuffer_emit_mi_flush(ctx);
     i965_avc_ildb_pipeline_select(ctx);
     i965_avc_ildb_state_base_address(ctx);
-    i965_avc_ildb_state_pointers(ctx);
-    i965_avc_ildb_urb_layout(ctx);
-    i965_avc_ildb_cs_urb_layout(ctx);
-    i965_avc_ildb_constant_buffer(ctx);
-    i965_avc_ildb_objects(ctx);
+    i965_avc_ildb_state_pointers(ctx, i965_h264_context);
+    i965_avc_ildb_urb_layout(ctx, i965_h264_context);
+    i965_avc_ildb_cs_urb_layout(ctx, i965_h264_context);
+    i965_avc_ildb_constant_buffer(ctx, i965_h264_context);
+    i965_avc_ildb_objects(ctx, i965_h264_context);
 }
 
 void
-i965_avc_ildb(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_ildb(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
 
     if (i965_h264_context->enable_avc_ildb) {
-        i965_avc_ildb_states_setup(ctx, decode_state);
-        i965_avc_ildb_pipeline_setup(ctx);
+        i965_avc_ildb_states_setup(ctx, decode_state, i965_h264_context);
+        i965_avc_ildb_pipeline_setup(ctx, i965_h264_context);
     }
 }
 
 void
-i965_avc_ildb_decode_init(VADriverContextP ctx)
+i965_avc_ildb_decode_init(VADriverContextP ctx, void *h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;;
     dri_bo *bo;
     int i;

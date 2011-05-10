@@ -322,11 +322,9 @@ i965_avc_hw_scoreboard_pipeline_setup(VADriverContextP ctx, struct i965_avc_hw_s
 }
 
 void
-i965_avc_hw_scoreboard(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_hw_scoreboard(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
 
     if (i965_h264_context->use_avc_hw_scoreboard) {
         struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
@@ -352,11 +350,10 @@ i965_avc_hw_scoreboard(VADriverContextP ctx, struct decode_state *decode_state)
 }
 
 void
-i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx)
+i965_avc_hw_scoreboard_decode_init(VADriverContextP ctx, void *h264_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_state->private_context;
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
 
     if (i965_h264_context->use_avc_hw_scoreboard) {
         struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;

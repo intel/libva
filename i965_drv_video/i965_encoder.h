@@ -26,8 +26,8 @@
  *
  */
 
-#ifndef _GEN6_MFC_H_
-#define _GEN6_MFC_H_
+#ifndef _I965_ENCODER_H_
+#define _I965_ENCODER_H_
 
 #include <xf86drm.h>
 #include <drm.h>
@@ -36,40 +36,16 @@
 #include "i965_structs.h"
 #include "i965_drv_video.h"
 
+#include "gen6_vme.h"
+#include "gen6_mfc.h"
 
-VAStatus i965_encoder_create_context(
-    VADriverContextP ctx,
-    VAConfigID config_id,
-    int picture_width,
-    int picture_height,
-    int flag,
-    VASurfaceID *render_targets,
-    int num_render_targets,
-    struct object_context *obj_context
-    );
+struct gen6_encoder_context
+{
+    struct hw_context base;
+    struct gen6_vme_context vme_context;
+    struct gen6_mfc_context mfc_context;
+};
 
-VAStatus i965_encoder_begin_picture(
-    VADriverContextP ctx,
-    VAContextID context,
-    VASurfaceID render_target
-    );
-
-VAStatus i965_encoder_render_picture(VADriverContextP ctx,
-                                 VAContextID context,
-                                 VABufferID *buffers,
-                                 int num_buffers
-    );
-
-VAStatus i965_encoder_end_picture(VADriverContextP ctx, 
-                              VAContextID context
-    );
-
-
-void i965_encoder_destroy_context(struct object_heap *heap, struct object_base *obj);
-
-Bool i965_encoder_init(VADriverContextP ctx);
-Bool i965_encoder_terminate(VADriverContextP ctx);
-
-#endif	/* _GEN6_MFC_H_ */
+#endif	/* _I965_ENCODER_H_ */
 
 

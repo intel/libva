@@ -26,19 +26,20 @@
  *
  */
 
-#ifndef _GEN6_MFC_BCS_H_
-#define _GEN6_MFC_BCS_H_
+#ifndef _GEN6_MFC_H_
+#define _GEN6_MFC_H_
 
 #include <xf86drm.h>
 #include <drm.h>
 #include <i915_drm.h>
 #include <intel_bufmgr.h>
 
-struct mfc_encode_state;
+struct encode_state;
 
 #define MAX_MFC_REFERENCE_SURFACES        16
 #define NUM_MFC_DMV_BUFFERS				  34
-struct gen6_mfc_bcs_state 
+
+struct gen6_mfc_context
 {
     struct {
         unsigned int width;
@@ -94,8 +95,12 @@ struct gen6_mfc_bcs_state
     }direct_mv_buffers[NUM_MFC_DMV_BUFFERS];				//INTERNAL:	0-31 as input,32 and 33 as output
 };
 
-VAStatus gen6_mfc_pipeline(VADriverContextP ctx, 
-                           VAContextID context,                              
-                           struct mfc_encode_state *encode_state);
+VAStatus 
+gen6_mfc_pipeline(VADriverContextP ctx,
+                  VAProfile profile,
+                  struct encode_state *encode_state,
+                  struct gen6_encoder_context *gen6_encoder_context);
+Bool gen6_mfc_context_init(VADriverContextP ctx, struct gen6_mfc_context *mfc_context);
+Bool gen6_mfc_context_destroy(struct gen6_mfc_context *mfc_context);
 
 #endif	/* _GEN6_MFC_BCS_H_ */

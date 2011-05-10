@@ -77,8 +77,8 @@ struct i965_avc_hw_scoreboard_context
     } urb;
 };
 
-void i965_avc_hw_scoreboard(VADriverContextP, struct decode_state *);
-void i965_avc_hw_scoreboard_decode_init(VADriverContextP);
+void i965_avc_hw_scoreboard(VADriverContextP, struct decode_state *, void *h264_context);
+void i965_avc_hw_scoreboard_decode_init(VADriverContextP, void *h264_context);
 Bool i965_avc_hw_scoreboard_ternimate(struct i965_avc_hw_scoreboard_context *);
 
 #endif /* __I965_AVC_HW_SCOREBOARD_H__ */

@@ -55,11 +55,11 @@ static const uint32_t zigzag_direct[64] = {
 };
 
 static void
-gen6_mfd_avc_frame_store_index(VADriverContextP ctx, VAPictureParameterBufferH264 *pic_param)
+gen6_mfd_avc_frame_store_index(VADriverContextP ctx,
+                               VAPictureParameterBufferH264 *pic_param,
+                               struct gen6_mfd_context *gen6_mfd_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = (struct gen6_mfd_context *)media_state->private_context;
     int i, j;
 
     assert(ARRAY_ELEMS(gen6_mfd_context->reference_surface) == ARRAY_ELEMS(pic_param->ReferenceFrames));
@@ -239,12 +239,9 @@ gen6_mfd_init_avc_surface(VADriverContextP ctx,
 static void
 gen6_mfd_pipe_mode_select(VADriverContextP ctx,
                           struct decode_state *decode_state,
-                          int standard_select)
+                          int standard_select,
+                          struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
-
     assert(standard_select == MFX_FORMAT_MPEG2 ||
            standard_select == MFX_FORMAT_AVC ||
            standard_select == MFX_FORMAT_VC1);
@@ -308,11 +305,10 @@ gen6_mfd_surface_state(VADriverContextP ctx,
 static void
 gen6_mfd_pipe_buf_addr_state(VADriverContextP ctx,
                              struct decode_state *decode_state,
-                             int standard_select)
+                             int standard_select,
+                             struct gen6_mfd_context *gen6_mfd_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
     int i;
 
     BEGIN_BCS_BATCH(ctx, 24);
@@ -391,12 +387,9 @@ gen6_mfd_ind_obj_base_addr_state(VADriverContextP ctx,
 static void
 gen6_mfd_bsp_buf_base_addr_state(VADriverContextP ctx,
                                  struct decode_state *decode_state,
-                                 int standard_select)
+                                 int standard_select,
+                                 struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
-
     BEGIN_BCS_BATCH(ctx, 4);
     OUT_BCS_BATCH(ctx, MFX_BSP_BUF_BASE_ADDR_STATE | (4 - 2));
 
@@ -572,11 +565,10 @@ gen6_mfd_avc_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
 static void
 gen6_mfd_avc_directmode_state(VADriverContextP ctx,
                               VAPictureParameterBufferH264 *pic_param,
-                              VASliceParameterBufferH264 *slice_param)
+                              VASliceParameterBufferH264 *slice_param,
+                              struct gen6_mfd_context *gen6_mfd_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
     struct object_surface *obj_surface;
     struct gen6_avc_surface *gen6_avc_surface;
     VAPictureH264 *va_pic;
@@ -783,11 +775,9 @@ gen6_mfd_avc_phantom_slice_state(VADriverContextP ctx, VAPictureParameterBufferH
 static void
 gen6_mfd_avc_ref_idx_state(VADriverContextP ctx,
                            VAPictureParameterBufferH264 *pic_param,
-                           VASliceParameterBufferH264 *slice_param)
+                           VASliceParameterBufferH264 *slice_param,
+                           struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
     int i, j, num_ref_list;
     struct {
         unsigned char bottom_idc:1;
@@ -984,18 +974,18 @@ gen6_mfd_avc_phantom_slice(VADriverContextP ctx, VAPictureParameterBufferH264 *p
 }
 
 static void
-gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_avc_decode_init(VADriverContextP ctx,
+                         struct decode_state *decode_state,
+                         struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
     VAPictureH264 *va_pic;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context;
     struct object_surface *obj_surface;
     dri_bo *bo;
     int i, j, enable_avc_ildb = 0;
-    
+
     for (j = 0; j < decode_state->num_slice_params && enable_avc_ildb == 0; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
@@ -1020,19 +1010,7 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
-    gen6_mfd_context = media_state->private_context;
-
-    if (gen6_mfd_context == NULL) {
-        gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
-        media_state->private_context = gen6_mfd_context;
-
-        for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
-            gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;
-            gen6_mfd_context->reference_surface[i].frame_store_id = -1;
-        }
-    }
-
-    gen6_mfd_avc_frame_store_index(ctx, pic_param);
+    gen6_mfd_avc_frame_store_index(ctx, pic_param, gen6_mfd_context);
 
     /* Current decoded picture */
     va_pic = &pic_param->CurrPic;
@@ -1110,7 +1088,9 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx, struct decode_state *decode_state
 }
 
 static void
-gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_avc_decode_picture(VADriverContextP ctx,
+                            struct decode_state *decode_state,
+                            struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param, *next_slice_param;
@@ -1119,14 +1099,14 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferH264 *)decode_state->pic_param->buffer;
+    gen6_mfd_avc_decode_init(ctx, decode_state, gen6_mfd_context);
 
-    gen6_mfd_avc_decode_init(ctx, decode_state);
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush_bcs(ctx);
-    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_AVC);
+    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
     gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_AVC);
-    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_AVC);
-    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_AVC);
+    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
+    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
     gen6_mfd_avc_img_state(ctx, decode_state);
     gen6_mfd_avc_qm_state(ctx, decode_state);
 
@@ -1154,9 +1134,9 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
             if (i < decode_state->slice_params[j]->num_elements - 1)
                 next_slice_param = slice_param + 1;
 
-            gen6_mfd_avc_directmode_state(ctx, pic_param, slice_param);
+            gen6_mfd_avc_directmode_state(ctx, pic_param, slice_param, gen6_mfd_context);
             gen6_mfd_avc_slice_state(ctx, pic_param, slice_param, next_slice_param);
-            gen6_mfd_avc_ref_idx_state(ctx, pic_param, slice_param);
+            gen6_mfd_avc_ref_idx_state(ctx, pic_param, slice_param, gen6_mfd_context);
             gen6_mfd_avc_weightoffset_state(ctx, pic_param, slice_param);
             gen6_mfd_avc_bsd_object(ctx, pic_param, slice_param, slice_data_bo);
             slice_param++;
@@ -1169,29 +1149,18 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
 }
 
 static void
-gen6_mfd_mpeg2_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_mpeg2_decode_init(VADriverContextP ctx,
+                           struct decode_state *decode_state,
+                           struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferMPEG2 *pic_param;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context;
     struct object_surface *obj_surface;
     int i;
     dri_bo *bo;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
-    gen6_mfd_context = media_state->private_context;
-
-    if (gen6_mfd_context == NULL) {
-        gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
-        media_state->private_context = gen6_mfd_context;
-
-        for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
-            gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;
-            gen6_mfd_context->reference_surface[i].frame_store_id = -1;
-        }
-    }
 
     /* reference picture */
     obj_surface = SURFACE(pic_param->forward_reference_picture);
@@ -1363,7 +1332,9 @@ gen6_mfd_mpeg2_bsd_object(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
+                              struct decode_state *decode_state,
+                              struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferMPEG2 *pic_param;
     VASliceParameterBufferMPEG2 *slice_param, *next_slice_param;
@@ -1373,13 +1344,13 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx, struct decode_state *decode_
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
 
-    gen6_mfd_mpeg2_decode_init(ctx, decode_state);
+    gen6_mfd_mpeg2_decode_init(ctx, decode_state, gen6_mfd_context);
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush_bcs(ctx);
-    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
     gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_MPEG2);
-    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2);
-    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
+    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
     gen6_mfd_mpeg2_pic_state(ctx, decode_state);
     gen6_mfd_mpeg2_qm_state(ctx, decode_state);
 
@@ -1494,29 +1465,18 @@ gen6_mfd_init_vc1_surface(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_vc1_decode_init(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_vc1_decode_init(VADriverContextP ctx,
+                         struct decode_state *decode_state,
+                         struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferVC1 *pic_param;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context;
     struct object_surface *obj_surface;
     int i;
     dri_bo *bo;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
-    gen6_mfd_context = media_state->private_context;
-
-    if (gen6_mfd_context == NULL) {
-        gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
-        media_state->private_context = gen6_mfd_context;
-
-        for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
-            gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;
-            gen6_mfd_context->reference_surface[i].frame_store_id = -1;
-        }
-    }
 
     /* reference picture */
     obj_surface = SURFACE(pic_param->forward_reference_picture);
@@ -1605,8 +1565,7 @@ gen6_mfd_vc1_decode_init(VADriverContextP ctx, struct decode_state *decode_state
         int width_in_mbs = ALIGN(pic_param->coded_width, 16) / 16;
         int height_in_mbs = ALIGN(pic_param->coded_height, 16) / 16;
         int bitplane_width = ALIGN(width_in_mbs, 2) / 2;
-        int bitplane_height = height_in_mbs;
-        int src_w, src_h, dst_w, dst_h;
+        int src_w, src_h;
         uint8_t *src = NULL, *dst = NULL;
 
         assert(decode_state->bit_plane->buffer);
@@ -2010,7 +1969,9 @@ gen6_mfd_vc1_bsd_object(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_vc1_decode_picture(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
+                            struct decode_state *decode_state,
+                            struct gen6_mfd_context *gen6_mfd_context)
 {
     VAPictureParameterBufferVC1 *pic_param;
     VASliceParameterBufferVC1 *slice_param, *next_slice_param;
@@ -2020,13 +1981,13 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
 
-    gen6_mfd_vc1_decode_init(ctx, decode_state);
+    gen6_mfd_vc1_decode_init(ctx, decode_state, gen6_mfd_context);
     intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
     intel_batchbuffer_emit_mi_flush_bcs(ctx);
-    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_VC1);
+    gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
     gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_VC1);
-    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_VC1);
-    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_VC1);
+    gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
+    gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
     gen6_mfd_vc1_pic_state(ctx, decode_state);
     gen6_mfd_vc1_pred_pipe_state(ctx, decode_state);
     gen6_mfd_vc1_directmode_state(ctx, decode_state);
@@ -2055,27 +2016,34 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx, struct decode_state *decode_st
     intel_batchbuffer_flush_bcs(ctx);
 }
 
-void 
+static void 
 gen6_mfd_decode_picture(VADriverContextP ctx, 
                         VAProfile profile, 
-                        struct decode_state *decode_state)
+                        union codec_state *codec_state,
+                        struct hw_context *hw_context)
+
 {
+    struct gen6_mfd_context *gen6_mfd_context = (struct gen6_mfd_context *)hw_context;
+    struct decode_state *decode_state = &codec_state->dec;
+
+    assert(gen6_mfd_context);
+
     switch (profile) {
     case VAProfileMPEG2Simple:
     case VAProfileMPEG2Main:
-        gen6_mfd_mpeg2_decode_picture(ctx, decode_state);
+        gen6_mfd_mpeg2_decode_picture(ctx, decode_state, gen6_mfd_context);
         break;
         
     case VAProfileH264Baseline:
     case VAProfileH264Main:
     case VAProfileH264High:
-        gen6_mfd_avc_decode_picture(ctx, decode_state);
+        gen6_mfd_avc_decode_picture(ctx, decode_state, gen6_mfd_context);
         break;
 
     case VAProfileVC1Simple:
     case VAProfileVC1Main:
     case VAProfileVC1Advanced:
-        gen6_mfd_vc1_decode_picture(ctx, decode_state);
+        gen6_mfd_vc1_decode_picture(ctx, decode_state, gen6_mfd_context);
         break;
 
     default:
@@ -2084,45 +2052,48 @@ gen6_mfd_decode_picture(VADriverContextP ctx,
     }
 }
 
-Bool
-gen6_mfd_init(VADriverContextP ctx)
+static void
+gen6_mfd_context_destroy(void *hw_context)
 {
-    return True;
+    struct gen6_mfd_context *gen6_mfd_context = (struct gen6_mfd_context *)hw_context;
+
+    dri_bo_unreference(gen6_mfd_context->post_deblocking_output.bo);
+    gen6_mfd_context->post_deblocking_output.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->pre_deblocking_output.bo);
+    gen6_mfd_context->pre_deblocking_output.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->intra_row_store_scratch_buffer.bo);
+    gen6_mfd_context->intra_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
+    gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
+    gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->mpr_row_store_scratch_buffer.bo);
+    gen6_mfd_context->mpr_row_store_scratch_buffer.bo = NULL;
+
+    dri_bo_unreference(gen6_mfd_context->bitplane_read_buffer.bo);
+    gen6_mfd_context->bitplane_read_buffer.bo = NULL;
+
+    free(gen6_mfd_context);
 }
 
-Bool 
-gen6_mfd_terminate(VADriverContextP ctx)
+struct hw_context *
+gen6_dec_hw_context_init(VADriverContextP ctx, VAProfile profile)
 {
-    struct i965_driver_data *i965 = i965_driver_data(ctx);
-    struct i965_media_state *media_state = &i965->media_state;
-    struct gen6_mfd_context *gen6_mfd_context = media_state->private_context;
+    struct gen6_mfd_context *gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
+    int i;
 
-    if (gen6_mfd_context) {
-        dri_bo_unreference(gen6_mfd_context->post_deblocking_output.bo);
-        gen6_mfd_context->post_deblocking_output.bo = NULL;
+    gen6_mfd_context->base.destroy = gen6_mfd_context_destroy;
+    gen6_mfd_context->base.run = gen6_mfd_decode_picture;
 
-        dri_bo_unreference(gen6_mfd_context->pre_deblocking_output.bo);
-        gen6_mfd_context->pre_deblocking_output.bo = NULL;
-
-        dri_bo_unreference(gen6_mfd_context->intra_row_store_scratch_buffer.bo);
-        gen6_mfd_context->intra_row_store_scratch_buffer.bo = NULL;
-
-        dri_bo_unreference(gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo);
-        gen6_mfd_context->deblocking_filter_row_store_scratch_buffer.bo = NULL;
-
-        dri_bo_unreference(gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo);
-        gen6_mfd_context->bsd_mpc_row_store_scratch_buffer.bo = NULL;
-
-        dri_bo_unreference(gen6_mfd_context->mpr_row_store_scratch_buffer.bo);
-        gen6_mfd_context->mpr_row_store_scratch_buffer.bo = NULL;
-
-        dri_bo_unreference(gen6_mfd_context->bitplane_read_buffer.bo);
-        gen6_mfd_context->bitplane_read_buffer.bo = NULL;
-
-        free(gen6_mfd_context);
+    for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
+        gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;
+        gen6_mfd_context->reference_surface[i].frame_store_id = -1;
     }
-
-    media_state->private_context = NULL;
-    return True;
+    
+    return (struct hw_context *)gen6_mfd_context;
 }
-

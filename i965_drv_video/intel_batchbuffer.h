@@ -23,7 +23,7 @@ struct intel_batchbuffer
 
     int (*run)(drm_intel_bo *bo, int used,
                drm_clip_rect_t *cliprects, int num_cliprects,
-               int DR4, int ring_flag);
+               int DR4, unsigned int ring_flag);
 };
 
 Bool intel_batchbuffer_init(struct intel_driver_data *intel);
