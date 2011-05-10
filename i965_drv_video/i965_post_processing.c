@@ -224,212 +224,8 @@ static struct pp_module pp_modules_gen6[] = {
     },
 };
 
-struct pp_static_parameter
-{
-    struct {
-        /* Procamp r1.0 */
-        float procamp_constant_c0;
-        
-        /* Load and Same r1.1 */
-        unsigned int source_packed_y_offset:8;
-        unsigned int source_packed_u_offset:8;
-        unsigned int source_packed_v_offset:8;
-        unsigned int pad0:8;
-
-        union {
-            /* Load and Save r1.2 */
-            struct {
-                unsigned int destination_packed_y_offset:8;
-                unsigned int destination_packed_u_offset:8;
-                unsigned int destination_packed_v_offset:8;
-                unsigned int pad0:8;
-            } load_and_save;
-
-            /* CSC r1.2 */
-            struct {
-                unsigned int destination_rgb_format:8;
-                unsigned int pad0:24;
-            } csc;
-        } r1_2;
-        
-        /* Procamp r1.3 */
-        float procamp_constant_c1;
-
-        /* Procamp r1.4 */
-        float procamp_constant_c2;
-
-        /* DI r1.5 */
-        unsigned int statistics_surface_picth:16;  /* Devided by 2 */
-        unsigned int pad1:16;
-
-        union {
-            /* DI r1.6 */
-            struct {
-                unsigned int pad0:24;
-                unsigned int top_field_first:8;
-            } di;
-
-            /* AVS/Scaling r1.6 */
-            float normalized_video_y_scaling_step;
-        } r1_6;
-
-        /* Procamp r1.7 */
-        float procamp_constant_c5;
-    } grf1;
-    
-    struct {
-        /* Procamp r2.0 */
-        float procamp_constant_c3;
-
-        /* MBZ r2.1*/
-        unsigned int pad0;
-
-        /* WG+CSC r2.2 */
-        float wg_csc_constant_c4;
-
-        /* WG+CSC r2.3 */
-        float wg_csc_constant_c8;
-
-        /* Procamp r2.4 */
-        float procamp_constant_c4;
-
-        /* MBZ r2.5 */
-        unsigned int pad1;
-
-        /* MBZ r2.6 */
-        unsigned int pad2;
-
-        /* WG+CSC r2.7 */
-        float wg_csc_constant_c9;
-    } grf2;
-
-    struct {
-        /* WG+CSC r3.0 */
-        float wg_csc_constant_c0;
-
-        /* Blending r3.1 */
-        float scaling_step_ratio;
-
-        /* Blending r3.2 */
-        float normalized_alpha_y_scaling;
-        
-        /* WG+CSC r3.3 */
-        float wg_csc_constant_c4;
-
-        /* WG+CSC r3.4 */
-        float wg_csc_constant_c1;
-
-        /* ALL r3.5 */
-        int horizontal_origin_offset:16;
-        int vertical_origin_offset:16;
-
-        /* Shared r3.6*/
-        union {
-            /* Color filll */
-            unsigned int color_pixel;
-
-            /* WG+CSC */
-            float wg_csc_constant_c2;
-        } r3_6;
-
-        /* WG+CSC r3.7 */
-        float wg_csc_constant_c3;
-    } grf3;
-
-    struct {
-        /* WG+CSC r4.0 */
-        float wg_csc_constant_c6;
-
-        /* ALL r4.1 MBZ ???*/
-        unsigned int pad0;
-
-        /* Shared r4.2 */
-        union {
-            /* AVS */
-            struct {
-                unsigned int pad1:15;
-                unsigned int nlas:1;
-                unsigned int pad2:16;
-            } avs;
-
-            /* DI */
-            struct {
-                unsigned int motion_history_coefficient_m2:8;
-                unsigned int motion_history_coefficient_m1:8;
-                unsigned int pad0:16;
-            } di;
-        } r4_2;
-
-        /* WG+CSC r4.3 */
-        float wg_csc_constant_c7;
-
-        /* WG+CSC r4.4 */
-        float wg_csc_constant_c10;
-
-        /* AVS r4.5 */
-        float source_video_frame_normalized_horizontal_origin;
-
-        /* MBZ r4.6 */
-        unsigned int pad1;
-
-        /* WG+CSC r4.7 */
-        float wg_csc_constant_c11;
-    } grf4;
-};
-
-struct pp_inline_parameter
-{
-    struct {
-        /* ALL r5.0 */
-        int destination_block_horizontal_origin:16;
-        int destination_block_vertical_origin:16;
-
-        /* Shared r5.1 */
-        union {
-            /* AVS/Scaling */
-            float source_surface_block_normalized_horizontal_origin;
-
-            /* FMD */
-            struct {
-                unsigned int variance_surface_vertical_origin:16;
-                unsigned int pad0:16;
-            } fmd;
-        } r5_1; 
-
-        /* AVS/Scaling r5.2 */
-        float source_surface_block_normalized_vertical_origin;
-
-        /* Alpha r5.3 */
-        float alpha_surface_block_normalized_horizontal_origin;
-
-        /* Alpha r5.4 */
-        float alpha_surface_block_normalized_vertical_origin;
-
-        /* Alpha r5.5 */
-        unsigned int alpha_mask_x:16;
-        unsigned int alpha_mask_y:8;
-        unsigned int block_count_x:8;
-
-        /* r5.6 */
-        unsigned int block_horizontal_mask:16;
-        unsigned int block_vertical_mask:8;
-        unsigned int number_blocks:8;
-
-        /* AVS/Scaling r5.7 */
-        float normalized_video_x_scaling_step;
-    } grf5;
-
-    struct {
-        /* AVS r6.0 */
-        float video_step_delta;
-
-        /* r6.1-r6.7 */
-        unsigned int padx[7];
-    } grf6;
-};
-
-static struct pp_static_parameter pp_static_parameter;
-static struct pp_inline_parameter pp_inline_parameter;
+#define pp_static_parameter     pp_context->pp_static_parameter
+#define pp_inline_parameter     pp_context->pp_inline_parameter
 
 static void
 pp_set_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
@@ -682,7 +478,7 @@ ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_cont
 
     for (y = 0; y < y_steps; y++) {
         for (x = 0; x < x_steps; x++) {
-            if (!pp_context->pp_set_block_parameter(&pp_context->private_context, x, y)) {
+            if (!pp_context->pp_set_block_parameter(pp_context, x, y)) {
                 BEGIN_BATCH(ctx, 20);
                 OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 18);
                 OUT_BATCH(ctx, 0);
@@ -730,7 +526,7 @@ pp_null_y_steps(void *private_context)
 }
 
 static int
-pp_null_set_block_parameter(void *private_context, int x, int y)
+pp_null_set_block_parameter(struct i965_post_processing_context *pp_context, int x, int y)
 {
     return 0;
 }
@@ -776,7 +572,7 @@ pp_load_save_y_steps(void *private_context)
 }
 
 static int
-pp_load_save_set_block_parameter(void *private_context, int x, int y)
+pp_load_save_set_block_parameter(struct i965_post_processing_context *pp_context, int x, int y)
 {
     pp_inline_parameter.grf5.block_vertical_mask = 0xff;
     pp_inline_parameter.grf5.block_horizontal_mask = 0xffff;
@@ -961,7 +757,7 @@ pp_scaling_y_steps(void *private_context)
 }
 
 static int
-pp_scaling_set_block_parameter(void *private_context, int x, int y)
+pp_scaling_set_block_parameter(struct i965_post_processing_context *pp_context, int x, int y)
 {
     float src_x_steping = pp_inline_parameter.grf5.normalized_video_x_scaling_step;
     float src_y_steping = pp_static_parameter.grf1.r1_6.normalized_video_y_scaling_step;
@@ -1183,9 +979,9 @@ pp_avs_y_steps(void *private_context)
 }
 
 static int
-pp_avs_set_block_parameter(void *private_context, int x, int y)
+pp_avs_set_block_parameter(struct i965_post_processing_context *pp_context, int x, int y)
 {
-    struct pp_avs_context *pp_avs_context = private_context;
+    struct pp_avs_context *pp_avs_context = (struct pp_avs_context *)&pp_context->private_context;
     float src_x_steping, src_y_steping, video_step_delta;
     int tmp_w = ALIGN(pp_avs_context->dest_h * pp_avs_context->src_w / pp_avs_context->src_h, 16);
 
@@ -1649,7 +1445,7 @@ pp_dndi_y_steps(void *private_context)
 }
 
 static int
-pp_dndi_set_block_parameter(void *private_context, int x, int y)
+pp_dndi_set_block_parameter(struct i965_post_processing_context *pp_context, int x, int y)
 {
     pp_inline_parameter.grf5.destination_block_horizontal_origin = x * 16;
     pp_inline_parameter.grf5.destination_block_vertical_origin = y * 4;
@@ -2334,7 +2130,7 @@ gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context 
 
     for (y = 0; y < y_steps; y++) {
         for (x = 0; x < x_steps; x++) {
-            if (!pp_context->pp_set_block_parameter(&pp_context->private_context, x, y)) {
+            if (!pp_context->pp_set_block_parameter(pp_context, x, y)) {
                 BEGIN_BATCH(ctx, 22);
                 OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 20);
                 OUT_BATCH(ctx, 0);
