@@ -37,8 +37,6 @@
 
 #include "intel_driver.h"
 
-#include "i965_render.h"
-
 #define I965_MAX_PROFILES                       11
 #define I965_MAX_ENTRYPOINTS                    5
 #define I965_MAX_CONFIG_ATTRIBUTES              10
@@ -203,6 +201,9 @@ struct hw_codec_info
     struct hw_context *(*dec_hw_context_init)(VADriverContextP, VAProfile);
     struct hw_context *(*enc_hw_context_init)(VADriverContextP, VAProfile);
 };
+
+
+#include "i965_render.h"
 
 struct i965_driver_data 
 {

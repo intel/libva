@@ -213,10 +213,6 @@ static struct i965_kernel render_kernels_gen6[] = {
     }
 };
 
-static struct i965_kernel *render_kernels = NULL;
-
-#define NUM_RENDER_KERNEL (sizeof(render_kernels_gen4)/sizeof(render_kernels_gen4[0]))
-
 #define URB_VS_ENTRIES	      8
 #define URB_VS_ENTRY_SIZE     1
 
@@ -269,7 +265,7 @@ i965_render_sf_unit(VADriverContextP ctx)
     memset(sf_state, 0, sizeof(*sf_state));
 
     sf_state->thread0.grf_reg_count = I965_GRF_BLOCKS(SF_KERNEL_NUM_GRF);
-    sf_state->thread0.kernel_start_pointer = render_kernels[SF_KERNEL].bo->offset >> 6;
+    sf_state->thread0.kernel_start_pointer = render_state->render_kernels[SF_KERNEL].bo->offset >> 6;
 
     sf_state->sf1.single_program_flow = 1; /* XXX */
     sf_state->sf1.binding_table_entry_count = 0;
@@ -308,7 +304,7 @@ i965_render_sf_unit(VADriverContextP ctx)
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       sf_state->thread0.grf_reg_count << 1,
                       offsetof(struct i965_sf_unit_state, thread0),
-                      render_kernels[SF_KERNEL].bo);
+                      render_state->render_kernels[SF_KERNEL].bo);
 
     dri_bo_unmap(render_state->sf.state);
 }
@@ -354,7 +350,7 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
     memset(wm_state, 0, sizeof(*wm_state));
 
     wm_state->thread0.grf_reg_count = I965_GRF_BLOCKS(PS_KERNEL_NUM_GRF);
-    wm_state->thread0.kernel_start_pointer = render_kernels[PS_SUBPIC_KERNEL].bo->offset >> 6;
+    wm_state->thread0.kernel_start_pointer = render_state->render_kernels[PS_SUBPIC_KERNEL].bo->offset >> 6;
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
 
@@ -392,7 +388,7 @@ i965_subpic_render_wm_unit(VADriverContextP ctx)
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       wm_state->thread0.grf_reg_count << 1,
                       offsetof(struct i965_wm_unit_state, thread0),
-                      render_kernels[PS_SUBPIC_KERNEL].bo);
+                      render_state->render_kernels[PS_SUBPIC_KERNEL].bo);
 
     dri_bo_emit_reloc(render_state->wm.state,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -419,7 +415,7 @@ i965_render_wm_unit(VADriverContextP ctx)
     memset(wm_state, 0, sizeof(*wm_state));
 
     wm_state->thread0.grf_reg_count = I965_GRF_BLOCKS(PS_KERNEL_NUM_GRF);
-    wm_state->thread0.kernel_start_pointer = render_kernels[PS_KERNEL].bo->offset >> 6;
+    wm_state->thread0.kernel_start_pointer = render_state->render_kernels[PS_KERNEL].bo->offset >> 6;
 
     wm_state->thread1.single_program_flow = 1; /* XXX */
 
@@ -457,7 +453,7 @@ i965_render_wm_unit(VADriverContextP ctx)
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       wm_state->thread0.grf_reg_count << 1,
                       offsetof(struct i965_wm_unit_state, thread0),
-                      render_kernels[PS_KERNEL].bo);
+                      render_state->render_kernels[PS_KERNEL].bo);
 
     dri_bo_emit_reloc(render_state->wm.state,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -1821,7 +1817,7 @@ gen6_emit_wm_state(VADriverContextP ctx, int kernel)
     OUT_BATCH(ctx, 0);
 
     OUT_BATCH(ctx, GEN6_3DSTATE_WM | (9 - 2));
-    OUT_RELOC(ctx, render_kernels[kernel].bo,
+    OUT_RELOC(ctx, render_state->render_kernels[kernel].bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
     OUT_BATCH(ctx, (1 << GEN6_3DSTATE_WM_SAMPLER_COUNT_SHITF) |
@@ -2088,14 +2084,14 @@ i965_render_init(VADriverContextP ctx)
                                  sizeof(render_kernels_gen6[0])));
 
     if (IS_GEN6(i965->intel.device_id))
-        render_kernels = render_kernels_gen6;
+        memcpy(render_state->render_kernels, render_kernels_gen6, sizeof(render_state->render_kernels));
     else if (IS_IRONLAKE(i965->intel.device_id))
-        render_kernels = render_kernels_gen5;
+        memcpy(render_state->render_kernels, render_kernels_gen5, sizeof(render_state->render_kernels));
     else
-        render_kernels = render_kernels_gen4;
+        memcpy(render_state->render_kernels, render_kernels_gen4, sizeof(render_state->render_kernels));
 
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
-        struct i965_kernel *kernel = &render_kernels[i];
+        struct i965_kernel *kernel = &render_state->render_kernels[i];
 
         if (!kernel->size)
             continue;
@@ -2128,7 +2124,7 @@ i965_render_terminate(VADriverContextP ctx)
     render_state->curbe.bo = NULL;
 
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
-        struct i965_kernel *kernel = &render_kernels[i];
+        struct i965_kernel *kernel = &render_state->render_kernels[i];
         
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;

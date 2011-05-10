@@ -31,7 +31,11 @@
 #define MAX_SAMPLERS            16
 #define MAX_RENDER_SURFACES     (MAX_SAMPLERS + 1)
 
+#define NUM_RENDER_KERNEL       3
+
 #include "i965_post_processing.h"
+
+struct i965_kernel;
 
 struct i965_render_state
 {
@@ -71,7 +75,8 @@ struct i965_render_state
     struct intel_region *draw_region;
 
     int pp_flag; /* 0: disable, 1: enable */
-    struct i965_post_processing_context pp_context;
+
+    struct i965_kernel render_kernels[3];
 };
 
 Bool i965_render_init(VADriverContextP ctx);

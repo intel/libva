@@ -20,6 +20,8 @@ enum {
     H264_AVC_NULL
 };
 
+#define NUM_H264_AVC_KERNELS    2
+
 struct i965_h264_context
 {
     struct {
@@ -62,6 +64,8 @@ struct i965_h264_context
         VASurfaceID surface_id;
         int frame_store_id;
     } fsid_list[16];
+
+    struct i965_kernel avc_kernels[NUM_H264_AVC_KERNELS];
 };
 
 void i965_media_h264_decode_init(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context);

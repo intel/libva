@@ -38,6 +38,8 @@
 #define MAX_INTERFACE_DESC_GEN6      32
 #define MAX_MEDIA_SURFACES_GEN6      34
 
+#define GEN6_VME_KERNEL_NUMBER          2
+
 struct encode_state;
 struct gen6_encoder_context;
 
@@ -77,6 +79,8 @@ struct gen6_vme_context
         unsigned int size_block; /* in bytes */
         unsigned int pitch;
     } vme_output;
+
+    struct i965_kernel vme_kernels[GEN6_VME_KERNEL_NUMBER];
 };
 
 VAStatus gen6_vme_pipeline(VADriverContextP ctx,

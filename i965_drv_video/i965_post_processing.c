@@ -37,23 +37,12 @@
 #include "intel_driver.h"
 #include "i965_defines.h"
 #include "i965_structs.h"
-
+#include "i965_drv_video.h"
 #include "i965_post_processing.h"
 #include "i965_render.h"
-#include "i965_drv_video.h"
 
 #define HAS_PP(ctx) (IS_IRONLAKE((ctx)->intel.device_id) ||     \
                      IS_GEN6((ctx)->intel.device_id))
-
-struct pp_module
-{
-    struct i965_kernel kernel;
-    
-    /* others */
-    void (*initialize)(VADriverContextP ctx, VASurfaceID surface, int input,
-                       unsigned short srcw, unsigned short srch,
-                       unsigned short destw, unsigned short desth);
-};
 
 static const uint32_t pp_null_gen5[][4] = {
 #include "shaders/post_processing/null.g4b.gen5"
@@ -234,10 +223,6 @@ static struct pp_module pp_modules_gen6[] = {
         pp_nv12_dndi_initialize,
     },
 };
-
-#define NUM_PP_MODULES ARRAY_ELEMS(pp_modules_gen5)
-
-static struct pp_module *pp_modules = NULL;
 
 struct pp_static_parameter
 {
@@ -503,7 +488,7 @@ ironlake_pp_interface_descriptor_table(struct i965_post_processing_context *pp_c
     desc = bo->virtual;
     memset(desc, 0, sizeof(*desc));
     desc->desc0.grf_reg_blocks = 10;
-    desc->desc0.kernel_start_pointer = pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
+    desc->desc0.kernel_start_pointer = pp_context->pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
     desc->desc1.const_urb_entry_read_offset = 0;
     desc->desc1.const_urb_entry_read_len = 4; /* grf 1-4 */
     desc->desc2.sampler_state_pointer = pp_context->sampler_state_table.bo->offset >> 5;
@@ -516,7 +501,7 @@ ironlake_pp_interface_descriptor_table(struct i965_post_processing_context *pp_c
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       desc->desc0.grf_reg_blocks,
                       offsetof(struct i965_interface_descriptor, desc0),
-                      pp_modules[pp_index].kernel.bo);
+                      pp_context->pp_modules[pp_index].kernel.bo);
 
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -2036,9 +2021,8 @@ ironlake_pp_initialize(VADriverContextP ctx,
     memset(&pp_static_parameter, 0, sizeof(pp_static_parameter));
     memset(&pp_inline_parameter, 0, sizeof(pp_inline_parameter));
     assert(pp_index >= PP_NULL && pp_index < NUM_PP_MODULES);
-    assert(pp_modules);
     pp_context->current_pp = pp_index;
-    pp_module = &pp_modules[pp_index];
+    pp_module = &pp_context->pp_modules[pp_index];
     
     if (pp_module->initialize)
         pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
@@ -2157,9 +2141,8 @@ gen6_pp_initialize(VADriverContextP ctx,
     memset(&pp_static_parameter, 0, sizeof(pp_static_parameter));
     memset(&pp_inline_parameter, 0, sizeof(pp_inline_parameter));
     assert(pp_index >= PP_NULL && pp_index < NUM_PP_MODULES);
-    assert(pp_modules);
     pp_context->current_pp = pp_index;
-    pp_module = &pp_modules[pp_index];
+    pp_module = &pp_context->pp_modules[pp_index];
     
     if (pp_module->initialize)
         pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
@@ -2207,7 +2190,7 @@ gen6_pp_interface_descriptor_table(struct i965_post_processing_context *pp_conte
     desc = bo->virtual;
     memset(desc, 0, sizeof(*desc));
     desc->desc0.kernel_start_pointer = 
-        pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
+        pp_context->pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
     desc->desc1.single_program_flow = 1;
     desc->desc1.floating_point_mode = FLOATING_POINT_IEEE_754;
     desc->desc2.sampler_count = 1;      /* 1 - 4 samplers used */
@@ -2223,7 +2206,7 @@ gen6_pp_interface_descriptor_table(struct i965_post_processing_context *pp_conte
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       0,
                       offsetof(struct gen6_interface_descriptor_data, desc0),
-                      pp_modules[pp_index].kernel.bo);
+                      pp_context->pp_modules[pp_index].kernel.bo);
 
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -2517,17 +2500,17 @@ i965_post_processing_terminate(VADriverContextP ctx)
             dri_bo_unreference(pp_context->stmm.bo);
             pp_context->stmm.bo = NULL;
 
+            for (i = 0; i < NUM_PP_MODULES; i++) {
+                struct pp_module *pp_module = &pp_context->pp_modules[i];
+
+                dri_bo_unreference(pp_module->kernel.bo);
+                pp_module->kernel.bo = NULL;
+            }
+
             free(pp_context);
         }
 
         i965->pp_context = NULL;
-
-        for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
-            struct pp_module *pp_module = &pp_modules[i];
-
-            dri_bo_unreference(pp_module->kernel.bo);
-            pp_module->kernel.bo = NULL;
-        }
     }
 
     return True;
@@ -2544,36 +2527,36 @@ i965_post_processing_init(VADriverContextP ctx)
         if (pp_context == NULL) {
             pp_context = calloc(1, sizeof(*pp_context));
             i965->pp_context = pp_context;
-        }
 
-        pp_context->urb.size = URB_SIZE((&i965->intel));
-        pp_context->urb.num_vfe_entries = 32;
-        pp_context->urb.size_vfe_entry = 1;     /* in 512 bits unit */
-        pp_context->urb.num_cs_entries = 1;
-        pp_context->urb.size_cs_entry = 2;      /* in 512 bits unit */
-        pp_context->urb.vfe_start = 0;
-        pp_context->urb.cs_start = pp_context->urb.vfe_start + 
-            pp_context->urb.num_vfe_entries * pp_context->urb.size_vfe_entry;
-        assert(pp_context->urb.cs_start + 
-               pp_context->urb.num_cs_entries * pp_context->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
+            pp_context->urb.size = URB_SIZE((&i965->intel));
+            pp_context->urb.num_vfe_entries = 32;
+            pp_context->urb.size_vfe_entry = 1;     /* in 512 bits unit */
+            pp_context->urb.num_cs_entries = 1;
+            pp_context->urb.size_cs_entry = 2;      /* in 512 bits unit */
+            pp_context->urb.vfe_start = 0;
+            pp_context->urb.cs_start = pp_context->urb.vfe_start + 
+                pp_context->urb.num_vfe_entries * pp_context->urb.size_vfe_entry;
+            assert(pp_context->urb.cs_start + 
+                   pp_context->urb.num_cs_entries * pp_context->urb.size_cs_entry <= URB_SIZE((&i965->intel)));
 
-        assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen6));
+            assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen5));
+            assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen6));
 
-        if (IS_GEN6(i965->intel.device_id))
-            pp_modules = pp_modules_gen6;
-        else if (IS_IRONLAKE(i965->intel.device_id)) {
-            pp_modules = pp_modules_gen5;
-        }
+            if (IS_GEN6(i965->intel.device_id))
+                memcpy(pp_context->pp_modules, pp_modules_gen6, sizeof(pp_context->pp_modules));
+            else if (IS_IRONLAKE(i965->intel.device_id))
+                memcpy(pp_context->pp_modules, pp_modules_gen5, sizeof(pp_context->pp_modules));
 
-        for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
-            struct pp_module *pp_module = &pp_modules[i];
-            dri_bo_unreference(pp_module->kernel.bo);
-            pp_module->kernel.bo = dri_bo_alloc(i965->intel.bufmgr,
-                                                pp_module->kernel.name,
-                                                pp_module->kernel.size,
-                                                4096);
-            assert(pp_module->kernel.bo);
-            dri_bo_subdata(pp_module->kernel.bo, 0, pp_module->kernel.size, pp_module->kernel.bin);
+            for (i = 0; i < NUM_PP_MODULES; i++) {
+                struct pp_module *pp_module = &pp_context->pp_modules[i];
+                dri_bo_unreference(pp_module->kernel.bo);
+                pp_module->kernel.bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                    pp_module->kernel.name,
+                                                    pp_module->kernel.size,
+                                                    4096);
+                assert(pp_module->kernel.bo);
+                dri_bo_subdata(pp_module->kernel.bo, 0, pp_module->kernel.size, pp_module->kernel.bin);
+            }
         }
     }
 

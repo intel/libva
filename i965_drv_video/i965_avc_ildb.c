@@ -123,8 +123,6 @@ struct avc_ildb_root_input
     unsigned int pad3;
 };
 
-extern struct i965_kernel *h264_avc_kernels;
-
 #define NUM_AVC_ILDB_INTERFACES ARRAY_ELEMS(avc_ildb_kernel_offset_gen4)
 static unsigned long *avc_ildb_kernel_offset = NULL;
 
@@ -278,7 +276,7 @@ i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx, struct i965_h264_
         int kernel_offset = avc_ildb_kernel_offset[i];
         memset(desc, 0, sizeof(*desc));
         desc->desc0.grf_reg_blocks = 7; 
-        desc->desc0.kernel_start_pointer = (h264_avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
+        desc->desc0.kernel_start_pointer = (i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
         desc->desc1.const_urb_entry_read_offset = 0;
         desc->desc1.const_urb_entry_read_len = ((i == AVC_ILDB_ROOT_Y_ILDB_FRAME ||
                                                  i == AVC_ILDB_ROOT_Y_ILDB_FIELD ||
@@ -291,7 +289,7 @@ i965_avc_ildb_interface_descriptor_table(VADriverContextP ctx, struct i965_h264_
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           desc->desc0.grf_reg_blocks + kernel_offset,
                           i * sizeof(*desc) + offsetof(struct i965_interface_descriptor, desc0),
-                          h264_avc_kernels[H264_AVC_COMBINED].bo);
+                          i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo);
 
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,

@@ -275,9 +275,6 @@ static struct i965_kernel h264_avc_kernels_gen5[] = {
     }
 };
 
-#define NUM_H264_AVC_KERNELS (sizeof(h264_avc_kernels_gen4) / sizeof(h264_avc_kernels_gen4[0]))
-struct i965_kernel *h264_avc_kernels = NULL;
-
 #define NUM_AVC_MC_INTERFACES (sizeof(avc_mc_kernel_offset_gen4) / sizeof(avc_mc_kernel_offset_gen4[0]))
 static unsigned long *avc_mc_kernel_offset = NULL;
 
@@ -448,6 +445,7 @@ i965_media_h264_binding_table(VADriverContextP ctx, struct i965_media_context *m
 static void 
 i965_media_h264_interface_descriptor_remap_table(VADriverContextP ctx, struct i965_media_context *media_context)
 {
+    struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)media_context->private_context;
     struct i965_interface_descriptor *desc;
     int i;
     dri_bo *bo;
@@ -461,7 +459,7 @@ i965_media_h264_interface_descriptor_remap_table(VADriverContextP ctx, struct i9
         int kernel_offset = avc_mc_kernel_offset[i];
         memset(desc, 0, sizeof(*desc));
         desc->desc0.grf_reg_blocks = 7; 
-        desc->desc0.kernel_start_pointer = (h264_avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
+        desc->desc0.kernel_start_pointer = (i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo->offset + kernel_offset) >> 6; /* reloc */
         desc->desc1.const_urb_entry_read_offset = 0;
         desc->desc1.const_urb_entry_read_len = 2;
         desc->desc3.binding_table_entry_count = 0;
@@ -472,7 +470,7 @@ i965_media_h264_interface_descriptor_remap_table(VADriverContextP ctx, struct i9
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           desc->desc0.grf_reg_blocks + kernel_offset,
                           i * sizeof(*desc) + offsetof(struct i965_interface_descriptor, desc0),
-                          h264_avc_kernels[H264_AVC_COMBINED].bo);
+                          i965_h264_context->avc_kernels[H264_AVC_COMBINED].bo);
 
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -758,15 +756,16 @@ i965_media_h264_free_private_context(void **data)
     dri_bo_unreference(i965_h264_context->avc_it_command_mb_info.bo);
     dri_bo_unreference(i965_h264_context->avc_it_data.bo);
     dri_bo_unreference(i965_h264_context->avc_ildb_data.bo);
-    free(i965_h264_context);
-    *data = NULL;
 
     for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-        struct i965_kernel *kernel = &h264_avc_kernels[i];
+        struct i965_kernel *kernel = &i965_h264_context->avc_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;
     }
+
+    free(i965_h264_context);
+    *data = NULL;
 }
 
 void
@@ -850,34 +849,31 @@ i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context
     i965_h264_context = calloc(1, sizeof(struct i965_h264_context));
 
     /* kernel */
-    if (h264_avc_kernels == NULL) {
-        assert(NUM_H264_AVC_KERNELS == (sizeof(h264_avc_kernels_gen5) / 
-                                        sizeof(h264_avc_kernels_gen5[0])));
-        assert(NUM_AVC_MC_INTERFACES == (sizeof(avc_mc_kernel_offset_gen5) /
-                                         sizeof(avc_mc_kernel_offset_gen5[0])));
+    assert(NUM_H264_AVC_KERNELS == (sizeof(h264_avc_kernels_gen5) / 
+                                    sizeof(h264_avc_kernels_gen5[0])));
+    assert(NUM_AVC_MC_INTERFACES == (sizeof(avc_mc_kernel_offset_gen5) /
+                                     sizeof(avc_mc_kernel_offset_gen5[0])));
+    if (IS_IRONLAKE(i965->intel.device_id)) {
+        memcpy(i965_h264_context->avc_kernels, h264_avc_kernels_gen5, sizeof(i965_h264_context->avc_kernels));
+        avc_mc_kernel_offset = avc_mc_kernel_offset_gen5;
+        intra_kernel_header = &intra_kernel_header_gen5;
+        i965_h264_context->use_avc_hw_scoreboard = 1;
+        i965_h264_context->use_hw_w128 = 1;
+    } else {
+        memcpy(i965_h264_context->avc_kernels, h264_avc_kernels_gen4, sizeof(i965_h264_context->avc_kernels));
+        avc_mc_kernel_offset = avc_mc_kernel_offset_gen4;
+        intra_kernel_header = &intra_kernel_header_gen4;
+        i965_h264_context->use_avc_hw_scoreboard = 0;
+        i965_h264_context->use_hw_w128 = 0;
+    }
 
-        if (IS_IRONLAKE(i965->intel.device_id)) {
-            h264_avc_kernels = h264_avc_kernels_gen5;
-            avc_mc_kernel_offset = avc_mc_kernel_offset_gen5;
-            intra_kernel_header = &intra_kernel_header_gen5;
-            i965_h264_context->use_avc_hw_scoreboard = 1;
-            i965_h264_context->use_hw_w128 = 1;
-        } else {
-            h264_avc_kernels = h264_avc_kernels_gen4;
-            avc_mc_kernel_offset = avc_mc_kernel_offset_gen4;
-            intra_kernel_header = &intra_kernel_header_gen4;
-            i965_h264_context->use_avc_hw_scoreboard = 0;
-            i965_h264_context->use_hw_w128 = 0;
-        }
-
-        for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-            struct i965_kernel *kernel = &h264_avc_kernels[i];
-            kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
-                                      kernel->name, 
-                                      kernel->size, 0x1000);
-            assert(kernel->bo);
-            dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
-        }
+    for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
+        struct i965_kernel *kernel = &i965_h264_context->avc_kernels[i];
+        kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
+                                  kernel->name, 
+                                  kernel->size, 0x1000);
+        assert(kernel->bo);
+        dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
     }
 
     for (i = 0; i < 16; i++) {

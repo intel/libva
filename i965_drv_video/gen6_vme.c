@@ -74,8 +74,6 @@ static struct i965_kernel gen6_vme_kernels[] = {
     }
 };
 
-#define	GEN6_VME_KERNEL_NUMBER ARRAY_ELEMS(gen6_vme_kernels)
-
 static void
 gen6_vme_set_common_surface_tiling(struct i965_surface_state *ss, unsigned int tiling)
 {
@@ -358,7 +356,7 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
 
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         struct i965_kernel *kernel;
-        kernel = &gen6_vme_kernels[i];
+        kernel = &vme_context->vme_kernels[i];
         assert(sizeof(*desc) == 32);
         /*Setup the descritor table*/
         memset(desc, 0, sizeof(*desc));
@@ -708,9 +706,11 @@ Bool gen6_vme_context_init(VADriverContextP ctx, struct gen6_vme_context *vme_co
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     int i;
 
+    memcpy(vme_context->vme_kernels, gen6_vme_kernels, sizeof(vme_context->vme_kernels));
+
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         /*Load kernel into GPU memory*/	
-        struct i965_kernel *kernel = &gen6_vme_kernels[i];
+        struct i965_kernel *kernel = &vme_context->vme_kernels[i];
 
         kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                   kernel->name, 
@@ -749,7 +749,7 @@ Bool gen6_vme_context_destroy(struct gen6_vme_context *vme_context)
 
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         /*Load kernel into GPU memory*/	
-        struct i965_kernel *kernel = &gen6_vme_kernels[i];
+        struct i965_kernel *kernel = &vme_context->vme_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;

@@ -27,6 +27,7 @@
  *
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -450,10 +451,6 @@ static struct i965_kernel  mpeg2_vld_kernels_gen5[] = {
     }
 };
 
-static struct i965_kernel  *mpeg2_vld_kernels = NULL;
-
-#define NUM_MPEG2_VLD_KERNELS (sizeof(mpeg2_vld_kernels_gen4)/sizeof(mpeg2_vld_kernels_gen4[0]))
-
 static void
 i965_media_mpeg2_surface_state(VADriverContextP ctx, 
                                int index,
@@ -702,6 +699,7 @@ i965_media_mpeg2_vfe_state(VADriverContextP ctx, struct i965_media_context *medi
 static void 
 i965_media_mpeg2_interface_descriptor_remap_table(VADriverContextP ctx, struct i965_media_context *media_context)
 {
+    struct i965_mpeg2_context *i965_mpeg2_context = (struct i965_mpeg2_context *)media_context->private_context;
     struct i965_interface_descriptor *desc;
     int i;
     dri_bo *bo;
@@ -714,7 +712,7 @@ i965_media_mpeg2_interface_descriptor_remap_table(VADriverContextP ctx, struct i
     for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
         memset(desc, 0, sizeof(*desc));
         desc->desc0.grf_reg_blocks = 15;
-        desc->desc0.kernel_start_pointer = mpeg2_vld_kernels[i].bo->offset >> 6; /* reloc */
+        desc->desc0.kernel_start_pointer = i965_mpeg2_context->vld_kernels[i].bo->offset >> 6; /* reloc */
         desc->desc1.const_urb_entry_read_offset = 0;
         desc->desc1.const_urb_entry_read_len = 30;
         desc->desc3.binding_table_entry_count = 0;
@@ -725,7 +723,7 @@ i965_media_mpeg2_interface_descriptor_remap_table(VADriverContextP ctx, struct i
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           desc->desc0.grf_reg_blocks,
                           i * sizeof(*desc) + offsetof(struct i965_interface_descriptor, desc0),
-                          mpeg2_vld_kernels[i].bo);
+                          i965_mpeg2_context->vld_kernels[i].bo);
 
         dri_bo_emit_reloc(bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -809,6 +807,7 @@ i965_media_mpeg2_upload_constants(VADriverContextP ctx,
                                   struct decode_state *decode_state,
                                   struct i965_media_context *media_context)
 {
+    struct i965_mpeg2_context *i965_mpeg2_context = (struct i965_mpeg2_context *)media_context->private_context;
     int i, j;
     unsigned char *constant_buffer;
     unsigned char *qmx;
@@ -854,12 +853,12 @@ i965_media_mpeg2_upload_constants(VADriverContextP ctx,
     lib_reloc_offset = 128 + sizeof(idct_table);
     lib_reloc = (unsigned int *)(constant_buffer + lib_reloc_offset);
     for (i = 0; i < 8; i++) {
-        lib_reloc[i] = mpeg2_vld_kernels[LIB_INTERFACE].bo->offset;
+        lib_reloc[i] = i965_mpeg2_context->vld_kernels[LIB_INTERFACE].bo->offset;
         dri_bo_emit_reloc(media_context->curbe.bo,
                           I915_GEM_DOMAIN_INSTRUCTION, 0,
                           0,
                           lib_reloc_offset + i * sizeof(unsigned int),
-                          mpeg2_vld_kernels[LIB_INTERFACE].bo);
+                          i965_mpeg2_context->vld_kernels[LIB_INTERFACE].bo);
     }
 
     dri_bo_unmap(media_context->curbe.bo);
@@ -916,16 +915,21 @@ i965_media_mpeg2_objects(VADriverContextP ctx,
 static void
 i965_media_mpeg2_free_private_context(void **data)
 {
+    struct i965_mpeg2_context *i965_mpeg2_context = *data;
     int i;
 
+    if (i965_mpeg2_context == NULL)
+        return;
+
     for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-        struct i965_kernel *kernel = &mpeg2_vld_kernels[i];
+        struct i965_kernel *kernel = &i965_mpeg2_context->vld_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;
     }
 
-    mpeg2_vld_kernels = NULL;
+    free(i965_mpeg2_context);
+    *data = NULL;
 }
 
 void 
@@ -952,27 +956,30 @@ void
 i965_media_mpeg2_dec_context_init(VADriverContextP ctx, struct i965_media_context *media_context)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct i965_mpeg2_context *i965_mpeg2_context;
     int i;
 
+    i965_mpeg2_context = calloc(1, sizeof(struct i965_mpeg2_context));
+
     /* kernel */
-    if (mpeg2_vld_kernels == NULL) {
-        assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
-                                         sizeof(mpeg2_vld_kernels_gen5[0])));
-        assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
+    assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen4) / 
+                                     sizeof(mpeg2_vld_kernels_gen4[0])));
+    assert(NUM_MPEG2_VLD_KERNELS == (sizeof(mpeg2_vld_kernels_gen5) / 
+                                     sizeof(mpeg2_vld_kernels_gen5[0])));
+    assert(NUM_MPEG2_VLD_KERNELS <= MAX_INTERFACE_DESC);
 
-        if (IS_IRONLAKE(i965->intel.device_id))
-            mpeg2_vld_kernels = mpeg2_vld_kernels_gen5;
-        else
-            mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
+    if (IS_IRONLAKE(i965->intel.device_id))
+        memcpy(i965_mpeg2_context->vld_kernels, mpeg2_vld_kernels_gen5, sizeof(i965_mpeg2_context->vld_kernels));
+    else
+        memcpy(i965_mpeg2_context->vld_kernels, mpeg2_vld_kernels_gen4, sizeof(i965_mpeg2_context->vld_kernels));
 
-        for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-            struct i965_kernel *kernel = &mpeg2_vld_kernels[i];
-            kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
-                                      kernel->name, 
-                                      kernel->size, 64);
-            assert(kernel->bo);
-            dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
-        }
+    for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
+        struct i965_kernel *kernel = &i965_mpeg2_context->vld_kernels[i];
+        kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
+                                  kernel->name, 
+                                  kernel->size, 64);
+        assert(kernel->bo);
+        dri_bo_subdata(kernel->bo, 0, kernel->size, kernel->bin);
     }
 
     /* URB */

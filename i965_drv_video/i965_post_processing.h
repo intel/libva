@@ -43,6 +43,8 @@ enum
     PP_NV12_DNDI,
 };
 
+#define NUM_PP_MODULES                  5
+
 struct pp_load_save_context
 {
     int dest_w;
@@ -70,9 +72,20 @@ struct pp_dndi_context
 
 };
 
+struct pp_module
+{
+    struct i965_kernel kernel;
+    
+    /* others */
+    void (*initialize)(VADriverContextP ctx, VASurfaceID surface, int input,
+                       unsigned short srcw, unsigned short srch,
+                       unsigned short destw, unsigned short desth);
+};
+
 struct i965_post_processing_context
 {
     int current_pp;
+    struct pp_module pp_modules[NUM_PP_MODULES];
 
     struct {
         dri_bo *bo;
