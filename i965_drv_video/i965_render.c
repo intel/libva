@@ -50,7 +50,7 @@
 #define SF_KERNEL_NUM_GRF       16
 #define SF_MAX_THREADS          1
 
-static const unsigned int sf_kernel_static[][4] = 
+static const uint32_t sf_kernel_static[][4] = 
 {
 #include "shaders/render/exa_sf.g4b"
 };
@@ -60,7 +60,7 @@ static const unsigned int sf_kernel_static[][4] =
 
 #define I965_GRF_BLOCKS(nreg)	((nreg + 15) / 16 - 1)
 
-static const unsigned int ps_kernel_static[][4] = 
+static const uint32_t ps_kernel_static[][4] = 
 {
 #include "shaders/render/exa_wm_xy.g4b"
 #include "shaders/render/exa_wm_src_affine.g4b"
@@ -68,7 +68,7 @@ static const unsigned int ps_kernel_static[][4] =
 #include "shaders/render/exa_wm_yuv_rgb.g4b"
 #include "shaders/render/exa_wm_write.g4b"
 };
-static const unsigned int ps_subpic_kernel_static[][4] = 
+static const uint32_t ps_subpic_kernel_static[][4] = 
 {
 #include "shaders/render/exa_wm_xy.g4b"
 #include "shaders/render/exa_wm_src_affine.g4b"
@@ -77,12 +77,12 @@ static const unsigned int ps_subpic_kernel_static[][4] =
 };
 
 /* On IRONLAKE */
-static const unsigned int sf_kernel_static_gen5[][4] = 
+static const uint32_t sf_kernel_static_gen5[][4] = 
 {
 #include "shaders/render/exa_sf.g4b.gen5"
 };
 
-static const unsigned int ps_kernel_static_gen5[][4] = 
+static const uint32_t ps_kernel_static_gen5[][4] = 
 {
 #include "shaders/render/exa_wm_xy.g4b.gen5"
 #include "shaders/render/exa_wm_src_affine.g4b.gen5"
@@ -90,7 +90,7 @@ static const unsigned int ps_kernel_static_gen5[][4] =
 #include "shaders/render/exa_wm_yuv_rgb.g4b.gen5"
 #include "shaders/render/exa_wm_write.g4b.gen5"
 };
-static const unsigned int ps_subpic_kernel_static_gen5[][4] = 
+static const uint32_t ps_subpic_kernel_static_gen5[][4] = 
 {
 #include "shaders/render/exa_wm_xy.g4b.gen5"
 #include "shaders/render/exa_wm_src_affine.g4b.gen5"
@@ -99,7 +99,7 @@ static const unsigned int ps_subpic_kernel_static_gen5[][4] =
 };
 
 /* programs for Sandybridge */
-static const unsigned int sf_kernel_static_gen6[][4] = 
+static const uint32_t sf_kernel_static_gen6[][4] = 
 {
 };
 
@@ -138,23 +138,17 @@ enum
     PS_SUBPIC_KERNEL
 };
 
-struct render_kernel
-{
-    char *name;
-    const unsigned int (*bin)[4];
-    int size;
-    dri_bo *bo;
-};
-
-static struct render_kernel render_kernels_gen4[] = {
+static struct i965_kernel render_kernels_gen4[] = {
     {
         "SF",
+        SF_KERNEL,
         sf_kernel_static,
         sizeof(sf_kernel_static),
         NULL
     },
     {
         "PS",
+        PS_KERNEL,
         ps_kernel_static,
         sizeof(ps_kernel_static),
         NULL
@@ -162,21 +156,24 @@ static struct render_kernel render_kernels_gen4[] = {
 
     {
         "PS_SUBPIC",
+        PS_SUBPIC_KERNEL,
         ps_subpic_kernel_static,
         sizeof(ps_subpic_kernel_static),
         NULL
     }
 };
 
-static struct render_kernel render_kernels_gen5[] = {
+static struct i965_kernel render_kernels_gen5[] = {
     {
         "SF",
+        SF_KERNEL,
         sf_kernel_static_gen5,
         sizeof(sf_kernel_static_gen5),
         NULL
     },
     {
         "PS",
+        PS_KERNEL,
         ps_kernel_static_gen5,
         sizeof(ps_kernel_static_gen5),
         NULL
@@ -184,21 +181,24 @@ static struct render_kernel render_kernels_gen5[] = {
 
     {
         "PS_SUBPIC",
+        PS_SUBPIC_KERNEL,
         ps_subpic_kernel_static_gen5,
         sizeof(ps_subpic_kernel_static_gen5),
         NULL
     }
 };
 
-static struct render_kernel render_kernels_gen6[] = {
+static struct i965_kernel render_kernels_gen6[] = {
     {
         "SF",
+        SF_KERNEL,
         sf_kernel_static_gen6,
         sizeof(sf_kernel_static_gen6),
         NULL
     },
     {
         "PS",
+        PS_KERNEL,
         ps_kernel_static_gen6,
         sizeof(ps_kernel_static_gen6),
         NULL
@@ -206,13 +206,14 @@ static struct render_kernel render_kernels_gen6[] = {
 
     {
         "PS_SUBPIC",
+        PS_SUBPIC_KERNEL,
         ps_subpic_kernel_static_gen6,
         sizeof(ps_subpic_kernel_static_gen6),
         NULL
     }
 };
 
-static struct render_kernel *render_kernels = NULL;
+static struct i965_kernel *render_kernels = NULL;
 
 #define NUM_RENDER_KERNEL (sizeof(render_kernels_gen4)/sizeof(render_kernels_gen4[0]))
 
@@ -2094,7 +2095,7 @@ i965_render_init(VADriverContextP ctx)
         render_kernels = render_kernels_gen4;
 
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
-        struct render_kernel *kernel = &render_kernels[i];
+        struct i965_kernel *kernel = &render_kernels[i];
 
         if (!kernel->size)
             continue;
@@ -2127,7 +2128,7 @@ i965_render_terminate(VADriverContextP ctx)
     render_state->curbe.bo = NULL;
 
     for (i = 0; i < NUM_RENDER_KERNEL; i++) {
-        struct render_kernel *kernel = &render_kernels[i];
+        struct i965_kernel *kernel = &render_kernels[i];
         
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;

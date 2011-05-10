@@ -123,7 +123,7 @@ struct avc_ildb_root_input
     unsigned int pad3;
 };
 
-extern struct media_kernel *h264_avc_kernels;
+extern struct i965_kernel *h264_avc_kernels;
 
 #define NUM_AVC_ILDB_INTERFACES ARRAY_ELEMS(avc_ildb_kernel_offset_gen4)
 static unsigned long *avc_ildb_kernel_offset = NULL;

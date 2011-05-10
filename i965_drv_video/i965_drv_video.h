@@ -47,11 +47,11 @@
 #define I965_MAX_DISPLAY_ATTRIBUTES             4
 #define I965_STR_VENDOR                         "i965 Driver 0.1"
 
-struct media_kernel 
+struct i965_kernel 
 {
     char *name;
     int interface;
-    unsigned int (*bin)[4];
+    const uint32_t (*bin)[4];
     int size;
     dri_bo *bo;
 };

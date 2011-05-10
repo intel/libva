@@ -47,36 +47,31 @@
 
 struct pp_module
 {
-    /* kernel */
-    char *name;
-    int interface;
-    unsigned int (*bin)[4];
-    int size;
-    dri_bo *bo;
-
+    struct i965_kernel kernel;
+    
     /* others */
     void (*initialize)(VADriverContextP ctx, VASurfaceID surface, int input,
                        unsigned short srcw, unsigned short srch,
                        unsigned short destw, unsigned short desth);
 };
 
-static uint32_t pp_null_gen5[][4] = {
+static const uint32_t pp_null_gen5[][4] = {
 #include "shaders/post_processing/null.g4b.gen5"
 };
 
-static uint32_t pp_nv12_load_save_gen5[][4] = {
+static const uint32_t pp_nv12_load_save_gen5[][4] = {
 #include "shaders/post_processing/nv12_load_save_nv12.g4b.gen5"
 };
 
-static uint32_t pp_nv12_scaling_gen5[][4] = {
+static const uint32_t pp_nv12_scaling_gen5[][4] = {
 #include "shaders/post_processing/nv12_scaling_nv12.g4b.gen5"
 };
 
-static uint32_t pp_nv12_avs_gen5[][4] = {
+static const uint32_t pp_nv12_avs_gen5[][4] = {
 #include "shaders/post_processing/nv12_avs_nv12.g4b.gen5"
 };
 
-static uint32_t pp_nv12_dndi_gen5[][4] = {
+static const uint32_t pp_nv12_dndi_gen5[][4] = {
 #include "shaders/post_processing/nv12_dndi_nv12.g4b.gen5"
 };
 
@@ -98,114 +93,144 @@ static void pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, i
 
 static struct pp_module pp_modules_gen5[] = {
     {
-        "NULL module (for testing)",
-        PP_NULL,
-        pp_null_gen5,
-        sizeof(pp_null_gen5),
-        NULL,
+        {
+            "NULL module (for testing)",
+            PP_NULL,
+            pp_null_gen5,
+            sizeof(pp_null_gen5),
+            NULL,
+        },
+
         pp_null_initialize,
     },
 
     {
-        "NV12 Load & Save module",
-        PP_NV12_LOAD_SAVE,
-        pp_nv12_load_save_gen5,
-        sizeof(pp_nv12_load_save_gen5),
-        NULL,
+        {
+            "NV12 Load & Save module",
+            PP_NV12_LOAD_SAVE,
+            pp_nv12_load_save_gen5,
+            sizeof(pp_nv12_load_save_gen5),
+            NULL,
+        },
+
         pp_nv12_load_save_initialize,
     },
 
     {
-        "NV12 Scaling module",
-        PP_NV12_SCALING,
-        pp_nv12_scaling_gen5,
-        sizeof(pp_nv12_scaling_gen5),
-        NULL,
+        {
+            "NV12 Scaling module",
+            PP_NV12_SCALING,
+            pp_nv12_scaling_gen5,
+            sizeof(pp_nv12_scaling_gen5),
+            NULL,
+        },
+
         pp_nv12_scaling_initialize,
     },
 
     {
-        "NV12 AVS module",
-        PP_NV12_AVS,
-        pp_nv12_avs_gen5,
-        sizeof(pp_nv12_avs_gen5),
-        NULL,
+        {
+            "NV12 AVS module",
+            PP_NV12_AVS,
+            pp_nv12_avs_gen5,
+            sizeof(pp_nv12_avs_gen5),
+            NULL,
+        },
+
         pp_nv12_avs_initialize,
     },
 
     {
-        "NV12 DNDI module",
-        PP_NV12_DNDI,
-        pp_nv12_dndi_gen5,
-        sizeof(pp_nv12_dndi_gen5),
-        NULL,
+        {
+            "NV12 DNDI module",
+            PP_NV12_DNDI,
+            pp_nv12_dndi_gen5,
+            sizeof(pp_nv12_dndi_gen5),
+            NULL,
+        },
+
         pp_nv12_dndi_initialize,
     },
 };
 
-static uint32_t pp_null_gen6[][4] = {
+static const uint32_t pp_null_gen6[][4] = {
 #include "shaders/post_processing/null.g6b"
 };
 
-static uint32_t pp_nv12_load_save_gen6[][4] = {
+static const uint32_t pp_nv12_load_save_gen6[][4] = {
 #include "shaders/post_processing/nv12_load_save_nv12.g6b"
 };
 
-static uint32_t pp_nv12_scaling_gen6[][4] = {
+static const uint32_t pp_nv12_scaling_gen6[][4] = {
 #include "shaders/post_processing/nv12_scaling_nv12.g6b"
 };
 
-static uint32_t pp_nv12_avs_gen6[][4] = {
+static const uint32_t pp_nv12_avs_gen6[][4] = {
 #include "shaders/post_processing/nv12_avs_nv12.g6b"
 };
 
-static uint32_t pp_nv12_dndi_gen6[][4] = {
+static const uint32_t pp_nv12_dndi_gen6[][4] = {
 #include "shaders/post_processing/nv12_dndi_nv12.g6b"
 };
 
 static struct pp_module pp_modules_gen6[] = {
     {
-        "NULL module (for testing)",
-        PP_NULL,
-        pp_null_gen6,
-        sizeof(pp_null_gen6),
-        NULL,
+        {
+            "NULL module (for testing)",
+            PP_NULL,
+            pp_null_gen6,
+            sizeof(pp_null_gen6),
+            NULL,
+        },
+
         pp_null_initialize,
     },
 
     {
-        "NV12 Load & Save module",
-        PP_NV12_LOAD_SAVE,
-        pp_nv12_load_save_gen6,
-        sizeof(pp_nv12_load_save_gen6),
-        NULL,
+        {
+            "NV12 Load & Save module",
+            PP_NV12_LOAD_SAVE,
+            pp_nv12_load_save_gen6,
+            sizeof(pp_nv12_load_save_gen6),
+            NULL,
+        },
+
         pp_nv12_load_save_initialize,
     },
 
     {
-        "NV12 Scaling module",
-        PP_NV12_SCALING,
-        pp_nv12_scaling_gen6,
-        sizeof(pp_nv12_scaling_gen6),
-        NULL,
+        {
+            "NV12 Scaling module",
+            PP_NV12_SCALING,
+            pp_nv12_scaling_gen6,
+            sizeof(pp_nv12_scaling_gen6),
+            NULL,
+        },
+
         pp_nv12_scaling_initialize,
     },
 
     {
-        "NV12 AVS module",
-        PP_NV12_AVS,
-        pp_nv12_avs_gen6,
-        sizeof(pp_nv12_avs_gen6),
-        NULL,
+        {
+            "NV12 AVS module",
+            PP_NV12_AVS,
+            pp_nv12_avs_gen6,
+            sizeof(pp_nv12_avs_gen6),
+            NULL,
+        },
+
         pp_nv12_avs_initialize,
     },
 
     {
-        "NV12 DNDI module",
-        PP_NV12_DNDI,
-        pp_nv12_dndi_gen6,
-        sizeof(pp_nv12_dndi_gen6),
-        NULL,
+        {
+            "NV12 DNDI module",
+            PP_NV12_DNDI,
+            pp_nv12_dndi_gen6,
+            sizeof(pp_nv12_dndi_gen6),
+            NULL,
+        },
+
         pp_nv12_dndi_initialize,
     },
 };
@@ -478,7 +503,7 @@ ironlake_pp_interface_descriptor_table(struct i965_post_processing_context *pp_c
     desc = bo->virtual;
     memset(desc, 0, sizeof(*desc));
     desc->desc0.grf_reg_blocks = 10;
-    desc->desc0.kernel_start_pointer = pp_modules[pp_index].bo->offset >> 6; /* reloc */
+    desc->desc0.kernel_start_pointer = pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
     desc->desc1.const_urb_entry_read_offset = 0;
     desc->desc1.const_urb_entry_read_len = 4; /* grf 1-4 */
     desc->desc2.sampler_state_pointer = pp_context->sampler_state_table.bo->offset >> 5;
@@ -491,7 +516,7 @@ ironlake_pp_interface_descriptor_table(struct i965_post_processing_context *pp_c
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       desc->desc0.grf_reg_blocks,
                       offsetof(struct i965_interface_descriptor, desc0),
-                      pp_modules[pp_index].bo);
+                      pp_modules[pp_index].kernel.bo);
 
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -2182,7 +2207,7 @@ gen6_pp_interface_descriptor_table(struct i965_post_processing_context *pp_conte
     desc = bo->virtual;
     memset(desc, 0, sizeof(*desc));
     desc->desc0.kernel_start_pointer = 
-        pp_modules[pp_index].bo->offset >> 6; /* reloc */
+        pp_modules[pp_index].kernel.bo->offset >> 6; /* reloc */
     desc->desc1.single_program_flow = 1;
     desc->desc1.floating_point_mode = FLOATING_POINT_IEEE_754;
     desc->desc2.sampler_count = 1;      /* 1 - 4 samplers used */
@@ -2198,7 +2223,7 @@ gen6_pp_interface_descriptor_table(struct i965_post_processing_context *pp_conte
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                       0,
                       offsetof(struct gen6_interface_descriptor_data, desc0),
-                      pp_modules[pp_index].bo);
+                      pp_modules[pp_index].kernel.bo);
 
     dri_bo_emit_reloc(bo,
                       I915_GEM_DOMAIN_INSTRUCTION, 0,
@@ -2500,8 +2525,8 @@ i965_post_processing_terminate(VADriverContextP ctx)
         for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
             struct pp_module *pp_module = &pp_modules[i];
 
-            dri_bo_unreference(pp_module->bo);
-            pp_module->bo = NULL;
+            dri_bo_unreference(pp_module->kernel.bo);
+            pp_module->kernel.bo = NULL;
         }
     }
 
@@ -2542,13 +2567,13 @@ i965_post_processing_init(VADriverContextP ctx)
 
         for (i = 0; i < NUM_PP_MODULES && pp_modules; i++) {
             struct pp_module *pp_module = &pp_modules[i];
-            dri_bo_unreference(pp_module->bo);
-            pp_module->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                         pp_module->name,
-                                         pp_module->size,
-                                         4096);
-            assert(pp_module->bo);
-            dri_bo_subdata(pp_module->bo, 0, pp_module->size, pp_module->bin);
+            dri_bo_unreference(pp_module->kernel.bo);
+            pp_module->kernel.bo = dri_bo_alloc(i965->intel.bufmgr,
+                                                pp_module->kernel.name,
+                                                pp_module->kernel.size,
+                                                4096);
+            assert(pp_module->kernel.bo);
+            dri_bo_subdata(pp_module->kernel.bo, 0, pp_module->kernel.size, pp_module->kernel.bin);
         }
     }
 

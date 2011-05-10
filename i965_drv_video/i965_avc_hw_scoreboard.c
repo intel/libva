@@ -41,7 +41,7 @@
 #include "i965_media_h264.h"
 #include "i965_media.h"
 
-extern struct media_kernel *h264_avc_kernels;
+extern struct i965_kernel *h264_avc_kernels;
 
 /* On Ironlake */
 #include "shaders/h264/mc/export.inc.gen5"

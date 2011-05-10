@@ -47,17 +47,17 @@
 #define CURBE_TOTAL_DATA_LENGTH (4 * 32)        /* in byte, it should be less than or equal to CURBE_ALLOCATION_SIZE * 32 */
 #define CURBE_URB_ENTRY_LENGTH  4               /* in 256-bit, it should be less than or equal to CURBE_TOTAL_DATA_LENGTH / 32 */
   
-static uint32_t gen6_vme_intra_frame[][4] = {
+static const uint32_t gen6_vme_intra_frame[][4] = {
 #include "shaders/vme/intra_frame.g6b"
     {0,0,0,0}
 };
 
-static uint32_t gen6_vme_inter_frame[][4] = {
+static const uint32_t gen6_vme_inter_frame[][4] = {
 #include "shaders/vme/inter_frame.g6b"
     {0,0,0,0}
 };
 
-static struct media_kernel gen6_vme_kernels[] = {
+static struct i965_kernel gen6_vme_kernels[] = {
     {
         "VME Intra Frame",
         VME_INTRA_SHADER,										/*index*/
@@ -357,7 +357,7 @@ static VAStatus gen6_vme_interface_setup(VADriverContextP ctx,
     desc = bo->virtual;
 
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
-        struct media_kernel *kernel;
+        struct i965_kernel *kernel;
         kernel = &gen6_vme_kernels[i];
         assert(sizeof(*desc) == 32);
         /*Setup the descritor table*/
@@ -710,7 +710,7 @@ Bool gen6_vme_context_init(VADriverContextP ctx, struct gen6_vme_context *vme_co
 
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         /*Load kernel into GPU memory*/	
-        struct media_kernel *kernel = &gen6_vme_kernels[i];
+        struct i965_kernel *kernel = &gen6_vme_kernels[i];
 
         kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                   kernel->name, 
@@ -749,7 +749,7 @@ Bool gen6_vme_context_destroy(struct gen6_vme_context *vme_context)
 
     for (i = 0; i < GEN6_VME_KERNEL_NUMBER; i++) {
         /*Load kernel into GPU memory*/	
-        struct media_kernel *kernel = &gen6_vme_kernels[i];
+        struct i965_kernel *kernel = &gen6_vme_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;

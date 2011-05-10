@@ -154,15 +154,15 @@ struct intra_kernel_header intra_kernel_header_gen4 = {
     (intra_Pred_4x4_Y_IP - ADD_ERROR_SB0_IP)
 };
 
-static uint32_t h264_avc_combined_gen4[][4] = {
+static const uint32_t h264_avc_combined_gen4[][4] = {
 #include "shaders/h264/mc/avc_mc.g4b"
 };
 
-static uint32_t h264_avc_null_gen4[][4] = {
+static const uint32_t h264_avc_null_gen4[][4] = {
 #include "shaders/h264/mc/null.g4b"
 };
 
-static struct media_kernel h264_avc_kernels_gen4[] = {
+static struct i965_kernel h264_avc_kernels_gen4[] = {
     {
         "AVC combined kernel",
         H264_AVC_COMBINED,
@@ -249,15 +249,15 @@ struct intra_kernel_header intra_kernel_header_gen5 = {
     (intra_Pred_4x4_Y_IP_GEN5 - ADD_ERROR_SB0_IP_GEN5)
 };
 
-static uint32_t h264_avc_combined_gen5[][4] = {
+static const uint32_t h264_avc_combined_gen5[][4] = {
 #include "shaders/h264/mc/avc_mc.g4b.gen5"
 };
 
-static uint32_t h264_avc_null_gen5[][4] = {
+static const uint32_t h264_avc_null_gen5[][4] = {
 #include "shaders/h264/mc/null.g4b.gen5"
 };
 
-static struct media_kernel h264_avc_kernels_gen5[] = {
+static struct i965_kernel h264_avc_kernels_gen5[] = {
     {
         "AVC combined kernel",
         H264_AVC_COMBINED,
@@ -276,7 +276,7 @@ static struct media_kernel h264_avc_kernels_gen5[] = {
 };
 
 #define NUM_H264_AVC_KERNELS (sizeof(h264_avc_kernels_gen4) / sizeof(h264_avc_kernels_gen4[0]))
-struct media_kernel *h264_avc_kernels = NULL;
+struct i965_kernel *h264_avc_kernels = NULL;
 
 #define NUM_AVC_MC_INTERFACES (sizeof(avc_mc_kernel_offset_gen4) / sizeof(avc_mc_kernel_offset_gen4[0]))
 static unsigned long *avc_mc_kernel_offset = NULL;
@@ -762,7 +762,7 @@ i965_media_h264_free_private_context(void **data)
     *data = NULL;
 
     for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-        struct media_kernel *kernel = &h264_avc_kernels[i];
+        struct i965_kernel *kernel = &h264_avc_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;
@@ -871,7 +871,7 @@ i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context
         }
 
         for (i = 0; i < NUM_H264_AVC_KERNELS; i++) {
-            struct media_kernel *kernel = &h264_avc_kernels[i];
+            struct i965_kernel *kernel = &h264_avc_kernels[i];
             kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                       kernel->name, 
                                       kernel->size, 0x1000);

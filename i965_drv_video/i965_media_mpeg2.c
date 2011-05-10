@@ -111,54 +111,54 @@ const uint32_t zigzag_direct[64] = {
     53, 60, 61, 54, 47, 55, 62, 63
 };
 
-static uint32_t frame_intra_kernel[][4] = {
+static const uint32_t frame_intra_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_intra.g4b"
 };
-static uint32_t frame_frame_pred_forward_kernel[][4] = {
+static const uint32_t frame_frame_pred_forward_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_forward.g4b"
 };
-static uint32_t frame_frame_pred_backward_kernel[][4] = {
+static const uint32_t frame_frame_pred_backward_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_backward.g4b"
 };
-static uint32_t frame_frame_pred_bidirect_kernel[][4] = {
+static const uint32_t frame_frame_pred_bidirect_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_bidirect.g4b"
 };
-static uint32_t frame_field_pred_forward_kernel[][4] = {
+static const uint32_t frame_field_pred_forward_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_forward.g4b"
 };
-static uint32_t frame_field_pred_backward_kernel[][4] = {
+static const uint32_t frame_field_pred_backward_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_backward.g4b"
 };
-static uint32_t frame_field_pred_bidirect_kernel[][4] = {
+static const uint32_t frame_field_pred_bidirect_kernel[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_bidirect.g4b"
 };
-static uint32_t lib_kernel[][4] = {
+static const uint32_t lib_kernel[][4] = {
    #include "shaders/mpeg2/vld/lib.g4b"
 };
 /*field picture*/
-static uint32_t field_intra_kernel[][4] = {
+static const uint32_t field_intra_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_intra.g4b"
 };
-static uint32_t field_forward_kernel[][4] = {
+static const uint32_t field_forward_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_forward.g4b"
 };
-static uint32_t field_forward_16x8_kernel[][4] = {
+static const uint32_t field_forward_16x8_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_forward_16x8.g4b"
 };
-static uint32_t field_backward_kernel[][4] = {
+static const uint32_t field_backward_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_backward.g4b"
 };
-static uint32_t field_backward_16x8_kernel[][4] = {
+static const uint32_t field_backward_16x8_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_backward_16x8.g4b"
 };
-static uint32_t field_bidirect_kernel[][4] = {
+static const uint32_t field_bidirect_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_bidirect.g4b"
 };
-static uint32_t field_bidirect_16x8_kernel[][4] = {
+static const uint32_t field_bidirect_16x8_kernel[][4] = {
    #include "shaders/mpeg2/vld/field_bidirect_16x8.g4b"
 };
 
-static struct media_kernel  mpeg2_vld_kernels_gen4[] = {
+static struct i965_kernel  mpeg2_vld_kernels_gen4[] = {
     {
         "FRAME_INTRA",
         FRAME_INTRA,
@@ -281,54 +281,54 @@ static struct media_kernel  mpeg2_vld_kernels_gen4[] = {
 };
 
 /* On IRONLAKE */
-static uint32_t frame_intra_kernel_gen5[][4] = {
+static const uint32_t frame_intra_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_intra.g4b.gen5"
 };
-static uint32_t frame_frame_pred_forward_kernel_gen5[][4] = {
+static const uint32_t frame_frame_pred_forward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_forward.g4b.gen5"
 };
-static uint32_t frame_frame_pred_backward_kernel_gen5[][4] = {
+static const uint32_t frame_frame_pred_backward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_backward.g4b.gen5"
 };
-static uint32_t frame_frame_pred_bidirect_kernel_gen5[][4] = {
+static const uint32_t frame_frame_pred_bidirect_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_frame_pred_bidirect.g4b.gen5"
 };
-static uint32_t frame_field_pred_forward_kernel_gen5[][4] = {
+static const uint32_t frame_field_pred_forward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_forward.g4b.gen5"
 };
-static uint32_t frame_field_pred_backward_kernel_gen5[][4] = {
+static const uint32_t frame_field_pred_backward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_backward.g4b.gen5"
 };
-static uint32_t frame_field_pred_bidirect_kernel_gen5[][4] = {
+static const uint32_t frame_field_pred_bidirect_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/frame_field_pred_bidirect.g4b.gen5"
 };
-static uint32_t lib_kernel_gen5[][4] = {
+static const uint32_t lib_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/lib.g4b.gen5"
 };
 /*field picture*/
-static uint32_t field_intra_kernel_gen5[][4] = {
+static const uint32_t field_intra_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_intra.g4b.gen5"
 };
-static uint32_t field_forward_kernel_gen5[][4] = {
+static const uint32_t field_forward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_forward.g4b.gen5"
 };
-static uint32_t field_forward_16x8_kernel_gen5[][4] = {
+static const uint32_t field_forward_16x8_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_forward_16x8.g4b.gen5"
 };
-static uint32_t field_backward_kernel_gen5[][4] = {
+static const uint32_t field_backward_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_backward.g4b.gen5"
 };
-static uint32_t field_backward_16x8_kernel_gen5[][4] = {
+static const uint32_t field_backward_16x8_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_backward_16x8.g4b.gen5"
 };
-static uint32_t field_bidirect_kernel_gen5[][4] = {
+static const uint32_t field_bidirect_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_bidirect.g4b.gen5"
 };
-static uint32_t field_bidirect_16x8_kernel_gen5[][4] = {
+static const uint32_t field_bidirect_16x8_kernel_gen5[][4] = {
    #include "shaders/mpeg2/vld/field_bidirect_16x8.g4b.gen5"
 };
 
-static struct media_kernel  mpeg2_vld_kernels_gen5[] = {
+static struct i965_kernel  mpeg2_vld_kernels_gen5[] = {
     {
         "FRAME_INTRA",
         FRAME_INTRA,
@@ -450,7 +450,7 @@ static struct media_kernel  mpeg2_vld_kernels_gen5[] = {
     }
 };
 
-static struct media_kernel  *mpeg2_vld_kernels = NULL;
+static struct i965_kernel  *mpeg2_vld_kernels = NULL;
 
 #define NUM_MPEG2_VLD_KERNELS (sizeof(mpeg2_vld_kernels_gen4)/sizeof(mpeg2_vld_kernels_gen4[0]))
 
@@ -919,7 +919,7 @@ i965_media_mpeg2_free_private_context(void **data)
     int i;
 
     for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-        struct media_kernel *kernel = &mpeg2_vld_kernels[i];
+        struct i965_kernel *kernel = &mpeg2_vld_kernels[i];
 
         dri_bo_unreference(kernel->bo);
         kernel->bo = NULL;
@@ -966,7 +966,7 @@ i965_media_mpeg2_dec_context_init(VADriverContextP ctx, struct i965_media_contex
             mpeg2_vld_kernels = mpeg2_vld_kernels_gen4;
 
         for (i = 0; i < NUM_MPEG2_VLD_KERNELS; i++) {
-            struct media_kernel *kernel = &mpeg2_vld_kernels[i];
+            struct i965_kernel *kernel = &mpeg2_vld_kernels[i];
             kernel->bo = dri_bo_alloc(i965->intel.bufmgr, 
                                       kernel->name, 
                                       kernel->size, 64);
