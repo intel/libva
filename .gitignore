@@ -41,5 +41,6 @@ TAGS
 /test/basic/test_11
 /test/decode/mpeg2vldemo
 /test/encode/h264encode
+/test/encode/avcenc
 /test/putsurface/putsurface
 /test/vainfo
