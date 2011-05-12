@@ -436,85 +436,97 @@ static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx,
 
 static void gen6_vme_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(batch);
 }
 
 static void gen6_vme_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 10);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
 
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 8);
+    BEGIN_BATCH(batch, 10);
 
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//General State Base Address
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//Surface State Base Address	
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//Dynamic State Base Address
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//Indirect Object Base Address
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//Instruction Base Address
+    OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 8);
 
-    OUT_BATCH(ctx, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//General State Access Upper Bound	
-    OUT_BATCH(ctx, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Dynamic State Access Upper Bound
-    OUT_BATCH(ctx, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Indirect Object Access Upper Bound
-    OUT_BATCH(ctx, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Instruction Access Upper Bound
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//General State Base Address
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//Surface State Base Address	
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//Dynamic State Base Address
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//Indirect Object Base Address
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//Instruction Base Address
+
+    OUT_BATCH(batch, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//General State Access Upper Bound	
+    OUT_BATCH(batch, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Dynamic State Access Upper Bound
+    OUT_BATCH(batch, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Indirect Object Access Upper Bound
+    OUT_BATCH(batch, 0xFFFFF000 | BASE_ADDRESS_MODIFY);		//Instruction Access Upper Bound
 
     /*
-      OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);				//LLC Coherent Base Address
-      OUT_BATCH(ctx, 0xFFFFF000 | BASE_ADDRESS_MODIFY );		//LLC Coherent Upper Bound
+      OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);				//LLC Coherent Base Address
+      OUT_BATCH(batch, 0xFFFFF000 | BASE_ADDRESS_MODIFY );		//LLC Coherent Upper Bound
     */
 
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void gen6_vme_vfe_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
-    BEGIN_BATCH(ctx, 8);
+    BEGIN_BATCH(batch, 8);
 
-    OUT_BATCH(ctx, CMD_MEDIA_VFE_STATE | 6);					/*Gen6 CMD_MEDIA_STATE_POINTERS = CMD_MEDIA_STATE */
-    OUT_BATCH(ctx, 0);												/*Scratch Space Base Pointer and Space*/
-    OUT_BATCH(ctx, (vme_context->vfe_state.max_num_threads << 16) 
+    OUT_BATCH(batch, CMD_MEDIA_VFE_STATE | 6);					/*Gen6 CMD_MEDIA_STATE_POINTERS = CMD_MEDIA_STATE */
+    OUT_BATCH(batch, 0);												/*Scratch Space Base Pointer and Space*/
+    OUT_BATCH(batch, (vme_context->vfe_state.max_num_threads << 16) 
               | (vme_context->vfe_state.num_urb_entries << 8) 
               | (vme_context->vfe_state.gpgpu_mode << 2) );	/*Maximum Number of Threads , Number of URB Entries, MEDIA Mode*/
-    OUT_BATCH(ctx, 0);												/*Debug: Object ID*/
-    OUT_BATCH(ctx, (vme_context->vfe_state.urb_entry_size << 16) 
+    OUT_BATCH(batch, 0);												/*Debug: Object ID*/
+    OUT_BATCH(batch, (vme_context->vfe_state.urb_entry_size << 16) 
               | vme_context->vfe_state.curbe_allocation_size);				/*URB Entry Allocation Size , CURBE Allocation Size*/
-    OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
-    OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
-    OUT_BATCH(ctx, 0);											/*Disable Scoreboard*/
+    OUT_BATCH(batch, 0);											/*Disable Scoreboard*/
+    OUT_BATCH(batch, 0);											/*Disable Scoreboard*/
+    OUT_BATCH(batch, 0);											/*Disable Scoreboard*/
 	
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 
 }
 
 static void gen6_vme_curbe_load(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
-    BEGIN_BATCH(ctx, 4);
+    BEGIN_BATCH(batch, 4);
 
-    OUT_BATCH(ctx, CMD_MEDIA_CURBE_LOAD | 2);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, CMD_MEDIA_CURBE_LOAD | 2);
+    OUT_BATCH(batch, 0);
 
-    OUT_BATCH(ctx, CURBE_TOTAL_DATA_LENGTH);
-    OUT_RELOC(ctx, vme_context->curbe.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BATCH(batch, CURBE_TOTAL_DATA_LENGTH);
+    OUT_RELOC(batch, vme_context->curbe.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void gen6_vme_idrt(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
-    BEGIN_BATCH(ctx, 4);
+    BEGIN_BATCH(batch, 4);
 
-    OUT_BATCH(ctx, CMD_MEDIA_INTERFACE_LOAD | 2);	
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, GEN6_VME_KERNEL_NUMBER * sizeof(struct gen6_interface_descriptor_data));
-    OUT_RELOC(ctx, vme_context->idrt.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BATCH(batch, CMD_MEDIA_INTERFACE_LOAD | 2);	
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, GEN6_VME_KERNEL_NUMBER * sizeof(struct gen6_interface_descriptor_data));
+    OUT_RELOC(batch, vme_context->idrt.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static int gen6_vme_media_object(VADriverContextP ctx, 
@@ -522,23 +534,25 @@ static int gen6_vme_media_object(VADriverContextP ctx,
                                  int mb_x, int mb_y,
                                  int kernel)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE(encode_state->current_render_target);
     int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
     int len_in_dowrds = 6 + 1;
 
-    BEGIN_BATCH(ctx, len_in_dowrds);
+    BEGIN_BATCH(batch, len_in_dowrds);
     
-    OUT_BATCH(ctx, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
-    OUT_BATCH(ctx, kernel);		/*Interface Descriptor Offset*/	
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, CMD_MEDIA_OBJECT | (len_in_dowrds - 2));
+    OUT_BATCH(batch, kernel);		/*Interface Descriptor Offset*/	
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
    
     /*inline data */
-    OUT_BATCH(ctx, mb_width << 16 | mb_y << 8 | mb_x);			/*M0.0 Refrence0 X,Y, not used in Intra*/
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, mb_width << 16 | mb_y << 8 | mb_x);			/*M0.0 Refrence0 X,Y, not used in Intra*/
+    ADVANCE_BATCH(batch);
 
     return len_in_dowrds * 4;
 }
@@ -603,6 +617,8 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
                                          struct encode_state *encode_state,
                                          struct gen6_encoder_context *gen6_encoder_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
     int is_intra = pSliceParameter->slice_flags.bits.is_intra;
@@ -611,19 +627,19 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
     int emit_new_state = 1, object_len_in_bytes;
     int x, y;
 
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
+    intel_batchbuffer_start_atomic(batch, 0x1000);
 
     for(y = 0; y < height_in_mbs; y++){
         for(x = 0; x < width_in_mbs; x++){	
 
             if (emit_new_state) {
                 /*Step1: MI_FLUSH/PIPE_CONTROL*/
-                BEGIN_BATCH(ctx, 4);
-                OUT_BATCH(ctx, CMD_PIPE_CONTROL | 0x02);
-                OUT_BATCH(ctx, 0);
-                OUT_BATCH(ctx, 0);
-                OUT_BATCH(ctx, 0);
-                ADVANCE_BATCH(ctx);
+                BEGIN_BATCH(batch, 4);
+                OUT_BATCH(batch, CMD_PIPE_CONTROL | 0x02);
+                OUT_BATCH(batch, 0);
+                OUT_BATCH(batch, 0);
+                OUT_BATCH(batch, 0);
+                ADVANCE_BATCH(batch);
 
                 /*Step2: State command PIPELINE_SELECT*/
                 gen6_vme_pipeline_select(ctx);
@@ -640,16 +656,17 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
             /*Step4: Primitive commands*/
             object_len_in_bytes = gen6_vme_media_object(ctx, encode_state, x, y, is_intra ? VME_INTRA_SHADER : VME_INTER_SHADER);
 
-            if (intel_batchbuffer_check_free_space(ctx, object_len_in_bytes) == 0) {
-                intel_batchbuffer_end_atomic(ctx);	
-                intel_batchbuffer_flush(ctx);
+            if (intel_batchbuffer_check_free_space(batch, object_len_in_bytes) == 0) {
+                assert(0);
+                intel_batchbuffer_end_atomic(batch);	
+                intel_batchbuffer_flush(batch);
                 emit_new_state = 1;
-                intel_batchbuffer_start_atomic(ctx, 0x1000);
+                intel_batchbuffer_start_atomic(batch, 0x1000);
             }
         }
     }
 
-    intel_batchbuffer_end_atomic(ctx);	
+    intel_batchbuffer_end_atomic(batch);	
 }
 
 static VAStatus gen6_vme_prepare(VADriverContextP ctx, 
@@ -676,7 +693,10 @@ static VAStatus gen6_vme_run(VADriverContextP ctx,
                              struct encode_state *encode_state,
                              struct gen6_encoder_context *gen6_encoder_context)
 {
-    intel_batchbuffer_flush(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    intel_batchbuffer_flush(batch);
 
     return VA_STATUS_SUCCESS;
 }

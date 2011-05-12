@@ -22,6 +22,7 @@
 
 #define CMD_MI                                  (0x0 << 29)
 #define CMD_2D                                  (0x2 << 29)
+#define CMD_3D                                  (0x3 << 29)
 
 #define MI_NOOP                                 (CMD_MI | 0)
 
@@ -42,6 +43,21 @@
 /* BR13 */
 #define BR13_565                                (0x1 << 24)
 #define BR13_8888                               (0x3 << 24)
+
+#define CMD_PIPE_CONTROL                        (CMD_3D | (3 << 27) | (2 << 24) | (0 << 16))
+#define CMD_PIPE_CONTROL_NOWRITE                (0 << 14)
+#define CMD_PIPE_CONTROL_WRITE_QWORD            (1 << 14)
+#define CMD_PIPE_CONTROL_WRITE_DEPTH            (2 << 14)
+#define CMD_PIPE_CONTROL_WRITE_TIME             (3 << 14)
+#define CMD_PIPE_CONTROL_DEPTH_STALL            (1 << 13)
+#define CMD_PIPE_CONTROL_WC_FLUSH               (1 << 12)
+#define CMD_PIPE_CONTROL_IS_FLUSH               (1 << 11)
+#define CMD_PIPE_CONTROL_TC_FLUSH               (1 << 10)
+#define CMD_PIPE_CONTROL_NOTIFY_ENABLE          (1 << 8)
+#define CMD_PIPE_CONTROL_GLOBAL_GTT             (1 << 2)
+#define CMD_PIPE_CONTROL_LOCAL_PGTT             (0 << 2)
+#define CMD_PIPE_CONTROL_DEPTH_CACHE_FLUSH      (1 << 0)
+
 
 struct intel_batchbuffer;
 
@@ -90,7 +106,6 @@ struct intel_driver_data
     int locked;
 
     struct intel_batchbuffer *batch;
-    struct intel_batchbuffer *batch_bcs;
     dri_bufmgr *bufmgr;
 
     unsigned int has_exec2  : 1; /* Flag: has execbuffer2? */

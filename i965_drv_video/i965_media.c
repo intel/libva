@@ -46,95 +46,109 @@
 static void
 i965_media_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_media_urb_layout(VADriverContextP ctx, struct i965_media_context *media_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = media_context->urb.cs_start;
     cs_fence = URB_SIZE((&i965->intel));
 
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 
               (vfe_fence << UF2_VFE_FENCE_SHIFT) |      /* VFE_SIZE */
               (cs_fence << UF2_CS_FENCE_SHIFT));        /* CS_SIZE */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_media_state_base_address(VADriverContextP ctx, struct i965_media_context *media_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
-        BEGIN_BATCH(ctx, 8);
-        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        BEGIN_BATCH(batch, 8);
+        OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
         
         if (media_context->indirect_object.bo) {
-            OUT_RELOC(ctx, media_context->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
+            OUT_RELOC(batch, media_context->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
                       media_context->indirect_object.offset | BASE_ADDRESS_MODIFY);
         } else {
-            OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+            OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
         }
 
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        ADVANCE_BATCH(ctx);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(batch);
     } else {
-        BEGIN_BATCH(ctx, 6);
-        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+        BEGIN_BATCH(batch, 6);
+        OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 4);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
 
         if (media_context->indirect_object.bo) {
-            OUT_RELOC(ctx, media_context->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
+            OUT_RELOC(batch, media_context->indirect_object.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 
                       media_context->indirect_object.offset | BASE_ADDRESS_MODIFY);
         } else {
-            OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
+            OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
         }
 
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        ADVANCE_BATCH(ctx);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(batch);
     }
 }
 
 static void
 i965_media_state_pointers(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_MEDIA_STATE_POINTERS | 1);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
 
     if (media_context->extended_state.enabled)
-        OUT_RELOC(ctx, media_context->extended_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
+        OUT_RELOC(batch, media_context->extended_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
     else
-        OUT_BATCH(ctx, 0);
+        OUT_BATCH(batch, 0);
 
-    OUT_RELOC(ctx, media_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    ADVANCE_BATCH(ctx);
+    OUT_RELOC(batch, media_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 i965_media_cs_urb_layout(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CS_URB_STATE | 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
+    OUT_BATCH(batch,
               ((media_context->urb.size_cs_entry - 1) << 4) |     /* URB Entry Allocation Size */
               (media_context->urb.num_cs_entries << 0));          /* Number of URB Entries */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
@@ -148,26 +162,32 @@ i965_media_pipeline_state(VADriverContextP ctx, struct i965_media_context *media
 static void
 i965_media_constant_buffer(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
-    OUT_RELOC(ctx, media_context->curbe.bo,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
+    OUT_RELOC(batch, media_context->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               media_context->urb.size_cs_entry - 1);
-    ADVANCE_BATCH(ctx);    
+    ADVANCE_BATCH(batch);    
 }
 
 static void 
 i965_media_depth_buffer(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, CMD_DEPTH_BUFFER | 4);
-    OUT_BATCH(ctx, (I965_DEPTHFORMAT_D32_FLOAT << 18) | 
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 6);
+    OUT_BATCH(batch, CMD_DEPTH_BUFFER | 4);
+    OUT_BATCH(batch, (I965_DEPTHFORMAT_D32_FLOAT << 18) | 
               (I965_SURFACE_NULL << 29));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void
@@ -175,8 +195,11 @@ i965_media_pipeline_setup(VADriverContextP ctx,
                           struct decode_state *decode_state,
                           struct i965_media_context *media_context)
 {
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);                               /* step 1 */
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);                               /* step 1 */
     i965_media_depth_buffer(ctx);
     i965_media_pipeline_select(ctx);                                    /* step 2 */
     i965_media_urb_layout(ctx, media_context);                          /* step 3 */
@@ -184,7 +207,7 @@ i965_media_pipeline_setup(VADriverContextP ctx,
     i965_media_constant_buffer(ctx, decode_state, media_context);       /* step 5 */
     assert(media_context->media_objects);
     media_context->media_objects(ctx, decode_state, media_context);     /* step 6 */
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void 

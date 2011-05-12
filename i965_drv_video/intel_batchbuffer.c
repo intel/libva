@@ -45,7 +45,7 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
 
     dri_bo_unreference(batch->buffer);
     batch->buffer = dri_bo_alloc(intel->bufmgr, 
-                                 batch->flag == I915_EXEC_RENDER ? "render batch buffer" : "bsd batch buffer", 
+                                 "batch buffer",
                                  batch_size,
                                  0x1000);
     assert(batch->buffer);
@@ -57,66 +57,47 @@ intel_batchbuffer_reset(struct intel_batchbuffer *batch)
     batch->atomic = 0;
 }
 
-Bool 
-intel_batchbuffer_init(struct intel_driver_data *intel)
+static unsigned int
+intel_batchbuffer_space(struct intel_batchbuffer *batch)
 {
-    intel->batch = calloc(1, sizeof(*(intel->batch)));
-    assert(intel->batch);
-    intel->batch->intel = intel;
-    intel->batch->flag = I915_EXEC_RENDER;
-    intel->batch->run = drm_intel_bo_mrb_exec;
-    intel_batchbuffer_reset(intel->batch);
-
-    if (intel->has_bsd) {
-        intel->batch_bcs = calloc(1, sizeof(*(intel->batch_bcs)));
-        assert(intel->batch_bcs);
-        intel->batch_bcs->intel = intel;
-        intel->batch_bcs->flag = I915_EXEC_BSD;
-        intel->batch_bcs->run = drm_intel_bo_mrb_exec;
-        intel_batchbuffer_reset(intel->batch_bcs);
-    }
-
-    return True;
+    return (batch->size - BATCH_RESERVED) - (batch->ptr - batch->map);
 }
 
-Bool
-intel_batchbuffer_terminate(struct intel_driver_data *intel)
+
+struct intel_batchbuffer * 
+intel_batchbuffer_new(struct intel_driver_data *intel, int flag)
 {
-    if (intel->batch) {
-        if (intel->batch->map) {
-            dri_bo_unmap(intel->batch->buffer);
-            intel->batch->map = NULL;
-        }
+    struct intel_batchbuffer *batch = calloc(1, sizeof(*batch));
+    assert(flag == I915_EXEC_RENDER ||
+           flag == I915_EXEC_BSD ||
+           flag == I915_EXEC_BLT);
 
-        dri_bo_unreference(intel->batch->buffer);
-        free(intel->batch);
-        intel->batch = NULL;
-    }
+    batch->intel = intel;
+    batch->flag = flag;
+    batch->run = drm_intel_bo_mrb_exec;
+    intel_batchbuffer_reset(batch);
 
-    if (intel->batch_bcs) {
-        if (intel->batch_bcs->map) {
-            dri_bo_unmap(intel->batch_bcs->buffer);
-            intel->batch_bcs->map = NULL;
-        }
-
-        dri_bo_unreference(intel->batch_bcs->buffer);
-        free(intel->batch_bcs);
-        intel->batch_bcs = NULL;
-    }
-
-    return True;
+    return batch;
 }
 
-static Bool
-intel_batchbuffer_flush_helper(VADriverContextP ctx,
-                               struct intel_batchbuffer *batch)
+void intel_batchbuffer_free(struct intel_batchbuffer *batch)
 {
-    struct intel_driver_data *intel = batch->intel;
+    if (batch->map) {
+        dri_bo_unmap(batch->buffer);
+        batch->map = NULL;
+    }
+
+    dri_bo_unreference(batch->buffer);
+    free(batch);
+}
+
+void 
+intel_batchbuffer_flush(struct intel_batchbuffer *batch)
+{
     unsigned int used = batch->ptr - batch->map;
-    int is_locked = intel->locked;
 
     if (used == 0) {
-        return True;
+        return;
     }
 
     if ((used & 4) == 0) {
@@ -128,322 +109,167 @@ intel_batchbuffer_flush_helper(VADriverContextP ctx,
     batch->ptr += 4;
     dri_bo_unmap(batch->buffer);
     used = batch->ptr - batch->map;
-
-    if (!is_locked)
-        intel_lock_hardware(ctx);
-
     batch->run(batch->buffer, used, 0, 0, 0, batch->flag);
-
-    if (!is_locked)
-        intel_unlock_hardware(ctx);
-
     intel_batchbuffer_reset(batch);
-
-    return True;
 }
 
-Bool 
-intel_batchbuffer_flush(VADriverContextP ctx)
+void 
+intel_batchbuffer_emit_dword(struct intel_batchbuffer *batch, unsigned int x)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    
-    return intel_batchbuffer_flush_helper(ctx, intel->batch);
-}
-
-Bool 
-intel_batchbuffer_flush_bcs(VADriverContextP ctx)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    
-    return intel_batchbuffer_flush_helper(ctx, intel->batch_bcs);
-}
-
-static unsigned int
-intel_batchbuffer_space_helper(struct intel_batchbuffer *batch)
-{
-    return (batch->size - BATCH_RESERVED) - (batch->ptr - batch->map);
-}
-
-static void
-intel_batchbuffer_emit_dword_helper(struct intel_batchbuffer *batch, 
-                                    unsigned int x)
-{
-    assert(intel_batchbuffer_space_helper(batch) >= 4);
+    assert(intel_batchbuffer_space(batch) >= 4);
     *(unsigned int *)batch->ptr = x;
     batch->ptr += 4;
 }
 
 void 
-intel_batchbuffer_emit_dword(VADriverContextP ctx, unsigned int x)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_emit_dword_helper(intel->batch, x);
-}
-
-void 
-intel_batchbuffer_emit_dword_bcs(VADriverContextP ctx, unsigned int x)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_emit_dword_helper(intel->batch_bcs, x);
-}
-
-static void 
-intel_batchbuffer_emit_reloc_helper(VADriverContextP ctx, 
-                                    struct intel_batchbuffer *batch,
-                                    dri_bo *bo, 
-                                    uint32_t read_domains, uint32_t write_domains, 
-                                    uint32_t delta)
+intel_batchbuffer_emit_reloc(struct intel_batchbuffer *batch, dri_bo *bo, 
+                                uint32_t read_domains, uint32_t write_domains, 
+                                uint32_t delta)
 {
     assert(batch->ptr - batch->map < batch->size);
     dri_bo_emit_reloc(batch->buffer, read_domains, write_domains,
                       delta, batch->ptr - batch->map, bo);
-    intel_batchbuffer_emit_dword_helper(batch, bo->offset + delta);
+    intel_batchbuffer_emit_dword(batch, bo->offset + delta);
 }
 
 void 
-intel_batchbuffer_emit_reloc(VADriverContextP ctx, dri_bo *bo, 
-                             uint32_t read_domains, uint32_t write_domains, 
-                             uint32_t delta)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_emit_reloc_helper(ctx, intel->batch,
-                                        bo, read_domains, write_domains,
-                                        delta);
-}
-
-void 
-intel_batchbuffer_emit_reloc_bcs(VADriverContextP ctx, dri_bo *bo, 
-                                 uint32_t read_domains, uint32_t write_domains, 
-                                 uint32_t delta)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_emit_reloc_helper(ctx, intel->batch_bcs,
-                                        bo, read_domains, write_domains,
-                                        delta);
-}
-
-static void 
-intel_batchbuffer_require_space_helper(VADriverContextP ctx, 
-                                struct intel_batchbuffer *batch,
-                                unsigned int size)
+intel_batchbuffer_require_space(struct intel_batchbuffer *batch,
+                                   unsigned int size)
 {
     assert(size < batch->size - 8);
 
-    if (intel_batchbuffer_space_helper(batch) < size) {
-        intel_batchbuffer_flush_helper(ctx, batch);
+    if (intel_batchbuffer_space(batch) < size) {
+        intel_batchbuffer_flush(batch);
     }
 }
 
 void 
-intel_batchbuffer_require_space(VADriverContextP ctx, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_require_space_helper(ctx, intel->batch, size);
-}
-
-void 
-intel_batchbuffer_require_space_bcs(VADriverContextP ctx, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_require_space_helper(ctx, intel->batch_bcs, size);
-}
-
-static void 
-intel_batchbuffer_data_helper(VADriverContextP ctx, 
-                              struct intel_batchbuffer *batch,
-                              void *data,
-                              unsigned int size)
+intel_batchbuffer_data(struct intel_batchbuffer *batch,
+                          void *data,
+                          unsigned int size)
 {
     assert((size & 3) == 0);
-    intel_batchbuffer_require_space_helper(ctx, batch, size);
+    intel_batchbuffer_require_space(batch, size);
 
     assert(batch->ptr);
     memcpy(batch->ptr, data, size);
     batch->ptr += size;
 }
 
-void 
-intel_batchbuffer_data(VADriverContextP ctx, void *data, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_data_helper(ctx, intel->batch, data, size);
-}
-
-void 
-intel_batchbuffer_data_bcs(VADriverContextP ctx, void *data, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_data_helper(ctx, intel->batch_bcs, data, size);
-}
-
 void
-intel_batchbuffer_emit_mi_flush(VADriverContextP ctx)
+intel_batchbuffer_emit_mi_flush(struct intel_batchbuffer *batch)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    if (intel->batch->flag == I915_EXEC_BLT) {
-        BEGIN_BLT_BATCH(ctx, 4);
-        OUT_BATCH(ctx, MI_FLUSH_DW);
-        OUT_BATCH(ctx, 0);
-        OUT_BATCH(ctx, 0);
-        OUT_BATCH(ctx, 0);
-        ADVANCE_BATCH(ctx);
-    } else if (intel->batch->flag == I915_EXEC_RENDER) {
-        BEGIN_BATCH(ctx, 1);
-        OUT_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
-        ADVANCE_BATCH(ctx);
-    }
-}
-
-void
-intel_batchbuffer_emit_mi_flush_bcs(VADriverContextP ctx)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_driver_data *intel = batch->intel; 
 
     if (IS_GEN6(intel->device_id)) {
-        BEGIN_BCS_BATCH(ctx, 4);
-        OUT_BCS_BATCH(ctx, MI_FLUSH_DW | MI_FLUSH_DW_VIDEO_PIPELINE_CACHE_INVALIDATE);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        ADVANCE_BCS_BATCH(ctx);
+        if (batch->flag == I915_EXEC_RENDER) {
+            BEGIN_BATCH(batch, 4);
+            OUT_BATCH(batch, CMD_PIPE_CONTROL | 0x2);
+            OUT_BATCH(batch, 
+                      CMD_PIPE_CONTROL_WC_FLUSH |
+                      CMD_PIPE_CONTROL_TC_FLUSH |
+                      CMD_PIPE_CONTROL_NOWRITE);
+            OUT_BATCH(batch, 0);
+            OUT_BATCH(batch, 0);
+            ADVANCE_BATCH(batch);
+        } else {
+            if (batch->flag == I915_EXEC_BLT) {
+                BEGIN_BLT_BATCH(batch, 4);
+                OUT_BLT_BATCH(batch, MI_FLUSH_DW);
+                OUT_BLT_BATCH(batch, 0);
+                OUT_BLT_BATCH(batch, 0);
+                OUT_BLT_BATCH(batch, 0);
+                ADVANCE_BLT_BATCH(batch);
+            } else {
+                assert(batch->flag == I915_EXEC_BSD);
+                BEGIN_BCS_BATCH(batch, 4);
+                OUT_BCS_BATCH(batch, MI_FLUSH_DW | MI_FLUSH_DW_VIDEO_PIPELINE_CACHE_INVALIDATE);
+                OUT_BCS_BATCH(batch, 0);
+                OUT_BCS_BATCH(batch, 0);
+                OUT_BCS_BATCH(batch, 0);
+                ADVANCE_BCS_BATCH(batch);
+            }
+        }
     } else {
-        BEGIN_BCS_BATCH(ctx, 1);
-        OUT_BCS_BATCH(ctx, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
-        ADVANCE_BCS_BATCH(ctx);
+        if (batch->flag == I915_EXEC_RENDER) {
+            BEGIN_BATCH(batch, 1);
+            OUT_BATCH(batch, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+            ADVANCE_BATCH(batch);
+        } else {
+            assert(batch->flag == I915_EXEC_BSD);
+            BEGIN_BCS_BATCH(batch, 1);
+            OUT_BCS_BATCH(batch, MI_FLUSH | MI_FLUSH_STATE_INSTRUCTION_CACHE_INVALIDATE);
+            ADVANCE_BCS_BATCH(batch);
+        }
     }
 }
 
 void
-intel_batchbuffer_start_atomic_helper(VADriverContextP ctx, 
-                                      struct intel_batchbuffer *batch,
-                                      unsigned int size)
-{
-    assert(!batch->atomic);
-    intel_batchbuffer_require_space_helper(ctx, batch, size);
-    batch->atomic = 1;
-}
-
-void
-intel_batchbuffer_start_atomic(VADriverContextP ctx, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    intel_batchbuffer_check_batchbuffer_flag(ctx, I915_EXEC_RENDER);
-    intel_batchbuffer_start_atomic_helper(ctx, intel->batch, size);
-}
-
-void
-intel_batchbuffer_start_atomic_bcs(VADriverContextP ctx, unsigned int size)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    intel_batchbuffer_start_atomic_helper(ctx, intel->batch_bcs, size);
-}
-
-void
-intel_batchbuffer_end_atomic_helper(struct intel_batchbuffer *batch)
-{
-    assert(batch->atomic);
-    batch->atomic = 0;
-}
-
-void
-intel_batchbuffer_end_atomic(VADriverContextP ctx)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_end_atomic_helper(intel->batch);
-}
-
-void
-intel_batchbuffer_end_atomic_bcs(VADriverContextP ctx)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    intel_batchbuffer_end_atomic_helper(intel->batch_bcs);
-}
-
-static void
-intel_batchbuffer_begin_batch_helper(struct intel_batchbuffer *batch, int total)
+intel_batchbuffer_begin_batch(struct intel_batchbuffer *batch, int total)
 {
     batch->emit_total = total * 4;
     batch->emit_start = batch->ptr;
 }
 
 void
-intel_batchbuffer_begin_batch(VADriverContextP ctx, int total)
-{
-   struct intel_driver_data *intel = intel_driver_data(ctx);
-
-   intel_batchbuffer_begin_batch_helper(intel->batch, total);
-}
-
-void
-intel_batchbuffer_begin_batch_bcs(VADriverContextP ctx, int total)
-{
-   struct intel_driver_data *intel = intel_driver_data(ctx);
-
-   intel_batchbuffer_begin_batch_helper(intel->batch_bcs, total);
-}
-
-static void
-intel_batchbuffer_advance_batch_helper(struct intel_batchbuffer *batch)
+intel_batchbuffer_advance_batch(struct intel_batchbuffer *batch)
 {
     assert(batch->emit_total == (batch->ptr - batch->emit_start));
 }
 
 void
-intel_batchbuffer_advance_batch(VADriverContextP ctx)
+intel_batchbuffer_check_batchbuffer_flag(struct intel_batchbuffer *batch, int flag)
 {
-   struct intel_driver_data *intel = intel_driver_data(ctx);
-
-   intel_batchbuffer_advance_batch_helper(intel->batch);
-}
-
-void
-intel_batchbuffer_advance_batch_bcs(VADriverContextP ctx)
-{
-   struct intel_driver_data *intel = intel_driver_data(ctx);
-
-   intel_batchbuffer_advance_batch_helper(intel->batch_bcs);
-}
-
-void
-intel_batchbuffer_check_batchbuffer_flag(VADriverContextP ctx, int flag)
-{
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
     if (flag != I915_EXEC_RENDER &&
         flag != I915_EXEC_BLT &&
         flag != I915_EXEC_BSD)
         return;
 
-    if (intel->batch->flag == flag)
+    if (batch->flag == flag)
         return;
 
-    intel_batchbuffer_flush_helper(ctx, intel->batch);
-    intel->batch->flag = flag;
+    intel_batchbuffer_flush(batch);
+    batch->flag = flag;
 }
 
 int
-intel_batchbuffer_check_free_space(VADriverContextP ctx, int size)
+intel_batchbuffer_check_free_space(struct intel_batchbuffer *batch, int size)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-
-    return intel_batchbuffer_space_helper(intel->batch) >= size;
+    return intel_batchbuffer_space(batch) >= size;
 }
 
-int
-intel_batchbuffer_check_free_space_bcs(VADriverContextP ctx, int size)
+static void
+intel_batchbuffer_start_atomic_helper(struct intel_batchbuffer *batch,
+                                      int flag,
+                                      unsigned int size)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
+    assert(!batch->atomic);
+    intel_batchbuffer_check_batchbuffer_flag(batch, flag);
+    intel_batchbuffer_require_space(batch, size);
+    batch->atomic = 1;
+}
 
-    return intel_batchbuffer_space_helper(intel->batch_bcs) >= size;
+void
+intel_batchbuffer_start_atomic(struct intel_batchbuffer *batch, unsigned int size)
+{
+    intel_batchbuffer_start_atomic_helper(batch, I915_EXEC_RENDER, size);
+}
+
+void
+intel_batchbuffer_start_atomic_blt(struct intel_batchbuffer *batch, unsigned int size)
+{
+    intel_batchbuffer_start_atomic_helper(batch, I915_EXEC_BLT, size);
+}
+
+void
+intel_batchbuffer_start_atomic_bcs(struct intel_batchbuffer *batch, unsigned int size)
+{
+    intel_batchbuffer_start_atomic_helper(batch, I915_EXEC_BSD, size);
+}
+
+void
+intel_batchbuffer_end_atomic(struct intel_batchbuffer *batch)
+{
+    assert(batch->atomic);
+    batch->atomic = 0;
 }

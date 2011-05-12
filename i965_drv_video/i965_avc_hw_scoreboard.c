@@ -198,93 +198,113 @@ i965_avc_hw_scoreboard_states_setup(struct i965_avc_hw_scoreboard_context *avc_h
 static void
 i965_avc_hw_scoreboard_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_avc_hw_scoreboard_urb_layout(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = avc_hw_scoreboard_context->urb.cs_start;
     cs_fence = URB_SIZE((&i965->intel));
 
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 
               (vfe_fence << UF2_VFE_FENCE_SHIFT) |      /* VFE_SIZE */
               (cs_fence << UF2_CS_FENCE_SHIFT));        /* CS_SIZE */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_avc_hw_scoreboard_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 8);
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 8);
+    OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_avc_hw_scoreboard_state_pointers(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_MEDIA_STATE_POINTERS | 1);
-    OUT_BATCH(ctx, 0);
-    OUT_RELOC(ctx, avc_hw_scoreboard_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
+    OUT_BATCH(batch, 0);
+    OUT_RELOC(batch, avc_hw_scoreboard_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 i965_avc_hw_scoreboard_cs_urb_layout(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CS_URB_STATE | 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+ 
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
+    OUT_BATCH(batch,
               ((avc_hw_scoreboard_context->urb.size_cs_entry - 1) << 4) |     /* URB Entry Allocation Size */
               (avc_hw_scoreboard_context->urb.num_cs_entries << 0));          /* Number of URB Entries */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_avc_hw_scoreboard_constant_buffer(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
-    OUT_RELOC(ctx, avc_hw_scoreboard_context->curbe.bo,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
+    OUT_RELOC(batch, avc_hw_scoreboard_context->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               avc_hw_scoreboard_context->urb.size_cs_entry - 1);
-    ADVANCE_BATCH(ctx);    
+    ADVANCE_BATCH(batch);    
 }
 
 static void
 i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     int number_mb_cmds = 512;
     int starting_mb_number = avc_hw_scoreboard_context->inline_data.starting_mb_number;
     int i;
 
     for (i = 0; i < avc_hw_scoreboard_context->inline_data.num_mb_cmds / 512; i++) {
-        BEGIN_BATCH(ctx, 6);
-        OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
-        OUT_BATCH(ctx, 0); /* interface descriptor offset: 0 */
-        OUT_BATCH(ctx, 0); /* no indirect data */
-        OUT_BATCH(ctx, 0);
-        OUT_BATCH(ctx, ((number_mb_cmds << 16) |
+        BEGIN_BATCH(batch, 6);
+        OUT_BATCH(batch, CMD_MEDIA_OBJECT | 4);
+        OUT_BATCH(batch, 0); /* interface descriptor offset: 0 */
+        OUT_BATCH(batch, 0); /* no indirect data */
+        OUT_BATCH(batch, 0);
+        OUT_BATCH(batch, ((number_mb_cmds << 16) |
                         (starting_mb_number << 0)));
-        OUT_BATCH(ctx, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
-        ADVANCE_BATCH(ctx);
+        OUT_BATCH(batch, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
+        ADVANCE_BATCH(batch);
 
         starting_mb_number += 512;
     }
@@ -292,23 +312,26 @@ i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_avc_hw_scoreboa
     number_mb_cmds = avc_hw_scoreboard_context->inline_data.num_mb_cmds % 512;
 
     if (number_mb_cmds) {
-        BEGIN_BATCH(ctx, 6);
-        OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 4);
-        OUT_BATCH(ctx, 0); /* interface descriptor offset: 0 */
-        OUT_BATCH(ctx, 0); /* no indirect data */
-        OUT_BATCH(ctx, 0);
-        OUT_BATCH(ctx, ((number_mb_cmds << 16) |
+        BEGIN_BATCH(batch, 6);
+        OUT_BATCH(batch, CMD_MEDIA_OBJECT | 4);
+        OUT_BATCH(batch, 0); /* interface descriptor offset: 0 */
+        OUT_BATCH(batch, 0); /* no indirect data */
+        OUT_BATCH(batch, 0);
+        OUT_BATCH(batch, ((number_mb_cmds << 16) |
                         (starting_mb_number << 0)));
-        OUT_BATCH(ctx, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
-        ADVANCE_BATCH(ctx);
+        OUT_BATCH(batch, avc_hw_scoreboard_context->inline_data.pic_width_in_mbs);
+        ADVANCE_BATCH(batch);
     }
 }
 
 static void
 i965_avc_hw_scoreboard_pipeline_setup(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
 {
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     i965_avc_hw_scoreboard_pipeline_select(ctx);
     i965_avc_hw_scoreboard_state_base_address(ctx);
     i965_avc_hw_scoreboard_state_pointers(ctx, avc_hw_scoreboard_context);
@@ -316,7 +339,7 @@ i965_avc_hw_scoreboard_pipeline_setup(VADriverContextP ctx, struct i965_avc_hw_s
     i965_avc_hw_scoreboard_cs_urb_layout(ctx, avc_hw_scoreboard_context);
     i965_avc_hw_scoreboard_constant_buffer(ctx, avc_hw_scoreboard_context);
     i965_avc_hw_scoreboard_objects(ctx, avc_hw_scoreboard_context);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 void

@@ -710,6 +710,8 @@ i965_media_h264_objects(VADriverContextP ctx,
                         struct decode_state *decode_state,
                         struct i965_media_context *media_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_h264_context *i965_h264_context;
     unsigned int *object_command;
 
@@ -725,19 +727,19 @@ i965_media_h264_objects(VADriverContextP ctx,
     *object_command = MI_BATCH_BUFFER_END;
     dri_bo_unmap(i965_h264_context->avc_it_command_mb_info.bo);
 
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, MI_BATCH_BUFFER_START | (2 << 6));
-    OUT_RELOC(ctx, i965_h264_context->avc_it_command_mb_info.bo, 
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, MI_BATCH_BUFFER_START | (2 << 6));
+    OUT_RELOC(batch, i965_h264_context->avc_it_command_mb_info.bo, 
               I915_GEM_DOMAIN_COMMAND, 0, 
               0);
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 
     /* Have to execute the batch buffer here becuase MI_BATCH_BUFFER_END
      * will cause control to pass back to ring buffer 
      */
-    intel_batchbuffer_end_atomic(ctx);
-    intel_batchbuffer_flush(ctx);
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
+    intel_batchbuffer_end_atomic(batch);
+    intel_batchbuffer_flush(batch);
+    intel_batchbuffer_start_atomic(batch, 0x1000);
     i965_avc_ildb(ctx, decode_state, i965_h264_context);
 }
 

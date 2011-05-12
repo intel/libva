@@ -57,8 +57,6 @@
 /* DW1 */
 # define CMD_CLEAR_PARAMS_DEPTH_CLEAR_VALID     (1 << 15)
 
-#define CMD_PIPE_CONTROL                        CMD(3, 2, 0)
-
 /* for GEN6+ */
 #define GEN6_3DSTATE_SAMPLER_STATE_POINTERS	CMD(3, 0, 0x02)
 # define GEN6_3DSTATE_SAMPLER_STATE_MODIFY_PS	(1 << 12)

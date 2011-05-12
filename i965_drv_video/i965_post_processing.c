@@ -399,78 +399,97 @@ ironlake_pp_states_setup(VADriverContextP ctx)
 static void
 ironlake_pp_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 ironlake_pp_urb_layout(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = pp_context->urb.cs_start;
     cs_fence = pp_context->urb.size;
 
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_URB_FENCE | UF0_VFE_REALLOC | UF0_CS_REALLOC | 1);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 
               (vfe_fence << UF2_VFE_FENCE_SHIFT) |      /* VFE_SIZE */
               (cs_fence << UF2_CS_FENCE_SHIFT));        /* CS_SIZE */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 ironlake_pp_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 8);
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 8);
+    OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 ironlake_pp_state_pointers(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, CMD_MEDIA_STATE_POINTERS | 1);
-    OUT_BATCH(ctx, 0);
-    OUT_RELOC(ctx, pp_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
+    OUT_BATCH(batch, 0);
+    OUT_RELOC(batch, pp_context->vfe_state.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 ironlake_pp_cs_urb_layout(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CS_URB_STATE | 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
+    OUT_BATCH(batch,
               ((pp_context->urb.size_cs_entry - 1) << 4) |     /* URB Entry Allocation Size */
               (pp_context->urb.num_cs_entries << 0));          /* Number of URB Entries */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 ironlake_pp_constant_buffer(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
-    OUT_RELOC(ctx, pp_context->curbe.bo,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
+    OUT_RELOC(batch, pp_context->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               pp_context->urb.size_cs_entry - 1);
-    ADVANCE_BATCH(ctx);    
+    ADVANCE_BATCH(batch);    
 }
 
 static void
 ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int x, x_steps, y, y_steps;
 
     x_steps = pp_context->pp_x_steps(&pp_context->private_context);
@@ -479,17 +498,17 @@ ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_cont
     for (y = 0; y < y_steps; y++) {
         for (x = 0; x < x_steps; x++) {
             if (!pp_context->pp_set_block_parameter(pp_context, x, y)) {
-                BEGIN_BATCH(ctx, 20);
-                OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 18);
-                OUT_BATCH(ctx, 0);
-                OUT_BATCH(ctx, 0); /* no indirect data */
-                OUT_BATCH(ctx, 0);
+                BEGIN_BATCH(batch, 20);
+                OUT_BATCH(batch, CMD_MEDIA_OBJECT | 18);
+                OUT_BATCH(batch, 0);
+                OUT_BATCH(batch, 0); /* no indirect data */
+                OUT_BATCH(batch, 0);
 
                 /* inline data grf 5-6 */
                 assert(sizeof(pp_inline_parameter) == 64);
-                intel_batchbuffer_data(ctx, &pp_inline_parameter, sizeof(pp_inline_parameter));
+                intel_batchbuffer_data(batch, &pp_inline_parameter, sizeof(pp_inline_parameter));
 
-                ADVANCE_BATCH(ctx);
+                ADVANCE_BATCH(batch);
             }
         }
     }
@@ -498,11 +517,13 @@ ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_cont
 static void
 ironlake_pp_pipeline_setup(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
 
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     ironlake_pp_pipeline_select(ctx);
     ironlake_pp_state_base_address(ctx);
     ironlake_pp_state_pointers(ctx, pp_context);
@@ -510,7 +531,7 @@ ironlake_pp_pipeline_setup(VADriverContextP ctx)
     ironlake_pp_cs_urb_layout(ctx, pp_context);
     ironlake_pp_constant_buffer(ctx, pp_context);
     ironlake_pp_object_walker(ctx, pp_context);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static int
@@ -2047,82 +2068,99 @@ gen6_pp_states_setup(VADriverContextP ctx)
 static void
 gen6_pp_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_pp_state_base_address(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 10);
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | (10 - 2));
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 10);
+    OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | (10 - 2));
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_pp_vfe_state(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    BEGIN_BATCH(ctx, 8);
-    OUT_BATCH(ctx, CMD_MEDIA_VFE_STATE | (8 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 8);
+    OUT_BATCH(batch, CMD_MEDIA_VFE_STATE | (8 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch,
               (pp_context->urb.num_vfe_entries - 1) << 16 |
               pp_context->urb.num_vfe_entries << 8);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx,
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch,
               (pp_context->urb.size_vfe_entry * 2) << 16 |  /* in 256 bits unit */
               (pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 2 - 1));            /* in 256 bits unit */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_pp_curbe_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     assert(pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 512 <= pp_context->curbe.bo->size);
 
-    BEGIN_BATCH(ctx, 4);
-    OUT_BATCH(ctx, CMD_MEDIA_CURBE_LOAD | (4 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx,
+    BEGIN_BATCH(batch, 4);
+    OUT_BATCH(batch, CMD_MEDIA_CURBE_LOAD | (4 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch,
               pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 512);
-    OUT_RELOC(ctx, 
+    OUT_RELOC(batch, 
               pp_context->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_interface_descriptor_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    BEGIN_BATCH(ctx, 4);
-    OUT_BATCH(ctx, CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD | (4 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 4);
+    OUT_BATCH(batch, CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD | (4 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch,
               pp_context->idrt.num_interface_descriptors * sizeof(struct gen6_interface_descriptor_data));
-    OUT_RELOC(ctx, 
+    OUT_RELOC(batch, 
               pp_context->idrt.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int x, x_steps, y, y_steps;
 
     x_steps = pp_context->pp_x_steps(&pp_context->private_context);
@@ -2131,19 +2169,19 @@ gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context 
     for (y = 0; y < y_steps; y++) {
         for (x = 0; x < x_steps; x++) {
             if (!pp_context->pp_set_block_parameter(pp_context, x, y)) {
-                BEGIN_BATCH(ctx, 22);
-                OUT_BATCH(ctx, CMD_MEDIA_OBJECT | 20);
-                OUT_BATCH(ctx, 0);
-                OUT_BATCH(ctx, 0); /* no indirect data */
-                OUT_BATCH(ctx, 0);
-                OUT_BATCH(ctx, 0); /* scoreboard */
-                OUT_BATCH(ctx, 0);
+                BEGIN_BATCH(batch, 22);
+                OUT_BATCH(batch, CMD_MEDIA_OBJECT | 20);
+                OUT_BATCH(batch, 0);
+                OUT_BATCH(batch, 0); /* no indirect data */
+                OUT_BATCH(batch, 0);
+                OUT_BATCH(batch, 0); /* scoreboard */
+                OUT_BATCH(batch, 0);
 
                 /* inline data grf 5-6 */
                 assert(sizeof(pp_inline_parameter) == 64);
-                intel_batchbuffer_data(ctx, &pp_inline_parameter, sizeof(pp_inline_parameter));
+                intel_batchbuffer_data(batch, &pp_inline_parameter, sizeof(pp_inline_parameter));
 
-                ADVANCE_BATCH(ctx);
+                ADVANCE_BATCH(batch);
             }
         }
     }
@@ -2152,18 +2190,20 @@ gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context 
 static void
 gen6_pp_pipeline_setup(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
 
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     gen6_pp_pipeline_select(ctx);
     gen6_pp_curbe_load(ctx, pp_context);
     gen6_interface_descriptor_load(ctx, pp_context);
     gen6_pp_state_base_address(ctx);
     gen6_pp_vfe_state(ctx, pp_context);
     gen6_pp_object_walker(ctx, pp_context);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void

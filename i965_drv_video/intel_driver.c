@@ -81,8 +81,7 @@ intel_driver_init(VADriverContextP ctx)
         intel->has_blt = has_blt;
 
     intel_memman_init(intel);
-    intel_batchbuffer_init(intel);
-
+    intel->batch = intel_batchbuffer_new(intel, I915_EXEC_RENDER);
     return True;
 }
 
@@ -92,8 +91,7 @@ intel_driver_terminate(VADriverContextP ctx)
     struct intel_driver_data *intel = intel_driver_data(ctx);
 
     intel_memman_terminate(intel);
-    intel_batchbuffer_terminate(intel);
-
+    intel_batchbuffer_free(intel->batch);
     pthread_mutex_destroy(&intel->ctxmutex);
 
     return True;

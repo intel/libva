@@ -99,15 +99,18 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
 static void
 i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_state, int slice)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     dri_bo *ind_bo = decode_state->slice_datas[slice]->bo;
 
-    BEGIN_BCS_BATCH(ctx, 3);
-    OUT_BCS_BATCH(ctx, CMD_BSD_IND_OBJ_BASE_ADDR | (3 - 2));
-    OUT_BCS_RELOC(ctx, ind_bo,
+    BEGIN_BCS_BATCH(batch, 3);
+    OUT_BCS_BATCH(batch, CMD_BSD_IND_OBJ_BASE_ADDR | (3 - 2));
+    OUT_BCS_RELOC(batch, ind_bo,
                   I915_GEM_DOMAIN_INSTRUCTION, 0,
                   0);
-    OUT_BCS_BATCH(ctx, 0);
-    ADVANCE_BCS_BATCH(ctx);
+    OUT_BCS_BATCH(batch, 0);
+    ADVANCE_BCS_BATCH(batch);
 }
 
 static void
@@ -115,6 +118,8 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
                        struct decode_state *decode_state,
                        struct i965_h264_context *i965_h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int qm_present_flag;
     int img_struct;
     int mbaff_frame_flag;
@@ -167,14 +172,14 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
 
     avc_it_command_header = (CMD_MEDIA_OBJECT_EX | (12 - 2));
 
-    BEGIN_BCS_BATCH(ctx, 6);
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_IMG_STATE | (6 - 2));
-    OUT_BCS_BATCH(ctx, 
+    BEGIN_BCS_BATCH(batch, 6);
+    OUT_BCS_BATCH(batch, CMD_AVC_BSD_IMG_STATE | (6 - 2));
+    OUT_BCS_BATCH(batch, 
                   ((width_in_mbs * height_in_mbs) & 0x7fff));
-    OUT_BCS_BATCH(ctx, 
+    OUT_BCS_BATCH(batch, 
                   (height_in_mbs << 16) | 
                   (width_in_mbs << 0));
-    OUT_BCS_BATCH(ctx, 
+    OUT_BCS_BATCH(batch, 
                   ((pic_param->second_chroma_qp_index_offset & 0x1f) << 24) |
                   ((pic_param->chroma_qp_index_offset & 0x1f) << 16) | 
                   (SCAN_RASTER_ORDER << 15) | /* AVC ILDB Data */
@@ -184,7 +189,7 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
                   (qm_present_flag << 10) |
                   (img_struct << 8) |
                   (16 << 0)); /* FIXME: always support 16 reference frames ??? */
-    OUT_BCS_BATCH(ctx,
+    OUT_BCS_BATCH(batch,
                   (RESIDUAL_DATA_OFFSET << 24) | /* residual data offset */
                   (0 << 17) | /* don't overwrite SRT */
                   (0 << 16) | /* Un-SRT (Unsynchronized Root Thread) */
@@ -199,13 +204,15 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
                   (pic_param->seq_fields.bits.frame_mbs_only_flag << 2) |
                   (mbaff_frame_flag << 1) |
                   (pic_param->pic_fields.bits.field_pic_flag << 0));
-    OUT_BCS_BATCH(ctx, avc_it_command_header);
-    ADVANCE_BCS_BATCH(ctx);
+    OUT_BCS_BATCH(batch, avc_it_command_header);
+    ADVANCE_BCS_BATCH(batch);
 }
 
 static void
 i965_avc_bsd_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int cmd_len;
     VAIQMatrixBufferH264 *iq_matrix;
     VAPictureParameterBufferH264 *pic_param;
@@ -223,24 +230,24 @@ i965_avc_bsd_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
     if (pic_param->pic_fields.bits.transform_8x8_mode_flag)
         cmd_len += 2 * 16; /* load two 8x8 scaling matrices */
 
-    BEGIN_BCS_BATCH(ctx, cmd_len);
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_QM_STATE | (cmd_len - 2));
+    BEGIN_BCS_BATCH(batch, cmd_len);
+    OUT_BCS_BATCH(batch, CMD_AVC_BSD_QM_STATE | (cmd_len - 2));
 
     if (pic_param->pic_fields.bits.transform_8x8_mode_flag)
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0x0  << 8) | /* don't use default built-in matrices */
                       (0xff << 0)); /* six 4x4 and two 8x8 scaling matrices */
     else
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0x0  << 8) | /* don't use default built-in matrices */
                       (0x3f << 0)); /* six 4x4 scaling matrices */
 
-    intel_batchbuffer_data_bcs(ctx, &iq_matrix->ScalingList4x4[0][0], 6 * 4 * 4);
+    intel_batchbuffer_data(batch, &iq_matrix->ScalingList4x4[0][0], 6 * 4 * 4);
 
     if (pic_param->pic_fields.bits.transform_8x8_mode_flag)
-        intel_batchbuffer_data_bcs(ctx, &iq_matrix->ScalingList8x8[0][0], 2 * 16 * 4);
+        intel_batchbuffer_data(batch, &iq_matrix->ScalingList8x8[0][0], 2 * 16 * 4);
 
-    ADVANCE_BCS_BATCH(ctx);
+    ADVANCE_BCS_BATCH(batch);
 }
 
 static void
@@ -249,6 +256,8 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                          VASliceParameterBufferH264 *slice_param,
                          struct i965_h264_context *i965_h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int present_flag, cmd_len, list, j;
     struct {
         unsigned char bottom_idc:1;
@@ -288,9 +297,9 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
         cmd_len += 96;
     }
 
-    BEGIN_BCS_BATCH(ctx, cmd_len);
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_SLICE_STATE | (cmd_len - 2));
-    OUT_BCS_BATCH(ctx, present_flag);
+    BEGIN_BCS_BATCH(batch, cmd_len);
+    OUT_BCS_BATCH(batch, CMD_AVC_BSD_SLICE_STATE | (cmd_len - 2));
+    OUT_BCS_BATCH(batch, present_flag);
 
     for (list = 0; list < 2; list++) {
         int flag;
@@ -339,7 +348,7 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
             va_pic++;
         }
         
-        intel_batchbuffer_data_bcs(ctx, refs, sizeof(refs));
+        intel_batchbuffer_data(batch, refs, sizeof(refs));
     }
 
     i965_h264_context->weight128_luma_l0 = 0;
@@ -378,7 +387,7 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
             }
         }
 
-        intel_batchbuffer_data_bcs(ctx, weightoffsets, sizeof(weightoffsets));
+        intel_batchbuffer_data(batch, weightoffsets, sizeof(weightoffsets));
     }
 
     if (present_flag & PRESENT_WEIGHT_OFFSET_L1) {
@@ -407,10 +416,10 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
             }
         }
 
-        intel_batchbuffer_data_bcs(ctx, weightoffsets, sizeof(weightoffsets));
+        intel_batchbuffer_data(batch, weightoffsets, sizeof(weightoffsets));
     }
 
-    ADVANCE_BCS_BATCH(ctx);
+    ADVANCE_BCS_BATCH(batch);
 }
 
 static void
@@ -419,6 +428,8 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
                             VASliceParameterBufferH264 *slice_param,
                             struct i965_h264_context *i965_h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_avc_bsd_context *i965_avc_bsd_context;
     int i, j;
@@ -428,27 +439,27 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
 
     i965_avc_bsd_context = &i965_h264_context->i965_avc_bsd_context;
 
-    BEGIN_BCS_BATCH(ctx, 74);
-    OUT_BCS_BATCH(ctx, CMD_AVC_BSD_BUF_BASE_STATE | (74 - 2));
-    OUT_BCS_RELOC(ctx, i965_avc_bsd_context->bsd_raw_store.bo,
+    BEGIN_BCS_BATCH(batch, 74);
+    OUT_BCS_BATCH(batch, CMD_AVC_BSD_BUF_BASE_STATE | (74 - 2));
+    OUT_BCS_RELOC(batch, i965_avc_bsd_context->bsd_raw_store.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   0);
-    OUT_BCS_RELOC(ctx, i965_avc_bsd_context->mpr_row_store.bo,
+    OUT_BCS_RELOC(batch, i965_avc_bsd_context->mpr_row_store.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   0);
-    OUT_BCS_RELOC(ctx, i965_h264_context->avc_it_command_mb_info.bo,
+    OUT_BCS_RELOC(batch, i965_h264_context->avc_it_command_mb_info.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   i965_h264_context->avc_it_command_mb_info.mbs * i965_h264_context->use_avc_hw_scoreboard * MB_CMD_IN_BYTES);
-    OUT_BCS_RELOC(ctx, i965_h264_context->avc_it_data.bo,
+    OUT_BCS_RELOC(batch, i965_h264_context->avc_it_data.bo,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   (i965_h264_context->avc_it_data.write_offset << 6));
 
     if (i965_h264_context->enable_avc_ildb)
-        OUT_BCS_RELOC(ctx, i965_h264_context->avc_ildb_data.bo,
+        OUT_BCS_RELOC(batch, i965_h264_context->avc_ildb_data.bo,
                       I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                       0);
     else
-        OUT_BCS_BATCH(ctx, 0);
+        OUT_BCS_BATCH(batch, 0);
 
     for (i = 0; i < ARRAY_ELEMS(i965_h264_context->fsid_list); i++) {
         if (i965_h264_context->fsid_list[i].surface_id != VA_INVALID_ID) {
@@ -473,26 +484,26 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
                 avc_bsd_surface = obj_surface->private_data;
             
                 if (avc_bsd_surface == NULL) {
-                    OUT_BCS_BATCH(ctx, 0);
-                    OUT_BCS_BATCH(ctx, 0);
+                    OUT_BCS_BATCH(batch, 0);
+                    OUT_BCS_BATCH(batch, 0);
                 } else {
-                    OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_top,
+                    OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_top,
                                   I915_GEM_DOMAIN_INSTRUCTION, 0,
                                   0);
 
                     if (avc_bsd_surface->dmv_bottom_flag == 1)
-                        OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_bottom,
+                        OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_bottom,
                                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                                       0);
                     else
-                        OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_top,
+                        OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_top,
                                       I915_GEM_DOMAIN_INSTRUCTION, 0,
                                       0);
                 }
             } 
         } else {
-            OUT_BCS_BATCH(ctx, 0);
-            OUT_BCS_BATCH(ctx, 0);
+            OUT_BCS_BATCH(batch, 0);
+            OUT_BCS_BATCH(batch, 0);
         }
     }
 
@@ -512,16 +523,16 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
                                        0x1000);
     }
 
-    OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_top,
+    OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_top,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                   0);
 
     if (avc_bsd_surface->dmv_bottom_flag == 1)
-        OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_bottom,
+        OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_bottom,
                       I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                       0);
     else
-        OUT_BCS_RELOC(ctx, avc_bsd_surface->dmv_top,
+        OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_top,
                       I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
                       0);
 
@@ -544,20 +555,20 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
             assert(found == 1);
 
             if (!(va_pic->flags & VA_PICTURE_H264_INVALID)) {
-                OUT_BCS_BATCH(ctx, va_pic->TopFieldOrderCnt);
-                OUT_BCS_BATCH(ctx, va_pic->BottomFieldOrderCnt);
+                OUT_BCS_BATCH(batch, va_pic->TopFieldOrderCnt);
+                OUT_BCS_BATCH(batch, va_pic->BottomFieldOrderCnt);
             } 
         } else {
-            OUT_BCS_BATCH(ctx, 0);
-            OUT_BCS_BATCH(ctx, 0);
+            OUT_BCS_BATCH(batch, 0);
+            OUT_BCS_BATCH(batch, 0);
         }
     }
 
     va_pic = &pic_param->CurrPic;
-    OUT_BCS_BATCH(ctx, va_pic->TopFieldOrderCnt);
-    OUT_BCS_BATCH(ctx, va_pic->BottomFieldOrderCnt);
+    OUT_BCS_BATCH(batch, va_pic->TopFieldOrderCnt);
+    OUT_BCS_BATCH(batch, va_pic->BottomFieldOrderCnt);
 
-    ADVANCE_BCS_BATCH(ctx);
+    ADVANCE_BCS_BATCH(batch);
 }
 
 /*
@@ -597,6 +608,8 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                    int slice_index,
                    struct i965_h264_context *i965_h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
@@ -661,15 +674,15 @@ g4x_avc_bsd_object(VADriverContextP ctx,
         slice_hor_pos = first_mb_in_slice % width_in_mbs; 
         slice_ver_pos = first_mb_in_slice / width_in_mbs;
 
-        BEGIN_BCS_BATCH(ctx, cmd_len);
-        OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (cmd_len - 2));
-        OUT_BCS_BATCH(ctx, 
+        BEGIN_BCS_BATCH(batch, cmd_len);
+        OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (cmd_len - 2));
+        OUT_BCS_BATCH(batch, 
                       (encrypted << 31) |
                       ((slice_param->slice_data_size - (slice_data_bit_offset >> 3)) << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (slice_param->slice_data_offset +
                        (slice_data_bit_offset >> 3)));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0 << 31) | /* concealment mode: 0->intra 16x16 prediction, 1->inter P Copy */
                       (0 << 14) | /* ignore BSDPrematureComplete Error handling */
                       (0 << 13) | /* FIXME: ??? */
@@ -677,12 +690,12 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                       (0 << 10) | /* ignore Entropy Error handling */
                       (0 << 8)  | /* ignore MB Header Error handling */
                       (slice_type << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (num_ref_idx_l1 << 24) |
                       (num_ref_idx_l0 << 16) |
                       (slice_param->chroma_log2_weight_denom << 8) |
                       (slice_param->luma_log2_weight_denom << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (weighted_pred_idc << 30) |
                       (slice_param->direct_spatial_mv_pred_flag << 29) |
                       (slice_param->disable_deblocking_filter_idc << 27) |
@@ -690,30 +703,30 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                       ((pic_param->pic_init_qp_minus26 + 26 + slice_param->slice_qp_delta) << 16) |
                       ((slice_param->slice_beta_offset_div2 & 0xf) << 8) |
                       ((slice_param->slice_alpha_c0_offset_div2 & 0xf) << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (slice_ver_pos << 24) |
                       (slice_hor_pos << 16) | 
                       (first_mb_in_slice << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0 << 7) | /* FIXME: ??? */
                       ((0x7 - (slice_data_bit_offset & 0x7)) << 0));
 
         if (encrypted) {
-            OUT_BCS_BATCH(ctx, counter_value);
+            OUT_BCS_BATCH(batch, counter_value);
         }
 
-        ADVANCE_BCS_BATCH(ctx); 
+        ADVANCE_BCS_BATCH(batch); 
     } else {
-        BEGIN_BCS_BATCH(ctx, 8); 
-        OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (8 - 2));
-        OUT_BCS_BATCH(ctx, 0); /* indirect data length for phantom slice is 0 */
-        OUT_BCS_BATCH(ctx, 0); /* indirect data start address for phantom slice is 0 */
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));
-        OUT_BCS_BATCH(ctx, 0);
-        ADVANCE_BCS_BATCH(ctx);
+        BEGIN_BCS_BATCH(batch, 8); 
+        OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (8 - 2));
+        OUT_BCS_BATCH(batch, 0); /* indirect data length for phantom slice is 0 */
+        OUT_BCS_BATCH(batch, 0); /* indirect data start address for phantom slice is 0 */
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));
+        OUT_BCS_BATCH(batch, 0);
+        ADVANCE_BCS_BATCH(batch);
     }
 }
 
@@ -725,6 +738,8 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                         int slice_index,
                         struct i965_h264_context *i965_h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
@@ -788,17 +803,17 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
         slice_hor_pos = first_mb_in_slice % width_in_mbs; 
         slice_ver_pos = first_mb_in_slice / width_in_mbs;
 
-        BEGIN_BCS_BATCH(ctx, 16);
-        OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (16 - 2));
-        OUT_BCS_BATCH(ctx, 
+        BEGIN_BCS_BATCH(batch, 16);
+        OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (16 - 2));
+        OUT_BCS_BATCH(batch, 
                       (encrypted << 31) |
                       (0 << 30) | /* FIXME: packet based bit stream */
                       (0 << 29) | /* FIXME: packet format */
                       ((slice_param->slice_data_size - (slice_data_bit_offset >> 3)) << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (slice_param->slice_data_offset +
                        (slice_data_bit_offset >> 3)));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0 << 31) | /* concealment mode: 0->intra 16x16 prediction, 1->inter P Copy */
                       (0 << 14) | /* ignore BSDPrematureComplete Error handling */
                       (0 << 13) | /* FIXME: ??? */
@@ -806,12 +821,12 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                       (0 << 10) | /* ignore Entropy Error handling */
                       (0 << 8)  | /* ignore MB Header Error handling */
                       (slice_type << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (num_ref_idx_l1 << 24) |
                       (num_ref_idx_l0 << 16) |
                       (slice_param->chroma_log2_weight_denom << 8) |
                       (slice_param->luma_log2_weight_denom << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (weighted_pred_idc << 30) |
                       (slice_param->direct_spatial_mv_pred_flag << 29) |
                       (slice_param->disable_deblocking_filter_idc << 27) |
@@ -819,44 +834,44 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                       ((pic_param->pic_init_qp_minus26 + 26 + slice_param->slice_qp_delta) << 16) |
                       ((slice_param->slice_beta_offset_div2 & 0xf) << 8) |
                       ((slice_param->slice_alpha_c0_offset_div2 & 0xf) << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (slice_ver_pos << 24) |
                       (slice_hor_pos << 16) | 
                       (first_mb_in_slice << 0));
-        OUT_BCS_BATCH(ctx, 
+        OUT_BCS_BATCH(batch, 
                       (0 << 7) | /* FIXME: ??? */
                       ((0x7 - (slice_data_bit_offset & 0x7)) << 0));
-        OUT_BCS_BATCH(ctx, counter_value);
+        OUT_BCS_BATCH(batch, counter_value);
         
         /* FIXME: dw9-dw11 */
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, i965_h264_context->weight128_luma_l0);
-        OUT_BCS_BATCH(ctx, i965_h264_context->weight128_luma_l1);
-        OUT_BCS_BATCH(ctx, i965_h264_context->weight128_chroma_l0);
-        OUT_BCS_BATCH(ctx, i965_h264_context->weight128_chroma_l1);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, i965_h264_context->weight128_luma_l0);
+        OUT_BCS_BATCH(batch, i965_h264_context->weight128_luma_l1);
+        OUT_BCS_BATCH(batch, i965_h264_context->weight128_chroma_l0);
+        OUT_BCS_BATCH(batch, i965_h264_context->weight128_chroma_l1);
 
-        ADVANCE_BCS_BATCH(ctx); 
+        ADVANCE_BCS_BATCH(batch); 
     } else {
-        BEGIN_BCS_BATCH(ctx, 16);
-        OUT_BCS_BATCH(ctx, CMD_AVC_BSD_OBJECT | (16 - 2));
-        OUT_BCS_BATCH(ctx, 0); /* indirect data length for phantom slice is 0 */
-        OUT_BCS_BATCH(ctx, 0); /* indirect data start address for phantom slice is 0 */
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        OUT_BCS_BATCH(ctx, 0);
-        ADVANCE_BCS_BATCH(ctx);
+        BEGIN_BCS_BATCH(batch, 16);
+        OUT_BCS_BATCH(batch, CMD_AVC_BSD_OBJECT | (16 - 2));
+        OUT_BCS_BATCH(batch, 0); /* indirect data length for phantom slice is 0 */
+        OUT_BCS_BATCH(batch, 0); /* indirect data start address for phantom slice is 0 */
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, width_in_mbs * height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag));
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        OUT_BCS_BATCH(batch, 0);
+        ADVANCE_BCS_BATCH(batch);
     }
 }
 
@@ -1010,6 +1025,8 @@ i965_avc_bsd_frame_store_index(VADriverContextP ctx,
 void 
 i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
@@ -1044,7 +1061,7 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
         }
     }
 
-    intel_batchbuffer_start_atomic_bcs(ctx, 0x1000);
+    intel_batchbuffer_start_atomic_bcs(batch, 0x1000);
 
     i965_avc_bsd_img_state(ctx, decode_state, i965_h264_context);
     i965_avc_bsd_qm_state(ctx, decode_state);
@@ -1077,9 +1094,9 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
     }
 
     i965_avc_bsd_phantom_slice(ctx, decode_state, pic_param, i965_h264_context);
-    intel_batchbuffer_emit_mi_flush_bcs(ctx);
-    intel_batchbuffer_end_atomic_bcs(ctx);
-    intel_batchbuffer_flush_bcs(ctx);
+    intel_batchbuffer_emit_mi_flush(batch);
+    intel_batchbuffer_end_atomic(batch);
+    intel_batchbuffer_flush(batch);
 }
 
 void 

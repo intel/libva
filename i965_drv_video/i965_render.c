@@ -968,94 +968,112 @@ i965_subpic_render_state_setup(VADriverContextP ctx,
 static void
 i965_render_pipeline_select(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 1);
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+ 
+    BEGIN_BATCH(batch, 1);
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_state_sip(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_STATE_SIP | 0);
-    OUT_BATCH(ctx, 0);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_STATE_SIP | 0);
+    OUT_BATCH(batch, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_state_base_address(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
-        BEGIN_BATCH(ctx, 8);
-        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 6);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_RELOC(ctx, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        ADVANCE_BATCH(ctx);
+        BEGIN_BATCH(batch, 8);
+        OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_RELOC(batch, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(batch);
     } else {
-        BEGIN_BATCH(ctx, 6);
-        OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | 4);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_RELOC(ctx, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        OUT_BATCH(ctx, 0 | BASE_ADDRESS_MODIFY);
-        ADVANCE_BATCH(ctx);
+        BEGIN_BATCH(batch, 6);
+        OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 4);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_RELOC(batch, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        OUT_BATCH(batch, 0 | BASE_ADDRESS_MODIFY);
+        ADVANCE_BATCH(batch);
     }
 }
 
 static void
 i965_render_binding_table_pointers(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, CMD_BINDING_TABLE_POINTERS | 4);
-    OUT_BATCH(ctx, 0); /* vs */
-    OUT_BATCH(ctx, 0); /* gs */
-    OUT_BATCH(ctx, 0); /* clip */
-    OUT_BATCH(ctx, 0); /* sf */
-    OUT_BATCH(ctx, BINDING_TABLE_OFFSET);
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 6);
+    OUT_BATCH(batch, CMD_BINDING_TABLE_POINTERS | 4);
+    OUT_BATCH(batch, 0); /* vs */
+    OUT_BATCH(batch, 0); /* gs */
+    OUT_BATCH(batch, 0); /* clip */
+    OUT_BATCH(batch, 0); /* sf */
+    OUT_BATCH(batch, BINDING_TABLE_OFFSET);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 i965_render_constant_color(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 5);
-    OUT_BATCH(ctx, CMD_CONSTANT_COLOR | 3);
-    OUT_BATCH(ctx, float_to_uint(1.0));
-    OUT_BATCH(ctx, float_to_uint(0.0));
-    OUT_BATCH(ctx, float_to_uint(1.0));
-    OUT_BATCH(ctx, float_to_uint(1.0));
-    ADVANCE_BATCH(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 5);
+    OUT_BATCH(batch, CMD_CONSTANT_COLOR | 3);
+    OUT_BATCH(batch, float_to_uint(1.0));
+    OUT_BATCH(batch, float_to_uint(0.0));
+    OUT_BATCH(batch, float_to_uint(1.0));
+    OUT_BATCH(batch, float_to_uint(1.0));
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_pipelined_pointers(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    BEGIN_BATCH(ctx, 7);
-    OUT_BATCH(ctx, CMD_PIPELINED_POINTERS | 5);
-    OUT_RELOC(ctx, render_state->vs.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    OUT_BATCH(ctx, 0);  /* disable GS */
-    OUT_BATCH(ctx, 0);  /* disable CLIP */
-    OUT_RELOC(ctx, render_state->sf.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    OUT_RELOC(ctx, render_state->wm.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    OUT_RELOC(ctx, render_state->cc.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
-    ADVANCE_BATCH(ctx);
+    BEGIN_BATCH(batch, 7);
+    OUT_BATCH(batch, CMD_PIPELINED_POINTERS | 5);
+    OUT_RELOC(batch, render_state->vs.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BATCH(batch, 0);  /* disable GS */
+    OUT_BATCH(batch, 0);  /* disable CLIP */
+    OUT_RELOC(batch, render_state->sf.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_RELOC(batch, render_state->wm.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_RELOC(batch, render_state->cc.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_urb_layout(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     int urb_vs_start, urb_vs_size;
     int urb_gs_start, urb_gs_size;
     int urb_clip_start, urb_clip_size;
@@ -1073,8 +1091,8 @@ i965_render_urb_layout(VADriverContextP ctx)
     urb_cs_start = urb_sf_start + urb_sf_size;
     urb_cs_size = URB_CS_ENTRIES * URB_CS_ENTRY_SIZE;
 
-    BEGIN_BATCH(ctx, 3);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 3);
+    OUT_BATCH(batch, 
               CMD_URB_FENCE |
               UF0_CS_REALLOC |
               UF0_SF_REALLOC |
@@ -1082,107 +1100,116 @@ i965_render_urb_layout(VADriverContextP ctx)
               UF0_GS_REALLOC |
               UF0_VS_REALLOC |
               1);
-    OUT_BATCH(ctx, 
+    OUT_BATCH(batch, 
               ((urb_clip_start + urb_clip_size) << UF1_CLIP_FENCE_SHIFT) |
               ((urb_gs_start + urb_gs_size) << UF1_GS_FENCE_SHIFT) |
               ((urb_vs_start + urb_vs_size) << UF1_VS_FENCE_SHIFT));
-    OUT_BATCH(ctx,
+    OUT_BATCH(batch,
               ((urb_cs_start + urb_cs_size) << UF2_CS_FENCE_SHIFT) |
               ((urb_sf_start + urb_sf_size) << UF2_SF_FENCE_SHIFT));
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 i965_render_cs_urb_layout(VADriverContextP ctx)
 {
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CS_URB_STATE | 0);
-    OUT_BATCH(ctx,
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
+    OUT_BATCH(batch,
               ((URB_CS_ENTRY_SIZE - 1) << 4) |          /* URB Entry Allocation Size */
               (URB_CS_ENTRIES << 0));                /* Number of URB Entries */
-    ADVANCE_BATCH(ctx);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_constant_buffer(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    BEGIN_BATCH(ctx, 2);
-    OUT_BATCH(ctx, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
-    OUT_RELOC(ctx, render_state->curbe.bo,
+    BEGIN_BATCH(batch, 2);
+    OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
+    OUT_RELOC(batch, render_state->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               URB_CS_ENTRY_SIZE - 1);
-    ADVANCE_BATCH(ctx);    
+    ADVANCE_BATCH(batch);    
 }
 
 static void
 i965_render_drawing_rectangle(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct intel_region *dest_region = render_state->draw_region;
 
-    BEGIN_BATCH(ctx, 4);
-    OUT_BATCH(ctx, CMD_DRAWING_RECTANGLE | 2);
-    OUT_BATCH(ctx, 0x00000000);
-    OUT_BATCH(ctx, (dest_region->width - 1) | (dest_region->height - 1) << 16);
-    OUT_BATCH(ctx, 0x00000000);         
-    ADVANCE_BATCH(ctx);
+    BEGIN_BATCH(batch, 4);
+    OUT_BATCH(batch, CMD_DRAWING_RECTANGLE | 2);
+    OUT_BATCH(batch, 0x00000000);
+    OUT_BATCH(batch, (dest_region->width - 1) | (dest_region->height - 1) << 16);
+    OUT_BATCH(batch, 0x00000000);         
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_vertex_elements(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
-        BEGIN_BATCH(ctx, 5);
-        OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
+        BEGIN_BATCH(batch, 5);
+        OUT_BATCH(batch, CMD_VERTEX_ELEMENTS | 3);
         /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
-        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+        OUT_BATCH(batch, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
                   VE0_VALID |
                   (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
                   (0 << VE0_OFFSET_SHIFT));
-        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+        OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
                   (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
         /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
-        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+        OUT_BATCH(batch, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
                   VE0_VALID |
                   (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
                   (8 << VE0_OFFSET_SHIFT));
-        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+        OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
                   (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
-        ADVANCE_BATCH(ctx);
+        ADVANCE_BATCH(batch);
     } else {
-        BEGIN_BATCH(ctx, 5);
-        OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | 3);
+        BEGIN_BATCH(batch, 5);
+        OUT_BATCH(batch, CMD_VERTEX_ELEMENTS | 3);
         /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
-        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+        OUT_BATCH(batch, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
                   VE0_VALID |
                   (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
                   (0 << VE0_OFFSET_SHIFT));
-        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+        OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
                   (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
                   (0 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
         /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
-        OUT_BATCH(ctx, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+        OUT_BATCH(batch, (0 << VE0_VERTEX_BUFFER_INDEX_SHIFT) |
                   VE0_VALID |
                   (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
                   (8 << VE0_OFFSET_SHIFT));
-        OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+        OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
                   (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
                   (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT) |
                   (4 << VE1_DESTINATION_ELEMENT_OFFSET_SHIFT));
-        ADVANCE_BATCH(ctx);
+        ADVANCE_BATCH(batch);
     }
 }
 
@@ -1193,6 +1220,8 @@ i965_render_upload_image_palette(
     unsigned int     alpha
 )
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     unsigned int i;
 
@@ -1202,53 +1231,57 @@ i965_render_upload_image_palette(
     if (obj_image->image.num_palette_entries == 0)
         return;
 
-    BEGIN_BATCH(ctx, 1 + obj_image->image.num_palette_entries);
-    OUT_BATCH(ctx, CMD_SAMPLER_PALETTE_LOAD | (obj_image->image.num_palette_entries - 1));
+    BEGIN_BATCH(batch, 1 + obj_image->image.num_palette_entries);
+    OUT_BATCH(batch, CMD_SAMPLER_PALETTE_LOAD | (obj_image->image.num_palette_entries - 1));
     /*fill palette*/
     //int32_t out[16]; //0-23:color 23-31:alpha
     for (i = 0; i < obj_image->image.num_palette_entries; i++)
-        OUT_BATCH(ctx, (alpha << 24) | obj_image->palette[i]);
-    ADVANCE_BATCH(ctx);
+        OUT_BATCH(batch, (alpha << 24) | obj_image->palette[i]);
+    ADVANCE_BATCH(batch);
 }
 
 static void
 i965_render_startup(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    BEGIN_BATCH(ctx, 11);
-    OUT_BATCH(ctx, CMD_VERTEX_BUFFERS | 3);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 11);
+    OUT_BATCH(batch, CMD_VERTEX_BUFFERS | 3);
+    OUT_BATCH(batch, 
               (0 << VB0_BUFFER_INDEX_SHIFT) |
               VB0_VERTEXDATA |
               ((4 * 4) << VB0_BUFFER_PITCH_SHIFT));
-    OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
+    OUT_RELOC(batch, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
 
     if (IS_IRONLAKE(i965->intel.device_id))
-        OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
+        OUT_RELOC(batch, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
     else
-        OUT_BATCH(ctx, 3);
+        OUT_BATCH(batch, 3);
 
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, 0);
 
-    OUT_BATCH(ctx, 
+    OUT_BATCH(batch, 
               CMD_3DPRIMITIVE |
               _3DPRIMITIVE_VERTEX_SEQUENTIAL |
               (_3DPRIM_RECTLIST << _3DPRIMITIVE_TOPOLOGY_SHIFT) |
               (0 << 9) |
               4);
-    OUT_BATCH(ctx, 3); /* vertex count per instance */
-    OUT_BATCH(ctx, 0); /* start vertex offset */
-    OUT_BATCH(ctx, 1); /* single instance */
-    OUT_BATCH(ctx, 0); /* start instance location */
-    OUT_BATCH(ctx, 0); /* index buffer offset, ignored */
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, 3); /* vertex count per instance */
+    OUT_BATCH(batch, 0); /* start vertex offset */
+    OUT_BATCH(batch, 1); /* single instance */
+    OUT_BATCH(batch, 0); /* start instance location */
+    OUT_BATCH(batch, 0); /* index buffer offset, ignored */
+    ADVANCE_BATCH(batch);
 }
 
 static void 
 i965_clear_dest_region(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
     struct i965_render_state *render_state = &i965->render_state;
     struct intel_region *dest_region = render_state->draw_region;
@@ -1274,28 +1307,36 @@ i965_clear_dest_region(VADriverContextP ctx)
 
     br13 |= pitch;
 
-    if (IS_GEN6(i965->intel.device_id))
-        BEGIN_BLT_BATCH(ctx, 6);
-    else
-        BEGIN_BATCH(ctx, 6);
-    OUT_BATCH(ctx, blt_cmd);
-    OUT_BATCH(ctx, br13);
-    OUT_BATCH(ctx, (dest_region->y << 16) | (dest_region->x));
-    OUT_BATCH(ctx, ((dest_region->y + dest_region->height) << 16) |
+    if (IS_GEN6(i965->intel.device_id)) {
+        intel_batchbuffer_start_atomic_blt(batch, 24);
+        BEGIN_BLT_BATCH(batch, 6);
+    } else {
+        intel_batchbuffer_start_atomic(batch, 24);
+        BEGIN_BATCH(batch, 6);
+    }
+
+    OUT_BATCH(batch, blt_cmd);
+    OUT_BATCH(batch, br13);
+    OUT_BATCH(batch, (dest_region->y << 16) | (dest_region->x));
+    OUT_BATCH(batch, ((dest_region->y + dest_region->height) << 16) |
               (dest_region->x + dest_region->width));
-    OUT_RELOC(ctx, dest_region->bo, 
+    OUT_RELOC(batch, dest_region->bo, 
               I915_GEM_DOMAIN_RENDER, I915_GEM_DOMAIN_RENDER,
               0);
-    OUT_BATCH(ctx, 0x0);
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, 0x0);
+    ADVANCE_BATCH(batch);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void
 i965_surface_render_pipeline_setup(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     i965_clear_dest_region(ctx);
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     i965_render_pipeline_select(ctx);
     i965_render_state_sip(ctx);
     i965_render_state_base_address(ctx);
@@ -1308,14 +1349,17 @@ i965_surface_render_pipeline_setup(VADriverContextP ctx)
     i965_render_drawing_rectangle(ctx);
     i965_render_vertex_elements(ctx);
     i965_render_startup(ctx);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void
 i965_subpic_render_pipeline_setup(VADriverContextP ctx)
 {
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     i965_render_pipeline_select(ctx);
     i965_render_state_sip(ctx);
     i965_render_state_base_address(ctx);
@@ -1327,7 +1371,7 @@ i965_subpic_render_pipeline_setup(VADriverContextP ctx)
     i965_render_drawing_rectangle(ctx);
     i965_render_vertex_elements(ctx);
     i965_render_startup(ctx);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 
@@ -1424,12 +1468,15 @@ i965_render_put_surface(VADriverContextP ctx,
                         unsigned short desth,
                         unsigned int flag)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     i965_render_initialize(ctx);
     i965_surface_render_state_setup(ctx, surface,
                             srcx, srcy, srcw, srch,
                             destx, desty, destw, desth);
     i965_surface_render_pipeline_setup(ctx);
-    intel_batchbuffer_flush(ctx);
+    intel_batchbuffer_flush(batch);
 }
 
 static void
@@ -1444,9 +1491,12 @@ i965_render_put_subpicture(VADriverContextP ctx,
                            unsigned short destw,
                            unsigned short desth)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE(surface);
     struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
+
     assert(obj_subpic);
 
     i965_render_initialize(ctx);
@@ -1455,7 +1505,7 @@ i965_render_put_subpicture(VADriverContextP ctx,
                                    destx, desty, destw, desth);
     i965_subpic_render_pipeline_setup(ctx);
     i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
-    intel_batchbuffer_flush(ctx);
+    intel_batchbuffer_flush(batch);
 }
 
 /*
@@ -1608,116 +1658,136 @@ gen6_render_setup_states(VADriverContextP ctx,
 static void
 gen6_emit_invarient_states(VADriverContextP ctx)
 {
-    OUT_BATCH(ctx, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_MULTISAMPLE | (3 - 2));
-    OUT_BATCH(ctx, GEN6_3DSTATE_MULTISAMPLE_PIXEL_LOCATION_CENTER |
+    OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
+
+    OUT_BATCH(batch, GEN6_3DSTATE_MULTISAMPLE | (3 - 2));
+    OUT_BATCH(batch, GEN6_3DSTATE_MULTISAMPLE_PIXEL_LOCATION_CENTER |
               GEN6_3DSTATE_MULTISAMPLE_NUMSAMPLES_1); /* 1 sample/pixel */
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, 0);
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_SAMPLE_MASK | (2 - 2));
-    OUT_BATCH(ctx, 1);
+    OUT_BATCH(batch, GEN6_3DSTATE_SAMPLE_MASK | (2 - 2));
+    OUT_BATCH(batch, 1);
 
     /* Set system instruction pointer */
-    OUT_BATCH(ctx, CMD_STATE_SIP | 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, CMD_STATE_SIP | 0);
+    OUT_BATCH(batch, 0);
 }
 
 static void
 gen6_emit_state_base_address(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    OUT_BATCH(ctx, CMD_STATE_BASE_ADDRESS | (10 - 2));
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* General state base address */
-    OUT_RELOC(ctx, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY); /* Surface state base address */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Dynamic state base address */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Indirect object base address */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Instruction base address */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* General state upper bound */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Dynamic state upper bound */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Indirect object upper bound */
-    OUT_BATCH(ctx, BASE_ADDRESS_MODIFY); /* Instruction access upper bound */
+    OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | (10 - 2));
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* General state base address */
+    OUT_RELOC(batch, render_state->wm.surface_state_binding_table_bo, I915_GEM_DOMAIN_INSTRUCTION, 0, BASE_ADDRESS_MODIFY); /* Surface state base address */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Dynamic state base address */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Indirect object base address */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Instruction base address */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* General state upper bound */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Dynamic state upper bound */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Indirect object upper bound */
+    OUT_BATCH(batch, BASE_ADDRESS_MODIFY); /* Instruction access upper bound */
 }
 
 static void
 gen6_emit_viewport_state_pointers(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_VIEWPORT_STATE_POINTERS |
+    OUT_BATCH(batch, GEN6_3DSTATE_VIEWPORT_STATE_POINTERS |
               GEN6_3DSTATE_VIEWPORT_STATE_MODIFY_CC |
               (4 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_RELOC(ctx, render_state->cc.viewport, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_RELOC(batch, render_state->cc.viewport, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 }
 
 static void
 gen6_emit_urb(VADriverContextP ctx)
 {
-    OUT_BATCH(ctx, GEN6_3DSTATE_URB | (3 - 2));
-    OUT_BATCH(ctx, ((1 - 1) << GEN6_3DSTATE_URB_VS_SIZE_SHIFT) |
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    OUT_BATCH(batch, GEN6_3DSTATE_URB | (3 - 2));
+    OUT_BATCH(batch, ((1 - 1) << GEN6_3DSTATE_URB_VS_SIZE_SHIFT) |
               (24 << GEN6_3DSTATE_URB_VS_ENTRIES_SHIFT)); /* at least 24 on GEN6 */
-    OUT_BATCH(ctx, (0 << GEN6_3DSTATE_URB_GS_SIZE_SHIFT) |
+    OUT_BATCH(batch, (0 << GEN6_3DSTATE_URB_GS_SIZE_SHIFT) |
               (0 << GEN6_3DSTATE_URB_GS_ENTRIES_SHIFT)); /* no GS thread */
 }
 
 static void
 gen6_emit_cc_state_pointers(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_CC_STATE_POINTERS | (4 - 2));
-    OUT_RELOC(ctx, render_state->cc.blend, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
-    OUT_RELOC(ctx, render_state->cc.depth_stencil, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
-    OUT_RELOC(ctx, render_state->cc.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
+    OUT_BATCH(batch, GEN6_3DSTATE_CC_STATE_POINTERS | (4 - 2));
+    OUT_RELOC(batch, render_state->cc.blend, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
+    OUT_RELOC(batch, render_state->cc.depth_stencil, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
+    OUT_RELOC(batch, render_state->cc.state, I915_GEM_DOMAIN_INSTRUCTION, 0, 1);
 }
 
 static void
 gen6_emit_sampler_state_pointers(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_SAMPLER_STATE_POINTERS |
+    OUT_BATCH(batch, GEN6_3DSTATE_SAMPLER_STATE_POINTERS |
               GEN6_3DSTATE_SAMPLER_STATE_MODIFY_PS |
               (4 - 2));
-    OUT_BATCH(ctx, 0); /* VS */
-    OUT_BATCH(ctx, 0); /* GS */
-    OUT_RELOC(ctx,render_state->wm.sampler, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BATCH(batch, 0); /* VS */
+    OUT_BATCH(batch, 0); /* GS */
+    OUT_RELOC(batch,render_state->wm.sampler, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
 }
 
 static void
 gen6_emit_binding_table(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     /* Binding table pointers */
-    OUT_BATCH(ctx, CMD_BINDING_TABLE_POINTERS |
+    OUT_BATCH(batch, CMD_BINDING_TABLE_POINTERS |
               GEN6_BINDING_TABLE_MODIFY_PS |
               (4 - 2));
-    OUT_BATCH(ctx, 0);		/* vs */
-    OUT_BATCH(ctx, 0);		/* gs */
+    OUT_BATCH(batch, 0);		/* vs */
+    OUT_BATCH(batch, 0);		/* gs */
     /* Only the PS uses the binding table */
-    OUT_BATCH(ctx, BINDING_TABLE_OFFSET);
+    OUT_BATCH(batch, BINDING_TABLE_OFFSET);
 }
 
 static void
 gen6_emit_depth_buffer_state(VADriverContextP ctx)
 {
-    OUT_BATCH(ctx, CMD_DEPTH_BUFFER | (7 - 2));
-    OUT_BATCH(ctx, (I965_SURFACE_NULL << CMD_DEPTH_BUFFER_TYPE_SHIFT) |
-              (I965_DEPTHFORMAT_D32_FLOAT << CMD_DEPTH_BUFFER_FORMAT_SHIFT));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
 
-    OUT_BATCH(ctx, CMD_CLEAR_PARAMS | (2 - 2));
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, CMD_DEPTH_BUFFER | (7 - 2));
+    OUT_BATCH(batch, (I965_SURFACE_NULL << CMD_DEPTH_BUFFER_TYPE_SHIFT) |
+              (I965_DEPTHFORMAT_D32_FLOAT << CMD_DEPTH_BUFFER_FORMAT_SHIFT));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+
+    OUT_BATCH(batch, CMD_CLEAR_PARAMS | (2 - 2));
+    OUT_BATCH(batch, 0);
 }
 
 static void
@@ -1729,130 +1799,147 @@ gen6_emit_drawing_rectangle(VADriverContextP ctx)
 static void 
 gen6_emit_vs_state(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     /* disable VS constant buffer */
-    OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_VS | (5 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_VS | (5 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
 	
-    OUT_BATCH(ctx, GEN6_3DSTATE_VS | (6 - 2));
-    OUT_BATCH(ctx, 0); /* without VS kernel */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* pass-through */
+    OUT_BATCH(batch, GEN6_3DSTATE_VS | (6 - 2));
+    OUT_BATCH(batch, 0); /* without VS kernel */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* pass-through */
 }
 
 static void 
 gen6_emit_gs_state(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     /* disable GS constant buffer */
-    OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_GS | (5 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_GS | (5 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
 	
-    OUT_BATCH(ctx, GEN6_3DSTATE_GS | (7 - 2));
-    OUT_BATCH(ctx, 0); /* without GS kernel */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* pass-through */
+    OUT_BATCH(batch, GEN6_3DSTATE_GS | (7 - 2));
+    OUT_BATCH(batch, 0); /* without GS kernel */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* pass-through */
 }
 
 static void 
 gen6_emit_clip_state(VADriverContextP ctx)
 {
-    OUT_BATCH(ctx, GEN6_3DSTATE_CLIP | (4 - 2));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* pass-through */
-    OUT_BATCH(ctx, 0);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    OUT_BATCH(batch, GEN6_3DSTATE_CLIP | (4 - 2));
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* pass-through */
+    OUT_BATCH(batch, 0);
 }
 
 static void 
 gen6_emit_sf_state(VADriverContextP ctx)
 {
-    OUT_BATCH(ctx, GEN6_3DSTATE_SF | (20 - 2));
-    OUT_BATCH(ctx, (1 << GEN6_3DSTATE_SF_NUM_OUTPUTS_SHIFT) |
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    OUT_BATCH(batch, GEN6_3DSTATE_SF | (20 - 2));
+    OUT_BATCH(batch, (1 << GEN6_3DSTATE_SF_NUM_OUTPUTS_SHIFT) |
               (1 << GEN6_3DSTATE_SF_URB_ENTRY_READ_LENGTH_SHIFT) |
               (0 << GEN6_3DSTATE_SF_URB_ENTRY_READ_OFFSET_SHIFT));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, GEN6_3DSTATE_SF_CULL_NONE);
-    OUT_BATCH(ctx, 2 << GEN6_3DSTATE_SF_TRIFAN_PROVOKE_SHIFT); /* DW4 */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* DW9 */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* DW14 */
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0); /* DW19 */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, GEN6_3DSTATE_SF_CULL_NONE);
+    OUT_BATCH(batch, 2 << GEN6_3DSTATE_SF_TRIFAN_PROVOKE_SHIFT); /* DW4 */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* DW9 */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* DW14 */
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0); /* DW19 */
 }
 
 static void 
 gen6_emit_wm_state(VADriverContextP ctx, int kernel)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_CONSTANT_PS |
+    OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_PS |
               GEN6_3DSTATE_CONSTANT_BUFFER_0_ENABLE |
               (5 - 2));
-    OUT_RELOC(ctx, 
+    OUT_RELOC(batch, 
               render_state->curbe.bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
 
-    OUT_BATCH(ctx, GEN6_3DSTATE_WM | (9 - 2));
-    OUT_RELOC(ctx, render_state->render_kernels[kernel].bo,
+    OUT_BATCH(batch, GEN6_3DSTATE_WM | (9 - 2));
+    OUT_RELOC(batch, render_state->render_kernels[kernel].bo,
               I915_GEM_DOMAIN_INSTRUCTION, 0,
               0);
-    OUT_BATCH(ctx, (1 << GEN6_3DSTATE_WM_SAMPLER_COUNT_SHITF) |
+    OUT_BATCH(batch, (1 << GEN6_3DSTATE_WM_SAMPLER_COUNT_SHITF) |
               (5 << GEN6_3DSTATE_WM_BINDING_TABLE_ENTRY_COUNT_SHIFT));
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, (6 << GEN6_3DSTATE_WM_DISPATCH_START_GRF_0_SHIFT)); /* DW4 */
-    OUT_BATCH(ctx, ((40 - 1) << GEN6_3DSTATE_WM_MAX_THREADS_SHIFT) |
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, (6 << GEN6_3DSTATE_WM_DISPATCH_START_GRF_0_SHIFT)); /* DW4 */
+    OUT_BATCH(batch, ((40 - 1) << GEN6_3DSTATE_WM_MAX_THREADS_SHIFT) |
               GEN6_3DSTATE_WM_DISPATCH_ENABLE |
               GEN6_3DSTATE_WM_16_DISPATCH_ENABLE);
-    OUT_BATCH(ctx, (1 << GEN6_3DSTATE_WM_NUM_SF_OUTPUTS_SHIFT) |
+    OUT_BATCH(batch, (1 << GEN6_3DSTATE_WM_NUM_SF_OUTPUTS_SHIFT) |
               GEN6_3DSTATE_WM_PERSPECTIVE_PIXEL_BARYCENTRIC);
-    OUT_BATCH(ctx, 0);
-    OUT_BATCH(ctx, 0);
+    OUT_BATCH(batch, 0);
+    OUT_BATCH(batch, 0);
 }
 
 static void
 gen6_emit_vertex_element_state(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     /* Set up our vertex elements, sourced from the single vertex buffer. */
-    OUT_BATCH(ctx, CMD_VERTEX_ELEMENTS | (5 - 2));
+    OUT_BATCH(batch, CMD_VERTEX_ELEMENTS | (5 - 2));
     /* offset 0: X,Y -> {X, Y, 1.0, 1.0} */
-    OUT_BATCH(ctx, (0 << GEN6_VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+    OUT_BATCH(batch, (0 << GEN6_VE0_VERTEX_BUFFER_INDEX_SHIFT) |
               GEN6_VE0_VALID |
               (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
               (0 << VE0_OFFSET_SHIFT));
-    OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
+    OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) |
               (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
               (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
               (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
     /* offset 8: S0, T0 -> {S0, T0, 1.0, 1.0} */
-    OUT_BATCH(ctx, (0 << GEN6_VE0_VERTEX_BUFFER_INDEX_SHIFT) |
+    OUT_BATCH(batch, (0 << GEN6_VE0_VERTEX_BUFFER_INDEX_SHIFT) |
               GEN6_VE0_VALID |
               (I965_SURFACEFORMAT_R32G32_FLOAT << VE0_FORMAT_SHIFT) |
               (8 << VE0_OFFSET_SHIFT));
-    OUT_BATCH(ctx, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) | 
+    OUT_BATCH(batch, (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_0_SHIFT) | 
               (I965_VFCOMPONENT_STORE_SRC << VE1_VFCOMPONENT_1_SHIFT) |
               (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_2_SHIFT) |
               (I965_VFCOMPONENT_STORE_1_FLT << VE1_VFCOMPONENT_3_SHIFT));
@@ -1861,38 +1948,43 @@ gen6_emit_vertex_element_state(VADriverContextP ctx)
 static void
 gen6_emit_vertices(VADriverContextP ctx)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
-    BEGIN_BATCH(ctx, 11);
-    OUT_BATCH(ctx, CMD_VERTEX_BUFFERS | 3);
-    OUT_BATCH(ctx, 
+    BEGIN_BATCH(batch, 11);
+    OUT_BATCH(batch, CMD_VERTEX_BUFFERS | 3);
+    OUT_BATCH(batch, 
               (0 << GEN6_VB0_BUFFER_INDEX_SHIFT) |
               GEN6_VB0_VERTEXDATA |
               ((4 * 4) << VB0_BUFFER_PITCH_SHIFT));
-    OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
-    OUT_RELOC(ctx, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
-    OUT_BATCH(ctx, 0);
+    OUT_RELOC(batch, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 0);
+    OUT_RELOC(batch, render_state->vb.vertex_buffer, I915_GEM_DOMAIN_VERTEX, 0, 12 * 4);
+    OUT_BATCH(batch, 0);
 
-    OUT_BATCH(ctx, 
+    OUT_BATCH(batch, 
               CMD_3DPRIMITIVE |
               _3DPRIMITIVE_VERTEX_SEQUENTIAL |
               (_3DPRIM_RECTLIST << _3DPRIMITIVE_TOPOLOGY_SHIFT) |
               (0 << 9) |
               4);
-    OUT_BATCH(ctx, 3); /* vertex count per instance */
-    OUT_BATCH(ctx, 0); /* start vertex offset */
-    OUT_BATCH(ctx, 1); /* single instance */
-    OUT_BATCH(ctx, 0); /* start instance location */
-    OUT_BATCH(ctx, 0); /* index buffer offset, ignored */
-    ADVANCE_BATCH(ctx);
+    OUT_BATCH(batch, 3); /* vertex count per instance */
+    OUT_BATCH(batch, 0); /* start vertex offset */
+    OUT_BATCH(batch, 1); /* single instance */
+    OUT_BATCH(batch, 0); /* start instance location */
+    OUT_BATCH(batch, 0); /* index buffer offset, ignored */
+    ADVANCE_BATCH(batch);
 }
 
 static void
 gen6_render_emit_states(VADriverContextP ctx, int kernel)
 {
-    intel_batchbuffer_start_atomic(ctx, 0x1000);
-    intel_batchbuffer_emit_mi_flush(ctx);
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
+    intel_batchbuffer_start_atomic(batch, 0x1000);
+    intel_batchbuffer_emit_mi_flush(batch);
     gen6_emit_invarient_states(ctx);
     gen6_emit_state_base_address(ctx);
     gen6_emit_viewport_state_pointers(ctx);
@@ -1909,7 +2001,7 @@ gen6_render_emit_states(VADriverContextP ctx, int kernel)
     gen6_emit_drawing_rectangle(ctx);
     gen6_emit_vertex_element_state(ctx);
     gen6_emit_vertices(ctx);
-    intel_batchbuffer_end_atomic(ctx);
+    intel_batchbuffer_end_atomic(batch);
 }
 
 static void
@@ -1925,13 +2017,16 @@ gen6_render_put_surface(VADriverContextP ctx,
                         unsigned short desth,
                         unsigned int flag)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
+
     gen6_render_initialize(ctx);
     gen6_render_setup_states(ctx, surface,
                              srcx, srcy, srcw, srch,
                              destx, desty, destw, desth);
     i965_clear_dest_region(ctx);
     gen6_render_emit_states(ctx, PS_KERNEL);
-    intel_batchbuffer_flush(ctx);
+    intel_batchbuffer_flush(batch);
 }
 
 static void
@@ -1997,6 +2092,8 @@ gen6_render_put_subpicture(VADriverContextP ctx,
                            unsigned short destw,
                            unsigned short desth)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
+    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE(surface);
     struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
@@ -2008,7 +2105,7 @@ gen6_render_put_subpicture(VADriverContextP ctx,
                                         destx, desty, destw, desth);
     gen6_render_emit_states(ctx, PS_SUBPIC_KERNEL);
     i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
-    intel_batchbuffer_flush(ctx);
+    intel_batchbuffer_flush(batch);
 }
 
 /*
