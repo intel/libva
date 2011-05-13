@@ -163,6 +163,11 @@ static void* putsurface_thread(void *data)
         pixmap = pixmap_thread1;
         context = context_thread1;
     }
+
+    if (put_pixmap)
+        draw = pixmap;
+    else
+        draw = win;
 #endif
  
     printf("vaPutSurface into a Window directly\n\n");
