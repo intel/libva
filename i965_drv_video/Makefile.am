@@ -22,7 +22,7 @@
 
 SUBDIRS = shaders
 
-AM_CFLAGS = -Wall -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 @DRM_CFLAGS@
+AM_CFLAGS = -Wall -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 -DPTHREADS @DRM_CFLAGS@
 
 i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
 i965_drv_video_ladir = @LIBVA_DRIVERS_PATH@
@@ -69,4 +69,6 @@ noinst_HEADERS =                \
 	gen6_mfd.h		\
 	i965_encoder.h		\
 	gen6_vme.h		\
-	gen6_mfc.h
+	gen6_mfc.h		\
+	intel_compiler.h	\
+	i965_mutext.h

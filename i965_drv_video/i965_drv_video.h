@@ -33,8 +33,8 @@
 #include <va/va.h>
 #include <va/va_backend.h>
 
+#include "i965_mutext.h"
 #include "object_heap.h"
-
 #include "intel_driver.h"
 
 #define I965_MAX_PROFILES                       11
@@ -217,6 +217,7 @@ struct i965_driver_data
     struct object_heap subpic_heap;
     struct hw_codec_info *codec_info;
 
+    _I965Mutex render_mutex;
     struct intel_batchbuffer *batch;
     struct i965_render_state render_state;
     void *pp_context;

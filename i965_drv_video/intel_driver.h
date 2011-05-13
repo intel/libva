@@ -11,11 +11,7 @@
 
 #include <va/va_backend.h>
 
-#if defined(__GNUC__)
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
+#include "intel_compiler.h"
 
 #define BATCH_SIZE      0x80000
 #define BATCH_RESERVED  0x10

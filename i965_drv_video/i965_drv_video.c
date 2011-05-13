@@ -1649,6 +1649,7 @@ i965_Init(VADriverContextP ctx)
     if (i965_render_init(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
 
+    _i965InitMutex(&i965->render_mutex);
     i965->batch = intel_batchbuffer_new(&i965->intel, I915_EXEC_RENDER);
 
     return VA_STATUS_SUCCESS;
@@ -2228,6 +2229,8 @@ i965_PutSurface(VADriverContextP ctx,
     if (!obj_surface || !obj_surface->bo)
         return VA_STATUS_SUCCESS;
 
+    _i965LockMutex(&i965->render_mutex);
+
     dri_drawable = dri_get_drawable(ctx, (Drawable)draw);
     assert(dri_drawable);
 
@@ -2295,6 +2298,8 @@ i965_PutSurface(VADriverContextP ctx,
             obj_surface->free_private_data(&obj_surface->private_data);
     }
 
+    _i965UnlockMutex(&i965->render_mutex);
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -2305,6 +2310,8 @@ i965_Terminate(VADriverContextP ctx)
 
     if (i965->batch)
         intel_batchbuffer_free(i965->batch);
+
+    _i965DestroyMutex(&i965->render_mutex);
 
     if (i965_render_terminate(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
