@@ -66,6 +66,7 @@ struct i965_h264_context
     } fsid_list[16];
 
     struct i965_kernel avc_kernels[NUM_H264_AVC_KERNELS];
+    struct intel_batchbuffer *batch;
 };
 
 void i965_media_h264_decode_init(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context);

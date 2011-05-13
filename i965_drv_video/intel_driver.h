@@ -105,7 +105,6 @@ struct intel_driver_data
     pthread_mutex_t ctxmutex;
     int locked;
 
-    struct intel_batchbuffer *batch;
     dri_bufmgr *bufmgr;
 
     unsigned int has_exec2  : 1; /* Flag: has execbuffer2? */

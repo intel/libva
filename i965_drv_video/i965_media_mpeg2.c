@@ -882,10 +882,9 @@ i965_media_mpeg2_objects(VADriverContextP ctx,
                          struct decode_state *decode_state,
                          struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-    int i, j;
+    struct intel_batchbuffer *batch = media_context->base.batch;
     VASliceParameterBufferMPEG2 *slice_param;
+    int i, j;
 
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params[j] && decode_state->slice_params[j]->buffer);

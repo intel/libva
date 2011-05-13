@@ -242,8 +242,7 @@ gen6_mfd_pipe_mode_select(VADriverContextP ctx,
                           int standard_select,
                           struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
 
     assert(standard_select == MFX_FORMAT_MPEG2 ||
            standard_select == MFX_FORMAT_AVC ||
@@ -278,10 +277,10 @@ gen6_mfd_pipe_mode_select(VADriverContextP ctx,
 static void
 gen6_mfd_surface_state(VADriverContextP ctx,
                        struct decode_state *decode_state,
-                       int standard_select)
+                       int standard_select,
+                       struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface = SURFACE(decode_state->current_render_target);
     assert(obj_surface);
@@ -313,8 +312,7 @@ gen6_mfd_pipe_buf_addr_state(VADriverContextP ctx,
                              int standard_select,
                              struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     int i;
 
@@ -374,10 +372,10 @@ gen6_mfd_pipe_buf_addr_state(VADriverContextP ctx,
 static void
 gen6_mfd_ind_obj_base_addr_state(VADriverContextP ctx,
                                  dri_bo *slice_data_bo,
-                                 int standard_select)
+                                 int standard_select,
+                                 struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
 
     BEGIN_BCS_BATCH(batch, 11);
     OUT_BCS_BATCH(batch, MFX_IND_OBJ_BASE_ADDR_STATE | (11 - 2));
@@ -400,8 +398,7 @@ gen6_mfd_bsp_buf_base_addr_state(VADriverContextP ctx,
                                  int standard_select,
                                  struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
 
     BEGIN_BCS_BATCH(batch, 4);
     OUT_BCS_BATCH(batch, MFX_BSP_BUF_BASE_ADDR_STATE | (4 - 2));
@@ -441,10 +438,10 @@ gen6_mfd_aes_state(VADriverContextP ctx,
 static void
 gen6_mfd_wait(VADriverContextP ctx,
               struct decode_state *decode_state,
-              int standard_select)
+              int standard_select,
+              struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
 
     BEGIN_BCS_BATCH(batch, 1);
     OUT_BCS_BATCH(batch, MFX_WAIT | (1 << 8));
@@ -452,10 +449,11 @@ gen6_mfd_wait(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_avc_img_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_avc_img_state(VADriverContextP ctx,
+                       struct decode_state *decode_state,
+                       struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int qm_present_flag;
     int img_struct;
     int mbaff_frame_flag;
@@ -541,10 +539,11 @@ gen6_mfd_avc_img_state(VADriverContextP ctx, struct decode_state *decode_state)
 }
 
 static void
-gen6_mfd_avc_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_avc_qm_state(VADriverContextP ctx,
+                      struct decode_state *decode_state,
+                      struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int cmd_len;
     VAIQMatrixBufferH264 *iq_matrix;
     VAPictureParameterBufferH264 *pic_param;
@@ -588,9 +587,8 @@ gen6_mfd_avc_directmode_state(VADriverContextP ctx,
                               VASliceParameterBufferH264 *slice_param,
                               struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     struct object_surface *obj_surface;
     struct gen6_avc_surface *gen6_avc_surface;
     VAPictureH264 *va_pic;
@@ -687,10 +685,10 @@ static void
 gen6_mfd_avc_slice_state(VADriverContextP ctx,
                          VAPictureParameterBufferH264 *pic_param,
                          VASliceParameterBufferH264 *slice_param,
-                         VASliceParameterBufferH264 *next_slice_param)
+                         VASliceParameterBufferH264 *next_slice_param,
+                         struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1;
     int slice_hor_pos, slice_ver_pos, next_slice_hor_pos, next_slice_ver_pos;
@@ -774,10 +772,11 @@ gen6_mfd_avc_slice_state(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_avc_phantom_slice_state(VADriverContextP ctx, VAPictureParameterBufferH264 *pic_param)
+gen6_mfd_avc_phantom_slice_state(VADriverContextP ctx,
+                                 VAPictureParameterBufferH264 *pic_param,
+                                 struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
@@ -804,8 +803,7 @@ gen6_mfd_avc_ref_idx_state(VADriverContextP ctx,
                            VASliceParameterBufferH264 *slice_param,
                            struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int i, j, num_ref_list;
     struct {
         unsigned char bottom_idc:1;
@@ -879,10 +877,10 @@ gen6_mfd_avc_ref_idx_state(VADriverContextP ctx,
 static void
 gen6_mfd_avc_weightoffset_state(VADriverContextP ctx,
                                 VAPictureParameterBufferH264 *pic_param,
-                                VASliceParameterBufferH264 *slice_param)
+                                VASliceParameterBufferH264 *slice_param,
+                                struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int i, j, num_weight_offset_table = 0;
     short weightoffsets[32 * 6];
 
@@ -952,10 +950,10 @@ static void
 gen6_mfd_avc_bsd_object(VADriverContextP ctx,
                         VAPictureParameterBufferH264 *pic_param,
                         VASliceParameterBufferH264 *slice_param,
-                        dri_bo *slice_data_bo)
+                        dri_bo *slice_data_bo,
+                        struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int slice_data_bit_offset;
     uint8_t *slice_data = NULL;
 
@@ -986,10 +984,11 @@ gen6_mfd_avc_bsd_object(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_avc_phantom_slice_bsd_object(VADriverContextP ctx, VAPictureParameterBufferH264 *pic_param)
+gen6_mfd_avc_phantom_slice_bsd_object(VADriverContextP ctx,
+                                      VAPictureParameterBufferH264 *pic_param,
+                                      struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
 
     BEGIN_BCS_BATCH(batch, 6);
     OUT_BCS_BATCH(batch, MFD_AVC_BSD_OBJECT | (6 - 2));
@@ -1002,10 +1001,12 @@ gen6_mfd_avc_phantom_slice_bsd_object(VADriverContextP ctx, VAPictureParameterBu
 }
 
 static void
-gen6_mfd_avc_phantom_slice(VADriverContextP ctx, VAPictureParameterBufferH264 *pic_param)
+gen6_mfd_avc_phantom_slice(VADriverContextP ctx,
+                           VAPictureParameterBufferH264 *pic_param,
+                           struct gen6_mfd_context *gen6_mfd_context)
 {
-    gen6_mfd_avc_phantom_slice_state(ctx, pic_param);
-    gen6_mfd_avc_phantom_slice_bsd_object(ctx, pic_param);
+    gen6_mfd_avc_phantom_slice_state(ctx, pic_param, gen6_mfd_context);
+    gen6_mfd_avc_phantom_slice_bsd_object(ctx, pic_param, gen6_mfd_context);
 }
 
 static void
@@ -1127,8 +1128,7 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
                             struct decode_state *decode_state,
                             struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param, *next_slice_param;
     dri_bo *slice_data_bo;
@@ -1141,11 +1141,11 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
     intel_batchbuffer_start_atomic_bcs(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
     gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
-    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_AVC);
+    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
     gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
     gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_AVC, gen6_mfd_context);
-    gen6_mfd_avc_img_state(ctx, decode_state);
-    gen6_mfd_avc_qm_state(ctx, decode_state);
+    gen6_mfd_avc_img_state(ctx, decode_state, gen6_mfd_context);
+    gen6_mfd_avc_qm_state(ctx, decode_state, gen6_mfd_context);
 
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
@@ -1157,7 +1157,7 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
         else
             next_slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j + 1]->buffer;
 
-        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_AVC);
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_AVC, gen6_mfd_context);
         assert(decode_state->slice_params[j]->num_elements == 1);
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
@@ -1172,15 +1172,15 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
                 next_slice_param = slice_param + 1;
 
             gen6_mfd_avc_directmode_state(ctx, pic_param, slice_param, gen6_mfd_context);
-            gen6_mfd_avc_slice_state(ctx, pic_param, slice_param, next_slice_param);
+            gen6_mfd_avc_slice_state(ctx, pic_param, slice_param, next_slice_param, gen6_mfd_context);
             gen6_mfd_avc_ref_idx_state(ctx, pic_param, slice_param, gen6_mfd_context);
-            gen6_mfd_avc_weightoffset_state(ctx, pic_param, slice_param);
-            gen6_mfd_avc_bsd_object(ctx, pic_param, slice_param, slice_data_bo);
+            gen6_mfd_avc_weightoffset_state(ctx, pic_param, slice_param, gen6_mfd_context);
+            gen6_mfd_avc_bsd_object(ctx, pic_param, slice_param, slice_data_bo, gen6_mfd_context);
             slice_param++;
         }
     }
     
-    gen6_mfd_avc_phantom_slice(ctx, pic_param);
+    gen6_mfd_avc_phantom_slice(ctx, pic_param, gen6_mfd_context);
     intel_batchbuffer_end_atomic(batch);
     intel_batchbuffer_flush(batch);
 }
@@ -1260,10 +1260,11 @@ gen6_mfd_mpeg2_decode_init(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_mpeg2_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_mpeg2_pic_state(VADriverContextP ctx,
+                         struct decode_state *decode_state,
+                         struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferMPEG2 *pic_param;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
@@ -1293,10 +1294,11 @@ gen6_mfd_mpeg2_pic_state(VADriverContextP ctx, struct decode_state *decode_state
 }
 
 static void
-gen6_mfd_mpeg2_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_mpeg2_qm_state(VADriverContextP ctx,
+                        struct decode_state *decode_state,
+                        struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAIQMatrixBufferMPEG2 *iq_matrix;
     int i;
 
@@ -1341,10 +1343,10 @@ static void
 gen6_mfd_mpeg2_bsd_object(VADriverContextP ctx,
                           VAPictureParameterBufferMPEG2 *pic_param,
                           VASliceParameterBufferMPEG2 *slice_param,
-                          VASliceParameterBufferMPEG2 *next_slice_param)
+                          VASliceParameterBufferMPEG2 *next_slice_param,
+                          struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     unsigned int width_in_mbs = ALIGN(pic_param->horizontal_size, 16) / 16;
     unsigned int height_in_mbs = ALIGN(pic_param->vertical_size, 16) / 16;
     int mb_count;
@@ -1379,8 +1381,7 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
                               struct decode_state *decode_state,
                               struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferMPEG2 *pic_param;
     VASliceParameterBufferMPEG2 *slice_param, *next_slice_param;
     dri_bo *slice_data_bo;
@@ -1393,18 +1394,18 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
     intel_batchbuffer_start_atomic_bcs(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
     gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
-    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_MPEG2);
+    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
     gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
     gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_MPEG2, gen6_mfd_context);
-    gen6_mfd_mpeg2_pic_state(ctx, decode_state);
-    gen6_mfd_mpeg2_qm_state(ctx, decode_state);
+    gen6_mfd_mpeg2_pic_state(ctx, decode_state, gen6_mfd_context);
+    gen6_mfd_mpeg2_qm_state(ctx, decode_state, gen6_mfd_context);
 
     assert(decode_state->num_slice_params == 1);
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j]->buffer;
         slice_data_bo = decode_state->slice_datas[j]->bo;
-        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_MPEG2);
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_MPEG2, gen6_mfd_context);
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
@@ -1414,7 +1415,7 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
             else
                 next_slice_param = NULL;
 
-            gen6_mfd_mpeg2_bsd_object(ctx, pic_param, slice_param, next_slice_param);
+            gen6_mfd_mpeg2_bsd_object(ctx, pic_param, slice_param, next_slice_param, gen6_mfd_context);
             slice_param++;
         }
     }
@@ -1653,10 +1654,11 @@ gen6_mfd_vc1_decode_init(VADriverContextP ctx,
 }
 
 static void
-gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_vc1_pic_state(VADriverContextP ctx,
+                       struct decode_state *decode_state,
+                       struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface;
@@ -1865,10 +1867,11 @@ gen6_mfd_vc1_pic_state(VADriverContextP ctx, struct decode_state *decode_state)
 }
 
 static void
-gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx,
+                             struct decode_state *decode_state,
+                             struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
     int interpolation_mode = 0;
     int intensitycomp_single;
@@ -1917,10 +1920,11 @@ gen6_mfd_vc1_pred_pipe_state(VADriverContextP ctx, struct decode_state *decode_s
 
 
 static void
-gen6_mfd_vc1_directmode_state(VADriverContextP ctx, struct decode_state *decode_state)
+gen6_mfd_vc1_directmode_state(VADriverContextP ctx,
+                              struct decode_state *decode_state,
+                              struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct object_surface *obj_surface;
@@ -1988,10 +1992,10 @@ gen6_mfd_vc1_bsd_object(VADriverContextP ctx,
                         VAPictureParameterBufferVC1 *pic_param,
                         VASliceParameterBufferVC1 *slice_param,
                         VASliceParameterBufferVC1 *next_slice_param,
-                        dri_bo *slice_data_bo)
+                        dri_bo *slice_data_bo,
+                        struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     int next_slice_start_vert_pos;
     int macroblock_offset;
     uint8_t *slice_data = NULL;
@@ -2026,8 +2030,7 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
                             struct decode_state *decode_state,
                             struct gen6_mfd_context *gen6_mfd_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
     VASliceParameterBufferVC1 *slice_param, *next_slice_param;
     dri_bo *slice_data_bo;
@@ -2040,19 +2043,19 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
     intel_batchbuffer_start_atomic_bcs(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
     gen6_mfd_pipe_mode_select(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
-    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_VC1);
+    gen6_mfd_surface_state(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
     gen6_mfd_pipe_buf_addr_state(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
     gen6_mfd_bsp_buf_base_addr_state(ctx, decode_state, MFX_FORMAT_VC1, gen6_mfd_context);
-    gen6_mfd_vc1_pic_state(ctx, decode_state);
-    gen6_mfd_vc1_pred_pipe_state(ctx, decode_state);
-    gen6_mfd_vc1_directmode_state(ctx, decode_state);
+    gen6_mfd_vc1_pic_state(ctx, decode_state, gen6_mfd_context);
+    gen6_mfd_vc1_pred_pipe_state(ctx, decode_state, gen6_mfd_context);
+    gen6_mfd_vc1_directmode_state(ctx, decode_state, gen6_mfd_context);
 
     assert(decode_state->num_slice_params == 1);
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferVC1 *)decode_state->slice_params[j]->buffer;
         slice_data_bo = decode_state->slice_datas[j]->bo;
-        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_VC1);
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_VC1, gen6_mfd_context);
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
@@ -2062,7 +2065,7 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
             else
                 next_slice_param = NULL;
 
-            gen6_mfd_vc1_bsd_object(ctx, pic_param, slice_param, next_slice_param, slice_data_bo);
+            gen6_mfd_vc1_bsd_object(ctx, pic_param, slice_param, next_slice_param, slice_data_bo, gen6_mfd_context);
             slice_param++;
         }
     }
@@ -2133,17 +2136,20 @@ gen6_mfd_context_destroy(void *hw_context)
     dri_bo_unreference(gen6_mfd_context->bitplane_read_buffer.bo);
     gen6_mfd_context->bitplane_read_buffer.bo = NULL;
 
+    intel_batchbuffer_free(gen6_mfd_context->base.batch);
     free(gen6_mfd_context);
 }
 
 struct hw_context *
 gen6_dec_hw_context_init(VADriverContextP ctx, VAProfile profile)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
     struct gen6_mfd_context *gen6_mfd_context = calloc(1, sizeof(struct gen6_mfd_context));
     int i;
 
     gen6_mfd_context->base.destroy = gen6_mfd_context_destroy;
     gen6_mfd_context->base.run = gen6_mfd_decode_picture;
+    gen6_mfd_context->base.batch = intel_batchbuffer_new(intel, I915_EXEC_RENDER);
 
     for (i = 0; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++) {
         gen6_mfd_context->reference_surface[i].surface_id = VA_INVALID_ID;

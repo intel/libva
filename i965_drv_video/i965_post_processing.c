@@ -399,8 +399,8 @@ ironlake_pp_states_setup(VADriverContextP ctx)
 static void
 ironlake_pp_pipeline_select(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
@@ -410,8 +410,8 @@ ironlake_pp_pipeline_select(VADriverContextP ctx)
 static void
 ironlake_pp_urb_layout(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = pp_context->urb.cs_start;
@@ -429,8 +429,8 @@ ironlake_pp_urb_layout(VADriverContextP ctx, struct i965_post_processing_context
 static void
 ironlake_pp_state_base_address(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 8);
     OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
@@ -447,8 +447,8 @@ ironlake_pp_state_base_address(VADriverContextP ctx)
 static void
 ironlake_pp_state_pointers(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 3);
     OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
@@ -460,8 +460,8 @@ ironlake_pp_state_pointers(VADriverContextP ctx, struct i965_post_processing_con
 static void 
 ironlake_pp_cs_urb_layout(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
@@ -474,8 +474,8 @@ ironlake_pp_cs_urb_layout(VADriverContextP ctx, struct i965_post_processing_cont
 static void
 ironlake_pp_constant_buffer(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
@@ -488,8 +488,8 @@ ironlake_pp_constant_buffer(VADriverContextP ctx, struct i965_post_processing_co
 static void
 ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     int x, x_steps, y, y_steps;
 
     x_steps = pp_context->pp_x_steps(&pp_context->private_context);
@@ -517,9 +517,8 @@ ironlake_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_cont
 static void
 ironlake_pp_pipeline_setup(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_post_processing_context *pp_context = i965->pp_context;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);
@@ -2068,8 +2067,8 @@ gen6_pp_states_setup(VADriverContextP ctx)
 static void
 gen6_pp_pipeline_select(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
@@ -2079,8 +2078,8 @@ gen6_pp_pipeline_select(VADriverContextP ctx)
 static void
 gen6_pp_state_base_address(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 10);
     OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | (10 - 2));
@@ -2099,8 +2098,8 @@ gen6_pp_state_base_address(VADriverContextP ctx)
 static void
 gen6_pp_vfe_state(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 8);
     OUT_BATCH(batch, CMD_MEDIA_VFE_STATE | (8 - 2));
@@ -2121,8 +2120,8 @@ gen6_pp_vfe_state(VADriverContextP ctx, struct i965_post_processing_context *pp_
 static void
 gen6_pp_curbe_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     assert(pp_context->urb.size_cs_entry * pp_context->urb.num_cs_entries * 512 <= pp_context->curbe.bo->size);
 
@@ -2141,8 +2140,8 @@ gen6_pp_curbe_load(VADriverContextP ctx, struct i965_post_processing_context *pp
 static void
 gen6_interface_descriptor_load(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 4);
     OUT_BATCH(batch, CMD_MEDIA_INTERFACE_DESCRIPTOR_LOAD | (4 - 2));
@@ -2159,8 +2158,8 @@ gen6_interface_descriptor_load(VADriverContextP ctx, struct i965_post_processing
 static void
 gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context *pp_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     int x, x_steps, y, y_steps;
 
     x_steps = pp_context->pp_x_steps(&pp_context->private_context);
@@ -2190,9 +2189,8 @@ gen6_pp_object_walker(VADriverContextP ctx, struct i965_post_processing_context 
 static void
 gen6_pp_pipeline_setup(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_post_processing_context *pp_context = i965->pp_context;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);

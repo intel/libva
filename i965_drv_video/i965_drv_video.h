@@ -116,6 +116,7 @@ struct hw_context
                 union codec_state *codec_state,
                 struct hw_context *hw_context);
     void (*destroy)(void *);
+    struct intel_batchbuffer *batch;
 };
 
 struct object_context 
@@ -214,8 +215,10 @@ struct i965_driver_data
     struct object_heap buffer_heap;
     struct object_heap image_heap;
     struct object_heap subpic_heap;
-    struct i965_render_state render_state;
     struct hw_codec_info *codec_info;
+
+    struct intel_batchbuffer *batch;
+    struct i965_render_state render_state;
     void *pp_context;
 };
 

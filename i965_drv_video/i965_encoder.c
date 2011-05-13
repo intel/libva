@@ -62,16 +62,20 @@ gen6_encoder_context_destroy(void *hw_context)
 
     gen6_mfc_context_destroy(&gen6_encoder_context->mfc_context);
     gen6_vme_context_destroy(&gen6_encoder_context->vme_context);
+    intel_batchbuffer_free(gen6_encoder_context->base.batch);
     free(gen6_encoder_context);
 }
 
 struct hw_context *
 gen6_enc_hw_context_init(VADriverContextP ctx, VAProfile profile)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
     struct gen6_encoder_context *gen6_encoder_context = calloc(1, sizeof(struct gen6_encoder_context));
 
     gen6_encoder_context->base.destroy = gen6_encoder_context_destroy;
     gen6_encoder_context->base.run = gen6_encoder_end_picture;
+    gen6_encoder_context->base.batch = intel_batchbuffer_new(intel, I915_EXEC_RENDER);
+
     gen6_vme_context_init(ctx, &gen6_encoder_context->vme_context);
     gen6_mfc_context_init(ctx, &gen6_encoder_context->mfc_context);
 

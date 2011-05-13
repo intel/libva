@@ -1550,15 +1550,10 @@ i965_QuerySurfaceStatus(VADriverContextP ctx,
                         VASurfaceID render_target,
                         VASurfaceStatus *status)        /* out */
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
     struct object_surface *obj_surface = SURFACE(render_target);
 
     assert(obj_surface);
-
-    /* Commit pending operations to the HW */
-    intel_batchbuffer_flush(batch);
 
     /* Usually GEM will handle synchronization with the graphics hardware */
 #if 0
@@ -1653,6 +1648,8 @@ i965_Init(VADriverContextP ctx)
 
     if (i965_render_init(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;
+
+    i965->batch = intel_batchbuffer_new(&i965->intel, I915_EXEC_RENDER);
 
     return VA_STATUS_SUCCESS;
 }
@@ -2136,8 +2133,6 @@ i965_GetImage(VADriverContextP ctx,
               unsigned int height,
               VAImageID image)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
 
@@ -2157,9 +2152,6 @@ i965_GetImage(VADriverContextP ctx,
     if (x + width > obj_image->image.width ||
         y + height > obj_image->image.height)
         return VA_STATUS_ERROR_INVALID_PARAMETER;
-
-    /* Commit pending operations to the HW */
-    intel_batchbuffer_flush(batch);
 
     VAStatus va_status;
     void *image_data = NULL;
@@ -2310,6 +2302,9 @@ VAStatus
 i965_Terminate(VADriverContextP ctx)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    if (i965->batch)
+        intel_batchbuffer_free(i965->batch);
 
     if (i965_render_terminate(ctx) == False)
         return VA_STATUS_ERROR_UNKNOWN;

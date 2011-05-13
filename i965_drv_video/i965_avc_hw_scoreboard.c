@@ -66,8 +66,9 @@ static unsigned int avc_hw_scoreboard_constants[] = {
 };
 
 static void
-i965_avc_hw_scoreboard_surface_state(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_surface_state(struct i965_h264_context *i965_h264_context)
 {
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     struct i965_surface_state *ss;
     dri_bo *bo;
 
@@ -90,8 +91,9 @@ i965_avc_hw_scoreboard_surface_state(struct i965_avc_hw_scoreboard_context *avc_
 }
 
 static void
-i965_avc_hw_scoreboard_interface_descriptor_table(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_interface_descriptor_table(struct i965_h264_context *i965_h264_context)
 {
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     struct i965_interface_descriptor *desc;
     dri_bo *bo;
 
@@ -125,8 +127,9 @@ i965_avc_hw_scoreboard_interface_descriptor_table(struct i965_avc_hw_scoreboard_
 }
 
 static void
-i965_avc_hw_scoreboard_binding_table(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_binding_table(struct i965_h264_context *i965_h264_context)
 {
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     unsigned int *binding_table;
     dri_bo *bo = avc_hw_scoreboard_context->binding_table.bo;
 
@@ -144,8 +147,9 @@ i965_avc_hw_scoreboard_binding_table(struct i965_avc_hw_scoreboard_context *avc_
 }
 
 static void
-i965_avc_hw_scoreboard_vfe_state(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_vfe_state(struct i965_h264_context *i965_h264_context)
 {
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     struct i965_vfe_state *vfe_state;
     dri_bo *bo;
 
@@ -170,8 +174,9 @@ i965_avc_hw_scoreboard_vfe_state(struct i965_avc_hw_scoreboard_context *avc_hw_s
 }
 
 static void
-i965_avc_hw_scoreboard_upload_constants(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_upload_constants(struct i965_h264_context *i965_h264_context)
 {
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     unsigned char *constant_buffer;
 
     if (avc_hw_scoreboard_context->curbe.upload)
@@ -186,20 +191,19 @@ i965_avc_hw_scoreboard_upload_constants(struct i965_avc_hw_scoreboard_context *a
 }
 
 static void
-i965_avc_hw_scoreboard_states_setup(struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_states_setup(struct i965_h264_context *i965_h264_context)
 {
-    i965_avc_hw_scoreboard_surface_state(avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_binding_table(avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_interface_descriptor_table(avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_vfe_state(avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_upload_constants(avc_hw_scoreboard_context);
+    i965_avc_hw_scoreboard_surface_state(i965_h264_context);
+    i965_avc_hw_scoreboard_binding_table(i965_h264_context);
+    i965_avc_hw_scoreboard_interface_descriptor_table(i965_h264_context);
+    i965_avc_hw_scoreboard_vfe_state(i965_h264_context);
+    i965_avc_hw_scoreboard_upload_constants(i965_h264_context);
 }
 
 static void
-i965_avc_hw_scoreboard_pipeline_select(VADriverContextP ctx)
+i965_avc_hw_scoreboard_pipeline_select(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
@@ -207,11 +211,11 @@ i965_avc_hw_scoreboard_pipeline_select(VADriverContextP ctx)
 }
 
 static void
-i965_avc_hw_scoreboard_urb_layout(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = avc_hw_scoreboard_context->urb.cs_start;
@@ -227,10 +231,9 @@ i965_avc_hw_scoreboard_urb_layout(VADriverContextP ctx, struct i965_avc_hw_score
 }
 
 static void
-i965_avc_hw_scoreboard_state_base_address(VADriverContextP ctx)
+i965_avc_hw_scoreboard_state_base_address(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 8);
     OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | 6);
@@ -245,10 +248,10 @@ i965_avc_hw_scoreboard_state_base_address(VADriverContextP ctx)
 }
 
 static void
-i965_avc_hw_scoreboard_state_pointers(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_state_pointers(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 3);
     OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
@@ -258,10 +261,10 @@ i965_avc_hw_scoreboard_state_pointers(VADriverContextP ctx, struct i965_avc_hw_s
 }
 
 static void 
-i965_avc_hw_scoreboard_cs_urb_layout(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_cs_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
  
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
@@ -272,10 +275,10 @@ i965_avc_hw_scoreboard_cs_urb_layout(VADriverContextP ctx, struct i965_avc_hw_sc
 }
 
 static void
-i965_avc_hw_scoreboard_constant_buffer(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_constant_buffer(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
@@ -286,11 +289,10 @@ i965_avc_hw_scoreboard_constant_buffer(VADriverContextP ctx, struct i965_avc_hw_
 }
 
 static void
-i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-
+    struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context = &i965_h264_context->avc_hw_scoreboard_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int number_mb_cmds = 512;
     int starting_mb_number = avc_hw_scoreboard_context->inline_data.starting_mb_number;
     int i;
@@ -325,20 +327,19 @@ i965_avc_hw_scoreboard_objects(VADriverContextP ctx, struct i965_avc_hw_scoreboa
 }
 
 static void
-i965_avc_hw_scoreboard_pipeline_setup(VADriverContextP ctx, struct i965_avc_hw_scoreboard_context *avc_hw_scoreboard_context)
+i965_avc_hw_scoreboard_pipeline_setup(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
-    i965_avc_hw_scoreboard_pipeline_select(ctx);
-    i965_avc_hw_scoreboard_state_base_address(ctx);
-    i965_avc_hw_scoreboard_state_pointers(ctx, avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_urb_layout(ctx, avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_cs_urb_layout(ctx, avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_constant_buffer(ctx, avc_hw_scoreboard_context);
-    i965_avc_hw_scoreboard_objects(ctx, avc_hw_scoreboard_context);
+    i965_avc_hw_scoreboard_pipeline_select(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_state_base_address(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_state_pointers(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_urb_layout(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_cs_urb_layout(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_constant_buffer(ctx, i965_h264_context);
+    i965_avc_hw_scoreboard_objects(ctx, i965_h264_context);
     intel_batchbuffer_end_atomic(batch);
 }
 
@@ -365,8 +366,8 @@ i965_avc_hw_scoreboard(VADriverContextP ctx, struct decode_state *decode_state, 
         else
             avc_hw_scoreboard_context->hw_kernel.offset = avc_hw_scoreboard_kernel_offset[AVC_HW_SCOREBOARD];
 
-        i965_avc_hw_scoreboard_states_setup(avc_hw_scoreboard_context);
-        i965_avc_hw_scoreboard_pipeline_setup(ctx, avc_hw_scoreboard_context);
+        i965_avc_hw_scoreboard_states_setup(i965_h264_context);
+        i965_avc_hw_scoreboard_pipeline_setup(ctx, i965_h264_context);
     }
 }
 

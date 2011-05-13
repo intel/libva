@@ -44,10 +44,9 @@
 #include "i965_media_h264.h"
 
 static void
-i965_media_pipeline_select(VADriverContextP ctx)
+i965_media_pipeline_select(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
@@ -57,10 +56,8 @@ i965_media_pipeline_select(VADriverContextP ctx)
 static void
 i965_media_urb_layout(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
+    struct intel_batchbuffer *batch = media_context->base.batch;
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = media_context->urb.cs_start;
@@ -78,9 +75,8 @@ i965_media_urb_layout(VADriverContextP ctx, struct i965_media_context *media_con
 static void
 i965_media_state_base_address(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(batch, 8);
@@ -122,8 +118,7 @@ i965_media_state_base_address(VADriverContextP ctx, struct i965_media_context *m
 static void
 i965_media_state_pointers(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     BEGIN_BATCH(batch, 3);
     OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
@@ -140,8 +135,7 @@ i965_media_state_pointers(VADriverContextP ctx, struct i965_media_context *media
 static void 
 i965_media_cs_urb_layout(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
@@ -162,8 +156,7 @@ i965_media_pipeline_state(VADriverContextP ctx, struct i965_media_context *media
 static void
 i965_media_constant_buffer(VADriverContextP ctx, struct decode_state *decode_state, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
@@ -174,10 +167,9 @@ i965_media_constant_buffer(VADriverContextP ctx, struct decode_state *decode_sta
 }
 
 static void 
-i965_media_depth_buffer(VADriverContextP ctx)
+i965_media_depth_buffer(VADriverContextP ctx, struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     BEGIN_BATCH(batch, 6);
     OUT_BATCH(batch, CMD_DEPTH_BUFFER | 4);
@@ -195,13 +187,12 @@ i965_media_pipeline_setup(VADriverContextP ctx,
                           struct decode_state *decode_state,
                           struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);
-    intel_batchbuffer_emit_mi_flush(batch);                               /* step 1 */
-    i965_media_depth_buffer(ctx);
-    i965_media_pipeline_select(ctx);                                    /* step 2 */
+    intel_batchbuffer_emit_mi_flush(batch);                             /* step 1 */
+    i965_media_depth_buffer(ctx, media_context);
+    i965_media_pipeline_select(ctx, media_context);                     /* step 2 */
     i965_media_urb_layout(ctx, media_context);                          /* step 3 */
     i965_media_pipeline_state(ctx, media_context);                      /* step 4 */
     i965_media_constant_buffer(ctx, decode_state, media_context);       /* step 5 */
@@ -292,6 +283,7 @@ i965_media_decode_picture(VADriverContextP ctx,
     assert(media_context->media_states_setup);
     media_context->media_states_setup(ctx, decode_state, media_context);
     i965_media_pipeline_setup(ctx, decode_state, media_context);
+    intel_batchbuffer_flush(hw_context->batch);
 }
 
 static void
@@ -326,16 +318,19 @@ i965_media_context_destroy(void *hw_context)
     dri_bo_unreference(media_context->indirect_object.bo);
     media_context->indirect_object.bo = NULL;
 
+    intel_batchbuffer_free(media_context->base.batch);
     free(media_context);
 }
 
 struct hw_context *
 g4x_dec_hw_context_init(VADriverContextP ctx, VAProfile profile)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
     struct i965_media_context *media_context = calloc(1, sizeof(struct i965_media_context));
 
     media_context->base.destroy = i965_media_context_destroy;
     media_context->base.run = i965_media_decode_picture;
+    media_context->base.batch = intel_batchbuffer_new(intel, I915_EXEC_RENDER);
 
     switch (profile) {
     case VAProfileMPEG2Simple:
@@ -360,10 +355,12 @@ g4x_dec_hw_context_init(VADriverContextP ctx, VAProfile profile)
 struct hw_context *
 ironlake_dec_hw_context_init(VADriverContextP ctx, VAProfile profile)
 {
+    struct intel_driver_data *intel = intel_driver_data(ctx);
     struct i965_media_context *media_context = calloc(1, sizeof(struct i965_media_context));
 
     media_context->base.destroy = i965_media_context_destroy;
     media_context->base.run = i965_media_decode_picture;
+    media_context->base.batch = intel_batchbuffer_new(intel, I915_EXEC_RENDER);
 
     switch (profile) {
     case VAProfileMPEG2Simple:

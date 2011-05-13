@@ -97,10 +97,13 @@ i965_avc_bsd_init_avc_bsd_surface(VADriverContextP ctx,
 }
 
 static void
-i965_bsd_ind_obj_base_address(VADriverContextP ctx, struct decode_state *decode_state, int slice)
+i965_bsd_ind_obj_base_address(VADriverContextP ctx,
+                              struct decode_state *decode_state,
+                              int slice,
+                              struct i965_h264_context *i965_h264_context)
+                              
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     dri_bo *ind_bo = decode_state->slice_datas[slice]->bo;
 
@@ -118,8 +121,7 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
                        struct decode_state *decode_state,
                        struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int qm_present_flag;
     int img_struct;
     int mbaff_frame_flag;
@@ -209,10 +211,11 @@ i965_avc_bsd_img_state(VADriverContextP ctx,
 }
 
 static void
-i965_avc_bsd_qm_state(VADriverContextP ctx, struct decode_state *decode_state)
+i965_avc_bsd_qm_state(VADriverContextP ctx,
+                      struct decode_state *decode_state,
+                      struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int cmd_len;
     VAIQMatrixBufferH264 *iq_matrix;
     VAPictureParameterBufferH264 *pic_param;
@@ -256,8 +259,7 @@ i965_avc_bsd_slice_state(VADriverContextP ctx,
                          VASliceParameterBufferH264 *slice_param,
                          struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int present_flag, cmd_len, list, j;
     struct {
         unsigned char bottom_idc:1;
@@ -428,9 +430,8 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
                             VASliceParameterBufferH264 *slice_param,
                             struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     struct i965_avc_bsd_context *i965_avc_bsd_context;
     int i, j;
     VAPictureH264 *va_pic;
@@ -608,8 +609,7 @@ g4x_avc_bsd_object(VADriverContextP ctx,
                    int slice_index,
                    struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
@@ -738,8 +738,7 @@ ironlake_avc_bsd_object(VADriverContextP ctx,
                         int slice_index,
                         struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     int width_in_mbs = pic_param->picture_width_in_mbs_minus1 + 1;
     int height_in_mbs = pic_param->picture_height_in_mbs_minus1 + 1; /* frame height */
 
@@ -1025,9 +1024,8 @@ i965_avc_bsd_frame_store_index(VADriverContextP ctx,
 void 
 i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, void *h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_h264_context *i965_h264_context = (struct i965_h264_context *)h264_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     VAPictureParameterBufferH264 *pic_param;
     VASliceParameterBufferH264 *slice_param;
     int i, j;
@@ -1064,13 +1062,13 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
     intel_batchbuffer_start_atomic_bcs(batch, 0x1000);
 
     i965_avc_bsd_img_state(ctx, decode_state, i965_h264_context);
-    i965_avc_bsd_qm_state(ctx, decode_state);
+    i965_avc_bsd_qm_state(ctx, decode_state, i965_h264_context);
 
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
 
-        i965_bsd_ind_obj_base_address(ctx, decode_state, j);
+        i965_bsd_ind_obj_base_address(ctx, decode_state, j, i965_h264_context);
 
         assert(decode_state->slice_params[j]->num_elements == 1);  /* FIXME */
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {

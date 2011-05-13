@@ -710,8 +710,7 @@ i965_media_h264_objects(VADriverContextP ctx,
                         struct decode_state *decode_state,
                         struct i965_media_context *media_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = media_context->base.batch;
     struct i965_h264_context *i965_h264_context;
     unsigned int *object_command;
 
@@ -882,6 +881,8 @@ i965_media_h264_dec_context_init(VADriverContextP ctx, struct i965_media_context
         i965_h264_context->fsid_list[i].surface_id = VA_INVALID_ID;
         i965_h264_context->fsid_list[i].frame_store_id = -1;
     }
+
+    i965_h264_context->batch = media_context->base.batch;
 
     media_context->private_context = i965_h264_context;
     media_context->free_private_context = i965_media_h264_free_private_context;

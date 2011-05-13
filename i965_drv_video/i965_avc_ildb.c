@@ -396,10 +396,9 @@ i965_avc_ildb_states_setup(VADriverContextP ctx,
 }
 
 static void
-i965_avc_ildb_pipeline_select(VADriverContextP ctx)
+i965_avc_ildb_pipeline_select(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
@@ -409,11 +408,9 @@ i965_avc_ildb_pipeline_select(VADriverContextP ctx)
 static void
 i965_avc_ildb_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
-
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
     unsigned int vfe_fence, cs_fence;
 
     vfe_fence = avc_ildb_context->urb.cs_start;
@@ -429,11 +426,10 @@ i965_avc_ildb_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h2
 }
 
 static void
-i965_avc_ildb_state_base_address(VADriverContextP ctx)
+i965_avc_ildb_state_base_address(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx); 
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(batch, 8);
@@ -461,9 +457,8 @@ i965_avc_ildb_state_base_address(VADriverContextP ctx)
 static void
 i965_avc_ildb_state_pointers(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 3);
     OUT_BATCH(batch, CMD_MEDIA_STATE_POINTERS | 1);
@@ -475,9 +470,8 @@ i965_avc_ildb_state_pointers(VADriverContextP ctx, struct i965_h264_context *i96
 static void 
 i965_avc_ildb_cs_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
@@ -490,9 +484,8 @@ i965_avc_ildb_cs_urb_layout(VADriverContextP ctx, struct i965_h264_context *i965
 static void
 i965_avc_ildb_constant_buffer(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CONSTANT_BUFFER | (1 << 8) | (2 - 2));
@@ -505,9 +498,8 @@ i965_avc_ildb_constant_buffer(VADriverContextP ctx, struct i965_h264_context *i9
 static void
 i965_avc_ildb_objects(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_avc_ildb_context *avc_ildb_context = &i965_h264_context->avc_ildb_context;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     BEGIN_BATCH(batch, 6);
     OUT_BATCH(batch, CMD_MEDIA_OBJECT | 4);
@@ -541,12 +533,11 @@ i965_avc_ildb_objects(VADriverContextP ctx, struct i965_h264_context *i965_h264_
 static void
 i965_avc_ildb_pipeline_setup(VADriverContextP ctx, struct i965_h264_context *i965_h264_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = i965_h264_context->batch;
 
     intel_batchbuffer_emit_mi_flush(batch);
-    i965_avc_ildb_pipeline_select(ctx);
-    i965_avc_ildb_state_base_address(ctx);
+    i965_avc_ildb_pipeline_select(ctx, i965_h264_context);
+    i965_avc_ildb_state_base_address(ctx, i965_h264_context);
     i965_avc_ildb_state_pointers(ctx, i965_h264_context);
     i965_avc_ildb_urb_layout(ctx, i965_h264_context);
     i965_avc_ildb_cs_urb_layout(ctx, i965_h264_context);

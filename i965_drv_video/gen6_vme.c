@@ -434,20 +434,18 @@ static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx,
     return VA_STATUS_SUCCESS;
 }
 
-static void gen6_vme_pipeline_select(VADriverContextP ctx)
+static void gen6_vme_pipeline_select(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
 
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_MEDIA);
     ADVANCE_BATCH(batch);
 }
 
-static void gen6_vme_state_base_address(VADriverContextP ctx)
+static void gen6_vme_state_base_address(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
 
     BEGIN_BATCH(batch, 10);
 
@@ -474,8 +472,7 @@ static void gen6_vme_state_base_address(VADriverContextP ctx)
 
 static void gen6_vme_vfe_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
     BEGIN_BATCH(batch, 8);
@@ -498,8 +495,7 @@ static void gen6_vme_vfe_state(VADriverContextP ctx, struct gen6_encoder_context
 
 static void gen6_vme_curbe_load(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
     BEGIN_BATCH(batch, 4);
@@ -515,8 +511,7 @@ static void gen6_vme_curbe_load(VADriverContextP ctx, struct gen6_encoder_contex
 
 static void gen6_vme_idrt(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
 
     BEGIN_BATCH(batch, 4);
@@ -532,11 +527,11 @@ static void gen6_vme_idrt(VADriverContextP ctx, struct gen6_encoder_context *gen
 static int gen6_vme_media_object(VADriverContextP ctx, 
                                  struct encode_state *encode_state,
                                  int mb_x, int mb_y,
-                                 int kernel)
+                                 int kernel,
+                                 struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     struct object_surface *obj_surface = SURFACE(encode_state->current_render_target);
     int mb_width = ALIGN(obj_surface->orig_width, 16) / 16;
     int len_in_dowrds = 6 + 1;
@@ -617,8 +612,7 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
                                          struct encode_state *encode_state,
                                          struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     VAEncSliceParameterBuffer *pSliceParameter = (VAEncSliceParameterBuffer *)encode_state->slice_params[0]->buffer;
     VAEncSequenceParameterBufferH264 *pSequenceParameter = (VAEncSequenceParameterBufferH264 *)encode_state->seq_param->buffer;
     int is_intra = pSliceParameter->slice_flags.bits.is_intra;
@@ -642,10 +636,10 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
                 ADVANCE_BATCH(batch);
 
                 /*Step2: State command PIPELINE_SELECT*/
-                gen6_vme_pipeline_select(ctx);
+                gen6_vme_pipeline_select(ctx, gen6_encoder_context);
 
                 /*Step3: State commands configuring pipeline states*/
-                gen6_vme_state_base_address(ctx);
+                gen6_vme_state_base_address(ctx, gen6_encoder_context);
                 gen6_vme_vfe_state(ctx, gen6_encoder_context);
                 gen6_vme_curbe_load(ctx, gen6_encoder_context);
                 gen6_vme_idrt(ctx, gen6_encoder_context);
@@ -654,7 +648,7 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
             }
 
             /*Step4: Primitive commands*/
-            object_len_in_bytes = gen6_vme_media_object(ctx, encode_state, x, y, is_intra ? VME_INTRA_SHADER : VME_INTER_SHADER);
+            object_len_in_bytes = gen6_vme_media_object(ctx, encode_state, x, y, is_intra ? VME_INTRA_SHADER : VME_INTER_SHADER, gen6_encoder_context);
 
             if (intel_batchbuffer_check_free_space(batch, object_len_in_bytes) == 0) {
                 assert(0);
@@ -693,8 +687,7 @@ static VAStatus gen6_vme_run(VADriverContextP ctx,
                              struct encode_state *encode_state,
                              struct gen6_encoder_context *gen6_encoder_context)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
 
     intel_batchbuffer_flush(batch);
 

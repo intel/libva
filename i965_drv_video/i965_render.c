@@ -968,8 +968,8 @@ i965_subpic_render_state_setup(VADriverContextP ctx,
 static void
 i965_render_pipeline_select(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
  
     BEGIN_BATCH(batch, 1);
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
@@ -979,8 +979,8 @@ i965_render_pipeline_select(VADriverContextP ctx)
 static void
 i965_render_state_sip(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_STATE_SIP | 0);
@@ -991,9 +991,8 @@ i965_render_state_sip(VADriverContextP ctx)
 static void
 i965_render_state_base_address(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
@@ -1022,8 +1021,8 @@ i965_render_state_base_address(VADriverContextP ctx)
 static void
 i965_render_binding_table_pointers(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 6);
     OUT_BATCH(batch, CMD_BINDING_TABLE_POINTERS | 4);
@@ -1038,8 +1037,8 @@ i965_render_binding_table_pointers(VADriverContextP ctx)
 static void 
 i965_render_constant_color(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 5);
     OUT_BATCH(batch, CMD_CONSTANT_COLOR | 3);
@@ -1053,9 +1052,8 @@ i965_render_constant_color(VADriverContextP ctx)
 static void
 i965_render_pipelined_pointers(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     BEGIN_BATCH(batch, 7);
@@ -1072,8 +1070,8 @@ i965_render_pipelined_pointers(VADriverContextP ctx)
 static void
 i965_render_urb_layout(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     int urb_vs_start, urb_vs_size;
     int urb_gs_start, urb_gs_size;
     int urb_clip_start, urb_clip_size;
@@ -1113,8 +1111,8 @@ i965_render_urb_layout(VADriverContextP ctx)
 static void 
 i965_render_cs_urb_layout(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     BEGIN_BATCH(batch, 2);
     OUT_BATCH(batch, CMD_CS_URB_STATE | 0);
@@ -1127,9 +1125,8 @@ i965_render_cs_urb_layout(VADriverContextP ctx)
 static void
 i965_render_constant_buffer(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     BEGIN_BATCH(batch, 2);
@@ -1143,9 +1140,8 @@ i965_render_constant_buffer(VADriverContextP ctx)
 static void
 i965_render_drawing_rectangle(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
     struct intel_region *dest_region = render_state->draw_region;
 
@@ -1160,9 +1156,8 @@ i965_render_drawing_rectangle(VADriverContextP ctx)
 static void
 i965_render_vertex_elements(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     if (IS_IRONLAKE(i965->intel.device_id)) {
         BEGIN_BATCH(batch, 5);
@@ -1220,9 +1215,8 @@ i965_render_upload_image_palette(
     unsigned int     alpha
 )
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     unsigned int i;
 
     struct object_image *obj_image = IMAGE(image_id);
@@ -1243,9 +1237,8 @@ i965_render_upload_image_palette(
 static void
 i965_render_startup(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     BEGIN_BATCH(batch, 11);
@@ -1280,9 +1273,8 @@ i965_render_startup(VADriverContextP ctx)
 static void 
 i965_clear_dest_region(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
-    struct i965_driver_data *i965 = i965_driver_data(ctx);  
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
     struct intel_region *dest_region = render_state->draw_region;
     unsigned int blt_cmd, br13;
@@ -1331,8 +1323,8 @@ i965_clear_dest_region(VADriverContextP ctx)
 static void
 i965_surface_render_pipeline_setup(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     i965_clear_dest_region(ctx);
     intel_batchbuffer_start_atomic(batch, 0x1000);
@@ -1355,8 +1347,8 @@ i965_surface_render_pipeline_setup(VADriverContextP ctx)
 static void
 i965_subpic_render_pipeline_setup(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
@@ -1468,8 +1460,8 @@ i965_render_put_surface(VADriverContextP ctx,
                         unsigned short desth,
                         unsigned int flag)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     i965_render_initialize(ctx);
     i965_surface_render_state_setup(ctx, surface,
@@ -1491,9 +1483,8 @@ i965_render_put_subpicture(VADriverContextP ctx,
                            unsigned short destw,
                            unsigned short desth)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct object_surface *obj_surface = SURFACE(surface);
     struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
 
@@ -1658,8 +1649,8 @@ gen6_render_setup_states(VADriverContextP ctx,
 static void
 gen6_emit_invarient_states(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     OUT_BATCH(batch, CMD_PIPELINE_SELECT | PIPELINE_SELECT_3D);
 
@@ -1679,9 +1670,8 @@ gen6_emit_invarient_states(VADriverContextP ctx)
 static void
 gen6_emit_state_base_address(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     OUT_BATCH(batch, CMD_STATE_BASE_ADDRESS | (10 - 2));
@@ -1699,9 +1689,8 @@ gen6_emit_state_base_address(VADriverContextP ctx)
 static void
 gen6_emit_viewport_state_pointers(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     OUT_BATCH(batch, GEN6_3DSTATE_VIEWPORT_STATE_POINTERS |
@@ -1715,8 +1704,8 @@ gen6_emit_viewport_state_pointers(VADriverContextP ctx)
 static void
 gen6_emit_urb(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     OUT_BATCH(batch, GEN6_3DSTATE_URB | (3 - 2));
     OUT_BATCH(batch, ((1 - 1) << GEN6_3DSTATE_URB_VS_SIZE_SHIFT) |
@@ -1728,9 +1717,8 @@ gen6_emit_urb(VADriverContextP ctx)
 static void
 gen6_emit_cc_state_pointers(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     OUT_BATCH(batch, GEN6_3DSTATE_CC_STATE_POINTERS | (4 - 2));
@@ -1742,9 +1730,8 @@ gen6_emit_cc_state_pointers(VADriverContextP ctx)
 static void
 gen6_emit_sampler_state_pointers(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     OUT_BATCH(batch, GEN6_3DSTATE_SAMPLER_STATE_POINTERS |
@@ -1758,8 +1745,8 @@ gen6_emit_sampler_state_pointers(VADriverContextP ctx)
 static void
 gen6_emit_binding_table(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     /* Binding table pointers */
     OUT_BATCH(batch, CMD_BINDING_TABLE_POINTERS |
@@ -1774,8 +1761,8 @@ gen6_emit_binding_table(VADriverContextP ctx)
 static void
 gen6_emit_depth_buffer_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     OUT_BATCH(batch, CMD_DEPTH_BUFFER | (7 - 2));
     OUT_BATCH(batch, (I965_SURFACE_NULL << CMD_DEPTH_BUFFER_TYPE_SHIFT) |
@@ -1799,8 +1786,8 @@ gen6_emit_drawing_rectangle(VADriverContextP ctx)
 static void 
 gen6_emit_vs_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     /* disable VS constant buffer */
     OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_VS | (5 - 2));
@@ -1820,8 +1807,8 @@ gen6_emit_vs_state(VADriverContextP ctx)
 static void 
 gen6_emit_gs_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     /* disable GS constant buffer */
     OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_GS | (5 - 2));
@@ -1842,8 +1829,8 @@ gen6_emit_gs_state(VADriverContextP ctx)
 static void 
 gen6_emit_clip_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     OUT_BATCH(batch, GEN6_3DSTATE_CLIP | (4 - 2));
     OUT_BATCH(batch, 0);
@@ -1854,8 +1841,8 @@ gen6_emit_clip_state(VADriverContextP ctx)
 static void 
 gen6_emit_sf_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     OUT_BATCH(batch, GEN6_3DSTATE_SF | (20 - 2));
     OUT_BATCH(batch, (1 << GEN6_3DSTATE_SF_NUM_OUTPUTS_SHIFT) |
@@ -1884,9 +1871,8 @@ gen6_emit_sf_state(VADriverContextP ctx)
 static void 
 gen6_emit_wm_state(VADriverContextP ctx, int kernel)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     OUT_BATCH(batch, GEN6_3DSTATE_CONSTANT_PS |
@@ -1920,8 +1906,8 @@ gen6_emit_wm_state(VADriverContextP ctx, int kernel)
 static void
 gen6_emit_vertex_element_state(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     /* Set up our vertex elements, sourced from the single vertex buffer. */
     OUT_BATCH(batch, CMD_VERTEX_ELEMENTS | (5 - 2));
@@ -1948,9 +1934,8 @@ gen6_emit_vertex_element_state(VADriverContextP ctx)
 static void
 gen6_emit_vertices(VADriverContextP ctx)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct i965_render_state *render_state = &i965->render_state;
 
     BEGIN_BATCH(batch, 11);
@@ -1980,8 +1965,8 @@ gen6_emit_vertices(VADriverContextP ctx)
 static void
 gen6_render_emit_states(VADriverContextP ctx, int kernel)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     intel_batchbuffer_start_atomic(batch, 0x1000);
     intel_batchbuffer_emit_mi_flush(batch);
@@ -2017,8 +2002,8 @@ gen6_render_put_surface(VADriverContextP ctx,
                         unsigned short desth,
                         unsigned int flag)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
 
     gen6_render_initialize(ctx);
     gen6_render_setup_states(ctx, surface,
@@ -2092,9 +2077,8 @@ gen6_render_put_subpicture(VADriverContextP ctx,
                            unsigned short destw,
                            unsigned short desth)
 {
-    struct intel_driver_data *intel = intel_driver_data(ctx);
-    struct intel_batchbuffer *batch = intel->batch;
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    struct intel_batchbuffer *batch = i965->batch;
     struct object_surface *obj_surface = SURFACE(surface);
     struct object_subpic *obj_subpic = SUBPIC(obj_surface->subpic);
 
