@@ -42,40 +42,21 @@
 #include <fcntl.h>
 #include <errno.h>
 
-static VADisplayContextP pDisplayContexts = NULL;
-
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
 )
 {
-    VADisplayContextP ctx = pDisplayContexts;
-
-    while (ctx)
-    {
-	if (ctx == pDisplayContext && pDisplayContext->pDriverContext)
-	    return 1;
-	ctx = ctx->pNext;
-    }
-    return 0;
+    return (pDisplayContext != NULL && 
+            pDisplayContext->pDriverContext != NULL);
 }
 
 static void va_DisplayContextDestroy (
     VADisplayContextP pDisplayContext
 )
 {
-    VADisplayContextP *ctx = &pDisplayContexts;
+    if (pDisplayContext == NULL)
+        return;
 
-    /* Throw away pDisplayContext */
-    while (*ctx)
-    {
-	if (*ctx == pDisplayContext)
-	{
-	    *ctx = pDisplayContext->pNext;
-	    pDisplayContext->pNext = NULL;
-	    break;
-	}
-	ctx = &((*ctx)->pNext);
-    }
     free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
@@ -175,21 +156,10 @@ VADisplay vaGetDisplay (
 )
 {
   VADisplay dpy = NULL;
-  VADisplayContextP pDisplayContext = pDisplayContexts;
+  VADisplayContextP pDisplayContext;
 
   if (!native_dpy)
       return NULL;
-
-  while (pDisplayContext)
-  {
-      if (pDisplayContext->pDriverContext &&
-	  pDisplayContext->pDriverContext->native_dpy == (void *)native_dpy)
-      {
-          dpy = (VADisplay)pDisplayContext;
-          break;
-      }
-      pDisplayContext = pDisplayContext->pNext;
-  }
 
   if (!dpy)
   {
@@ -204,13 +174,11 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
 	  pDriverContext->native_dpy       = (void *)native_dpy;
-	  pDisplayContext->pNext           = pDisplayContexts;
 	  pDisplayContext->pDriverContext  = pDriverContext;
 	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
           pDisplayContext->opaque          = NULL;
-	  pDisplayContexts                 = pDisplayContext;
 	  pDriverContext->dri_state 	   = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
