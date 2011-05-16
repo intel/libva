@@ -75,6 +75,7 @@ int object_heap_init( object_heap_p heap, int object_size, int id_offset)
     heap->heap_increment = 16;
     heap->heap_index = NULL;
     heap->next_free = LAST_FREE;
+    _i965InitMutex(&heap->mutex);
     return object_heap_expand(heap);
 }
 
@@ -85,10 +86,13 @@ int object_heap_init( object_heap_p heap, int object_size, int id_offset)
 int object_heap_allocate( object_heap_p heap )
 {
     object_base_p obj;
+
+    _i965LockMutex(&heap->mutex);
     if ( LAST_FREE == heap->next_free )
     {
         if( -1 == object_heap_expand( heap ) )
         {
+            _i965UnlockMutex(&heap->mutex);
             return -1; /* Out of memory */
         }
     }
@@ -96,6 +100,8 @@ int object_heap_allocate( object_heap_p heap )
     
     obj = (object_base_p) (heap->heap_index + heap->next_free * heap->object_size);
     heap->next_free = obj->next_free;
+    _i965UnlockMutex(&heap->mutex);
+    
     obj->next_free = ALLOCATED;
     return obj->id;
 }
@@ -107,12 +113,16 @@ int object_heap_allocate( object_heap_p heap )
 object_base_p object_heap_lookup( object_heap_p heap, int id )
 {
     object_base_p obj;
+
+    _i965LockMutex(&heap->mutex);
     if ( (id < heap->id_offset) || (id > (heap->heap_size+heap->id_offset)) )
     {
+        _i965UnlockMutex(&heap->mutex);
         return NULL;
     }
     id &= OBJECT_HEAP_ID_MASK;
     obj = (object_base_p) (heap->heap_index + id * heap->object_size);
+    _i965UnlockMutex(&heap->mutex);
 
 	/* Check if the object has in fact been allocated */
 	if ( obj->next_free != ALLOCATED )
@@ -140,16 +150,19 @@ object_base_p object_heap_next( object_heap_p heap, object_heap_iterator *iter )
 {
     object_base_p obj;
     int i = *iter + 1;
+    _i965LockMutex(&heap->mutex);
     while ( i < heap->heap_size)
     {
         obj = (object_base_p) (heap->heap_index + i * heap->object_size);
         if (obj->next_free == ALLOCATED)
         {
+            _i965UnlockMutex(&heap->mutex);
             *iter = i;
             return obj;
         }
         i++;
     }
+    _i965UnlockMutex(&heap->mutex);
     *iter = i;
     return NULL;
 }
@@ -167,8 +180,10 @@ void object_heap_free( object_heap_p heap, object_base_p obj )
         /* Check if the object has in fact been allocated */
         ASSERT( obj->next_free == ALLOCATED );
     
+        _i965LockMutex(&heap->mutex);
         obj->next_free = heap->next_free;
         heap->next_free = obj->id & OBJECT_HEAP_ID_MASK;
+        _i965UnlockMutex(&heap->mutex);
     }
 }
 
@@ -179,6 +194,9 @@ void object_heap_destroy( object_heap_p heap )
 {
     object_base_p obj;
     int i;
+
+    _i965DestroyMutex(&heap->mutex);
+
     /* Check if heap is empty */
     for (i = 0; i < heap->heap_size; i++)
     {

@@ -25,6 +25,8 @@
 #ifndef _OBJECT_HEAP_H_
 #define _OBJECT_HEAP_H_
 
+#include "i965_mutext.h"
+
 #define OBJECT_HEAP_OFFSET_MASK		0x7F000000
 #define OBJECT_HEAP_ID_MASK			0x00FFFFFF
 
@@ -43,6 +45,7 @@ struct object_heap {
     int next_free;
     int heap_size;
     int heap_increment;
+    _I965Mutex mutex;
 };
 
 typedef int object_heap_iterator;
