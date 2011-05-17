@@ -1299,7 +1299,8 @@ i965_clear_dest_region(VADriverContextP ctx)
 
     br13 |= pitch;
 
-    if (IS_GEN6(i965->intel.device_id)) {
+    if (IS_GEN6(i965->intel.device_id) ||
+        IS_GEN7(i965->intel.device_id)) {
         intel_batchbuffer_start_atomic_blt(batch, 24);
         BEGIN_BLT_BATCH(batch, 6);
     } else {
@@ -2115,7 +2116,8 @@ intel_render_put_surface(VADriverContextP ctx,
                          destx, desty, destw, desth,
                          flag);
 
-    if (IS_GEN6(i965->intel.device_id))
+    if (IS_GEN6(i965->intel.device_id) ||
+        IS_GEN7(i965->intel.device_id))
         gen6_render_put_surface(ctx, surface,
                                 srcx, srcy, srcw, srch,
                                 destx, desty, destw, desth,
@@ -2141,7 +2143,8 @@ intel_render_put_subpicture(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
-    if (IS_GEN6(i965->intel.device_id))
+    if (IS_GEN6(i965->intel.device_id) ||
+        IS_GEN7(i965->intel.device_id))
         gen6_render_put_subpicture(ctx, surface,
                                    srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth);
@@ -2164,7 +2167,8 @@ i965_render_init(VADriverContextP ctx)
     assert(NUM_RENDER_KERNEL == (sizeof(render_kernels_gen6) / 
                                  sizeof(render_kernels_gen6[0])));
 
-    if (IS_GEN6(i965->intel.device_id))
+    if (IS_GEN6(i965->intel.device_id) ||
+        IS_GEN7(i965->intel.device_id))
         memcpy(render_state->render_kernels, render_kernels_gen6, sizeof(render_state->render_kernels));
     else if (IS_IRONLAKE(i965->intel.device_id))
         memcpy(render_state->render_kernels, render_kernels_gen5, sizeof(render_state->render_kernels));

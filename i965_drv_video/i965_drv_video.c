@@ -47,20 +47,27 @@
 #define IMAGE_ID_OFFSET                 0x0a000000
 #define SUBPIC_ID_OFFSET                0x10000000
 
-#define HAS_MPEG2(ctx)  (IS_G4X((ctx)->intel.device_id) ||              \
-                         IS_IRONLAKE((ctx)->intel.device_id) ||         \
-                         (IS_GEN6((ctx)->intel.device_id) && (ctx)->intel.has_bsd))
+#define HAS_MPEG2(ctx)  (IS_G4X((ctx)->intel.device_id) ||      \
+                         IS_IRONLAKE((ctx)->intel.device_id) || \
+                         ((IS_GEN6((ctx)->intel.device_id) ||   \
+                           IS_GEN7((ctx)->intel.device_id)) &&  \
+                          (ctx)->intel.has_bsd))
 
-#define HAS_H264(ctx)   ((IS_GEN6((ctx)->intel.device_id) ||            \
+#define HAS_H264(ctx)   ((IS_GEN7((ctx)->intel.device_id) ||            \
+                          IS_GEN6((ctx)->intel.device_id) ||            \
                           IS_IRONLAKE((ctx)->intel.device_id)) &&       \
                          (ctx)->intel.has_bsd)
 
-#define HAS_VC1(ctx)    (IS_GEN6((ctx)->intel.device_id) && (ctx)->intel.has_bsd)
+#define HAS_VC1(ctx)    ((IS_GEN7((ctx)->intel.device_id) ||    \
+                          IS_GEN6((ctx)->intel.device_id)) &&   \
+                         (ctx)->intel.has_bsd)
 
-#define HAS_TILED_SURFACE(ctx) (IS_GEN6((ctx)->intel.device_id) &&      \
+#define HAS_TILED_SURFACE(ctx) ((IS_GEN7((ctx)->intel.device_id) ||     \
+                                 IS_GEN6((ctx)->intel.device_id)) &&    \
                                 (ctx)->render_state.interleaved_uv)
 
-#define HAS_ENCODER(ctx)        (IS_GEN6((ctx)->intel.device_id) &&     \
+#define HAS_ENCODER(ctx)        ((IS_GEN7((ctx)->intel.device_id) ||    \
+                                  IS_GEN6((ctx)->intel.device_id)) &&   \
                                  (ctx)->intel.has_bsd)
 
 enum {
@@ -465,7 +472,8 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->orig_width = width;
         obj_surface->orig_height = height;
 
-        if (IS_GEN6(i965->intel.device_id)) {
+        if (IS_GEN6(i965->intel.device_id) ||
+            IS_GEN7(i965->intel.device_id)) {
             obj_surface->width = ALIGN(obj_surface->orig_width, 128);
             obj_surface->height = ALIGN(obj_surface->orig_height, 32);
         } else {
@@ -826,7 +834,7 @@ i965_CreateContext(VADriverContextP ctx,
         render_state->interleaved_uv = 1;
         break;
     default:
-        render_state->interleaved_uv = !!IS_GEN6(i965->intel.device_id);
+        render_state->interleaved_uv = !!(IS_GEN6(i965->intel.device_id) || IS_GEN7(i965->intel.device_id));
         break;
     }
 
@@ -1639,6 +1647,8 @@ i965_Init(VADriverContextP ctx)
     else if (IS_IRONLAKE(i965->intel.device_id))
         i965->codec_info = &ironlake_hw_codec_info;
     else if (IS_GEN6(i965->intel.device_id))
+        i965->codec_info = &gen6_hw_codec_info;
+    else if (IS_GEN7(i965->intel.device_id))
         i965->codec_info = &gen6_hw_codec_info;
     else
         return VA_STATUS_ERROR_UNKNOWN;

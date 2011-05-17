@@ -161,7 +161,8 @@ intel_batchbuffer_emit_mi_flush(struct intel_batchbuffer *batch)
 {
     struct intel_driver_data *intel = batch->intel; 
 
-    if (IS_GEN6(intel->device_id)) {
+    if (IS_GEN6(intel->device_id) ||
+        IS_GEN7(intel->device_id)) {
         if (batch->flag == I915_EXEC_RENDER) {
             BEGIN_BATCH(batch, 4);
             OUT_BATCH(batch, CMD_PIPE_CONTROL | 0x2);

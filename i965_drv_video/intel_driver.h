@@ -151,6 +151,11 @@ struct intel_region
 #define PCI_CHIP_SANDYBRIDGE_S_GT	0x010A  /* Server */
 #endif
 
+#define PCI_CHIP_IVYBRIDGE_GT1          0x0152  /* Desktop */
+#define PCI_CHIP_IVYBRIDGE_GT2          0x0162
+#define PCI_CHIP_IVYBRIDGE_M_GT1        0x0156  /* Mobile */
+#define PCI_CHIP_IVYBRIDGE_M_GT2        0x0166
+#define PCI_CHIP_IVYBRIDGE_S_GT1        0x015a  /* Server */
 
 #define IS_G45(devid)           (devid == PCI_CHIP_IGD_E_G ||   \
                                  devid == PCI_CHIP_Q45_G ||     \
@@ -170,5 +175,11 @@ struct intel_region
                                  devid == PCI_CHIP_SANDYBRIDGE_M_GT2 || \
                                  devid == PCI_CHIP_SANDYBRIDGE_M_GT2_PLUS || \
                                  devid == PCI_CHIP_SANDYBRIDGE_S_GT)
+
+#define IS_GEN7(devid)          (devid == PCI_CHIP_IVYBRIDGE_GT1 ||     \
+                                 devid == PCI_CHIP_IVYBRIDGE_GT2 ||     \
+                                 devid == PCI_CHIP_IVYBRIDGE_M_GT1 ||   \
+                                 devid == PCI_CHIP_IVYBRIDGE_M_GT2 ||   \
+                                 devid == PCI_CHIP_IVYBRIDGE_S_GT1)
 
 #endif /* _INTEL_DRIVER_H_ */

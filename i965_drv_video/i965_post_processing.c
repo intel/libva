@@ -42,7 +42,8 @@
 #include "i965_render.h"
 
 #define HAS_PP(ctx) (IS_IRONLAKE((ctx)->intel.device_id) ||     \
-                     IS_GEN6((ctx)->intel.device_id))
+                     IS_GEN6((ctx)->intel.device_id) ||         \
+                     IS_GEN7((ctx)->intel.device_id))
 
 static const uint32_t pp_null_gen5[][4] = {
 #include "shaders/post_processing/null.g4b.gen5"
@@ -2242,7 +2243,8 @@ i965_post_processing_internal(VADriverContextP ctx,
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
-    if (IS_GEN6(i965->intel.device_id))
+    if (IS_GEN6(i965->intel.device_id) ||
+        IS_GEN7(i965->intel.device_id))
         gen6_post_processing(ctx, surface, input,
                              srcx, srcy, srcw, srch,
                              destx, desty, destw, desth,
@@ -2376,7 +2378,8 @@ i965_post_processing_init(VADriverContextP ctx)
             assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen5));
             assert(NUM_PP_MODULES == ARRAY_ELEMS(pp_modules_gen6));
 
-            if (IS_GEN6(i965->intel.device_id))
+            if (IS_GEN6(i965->intel.device_id) ||
+                IS_GEN7(i965->intel.device_id))
                 memcpy(pp_context->pp_modules, pp_modules_gen6, sizeof(pp_context->pp_modules));
             else if (IS_IRONLAKE(i965->intel.device_id))
                 memcpy(pp_context->pp_modules, pp_modules_gen5, sizeof(pp_context->pp_modules));
