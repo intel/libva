@@ -1815,6 +1815,40 @@ i965_CreateImage(VADriverContextP ctx,
     return va_status;
 }
 
+void 
+i965_check_alloc_surface_bo(VADriverContextP ctx,
+                            struct object_surface *obj_surface,
+                            int tiled)
+{
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
+
+    if (obj_surface->bo)
+        return;
+
+    if (tiled) {
+        uint32_t tiling_mode = I915_TILING_Y; /* always uses Y-tiled format */
+        unsigned long pitch;
+
+        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
+                                                   "vaapi surface",
+                                                   obj_surface->width, 
+                                                   obj_surface->height + obj_surface->height / 2,
+                                                   1,
+                                                   &tiling_mode,
+                                                   &pitch,
+                                                   0);
+        assert(tiling_mode == I915_TILING_Y);
+        assert(pitch == obj_surface->width);
+    } else {
+        obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
+                                       "vaapi surface",
+                                       obj_surface->size,
+                                       0x1000);
+    }
+
+    assert(obj_surface->bo);
+}
+
 VAStatus i965_DeriveImage(VADriverContextP ctx,
                           VASurfaceID surface,
                           VAImage *out_image)        /* out */
@@ -1899,32 +1933,7 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
         }
     }
 
-    if (obj_surface->bo == NULL) {
-        if (HAS_TILED_SURFACE(i965)) {
-        
-            uint32_t tiling_mode = I915_TILING_Y;
-            unsigned long pitch;
-
-            obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                       "vaapi surface",
-                                                       obj_surface->width, 
-                                                       obj_surface->height + obj_surface->height / 2,
-                                                       1,
-                                                       &tiling_mode,
-                                                       &pitch,
-                                                       0);
-            assert(obj_surface->bo);
-            assert(tiling_mode == I915_TILING_Y);
-            assert(pitch == obj_surface->width);
-        } else {
-            obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                           "vaapi surface",
-                                           obj_surface->size,
-                                           0x1000);
-        }
-    }
-
-    assert(obj_surface->bo);
+    i965_check_alloc_surface_bo(ctx, obj_surface, HAS_TILED_SURFACE(i965));
     va_status = i965_create_buffer_internal(ctx, 0, VAImageBufferType,
                                             obj_surface->size, 1, NULL, obj_surface->bo, &image->buf);
     if (va_status != VA_STATUS_SUCCESS)

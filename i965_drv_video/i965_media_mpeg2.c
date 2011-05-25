@@ -516,14 +516,7 @@ i965_media_mpeg2_surface_setup(VADriverContextP ctx,
     int w = obj_surface->width;
     int h = obj_surface->height;
 
-    if (obj_surface->bo == NULL) {
-        struct i965_driver_data *i965 = i965_driver_data(ctx);  
-        
-        obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                       "vaapi surface",
-                                       obj_surface->size,
-                                       0x1000);
-    }
+    i965_check_alloc_surface_bo(ctx, obj_surface, 0);
 
     if (picture_structure == MPEG_FRAME) {
 	i965_media_mpeg2_surface_state(ctx, base_index + 0, obj_surface,

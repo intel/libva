@@ -120,22 +120,8 @@ gen7_mfd_avc_frame_store_index(VADriverContextP ctx,
             int frame_idx;
             struct object_surface *obj_surface = SURFACE(ref_pic->picture_id);
             
-            if (obj_surface->bo == NULL) {
-                uint32_t tiling_mode = I915_TILING_Y;
-                unsigned long pitch;
-        
-                obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                           "vaapi surface",
-                                                           obj_surface->width, 
-                                                           obj_surface->height + obj_surface->height / 2,
-                                                           1,
-                                                           &tiling_mode,
-                                                           &pitch,
-                                                           0);
-                assert(obj_surface->bo);
-                assert(tiling_mode == I915_TILING_Y);
-                assert(pitch == obj_surface->width);
-            }
+            assert(obj_surface);
+            i965_check_alloc_surface_bo(ctx, obj_surface, 1);
 
             for (frame_idx = 0; frame_idx < ARRAY_ELEMS(gen7_mfd_context->reference_surface); frame_idx++) {
                 for (j = 0; j < ARRAY_ELEMS(gen7_mfd_context->reference_surface); j++) {
@@ -1003,24 +989,8 @@ gen7_mfd_avc_decode_init(VADriverContextP ctx,
     obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
     obj_surface->flags |= (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
     gen7_mfd_init_avc_surface(ctx, pic_param, obj_surface);
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
 
-    if (obj_surface->bo == NULL) {
-        uint32_t tiling_mode = I915_TILING_Y;
-        unsigned long pitch;
-        
-        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                   "vaapi surface",
-                                                   obj_surface->width, 
-                                                   obj_surface->height + obj_surface->height / 2,
-                                                   1,
-                                                   &tiling_mode,
-                                                   &pitch,
-                                                   0);
-        assert(obj_surface->bo);
-        assert(tiling_mode == I915_TILING_Y);
-        assert(pitch == obj_surface->width);
-    }
-    
     dri_bo_unreference(gen7_mfd_context->post_deblocking_output.bo);
     gen7_mfd_context->post_deblocking_output.bo = obj_surface->bo;
     dri_bo_reference(gen7_mfd_context->post_deblocking_output.bo);
@@ -1167,22 +1137,7 @@ gen7_mfd_mpeg2_decode_init(VADriverContextP ctx,
     /* Current decoded picture */
     obj_surface = SURFACE(decode_state->current_render_target);
     assert(obj_surface);
-    if (obj_surface->bo == NULL) {
-        uint32_t tiling_mode = I915_TILING_Y;
-        unsigned long pitch;
-
-        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                   "vaapi surface",
-                                                   obj_surface->width, 
-                                                   obj_surface->height + obj_surface->height / 2,
-                                                   1,
-                                                   &tiling_mode,
-                                                   &pitch,
-                                                   0);
-        assert(obj_surface->bo);
-        assert(tiling_mode == I915_TILING_Y);
-        assert(pitch == obj_surface->width);
-    }
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
 
     dri_bo_unreference(gen7_mfd_context->pre_deblocking_output.bo);
     gen7_mfd_context->pre_deblocking_output.bo = obj_surface->bo;
@@ -1502,23 +1457,7 @@ gen7_mfd_vc1_decode_init(VADriverContextP ctx,
     obj_surface = SURFACE(decode_state->current_render_target);
     assert(obj_surface);
     gen7_mfd_init_vc1_surface(ctx, pic_param, obj_surface);
-
-    if (obj_surface->bo == NULL) {
-        uint32_t tiling_mode = I915_TILING_Y;
-        unsigned long pitch;
-
-        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                   "vaapi surface",
-                                                   obj_surface->width, 
-                                                   obj_surface->height + obj_surface->height / 2,
-                                                   1,
-                                                   &tiling_mode,
-                                                   &pitch,
-                                                   0);
-        assert(obj_surface->bo);
-        assert(tiling_mode == I915_TILING_Y);
-        assert(pitch == obj_surface->width);
-    }
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
 
     dri_bo_unreference(gen7_mfd_context->post_deblocking_output.bo);
     gen7_mfd_context->post_deblocking_output.bo = obj_surface->bo;

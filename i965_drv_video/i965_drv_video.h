@@ -249,4 +249,9 @@ i965_driver_data(VADriverContextP ctx)
     return (struct i965_driver_data *)(ctx->pDriverData);
 }
 
+void 
+i965_check_alloc_surface_bo(VADriverContextP ctx,
+                            struct object_surface *obj_surface,
+                            int tiled);
+
 #endif /* _I965_DRV_VIDEO_H_ */

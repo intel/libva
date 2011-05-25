@@ -615,23 +615,7 @@ static VAStatus gen6_mfc_avc_prepare(VADriverContextP ctx,
     /*Setup all the input&output object*/
     obj_surface = SURFACE(pPicParameter->reconstructed_picture);
     assert(obj_surface);
-
-    if (!obj_surface->bo) {
-        uint32_t tiling_mode = I915_TILING_Y;
-        unsigned long pitch;
-
-        obj_surface->bo = drm_intel_bo_alloc_tiled(i965->intel.bufmgr, 
-                                                   "vaapi surface",
-                                                   obj_surface->width, 
-                                                   obj_surface->height + obj_surface->height / 2,
-                                                   1,
-                                                   &tiling_mode,
-                                                   &pitch,
-                                                   0);
-        assert(obj_surface->bo);
-        assert(tiling_mode == I915_TILING_Y);
-        assert(pitch == obj_surface->width);
-    }
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
 
     mfc_context->post_deblocking_output.bo = obj_surface->bo;
     dri_bo_reference(mfc_context->post_deblocking_output.bo);

@@ -516,13 +516,7 @@ i965_avc_bsd_buf_base_state(VADriverContextP ctx,
     obj_surface->flags |= (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
     i965_avc_bsd_init_avc_bsd_surface(ctx, obj_surface, pic_param, i965_h264_context);
     avc_bsd_surface = obj_surface->private_data;
-
-    if (obj_surface->bo == NULL) {
-        obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                       "vaapi surface",
-                                       obj_surface->size,
-                                       0x1000);
-    }
+    i965_check_alloc_surface_bo(ctx, obj_surface, 0);
 
     OUT_BCS_RELOC(batch, avc_bsd_surface->dmv_top,
                   I915_GEM_DOMAIN_INSTRUCTION, I915_GEM_DOMAIN_INSTRUCTION,
@@ -964,17 +958,9 @@ i965_avc_bsd_frame_store_index(VADriverContextP ctx,
         if (!found) {
             int frame_idx;
             struct object_surface *obj_surface = SURFACE(ref_pic->picture_id);
+            assert(obj_surface);
+            i965_check_alloc_surface_bo(ctx, obj_surface, 0);
             
-            if (obj_surface->bo == NULL) {
-                /* Some broken sources such as conformance case FM2_SVA_C
-                 * will get here !!!. Allocating a BO for it to avoid SEGMENT FAULT
-                 */
-                obj_surface->bo = dri_bo_alloc(i965->intel.bufmgr,
-                                               "vaapi surface",
-                                               obj_surface->size,
-                                               0x1000);
-            }
-
             for (frame_idx = 0; frame_idx < ARRAY_ELEMS(i965_h264_context->fsid_list); frame_idx++) {
                 for (j = 0; j < ARRAY_ELEMS(i965_h264_context->fsid_list); j++) {
                     if (i965_h264_context->fsid_list[j].surface_id == VA_INVALID_ID)
