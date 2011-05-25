@@ -157,6 +157,7 @@
 #define MFX_BSP_BUF_BASE_ADDR_STATE             MFX(2, 0, 0, 4)
 #define MFX_AES_STATE                           MFX(2, 0, 0, 5)
 #define MFX_STATE_POINTER                       MFX(2, 0, 0, 6)
+#define MFX_QM_STATE                            MFX(2, 0, 0, 7)
 
 #define MFX_WAIT                                MFX(1, 0, 0, 0)
 
@@ -536,9 +537,25 @@
 #define MFX_FORMAT_MPEG2        0
 #define MFX_FORMAT_VC1          1
 #define MFX_FORMAT_AVC          2
+#define MFX_FORMAT_JPEG         3
+
+#define MFX_SHORT_MODE          0
+#define MFX_LONG_MODE           1
 
 #define MFX_CODEC_DECODE        0
 #define MFX_CODEC_ENCODE        1
+
+#define MFX_QM_AVC_4X4_INTRA_MATRIX     0
+#define MFX_QM_AVC_4X4_INTER_MATRIX     1
+#define MFX_QM_AVC_8x8_INTRA_MATRIX     2
+#define MFX_QM_AVC_8x8_INTER_MATRIX     3
+
+#define MFX_QM_MPEG_INTRA_QUANTIZER_MATRIX      0
+#define MFX_QM_MPEG_NON_INTRA_QUANTIZER_MATRIX  1
+
+#define MFX_QM_JPEG_LUMA_Y_QUANTIZER_MATRIX     0
+#define MFX_QM_JPEG_CHROMA_CB_QUANTIZER_MATRIX  1
+#define MFX_QM_JPEG_CHROMA_CR_QUANTIZER_MATRIX  2
 
 #define MFD_MODE_VLD            0
 #define MFD_MODE_IT             1

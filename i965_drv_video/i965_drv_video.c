@@ -155,6 +155,12 @@ static struct hw_codec_info gen6_hw_codec_info = {
     .enc_hw_context_init = gen6_enc_hw_context_init,
 };
 
+extern struct hw_context *gen7_dec_hw_context_init(VADriverContextP, VAProfile);
+static struct hw_codec_info gen7_hw_codec_info = {
+    .dec_hw_context_init = gen7_dec_hw_context_init,
+    .enc_hw_context_init = NULL,
+};
+
 VAStatus 
 i965_QueryConfigProfiles(VADriverContextP ctx,
                          VAProfile *profile_list,       /* out */
@@ -1649,7 +1655,7 @@ i965_Init(VADriverContextP ctx)
     else if (IS_GEN6(i965->intel.device_id))
         i965->codec_info = &gen6_hw_codec_info;
     else if (IS_GEN7(i965->intel.device_id))
-        i965->codec_info = &gen6_hw_codec_info;
+        i965->codec_info = &gen7_hw_codec_info;
     else
         return VA_STATUS_ERROR_UNKNOWN;
 

@@ -47,7 +47,8 @@ i965_drv_video_la_SOURCES =	\
 	gen6_mfd.c		\
 	i965_encoder.c		\
 	gen6_vme.c		\
-	gen6_mfc.c
+	gen6_mfc.c		\
+	gen7_mfd.c
 
 noinst_HEADERS =                \
 	object_heap.h           \
@@ -71,4 +72,5 @@ noinst_HEADERS =                \
 	gen6_vme.h		\
 	gen6_mfc.h		\
 	intel_compiler.h	\
-	i965_mutext.h
+	i965_mutext.h		\
+	gen7_mfd.h
