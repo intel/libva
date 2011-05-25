@@ -49,22 +49,41 @@ INTEL_G6B =				\
 	exa_wm_write.g6b 		\
 	exa_wm_yuv_rgb.g6b
 
+INTEL_G7A =				\
+	exa_wm_src_affine.g7a 		\
+	exa_wm_src_sample_argb.g7a 	\
+	exa_wm_src_sample_planar.g7a 	\
+	exa_wm_write.g7a 		\
+	exa_wm_yuv_rgb.g7a
+
+INTEL_G7B =				\
+	exa_wm_src_affine.g7b 		\
+	exa_wm_src_sample_argb.g7b 	\
+	exa_wm_src_sample_planar.g7b 	\
+	exa_wm_write.g7b 		\
+	exa_wm_yuv_rgb.g7b
+
 if HAVE_GEN4ASM
 
-SUFFIXES = .g4a .g4b .g6a .g6b
+SUFFIXES = .g4a .g4b .g6a .g6b .g7a .g7b
 .g4a.g4b:
 	m4 $*.g4a > $*.g4m && intel-gen4asm -o $@ $*.g4m && intel-gen4asm -g 5 -o $@.gen5 $*.g4m && rm $*.g4m
 
 .g6a.g6b:
 	m4 -I$(srcdir) -s $< > $*.g6m && intel-gen4asm -g 6 -o $@ $*.g6m && rm $*.g6m
 
+.g7a.g7b:
+	m4 -I$(srcdir) -s $< > $*.g7m && intel-gen4asm -g 7 -o $@ $*.g7m && rm $*.g7m
+
 $(INTEL_G4B): $(INTEL_G4I)
 $(INTEL_G6B): $(INTEL_G4I)
+$(INTEL_G7B): $(INTEL_G4I)
 
-BUILT_SOURCES= $(INTEL_G4B) $(INTEL_G6B)
+BUILT_SOURCES= $(INTEL_G4B) $(INTEL_G6B) $(INTEL_G7B)
 
 clean-local:
 	-rm -f $(INTEL_G4B)
 	-rm -f $(INTEL_G4B_GEN5)
 	-rm -f $(INTEL_G6B)
+	-rm -f $(INTEL_G7B)
 endif    
