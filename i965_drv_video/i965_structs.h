@@ -1128,4 +1128,128 @@ struct gen6_interface_descriptor_data
     } desc7;
 };
 
+struct gen7_surface_state
+{
+    struct {
+        unsigned int cube_pos_z:1;
+        unsigned int cube_neg_z:1;
+        unsigned int cube_pos_y:1;
+        unsigned int cube_neg_y:1;
+        unsigned int cube_pos_x:1;
+        unsigned int cube_neg_x:1;
+        unsigned int pad2:2;
+        unsigned int render_cache_read_write:1;
+        unsigned int pad1:1;
+        unsigned int surface_array_spacing:1;
+        unsigned int vert_line_stride_ofs:1;
+        unsigned int vert_line_stride:1;
+        unsigned int tile_walk:1;
+        unsigned int tiled_surface:1;
+        unsigned int horizontal_alignment:1;
+        unsigned int vertical_alignment:2;
+        unsigned int surface_format:9;     /**< BRW_SURFACEFORMAT_x */
+        unsigned int pad0:1;
+        unsigned int is_array:1;
+        unsigned int surface_type:3;       /**< BRW_SURFACE_1D/2D/3D/CUBE */
+    } ss0;
+
+    struct {
+        unsigned int base_addr;
+    } ss1;
+
+    struct {
+        unsigned int width:14;
+        unsigned int pad1:2;
+        unsigned int height:14;
+        unsigned int pad0:2;
+    } ss2;
+
+    struct {
+        unsigned int pitch:18;
+        unsigned int pad:3;
+        unsigned int depth:11;
+    } ss3;
+
+    struct {
+        unsigned int multisample_position_palette_index:3;
+        unsigned int num_multisamples:3;
+        unsigned int multisampled_surface_storage_format:1;
+        unsigned int render_target_view_extent:11;
+        unsigned int min_array_elt:11;
+        unsigned int rotation:2;
+        unsigned int pad0:1;
+    } ss4;
+
+    struct {
+        unsigned int mip_count:4;
+        unsigned int min_lod:4;
+        unsigned int pad1:12;
+        unsigned int y_offset:4;
+        unsigned int pad0:1;
+        unsigned int x_offset:7;
+    } ss5;
+
+    struct {
+        unsigned int pad; /* Multisample Control Surface stuff */
+    } ss6;
+
+    struct {
+        unsigned int resource_min_lod:12;
+        unsigned int pad0:16;
+        unsigned int alpha_clear_color:1;
+        unsigned int blue_clear_color:1;
+        unsigned int green_clear_color:1;
+        unsigned int red_clear_color:1;
+    } ss7;
+};
+
+struct gen7_sampler_state
+{
+   struct
+   {
+      unsigned int aniso_algorithm:1;
+      unsigned int lod_bias:13;
+      unsigned int min_filter:3;
+      unsigned int mag_filter:3;
+      unsigned int mip_filter:2;
+      unsigned int base_level:5;
+      unsigned int pad1:1;
+      unsigned int lod_preclamp:1;
+      unsigned int default_color_mode:1;
+      unsigned int pad0:1;
+      unsigned int disable:1;
+   } ss0;
+
+   struct
+   {
+      unsigned int cube_control_mode:1;
+      unsigned int shadow_function:3;
+      unsigned int pad:4;
+      unsigned int max_lod:12;
+      unsigned int min_lod:12;
+   } ss1;
+
+   struct
+   {
+      unsigned int pad:5;
+      unsigned int default_color_pointer:27;
+   } ss2;
+
+   struct
+   {
+      unsigned int r_wrap_mode:3;
+      unsigned int t_wrap_mode:3;
+      unsigned int s_wrap_mode:3;
+      unsigned int pad:1;
+      unsigned int non_normalized_coord:1;
+      unsigned int trilinear_quality:2;
+      unsigned int address_round:6;
+      unsigned int max_aniso:3;
+      unsigned int chroma_key_mode:1;
+      unsigned int chroma_key_index:2;
+      unsigned int chroma_key_enable:1;
+      unsigned int pad0:6;
+   } ss3;
+};
+
 #endif /* _I965_STRUCTS_H_ */
