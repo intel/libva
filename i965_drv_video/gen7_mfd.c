@@ -1629,6 +1629,7 @@ gen7_mfd_vc1_pic_state(VADriverContextP ctx,
     int picture_type;
     int profile;
     int overlap;
+    int interpolation_mode = 0;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
@@ -1764,60 +1765,75 @@ gen7_mfd_vc1_pic_state(VADriverContextP ctx,
     assert(pic_param->conditional_overlap_flag < 3);
     assert(pic_param->mv_fields.bits.mv_table < 4); /* FIXME: interlace mode */
 
+    if (pic_param->mv_fields.bits.mv_mode == VAMvMode1MvHalfPelBilinear ||
+        (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation &&
+         pic_param->mv_fields.bits.mv_mode2 == VAMvMode1MvHalfPelBilinear))
+        interpolation_mode = 8; /* Half-pel bilinear */
+    else if (pic_param->mv_fields.bits.mv_mode == VAMvMode1MvHalfPel ||
+             (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation &&
+              pic_param->mv_fields.bits.mv_mode2 == VAMvMode1MvHalfPel))
+        interpolation_mode = 0; /* Half-pel bicubic */
+    else
+        interpolation_mode = 1; /* Quarter-pel bicubic */
+
     BEGIN_BCS_BATCH(batch, 6);
-    OUT_BCS_BATCH(batch, MFX_VC1_PIC_STATE | (6 - 2));
+    OUT_BCS_BATCH(batch, MFD_VC1_LONG_PIC_STATE | (6 - 2));
     OUT_BCS_BATCH(batch,
-                  (ALIGN(pic_param->coded_height, 16) / 16) << 16 |
-                  (ALIGN(pic_param->coded_width, 16) / 16));
+                  (((ALIGN(pic_param->coded_height, 16) / 16) - 1) << 16) |
+                  ((ALIGN(pic_param->coded_width, 16) / 16) - 1));
     OUT_BCS_BATCH(batch,
-                  pic_param->sequence_fields.bits.syncmarker << 31 |
-                  1 << 29 | /* concealment */
-                  alt_pq << 24 |
-                  pic_param->entrypoint_fields.bits.loopfilter << 23 |
-                  overlap << 22 |
-                  (pic_param->pic_quantizer_fields.bits.quantizer == 0) << 21 | /* implicit quantizer */
-                  pic_param->pic_quantizer_fields.bits.pic_quantizer_scale << 16 |
-                  alt_pquant_edge_mask << 12 |
-                  alt_pquant_config << 10 |
-                  pic_param->pic_quantizer_fields.bits.half_qp << 9 |
-                  pic_param->pic_quantizer_fields.bits.pic_quantizer_type << 8 |
-                  va_to_gen7_vc1_condover[pic_param->conditional_overlap_flag] << 6 |
-                  !pic_param->picture_fields.bits.is_first_field << 5 |
-                  picture_type << 2 |
-                  fcm << 0);
+                  ((ALIGN(pic_param->coded_width, 16) / 16 + 1) / 2 - 1) << 24 |
+                  dmv_surface_valid << 15 |
+                  (pic_param->pic_quantizer_fields.bits.quantizer == 0) << 14 | /* implicit quantizer */
+                  pic_param->rounding_control << 13 |
+                  pic_param->sequence_fields.bits.syncmarker << 12 |
+                  interpolation_mode << 8 |
+                  0 << 7 | /* FIXME: scale up or down ??? */
+                  pic_param->range_reduction_frame << 6 |
+                  pic_param->entrypoint_fields.bits.loopfilter << 5 |
+                  overlap << 4 |
+                  !pic_param->picture_fields.bits.is_first_field << 3 |
+                  (pic_param->sequence_fields.bits.profile == 3) << 0);
     OUT_BCS_BATCH(batch,
-                  !!pic_param->bitplane_present.value << 23 |
-                  !pic_param->bitplane_present.flags.bp_forward_mb << 22 |
-                  !pic_param->bitplane_present.flags.bp_mv_type_mb << 21 |
-                  !pic_param->bitplane_present.flags.bp_skip_mb << 20 |
-                  !pic_param->bitplane_present.flags.bp_direct_mb << 19 |
-                  !pic_param->bitplane_present.flags.bp_overflags << 18 |
-                  !pic_param->bitplane_present.flags.bp_ac_pred << 17 |
-                  !pic_param->bitplane_present.flags.bp_field_tx << 16 |
-                  pic_param->mv_fields.bits.extended_dmv_range << 14 |
-                  pic_param->mv_fields.bits.extended_mv_range << 12 |
-                  pic_param->mv_fields.bits.four_mv_switch << 11 |
-                  pic_param->fast_uvmc_flag << 10 |
-                  unified_mv_mode << 8 |
-                  ref_field_pic_polarity << 6 |
-                  pic_param->reference_fields.bits.num_reference_pictures << 5 |
-                  pic_param->reference_fields.bits.reference_distance << 0);
+                  va_to_gen7_vc1_condover[pic_param->conditional_overlap_flag] << 29 |
+                  picture_type << 26 |
+                  fcm << 24 |
+                  alt_pq << 16 |
+                  pic_param->pic_quantizer_fields.bits.pic_quantizer_scale << 8 |
+                  scale_factor << 0);
     OUT_BCS_BATCH(batch,
-                  scale_factor << 24 |
+                  unified_mv_mode << 28 |
+                  pic_param->mv_fields.bits.four_mv_switch << 27 |
+                  pic_param->fast_uvmc_flag << 26 |
+                  ref_field_pic_polarity << 25 |
+                  pic_param->reference_fields.bits.num_reference_pictures << 24 |
+                  pic_param->reference_fields.bits.reference_distance << 20 |
+                  pic_param->reference_fields.bits.reference_distance << 16 | /* FIXME: ??? */
+                  pic_param->mv_fields.bits.extended_dmv_range << 10 |
+                  pic_param->mv_fields.bits.extended_mv_range << 8 |
+                  alt_pquant_edge_mask << 4 |
+                  alt_pquant_config << 2 |
+                  pic_param->pic_quantizer_fields.bits.half_qp << 1 |                  
+                  pic_param->pic_quantizer_fields.bits.pic_quantizer_type << 0);
+    OUT_BCS_BATCH(batch,
+                  !!pic_param->bitplane_present.value << 31 |
+                  !pic_param->bitplane_present.flags.bp_forward_mb << 30 |
+                  !pic_param->bitplane_present.flags.bp_mv_type_mb << 29 |
+                  !pic_param->bitplane_present.flags.bp_skip_mb << 28 |
+                  !pic_param->bitplane_present.flags.bp_direct_mb << 27 |
+                  !pic_param->bitplane_present.flags.bp_overflags << 26 |
+                  !pic_param->bitplane_present.flags.bp_ac_pred << 25 |
+                  !pic_param->bitplane_present.flags.bp_field_tx << 24 |
                   pic_param->mv_fields.bits.mv_table << 20 |
                   pic_param->mv_fields.bits.four_mv_block_pattern_table << 18 |
                   pic_param->mv_fields.bits.two_mv_block_pattern_table << 16 |
-                  va_to_gen7_vc1_ttfrm[pic_param->transform_fields.bits.frame_level_transform_type] << 12 |
+                  va_to_gen7_vc1_ttfrm[pic_param->transform_fields.bits.frame_level_transform_type] << 12 |                  
                   pic_param->transform_fields.bits.mb_level_transform_type_flag << 11 |
                   pic_param->mb_mode_table << 8 |
                   trans_ac_y << 6 |
                   pic_param->transform_fields.bits.transform_ac_codingset_idx1 << 4 |
                   pic_param->transform_fields.bits.intra_transform_dc_table << 3 |
                   pic_param->cbp_table << 0);
-    OUT_BCS_BATCH(batch,
-                  dmv_surface_valid << 13 |
-                  brfd << 8 |
-                  ((ALIGN(pic_param->coded_width, 16) / 16 + 1) / 2 - 1));
     ADVANCE_BCS_BATCH(batch);
 }
 
@@ -1828,48 +1844,30 @@ gen7_mfd_vc1_pred_pipe_state(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = gen7_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
-    int interpolation_mode = 0;
     int intensitycomp_single;
 
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
 
-    if (pic_param->mv_fields.bits.mv_mode == VAMvMode1MvHalfPelBilinear ||
-        (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation &&
-         pic_param->mv_fields.bits.mv_mode2 == VAMvMode1MvHalfPelBilinear))
-        interpolation_mode = 2; /* Half-pel bilinear */
-    else if (pic_param->mv_fields.bits.mv_mode == VAMvMode1MvHalfPel ||
-             (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation &&
-              pic_param->mv_fields.bits.mv_mode2 == VAMvMode1MvHalfPel))
-        interpolation_mode = 0; /* Half-pel bicubic */
-    else
-        interpolation_mode = 1; /* Quarter-pel bicubic */
-
     assert(decode_state->pic_param && decode_state->pic_param->buffer);
     pic_param = (VAPictureParameterBufferVC1 *)decode_state->pic_param->buffer;
     intensitycomp_single = (pic_param->mv_fields.bits.mv_mode == VAMvModeIntensityCompensation);
 
-    BEGIN_BCS_BATCH(batch, 7);
-    OUT_BCS_BATCH(batch, MFX_VC1_PRED_PIPE_STATE | (7 - 2));
+    BEGIN_BCS_BATCH(batch, 6);
+    OUT_BCS_BATCH(batch, MFX_VC1_PRED_PIPE_STATE | (6 - 2));
     OUT_BCS_BATCH(batch,
-                  0 << 8 | /* FIXME: interlace mode */
-                  pic_param->rounding_control << 4 |
-                  va_to_gen7_vc1_profile[pic_param->sequence_fields.bits.profile] << 2);
+                  0 << 14 | /* FIXME: double ??? */
+                  0 << 12 |
+                  intensitycomp_single << 10 |
+                  intensitycomp_single << 8 |
+                  0 << 4 | /* FIXME: interlace mode */
+                  0);
     OUT_BCS_BATCH(batch,
                   pic_param->luma_shift << 16 |
                   pic_param->luma_scale << 0); /* FIXME: Luma Scaling */
     OUT_BCS_BATCH(batch, 0);
     OUT_BCS_BATCH(batch, 0);
     OUT_BCS_BATCH(batch, 0);
-    OUT_BCS_BATCH(batch,
-                  interpolation_mode << 19 |
-                  pic_param->fast_uvmc_flag << 18 |
-                  0 << 17 | /* FIXME: scale up or down ??? */
-                  pic_param->range_reduction_frame << 16 |
-                  0 << 6 | /* FIXME: double ??? */
-                  0 << 4 |
-                  intensitycomp_single << 2 |
-                  intensitycomp_single << 0);
     ADVANCE_BCS_BATCH(batch);
 }
 
@@ -1967,15 +1965,16 @@ gen7_mfd_vc1_bsd_object(VADriverContextP ctx,
     else
         next_slice_start_vert_pos = ALIGN(pic_param->coded_height, 16) / 16;
 
-    BEGIN_BCS_BATCH(batch, 4);
-    OUT_BCS_BATCH(batch, MFD_VC1_BSD_OBJECT | (4 - 2));
+    BEGIN_BCS_BATCH(batch, 5);
+    OUT_BCS_BATCH(batch, MFD_VC1_BSD_OBJECT | (5 - 2));
     OUT_BCS_BATCH(batch, 
                   slice_param->slice_data_size - (macroblock_offset >> 3));
     OUT_BCS_BATCH(batch, 
                   slice_param->slice_data_offset + (macroblock_offset >> 3));
     OUT_BCS_BATCH(batch,
-                  slice_param->slice_vertical_position << 24 |
-                  next_slice_start_vert_pos << 16 |
+                  slice_param->slice_vertical_position << 16 |
+                  next_slice_start_vert_pos << 0);
+    OUT_BCS_BATCH(batch,
                   (macroblock_offset & 0x7));
     ADVANCE_BCS_BATCH(batch);
 }

@@ -183,6 +183,9 @@
 #define MFX_VC1_PRED_PIPE_STATE                 MFX(2, 2, 0, 1)
 #define MFX_VC1_DIRECTMODE_STATE                MFX(2, 2, 0, 2)
 
+#define MFD_VC1_SHORT_PIC_STATE                 MFX(2, 2, 1, 0)
+#define MFD_VC1_LONG_PIC_STATE                  MFX(2, 2, 1, 1)
+
 #define MFD_VC1_BSD_OBJECT                      MFX(2, 2, 1, 8)
 
 #define I965_DEPTHFORMAT_D32_FLOAT              1
