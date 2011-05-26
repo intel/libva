@@ -637,12 +637,7 @@ static void gen6_vme_pipeline_programing(VADriverContextP ctx,
 
             if (emit_new_state) {
                 /*Step1: MI_FLUSH/PIPE_CONTROL*/
-                BEGIN_BATCH(batch, 4);
-                OUT_BATCH(batch, CMD_PIPE_CONTROL | 0x02);
-                OUT_BATCH(batch, 0);
-                OUT_BATCH(batch, 0);
-                OUT_BATCH(batch, 0);
-                ADVANCE_BATCH(batch);
+                intel_batchbuffer_emit_mi_flush(batch);
 
                 /*Step2: State command PIPELINE_SELECT*/
                 gen6_vme_pipeline_select(ctx, gen6_encoder_context);
