@@ -1845,7 +1845,7 @@ typedef enum
 #define VA_ROTATION_NONE        0x00000000
 #define VA_ROTATION_90          0x00000001
 #define VA_ROTATION_180         0x00000002
-#define VA_ROTATION_270         0x00000004
+#define VA_ROTATION_270         0x00000003
 
 /* attribute value for VADisplayAttribOutOfLoopDeblock */
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000

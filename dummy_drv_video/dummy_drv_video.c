@@ -1114,7 +1114,6 @@ VAStatus dummy_SetDisplayAttributes (
 
 VAStatus dummy_BufferInfo(
         VADriverContextP ctx,
-        VAContextID context,	/* in */
         VABufferID buf_id,	/* in */
         VABufferType *type,	/* out */
         unsigned int *size,    	/* out */

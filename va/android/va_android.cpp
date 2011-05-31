@@ -321,6 +321,9 @@ VAStatus vaPutSurface (
     if (fool_postp)
         return VA_STATUS_SUCCESS;
 
+    if (draw == NULL)
+        return VA_STATUS_ERROR_UNKNOWN;
+
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 

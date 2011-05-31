@@ -58,6 +58,20 @@ do_drawable_hash(VADriverContextP ctx, XID drawable)
 }
 
 void
+free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
+{
+    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    int i = 0;
+
+    while (i++ < DRAWABLE_HASH_SZ) {
+	if (dri_drawable == dri_state->drawable_hash[i]) {
+	    dri_state->destroyDrawable(ctx, dri_drawable);
+	    dri_state->drawable_hash[i] = NULL;
+	}
+    }
+}
+
+void
 free_drawable_hashtable(VADriverContextP ctx)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
@@ -72,6 +86,8 @@ free_drawable_hashtable(VADriverContextP ctx)
             dri_drawable = prev->next;
             dri_state->destroyDrawable(ctx, prev);
         }
+
+	dri_state->drawable_hash[i] = NULL;
     }
 }
 
