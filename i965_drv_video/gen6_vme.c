@@ -425,10 +425,19 @@ static VAStatus gen6_vme_vme_state_setup(VADriverContextP ctx,
     assert(vme_context->vme_state.bo->virtual);
     vme_state_message = (unsigned int *)vme_context->vme_state.bo->virtual;
 	
-    for(i = 0;i < 32; i++) {
-        vme_state_message[i] = 0x11;
-    }		
-    vme_state_message[16] = 0x42424242;			//cost function LUT set 0 for Intra
+	vme_state_message[0] = 0x10010101;
+	vme_state_message[1] = 0x100F0F0F;
+	vme_state_message[2] = 0x10010101;
+	vme_state_message[3] = 0x000F0F0F;
+	for(i = 4; i < 14; i++) {
+		vme_state_message[i] = 0x00000000;
+	}	
+
+    for(i = 14; i < 32; i++) {
+        vme_state_message[i] = 0x00000000;
+    }
+
+    //vme_state_message[16] = 0x42424242;			//cost function LUT set 0 for Intra
 
     dri_bo_unmap( vme_context->vme_state.bo);
     return VA_STATUS_SUCCESS;
