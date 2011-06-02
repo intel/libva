@@ -85,7 +85,7 @@ static int qp_value = 26;
 
 static int log2_max_frame_num_minus4 = 0;
 static int pic_order_cnt_type = 0;
-static int log2_max_pic_order_cnt_lsb_minus4 = 0;
+static int log2_max_pic_order_cnt_lsb_minus4 = 2;
 static int entropy_coding_mode_flag = ENTROPY_MODE_CABAC;
 static int deblocking_filter_control_present_flag = 1;
 static int frame_mbs_only_flag = 1;
@@ -167,10 +167,11 @@ static VABufferID slice_parameter = VA_INVALID_ID;              /*Slice level pa
 
 static VABufferID coded_buf;                                    /*Output buffer, compressed data*/
 
-#define SID_NUMBER                              3
 #define SID_INPUT_PICTURE                       0
-#define SID_REFERENCE_PICTURE                   1
-#define SID_RECON_PICTURE                       2
+#define SID_REFERENCE_PICTURE_L0                1
+#define SID_REFERENCE_PICTURE_L1				2
+#define SID_RECON_PICTURE                       3
+#define SID_NUMBER                              SID_RECON_PICTURE + 1
 static  VASurfaceID surface_ids[SID_NUMBER];
 
 /***************************************************/
@@ -295,30 +296,24 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     vaDestroyImage(va_dpy, surface_image.image_id);
 }
 
-static void prepare_input(FILE * yuv_fp, int intra_slice)
+static void render_picture_parameter()
 {
-    static VAEncPictureParameterBufferH264Baseline pic_h264;
-    static VAEncSliceParameterBuffer slice_h264;
-    VAStatus va_status;
-    VABufferID tempID;	
     VACodedBufferSegment *coded_buffer_segment = NULL; 
-    unsigned char *coded_mem;
+	unsigned char *coded_mem;  
+	static VAEncPictureParameterBufferH264Ext pic_h264;
+    VAStatus va_status;
 
-    // Sequence level
+	// Sequence level
     va_status = vaRenderPicture(va_dpy, context_id, &seq_parameter, 1);
     CHECK_VASTATUS(va_status,"vaRenderPicture");;
-
-    // Copy Image to target surface according input YUV data.
-    upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
-
-    // Picture level
-    pic_h264.reference_picture = surface_ids[SID_REFERENCE_PICTURE];
-    pic_h264.reconstructed_picture = surface_ids[SID_RECON_PICTURE];
-    pic_h264.coded_buf = coded_buf;
-    pic_h264.picture_width = picture_width;
-    pic_h264.picture_height = picture_height;
-    pic_h264.last_picture = 0;
-    if (pic_parameter != VA_INVALID_ID) {	
+	// Picture level
+	memset(&pic_h264, 0, sizeof(pic_h264));
+	pic_h264.CurrPic.picture_id = surface_ids[SID_RECON_PICTURE];
+	pic_h264.ReferenceFrames[0].picture_id = surface_ids[SID_REFERENCE_PICTURE_L0];
+	pic_h264.ReferenceFrames[1].picture_id = surface_ids[SID_REFERENCE_PICTURE_L1];
+	pic_h264.ReferenceFrames[2].picture_id = VA_INVALID_ID;
+	pic_h264.CodedBuf = coded_buf;
+	 if (pic_parameter != VA_INVALID_ID) {	
         vaDestroyBuffer(va_dpy, pic_parameter);	
     }
     va_status = vaCreateBuffer(va_dpy, context_id,VAEncPictureParameterBufferType,
@@ -326,19 +321,25 @@ static void prepare_input(FILE * yuv_fp, int intra_slice)
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
     va_status = vaRenderPicture(va_dpy,context_id, &pic_parameter, 1);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
-	
+
     // clean old memory
     va_status = vaMapBuffer(va_dpy,coded_buf,(void **)(&coded_buffer_segment));
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
     memset(coded_mem, 0, coded_buffer_segment->size);
     vaUnmapBuffer(va_dpy, coded_buf);
+}
 
-    // Slice level	
+static void render_slice_parameter(int slice_type)
+{
+    static VAEncSliceParameterBufferH264Ext slice_h264;
+	VAStatus va_status;
+	
+	// Slice level	
     slice_h264.start_row_number = 0;
     slice_h264.slice_height = picture_height/16; /* Measured by MB */
-    slice_h264.slice_flags.bits.is_intra = intra_slice;
-    slice_h264.slice_flags.bits.disable_deblocking_filter_idc = 0;
+	slice_h264.slice_type = slice_type;
+
     if ( slice_parameter != VA_INVALID_ID){
         vaDestroyBuffer(va_dpy, slice_parameter);
     }
@@ -347,11 +348,70 @@ static void prepare_input(FILE * yuv_fp, int intra_slice)
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
     va_status = vaRenderPicture(va_dpy,context_id, &slice_parameter, 1);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
+}
+
+static void prepare_input_pb(FILE *yuv_fp, int is_bslice)
+{
+    VAStatus va_status;
+    VABufferID tempID;	
+
+    // Copy Image to target surface according input YUV data.
+	if ( is_bslice ) {
+		upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
+		fseek(yuv_fp, SEEK_CUR, frame_size);
+	} else {
+		fseek(yuv_fp, SEEK_CUR, frame_size); 
+		upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
+		fseek(yuv_fp, SEEK_CUR, -2l * frame_size);
+	}
+	
+	// Render picture level parameters
+	render_picture_parameter();
+	
+	// Render slice level parameters
+	if ( is_bslice ) {
+		render_slice_parameter(SLICE_TYPE_B);
+	} else {
+		render_slice_parameter(SLICE_TYPE_P);
+	}
+	
+	if ( is_bslice == 1) {
+		// Prepare for next I:P frame
+		tempID = surface_ids[SID_RECON_PICTURE];  
+		surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
+		surface_ids[SID_REFERENCE_PICTURE_L0] = surface_ids[SID_REFERENCE_PICTURE_L1];
+		surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;
+	} else {
+		// Prepare for next B frame
+		tempID = surface_ids[SID_RECON_PICTURE];  
+		surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L1]; 
+		surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;	
+	}
+}
+
+static void prepare_input_ip(FILE * yuv_fp, int intra_slice)
+{
+    VAStatus va_status;
+    VABufferID tempID;	
+    VACodedBufferSegment *coded_buffer_segment = NULL; 
+    unsigned char *coded_mem;
+
+    // Copy Image to target surface according input YUV data.
+    upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
+	
+	// Render picture level parameters
+	render_picture_parameter();
+	
+    // Slice level	
+	if ( intra_slice )
+		render_slice_parameter(SLICE_TYPE_I);
+	else
+		render_slice_parameter(SLICE_TYPE_P);
 
     // Prepare for next picture
     tempID = surface_ids[SID_RECON_PICTURE];  
-    surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE]; 
-    surface_ids[SID_REFERENCE_PICTURE] = tempID;
+    surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
+    surface_ids[SID_REFERENCE_PICTURE_L0] = tempID;
 }
 
 static void end_picture()
@@ -558,7 +618,7 @@ static void sps_rbsp(bitstream *bs)
         assert(0);
     }
 
-    bitstream_put_ue(bs, 1);                            /* num_ref_frames */
+    bitstream_put_ue(bs, 4);                            /* num_ref_frames */
     bitstream_put_ui(bs, 0, 1);                         /* gaps_in_frame_num_value_allowed_flag */
 
     bitstream_put_ue(bs, mb_width - 1);                 /* pic_width_in_mbs_minus1 */
@@ -642,7 +702,7 @@ build_header(FILE *avc_fp)
 
 
 static void 
-slice_header(bitstream *bs, int frame_num, int slice_type, int is_idr)
+slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, int nal_ref_idc, int is_idr)
 {       
     int is_cabac = (entropy_coding_mode_flag == ENTROPY_MODE_CABAC);
 
@@ -661,7 +721,7 @@ slice_header(bitstream *bs, int frame_num, int slice_type, int is_idr)
         bitstream_put_ue(bs, 0);		/* idr_pic_id: 0 */
 
     if (pic_order_cnt_type == 0) {
-	bitstream_put_ui(bs, (frame_num * 2) & 0x0F, log2_max_pic_order_cnt_lsb_minus4 + 4);
+		bitstream_put_ui(bs, (display_frame*2) & 0x3F, log2_max_pic_order_cnt_lsb_minus4 + 4);
         /* only support frame */
     } else {
         /* FIXME: */
@@ -671,24 +731,29 @@ slice_header(bitstream *bs, int frame_num, int slice_type, int is_idr)
     /* redundant_pic_cnt_present_flag == 0 */
     
     /* slice type */
-    if (slice_type == SLICE_TYPE_P) {
-        bitstream_put_ui(bs, 0, 1);            /* num_ref_idx_active_override_flag: 0 */
-        /* ref_pic_list_reordering */
-        bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l0: 0 */
-    } else if (slice_type == SLICE_TYPE_B) {
-        /* FIXME */
-        assert(0);
-    }   
+	if (slice_type == SLICE_TYPE_P) {
+		bitstream_put_ui(bs, 0, 1);            /* num_ref_idx_active_override_flag: 0 */
+		/* ref_pic_list_reordering */
+		bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l0: 0 */
+	} else if (slice_type == SLICE_TYPE_B) {
+		bitstream_put_ui(bs, 1, 1);            /* direct_spatial_mv_pred: 1 */
+		bitstream_put_ui(bs, 0, 1);            /* num_ref_idx_active_override_flag: 0 */
+		/* ref_pic_list_reordering */
+		bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l0: 0 */
+		bitstream_put_ui(bs, 0, 1);            /* ref_pic_list_reordering_flag_l1: 0 */
+	} 
 
     /* weighted_pred_flag == 0 */
 
     /* dec_ref_pic_marking */
-    if (is_idr) {
-        bitstream_put_ui(bs, 0, 1);            /* no_output_of_prior_pics_flag: 0 */
-        bitstream_put_ui(bs, 0, 1);            /* long_term_reference_flag: 0 */
-    } else {
-        bitstream_put_ui(bs, 0, 1);            /* adaptive_ref_pic_marking_mode_flag: 0 */
-    }
+	if (nal_ref_idc != 0) {
+		if ( is_idr) {
+			bitstream_put_ui(bs, 0, 1);            /* no_output_of_prior_pics_flag: 0 */
+			bitstream_put_ui(bs, 0, 1);            /* long_term_reference_flag: 0 */
+		} else {
+			bitstream_put_ui(bs, 0, 1);            /* adaptive_ref_pic_marking_mode_flag: 0 */
+		}
+	}
 
     if (is_cabac && (slice_type != SLICE_TYPE_I))
         bitstream_put_ue(bs, 0);               /* cabac_init_idc: 0 */
@@ -740,22 +805,64 @@ slice_data(bitstream *bs)
 }
 
 static void 
-build_nal_slice(FILE *avc_fp, int frame_num, int slice_type, int is_idr)
+build_nal_slice(FILE *avc_fp, int frame_num, int display_frame, int slice_type, int is_idr)
 {
     bitstream bs;
 
     bitstream_start(&bs);
     nal_start_code_prefix(&bs);
-    nal_header(&bs, NAL_REF_IDC_HIGH, is_idr ? NAL_IDR : NAL_NON_IDR);
-    slice_header(&bs, frame_num, slice_type, is_idr);
-    slice_data(&bs);
+    if ( slice_type == SLICE_TYPE_I)
+		nal_header(&bs, NAL_REF_IDC_HIGH, is_idr ? NAL_IDR : NAL_NON_IDR);
+	else if ( slice_type == SLICE_TYPE_P)
+		nal_header(&bs, NAL_REF_IDC_MEDIUM, is_idr ? NAL_IDR : NAL_NON_IDR);
+	else
+		nal_header(&bs, NAL_REF_IDC_NONE, is_idr ? NAL_IDR : NAL_NON_IDR);
+
+    if ( slice_type == SLICE_TYPE_I  ) {
+		slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_HIGH, is_idr);
+	} else if ( slice_type == SLICE_TYPE_P ) {
+		slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_MEDIUM, is_idr);
+	} else {
+		slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_NONE,is_idr);
+	}
+
+	slice_data(&bs);
     bitstream_end(&bs, avc_fp);
 }
 
 static void 
-store_coded_buffer(FILE *avc_fp, int frame_num, int is_intra, int is_idr)
+store_coded_buffer(FILE *avc_fp, int frame_num, int display_frame, int slice_type, int is_idr)
 {
-    build_nal_slice(avc_fp, frame_num, is_intra ? SLICE_TYPE_I : SLICE_TYPE_P, is_idr);
+    build_nal_slice(avc_fp, frame_num, display_frame, slice_type, is_idr);
+}
+
+static void encode_intra_slices(FILE *yuv_fp, FILE *avc_fp, int f, int is_idr)
+{
+	 begin_picture();
+	 prepare_input_ip(yuv_fp, 1);
+	 end_picture();
+	 store_coded_buffer(avc_fp, f, f, SLICE_TYPE_I, is_idr);
+}
+
+static void encode_p_slices(FILE *yuv_fp, FILE *avc_fp, int f)
+{
+	 begin_picture();
+	 prepare_input_ip(yuv_fp, 0);
+	 end_picture();
+	 store_coded_buffer(avc_fp, f, f, SLICE_TYPE_P, 0);
+}
+
+static void encode_pb_slices(FILE *yuv_fp, FILE *avc_fp, int f)
+{
+	begin_picture();
+	prepare_input_pb(yuv_fp, 0);
+	end_picture();
+	store_coded_buffer(avc_fp, f, f+1, SLICE_TYPE_P, 0);
+
+	begin_picture();
+	prepare_input_pb(yuv_fp, 1);
+	end_picture();
+	store_coded_buffer(avc_fp, f+1, f, SLICE_TYPE_B, 0);
 }
 
 int main(int argc, char *argv[])
@@ -813,15 +920,26 @@ int main(int argc, char *argv[])
     create_encode_pipe();
     alloc_encode_resource();
 
-    for ( f = 0; f < frame_number; f++ ) {		//picture level loop
+    for ( f = 0; f < frame_number; ) {		//picture level loop
         int is_intra = (f % 30 == 0);
         int is_idr = (f == 0);
-
-        begin_picture();
-        prepare_input(yuv_fp, is_intra);
-        end_picture();
-        store_coded_buffer(avc_fp, f, is_intra, is_idr);
-
+		int is_bslice = 0;
+		
+		if ( ! is_intra ) {
+			is_bslice = (f % 5 == 0) && (f < frame_number - 1);	
+		}
+	
+		if ( is_intra ) {
+			encode_intra_slices(yuv_fp, avc_fp, f, is_idr);
+			f++;
+		} else if ( is_bslice) {
+			encode_pb_slices(yuv_fp, avc_fp, f);
+			f+=2;
+		} else {
+			encode_p_slices(yuv_fp, avc_fp, f);
+			f++;
+		}
+       
         printf("\r %d/%d ...", f+1, frame_number);
         fflush(stdout);
     }
