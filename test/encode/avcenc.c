@@ -156,6 +156,8 @@ static VABufferID coded_buf;                                    /*Output buffer,
 #define SID_NUMBER                              SID_RECON_PICTURE + 1
 static  VASurfaceID surface_ids[SID_NUMBER];
 
+static int enc_frame_number;
+
 /***************************************************/
 
 static void alloc_encode_resource()
@@ -827,7 +829,7 @@ static void encode_intra_slices(FILE *yuv_fp, FILE *avc_fp, int f, int is_idr)
 	 begin_picture();
 	 prepare_input_ip(yuv_fp, 1);
 	 end_picture();
-	 store_coded_buffer(avc_fp, f, f, SLICE_TYPE_I, is_idr);
+	 store_coded_buffer(avc_fp, enc_frame_number, f, SLICE_TYPE_I, is_idr);
 }
 
 static void encode_p_slices(FILE *yuv_fp, FILE *avc_fp, int f)
@@ -835,7 +837,7 @@ static void encode_p_slices(FILE *yuv_fp, FILE *avc_fp, int f)
 	 begin_picture();
 	 prepare_input_ip(yuv_fp, 0);
 	 end_picture();
-	 store_coded_buffer(avc_fp, f, f, SLICE_TYPE_P, 0);
+	 store_coded_buffer(avc_fp, enc_frame_number, f, SLICE_TYPE_P, 0);
 }
 
 static void encode_pb_slices(FILE *yuv_fp, FILE *avc_fp, int f)
@@ -843,12 +845,12 @@ static void encode_pb_slices(FILE *yuv_fp, FILE *avc_fp, int f)
 	begin_picture();
 	prepare_input_pb(yuv_fp, 0);
 	end_picture();
-	store_coded_buffer(avc_fp, f, f+1, SLICE_TYPE_P, 0);
+	store_coded_buffer(avc_fp, enc_frame_number, f+1, SLICE_TYPE_P, 0);
 
 	begin_picture();
 	prepare_input_pb(yuv_fp, 1);
 	end_picture();
-	store_coded_buffer(avc_fp, f+1, f, SLICE_TYPE_B, 0);
+	store_coded_buffer(avc_fp, enc_frame_number + 1, f, SLICE_TYPE_B, 0);
 }
 
 int main(int argc, char *argv[])
@@ -903,7 +905,8 @@ int main(int argc, char *argv[])
 
     create_encode_pipe();
     alloc_encode_resource();
-
+	
+	enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
         int is_intra = (f % 30 == 0);
         int is_idr = (f == 0);
@@ -916,12 +919,15 @@ int main(int argc, char *argv[])
 		if ( is_intra ) {
 			encode_intra_slices(yuv_fp, avc_fp, f, is_idr);
 			f++;
+			enc_frame_number++;
 		} else if ( is_bslice) {
 			encode_pb_slices(yuv_fp, avc_fp, f);
 			f+=2;
+			enc_frame_number++;
 		} else {
 			encode_p_slices(yuv_fp, avc_fp, f);
 			f++;
+			enc_frame_number++;
 		}
        
         printf("\r %d/%d ...", f+1, frame_number);
