@@ -297,7 +297,9 @@ i965_media_h264_surface_state(VADriverContextP ctx,
     dri_bo *bo;
     uint32_t write_domain, read_domain;
 
-    bo = dri_bo_alloc(i965->intel.bufmgr, 
+    assert(obj_surface->bo);
+
+    bo = dri_bo_alloc(i965->intel.bufmgr,
                       "surface state", 
                       sizeof(struct i965_surface_state), 32);
     assert(bo);
