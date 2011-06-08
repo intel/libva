@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = test_01 test_02 test_03 test_04 test_05 test_06 \
+check_PROGRAMS = test_01 test_02 test_03 test_04 test_05 test_06 \
 		test_07 test_08 test_09 test_10 test_11
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/src/x11
@@ -62,7 +62,7 @@ test_11_SOURCES = test_11.c
 
 EXTRA_DIST = test_common.c
 
-valgrind:	$(bin_PROGRAMS)
-	for a in $(bin_PROGRAMS); do \
+valgrind:	$(check_PROGRAMS)
+	for a in $(check_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
 	done
