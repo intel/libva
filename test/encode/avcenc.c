@@ -346,11 +346,11 @@ static void prepare_input_pb(FILE *yuv_fp, int is_bslice)
     // Copy Image to target surface according input YUV data.
 	if ( is_bslice ) {
 		upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
-		fseek(yuv_fp, SEEK_CUR, frame_size);
+		fseek(yuv_fp, frame_size, SEEK_CUR);
 	} else {
-		fseek(yuv_fp, SEEK_CUR, frame_size); 
+		fseek(yuv_fp, frame_size, SEEK_CUR); 
 		upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
-		fseek(yuv_fp, SEEK_CUR, -2l * frame_size);
+		fseek(yuv_fp, -2l * frame_size, SEEK_CUR);
 	}
 	
 	// Render picture level parameters
@@ -913,7 +913,7 @@ int main(int argc, char *argv[])
 		int is_bslice = 0;
 		
 		if ( ! is_intra ) {
-			is_bslice = (f % 5 == 0) && (f < frame_number - 1);	
+			is_bslice = (f % 2 == 1) && (f < frame_number - 1);	
 		}
 	
 		if ( is_intra ) {
