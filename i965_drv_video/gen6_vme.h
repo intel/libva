@@ -47,11 +47,7 @@ struct gen6_vme_context
 {
     struct {
         dri_bo *bo;
-    } surface_state[MAX_MEDIA_SURFACES_GEN6];
-
-    struct {
-        dri_bo *bo;
-    } binding_table;
+    } surface_state_binding_table;
 
     struct {
         dri_bo *bo;
