@@ -150,6 +150,8 @@ define(`msg_reg4',              `g68')
  * VME message payload
  */
 define(`vme_msg_length',        `5')
+define(`vme_intra_wb_length',   `1')
+define(`vme_inter_wb_length',   `6')
 define(`vme_msg_ind',           `msg_ind')
 define(`vme_msg_0',             `msg_reg0')
 define(`vme_msg_1',             `msg_reg1')

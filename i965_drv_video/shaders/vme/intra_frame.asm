@@ -91,7 +91,7 @@ send (8)
                 VME_MESSAGE_TYPE_INTRA
         )
         mlen vme_msg_length
-        rlen 1
+        rlen vme_intra_wb_length
         {align1};
 
 /*
