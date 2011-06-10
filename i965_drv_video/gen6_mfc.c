@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 Intel Corporation
+ * Copyright © 2010-2011 Intel Corporation
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -43,7 +43,7 @@ gen6_mfc_pipe_mode_select(VADriverContextP ctx, struct gen6_encoder_context *gen
 {
     struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
 
-    BEGIN_BCS_BATCH(batch,4);
+    BEGIN_BCS_BATCH(batch, 4);
 
     OUT_BCS_BATCH(batch, MFX_PIPE_MODE_SELECT | (4 - 2));
     OUT_BCS_BATCH(batch,
@@ -71,6 +71,42 @@ gen6_mfc_pipe_mode_select(VADriverContextP ctx, struct gen6_encoder_context *gen
 }
 
 static void
+gen7_mfc_pipe_mode_select(VADriverContextP ctx,
+                          int standard_select,
+                          struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+
+    assert(standard_select == MFX_FORMAT_MPEG2 ||
+           standard_select == MFX_FORMAT_AVC);
+
+    BEGIN_BCS_BATCH(batch, 5);
+    OUT_BCS_BATCH(batch, MFX_PIPE_MODE_SELECT | (5 - 2));
+    OUT_BCS_BATCH(batch,
+                  (MFX_LONG_MODE << 17) | /* Must be long format for encoder */
+                  (MFD_MODE_VLD << 15) | /* VLD mode */
+                  (0 << 10) | /* disable Stream-Out */
+                  (1 << 9)  | /* Post Deblocking Output */
+                  (0 << 8)  | /* Pre Deblocking Output */
+                  (0 << 5)  | /* not in stitch mode */
+                  (1 << 4)  | /* encoding mode */
+                  (standard_select << 0));  /* standard select: avc or mpeg2 */
+    OUT_BCS_BATCH(batch,
+                  (0 << 7)  | /* expand NOA bus flag */
+                  (0 << 6)  | /* disable slice-level clock gating */
+                  (0 << 5)  | /* disable clock gating for NOA */
+                  (0 << 4)  | /* terminate if AVC motion and POC table error occurs */
+                  (0 << 3)  | /* terminate if AVC mbdata error occurs */
+                  (0 << 2)  | /* terminate if AVC CABAC/CAVLC decode error occurs */
+                  (0 << 1)  |
+                  (0 << 0));
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+
+    ADVANCE_BCS_BATCH(batch);
+}
+
+static void
 gen6_mfc_surface_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
     struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
@@ -91,6 +127,34 @@ gen6_mfc_surface_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_e
                   (0 << 2)  | /* must be 0 for interleave U/V */
                   (1 << 1)  | /* must be y-tiled */
                   (I965_TILEWALK_YMAJOR << 0));  			/* tile walk, TILEWALK_YMAJOR */
+    OUT_BCS_BATCH(batch,
+                  (0 << 16) | 								/* must be 0 for interleave U/V */
+                  (mfc_context->surface_state.h_pitch)); 		/* y offset for U(cb) */
+    OUT_BCS_BATCH(batch, 0);
+    ADVANCE_BCS_BATCH(batch);
+}
+
+static void
+gen7_mfc_surface_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+    struct gen6_mfc_context *mfc_context = &gen6_encoder_context->mfc_context;
+
+    BEGIN_BCS_BATCH(batch, 6);
+
+    OUT_BCS_BATCH(batch, MFX_SURFACE_STATE | (6 - 2));
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch,
+                  ((mfc_context->surface_state.height - 1) << 18) |
+                  ((mfc_context->surface_state.width - 1) << 4));
+    OUT_BCS_BATCH(batch,
+                  (MFX_SURFACE_PLANAR_420_8 << 28) | /* 420 planar YUV surface */
+                  (1 << 27) | /* must be 1 for interleave U/V, hardware requirement */
+                  (0 << 22) | /* surface object control state, FIXME??? */
+                  ((mfc_context->surface_state.w_pitch - 1) << 3) | /* pitch */
+                  (0 << 2)  | /* must be 0 for interleave U/V */
+                  (1 << 1)  | /* must be tiled */
+                  (I965_TILEWALK_YMAJOR << 0));  /* tile walk, TILEWALK_YMAJOR */
     OUT_BCS_BATCH(batch,
                   (0 << 16) | 								/* must be 0 for interleave U/V */
                   (mfc_context->surface_state.h_pitch)); 		/* y offset for U(cb) */
@@ -167,6 +231,31 @@ gen6_mfc_ind_obj_base_addr_state(VADriverContextP ctx, struct gen6_encoder_conte
 }
 
 static void
+gen7_mfc_ind_obj_base_addr_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+    struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
+
+    BEGIN_BCS_BATCH(batch, 11);
+
+    OUT_BCS_BATCH(batch, MFX_IND_OBJ_BASE_ADDR_STATE | (11 - 2));
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    /* MFX Indirect MV Object Base Address */
+    OUT_BCS_RELOC(batch, vme_context->vme_output.bo, I915_GEM_DOMAIN_INSTRUCTION, 0, 0);
+    OUT_BCS_BATCH(batch, 0x80000000); /* must set, up to 2G */
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    /*MFC Indirect PAK-BSE Object Base Address for Encoder*/	
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0x80000000); /* must set, up to 2G */
+
+    ADVANCE_BCS_BATCH(batch);
+}
+
+static void
 gen6_mfc_bsp_buf_base_addr_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
     struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
@@ -238,6 +327,63 @@ gen6_mfc_avc_img_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_e
     ADVANCE_BCS_BATCH(batch);
 }
 
+static void
+gen7_mfc_avc_img_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+    struct gen6_mfc_context *mfc_context = &gen6_encoder_context->mfc_context;
+
+    int width_in_mbs = (mfc_context->surface_state.width + 15) / 16;
+    int height_in_mbs = (mfc_context->surface_state.height + 15) / 16;
+
+    BEGIN_BCS_BATCH(batch, 16);
+    OUT_BCS_BATCH(batch, MFX_AVC_IMG_STATE | (16 - 2));
+    OUT_BCS_BATCH(batch,
+                  ((width_in_mbs * height_in_mbs) & 0xFFFF));
+    OUT_BCS_BATCH(batch, 
+                  ((height_in_mbs - 1) << 16) | 
+                  ((width_in_mbs - 1) << 0));
+    OUT_BCS_BATCH(batch, 
+                  (0 << 24) |	/* Second Chroma QP Offset */
+                  (0 << 16) |	/* Chroma QP Offset */
+                  (0 << 14) |   /* Max-bit conformance Intra flag */
+                  (0 << 13) |   /* Max Macroblock size conformance Inter flag */
+                  (0 << 12) |   /* FIXME: Weighted_Pred_Flag */
+                  (0 << 10) |   /* FIXME: Weighted_BiPred_Idc */
+                  (0 << 8)  |   /* FIXME: Image Structure */
+                  (0 << 0) );   /* Current Decoed Image Frame Store ID, reserved in Encode mode */
+    OUT_BCS_BATCH(batch,
+                  (0 << 16) |   /* Mininum Frame size */
+                  (0 << 15) |   /* Disable reading of Macroblock Status Buffer */
+                  (0 << 14) |   /* Load BitStream Pointer only once, 1 slic 1 frame */
+                  (0 << 13) |   /* CABAC 0 word insertion test enable */
+                  (1 << 12) |   /* MVUnpackedEnable,compliant to DXVA */
+                  (1 << 10) |   /* Chroma Format IDC, 4:2:0 */
+                  (0 << 9)  |   /* FIXME: MbMvFormatFlag */
+                  (1 << 7)  |   /* 0:CAVLC encoding mode,1:CABAC */
+                  (0 << 6)  |   /* Only valid for VLD decoding mode */
+                  (0 << 5)  |   /* Constrained Intra Predition Flag, from PPS */
+                  (0 << 4)  |   /* Direct 8x8 inference flag */
+                  (0 << 3)  |   /* Only 8x8 IDCT Transform Mode Flag */
+                  (1 << 2)  |   /* Frame MB only flag */
+                  (0 << 1)  |   /* MBAFF mode is in active */
+                  (0 << 0));    /* Field picture flag */
+    OUT_BCS_BATCH(batch, 0);    /* Mainly about MB rate control and debug, just ignoring */
+    OUT_BCS_BATCH(batch,        /* Inter and Intra Conformance Max size limit */
+                  (0xBB8 << 16) |       /* InterMbMaxSz */
+                  (0xEE8) );            /* IntraMbMaxSz */
+    OUT_BCS_BATCH(batch, 0);            /* Reserved */
+    OUT_BCS_BATCH(batch, 0);            /* Slice QP Delta for bitrate control */
+    OUT_BCS_BATCH(batch, 0);            /* Slice QP Delta for bitrate control */	
+    OUT_BCS_BATCH(batch, 0x8C000000);
+    OUT_BCS_BATCH(batch, 0x00010000);
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+    OUT_BCS_BATCH(batch, 0);
+
+    ADVANCE_BCS_BATCH(batch);
+}
 
 static void gen6_mfc_avc_directmode_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
@@ -355,6 +501,82 @@ static void gen6_mfc_avc_fqm_state(VADriverContextP ctx, struct gen6_encoder_con
     ADVANCE_BCS_BATCH(batch);	
 }
 
+static void
+gen7_mfc_qm_state(VADriverContextP ctx,
+                  int qm_type,
+                  unsigned int *qm,
+                  int qm_length,
+                  struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+    unsigned int qm_buffer[16];
+
+    assert(qm_length <= 16);
+    assert(sizeof(*qm) == 4);
+    memcpy(qm_buffer, qm, qm_length * 4);
+
+    BEGIN_BCS_BATCH(batch, 18);
+    OUT_BCS_BATCH(batch, MFX_QM_STATE | (18 - 2));
+    OUT_BCS_BATCH(batch, qm_type << 0);
+    intel_batchbuffer_data(batch, qm_buffer, 16 * 4);
+    ADVANCE_BCS_BATCH(batch);
+}
+
+static void gen7_mfc_avc_qm_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
+{
+    unsigned int qm[16] = {
+        0x10101010, 0x10101010, 0x10101010, 0x10101010,
+        0x10101010, 0x10101010, 0x10101010, 0x10101010,
+        0x10101010, 0x10101010, 0x10101010, 0x10101010,
+        0x10101010, 0x10101010, 0x10101010, 0x10101010
+    };
+
+    gen7_mfc_qm_state(ctx, MFX_QM_AVC_4X4_INTRA_MATRIX, qm, 12, gen6_encoder_context);
+    gen7_mfc_qm_state(ctx, MFX_QM_AVC_4X4_INTER_MATRIX, qm, 12, gen6_encoder_context);
+    gen7_mfc_qm_state(ctx, MFX_QM_AVC_8x8_INTRA_MATRIX, qm, 16, gen6_encoder_context);
+    gen7_mfc_qm_state(ctx, MFX_QM_AVC_8x8_INTER_MATRIX, qm, 16, gen6_encoder_context);
+}
+
+static void
+gen7_mfc_fqm_state(VADriverContextP ctx,
+                   int fqm_type,
+                   unsigned int *fqm,
+                   int fqm_length,
+                   struct gen6_encoder_context *gen6_encoder_context)
+{
+    struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
+    unsigned int fqm_buffer[32];
+
+    assert(fqm_length <= 32);
+    assert(sizeof(*fqm) == 4);
+    memcpy(fqm_buffer, fqm, fqm_length * 4);
+
+    BEGIN_BCS_BATCH(batch, 34);
+    OUT_BCS_BATCH(batch, MFX_FQM_STATE | (34 - 2));
+    OUT_BCS_BATCH(batch, fqm_type << 0);
+    intel_batchbuffer_data(batch, fqm_buffer, 32 * 4);
+    ADVANCE_BCS_BATCH(batch);
+}
+
+static void gen7_mfc_avc_fqm_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
+{
+    unsigned int qm[32] = {
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000,
+        0x10001000, 0x10001000, 0x10001000, 0x10001000
+    };
+
+    gen7_mfc_fqm_state(ctx, MFX_QM_AVC_4X4_INTRA_MATRIX, qm, 24, gen6_encoder_context);
+    gen7_mfc_fqm_state(ctx, MFX_QM_AVC_4X4_INTER_MATRIX, qm, 24, gen6_encoder_context);
+    gen7_mfc_fqm_state(ctx, MFX_QM_AVC_8x8_INTRA_MATRIX, qm, 32, gen6_encoder_context);
+    gen7_mfc_fqm_state(ctx, MFX_QM_AVC_8x8_INTER_MATRIX, qm, 32, gen6_encoder_context);
+}
+
 static void gen6_mfc_avc_ref_idx_state(VADriverContextP ctx, struct gen6_encoder_context *gen6_encoder_context)
 {
     struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
@@ -372,7 +594,6 @@ static void gen6_mfc_avc_ref_idx_state(VADriverContextP ctx, struct gen6_encoder
 
     ADVANCE_BCS_BATCH(batch);
 }
-	
 	
 static void
 gen6_mfc_avc_insert_object(VADriverContextP ctx, int flush_data, struct gen6_encoder_context *gen6_encoder_context)
@@ -535,6 +756,7 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx,
                                       struct encode_state *encode_state,
                                       struct gen6_encoder_context *gen6_encoder_context)
 {
+    struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = gen6_encoder_context->base.batch;
     struct gen6_mfc_context *mfc_context = &gen6_encoder_context->mfc_context;
     struct gen6_vme_context *vme_context = &gen6_encoder_context->vme_context;
@@ -561,18 +783,32 @@ void gen6_mfc_avc_pipeline_programing(VADriverContextP ctx,
 
             if (emit_new_state) {
                 intel_batchbuffer_emit_mi_flush(batch);
-                gen6_mfc_pipe_mode_select(ctx, gen6_encoder_context);
-                gen6_mfc_surface_state(ctx, gen6_encoder_context);
+                
+                if (IS_GEN7(i965->intel.device_id)) {
+                    gen7_mfc_pipe_mode_select(ctx, MFX_FORMAT_AVC, gen6_encoder_context);
+                    gen7_mfc_surface_state(ctx, gen6_encoder_context);
+                    gen7_mfc_ind_obj_base_addr_state(ctx, gen6_encoder_context);
+                } else {
+                    gen6_mfc_pipe_mode_select(ctx, gen6_encoder_context);
+                    gen6_mfc_surface_state(ctx, gen6_encoder_context);
+                    gen6_mfc_ind_obj_base_addr_state(ctx, gen6_encoder_context);
+                }
+
                 gen6_mfc_pipe_buf_addr_state(ctx, gen6_encoder_context);
-                gen6_mfc_ind_obj_base_addr_state(ctx, gen6_encoder_context);
                 gen6_mfc_bsp_buf_base_addr_state(ctx, gen6_encoder_context);
-                gen6_mfc_avc_img_state(ctx, gen6_encoder_context);
-                gen6_mfc_avc_qm_state(ctx, gen6_encoder_context);
-                gen6_mfc_avc_fqm_state(ctx, gen6_encoder_context);
+
+                if (IS_GEN7(i965->intel.device_id)) {
+                    gen7_mfc_avc_img_state(ctx, gen6_encoder_context);
+                    gen7_mfc_avc_qm_state(ctx, gen6_encoder_context);
+                    gen7_mfc_avc_fqm_state(ctx, gen6_encoder_context);
+                } else {
+                    gen6_mfc_avc_img_state(ctx, gen6_encoder_context);
+                    gen6_mfc_avc_qm_state(ctx, gen6_encoder_context);
+                    gen6_mfc_avc_fqm_state(ctx, gen6_encoder_context);
+                }
+
                 gen6_mfc_avc_ref_idx_state(ctx, gen6_encoder_context);
-                /*gen6_mfc_avc_directmode_state(ctx);*/
                 gen6_mfc_avc_slice_state(ctx, is_intra, gen6_encoder_context);
-                /*gen6_mfc_avc_insert_object(ctx, 0);*/
                 emit_new_state = 0;
             }
 

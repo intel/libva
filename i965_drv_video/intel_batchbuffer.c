@@ -166,10 +166,19 @@ intel_batchbuffer_emit_mi_flush(struct intel_batchbuffer *batch)
         if (batch->flag == I915_EXEC_RENDER) {
             BEGIN_BATCH(batch, 4);
             OUT_BATCH(batch, CMD_PIPE_CONTROL | 0x2);
-            OUT_BATCH(batch, 
-                      CMD_PIPE_CONTROL_WC_FLUSH |
-                      CMD_PIPE_CONTROL_TC_FLUSH |
-                      CMD_PIPE_CONTROL_NOWRITE);
+
+            if (IS_GEN6(intel->device_id))
+                OUT_BATCH(batch, 
+                          CMD_PIPE_CONTROL_WC_FLUSH |
+                          CMD_PIPE_CONTROL_TC_FLUSH |
+                          CMD_PIPE_CONTROL_NOWRITE);
+            else
+                OUT_BATCH(batch, 
+                          CMD_PIPE_CONTROL_WC_FLUSH |
+                          CMD_PIPE_CONTROL_TC_FLUSH |
+                          CMD_PIPE_CONTROL_DC_FLUSH |
+                          CMD_PIPE_CONTROL_NOWRITE);
+
             OUT_BATCH(batch, 0);
             OUT_BATCH(batch, 0);
             ADVANCE_BATCH(batch);

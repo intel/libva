@@ -1252,4 +1252,56 @@ struct gen7_sampler_state
    } ss3;
 };
 
+struct gen7_surface_state2
+{
+    struct {
+        unsigned int surface_base_address;
+    } ss0;
+
+    struct {
+        unsigned int cbcr_pixel_offset_v_direction:2;
+        unsigned int picture_structure:2;
+        unsigned int width:14;
+        unsigned int height:14;
+    } ss1;
+
+    struct {
+        unsigned int tile_walk:1;
+        unsigned int tiled_surface:1;
+        unsigned int half_pitch_for_chroma:1;
+        unsigned int pitch:18;
+        unsigned int pad0:1;
+        unsigned int surface_object_control_data:4;
+        unsigned int pad1:1;
+        unsigned int interleave_chroma:1;
+        unsigned int surface_format:4;
+    } ss2;
+
+    struct {
+        unsigned int y_offset_for_cb:15;
+        unsigned int pad0:1;
+        unsigned int x_offset_for_cb:14;
+        unsigned int pad1:2;
+    } ss3;
+
+    struct {
+        unsigned int y_offset_for_cr:15;
+        unsigned int pad0:1;
+        unsigned int x_offset_for_cr:14;
+        unsigned int pad1:2;
+    } ss4;
+
+    struct {
+        unsigned int pad0;
+    } ss5;
+
+    struct {
+        unsigned int pad0;
+    } ss6;
+
+    struct {
+        unsigned int pad0;
+    } ss7;
+};
+
 #endif /* _I965_STRUCTS_H_ */

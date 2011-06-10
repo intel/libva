@@ -16,7 +16,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <pciaccess.h>
 #include <assert.h>
 #include <time.h>
 

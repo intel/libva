@@ -30,10 +30,10 @@ define(`INTRA_PRED_AVAIL_FLAG_B',       `0x10')
 define(`INTRA_PRED_AVAIL_FLAG_C',       `0x8')
 define(`INTRA_PRED_AVAIL_FLAG_D',       `0x4')
 
-define(`BIND_IDX_VME',                  `0')
-define(`BIND_IDX_VME_REF0',             `1')
-define(`BIND_IDX_VME_REF1',             `2')
-define(`BIND_IDX_OUTPUT',               `3')
+define(`BIND_IDX_VME',                  `1')
+define(`BIND_IDX_VME_REF0',             `2')
+define(`BIND_IDX_VME_REF1',             `3')
+define(`BIND_IDX_OUTPUT',               `0')
 define(`BIND_IDX_INEP',                 `4')
 
 define(`SUB_PEL_MODE_INTEGER',          `0x00000000')
@@ -46,16 +46,31 @@ define(`INTER_SAD_HAAR',                `0x00200000')
 define(`INTRA_SAD_NONE',                `0x00000000')
 define(`INTRA_SAD_HAAR',                `0x00800000')
 
-define(`INTER_PART_MASK',				`0x7E000000')
+define(`INTER_PART_MASK',               `0x7E000000')
 
 define(`REF_REGION_SIZE',               `0x2020:UW')
 
 define(`BI_SUB_MB_PART_MASK',           `0x0c000000')
 define(`MAX_NUM_MV',                    `0x00000020')
-define(`SEARCH_PATH_LEN',				`0x00003F3F')
- 
-define(`INTRA_PREDICTORE_MODE',         `0x11111111:UD')
+define(`SEARCH_PATH_LEN',               `0x00003F3F')
         
+define(`INTRA_PREDICTORE_MODE',         `0x11111111:UD')
+
+define(`OBW_CACHE_TYPE',                `10')
+
+define(`OBW_MESSAGE_TYPE',              `8')
+
+define(`OBW_BIND_IDX',                  `BIND_IDX_OUTPUT')
+
+define(`OBW_CONTROL_0',                 `0')    /* 1 OWord, low 128 bits */
+define(`OBW_CONTROL_1',                 `1')    /* 1 OWord, high 128 bits */
+define(`OBW_CONTROL_2',                 `2')    /* 2 OWords */
+define(`OBW_CONTROL_3',                 `3')    /* 4 OWords */
+
+define(`OBW_WRITE_COMMIT_CATEGORY',     `0')    /* category on Ivybridge */
+
+define(`OBW_HEADER_PRESENT',            `1')
+
 /* GRF registers
  * r0 header
  * r1~r4 constant buffer (reserved)
@@ -96,10 +111,13 @@ define(`vme_wb2',               `r14')
 define(`vme_wb3',               `r15')
         
 /*
- * GRF 16 -- write back for Oword Block Write message with write commit bit
+ * GRF 16 -- reserved
  */        
-define(`obw_wb',                `r16')
-
+/*
+ * write commit is removed on Ivybridge
+ */
+define(`obw_wb',                `null<1>:W')
+define(`obw_wb_length',         `0')
 /*
  * GRF 18~21 -- Intra Neighbor Edge Pixels
  */
@@ -119,13 +137,27 @@ define(`tmp_x_w',               `tmp_reg2.0')
 define(`tmp_reg3',              `r35')
 
 /*
- * MRF registers
- */        
-define(`msg_reg0',              `m0')               /* m0 */
-define(`msg_reg1',              `m1')               /* m1 */
-define(`msg_reg2',              `m2')               /* m2 */
-define(`msg_reg3',              `m3')               /* m3 */
+ * Message Payload registers
+ */
+define(`msg_ind',               `64')
+define(`msg_reg0',              `g64')
+define(`msg_reg1',              `g65')
+define(`msg_reg2',              `g66')
+define(`msg_reg3',              `g67')
+define(`msg_reg4',              `g68')
 
+/*
+ * VME message payload
+ */
+define(`vme_msg_length',        `5')
+define(`vme_intra_wb_length',   `1')
+define(`vme_inter_wb_length',   `6')
+define(`vme_msg_ind',           `msg_ind')
+define(`vme_msg_0',             `msg_reg0')
+define(`vme_msg_1',             `msg_reg1')
+define(`vme_msg_2',             `msg_reg2')
+define(`vme_msg_3',             `msg_reg3')
+define(`vme_msg_4',             `msg_reg4')
 
 
 
