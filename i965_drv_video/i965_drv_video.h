@@ -154,6 +154,7 @@ struct object_surface
     int orig_width;
     int orig_height;
     int flags;
+    unsigned int fourcc;    
     dri_bo *bo;
     int pp_out_width;
     int pp_out_height;
@@ -252,6 +253,7 @@ i965_driver_data(VADriverContextP ctx)
 void 
 i965_check_alloc_surface_bo(VADriverContextP ctx,
                             struct object_surface *obj_surface,
-                            int tiled);
+                            int tiled,
+                            unsigned int fourcc);
 
 #endif /* _I965_DRV_VIDEO_H_ */

@@ -489,6 +489,7 @@ i965_CreateSurfaces(VADriverContextP ctx,
 
         obj_surface->size = SIZE_YUV420(obj_surface->width, obj_surface->height);
         obj_surface->flags = SURFACE_REFERENCED;
+        obj_surface->fourcc = 0;
         obj_surface->bo = NULL;
         obj_surface->pp_out_bo = NULL;
         obj_surface->locked_image_id = VA_INVALID_ID;
@@ -1818,7 +1819,8 @@ i965_CreateImage(VADriverContextP ctx,
 void 
 i965_check_alloc_surface_bo(VADriverContextP ctx,
                             struct object_surface *obj_surface,
-                            int tiled)
+                            int tiled,
+                            unsigned int fourcc)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
@@ -1846,6 +1848,7 @@ i965_check_alloc_surface_bo(VADriverContextP ctx,
                                        0x1000);
     }
 
+    obj_surface->fourcc = fourcc;
     assert(obj_surface->bo);
 }
 
@@ -1933,7 +1936,7 @@ VAStatus i965_DeriveImage(VADriverContextP ctx,
         }
     }
 
-    i965_check_alloc_surface_bo(ctx, obj_surface, HAS_TILED_SURFACE(i965));
+    i965_check_alloc_surface_bo(ctx, obj_surface, HAS_TILED_SURFACE(i965), image->format.fourcc);
     va_status = i965_create_buffer_internal(ctx, 0, VAImageBufferType,
                                             obj_surface->size, 1, NULL, obj_surface->bo, &image->buf);
     if (va_status != VA_STATUS_SUCCESS)
@@ -2050,13 +2053,14 @@ get_image_i420(struct object_image *obj_image, uint8_t *image_data,
 {
     uint8_t *dst[3], *src[3];
     const int Y = 0;
-    const int U = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 2 : 1;
-    const int V = obj_image->image.format.fourcc == VA_FOURCC_YV12 ? 1 : 2;
+    const int U = obj_image->image.format.fourcc == obj_surface->fourcc ? 1 : 2;
+    const int V = obj_image->image.format.fourcc == obj_surface->fourcc ? 2 : 1;
     unsigned int tiling, swizzle;
 
     if (!obj_surface->bo)
         return;
 
+    assert(obj_surface->fourcc);
     dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
 
     if (tiling != I915_TILING_NONE)
@@ -2114,6 +2118,7 @@ get_image_nv12(struct object_image *obj_image, uint8_t *image_data,
     if (!obj_surface->bo)
         return;
 
+    assert(obj_surface->fourcc);
     dri_bo_get_tiling(obj_surface->bo, &tiling, &swizzle);
 
     if (tiling != I915_TILING_NONE)

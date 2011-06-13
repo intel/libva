@@ -851,7 +851,7 @@ static VAStatus gen6_mfc_avc_prepare(VADriverContextP ctx,
     /*Setup all the input&output object*/
     obj_surface = SURFACE(pPicParameter->reconstructed_picture);
     assert(obj_surface);
-    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC('N','V','1','2'));
 
     mfc_context->post_deblocking_output.bo = obj_surface->bo;
     dri_bo_reference(mfc_context->post_deblocking_output.bo);

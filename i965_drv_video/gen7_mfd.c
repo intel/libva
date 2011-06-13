@@ -121,7 +121,7 @@ gen7_mfd_avc_frame_store_index(VADriverContextP ctx,
             struct object_surface *obj_surface = SURFACE(ref_pic->picture_id);
             
             assert(obj_surface);
-            i965_check_alloc_surface_bo(ctx, obj_surface, 1);
+            i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC('N','V','1','2'));
 
             for (frame_idx = 0; frame_idx < ARRAY_ELEMS(gen7_mfd_context->reference_surface); frame_idx++) {
                 for (j = 0; j < ARRAY_ELEMS(gen7_mfd_context->reference_surface); j++) {
@@ -989,7 +989,7 @@ gen7_mfd_avc_decode_init(VADriverContextP ctx,
     obj_surface->flags &= ~SURFACE_REF_DIS_MASK;
     obj_surface->flags |= (pic_param->pic_fields.bits.reference_pic_flag ? SURFACE_REFERENCED : 0);
     gen7_mfd_init_avc_surface(ctx, pic_param, obj_surface);
-    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC('N','V','1','2'));
 
     dri_bo_unreference(gen7_mfd_context->post_deblocking_output.bo);
     gen7_mfd_context->post_deblocking_output.bo = obj_surface->bo;
@@ -1137,7 +1137,7 @@ gen7_mfd_mpeg2_decode_init(VADriverContextP ctx,
     /* Current decoded picture */
     obj_surface = SURFACE(decode_state->current_render_target);
     assert(obj_surface);
-    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC('N','V','1','2'));
 
     dri_bo_unreference(gen7_mfd_context->pre_deblocking_output.bo);
     gen7_mfd_context->pre_deblocking_output.bo = obj_surface->bo;
@@ -1457,7 +1457,7 @@ gen7_mfd_vc1_decode_init(VADriverContextP ctx,
     obj_surface = SURFACE(decode_state->current_render_target);
     assert(obj_surface);
     gen7_mfd_init_vc1_surface(ctx, pic_param, obj_surface);
-    i965_check_alloc_surface_bo(ctx, obj_surface, 1);
+    i965_check_alloc_surface_bo(ctx, obj_surface, 1, VA_FOURCC('N','V','1','2'));
 
     dri_bo_unreference(gen7_mfd_context->post_deblocking_output.bo);
     gen7_mfd_context->post_deblocking_output.bo = obj_surface->bo;
