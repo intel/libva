@@ -44,5 +44,6 @@ intel_memman_init(struct intel_driver_data *intel)
 Bool 
 intel_memman_terminate(struct intel_driver_data *intel)
 {
+    drm_intel_bufmgr_destroy(intel->bufmgr);
     return True;
 }
