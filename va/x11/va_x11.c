@@ -54,8 +54,17 @@ static void va_DisplayContextDestroy (
     VADisplayContextP pDisplayContext
 )
 {
+    VADriverContextP ctx;
+    struct dri_state *dri_state;
+
     if (pDisplayContext == NULL)
         return;
+
+    ctx = pDisplayContext->pDriverContext;
+    dri_state = ctx->dri_state;
+
+    if (dri_state)
+        dri_state->close(ctx);
 
     free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);

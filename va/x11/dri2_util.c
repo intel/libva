@@ -193,6 +193,9 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     dri_state->close = dri2Close;
     gsDRI2SwapAvailable = (minor >= 2);
 
+    if (device_name)
+        Xfree(device_name);
+
     return True;
 
 err_out:
