@@ -69,6 +69,10 @@ static int entropy_coding_mode_flag = ENTROPY_MODE_CABAC;
 static int deblocking_filter_control_present_flag = 1;
 static int frame_mbs_only_flag = 1;
 
+static int intra_period = 30;
+static int pb_period = 5;
+static int frame_bit_rate = -1;
+
 static void create_encode_pipe()
 {
     VAEntrypoint entrypoints[5];
@@ -170,16 +174,23 @@ static void alloc_encode_resource()
 
     //1. Create sequence parameter set
     {
-        VAEncSequenceParameterBufferH264Baseline seq_h264 = {0};
-
-        seq_h264.level_idc = 30;
+        VAEncSequenceParameterBufferH264Ext seq_h264 = {0};
+        
         seq_h264.picture_width_in_mbs = picture_width_in_mbs;
         seq_h264.picture_height_in_mbs = picture_height_in_mbs;
-
-        seq_h264.bits_per_second = 384*1000;
-        seq_h264.initial_qp = qp_value;
-        seq_h264.min_qp = 3;
-
+        
+        seq_h264.intra_period = intra_period;
+        /*0:CBR, 1:VBR, 2,Constant QP*/
+        if ( qp_value == -1 ) 
+            seq_h264.rate_control_method = 0;       
+        else
+            seq_h264.rate_control_method = 2;
+        seq_h264.time_scale = 900;            /*in miscro second unit*/
+        seq_h264.num_units_in_tick = 15;
+        if ( frame_bit_rate > 0) {        
+            seq_h264.bits_per_second = 30 * frame_bit_rate;
+        }
+        
         va_status = vaCreateBuffer(va_dpy, context_id,
                                    VAEncSequenceParameterBufferType,
                                    sizeof(seq_h264),1,&seq_h264,&seq_parameter);
@@ -301,6 +312,7 @@ static void render_picture_parameter()
 	pic_h264.ReferenceFrames[1].picture_id = surface_ids[SID_REFERENCE_PICTURE_L1];
 	pic_h264.ReferenceFrames[2].picture_id = VA_INVALID_ID;
 	pic_h264.CodedBuf = coded_buf;
+    pic_h264.pic_init_qp = qp_value;
 	 if (pic_parameter != VA_INVALID_ID) {	
         vaDestroyBuffer(va_dpy, pic_parameter);	
     }
@@ -853,6 +865,11 @@ static void encode_pb_slices(FILE *yuv_fp, FILE *avc_fp, int f)
 	store_coded_buffer(avc_fp, enc_frame_number + 1, f, SLICE_TYPE_B, 0);
 }
 
+static void show_help()
+{
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate]\n");
+}
+
 int main(int argc, char *argv[])
 {
     int f;
@@ -863,8 +880,9 @@ int main(int argc, char *argv[])
     clock_t start_clock, end_clock;
     float encoding_time;
 
+    //TODO may be we should using option analytics library
     if(argc != 5 && argc != 6) {
-        printf("Usage: %s <width> <height> <input_yuvfile> <output_avcfile> [qp]\n", argv[0]);
+        show_help();
         return -1;
     }
 
@@ -873,10 +891,19 @@ int main(int argc, char *argv[])
     picture_width_in_mbs = (picture_width + 15) / 16;
     picture_height_in_mbs = (picture_height + 15) / 16;
 
-    if (argc == 6)
-        qp_value = atoi(argv[5]);
-    else
-        qp_value = 26;
+    if (argc == 6) {
+        qp_value = -1;
+        sscanf(argv[5], "qp=%d", &qp_value);
+        if ( qp_value == -1 ) {
+            frame_bit_rate = -1;
+            sscanf(argv[5], "fb=%d", &frame_bit_rate);
+            if (  frame_bit_rate == -1 ) {
+                show_help();
+                return -1;
+            }
+        }
+    } else
+        qp_value = 26;                          //default const QP mode
 
     yuv_fp = fopen(argv[3],"rb");
     if ( yuv_fp == NULL){
@@ -908,12 +935,12 @@ int main(int argc, char *argv[])
 	
 	enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
-        int is_intra = (f % 30 == 0);
+        int is_intra = (enc_frame_number % intra_period == 0);
         int is_idr = (f == 0);
 		int is_bslice = 0;
 		
-		if ( ! is_intra ) {
-			is_bslice = (f % 2 == 1) && (f < frame_number - 1);	
+		if ( ! is_intra && pb_period > 0) {
+			is_bslice = (f % pb_period == 1) && (f < frame_number - 1);	
 		}
 	
 		if ( is_intra ) {
