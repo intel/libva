@@ -1258,15 +1258,24 @@ gen7_mfd_mpeg2_bsd_object(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = gen7_mfd_context->base.batch;
     unsigned int width_in_mbs = ALIGN(pic_param->horizontal_size, 16) / 16;
-    unsigned int height_in_mbs = ALIGN(pic_param->vertical_size, 16) / 16;
-    int mb_count;
+    int mb_count, vpos0, hpos0, vpos1, hpos1, is_field_pic = 0;
 
-    if (next_slice_param == NULL)
-        mb_count = width_in_mbs * height_in_mbs - 
-            (slice_param->slice_vertical_position * width_in_mbs + slice_param->slice_horizontal_position);
-    else
-        mb_count = (next_slice_param->slice_vertical_position * width_in_mbs + next_slice_param->slice_horizontal_position) - 
-            (slice_param->slice_vertical_position * width_in_mbs + slice_param->slice_horizontal_position);
+    if (pic_param->picture_coding_extension.bits.picture_structure == MPEG_TOP_FIELD ||
+        pic_param->picture_coding_extension.bits.picture_structure == MPEG_BOTTOM_FIELD)
+        is_field_pic = 1;
+
+    vpos0 = slice_param->slice_vertical_position / (1 + is_field_pic);
+    hpos0 = slice_param->slice_horizontal_position;
+
+    if (next_slice_param == NULL) {
+        vpos1 = ALIGN(pic_param->vertical_size, 16) / 16 / (1 + is_field_pic);
+        hpos1 = 0;
+    } else {
+        vpos1 = next_slice_param->slice_vertical_position / (1 + is_field_pic);
+        hpos1 = next_slice_param->slice_horizontal_position;
+    }
+
+    mb_count = (vpos1 * width_in_mbs + hpos1) - (vpos0 * width_in_mbs + hpos0);
 
     BEGIN_BCS_BATCH(batch, 5);
     OUT_BCS_BATCH(batch, MFD_MPEG2_BSD_OBJECT | (5 - 2));
@@ -1275,8 +1284,8 @@ gen7_mfd_mpeg2_bsd_object(VADriverContextP ctx,
     OUT_BCS_BATCH(batch, 
                   slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
     OUT_BCS_BATCH(batch,
-                  slice_param->slice_horizontal_position << 24 |
-                  slice_param->slice_vertical_position << 16 |
+                  hpos0 << 24 |
+                  vpos0 << 16 |
                   mb_count << 8 |
                   (next_slice_param == NULL) << 5 |
                   (next_slice_param == NULL) << 3 |

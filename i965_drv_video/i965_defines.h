@@ -696,6 +696,10 @@
 #define MFX_SURFACE_PLANAR_420_8        4
 #define MFX_SURFACE_MONOCHROME          12
 
+#define MPEG_TOP_FIELD		1
+#define MPEG_BOTTOM_FIELD	2
+#define MPEG_FRAME		3
+
 #define URB_SIZE(intel)         (IS_GEN7(intel->device_id) ? 4096 :     \
                                  IS_GEN6(intel->device_id) ? 1024 :     \
                                  IS_IRONLAKE(intel->device_id) ? 1024 : \

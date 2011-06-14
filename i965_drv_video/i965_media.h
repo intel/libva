@@ -40,10 +40,6 @@
 #define MAX_INTERFACE_DESC      16
 #define MAX_MEDIA_SURFACES      34
 
-#define MPEG_TOP_FIELD		1
-#define MPEG_BOTTOM_FIELD	2
-#define MPEG_FRAME		3
-
 struct decode_state;
 
 struct i965_media_context

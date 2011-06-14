@@ -877,7 +877,11 @@ i965_media_mpeg2_objects(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = media_context->base.batch;
     VASliceParameterBufferMPEG2 *slice_param;
+    VAPictureParameterBufferMPEG2 *pic_param;
     int i, j;
+
+    assert(decode_state->pic_param && decode_state->pic_param->buffer);
+    pic_param = (VAPictureParameterBufferMPEG2 *)decode_state->pic_param->buffer;
 
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params[j] && decode_state->slice_params[j]->buffer);
@@ -885,7 +889,15 @@ i965_media_mpeg2_objects(VADriverContextP ctx,
         slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j]->buffer;
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
+            int vpos, hpos, is_field_pic = 0;
+
+            if (pic_param->picture_coding_extension.bits.picture_structure == MPEG_TOP_FIELD ||
+                pic_param->picture_coding_extension.bits.picture_structure == MPEG_BOTTOM_FIELD)
+                is_field_pic = 1;
+
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
+            vpos = slice_param->slice_vertical_position / (1 + is_field_pic);
+            hpos = slice_param->slice_horizontal_position;
 
             BEGIN_BATCH(batch, 6);
             OUT_BATCH(batch, CMD_MEDIA_OBJECT | 4);
@@ -895,8 +907,8 @@ i965_media_mpeg2_objects(VADriverContextP ctx,
                       I915_GEM_DOMAIN_SAMPLER, 0, 
                       slice_param->slice_data_offset + (slice_param->macroblock_offset >> 3));
             OUT_BATCH(batch, 
-                      ((slice_param->slice_horizontal_position << 24) |     
-                       (slice_param->slice_vertical_position << 16) |
+                      ((hpos << 24) |     
+                       (vpos << 16) |
                        (127 << 8) | 
                        (slice_param->macroblock_offset & 0x7)));
             OUT_BATCH(batch, slice_param->quantiser_scale_code << 24);
