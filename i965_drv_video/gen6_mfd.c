@@ -1182,7 +1182,7 @@ gen6_mfd_mpeg2_decode_init(VADriverContextP ctx,
     if (obj_surface && obj_surface->bo)
         gen6_mfd_context->reference_surface[1].surface_id = pic_param->backward_reference_picture;
     else
-        gen6_mfd_context->reference_surface[1].surface_id = pic_param->forward_reference_picture;
+        gen6_mfd_context->reference_surface[1].surface_id = gen6_mfd_context->reference_surface[0].surface_id;
 
     /* must do so !!! */
     for (i = 2; i < ARRAY_ELEMS(gen6_mfd_context->reference_surface); i++)
@@ -1364,7 +1364,6 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
     gen6_mfd_mpeg2_pic_state(ctx, decode_state, gen6_mfd_context);
     gen6_mfd_mpeg2_qm_state(ctx, decode_state, gen6_mfd_context);
 
-    assert(decode_state->num_slice_params == 1);
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j]->buffer;
