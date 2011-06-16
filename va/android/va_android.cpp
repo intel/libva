@@ -45,8 +45,6 @@
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/card0"
 
-static VADisplayContextP pDisplayContexts = NULL;
-
 static int open_device (char *dev_name)
 {
     struct stat st;
@@ -81,34 +79,23 @@ static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
                                   )
 {
-    VADisplayContextP ctx = pDisplayContexts;
-
-    while (ctx)
-    {
-	if (ctx == pDisplayContext && pDisplayContext->pDriverContext)
-	    return 1;
-	ctx = ctx->pNext;
-    }
-    return 0;
+    return (pDisplayContext != NULL &&
+            pDisplayContext->pDriverContext != NULL);
 }
 
 static void va_DisplayContextDestroy (
     VADisplayContextP pDisplayContext
 )
 {
-    VADisplayContextP *ctx = &pDisplayContexts;
+    struct dri_state *dri_state;
 
-    /* Throw away pDisplayContext */
-    while (*ctx)
-    {
-	if (*ctx == pDisplayContext)
-	{
-	    *ctx = pDisplayContext->pNext;
-	    pDisplayContext->pNext = NULL;
-	    break;
-	}
-	ctx = &((*ctx)->pNext);
-    }
+    if (pDisplayContext == NULL)
+        return;
+
+    /* close the open-ed DRM fd */
+    dri_state = (struct dri_state *)pDisplayContext->pDriverContext->dri_state;
+    close(dri_state->fd);
+
     free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
@@ -149,7 +136,7 @@ static VAStatus va_DisplayContextGetDriverName (
     *driver_name = strdup(devices[0].driver_name);
         
     dri_state->driConnectedFlag = VA_DUMMY;
-    
+
     return VA_STATUS_SUCCESS;
 }
 #else
@@ -204,7 +191,7 @@ static VAStatus va_DisplayContextGetDriverName (
            driver_name, vendor_id, device_id);
     
     dri_state->driConnectedFlag = VA_DUMMY;
-    
+
     return VA_STATUS_SUCCESS;
 }
 #endif
@@ -214,22 +201,10 @@ VADisplay vaGetDisplay (
 )
 {
     VADisplay dpy = NULL;
-    VADisplayContextP pDisplayContext = pDisplayContexts;
+    VADisplayContextP pDisplayContext;
 
     if (!native_dpy)
         return NULL;
-
-    while (pDisplayContext)
-    {
-        if (pDisplayContext->pDriverContext &&
-            pDisplayContext->pDriverContext->native_dpy == (void *)native_dpy)
-        {
-            dpy = (VADisplay)pDisplayContext;
-            break;
-        }
-        pDisplayContext = pDisplayContext->pNext;
-    }
-
 
     if (!dpy)
     {
@@ -244,12 +219,10 @@ VADisplay vaGetDisplay (
             pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
             pDriverContext->native_dpy       = (void *)native_dpy;
-            pDisplayContext->pNext           = pDisplayContexts;
             pDisplayContext->pDriverContext  = pDriverContext;
             pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-            pDisplayContexts                 = pDisplayContext;
             pDriverContext->dri_state 	     = dri_state;
             dpy                              = (VADisplay)pDisplayContext;
         }
