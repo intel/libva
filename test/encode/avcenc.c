@@ -192,7 +192,7 @@ static void alloc_encode_resource()
         }
         
         va_status = vaCreateBuffer(va_dpy, context_id,
-                                   VAEncSequenceParameterBufferType,
+                                   VAEncSequenceParameterBufferH264ExtType,
                                    sizeof(seq_h264),1,&seq_h264,&seq_parameter);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");;
     }
@@ -316,7 +316,7 @@ static void render_picture_parameter()
     if (pic_parameter != VA_INVALID_ID) {	
         vaDestroyBuffer(va_dpy, pic_parameter);	
     }
-    va_status = vaCreateBuffer(va_dpy, context_id,VAEncPictureParameterBufferType,
+    va_status = vaCreateBuffer(va_dpy, context_id,VAEncPictureParameterBufferH264ExtType,
                                sizeof(pic_h264),1,&pic_h264,&pic_parameter);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
     va_status = vaRenderPicture(va_dpy,context_id, &pic_parameter, 1);
@@ -343,7 +343,7 @@ static void render_slice_parameter(int slice_type)
     if ( slice_parameter != VA_INVALID_ID){
         vaDestroyBuffer(va_dpy, slice_parameter);
     }
-    va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
+    va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferH264ExtType,
                                sizeof(slice_h264),1,&slice_h264,&slice_parameter);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
     va_status = vaRenderPicture(va_dpy,context_id, &slice_parameter, 1);
