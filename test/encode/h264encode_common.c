@@ -77,7 +77,6 @@ static int display_surface(int frame_id, int *exit_encode);
 
 static int upload_source_YUV_once_for_all()
 {
-    VAImage surface_image;
     void *surface_p=NULL, *U_start,*V_start;
     VAStatus va_status;
     int box_width=8;

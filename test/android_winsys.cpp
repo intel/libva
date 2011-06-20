@@ -9,7 +9,7 @@ namespace android {
 };
 
 #define SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, win_width, win_height) \
-{\
+do {\
     client = new SurfaceComposerClient();\
     surface_ctrl = client->createSurface(getpid(), 0, win_width, win_height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);\
     android_surface = surface_ctrl->getSurface();\
@@ -27,6 +27,6 @@ namespace android {
     surface_ctrl->setLayer(0x100000);\
     client->closeTransaction();\
 \
-}\
+} while (0)                                     \
 
 

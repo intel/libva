@@ -36,9 +36,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-#define Display unsigned int
-static  int win_thread0 = 0, win_thread1 = 0;
-static  int multi_thread = 0;
+static  int android_display=0;
 
 using namespace android;
 #include "../android_winsys.cpp"
@@ -53,8 +51,25 @@ sp<Surface> android_surface1;
 sp<ISurface> android_isurface1;
 sp<SurfaceControl> surface_ctrl1;
 
+static void *open_display(void);
+static void close_display(void *win_display);
+static int create_window(void *win_display, int width, int height);
+static int check_window_event(void *x11_display, void *win, int *width, int *height, int *quit);
 
-static int create_window(int width, int height)
+#define CAST_DRAWABLE(a)  static_cast<ISurface*>((void *)(*(unsigned int *)a))
+#include "putsurface_common.c"
+
+static void *open_display()
+{
+    return &android_display;
+}
+
+static void close_display(void *win_display)
+{
+    return;
+}
+
+static int create_window(void *win_display, int width, int height)
 {
     sp<ProcessState> proc(ProcessState::self());
     ProcessState::self()->startThreadPool();
@@ -62,16 +77,21 @@ static int create_window(int width, int height)
     printf("Create window0 for thread0\n");
     SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, width, height);
 
-    win_thread0 = 1;
+    drawable_thread0 = static_cast<void*>(&android_isurface);
     if (multi_thread == 0)
         return 0;
 
     printf("Create window1 for thread1\n");
     /* need to modify here jgl*/
     SURFACE_CREATE(client1,surface_ctrl1,android_surface1, android_isurface1, width, height);
-
-    win_thread1 = 2;
+    drawable_thread1 = static_cast<void *>(&android_isurface);
+    
     return 0;
 }
 
-#include "putsurface_common.c"
+int check_window_event(void *win_display, void *drawble, int *width, int *height, int *quit)
+{
+    return 0;
+}
+
+
