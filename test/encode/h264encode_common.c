@@ -52,7 +52,7 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     exit(1);                                                            \
 }
 
-#include "loadsurface.h"
+#include "../loadsurface.h"
 #define SURFACE_NUM 18 /* 16 surfaces for src, 2 surface for reconstructed/reference */
 #define CODEDBUF_NUM 5
 static  VADisplay va_dpy;

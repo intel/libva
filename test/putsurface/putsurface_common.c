@@ -62,7 +62,7 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
     fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
     exit(1);                                                            \
 }
-#include "loadsurface.h"
+#include "../loadsurface.h"
 
 #define SURFACE_NUM 5
 static  VASurfaceID surface_id[SURFACE_NUM];
