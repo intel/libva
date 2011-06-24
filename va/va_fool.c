@@ -217,7 +217,7 @@ int va_FoolEnd(VADisplay dpy)
     if (fool_context[idx].codebuf)
         free(fool_context[idx].codebuf);
 
-    memset(&fool_context[idx], sizeof(struct _fool_context), 0);
+    memset(&fool_context[idx], 0, sizeof(struct _fool_context));
     return 0;
 }
 

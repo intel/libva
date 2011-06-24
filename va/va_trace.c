@@ -244,7 +244,7 @@ void va_TraceEnd(VADisplay dpy)
     if (trace_context[idx].trace_fp_surface && (trace_context[idx].trace_fp_surface != stderr))
         fclose(trace_context[idx].trace_fp_surface);
 
-    memset(&trace_context[idx], sizeof(struct _trace_context), 0);
+    memset(&trace_context[idx], 0, sizeof(struct _trace_context));
 }
 
 
