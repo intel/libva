@@ -93,7 +93,7 @@ static int display_surface(int frame_id, int *exit_encode)
         }	
     }	
 
-    return;
+    return 0;
 }
 
 #include "h264encode_common.c"

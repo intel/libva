@@ -161,6 +161,8 @@ static int check_window_event(void *win_display, void *drawable, int *width, int
         printf("Scale window to %dx%d\n", width, height);
     }
 #endif
+
+    return 0;
 }
 
 
