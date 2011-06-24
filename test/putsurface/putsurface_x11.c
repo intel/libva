@@ -79,6 +79,8 @@ static int create_window(void *win_display, int width, int height)
     printf("Create window0 for thread0\n");
     drawable_thread0 = (void *)XCreateSimpleWindow(x11_display, root, 0, 0, width, height,
                                            0, 0, WhitePixel(x11_display, 0));
+
+    win = (Window)drawable_thread0;
     if (drawable_thread0) {
         XSizeHints sizehints;
         sizehints.width  = width;
@@ -106,6 +108,7 @@ static int create_window(void *win_display, int width, int height)
     
     drawable_thread1 = (void *)XCreateSimpleWindow(x11_display, root, width, 0, width, height,
                                             0, 0, WhitePixel(x11_display, 0));
+    win = (Window)drawable_thread1;
     if (drawable_thread1) {
         XSizeHints sizehints;
         sizehints.width  = width;
