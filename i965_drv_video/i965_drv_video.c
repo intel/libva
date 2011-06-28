@@ -2244,10 +2244,12 @@ i965_PutSurface(VADriverContextP ctx,
     union dri_buffer *buffer;
     struct intel_region *dest_region;
     struct object_surface *obj_surface; 
+    VARectangle src_rect, dst_rect;
     int ret;
     uint32_t name;
     Bool new_region = False;
     int pp_flag = 0;
+
     /* Currently don't support DRI1 */
     if (dri_state->driConnectedFlag != VA_DRI2)
         return VA_STATUS_ERROR_UNKNOWN;
@@ -2305,16 +2307,21 @@ i965_PutSurface(VADriverContextP ctx,
     if (flags & (VA_BOTTOM_FIELD | VA_TOP_FIELD))
         pp_flag |= I965_PP_FLAG_DEINTERLACING;
 
-    intel_render_put_surface(ctx, surface,
-                             srcx, srcy, srcw, srch,
-                             destx, desty, destw, desth,
-                             pp_flag);
+    src_rect.x      = srcx;
+    src_rect.y      = srcy;
+    src_rect.width  = srcw;
+    src_rect.height = srch;
+
+    dst_rect.x      = destx;
+    dst_rect.y      = desty;
+    dst_rect.width  = destw;
+    dst_rect.height = desth;
+
+    intel_render_put_surface(ctx, surface, &src_rect, &dst_rect, pp_flag);
 
     if(obj_surface->subpic != VA_INVALID_ID) {
-        intel_render_put_subpicture(ctx, surface,
-                                    srcx, srcy, srcw, srch,
-                                    destx, desty, destw, desth);
-    } 
+        intel_render_put_subpicture(ctx, surface, &src_rect, &dst_rect);
+    }
 
     dri_swap_buffer(ctx, dri_drawable);
     obj_surface->flags |= SURFACE_DISPLAYED;

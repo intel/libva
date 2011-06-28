@@ -81,28 +81,22 @@ struct i965_render_state
 
 Bool i965_render_init(VADriverContextP ctx);
 Bool i965_render_terminate(VADriverContextP ctx);
-void intel_render_put_surface(VADriverContextP ctx,
-                             VASurfaceID surface,
-                             short srcx,
-                             short srcy,
-                             unsigned short srcw,
-                             unsigned short srch,
-                             short destx,
-                             short desty,
-                             unsigned short destw,
-                             unsigned short desth,
-                             unsigned int flag);
-
 
 void
-intel_render_put_subpicture(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth);
+intel_render_put_surface(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+);
+
+void
+intel_render_put_subpicture(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+);
+
 #endif /* _I965_RENDER_H_ */

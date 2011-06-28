@@ -351,17 +351,14 @@ struct i965_post_processing_context
 };
 
 void
-i965_post_processing(VADriverContextP ctx,
-                     VASurfaceID surface,
-                     short srcx,
-                     short srcy,
-                     unsigned short srcw,
-                     unsigned short srch,
-                     short destx,
-                     short desty,
-                     unsigned short destw,
-                     unsigned short desth,
-                     unsigned int pp_index);
+i965_post_processing(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+);
+
 Bool
 i965_post_processing_terminate(VADriverContextP ctx);
 Bool

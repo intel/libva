@@ -927,16 +927,12 @@ i965_subpic_render_upload_vertex(VADriverContextP ctx,
 }
 
 static void 
-i965_render_upload_vertex(VADriverContextP ctx,
-                          VASurfaceID surface,
-                          short srcx,
-                          short srcy,
-                          unsigned short srcw,
-                          unsigned short srch,
-                          short destx,
-                          short desty,
-                          unsigned short destw,
-                          unsigned short desth)
+i965_render_upload_vertex(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_render_state *render_state = &i965->render_state;
@@ -946,20 +942,20 @@ i965_render_upload_vertex(VADriverContextP ctx,
 
     float u1, v1, u2, v2;
     int i, width, height;
-    int box_x1 = dest_region->x + destx;
-    int box_y1 = dest_region->y + desty;
-    int box_x2 = box_x1 + destw;
-    int box_y2 = box_y1 + desth;
+    int box_x1 = dest_region->x + dst_rect->x;
+    int box_y1 = dest_region->y + dst_rect->y;
+    int box_x2 = box_x1 + dst_rect->width;
+    int box_y2 = box_y1 + dst_rect->height;
 
     obj_surface = SURFACE(surface);
     assert(surface);
     width = obj_surface->orig_width;
     height = obj_surface->orig_height;
 
-    u1 = (float)srcx / width;
-    v1 = (float)srcy / height;
-    u2 = (float)(srcx + srcw) / width;
-    v2 = (float)(srcy + srch) / height;
+    u1 = (float)src_rect->x / width;
+    v1 = (float)src_rect->y / height;
+    u2 = (float)(src_rect->x + src_rect->width) / width;
+    v2 = (float)(src_rect->y + src_rect->height) / height;
 
     dri_bo_map(render_state->vb.vertex_buffer, 1);
     assert(render_state->vb.vertex_buffer->virtual);
@@ -1008,16 +1004,12 @@ i965_render_upload_constants(VADriverContextP ctx)
 }
 
 static void
-i965_surface_render_state_setup(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth)
+i965_surface_render_state_setup(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     i965_render_vs_unit(ctx);
     i965_render_sf_unit(ctx);
@@ -1027,22 +1019,16 @@ i965_surface_render_state_setup(VADriverContextP ctx,
     i965_render_wm_unit(ctx);
     i965_render_cc_viewport(ctx);
     i965_render_cc_unit(ctx);
-    i965_render_upload_vertex(ctx, surface,
-                              srcx, srcy, srcw, srch,
-                              destx, desty, destw, desth);
+    i965_render_upload_vertex(ctx, surface, src_rect, dst_rect);
     i965_render_upload_constants(ctx);
 }
 static void
-i965_subpic_render_state_setup(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth)
+i965_subpic_render_state_setup(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     i965_render_vs_unit(ctx);
     i965_render_sf_unit(ctx);
@@ -1052,13 +1038,7 @@ i965_subpic_render_state_setup(VADriverContextP ctx,
     i965_subpic_render_wm_unit(ctx);
     i965_render_cc_viewport(ctx);
     i965_subpic_render_cc_unit(ctx);
-
-    VARectangle output_rect;
-    output_rect.x      = destx;
-    output_rect.y      = desty;
-    output_rect.width  = destw;
-    output_rect.height = desth;
-    i965_subpic_render_upload_vertex(ctx, surface, &output_rect);
+    i965_subpic_render_upload_vertex(ctx, surface, dst_rect);
 }
 
 
@@ -1546,40 +1526,30 @@ i965_render_initialize(VADriverContextP ctx)
 }
 
 static void
-i965_render_put_surface(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth,
-                        unsigned int flag)
+i965_render_put_surface(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
 
     i965_render_initialize(ctx);
-    i965_surface_render_state_setup(ctx, surface,
-                            srcx, srcy, srcw, srch,
-                            destx, desty, destw, desth);
+    i965_surface_render_state_setup(ctx, surface, src_rect, dst_rect);
     i965_surface_render_pipeline_setup(ctx);
     intel_batchbuffer_flush(batch);
 }
 
 static void
-i965_render_put_subpicture(VADriverContextP ctx,
-                           VASurfaceID surface,
-                           short srcx,
-                           short srcy,
-                           unsigned short srcw,
-                           unsigned short srch,
-                           short destx,
-                           short desty,
-                           unsigned short destw,
-                           unsigned short desth)
+i965_render_put_subpicture(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
@@ -1589,9 +1559,7 @@ i965_render_put_subpicture(VADriverContextP ctx,
     assert(obj_subpic);
 
     i965_render_initialize(ctx);
-    i965_subpic_render_state_setup(ctx, surface,
-                                   srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth);
+    i965_subpic_render_state_setup(ctx, surface, src_rect, dst_rect);
     i965_subpic_render_pipeline_setup(ctx);
     i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(batch);
@@ -1720,16 +1688,12 @@ gen6_render_depth_stencil_state(VADriverContextP ctx)
 }
 
 static void
-gen6_render_setup_states(VADriverContextP ctx,
-                         VASurfaceID surface,
-                         short srcx,
-                         short srcy,
-                         unsigned short srcw,
-                         unsigned short srch,
-                         short destx,
-                         short desty,
-                         unsigned short destw,
-                         unsigned short desth)
+gen6_render_setup_states(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     i965_render_dest_surface_state(ctx, 0);
     i965_render_src_surfaces_state(ctx, surface);
@@ -1739,9 +1703,7 @@ gen6_render_setup_states(VADriverContextP ctx,
     gen6_render_blend_state(ctx);
     gen6_render_depth_stencil_state(ctx);
     i965_render_upload_constants(ctx);
-    i965_render_upload_vertex(ctx, surface,
-                              srcx, srcy, srcw, srch,
-                              destx, desty, destw, desth);
+    i965_render_upload_vertex(ctx, surface, src_rect, dst_rect);
 }
 
 static void
@@ -2088,25 +2050,19 @@ gen6_render_emit_states(VADriverContextP ctx, int kernel)
 }
 
 static void
-gen6_render_put_surface(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth,
-                        unsigned int flag)
+gen6_render_put_surface(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
 
     gen6_render_initialize(ctx);
-    gen6_render_setup_states(ctx, surface,
-                             srcx, srcy, srcw, srch,
-                             destx, desty, destw, desth);
+    gen6_render_setup_states(ctx, surface, src_rect, dst_rect);
     i965_clear_dest_region(ctx);
     gen6_render_emit_states(ctx, PS_KERNEL);
     intel_batchbuffer_flush(batch);
@@ -2135,24 +2091,13 @@ gen6_subpicture_render_blend_state(VADriverContextP ctx)
 }
 
 static void
-gen6_subpicture_render_setup_states(VADriverContextP ctx,
-                                    VASurfaceID surface,
-                                    short srcx,
-                                    short srcy,
-                                    unsigned short srcw,
-                                    unsigned short srch,
-                                    short destx,
-                                    short desty,
-                                    unsigned short destw,
-                                    unsigned short desth)
+gen6_subpicture_render_setup_states(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
-    VARectangle output_rect;
-
-    output_rect.x      = destx;
-    output_rect.y      = desty;
-    output_rect.width  = destw;
-    output_rect.height = desth;
-
     i965_render_dest_surface_state(ctx, 0);
     i965_subpic_render_src_surfaces_state(ctx, surface);
     i965_render_sampler(ctx);
@@ -2160,20 +2105,16 @@ gen6_subpicture_render_setup_states(VADriverContextP ctx,
     gen6_render_color_calc_state(ctx);
     gen6_subpicture_render_blend_state(ctx);
     gen6_render_depth_stencil_state(ctx);
-    i965_subpic_render_upload_vertex(ctx, surface, &output_rect);
+    i965_subpic_render_upload_vertex(ctx, surface, dst_rect);
 }
 
 static void
-gen6_render_put_subpicture(VADriverContextP ctx,
-                           VASurfaceID surface,
-                           short srcx,
-                           short srcy,
-                           unsigned short srcw,
-                           unsigned short srch,
-                           short destx,
-                           short desty,
-                           unsigned short destw,
-                           unsigned short desth)
+gen6_render_put_subpicture(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
@@ -2182,9 +2123,7 @@ gen6_render_put_subpicture(VADriverContextP ctx,
 
     assert(obj_subpic);
     gen6_render_initialize(ctx);
-    gen6_subpicture_render_setup_states(ctx, surface,
-                                        srcx, srcy, srcw, srch,
-                                        destx, desty, destw, desth);
+    gen6_subpicture_render_setup_states(ctx, surface, src_rect, dst_rect);
     gen6_render_emit_states(ctx, PS_SUBPIC_KERNEL);
     i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(batch);
@@ -2341,16 +2280,12 @@ gen7_render_sampler(VADriverContextP ctx)
 }
 
 static void
-gen7_render_setup_states(VADriverContextP ctx,
-                         VASurfaceID surface,
-                         short srcx,
-                         short srcy,
-                         unsigned short srcw,
-                         unsigned short srch,
-                         short destx,
-                         short desty,
-                         unsigned short destw,
-                         unsigned short desth)
+gen7_render_setup_states(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     i965_render_dest_surface_state(ctx, 0);
     i965_render_src_surfaces_state(ctx, surface);
@@ -2360,9 +2295,7 @@ gen7_render_setup_states(VADriverContextP ctx,
     gen7_render_blend_state(ctx);
     gen7_render_depth_stencil_state(ctx);
     i965_render_upload_constants(ctx);
-    i965_render_upload_vertex(ctx, surface,
-                              srcx, srcy, srcw, srch,
-                              destx, desty, destw, desth);
+    i965_render_upload_vertex(ctx, surface, src_rect, dst_rect);
 }
 
 static void
@@ -2882,25 +2815,19 @@ gen7_render_emit_states(VADriverContextP ctx, int kernel)
 }
 
 static void
-gen7_render_put_surface(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth,
-                        unsigned int flag)
+gen7_render_put_surface(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
 
     gen7_render_initialize(ctx);
-    gen7_render_setup_states(ctx, surface,
-                             srcx, srcy, srcw, srch,
-                             destx, desty, destw, desth);
+    gen7_render_setup_states(ctx, surface, src_rect, dst_rect);
     i965_clear_dest_region(ctx);
     gen7_render_emit_states(ctx, PS_KERNEL);
     intel_batchbuffer_flush(batch);
@@ -2929,24 +2856,13 @@ gen7_subpicture_render_blend_state(VADriverContextP ctx)
 }
 
 static void
-gen7_subpicture_render_setup_states(VADriverContextP ctx,
-                                    VASurfaceID surface,
-                                    short srcx,
-                                    short srcy,
-                                    unsigned short srcw,
-                                    unsigned short srch,
-                                    short destx,
-                                    short desty,
-                                    unsigned short destw,
-                                    unsigned short desth)
+gen7_subpicture_render_setup_states(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
-    VARectangle output_rect;
-
-    output_rect.x      = destx;
-    output_rect.y      = desty;
-    output_rect.width  = destw;
-    output_rect.height = desth;
-
     i965_render_dest_surface_state(ctx, 0);
     i965_subpic_render_src_surfaces_state(ctx, surface);
     i965_render_sampler(ctx);
@@ -2954,20 +2870,16 @@ gen7_subpicture_render_setup_states(VADriverContextP ctx,
     gen7_render_color_calc_state(ctx);
     gen7_subpicture_render_blend_state(ctx);
     gen7_render_depth_stencil_state(ctx);
-    i965_subpic_render_upload_vertex(ctx, surface, &output_rect);
+    i965_subpic_render_upload_vertex(ctx, surface, dst_rect);
 }
 
 static void
-gen7_render_put_subpicture(VADriverContextP ctx,
-                           VASurfaceID surface,
-                           short srcx,
-                           short srcy,
-                           unsigned short srcw,
-                           unsigned short srch,
-                           short destx,
-                           short desty,
-                           unsigned short destw,
-                           unsigned short desth)
+gen7_render_put_subpicture(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct intel_batchbuffer *batch = i965->batch;
@@ -2976,9 +2888,7 @@ gen7_render_put_subpicture(VADriverContextP ctx,
 
     assert(obj_subpic);
     gen7_render_initialize(ctx);
-    gen7_subpicture_render_setup_states(ctx, surface,
-                                        srcx, srcy, srcw, srch,
-                                        destx, desty, destw, desth);
+    gen7_subpicture_render_setup_states(ctx, surface, src_rect, dst_rect);
     gen7_render_emit_states(ctx, PS_SUBPIC_KERNEL);
     i965_render_upload_image_palette(ctx, obj_subpic->image, 0xff);
     intel_batchbuffer_flush(batch);
@@ -2988,69 +2898,44 @@ gen7_render_put_subpicture(VADriverContextP ctx,
 /*
  * global functions
  */
+
 void
-intel_render_put_surface(VADriverContextP ctx,
-                        VASurfaceID surface,
-                        short srcx,
-                        short srcy,
-                        unsigned short srcw,
-                        unsigned short srch,
-                        short destx,
-                        short desty,
-                        unsigned short destw,
-                        unsigned short desth,
-                        unsigned int flag)
+intel_render_put_surface(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
-    i965_post_processing(ctx, surface,
-                         srcx, srcy, srcw, srch,
-                         destx, desty, destw, desth,
-                         flag);
+    i965_post_processing(ctx, surface, src_rect, dst_rect, flags);
 
     if (IS_GEN7(i965->intel.device_id))
-        gen7_render_put_surface(ctx, surface,
-                                srcx, srcy, srcw, srch,
-                                destx, desty, destw, desth,
-                                flag);
+        gen7_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
     else if (IS_GEN6(i965->intel.device_id))
-        gen6_render_put_surface(ctx, surface,
-                                srcx, srcy, srcw, srch,
-                                destx, desty, destw, desth,
-                                flag);
+        gen6_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
     else
-        i965_render_put_surface(ctx, surface,
-                                srcx, srcy, srcw, srch,
-                                destx, desty, destw, desth,
-                                flag);
+        i965_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
 }
 
 void
-intel_render_put_subpicture(VADriverContextP ctx,
-                           VASurfaceID surface,
-                           short srcx,
-                           short srcy,
-                           unsigned short srcw,
-                           unsigned short srch,
-                           short destx,
-                           short desty,
-                           unsigned short destw,
-                           unsigned short desth)
+intel_render_put_subpicture(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
     if (IS_GEN7(i965->intel.device_id))
-        gen7_render_put_subpicture(ctx, surface,
-                                   srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth);
+        gen7_render_put_subpicture(ctx, surface, src_rect, dst_rect);
     else if (IS_GEN6(i965->intel.device_id))
-        gen6_render_put_subpicture(ctx, surface,
-                                   srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth);
+        gen6_render_put_subpicture(ctx, surface, src_rect, dst_rect);
     else
-        i965_render_put_subpicture(ctx, surface,
-                                   srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth);
+        i965_render_put_subpicture(ctx, surface, src_rect, dst_rect);
 }
 
 Bool 

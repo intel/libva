@@ -1748,18 +1748,14 @@ void pp_nv12_dndi_initialize(VADriverContextP ctx, VASurfaceID surface, int inpu
 }
 
 static void
-ironlake_pp_initialize(VADriverContextP ctx,
-                       VASurfaceID surface,
-                       int input,
-                       short srcx,
-                       short srcy,
-                       unsigned short srcw,
-                       unsigned short srch,
-                       short destx,
-                       short desty,
-                       unsigned short destw,
-                       unsigned short desth,
-                       int pp_index)
+ironlake_pp_initialize(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    int                input,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    int                pp_index
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -1842,44 +1838,35 @@ ironlake_pp_initialize(VADriverContextP ctx,
     pp_module = &pp_context->pp_modules[pp_index];
     
     if (pp_module->initialize)
-        pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
+        pp_module->initialize(ctx, surface, input,
+                              src_rect->width, src_rect->height,
+                              dst_rect->width, dst_rect->height);
 }
 
 static void
-ironlake_post_processing(VADriverContextP ctx,
-                         VASurfaceID surface,
-                         int input,
-                         short srcx,
-                         short srcy,
-                         unsigned short srcw,
-                         unsigned short srch,
-                         short destx,
-                         short desty,
-                         unsigned short destw,
-                         unsigned short desth,
-                         int pp_index)
+ironlake_post_processing(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    int                input,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    int                pp_index
+)
 {
-    ironlake_pp_initialize(ctx, surface, input,
-                           srcx, srcy, srcw, srch,
-                           destx, desty, destw, desth,
-                           pp_index);
+    ironlake_pp_initialize(ctx, surface, input, src_rect, dst_rect, pp_index);
     ironlake_pp_states_setup(ctx);
     ironlake_pp_pipeline_setup(ctx);
 }
 
 static void
-gen6_pp_initialize(VADriverContextP ctx,
-                   VASurfaceID surface,
-                   int input,
-                   short srcx,
-                   short srcy,
-                   unsigned short srcw,
-                   unsigned short srch,
-                   short destx,
-                   short desty,
-                   unsigned short destw,
-                   unsigned short desth,
-                   int pp_index)
+gen6_pp_initialize(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    int                input,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    int                pp_index
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
     struct i965_post_processing_context *pp_context = i965->pp_context;
@@ -1962,7 +1949,9 @@ gen6_pp_initialize(VADriverContextP ctx,
     pp_module = &pp_context->pp_modules[pp_index];
     
     if (pp_module->initialize)
-        pp_module->initialize(ctx, surface, input, srcw, srch, destw, desth);
+        pp_module->initialize(ctx, surface, input,
+                              src_rect->width, src_rect->height,
+                              dst_rect->width, dst_rect->height);
 }
 
 static void
@@ -2206,68 +2195,48 @@ gen6_pp_pipeline_setup(VADriverContextP ctx)
 }
 
 static void
-gen6_post_processing(VADriverContextP ctx,
-                     VASurfaceID surface,
-                     int input,
-                     short srcx,
-                     short srcy,
-                     unsigned short srcw,
-                     unsigned short srch,
-                     short destx,
-                     short desty,
-                     unsigned short destw,
-                     unsigned short desth,
-                     int pp_index)
+gen6_post_processing(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    int                input,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    int                pp_index
+)
 {
-    gen6_pp_initialize(ctx, surface, input,
-                       srcx, srcy, srcw, srch,
-                       destx, desty, destw, desth,
-                       pp_index);
+    gen6_pp_initialize(ctx, surface, input, src_rect, dst_rect, pp_index);
     gen6_pp_states_setup(ctx);
     gen6_pp_pipeline_setup(ctx);
 }
 
 static void
-i965_post_processing_internal(VADriverContextP ctx,
-                              VASurfaceID surface,
-                              int input,
-                              short srcx,
-                              short srcy,
-                              unsigned short srcw,
-                              unsigned short srch,
-                              short destx,
-                              short desty,
-                              unsigned short destw,
-                              unsigned short desth,
-                              int pp_index)
+i965_post_processing_internal(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    int                input,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    int                pp_index
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
     if (IS_GEN6(i965->intel.device_id) ||
         IS_GEN7(i965->intel.device_id))
-        gen6_post_processing(ctx, surface, input,
-                             srcx, srcy, srcw, srch,
-                             destx, desty, destw, desth,
-                             pp_index);
+        gen6_post_processing(ctx, surface, input, src_rect, dst_rect, pp_index);
     else
-        ironlake_post_processing(ctx, surface, input,
-                                 srcx, srcy, srcw, srch,
-                                 destx, desty, destw, desth,
+        ironlake_post_processing(ctx, surface, input, src_rect, dst_rect,
                                  pp_index);
 }
 
 void
-i965_post_processing(VADriverContextP ctx,
-                     VASurfaceID surface,
-                     short srcx,
-                     short srcy,
-                     unsigned short srcw,
-                     unsigned short srch,
-                     short destx,
-                     short desty,
-                     unsigned short destw,
-                     unsigned short desth,
-                     unsigned int flag)
+i965_post_processing(
+    VADriverContextP   ctx,
+    VASurfaceID        surface,
+    const VARectangle *src_rect,
+    const VARectangle *dst_rect,
+    unsigned int       flags
+)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
 
@@ -2276,18 +2245,16 @@ i965_post_processing(VADriverContextP ctx,
         if (i965->render_state.interleaved_uv) {
             int internal_input = 0;
 
-            if (flag & I965_PP_FLAG_DEINTERLACING) {
+            if (flags & I965_PP_FLAG_DEINTERLACING) {
                 i965_post_processing_internal(ctx, surface, internal_input,
-                                              srcx, srcy, srcw, srch,
-                                              destx, desty, destw, desth,
+                                              src_rect, dst_rect,
                                               PP_NV12_DNDI);
                 internal_input = 1;
             }
 
-            if (flag & I965_PP_FLAG_AVS) {
+            if (flags & I965_PP_FLAG_AVS) {
                 i965_post_processing_internal(ctx, surface, internal_input,
-                                              srcx, srcy, srcw, srch,
-                                              destx, desty, destw, desth,
+                                              src_rect, dst_rect,
                                               PP_NV12_AVS);
             }
         }
