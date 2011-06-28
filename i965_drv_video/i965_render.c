@@ -883,26 +883,29 @@ i965_subpic_render_upload_vertex(VADriverContextP ctx,
     struct i965_render_state *render_state = &i965->render_state;
     struct object_surface    *obj_surface  = SURFACE(surface);
     struct object_subpic     *obj_subpic   = SUBPIC(obj_surface->subpic);
-
-    const float sx = (float)output_rect->width  / (float)obj_surface->orig_width;
-    const float sy = (float)output_rect->height / (float)obj_surface->orig_height;
+    VARectangle dst_rect;
     float *vb, tx1, tx2, ty1, ty2, x1, x2, y1, y2;
     int i = 0;
 
-    VARectangle dst_rect;
-    dst_rect.x      = output_rect->x + sx * (float)obj_subpic->dst_rect.x;
-    dst_rect.y      = output_rect->y + sy * (float)obj_subpic->dst_rect.y;
-    dst_rect.width  = sx * (float)obj_subpic->dst_rect.width;
-    dst_rect.height = sy * (float)obj_subpic->dst_rect.height;
+    if (obj_subpic->flags & VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD)
+        dst_rect = obj_subpic->dst_rect;
+    else {
+        const float sx  = (float)output_rect->width  / obj_surface->orig_width;
+        const float sy  = (float)output_rect->height / obj_surface->orig_height;
+        dst_rect.x      = output_rect->x + sx * obj_subpic->dst_rect.x;
+        dst_rect.y      = output_rect->y + sy * obj_subpic->dst_rect.y;
+        dst_rect.width  = sx * obj_subpic->dst_rect.width;
+        dst_rect.height = sy * obj_subpic->dst_rect.height;
+    }
 
     dri_bo_map(render_state->vb.vertex_buffer, 1);
     assert(render_state->vb.vertex_buffer->virtual);
     vb = render_state->vb.vertex_buffer->virtual;
 
-    tx1 = (float)obj_subpic->src_rect.x / (float)obj_subpic->width;
-    ty1 = (float)obj_subpic->src_rect.y / (float)obj_subpic->height;
-    tx2 = (float)(obj_subpic->src_rect.x + obj_subpic->src_rect.width) / (float)obj_subpic->width;
-    ty2 = (float)(obj_subpic->src_rect.y + obj_subpic->src_rect.height) / (float)obj_subpic->height;
+    tx1 = (float)obj_subpic->src_rect.x / obj_subpic->width;
+    ty1 = (float)obj_subpic->src_rect.y / obj_subpic->height;
+    tx2 = (float)(obj_subpic->src_rect.x + obj_subpic->src_rect.width) / obj_subpic->width;
+    ty2 = (float)(obj_subpic->src_rect.y + obj_subpic->src_rect.height) / obj_subpic->height;
 
     x1 = (float)dst_rect.x;
     y1 = (float)dst_rect.y;

@@ -196,6 +196,7 @@ struct object_subpic
     int height;
     int pitch;
     dri_bo *bo;
+    unsigned int flags;
 };
 
 struct hw_codec_info

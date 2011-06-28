@@ -104,18 +104,18 @@ static const i965_subpic_format_map_t
 i965_subpic_formats_map[I965_MAX_SUBPIC_FORMATS + 1] = {
     { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_P4A4_UNORM,
       { VA_FOURCC('I','A','4','4'), VA_MSB_FIRST, 8, },
-      0 },
+      VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD },
     { I965_SURFACETYPE_INDEXED, I965_SURFACEFORMAT_A4P4_UNORM,
       { VA_FOURCC('A','I','4','4'), VA_MSB_FIRST, 8, },
-      0 },
+      VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD },
     { I965_SURFACETYPE_RGBA, I965_SURFACEFORMAT_B8G8R8A8_UNORM,
       { VA_FOURCC('B','G','R','A'), VA_LSB_FIRST, 32,
         32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 },
-      0 },
+      VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD },
     { I965_SURFACETYPE_RGBA, I965_SURFACEFORMAT_R8G8B8A8_UNORM,
       { VA_FOURCC('R','G','B','A'), VA_LSB_FIRST, 32,
         32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000 },
-      0 },
+      VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD },
 };
 
 static const i965_subpic_format_map_t *
@@ -695,6 +695,7 @@ i965_AssociateSubpicture(VADriverContextP ctx,
     obj_subpic->dst_rect.y      = dest_y;
     obj_subpic->dst_rect.width  = dest_width;
     obj_subpic->dst_rect.height = dest_height;
+    obj_subpic->flags           = flags;
 
     for (i = 0; i < num_surfaces; i++) {
         struct object_surface *obj_surface = SURFACE(target_surfaces[i]);
