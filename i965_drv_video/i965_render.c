@@ -891,7 +891,7 @@ i965_subpic_render_upload_vertex(VADriverContextP ctx,
 
     VARectangle dst_rect;
     dst_rect.x      = output_rect->x + sx * (float)obj_subpic->dst_rect.x;
-    dst_rect.y      = output_rect->y + sx * (float)obj_subpic->dst_rect.y;
+    dst_rect.y      = output_rect->y + sy * (float)obj_subpic->dst_rect.y;
     dst_rect.width  = sx * (float)obj_subpic->dst_rect.width;
     dst_rect.height = sy * (float)obj_subpic->dst_rect.height;
 
