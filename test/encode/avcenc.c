@@ -196,7 +196,7 @@ static void release_encode_resource()
     vaDestroySurfaces(va_dpy, &surface_ids[0], SID_NUMBER);	
 }
 
-static void avcenc_update_picture_parameter(int frame_num, int display_num)
+static void avcenc_update_picture_parameter(int slice_type, int frame_num, int display_num, int is_idr)
 {
     VAEncPictureParameterBufferH264Ext *pic_param;
     VAStatus va_status;
@@ -211,6 +211,8 @@ static void avcenc_update_picture_parameter(int frame_num, int display_num)
     assert(avcenc_context.codedbuf_buf_id != VA_INVALID_ID);
     pic_param->CodedBuf = avcenc_context.codedbuf_buf_id;
     pic_param->frame_num = frame_num;
+    pic_param->pic_fields.bits.idr_pic_flag = !!is_idr;
+    pic_param->pic_fields.bits.reference_pic_flag = (slice_type != SLICE_TYPE_B);
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
@@ -317,7 +319,7 @@ static void avcenc_update_slice_parameter(int slice_type)
     avcenc_context.num_slices = i;
 }
 
-static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice_type)
+static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice_type, int is_idr)
 {
     VAStatus va_status;
     VACodedBufferSegment *coded_buffer_segment = NULL; 
@@ -348,7 +350,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
 
     /* picture parameter set */
-    avcenc_update_picture_parameter(frame_num, display_num);
+    avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
 
     /* slice parameter */
     avcenc_update_slice_parameter(slice_type);
@@ -717,7 +719,7 @@ build_header(FILE *avc_fp)
     build_nal_pps(avc_fp);
 }
 
-
+#if 0
 static void 
 slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, int nal_ref_idc, int is_idr)
 {
@@ -786,6 +788,8 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     }
 }
 
+#endif
+
 static void 
 slice_data(bitstream *bs)
 {
@@ -794,8 +798,6 @@ slice_data(bitstream *bs)
     int i, slice_data_length;
     VAStatus va_status;
     VASurfaceStatus surface_status;
-    VAEncPictureParameterBufferH264Ext *pic_param = &avcenc_context.pic_param;
-    int is_cabac = (pic_param->pic_fields.bits.entropy_coding_mode_flag == ENTROPY_MODE_CABAC);
 
     va_status = vaSyncSurface(va_dpy, surface_ids[SID_INPUT_PICTURE]);
     CHECK_VASTATUS(va_status,"vaSyncSurface");
@@ -808,17 +810,11 @@ slice_data(bitstream *bs)
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
-    if (is_cabac) {
-        bitstream_byte_aligning(bs, 1);
-        slice_data_length = get_coded_bitsteam_length(coded_mem, codedbuf_size);
+    slice_data_length = get_coded_bitsteam_length(coded_mem, codedbuf_size);
 
-	for (i = 0; i < slice_data_length; i++) {
-            bitstream_put_ui(bs, *coded_mem, 8);
-            coded_mem++;
-	}
-    } else {
-        /* FIXME */
-        assert(0);
+    for (i = 0; i < slice_data_length; i++) {
+        bitstream_put_ui(bs, *coded_mem, 8);
+        coded_mem++;
     }
 
     vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
@@ -830,22 +826,6 @@ build_nal_slice(FILE *avc_fp, int frame_num, int display_frame, int slice_type, 
     bitstream bs;
 
     bitstream_start(&bs);
-    nal_start_code_prefix(&bs);
-    if ( slice_type == SLICE_TYPE_I)
-        nal_header(&bs, NAL_REF_IDC_HIGH, is_idr ? NAL_IDR : NAL_NON_IDR);
-    else if ( slice_type == SLICE_TYPE_P)
-        nal_header(&bs, NAL_REF_IDC_MEDIUM, is_idr ? NAL_IDR : NAL_NON_IDR);
-    else
-        nal_header(&bs, NAL_REF_IDC_NONE, is_idr ? NAL_IDR : NAL_NON_IDR);
-
-    if ( slice_type == SLICE_TYPE_I  ) {
-        slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_HIGH, is_idr);
-    } else if ( slice_type == SLICE_TYPE_P ) {
-        slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_MEDIUM, is_idr);
-    } else {
-        slice_header(&bs, frame_num, display_frame, slice_type, NAL_REF_IDC_NONE,is_idr);
-    }
-
     slice_data(&bs);
     bitstream_end(&bs, avc_fp);
 }
@@ -862,7 +842,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
                int is_idr,
                int slice_type, int next_is_bpic)
 {
-    begin_picture(yuv_fp, frame_num, display_num, slice_type);
+    begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
     avcenc_render_picture();
     store_coded_buffer(avc_fp, frame_num, display_num, slice_type, is_idr);
     end_picture(slice_type, next_is_bpic);
