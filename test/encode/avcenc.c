@@ -782,8 +782,6 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     }
 }
 
-#endif
-
 static void 
 slice_data(bitstream *bs)
 {
@@ -824,10 +822,36 @@ build_nal_slice(FILE *avc_fp, int frame_num, int display_frame, int slice_type, 
     bitstream_end(&bs, avc_fp);
 }
 
+#endif
+
 static void 
 store_coded_buffer(FILE *avc_fp, int frame_num, int display_frame, int slice_type, int is_idr)
 {
-    build_nal_slice(avc_fp, frame_num, display_frame, slice_type, is_idr);
+    VACodedBufferSegment *coded_buffer_segment;
+    unsigned char *coded_mem;
+    int slice_data_length;
+    VAStatus va_status;
+    VASurfaceStatus surface_status;
+    size_t w_items;
+
+    va_status = vaSyncSurface(va_dpy, surface_ids[SID_INPUT_PICTURE]);
+    CHECK_VASTATUS(va_status,"vaSyncSurface");
+
+    surface_status = 0;
+    va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[SID_INPUT_PICTURE], &surface_status);
+    CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
+
+    va_status = vaMapBuffer(va_dpy, avcenc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
+    CHECK_VASTATUS(va_status,"vaMapBuffer");
+    coded_mem = coded_buffer_segment->buf;
+
+    slice_data_length = get_coded_bitsteam_length(coded_mem, codedbuf_size);
+
+    do {
+        w_items = fwrite(coded_mem, slice_data_length, 1, avc_fp);
+    } while (w_items != 1);
+
+    vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
 }
 
 static void
