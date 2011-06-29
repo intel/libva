@@ -452,6 +452,7 @@ struct __bitstream {
 
 typedef struct __bitstream bitstream;
 
+#if 0
 static int 
 get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 {
@@ -467,6 +468,7 @@ get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 
     return i;
 }
+#endif
 
 static unsigned int 
 swap32(unsigned int val)
@@ -845,7 +847,7 @@ store_coded_buffer(FILE *avc_fp, int frame_num, int display_frame, int slice_typ
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
-    slice_data_length = get_coded_bitsteam_length(coded_mem, codedbuf_size);
+    slice_data_length = coded_buffer_segment->size;
 
     do {
         w_items = fwrite(coded_mem, slice_data_length, 1, avc_fp);
