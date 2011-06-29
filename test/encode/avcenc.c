@@ -322,8 +322,6 @@ static void avcenc_update_slice_parameter(int slice_type)
 static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice_type, int is_idr)
 {
     VAStatus va_status;
-    VACodedBufferSegment *coded_buffer_segment = NULL; 
-    unsigned char *coded_mem;  
 
     /* sequence parameter set */
     VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
@@ -341,13 +339,6 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                codedbuf_size, 1, NULL,
                                &avcenc_context.codedbuf_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
-    va_status = vaMapBuffer(va_dpy,
-                            avcenc_context.codedbuf_buf_id,
-                            (void **)(&coded_buffer_segment));
-    CHECK_VASTATUS(va_status,"vaMapBuffer");
-    coded_mem = coded_buffer_segment->buf;
-    memset(coded_mem, 0, coded_buffer_segment->size);
-    vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
 
     /* picture parameter set */
     avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
@@ -466,12 +457,15 @@ get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 {
     int i;
 
-    for (i = buffer_length - 1; i >= 0; i--) {
-        if (buffer[i])
+    for (i = 0; i < buffer_length - 3; i++) {
+        if (!buffer[i] &&
+            !buffer[i + 1] &&
+            !buffer[i + 2] &&
+            !buffer[i + 3])
             break;
     }
 
-    return i + 1;
+    return i;
 }
 
 static unsigned int 
