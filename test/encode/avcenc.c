@@ -56,7 +56,6 @@ static int picture_width, picture_width_in_mbs;
 static int picture_height, picture_height_in_mbs;
 static int frame_size;
 static unsigned char *newImageBuffer = 0;
-static int codedbuf_size;
 
 static int qp_value = 26;
 
@@ -84,6 +83,8 @@ struct {
     VABufferID packed_seq_buf_id;
     VABufferID packed_pic_buf_id;
     int num_slices;
+    int codedbuf_i_size;
+    int codedbuf_pb_size;
 } avcenc_context;
 
 static void create_encode_pipe()
@@ -331,17 +332,6 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
                                sizeof(*seq_param), 1, seq_param,
                                &avcenc_context.seq_param_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
-
-    /* coded buffer */
-    va_status = vaCreateBuffer(va_dpy,
-                               avcenc_context.context_id,
-                               VAEncCodedBufferType,
-                               codedbuf_size, 1, NULL,
-                               &avcenc_context.codedbuf_buf_id);
-    CHECK_VASTATUS(va_status,"vaCreateBuffer");
-
-    /* picture parameter set */
-    avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
 
     /* slice parameter */
     avcenc_update_slice_parameter(slice_type);
@@ -826,8 +816,8 @@ build_nal_slice(FILE *avc_fp, int frame_num, int display_frame, int slice_type, 
 
 #endif
 
-static void 
-store_coded_buffer(FILE *avc_fp, int frame_num, int display_frame, int slice_type, int is_idr)
+static int
+store_coded_buffer(FILE *avc_fp, int slice_type)
 {
     VACodedBufferSegment *coded_buffer_segment;
     unsigned char *coded_mem;
@@ -847,13 +837,38 @@ store_coded_buffer(FILE *avc_fp, int frame_num, int display_frame, int slice_typ
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     coded_mem = coded_buffer_segment->buf;
 
+    if (coded_buffer_segment->status & VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK) {
+        if (slice_type == SLICE_TYPE_I)
+            avcenc_context.codedbuf_i_size *= 2;
+        else
+            avcenc_context.codedbuf_pb_size *= 2;
+
+        return -1;
+    }
+
     slice_data_length = coded_buffer_segment->size;
 
     do {
         w_items = fwrite(coded_mem, slice_data_length, 1, avc_fp);
     } while (w_items != 1);
 
+    if (slice_type == SLICE_TYPE_I) {
+        if (avcenc_context.codedbuf_i_size > slice_data_length * 3 / 2) {
+            avcenc_context.codedbuf_i_size = slice_data_length * 3 / 2;
+        }
+        
+        if (avcenc_context.codedbuf_pb_size < slice_data_length) {
+            avcenc_context.codedbuf_pb_size = slice_data_length;
+        }
+    } else {
+        if (avcenc_context.codedbuf_pb_size > slice_data_length * 3 / 2) {
+            avcenc_context.codedbuf_pb_size = slice_data_length * 3 / 2;
+        }
+    }
+
     vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
+
+    return 0;
 }
 
 static void
@@ -862,9 +877,37 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
                int is_idr,
                int slice_type, int next_is_bpic)
 {
+    VAStatus va_status;
+    int count = 5, ret = 0, codedbuf_size;
+    
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
-    avcenc_render_picture();
-    store_coded_buffer(avc_fp, frame_num, display_num, slice_type, is_idr);
+
+    do {
+        avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
+        avcenc_destroy_buffers(&avcenc_context.pic_param_buf_id, 1);
+
+
+        if (SLICE_TYPE_I == slice_type) {
+            codedbuf_size = avcenc_context.codedbuf_i_size;
+        } else {
+            codedbuf_size = avcenc_context.codedbuf_pb_size;
+        }
+
+        /* coded buffer */
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncCodedBufferType,
+                                   codedbuf_size, 1, NULL,
+                                   &avcenc_context.codedbuf_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+        /* picture parameter set */
+        avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
+
+        avcenc_render_picture();
+        ret = store_coded_buffer(avc_fp, slice_type);
+    } while (ret && --count);
+
     end_picture(slice_type, next_is_bpic);
 }
 
@@ -1000,6 +1043,8 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.packed_seq_buf_id = VA_INVALID_ID;
     avcenc_context.packed_pic_buf_id = VA_INVALID_ID;
     avcenc_context.codedbuf_buf_id = VA_INVALID_ID;
+    avcenc_context.codedbuf_i_size = width * height;
+    avcenc_context.codedbuf_pb_size = 0;
 
     for (i = 0; i < MAX_SLICES; i++) {
         avcenc_context.slice_param_buf_id[i] = VA_INVALID_ID;
@@ -1056,7 +1101,6 @@ int main(int argc, char *argv[])
     fseek(yuv_fp,0l, SEEK_END);
     file_size = ftell(yuv_fp);
     frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
-    codedbuf_size = picture_width * picture_height * 1.5;
 
     if ( (file_size < frame_size) || (file_size % frame_size) ) {
         printf("The YUV file's size is not correct\n");
