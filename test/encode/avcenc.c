@@ -456,9 +456,11 @@ static void end_picture(int slice_type, int next_is_bpic)
             surface_ids[SID_REFERENCE_PICTURE_L0] = tempID;
         }
     } else {
-        surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
-        surface_ids[SID_REFERENCE_PICTURE_L0] = surface_ids[SID_REFERENCE_PICTURE_L1];
-        surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;
+        if (!next_is_bpic) {
+            surface_ids[SID_RECON_PICTURE] = surface_ids[SID_REFERENCE_PICTURE_L0]; 
+            surface_ids[SID_REFERENCE_PICTURE_L0] = surface_ids[SID_REFERENCE_PICTURE_L1];
+            surface_ids[SID_REFERENCE_PICTURE_L1] = tempID;
+        }
     }
 
     avcenc_destroy_buffers(&avcenc_context.seq_param_buf_id, 1);
@@ -1000,15 +1002,23 @@ static void encode_p_picture(FILE *yuv_fp, FILE *avc_fp, int f)
                    SLICE_TYPE_P, 0);
 }
 
-static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f)
+static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
 {
+    int i;
     encode_picture(yuv_fp, avc_fp,
-                   enc_frame_number, f + 1,
+                   enc_frame_number, f + nbframes,
                    0,
                    SLICE_TYPE_P, 1);
 
+    for( i = 0; i < nbframes - 1; i++) {
+        encode_picture(yuv_fp, avc_fp,
+                enc_frame_number + 1, f + i,
+                0,
+                SLICE_TYPE_B, 1);
+    }
+    
     encode_picture(yuv_fp, avc_fp,
-                   enc_frame_number + 1, f,
+                   enc_frame_number + 1, f + nbframes - 1,
                    0,
                    SLICE_TYPE_B, 0);
 }
@@ -1208,8 +1218,8 @@ int main(int argc, char *argv[])
             f++;
             enc_frame_number++;
         } else if ( is_bslice) {
-            encode_pb_pictures(yuv_fp, avc_fp, f);
-            f+=2;
+            encode_pb_pictures(yuv_fp, avc_fp, f, 2);   //last parameter is continue B frames number
+            f += (1 + 2);
             enc_frame_number++;
         } else {
             encode_p_picture(yuv_fp, avc_fp, f);
