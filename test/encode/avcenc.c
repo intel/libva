@@ -293,7 +293,7 @@ static void avcenc_update_slice_parameter(int slice_type)
     slice_param->slice_height = picture_height_in_mbs/16; /* Measured by MB */
     slice_param->pic_parameter_set_id = 0;
     slice_param->slice_type = slice_type;
-    slice_param->direct_spatial_mv_pred_flag = 1;
+    slice_param->direct_spatial_mv_pred_flag = 0;
     slice_param->num_ref_idx_l0_active_minus1 = 0;      /* FIXME: ??? */
     slice_param->num_ref_idx_l1_active_minus1 = 0;
     slice_param->cabac_init_idc = 0;
