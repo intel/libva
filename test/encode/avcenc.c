@@ -1025,7 +1025,7 @@ static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
 
 static void show_help()
 {
-    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate]\n");
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate] [mode=1(I frames only)/2(I and P frames)/3(I, P and B frames)\n");
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264Ext *seq_param,
@@ -1146,9 +1146,10 @@ int main(int argc, char *argv[])
     long file_size;
     clock_t start_clock, end_clock;
     float encoding_time;
-
+    int i_frame_only=0,i_p_frame_only=1;
+    int mode_value;
     //TODO may be we should using option analytics library
-    if(argc != 5 && argc != 6) {
+    if(argc != 5 && argc != 6 && argc != 7) {
         show_help();
         return -1;
     }
@@ -1174,7 +1175,29 @@ int main(int argc, char *argv[])
             qp_value = 0;
         }
     } else
-        qp_value = 26;                          //default const QP mode
+        qp_value = 28;                          //default const QP mode
+
+    if (argc == 7) {
+        qp_value = -1;
+        sscanf(argv[6], "mode=%d", &mode_value);
+        if ( mode_value == 0 ) {
+                i_frame_only = 1;
+		i_p_frame_only = 0;
+        }
+        else if ( mode_value == 1) {
+		i_frame_only = 0;
+                i_p_frame_only = 1;
+        }
+        else if ( mode_value == 2 ) {
+		i_frame_only = 0;
+                i_p_frame_only = 0;
+        }
+        else {
+                printf("mode_value=%d\n",mode_value);
+                show_help();
+                return -1;
+        }
+    }
 
     yuv_fp = fopen(argv[3],"rb");
     if ( yuv_fp == NULL){
@@ -1205,12 +1228,12 @@ int main(int argc, char *argv[])
 	
     enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
-        int is_intra = (enc_frame_number % intra_period == 0);
+        int is_intra = i_frame_only?1:(enc_frame_number % intra_period == 0);
         int is_idr = (f == 0);
         int is_bslice = 0;
 		
         if ( ! is_intra && pb_period > 0) {
-            is_bslice = (f % pb_period == 1) && (f < frame_number - 1);	
+            is_bslice = i_p_frame_only?0:(f % pb_period == 1) && (f < frame_number - 1);	
         }
 	
         if ( is_intra ) {
