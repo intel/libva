@@ -1194,7 +1194,6 @@ int main(int argc, char *argv[])
         qp_value = 28;                          //default const QP mode
 
     if (argc == 7) {
-        qp_value = -1;
         sscanf(argv[6], "mode=%d", &mode_value);
         if ( mode_value == 0 ) {
                 i_frame_only = 1;
