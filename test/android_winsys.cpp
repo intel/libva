@@ -1,3 +1,4 @@
+#include <ui/DisplayInfo.h>
 
 namespace android {
     class Test {
@@ -8,25 +9,32 @@ namespace android {
     };
 };
 
+#define min(a,b) (a<b?a:b)
 #define SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, win_width, win_height) \
-do {\
-    client = new SurfaceComposerClient();\
-    surface_ctrl = client->createSurface(getpid(), 0, win_width, win_height, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers);\
-    android_surface = surface_ctrl->getSurface();\
-    android_isurface = Test::getISurface(android_surface);\
-\
-    client->openTransaction();\
-    surface_ctrl->setPosition(0, 0);\
-    client->closeTransaction();\
-\
-    client->openTransaction();\
-    surface_ctrl->setSize(win_width, win_height);\
-    client->closeTransaction();\
-\
-    client->openTransaction();\
-    surface_ctrl->setLayer(0x100000);\
-    client->closeTransaction();\
-\
-} while (0)                                     \
+do {                                                                    \
+    client = new SurfaceComposerClient();                               \
+    android::DisplayInfo info;                                          \
+    int w, h;                                                           \
+                                                                        \
+    client->getDisplayInfo(android::DisplayID(0), &info);               \
+    w = min(win_width, info.w);                                         \
+    h = min(win_height, info.h);                                        \
+                                                                        \
+    surface_ctrl = client->createSurface(getpid(), 0, w, h, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers); \
+    android_surface = surface_ctrl->getSurface();                       \
+    android_isurface = Test::getISurface(android_surface);              \
+                                                                        \
+    client->openTransaction();                                          \
+    surface_ctrl->setPosition(0, 0);                                    \
+    client->closeTransaction();                                         \
+                                                                        \
+    client->openTransaction();                                          \
+    surface_ctrl->setSize(w, h);                                        \
+    client->closeTransaction();                                         \
+                                                                        \
+    client->openTransaction();                                          \
+    surface_ctrl->setLayer(0x100000);                                   \
+    client->closeTransaction();                                         \
+} while (0)
 
 

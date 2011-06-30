@@ -634,7 +634,7 @@ static void va_TraceVAPictureParameterBufferMPEG2(
     VAPictureParameterBufferMPEG2 *p=(VAPictureParameterBufferMPEG2 *)data;
     DPY2INDEX(dpy);
 
-    va_TraceMsg(idx,"VAPictureParameterBufferH264\n");
+    va_TraceMsg(idx,"VAPictureParameterBufferMPEG2\n");
 
     va_TraceMsg(idx,"\thorizontal size= %d\n", p->horizontal_size);
     va_TraceMsg(idx,"\tvertical size= %d\n", p->vertical_size);
@@ -808,6 +808,67 @@ static void va_TraceVAIQMatrixBufferMPEG4(
         va_TraceMsg(idx,"\t\t%d\n", p->non_intra_quant_mat[i]);
     va_TraceMsg(idx, NULL);
 
+    return;
+}
+
+static void va_TraceVAEncSequenceParameterBufferMPEG4(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncSequenceParameterBufferMPEG4 *p = (VAEncSequenceParameterBufferMPEG4 *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAEncSequenceParameterBufferMPEG4\n");
+    
+    va_TraceMsg(idx, "\tprofile_and_level_indication = %d\n", p->profile_and_level_indication);
+    va_TraceMsg(idx, "\tintra_period = %d\n", p->intra_period);
+    va_TraceMsg(idx, "\tvideo_object_layer_width = %d\n", p->video_object_layer_width);
+    va_TraceMsg(idx, "\tvideo_object_layer_height = %d\n", p->video_object_layer_height);
+    va_TraceMsg(idx, "\tvop_time_increment_resolution = %d\n", p->vop_time_increment_resolution);
+    va_TraceMsg(idx, "\tfixed_vop_rate = %d\n", p->fixed_vop_rate);
+    va_TraceMsg(idx, "\tfixed_vop_time_increment = %d\n", p->fixed_vop_time_increment);
+    va_TraceMsg(idx, "\tbits_per_second = %d\n", p->bits_per_second);
+    va_TraceMsg(idx, "\tframe_rate = %d\n", p->frame_rate);
+    va_TraceMsg(idx, "\tinitial_qp = %d\n", p->initial_qp);
+    va_TraceMsg(idx, "\tmin_qp = %d\n", p->min_qp);
+    va_TraceMsg(idx, NULL);
+
+    /* start a new sequce, coded log file can be truncated */
+    trace_context[idx].trace_sequence_start = 1;
+
+    return;
+}
+
+static void va_TraceVAEncPictureParameterBufferMPEG4(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncPictureParameterBufferMPEG4 *p = (VAEncPictureParameterBufferMPEG4 *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAEncPictureParameterBufferMPEG4\n");
+    va_TraceMsg(idx, "\treference_picture = 0x%08x\n", p->reference_picture);
+    va_TraceMsg(idx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
+    va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
+    va_TraceMsg(idx, "\tpicture_width = %d\n", p->picture_width);
+    va_TraceMsg(idx, "\tpicture_height = %d\n", p->picture_height);
+    va_TraceMsg(idx, "\tmodulo_time_base = %d\n", p->modulo_time_base);
+    va_TraceMsg(idx, "\tvop_time_increment = %d\n", p->vop_time_increment);
+    va_TraceMsg(idx, "\tpicture_type = %d\n", p->picture_type);
+    va_TraceMsg(idx, NULL);
+
+    trace_context[idx].trace_codedbuf =  p->coded_buf;
+    
     return;
 }
 
@@ -1410,6 +1471,101 @@ static void va_TraceMPEG2Buf(
     }
 }
 
+static void va_TraceVAEncSequenceParameterBufferH263(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncSequenceParameterBufferH263 *p = (VAEncSequenceParameterBufferH263 *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAEncSequenceParameterBufferH263\n");
+    
+    va_TraceMsg(idx, "\tintra_period = %d\n", p->intra_period);
+    va_TraceMsg(idx, "\tbits_per_second = %d\n", p->bits_per_second);
+    va_TraceMsg(idx, "\tframe_rate = %d\n", p->frame_rate);
+    va_TraceMsg(idx, "\tinitial_qp = %d\n", p->initial_qp);
+    va_TraceMsg(idx, "\tmin_qp = %d\n", p->min_qp);
+    va_TraceMsg(idx, NULL);
+
+    /* start a new sequce, coded log file can be truncated */
+    trace_context[idx].trace_sequence_start = 1;
+
+    return;
+}
+
+
+static void va_TraceVAEncPictureParameterBufferH263(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncPictureParameterBufferH263 *p = (VAEncPictureParameterBufferH263 *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAEncPictureParameterBufferH263\n");
+    va_TraceMsg(idx, "\treference_picture = 0x%08x\n", p->reference_picture);
+    va_TraceMsg(idx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
+    va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
+    va_TraceMsg(idx, "\tpicture_width = %d\n", p->picture_width);
+    va_TraceMsg(idx, "\tpicture_height = %d\n", p->picture_height);
+    va_TraceMsg(idx, "\tpicture_type = 0x%08x\n", p->picture_type);
+    va_TraceMsg(idx, NULL);
+
+    trace_context[idx].trace_codedbuf =  p->coded_buf;
+    
+    return;
+}
+
+
+static void va_TraceH263Buf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    switch (type) {
+    case VAPictureParameterBufferType:
+    case VAIQMatrixBufferType:
+    case VABitPlaneBufferType:
+    case VASliceGroupMapBufferType:
+    case VASliceParameterBufferType:
+    case VASliceDataBufferType:
+    case VAMacroblockParameterBufferType:
+    case VAResidualDataBufferType:
+    case VADeblockingParameterBufferType:
+    case VAImageBufferType:
+    case VAProtectedSliceDataBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncCodedBufferType:
+        break;
+    case VAEncSequenceParameterBufferType:
+        va_TraceVAEncSequenceParameterBufferH263(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncPictureParameterBufferType:
+        va_TraceVAEncPictureParameterBufferH263(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncSliceParameterBufferType:
+        va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    default:
+        break;
+    }
+}
+
 static void va_TraceMPEG4Buf(
     VADisplay dpy,
     VAContextID context,
@@ -1455,10 +1611,10 @@ static void va_TraceMPEG4Buf(
     case VAEncCodedBufferType:
         break;
     case VAEncSequenceParameterBufferType:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAEncSequenceParameterBufferMPEG4(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncPictureParameterBufferType:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAEncPictureParameterBufferMPEG4(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncSliceParameterBufferType:
         va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -1640,7 +1796,7 @@ void va_TraceRenderPicture(
         case VAProfileMPEG2Simple:
         case VAProfileMPEG2Main:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t------------------", j);
+                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG2Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
@@ -1649,7 +1805,7 @@ void va_TraceRenderPicture(
         case VAProfileMPEG4AdvancedSimple:
         case VAProfileMPEG4Main:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t------------------", j);
+                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
