@@ -68,6 +68,21 @@ static int frame_bit_rate = -1;
 #define BR_CQP          2
 
 #define MAX_SLICES      32
+
+static int
+build_packed_pic_buffer(unsigned char **header_buffer);
+
+static int
+build_packed_seq_buffer(unsigned char **header_buffer);
+
+struct packed_data_format
+{
+    unsigned int length_in_bits;
+    unsigned char flag;
+    unsigned char num_skip_bytes;
+    unsigned char pad[2];
+};
+
 struct {
     VAEncSequenceParameterBufferH264Ext seq_param;
     VAEncPictureParameterBufferH264Ext pic_param;
@@ -324,6 +339,31 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
 {
     VAStatus va_status;
 
+    if (frame_num == 0) {
+        unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL;
+        int seq_length, pic_length;
+
+        assert(slice_type == SLICE_TYPE_I);
+        seq_length = build_packed_seq_buffer(&packed_seq_buffer);
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedSequenceParameterBufferType,
+                                   (seq_length + 7) / 8, 1, packed_seq_buffer,
+                                   &avcenc_context.packed_seq_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+
+        pic_length = build_packed_pic_buffer(&packed_pic_buffer);
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedPictureParameterBufferType,
+                                   (pic_length + 7) / 8 , 1, packed_pic_buffer,
+                                   &avcenc_context.packed_pic_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+
+        free(packed_seq_buffer);
+        free(packed_pic_buffer);
+    }
+
     /* sequence parameter set */
     VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
     va_status = vaCreateBuffer(va_dpy,
@@ -476,27 +516,25 @@ bitstream_start(bitstream *bs)
 {
     bs->max_size_in_dword = BITSTREAM_ALLOCATE_STEPPING;
     bs->buffer = calloc(bs->max_size_in_dword * sizeof(int), 1);
-    bs->bit_offset = 0;
+    bs->bit_offset = sizeof(struct packed_data_format) * 8; /* the first 64 bits used for format */
 }
 
 static void
-bitstream_end(bitstream *bs, FILE *avc_fp)
+bitstream_end(bitstream *bs)
 {
     int pos = (bs->bit_offset >> 5);
     int bit_offset = (bs->bit_offset & 0x1f);
     int bit_left = 32 - bit_offset;
-    int length = (bs->bit_offset + 7) >> 3;
-    size_t w_items;
+    struct packed_data_format *format;
 
     if (bit_offset) {
         bs->buffer[pos] = swap32((bs->buffer[pos] << bit_left));
     }
 
-    do {
-        w_items = fwrite(bs->buffer, length, 1, avc_fp);
-    } while (w_items != 1);
-
-    free(bs->buffer);
+    format = (struct packed_data_format *)bs->buffer;
+    format->length_in_bits = bs->bit_offset - sizeof(struct packed_data_format) * 8;
+    format->flag |= 1;
+    format->num_skip_bytes = 5; /* ignore start code & nal type for emulation prevetion check */
 }
  
 static void
@@ -646,6 +684,7 @@ static void sps_rbsp(bitstream *bs)
     rbsp_trailing_bits(bs);     /* rbsp_trailing_bits */
 }
 
+#if 0
 static void build_nal_sps(FILE *avc_fp)
 {
     bitstream bs;
@@ -656,6 +695,7 @@ static void build_nal_sps(FILE *avc_fp)
     sps_rbsp(&bs);
     bitstream_end(&bs, avc_fp);
 }
+#endif
 
 static void pps_rbsp(bitstream *bs)
 {
@@ -687,6 +727,7 @@ static void pps_rbsp(bitstream *bs)
     rbsp_trailing_bits(bs);
 }
 
+#if 0
 static void build_nal_pps(FILE *avc_fp)
 {
     bitstream bs;
@@ -704,6 +745,38 @@ build_header(FILE *avc_fp)
     build_nal_sps(avc_fp);
     build_nal_pps(avc_fp);
 }
+#endif
+
+static int
+build_packed_pic_buffer(unsigned char **header_buffer)
+{
+    bitstream bs;
+
+    bitstream_start(&bs);
+    nal_start_code_prefix(&bs);
+    nal_header(&bs, NAL_REF_IDC_HIGH, NAL_PPS);
+    pps_rbsp(&bs);
+    bitstream_end(&bs);
+
+    *header_buffer = (unsigned char *)bs.buffer;
+    return bs.bit_offset;
+}
+
+static int
+build_packed_seq_buffer(unsigned char **header_buffer)
+{
+    bitstream bs;
+
+    bitstream_start(&bs);
+    nal_start_code_prefix(&bs);
+    nal_header(&bs, NAL_REF_IDC_HIGH, NAL_SPS);
+    sps_rbsp(&bs);
+    bitstream_end(&bs);
+
+    *header_buffer = (unsigned char *)bs.buffer;
+    return bs.bit_offset;
+}
+
 
 #if 0
 static void 
@@ -1117,7 +1190,6 @@ int main(int argc, char *argv[])
     start_clock = clock();
 
     avcenc_context_init(picture_width, picture_height);
-    build_header(avc_fp);
     create_encode_pipe();
     alloc_encode_resource();
 	
