@@ -232,7 +232,7 @@ static void avcenc_update_picture_parameter(int slice_type, int frame_num, int d
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncPictureParameterBufferH264ExtType,
+                               VAEncPictureParameterBufferExtType,
                                sizeof(*pic_param), 1, pic_param,
                                &avcenc_context.pic_param_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
@@ -325,7 +325,7 @@ static void avcenc_update_slice_parameter(int slice_type)
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncSliceParameterBufferH264ExtType,
+                               VAEncSliceParameterBufferExtType,
                                sizeof(*slice_param), 1, slice_param,
                                &avcenc_context.slice_param_buf_id[i]);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
@@ -368,7 +368,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncSequenceParameterBufferH264ExtType,
+                               VAEncSequenceParameterBufferExtType,
                                sizeof(*seq_param), 1, seq_param,
                                &avcenc_context.seq_param_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
