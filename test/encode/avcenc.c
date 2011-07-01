@@ -1144,10 +1144,10 @@ int main(int argc, char *argv[])
     FILE *avc_fp;
     int frame_number;
     long file_size;
-    clock_t start_clock, end_clock;
-    float encoding_time;
     int i_frame_only=0,i_p_frame_only=1;
     int mode_value;
+    struct timeval tpstart,tpend; 
+    float  timeuse;
     //TODO may be we should using option analytics library
     if(argc != 5 && argc != 6 && argc != 7) {
         show_help();
@@ -1219,12 +1219,11 @@ int main(int argc, char *argv[])
         printf("Can't open output avc file\n");
         return -1;
     }	
-    start_clock = clock();
-
+    gettimeofday(&tpstart,NULL);	
     avcenc_context_init(picture_width, picture_height);
     create_encode_pipe();
     alloc_encode_resource();
-	
+
     enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
         int is_intra = i_frame_only?1:(enc_frame_number % intra_period == 0);
@@ -1253,11 +1252,11 @@ int main(int argc, char *argv[])
         fflush(stdout);
     }
 
-    end_clock = clock();
+    gettimeofday(&tpend,NULL);
+    timeuse=1000000*(tpend.tv_sec-tpstart.tv_sec)+ tpend.tv_usec-tpstart.tv_usec;
+    timeuse/=1000000;
     printf("\ndone!\n");
-    encoding_time = (float)(end_clock-start_clock)/CLOCKS_PER_SEC;
-    printf("encode %d frames in %f secondes, FPS is %.1f\n",frame_number, encoding_time, frame_number/encoding_time);
-
+    printf("encode %d frames in %f secondes, FPS is %.1f\n",frame_number, timeuse, frame_number/timeuse);
     release_encode_resource();
     destory_encode_pipe();
 
