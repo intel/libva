@@ -1175,7 +1175,7 @@ int main(int argc, char *argv[])
     picture_width_in_mbs = (picture_width + 15) / 16;
     picture_height_in_mbs = (picture_height + 15) / 16;
 
-    if (argc == 6) {
+    if (argc == 6 || argc == 7) {
         qp_value = -1;
         sscanf(argv[5], "qp=%d", &qp_value);
         if ( qp_value == -1 ) {
