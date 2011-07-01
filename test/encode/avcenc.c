@@ -931,6 +931,7 @@ store_coded_buffer(FILE *avc_fp, int slice_type)
         else
             avcenc_context.codedbuf_pb_size *= 2;
 
+        vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
         return -1;
     }
 
@@ -966,7 +967,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
                int slice_type, int next_is_bpic)
 {
     VAStatus va_status;
-    int count = 5, ret = 0, codedbuf_size;
+    int count = 10, ret = 0, codedbuf_size;
     
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
 
