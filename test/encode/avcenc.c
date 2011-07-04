@@ -75,6 +75,9 @@ build_packed_pic_buffer(unsigned char **header_buffer);
 static int
 build_packed_seq_buffer(unsigned char **header_buffer);
 
+static void 
+upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
+
 struct packed_data_format
 {
     unsigned int length_in_bits;
@@ -100,6 +103,7 @@ struct {
     int num_slices;
     int codedbuf_i_size;
     int codedbuf_pb_size;
+    int current_input_surface;
 } avcenc_context;
 
 static void create_encode_pipe()
@@ -176,18 +180,20 @@ static void destory_encode_pipe()
  *  The encode pipe resource define 
  *
  ***************************************************/
-#define SID_INPUT_PICTURE                       0
-#define SID_REFERENCE_PICTURE_L0                1
-#define SID_REFERENCE_PICTURE_L1				2
-#define SID_RECON_PICTURE                       3
+#define SID_INPUT_PICTURE_0                     0
+#define SID_INPUT_PICTURE_1                     1
+#define SID_REFERENCE_PICTURE_L0                2
+#define SID_REFERENCE_PICTURE_L1                3
+#define SID_RECON_PICTURE                       4
 #define SID_NUMBER                              SID_RECON_PICTURE + 1
 static  VASurfaceID surface_ids[SID_NUMBER];
 
+static int frame_number;
 static int enc_frame_number;
 
 /***************************************************/
 
-static void alloc_encode_resource()
+static void alloc_encode_resource(FILE *yuv_fp)
 {
     VAStatus va_status;
 
@@ -202,6 +208,9 @@ static void alloc_encode_resource()
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     newImageBuffer = (unsigned char *)malloc(frame_size);
+
+    /* firstly upload YUV data to SID_INPUT_PICTURE_1 */
+    upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE_1]);
 }
 
 static void release_encode_resource()
@@ -339,6 +348,11 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
 {
     VAStatus va_status;
 
+    if (avcenc_context.current_input_surface == SID_INPUT_PICTURE_0)
+        avcenc_context.current_input_surface = SID_INPUT_PICTURE_1;
+    else
+        avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
+
     if (frame_num == 0) {
         unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL;
         int seq_length, pic_length;
@@ -376,14 +390,10 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     /* slice parameter */
     avcenc_update_slice_parameter(slice_type);
 
-    /* Copy Image to target surface according input YUV data. */
-    fseek(yuv_fp, frame_size * display_num, SEEK_SET);
-    upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE]);
-
     return 0;
 }
 
-static int avcenc_render_picture()
+int avcenc_render_picture()
 {
     VAStatus va_status;
     VABufferID va_buffers[8];
@@ -403,7 +413,7 @@ static int avcenc_render_picture()
 
     va_status = vaBeginPicture(va_dpy,
                                avcenc_context.context_id,
-                               surface_ids[SID_INPUT_PICTURE]);
+                               surface_ids[avcenc_context.current_input_surface]);
     CHECK_VASTATUS(va_status,"vaBeginPicture");
 
     va_status = vaRenderPicture(va_dpy,
@@ -858,11 +868,11 @@ slice_data(bitstream *bs)
     VAStatus va_status;
     VASurfaceStatus surface_status;
 
-    va_status = vaSyncSurface(va_dpy, surface_ids[SID_INPUT_PICTURE]);
+    va_status = vaSyncSurface(va_dpy, surface_ids[avcenc_context.current_input_surface]);
     CHECK_VASTATUS(va_status,"vaSyncSurface");
 
     surface_status = 0;
-    va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[SID_INPUT_PICTURE], &surface_status);
+    va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[avcenc_context.current_input_surface], &surface_status);
     CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(va_dpy, avcenc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
@@ -901,11 +911,11 @@ store_coded_buffer(FILE *avc_fp, int slice_type)
     VASurfaceStatus surface_status;
     size_t w_items;
 
-    va_status = vaSyncSurface(va_dpy, surface_ids[SID_INPUT_PICTURE]);
+    va_status = vaSyncSurface(va_dpy, surface_ids[avcenc_context.current_input_surface]);
     CHECK_VASTATUS(va_status,"vaSyncSurface");
 
     surface_status = 0;
-    va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[SID_INPUT_PICTURE], &surface_status);
+    va_status = vaQuerySurfaceStatus(va_dpy, surface_ids[avcenc_context.current_input_surface], &surface_status);
     CHECK_VASTATUS(va_status,"vaQuerySurfaceStatus");
 
     va_status = vaMapBuffer(va_dpy, avcenc_context.codedbuf_buf_id, (void **)(&coded_buffer_segment));
@@ -951,7 +961,8 @@ static void
 encode_picture(FILE *yuv_fp, FILE *avc_fp,
                int frame_num, int display_num,
                int is_idr,
-               int slice_type, int next_is_bpic)
+               int slice_type, int next_is_bpic,
+               int next_display_num)
 {
     VAStatus va_status;
     int count = 10, ret = 0, codedbuf_size;
@@ -981,6 +992,20 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
 
         avcenc_render_picture();
+
+        if (count == 10 && next_display_num < frame_number) {
+            int index;
+
+            /* prepare for next frame */
+            if (avcenc_context.current_input_surface == SID_INPUT_PICTURE_0)
+                index = SID_INPUT_PICTURE_1;
+            else
+                index = SID_INPUT_PICTURE_0;
+
+            fseek(yuv_fp, frame_size * next_display_num, SEEK_SET);
+            upload_yuv_to_surface(yuv_fp, surface_ids[index]);
+        }
+
         ret = store_coded_buffer(avc_fp, slice_type);
     } while (ret && --count);
 
@@ -992,7 +1017,7 @@ static void encode_i_picture(FILE *yuv_fp, FILE *avc_fp, int f, int is_idr)
     encode_picture(yuv_fp, avc_fp,
                    enc_frame_number, f,
                    is_idr,
-                   SLICE_TYPE_I, 0);
+                   SLICE_TYPE_I, 0, f + 1);
 }
 
 static void encode_p_picture(FILE *yuv_fp, FILE *avc_fp, int f)
@@ -1000,7 +1025,7 @@ static void encode_p_picture(FILE *yuv_fp, FILE *avc_fp, int f)
     encode_picture(yuv_fp, avc_fp,
                    enc_frame_number, f,
                    0,
-                   SLICE_TYPE_P, 0);
+                   SLICE_TYPE_P, 0, f + 1);
 }
 
 static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
@@ -1009,19 +1034,19 @@ static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
     encode_picture(yuv_fp, avc_fp,
                    enc_frame_number, f + nbframes,
                    0,
-                   SLICE_TYPE_P, 1);
+                   SLICE_TYPE_P, 1, f);
 
     for( i = 0; i < nbframes - 1; i++) {
         encode_picture(yuv_fp, avc_fp,
-                enc_frame_number + 1, f + i,
-                0,
-                SLICE_TYPE_B, 1);
+                       enc_frame_number + 1, f + i,
+                       0,
+                       SLICE_TYPE_B, 1, f + i + 1);
     }
     
     encode_picture(yuv_fp, avc_fp,
                    enc_frame_number + 1, f + nbframes - 1,
                    0,
-                   SLICE_TYPE_B, 0);
+                   SLICE_TYPE_B, 0, f + nbframes + 1);
 }
 
 static void show_help()
@@ -1129,6 +1154,7 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.codedbuf_buf_id = VA_INVALID_ID;
     avcenc_context.codedbuf_i_size = width * height;
     avcenc_context.codedbuf_pb_size = 0;
+    avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
 
     for (i = 0; i < MAX_SLICES; i++) {
         avcenc_context.slice_param_buf_id[i] = VA_INVALID_ID;
@@ -1143,7 +1169,6 @@ int main(int argc, char *argv[])
     int f;
     FILE *yuv_fp;
     FILE *avc_fp;
-    int frame_number;
     long file_size;
     int i_frame_only=0,i_p_frame_only=1;
     int mode_value;
@@ -1223,7 +1248,7 @@ int main(int argc, char *argv[])
     gettimeofday(&tpstart,NULL);	
     avcenc_context_init(picture_width, picture_height);
     create_encode_pipe();
-    alloc_encode_resource();
+    alloc_encode_resource(yuv_fp);
 
     enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
