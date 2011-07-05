@@ -20,6 +20,8 @@
 #include <assert.h>
 #include <time.h>
 
+#include <pthread.h>
+
 #include <va/va.h>
 #include <va/va_x11.h>
 
@@ -76,6 +78,12 @@ build_packed_pic_buffer(unsigned char **header_buffer);
 static int
 build_packed_seq_buffer(unsigned char **header_buffer);
 
+struct upload_thread_param
+{
+    FILE *yuv_fp;
+    VASurfaceID surface_id;
+};
+
 static void 
 upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
@@ -105,6 +113,9 @@ struct {
     int codedbuf_i_size;
     int codedbuf_pb_size;
     int current_input_surface;
+    struct upload_thread_param upload_thread_param;
+    pthread_t upload_thread_id;
+    int upload_thread_value;
 } avcenc_context;
 
 static void create_encode_pipe()
@@ -194,6 +205,16 @@ static int enc_frame_number;
 
 /***************************************************/
 
+static void *
+upload_thread_function(void *data)
+{
+    struct upload_thread_param *param = data;
+
+    upload_yuv_to_surface(param->yuv_fp, param->surface_id);
+
+    return NULL;
+}
+
 static void alloc_encode_resource(FILE *yuv_fp)
 {
     VAStatus va_status;
@@ -211,7 +232,13 @@ static void alloc_encode_resource(FILE *yuv_fp)
     newImageBuffer = (unsigned char *)malloc(frame_size);
 
     /* firstly upload YUV data to SID_INPUT_PICTURE_1 */
-    upload_yuv_to_surface(yuv_fp, surface_ids[SID_INPUT_PICTURE_1]);
+    avcenc_context.upload_thread_param.yuv_fp = yuv_fp;
+    avcenc_context.upload_thread_param.surface_id = surface_ids[SID_INPUT_PICTURE_1];
+
+    avcenc_context.upload_thread_value = pthread_create(&avcenc_context.upload_thread_id,
+                                                        NULL,
+                                                        upload_thread_function, 
+                                                        (void*)&avcenc_context.upload_thread_param);
 }
 
 static void release_encode_resource()
@@ -348,6 +375,15 @@ static void avcenc_update_slice_parameter(int slice_type)
 static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice_type, int is_idr)
 {
     VAStatus va_status;
+
+    if (avcenc_context.upload_thread_value != 0) {
+        fprintf(stderr, "FATAL error!!!\n");
+        exit(1);
+    }
+    
+    pthread_join(avcenc_context.upload_thread_id, NULL);
+
+    avcenc_context.upload_thread_value = -1;
 
     if (avcenc_context.current_input_surface == SID_INPUT_PICTURE_0)
         avcenc_context.current_input_surface = SID_INPUT_PICTURE_1;
@@ -970,6 +1006,26 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
     
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
 
+    if (next_display_num < frame_number) {
+        int index;
+
+        /* prepare for next frame */
+        if (avcenc_context.current_input_surface == SID_INPUT_PICTURE_0)
+            index = SID_INPUT_PICTURE_1;
+        else
+            index = SID_INPUT_PICTURE_0;
+
+        fseek(yuv_fp, frame_size * next_display_num, SEEK_SET);
+
+        avcenc_context.upload_thread_param.yuv_fp = yuv_fp;
+        avcenc_context.upload_thread_param.surface_id = surface_ids[index];
+
+        avcenc_context.upload_thread_value = pthread_create(&avcenc_context.upload_thread_id,
+                                                            NULL,
+                                                            upload_thread_function, 
+                                                            (void*)&avcenc_context.upload_thread_param);
+    }
+
     do {
         avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
         avcenc_destroy_buffers(&avcenc_context.pic_param_buf_id, 1);
@@ -993,19 +1049,6 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
 
         avcenc_render_picture();
-
-        if (count == 10 && next_display_num < frame_number) {
-            int index;
-
-            /* prepare for next frame */
-            if (avcenc_context.current_input_surface == SID_INPUT_PICTURE_0)
-                index = SID_INPUT_PICTURE_1;
-            else
-                index = SID_INPUT_PICTURE_0;
-
-            fseek(yuv_fp, frame_size * next_display_num, SEEK_SET);
-            upload_yuv_to_surface(yuv_fp, surface_ids[index]);
-        }
 
         ret = store_coded_buffer(avc_fp, slice_type);
     } while (ret && --count);
@@ -1156,6 +1199,7 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.codedbuf_i_size = width * height;
     avcenc_context.codedbuf_pb_size = 0;
     avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
+    avcenc_context.upload_thread_value = -1;
 
     for (i = 0; i < MAX_SLICES; i++) {
         avcenc_context.slice_param_buf_id[i] = VA_INVALID_ID;
