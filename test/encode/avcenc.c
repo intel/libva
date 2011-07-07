@@ -1015,7 +1015,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
                int next_display_num)
 {
     VAStatus va_status;
-    int count = 10, ret = 0, codedbuf_size;
+    int ret = 0, codedbuf_size;
     
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
 
@@ -1064,7 +1064,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         avcenc_render_picture();
 
         ret = store_coded_buffer(avc_fp, slice_type);
-    } while (ret && --count);
+    } while (ret);
 
     end_picture(slice_type, next_is_bpic);
 }
