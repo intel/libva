@@ -718,7 +718,7 @@ gen7_mfd_avc_slice_state(VADriverContextP ctx,
         next_slice_ver_pos = first_mb_in_next_slice / width_in_mbs;
     } else {
         next_slice_hor_pos = 0;
-        next_slice_ver_pos = height_in_mbs;
+        next_slice_ver_pos = height_in_mbs / (1 + !!pic_param->pic_fields.bits.field_pic_flag);
     }
 
     BEGIN_BCS_BATCH(batch, 11); /* FIXME: is it 10??? */
