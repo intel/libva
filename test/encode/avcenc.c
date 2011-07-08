@@ -1279,6 +1279,7 @@ int main(int argc, char *argv[])
     frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
 
     if ( (file_size < frame_size) || (file_size % frame_size) ) {
+        fclose(yuv_fp);
         printf("The YUV file's size is not correct\n");
         return -1;
     }
@@ -1287,6 +1288,7 @@ int main(int argc, char *argv[])
 
     avc_fp = fopen(argv[4], "wb");	
     if ( avc_fp == NULL) {
+        fclose(yuv_fp);
         printf("Can't open output avc file\n");
         return -1;
     }	
@@ -1330,6 +1332,9 @@ int main(int argc, char *argv[])
     printf("encode %d frames in %f secondes, FPS is %.1f\n",frame_number, timeuse, frame_number/timeuse);
     release_encode_resource();
     destory_encode_pipe();
+
+    fclose(yuv_fp);
+    fclose(avc_fp);
 
     return 0;
 }
