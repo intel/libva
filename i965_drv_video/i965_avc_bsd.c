@@ -1027,7 +1027,6 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
 
-        assert(decode_state->slice_params[j]->num_elements == 1);  /* FIXME */
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
             assert((slice_param->slice_type == SLICE_TYPE_I) ||
@@ -1056,7 +1055,6 @@ i965_avc_bsd_pipeline(VADriverContextP ctx, struct decode_state *decode_state, v
 
         i965_bsd_ind_obj_base_address(ctx, decode_state, j, i965_h264_context);
 
-        assert(decode_state->slice_params[j]->num_elements == 1);  /* FIXME */
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
             assert((slice_param->slice_type == SLICE_TYPE_I) ||

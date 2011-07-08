@@ -1012,7 +1012,6 @@ gen6_mfd_avc_decode_init(VADriverContextP ctx,
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
 
-        assert(decode_state->slice_params[j]->num_elements == 1);
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
             assert((slice_param->slice_type == SLICE_TYPE_I) ||
@@ -1100,7 +1099,7 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferH264 *pic_param;
-    VASliceParameterBufferH264 *slice_param, *next_slice_param;
+    VASliceParameterBufferH264 *slice_param, *next_slice_param, *next_slice_group_param;
     dri_bo *slice_data_bo;
     int i, j;
 
@@ -1121,14 +1120,12 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j]->buffer;
         slice_data_bo = decode_state->slice_datas[j]->bo;
+        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_AVC, gen6_mfd_context);
 
         if (j == decode_state->num_slice_params - 1)
-            next_slice_param = NULL;
+            next_slice_group_param = NULL;
         else
-            next_slice_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j + 1]->buffer;
-
-        gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_AVC, gen6_mfd_context);
-        assert(decode_state->slice_params[j]->num_elements == 1);
+            next_slice_group_param = (VASliceParameterBufferH264 *)decode_state->slice_params[j + 1]->buffer;
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
@@ -1140,6 +1137,8 @@ gen6_mfd_avc_decode_picture(VADriverContextP ctx,
 
             if (i < decode_state->slice_params[j]->num_elements - 1)
                 next_slice_param = slice_param + 1;
+            else
+                next_slice_param = next_slice_group_param;
 
             gen6_mfd_avc_directmode_state(ctx, pic_param, slice_param, gen6_mfd_context);
             gen6_mfd_avc_slice_state(ctx, pic_param, slice_param, next_slice_param, gen6_mfd_context);
@@ -1347,7 +1346,7 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferMPEG2 *pic_param;
-    VASliceParameterBufferMPEG2 *slice_param, *next_slice_param;
+    VASliceParameterBufferMPEG2 *slice_param, *next_slice_param, *next_slice_group_param;
     dri_bo *slice_data_bo;
     int i, j;
 
@@ -1370,13 +1369,18 @@ gen6_mfd_mpeg2_decode_picture(VADriverContextP ctx,
         slice_data_bo = decode_state->slice_datas[j]->bo;
         gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_MPEG2, gen6_mfd_context);
 
+        if (j == decode_state->num_slice_params - 1)
+            next_slice_group_param = NULL;
+        else
+            next_slice_group_param = (VASliceParameterBufferMPEG2 *)decode_state->slice_params[j + 1]->buffer;
+
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
 
             if (i < decode_state->slice_params[j]->num_elements - 1)
                 next_slice_param = slice_param + 1;
             else
-                next_slice_param = NULL;
+                next_slice_param = next_slice_group_param;
 
             gen6_mfd_mpeg2_bsd_object(ctx, pic_param, slice_param, next_slice_param, gen6_mfd_context);
             slice_param++;
@@ -1979,7 +1983,7 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
 {
     struct intel_batchbuffer *batch = gen6_mfd_context->base.batch;
     VAPictureParameterBufferVC1 *pic_param;
-    VASliceParameterBufferVC1 *slice_param, *next_slice_param;
+    VASliceParameterBufferVC1 *slice_param, *next_slice_param, *next_slice_group_param;
     dri_bo *slice_data_bo;
     int i, j;
 
@@ -1997,12 +2001,16 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
     gen6_mfd_vc1_pred_pipe_state(ctx, decode_state, gen6_mfd_context);
     gen6_mfd_vc1_directmode_state(ctx, decode_state, gen6_mfd_context);
 
-    assert(decode_state->num_slice_params == 1);
     for (j = 0; j < decode_state->num_slice_params; j++) {
         assert(decode_state->slice_params && decode_state->slice_params[j]->buffer);
         slice_param = (VASliceParameterBufferVC1 *)decode_state->slice_params[j]->buffer;
         slice_data_bo = decode_state->slice_datas[j]->bo;
         gen6_mfd_ind_obj_base_addr_state(ctx, slice_data_bo, MFX_FORMAT_VC1, gen6_mfd_context);
+
+        if (j == decode_state->num_slice_params - 1)
+            next_slice_group_param = NULL;
+        else
+            next_slice_group_param = (VASliceParameterBufferVC1 *)decode_state->slice_params[j + 1]->buffer;
 
         for (i = 0; i < decode_state->slice_params[j]->num_elements; i++) {
             assert(slice_param->slice_data_flag == VA_SLICE_DATA_FLAG_ALL);
@@ -2010,7 +2018,7 @@ gen6_mfd_vc1_decode_picture(VADriverContextP ctx,
             if (i < decode_state->slice_params[j]->num_elements - 1)
                 next_slice_param = slice_param + 1;
             else
-                next_slice_param = NULL;
+                next_slice_param = next_slice_group_param;
 
             gen6_mfd_vc1_bsd_object(ctx, pic_param, slice_param, next_slice_param, slice_data_bo, gen6_mfd_context);
             slice_param++;
