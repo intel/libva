@@ -757,7 +757,6 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
                               VASurfaceID surface)
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);  
-    struct i965_render_state *render_state = &i965->render_state;
     struct object_surface *obj_surface;
     int w, h;
     int rw, rh;
@@ -766,19 +765,11 @@ i965_render_src_surfaces_state(VADriverContextP ctx,
     obj_surface = SURFACE(surface);
     assert(obj_surface);
 
-    if (obj_surface->pp_out_bo) {
-        w = obj_surface->pp_out_width;
-        h = obj_surface->pp_out_height;
-        rw = obj_surface->orig_pp_out_width;
-        rh = obj_surface->orig_pp_out_height;
-        region = obj_surface->pp_out_bo;
-    } else {
-        w = obj_surface->width;
-        h = obj_surface->height;
-        rw = obj_surface->orig_width;
-        rh = obj_surface->orig_height;
-        region = obj_surface->bo;
-    }
+    w = obj_surface->width;
+    h = obj_surface->height;
+    rw = obj_surface->orig_width;
+    rh = obj_surface->orig_height;
+    region = obj_surface->bo;
 
     i965_render_src_surface_state(ctx, 1, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);     /* Y */
     i965_render_src_surface_state(ctx, 2, region, 0, rw, rh, w, I965_SURFACEFORMAT_R8_UNORM);
@@ -2901,7 +2892,10 @@ gen7_render_put_subpicture(
 /*
  * global functions
  */
-
+VAStatus 
+i965_DestroySurfaces(VADriverContextP ctx,
+                     VASurfaceID *surface_list,
+                     int num_surfaces);
 void
 intel_render_put_surface(
     VADriverContextP   ctx,
@@ -2912,15 +2906,24 @@ intel_render_put_surface(
 )
 {
     struct i965_driver_data *i965 = i965_driver_data(ctx);
+    int has_done_scaling = 0;
+    VASurfaceID in_surface_id = surface;
+    VASurfaceID out_surface_id = i965_post_processing(ctx, surface, src_rect, dst_rect, flags, &has_done_scaling);
 
-    i965_post_processing(ctx, surface, src_rect, dst_rect, flags);
+    assert((!has_done_scaling) || (out_surface_id != VA_INVALID_ID));
+
+    if (out_surface_id != VA_INVALID_ID)
+        in_surface_id = out_surface_id;
 
     if (IS_GEN7(i965->intel.device_id))
-        gen7_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
+        gen7_render_put_surface(ctx, in_surface_id, has_done_scaling ? dst_rect : src_rect, dst_rect, flags);
     else if (IS_GEN6(i965->intel.device_id))
-        gen6_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
+        gen6_render_put_surface(ctx, in_surface_id, has_done_scaling ? dst_rect : src_rect, dst_rect, flags);
     else
-        i965_render_put_surface(ctx, surface, src_rect, dst_rect, flags);
+        i965_render_put_surface(ctx, in_surface_id, has_done_scaling ? dst_rect : src_rect, dst_rect, flags);
+
+    if (in_surface_id != surface)
+        i965_DestroySurfaces(ctx, &in_surface_id, 1);
 }
 
 void

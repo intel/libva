@@ -53,14 +53,22 @@ struct pp_load_save_context
 
 struct pp_scaling_context
 {
+    int dest_x; /* in pixel */
+    int dest_y; /* in pixel */
     int dest_w;
     int dest_h;
+    int src_normalized_x;
+    int src_normalized_y;
 };
 
 struct pp_avs_context
 {
+    int dest_x; /* in pixel */
+    int dest_y; /* in pixel */
     int dest_w;
     int dest_h;
+    int src_normalized_x;
+    int src_normalized_y;
     int src_w;
     int src_h;
 };
@@ -69,7 +77,6 @@ struct pp_dndi_context
 {
     int dest_w;
     int dest_h;
-
 };
 
 struct pp_module
@@ -77,9 +84,9 @@ struct pp_module
     struct i965_kernel kernel;
     
     /* others */
-    void (*initialize)(VADriverContextP ctx, VASurfaceID surface, int input,
-                       unsigned short srcw, unsigned short srch,
-                       unsigned short destw, unsigned short desth);
+    void (*initialize)(VADriverContextP ctx, 
+                       VASurfaceID in_surface_id, VASurfaceID out_surface_id,
+                       const VARectangle *src_rect, const VARectangle *dst_rect);
 };
 
 struct pp_static_parameter
@@ -350,13 +357,14 @@ struct i965_post_processing_context
     int (*pp_set_block_parameter)(struct i965_post_processing_context *pp_context, int x, int y);
 };
 
-void
+VASurfaceID
 i965_post_processing(
     VADriverContextP   ctx,
     VASurfaceID        surface,
     const VARectangle *src_rect,
     const VARectangle *dst_rect,
-    unsigned int       flags
+    unsigned int       flags,
+    int                *has_done_scaling 
 );
 
 Bool

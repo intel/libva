@@ -435,8 +435,6 @@ i965_destroy_surface(struct object_heap *heap, struct object_base *obj)
 
     dri_bo_unreference(obj_surface->bo);
     obj_surface->bo = NULL;
-    dri_bo_unreference(obj_surface->pp_out_bo);
-    obj_surface->pp_out_bo = NULL;
 
     if (obj_surface->free_private_data != NULL) {
         obj_surface->free_private_data(&obj_surface->private_data);
@@ -491,7 +489,6 @@ i965_CreateSurfaces(VADriverContextP ctx,
         obj_surface->flags = SURFACE_REFERENCED;
         obj_surface->fourcc = 0;
         obj_surface->bo = NULL;
-        obj_surface->pp_out_bo = NULL;
         obj_surface->locked_image_id = VA_INVALID_ID;
         obj_surface->private_data = NULL;
         obj_surface->free_private_data = NULL;
