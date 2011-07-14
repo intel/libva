@@ -38,6 +38,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <errno.h>
 
 
 /*
@@ -169,6 +170,7 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_log = tmp;
             strcpy(trace_context[trace_index].trace_log_fn, env_value);
         } else {
+            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
             trace_context[trace_index].trace_fp_log = stderr;
             strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
         }
@@ -204,6 +206,7 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_codedbuf = tmp;
             strcpy(trace_context[trace_index].trace_codedbuf_fn, env_value);
         } else {
+            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
             trace_context[trace_index].trace_fp_codedbuf = stderr;
             strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
         }
@@ -220,6 +223,7 @@ void va_TraceInit(VADisplay dpy)
             trace_context[trace_index].trace_fp_surface = tmp;
             strcpy(trace_context[trace_index].trace_surface_fn, env_value);
         } else {
+            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
             trace_context[trace_index].trace_fp_surface = stderr;
             strcpy(trace_context[trace_index].trace_surface_fn, "/dev/stderr");
         }
@@ -1537,16 +1541,34 @@ static void va_TraceH263Buf(
 )
 {
     switch (type) {
-    case VAPictureParameterBufferType:
-    case VAIQMatrixBufferType:
-    case VABitPlaneBufferType:
+    case VAPictureParameterBufferType:/* print MPEG4 buffer */
+        va_TraceVAPictureParameterBufferMPEG4(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAIQMatrixBufferType:/* print MPEG4 buffer */
+        va_TraceVAIQMatrixBufferMPEG4(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VABitPlaneBufferType:/* print MPEG4 buffer */
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VASliceGroupMapBufferType:
-    case VASliceParameterBufferType:
+        break;
+    case VASliceParameterBufferType:/* print MPEG4 buffer */
+        va_TraceVASliceParameterBufferMPEG4(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VASliceDataBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VAMacroblockParameterBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VAResidualDataBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VADeblockingParameterBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     case VAImageBufferType:
+        break;
     case VAProtectedSliceDataBufferType:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -1836,7 +1858,7 @@ void va_TraceRenderPicture(
                 va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
-                va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
+                va_TraceH263Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         default:

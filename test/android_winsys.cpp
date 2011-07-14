@@ -10,22 +10,23 @@ namespace android {
 };
 
 #define min(a,b) (a<b?a:b)
-#define SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, win_width, win_height) \
+#define SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, x, y, win_width, win_height) \
 do {                                                                    \
     client = new SurfaceComposerClient();                               \
     android::DisplayInfo info;                                          \
     int w, h;                                                           \
                                                                         \
     client->getDisplayInfo(android::DisplayID(0), &info);               \
-    w = min(win_width, info.w);                                         \
-    h = min(win_height, info.h);                                        \
+    /*w = min(win_width, info.w);*/                                     \
+    /*h = min(win_height, info.h);*/                                    \
+    w = win_width, h = win_height;                                      \
                                                                         \
     surface_ctrl = client->createSurface(getpid(), 0, w, h, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers); \
     android_surface = surface_ctrl->getSurface();                       \
     android_isurface = Test::getISurface(android_surface);              \
                                                                         \
     client->openTransaction();                                          \
-    surface_ctrl->setPosition(0, 0);                                    \
+    surface_ctrl->setPosition(x, y);                                    \
     client->closeTransaction();                                         \
                                                                         \
     client->openTransaction();                                          \

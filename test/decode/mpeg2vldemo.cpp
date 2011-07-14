@@ -290,7 +290,7 @@ int main(int argc,char **argv)
         ProcessState::self()->startThreadPool();
 
         printf("Create window0 for thread0\n");
-        SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, WIN_WIDTH, WIN_HEIGHT);
+        SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, 0, 0, WIN_WIDTH, WIN_HEIGHT);
 
         va_status = vaPutSurface(va_dpy, surface_id, android_isurface,
                 0,0,CLIP_WIDTH,CLIP_HEIGHT,

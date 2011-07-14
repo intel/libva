@@ -1497,6 +1497,7 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_NV12		0x3231564E
 #define VA_FOURCC_AI44		0x34344149
 #define VA_FOURCC_RGBA		0x41424752
+#define VA_FOURCC_BGRA		0x41524742
 #define VA_FOURCC_UYVY          0x59565955
 #define VA_FOURCC_YUY2          0x32595559
 #define VA_FOURCC_AYUV          0x56555941

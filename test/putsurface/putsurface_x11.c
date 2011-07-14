@@ -32,7 +32,7 @@ static  pthread_mutex_t gmutex;
 
 static void *open_display(void);
 static void close_display(void *win_display);
-static int create_window(void *win_display, int width, int height);
+static int create_window(void *win_display, int x, int y, int width, int height);
 static int check_window_event(void *x11_display, void *drawable, int *width, int *height, int *quit);
 
 #define CAST_DRAWABLE(a)  (Drawable)(a)
@@ -68,7 +68,7 @@ static Pixmap create_pixmap(void *win_display, int width, int height)
     return pixmap;
 }
 
-static int create_window(void *win_display, int width, int height)
+static int create_window(void *win_display, int x, int y, int width, int height)
 {
     Display *x11_display = (Display *)win_display;
     int screen = DefaultScreen(x11_display);
@@ -77,7 +77,7 @@ static int create_window(void *win_display, int width, int height)
     root = RootWindow(x11_display, screen);
 
     printf("Create window0 for thread0\n");
-    drawable_thread0 = (void *)XCreateSimpleWindow(x11_display, root, 0, 0, width, height,
+    drawable_thread0 = (void *)XCreateSimpleWindow(x11_display, root, x, y, width, height,
                                            0, 0, WhitePixel(x11_display, 0));
 
     win = (Window)drawable_thread0;

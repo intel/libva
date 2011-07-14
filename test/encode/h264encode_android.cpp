@@ -58,7 +58,7 @@ static int display_surface(int frame_id, int *exit_encode)
     ProcessState::self()->startThreadPool();
 
     printf("Create window0 for thread0\n");
-    SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, win_width, win_height);
+    SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, 0, 0, win_width, win_height);
     va_status = vaPutSurface(va_dpy, surface_id[frame_id], android_isurface,
             0,0, frame_width, frame_height,
             0,0, win_width, win_height,

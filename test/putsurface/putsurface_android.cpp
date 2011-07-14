@@ -53,7 +53,7 @@ sp<SurfaceControl> surface_ctrl1;
 
 static void *open_display(void);
 static void close_display(void *win_display);
-static int create_window(void *win_display, int width, int height);
+static int create_window(void *win_display, int x, int y, int width, int height);
 static int check_window_event(void *x11_display, void *win, int *width, int *height, int *quit);
 
 #define CAST_DRAWABLE(a)  static_cast<ISurface*>((void *)(*(unsigned int *)a))
@@ -69,13 +69,13 @@ static void close_display(void *win_display)
     return;
 }
 
-static int create_window(void *win_display, int width, int height)
+static int create_window(void *win_display, int x, int y, int width, int height)
 {
     sp<ProcessState> proc(ProcessState::self());
     ProcessState::self()->startThreadPool();
 
     printf("Create window0 for thread0\n");
-    SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, width, height);
+    SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, x, y, width, height);
 
     drawable_thread0 = static_cast<void*>(&android_isurface);
     if (multi_thread == 0)
@@ -83,7 +83,7 @@ static int create_window(void *win_display, int width, int height)
 
     printf("Create window1 for thread1\n");
     /* need to modify here jgl*/
-    SURFACE_CREATE(client1,surface_ctrl1,android_surface1, android_isurface1, width, height);
+    SURFACE_CREATE(client1,surface_ctrl1,android_surface1, android_isurface1, x, y, width, height);
     drawable_thread1 = static_cast<void *>(&android_isurface);
     
     return 0;
