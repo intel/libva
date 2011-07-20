@@ -62,12 +62,12 @@ dri1Close(VADriverContextP ctx)
     struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
 
     free_drawable_hashtable(ctx);
-    VA_DRIDestroyContext((Display *)ctx->native_dpy, ctx->x11_screen, dri_state->hwContextID);
+    VA_DRIDestroyContext(ctx->native_dpy, ctx->x11_screen, dri_state->hwContextID);
     assert(dri_state->pSAREA != MAP_FAILED);
     drmUnmap(dri_state->pSAREA, SAREA_MAX);
     assert(dri_state->fd >= 0);
     drmCloseOnce(dri_state->fd);
-    VA_DRICloseConnection((Display *)ctx->native_dpy, ctx->x11_screen);
+    VA_DRICloseConnection(ctx->native_dpy, ctx->x11_screen);
 }
 
 Bool 
@@ -87,7 +87,7 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
     dri_state->pSAREA = MAP_FAILED;
     dri_state->driConnectedFlag = VA_NONE;
 
-    if (!VA_DRIQueryDirectRenderingCapable((Display *)ctx->native_dpy, 
+    if (!VA_DRIQueryDirectRenderingCapable(ctx->native_dpy, 
                                            ctx->x11_screen, 
                                            &direct_capable))
         goto err_out0;
@@ -95,12 +95,12 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
     if (!direct_capable)
         goto err_out0;
 
-    if (!VA_DRIGetClientDriverName((Display *)ctx->native_dpy, ctx->x11_screen, 
+    if (!VA_DRIGetClientDriverName(ctx->native_dpy, ctx->x11_screen, 
                                    &driver_major, &driver_minor,
                                    &driver_patch, driver_name))
         goto err_out0;
 
-    if (!VA_DRIOpenConnection((Display *)ctx->native_dpy, ctx->x11_screen, 
+    if (!VA_DRIOpenConnection(ctx->native_dpy, ctx->x11_screen, 
                               &dri_state->hSAREA, &BusID))
         goto err_out0;
 
@@ -115,14 +115,14 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
     if (drmGetMagic(dri_state->fd, &magic))
         goto err_out1;
 
-    if (newlyopened && !VA_DRIAuthConnection((Display *)ctx->native_dpy, ctx->x11_screen, magic))
+    if (newlyopened && !VA_DRIAuthConnection(ctx->native_dpy, ctx->x11_screen, magic))
         goto err_out1;
 
     if (drmMap(dri_state->fd, dri_state->hSAREA, SAREA_MAX, &dri_state->pSAREA))
         goto err_out1;
 
-    if (!VA_DRICreateContext((Display *)ctx->native_dpy, ctx->x11_screen,
-                             DefaultVisual((Display *)ctx->native_dpy, ctx->x11_screen),
+    if (!VA_DRICreateContext(ctx->native_dpy, ctx->x11_screen,
+                             DefaultVisual(ctx->native_dpy, ctx->x11_screen),
                              &dri_state->hwContextID, &dri_state->hwContext))
         goto err_out1;
 
@@ -142,7 +142,7 @@ err_out1:
     if (dri_state->fd >= 0)
         drmCloseOnce(dri_state->fd);
 
-    VA_DRICloseConnection((Display *)ctx->native_dpy, ctx->x11_screen);
+    VA_DRICloseConnection(ctx->native_dpy, ctx->x11_screen);
 
 err_out0:
     if (*driver_name)

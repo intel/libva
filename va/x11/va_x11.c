@@ -107,12 +107,12 @@ static VAStatus va_NVCTRL_GetDriverName (
     int direct_capable, driver_major, driver_minor, driver_patch;
     Bool result;
 
-    result = VA_NVCTRLQueryDirectRenderingCapable((Display *)ctx->native_dpy, ctx->x11_screen,
+    result = VA_NVCTRLQueryDirectRenderingCapable(ctx->native_dpy, ctx->x11_screen,
                                                   &direct_capable);
     if (!result || !direct_capable)
         return VA_STATUS_ERROR_UNKNOWN;
 
-    result = VA_NVCTRLGetClientDriverName((Display *)ctx->native_dpy, ctx->x11_screen,
+    result = VA_NVCTRLGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
                                           &driver_major, &driver_minor,
                                           &driver_patch, driver_name);
     if (!result)

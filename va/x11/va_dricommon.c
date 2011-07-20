@@ -50,7 +50,7 @@ do_drawable_hash(VADriverContextP ctx, XID drawable)
 
     dri_drawable = dri_state->createDrawable(ctx, drawable);
     dri_drawable->x_drawable = drawable;
-    dri_drawable->is_window = is_window((Display *)ctx->native_dpy, drawable);
+    dri_drawable->is_window = is_window(ctx->native_dpy, drawable);
     dri_drawable->next = dri_state->drawable_hash[index];
     dri_state->drawable_hash[index] = dri_drawable;
 
