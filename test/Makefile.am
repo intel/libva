@@ -25,3 +25,4 @@ AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x1
 
 SUBDIRS = basic decode encode putsurface vainfo
 
+EXTRA_DIST = loadsurface.h loadsurface_yuv.h

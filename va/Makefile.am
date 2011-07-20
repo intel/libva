@@ -49,6 +49,9 @@ libva_source_h = \
 	$(NULL)
 
 libva_source_h_priv = \
+	sysdeps.h		\
+	va_fool.h		\
+	va_trace.h		\
 	$(NULL)
 
 lib_LTLIBRARIES			= libva.la

@@ -32,6 +32,8 @@ h264encode_SOURCES = h264encode_x11.c
 avcenc_LDADD= $(TEST_LIBS)
 avcenc_SOURCES= avcenc.c
 
+EXTRA_DIST = h264encode_common.c
+
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
