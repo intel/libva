@@ -199,7 +199,7 @@ static int check_tfp_extensions(VADriverContextP ctx)
     if (!check_extension("GL_ARB_texture_non_power_of_two", gl_extensions))
         return 0;
 
-    glx_extensions = glXQueryExtensionsString((Display *)ctx->native_dpy, ctx->x11_screen);
+    glx_extensions = glXQueryExtensionsString(ctx->native_dpy, ctx->x11_screen);
     if (!check_extension("GLX_EXT_texture_from_pixmap", glx_extensions))
         return 0;
     return 1;
@@ -340,7 +340,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     if (!cs)
         goto error;
 
-    cs->display = (Display *)ctx->native_dpy;
+    cs->display = ctx->native_dpy;
     cs->window  = parent ? parent->window : None;
     cs->context = NULL;
 
@@ -357,7 +357,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
             goto choose_fbconfig;
 
         fbconfigs = glXGetFBConfigs(
-            (Display *)ctx->native_dpy,
+            ctx->native_dpy,
             ctx->x11_screen,
             &n_fbconfigs
         );
@@ -367,7 +367,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
         /* Find out a GLXFBConfig compatible with the parent context */
         for (n = 0; n < n_fbconfigs; n++) {
             status = glXGetFBConfigAttrib(
-                (Display *)ctx->native_dpy,
+                ctx->native_dpy,
                 fbconfigs[n],
                 GLX_FBCONFIG_ID, &val
             );
@@ -380,7 +380,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     else {
     choose_fbconfig:
         fbconfigs = glXChooseFBConfig(
-            (Display *)ctx->native_dpy,
+            ctx->native_dpy,
             ctx->x11_screen,
             fbconfig_attrs, &n_fbconfigs
         );
@@ -392,7 +392,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     }
 
     cs->context = glXCreateNewContext(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         fbconfigs[n],
         GLX_RGBA_TYPE,
         parent ? parent->context : NULL,
@@ -470,12 +470,12 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     int                  *attrib;
     int                   n_fbconfig_attrs;
 
-    root_window = RootWindow((Display *)ctx->native_dpy, ctx->x11_screen);
-    XGetWindowAttributes((Display *)ctx->native_dpy, root_window, &wattr);
+    root_window = RootWindow(ctx->native_dpy, ctx->x11_screen);
+    XGetWindowAttributes(ctx->native_dpy, root_window, &wattr);
     if (wattr.depth != 24 && wattr.depth != 32)
         return 0;
     pixmap = XCreatePixmap(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         root_window,
         width,
         height,
@@ -509,7 +509,7 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     *attrib++ = GL_NONE;
 
     fbconfig = glXChooseFBConfig(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         ctx->x11_screen,
         fbconfig_attrs,
         &n_fbconfig_attrs
@@ -533,7 +533,7 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 
     x11_trap_errors();
     glx_pixmap = pOpenGLVTable->glx_create_pixmap(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         fbconfig[0],
         pixmap,
         pixmap_attrs
@@ -561,12 +561,12 @@ static void destroy_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     }
 
     if (pSurfaceGLX->glx_pixmap) {
-        pOpenGLVTable->glx_destroy_pixmap((Display *)ctx->native_dpy, pSurfaceGLX->glx_pixmap);
+        pOpenGLVTable->glx_destroy_pixmap(ctx->native_dpy, pSurfaceGLX->glx_pixmap);
         pSurfaceGLX->glx_pixmap = None;
     }
 
     if (pSurfaceGLX->pixmap) {
-        XFreePixmap((Display *)ctx->native_dpy, pSurfaceGLX->pixmap);
+        XFreePixmap(ctx->native_dpy, pSurfaceGLX->pixmap);
         pSurfaceGLX->pixmap = None;
     }
 }
@@ -583,12 +583,12 @@ static int bind_pixmap(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 
     x11_trap_errors();
     pOpenGLVTable->glx_bind_tex_image(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         pSurfaceGLX->glx_pixmap,
         GLX_FRONT_LEFT_EXT,
         NULL
     );
-    XSync((Display *)ctx->native_dpy, False);
+    XSync(ctx->native_dpy, False);
     if (x11_untrap_errors() != 0) {
         va_glx_error_message("failed to bind pixmap\n");
         return 0;
@@ -608,11 +608,11 @@ static int unbind_pixmap(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
 
     x11_trap_errors();
     pOpenGLVTable->glx_release_tex_image(
-        (Display *)ctx->native_dpy,
+        ctx->native_dpy,
         pSurfaceGLX->glx_pixmap,
         GLX_FRONT_LEFT_EXT
     );
-    XSync((Display *)ctx->native_dpy, False);
+    XSync(ctx->native_dpy, False);
     if (x11_untrap_errors() != 0) {
         va_glx_error_message("failed to release pixmap\n");
         return 0;
@@ -946,7 +946,7 @@ associate_surface(
         NULL, 0,
         flags
     );
-    XSync((Display *)ctx->native_dpy, False);
+    XSync(ctx->native_dpy, False);
     if (x11_untrap_errors() != 0)
         return VA_STATUS_ERROR_OPERATION_FAILED;
     if (status != VA_STATUS_SUCCESS)
@@ -1068,7 +1068,7 @@ VAStatus va_glx_init_context(VADriverContextP ctx)
         vtable->vaDestroySurfaceGLX     = vaDestroySurfaceGLX_impl_libva;
         vtable->vaCopySurfaceGLX        = vaCopySurfaceGLX_impl_libva;
 
-        if (!glXQueryVersion((Display *)ctx->native_dpy, &glx_major, &glx_minor))
+        if (!glXQueryVersion(ctx->native_dpy, &glx_major, &glx_minor))
             return VA_STATUS_ERROR_UNIMPLEMENTED;
 
         if (!check_tfp_extensions(ctx) || !load_tfp_extensions(ctx))
