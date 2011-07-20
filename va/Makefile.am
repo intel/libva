@@ -20,6 +20,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+SUBDIRS =
+
 INCLUDES = \
 	$(LIBVA_CFLAGS) -I$(top_srcdir)/va/x11 \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
@@ -27,76 +29,84 @@ INCLUDES = \
 LDADD = \
 	$(LIBVA_LT_LDFLAGS)
 
-libva_la_SOURCES = va.c va_trace.c va_fool.c va_fool_getframe.c
-libva_ladir = $(libdir)
-libva_la_LDFLAGS = $(LDADD) -no-undefined
-libva_la_LIBADD = $(LIBVA_LIBS) -ldl
+libva_source_c = \
+	va.c			\
+	va_fool.c		\
+	va_fool_getframe.c	\
+	va_trace.c		\
+	$(NULL)
 
-libva_tpi_la_SOURCES = va_tpi.c
-libva_tpi_ladir = $(libdir)
-libva_tpi_la_LDFLAGS = $(LDADD) -no-undefined
-libva_tpi_la_LIBADD = $(libvacorelib) -ldl
-libva_tpi_la_DEPENDENCIES = $(libvacorelib) 
+libva_source_h = \
+	va.h			\
+	va_backend.h		\
+	va_backend_tpi.h	\
+	va_dummy.h		\
+	va_tpi.h		\
+	va_version.h		\
+	va_x11.h		\
+	$(NULL)
 
+libva_source_h_priv = \
+	$(NULL)
 
-libva_x11_backend      = libva-x11.la
-libva_x11_backenddir   = x11
+lib_LTLIBRARIES			= libva.la
+libvaincludedir			= ${includedir}/va
+libvainclude_HEADERS		= $(libva_source_h)
+noinst_HEADERS			= $(libva_source_h_priv)
+libva_la_SOURCES		= $(libva_source_c)
+libva_la_LDFLAGS		= $(LDADD) -no-undefined
+libva_la_LIBADD			= $(LIBVA_LIBS) -ldl
 
-libva_x11_la_SOURCES = 
-libva_x11_la_LIBADD  = $(libvacorelib) x11/libva_x11.la $(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS) -ldl
-libva_x11_la_LDFLAGS = $(LDADD)
-libva_x11_la_DEPENDENCIES = $(libvacorelib) x11/libva_x11.la
+lib_LTLIBRARIES			+= libva-tpi.la
+libva_tpi_la_SOURCES		= va_tpi.c
+libva_tpi_la_LDFLAGS		= $(LDADD) -no-undefined
+libva_tpi_la_DEPENDENCIES	= $(libvacorelib) 
+libva_tpi_la_LIBADD		= $(libvacorelib) -ldl
 
-if BUILD_DUMMY_BACKEND
-libva_dummy_backend = libva-dummy.la
-libva_dummy_backenddir = dummy
-
-libva_dummy_la_SOURCES = 
-libva_dummy_la_LIBADD  = $(libvacorelib) dummy/libva_dummy.la $(LIBVA_LIBS) $(DRM_LIBS)
-libva_dummy_la_LDFLAGS = $(LDADD)
-libva_dummy_la_DEPENDENCIES = $(libvacorelib) dummy/libva_dummy.la
-else
-libva_dummy_backend =
-libva_dummy_backenddir =
-endif
+SUBDIRS				+= x11
+lib_LTLIBRARIES			+= libva-x11.la
+libva_x11_la_SOURCES		= 
+libva_x11_la_LDFLAGS		= $(LDADD)
+libva_x11_la_DEPENDENCIES	= $(libvacorelib) x11/libva_x11.la
+libva_x11_la_LIBADD		= $(libvacorelib) x11/libva_x11.la \
+	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS) -ldl
 
 if USE_GLX
-libva_glx_backend      = libva-glx.la
-libva_glx_backenddir   = glx
-
-libva_glx_la_SOURCES =
-libva_glx_la_LIBADD  = $(libvacorelib) glx/libva_glx.la libva-x11.la $(GL_DEPS_LIBS) -ldl
-libva_glx_la_LDFLAGS = $(LDADD)
-libva_glx_la_DEPENDENCIES = $(libvacorelib) glx/libva_glx.la libva-x11.la
-
-else
-libva_glx_backend      =
-libva_glx_backenddir   =
+SUBDIRS				+= glx
+lib_LTLIBRARIES			+= libva-glx.la
+libva_glx_la_SOURCES		=
+libva_glx_la_LDFLAGS		= $(LDADD)
+libva_glx_la_DEPENDENCIES	= $(libvacorelib) glx/libva_glx.la libva-x11.la
+libva_glx_la_LIBADD		= $(libvacorelib) glx/libva_glx.la libva-x11.la \
+	$(GL_DEPS_LIBS) -ldl
 endif
 
 if USE_EGL
-libva_egl_backend      = libva-egl.la
-libva_egl_backenddir   = egl
-libva_egl_la_SOURCES =
-libva_egl_la_LIBADD  = $(libvacorelib) egl/libva_egl.la libva-x11.la $(GL_DEPS_LIBS) -ldl
-libva_egl_la_LDFLAGS = $(LDADD)
-libva_egl_la_DEPENDENCIES = $(libvacorelib) egl/libva_egl.la libva-x11.la
-else
-libva_egl_backend      =
-libva_egl_backenddir   =
+SUBDIRS				+= egl
+lib_LTLIBRARIES			+= libva-egl.la
+libva_egl_la_SOURCES		=
+libva_egl_la_LDFLAGS		= $(LDADD)
+libva_egl_la_DEPENDENCIES	= $(libvacorelib) egl/libva_egl.la libva-x11.la
+libva_egl_la_LIBADD		= $(libvacorelib) egl/libva_egl.la libva-x11.la \
+	$(GL_DEPS_LIBS) -ldl
 endif
 
-lib_LTLIBRARIES = libva.la libva-tpi.la $(libva_x11_backend) $(libva_dummy_backend) $(libva_glx_backend) $(libva_egl_backend)
+if BUILD_DUMMY_BACKEND
+SUBDIRS				+= dummy
+lib_LTLIBRARIES			+= libva-dummy.la
+libva_dummy_la_SOURCES		= 
+libva_dummy_la_LDFLAGS		= $(LDADD)
+libva_dummy_la_DEPENDENCIES	= $(libvacorelib) dummy/libva_dummy.la
+libva_dummy_la_LIBADD		= $(libvacorelib) dummy/libva_dummy.la \
+	$(LIBVA_LIBS) $(DRM_LIBS)
+endif
 
 DIST_SUBDIRS = x11 glx egl dummy
 
-SUBDIRS = $(libva_x11_backenddir) $(libva_dummy_backenddir) $(libva_glx_backenddir) $(libva_egl_backenddir)
-
-libvaincludedir = ${includedir}/va
-libvainclude_HEADERS = va.h va_tpi.h va_x11.h va_backend.h va_dummy.h va_version.h va_backend_tpi.h
-
 DISTCLEANFILES = \
-	va_version.h
+	va_version.h		\
+	$(NULL)
 
 EXTRA_DIST = \
-	va_version.h.in
+	va_version.h.in		\
+	$(NULL)

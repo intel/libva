@@ -24,18 +24,21 @@ AM_CFLAGS = -DLINUX -I$(top_srcdir)/va -I$(top_srcdir)/va/x11
 
 source_c = \
 	va_glx.c		\
-	va_glx_impl.c
+	va_glx_impl.c		\
+	$(NULL)
 
 source_h = \
+	va_backend_glx.h	\
 	va_glx.h		\
-	va_backend_glx.h
+	$(NULL)
 
 source_h_priv = \
 	va_glx_impl.h		\
-	va_glx_private.h
+	va_glx_private.h	\
+	$(NULL)
 
-noinst_LTLIBRARIES	 = libva_glx.la
-libva_glxincludedir	 = ${includedir}/va
-libva_glxinclude_HEADERS = $(source_h)
-libva_glx_la_SOURCES	 = $(source_c)
-noinst_HEADERS		 = $(source_h_priv)
+noinst_LTLIBRARIES		 = libva_glx.la
+libva_glxincludedir		 = ${includedir}/va
+libva_glxinclude_HEADERS	 = $(source_h)
+libva_glx_la_SOURCES		 = $(source_c)
+noinst_HEADERS			 = $(source_h_priv)

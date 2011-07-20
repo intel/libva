@@ -22,11 +22,33 @@
 
 AM_CFLAGS = -DLINUX -I$(top_srcdir)/va $(DRM_CFLAGS)
 
-noinst_LTLIBRARIES = libva_x11.la	
+source_c = \
+	dri1_util.c		\
+	dri2_util.c		\
+	va_dri.c		\
+	va_dri2.c		\
+	va_dricommon.c		\
+	va_fglrx.c		\
+	va_nvctrl.c		\
+	va_x11.c		\
+	$(NULL)
 
-libva_x11includedir = ${includedir}/va
-libva_x11include_HEADERS = va_dri.h va_dri2.h va_dricommon.h
+source_h = \
+	va_dri.h		\
+	va_dri2.h		\
+	va_dricommon.h		\
+	$(NULL)
 
-libva_x11_la_SOURCES = va_x11.c va_dri.c va_dri2.c va_dricommon.c dri2_util.c dri1_util.c va_nvctrl.c va_fglrx.c
+source_h_priv = \
+	va_dri2str.h		\
+	va_dri2tokens.h		\
+	va_dristr.h		\
+	va_fglrx.h		\
+	va_nvctrl.h		\
+	$(NULL)
 
-EXTRA_DIST = va_dristr.h va_dri2str.h va_dri2tokens.h va_nvctrl.h va_fglrx.h
+noinst_LTLIBRARIES		= libva_x11.la	
+libva_x11includedir		= ${includedir}/va
+libva_x11include_HEADERS	= $(source_h)
+libva_x11_la_SOURCES		= $(source_c)
+noinst_HEADERS			= $(source_h_priv)
