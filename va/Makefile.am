@@ -23,7 +23,9 @@
 SUBDIRS =
 
 INCLUDES = \
-	$(LIBVA_CFLAGS) -I$(top_srcdir)/va/x11 \
+	$(LIBVA_CFLAGS) \
+	-I$(top_srcdir) \
+	-I$(top_srcdir)/va/x11 \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 LDADD = \

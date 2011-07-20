@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AM_CFLAGS = -DLINUX -I$(top_srcdir)/va -I$(top_srcdir)/va/x11
+INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11
 
 source_c = \
 	va_egl.c		
