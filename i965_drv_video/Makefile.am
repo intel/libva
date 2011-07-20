@@ -22,55 +22,73 @@
 
 SUBDIRS = shaders
 
-AM_CFLAGS = -Wall -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 -DPTHREADS @DRM_CFLAGS@
+INCLUDES = \
+	-Wall			\
+	-I$(top_srcdir)		\
+	-I$(top_srcdir)/va	\
+	-I$(top_srcdir)/va/x11	\
+	-DPTHREADS		\
+	$(DRM_CFLAGS)		\
+	$(NULL)
 
-i965_drv_video_la_LTLIBRARIES = i965_drv_video.la
-i965_drv_video_ladir = @LIBVA_DRIVERS_PATH@
-i965_drv_video_la_LDFLAGS = -module -avoid-version -no-undefined -Wl,--no-undefined @DRM_LIBS@ -ldrm_intel
-i965_drv_video_la_LIBADD = ../va/libva-x11.la -lpthread
+driver_ldflags = \
+	-module -avoid-version	\
+	-no-undefined		\
+	-Wl,--no-undefined	\
+	$(DRM_LIBS) -ldrm_intel	\
+	$(NULL)
 
-i965_drv_video_la_SOURCES =	\
-	object_heap.c		\
-	intel_batchbuffer.c	\
-	intel_batchbuffer_dump.c\
-	intel_memman.c		\
-	intel_driver.c		\
-	i965_media.c		\
-	i965_media_mpeg2.c	\
-	i965_media_h264.c	\
-	i965_render.c		\
-	i965_drv_video.c	\
+source_c = \
+	gen6_mfc.c		\
+	gen6_mfd.c		\
+	gen6_vme.c		\
+	gen7_mfd.c		\
 	i965_avc_bsd.c		\
 	i965_avc_hw_scoreboard.c\
 	i965_avc_ildb.c		\
-	i965_post_processing.c	\
-	gen6_mfd.c		\
+	i965_drv_video.c	\
 	i965_encoder.c		\
-	gen6_vme.c		\
-	gen6_mfc.c		\
-	gen7_mfd.c
+	i965_media.c		\
+	i965_media_h264.c	\
+	i965_media_mpeg2.c	\
+	i965_post_processing.c	\
+	i965_render.c		\
+	intel_batchbuffer.c	\
+	intel_batchbuffer_dump.c\
+	intel_driver.c		\
+	intel_memman.c		\
+	object_heap.c		\
+	$(NULL)
 
-noinst_HEADERS =                \
-	object_heap.h           \
-	intel_batchbuffer.h     \
-	intel_batchbuffer_dump.h\
-	intel_memman.h          \
-	intel_driver.h          \
-	i965_media.h            \
-	i965_media_mpeg2.h      \
-	i965_media_h264.h	\
-	i965_render.h           \
-	i965_drv_video.h        \
-	i965_defines.h          \
-	i965_structs.h		\
+source_h = \
+	gen6_mfc.h		\
+	gen6_mfd.h		\
+	gen6_vme.h		\
+	gen7_mfd.h		\
 	i965_avc_bsd.h		\
 	i965_avc_hw_scoreboard.h\
 	i965_avc_ildb.h		\
-	i965_post_processing.h	\
-	gen6_mfd.h		\
+	i965_defines.h          \
+	i965_drv_video.h        \
 	i965_encoder.h		\
-	gen6_vme.h		\
-	gen6_mfc.h		\
-	intel_compiler.h	\
+	i965_media.h            \
+	i965_media_h264.h	\
+	i965_media_mpeg2.h      \
 	i965_mutext.h		\
-	gen7_mfd.h
+	i965_post_processing.h	\
+	i965_render.h           \
+	i965_structs.h		\
+	intel_batchbuffer.h     \
+	intel_batchbuffer_dump.h\
+	intel_compiler.h	\
+	intel_driver.h          \
+	intel_memman.h          \
+	object_heap.h           \
+	$(NULL)
+
+i965_drv_video_la_LTLIBRARIES	= i965_drv_video.la
+i965_drv_video_ladir		= $(LIBVA_DRIVERS_PATH)
+i965_drv_video_la_LDFLAGS	= $(driver_ldflags)
+i965_drv_video_la_LIBADD	= $(top_builddir)/va/libva-x11.la -lpthread
+i965_drv_video_la_SOURCES	= $(source_c)
+noinst_HEADERS			= $(source_h)
