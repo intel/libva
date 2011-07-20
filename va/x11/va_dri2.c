@@ -44,6 +44,9 @@
 #define DRI2DriverDRI 0
 #endif
 
+static int
+VA_DRI2Error(Display *dpy, xError *err, XExtCodes *codes, int *ret_code);
+
 static char va_dri2ExtensionName[] = DRI2_NAME;
 static XExtensionInfo _va_dri2_info_data;
 static XExtensionInfo *va_dri2Info = &_va_dri2_info_data;
@@ -58,7 +61,7 @@ static /* const */ XExtensionHooks va_dri2ExtensionHooks = {
     VA_DRI2CloseDisplay,		/* close_display */
     NULL,				/* wire_to_event */
     NULL,				/* event_to_wire */
-    NULL,				/* error */
+    VA_DRI2Error,			/* error */
     NULL,				/* error_string */
 };
 
@@ -66,6 +69,22 @@ static XEXT_GENERATE_FIND_DISPLAY (DRI2FindDisplay, va_dri2Info,
 				   va_dri2ExtensionName, 
 				   &va_dri2ExtensionHooks, 
 				   0, NULL)
+
+static int
+VA_DRI2Error(Display *dpy, xError *err, XExtCodes *codes, int *ret_code)
+{
+    /*
+     * If the X drawable was destroyed before the VA drawable, the DRI2 drawable
+     * will be gone by the time we call VA_DRI2DestroyDrawable(). So, simply
+     * ignore BadDrawable errors in that case.
+     */
+    if (err->majorCode == codes->major_opcode &&
+        err->errorCode == BadDrawable &&
+        err->minorCode == X_DRI2DestroyDrawable)
+	return True;
+
+    return False;
+}
 
 Bool VA_DRI2QueryExtension(Display *dpy, int *eventBase, int *errorBase)
 {
