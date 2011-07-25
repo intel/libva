@@ -1108,7 +1108,7 @@ static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
 
 static void show_help()
 {
-    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate] [mode=1(I frames only)/2(I and P frames)/3(I, P and B frames)\n");
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate] [mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)\n");
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264Ext *seq_param,
