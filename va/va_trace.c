@@ -1529,6 +1529,68 @@ static void va_TraceVAEncPictureParameterBufferH263(
     return;
 }
 
+static void va_TraceVAEncPictureParameterBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncPictureParameterBufferJPEG *p = (VAEncPictureParameterBufferJPEG *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAEncPictureParameterBufferJPEG\n");
+    va_TraceMsg(idx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
+    va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
+    va_TraceMsg(idx, "\tpicture_width = %d\n", p->picture_width);
+    va_TraceMsg(idx, "\tpicture_height = %d\n", p->picture_height);
+    va_TraceMsg(idx, NULL);
+
+    trace_context[idx].trace_codedbuf =  p->coded_buf;
+    
+    return;
+}
+
+static void va_TraceVAEncQMatrixBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAQMatrixBufferJPEG *p = (VAQMatrixBufferJPEG *)data;
+    DPY2INDEX(dpy);
+    
+    va_TraceMsg(idx, "VAQMatrixBufferJPEG\n");
+    va_TraceMsg(idx, "\tload_lum_quantiser_matrix = %d", p->load_lum_quantiser_matrix);
+    if (p->load_lum_quantiser_matrix) {
+        int i;
+        for (i = 0; i < 64; i++) {
+            if ((i % 8) == 0)
+                va_TraceMsg(idx, "\n\t");
+            va_TraceMsg(idx, "\t0x%02x", p->lum_quantiser_matrix[i]);
+        }
+        va_TraceMsg(idx, "\n");
+    }
+    va_TraceMsg(idx, "\tload_chroma_quantiser_matrix = %08x\n", p->load_chroma_quantiser_matrix);
+    if (p->load_chroma_quantiser_matrix) {
+        int i;
+        for (i = 0; i < 64; i++) {
+            if ((i % 8) == 0)
+                va_TraceMsg(idx, "\n\t");
+            va_TraceMsg(idx, "\t0x%02x", p->chroma_quantiser_matrix[i]);
+        }
+        va_TraceMsg(idx, "\n");
+    }
+    
+    va_TraceMsg(idx, NULL);
+    
+    return;
+}
 
 static void va_TraceH263Buf(
     VADisplay dpy,
@@ -1582,6 +1644,45 @@ static void va_TraceH263Buf(
         break;
     case VAEncSliceParameterBufferType:
         va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    default:
+        break;
+    }
+}
+
+
+static void va_TraceJPEGBuf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    switch (type) {
+    case VAPictureParameterBufferType:/* print MPEG4 buffer */
+    case VAIQMatrixBufferType:/* print MPEG4 buffer */
+    case VABitPlaneBufferType:/* print MPEG4 buffer */
+    case VASliceGroupMapBufferType:
+    case VASliceParameterBufferType:/* print MPEG4 buffer */
+    case VASliceDataBufferType:
+    case VAMacroblockParameterBufferType:
+    case VAResidualDataBufferType:
+    case VADeblockingParameterBufferType:
+    case VAImageBufferType:
+    case VAProtectedSliceDataBufferType:
+    case VAEncCodedBufferType:
+    case VAEncSequenceParameterBufferType:
+    case VAEncSliceParameterBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncPictureParameterBufferType:
+        va_TraceVAEncPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAQMatrixBufferType:
+        va_TraceVAEncQMatrixBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
         break;
@@ -1859,6 +1960,14 @@ void va_TraceRenderPicture(
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceH263Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
+            }
+            break;
+        case VAProfileJPEGBaseline:
+            for (j=0; j<num_elements; j++) {
+                va_TraceMsg(idx, "\t---------------------------\n", j);
+                va_TraceMsg(idx, "\telement[%d] = ", j);
+                
+                va_TraceJPEGBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         default:
