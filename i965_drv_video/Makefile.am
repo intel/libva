@@ -23,12 +23,16 @@
 SUBDIRS = shaders
 
 INCLUDES = \
-	-Wall			\
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	-I$(top_srcdir)/va/x11	\
 	-DPTHREADS		\
 	$(DRM_CFLAGS)		\
+	$(NULL)
+
+driver_cflags = \
+	-Wall			\
+	-fvisibility=hidden	\
 	$(NULL)
 
 driver_ldflags = \
@@ -88,6 +92,7 @@ source_h = \
 
 i965_drv_video_la_LTLIBRARIES	= i965_drv_video.la
 i965_drv_video_ladir		= $(LIBVA_DRIVERS_PATH)
+i965_drv_video_la_CFLAGS	= $(driver_cflags)
 i965_drv_video_la_LDFLAGS	= $(driver_ldflags)
 i965_drv_video_la_LIBADD	= $(top_builddir)/va/libva-x11.la -lpthread
 i965_drv_video_la_SOURCES	= $(source_c)

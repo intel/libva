@@ -2522,6 +2522,9 @@ i965_UnlockSurface(
     return vaStatus;
 }
 
+VAStatus DLL_EXPORT
+VA_DRIVER_INIT_FUNC(VADriverContextP ctx);
+
 VAStatus 
 VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
 {
