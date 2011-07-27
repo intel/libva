@@ -1006,7 +1006,8 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
     
     begin_picture(yuv_fp, frame_num, display_num, slice_type, is_idr);
 
-    if (next_display_num < frame_number) {
+    //if (next_display_num < frame_number) {
+    if (1) {
         int index;
 
         /* prepare for next frame */
@@ -1014,7 +1015,8 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
             index = SID_INPUT_PICTURE_1;
         else
             index = SID_INPUT_PICTURE_0;
-
+        if ( next_display_num >= frame_number )
+            next_display_num = frame_number - 1;
         fseek(yuv_fp, frame_size * next_display_num, SEEK_SET);
 
         avcenc_context.upload_thread_param.yuv_fp = yuv_fp;
@@ -1307,8 +1309,8 @@ int main(int argc, char *argv[])
             static int fcurrent = 0;
             int fnext;
             
-            fcurrent = fcurrent % sizeof(frame_type_pattern)/sizeof(int[2]);
-            fnext = (fcurrent+1) % sizeof(frame_type_pattern)/sizeof(int[2]);
+            fcurrent = fcurrent % (sizeof(frame_type_pattern)/sizeof(int[2]));
+            fnext = (fcurrent+1) % (sizeof(frame_type_pattern)/sizeof(int[2]));
             
             if ( frame_type_pattern[fcurrent][0] == SLICE_TYPE_I ) {
                 encode_picture(yuv_fp, avc_fp,enc_frame_number, f, f==0, SLICE_TYPE_I, 0, 
