@@ -1056,23 +1056,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
     end_picture(slice_type, next_is_bpic);
 }
 
-static void encode_i_picture(FILE *yuv_fp, FILE *avc_fp, int f, int is_idr)
-{
-    encode_picture(yuv_fp, avc_fp,
-                   enc_frame_number, f,
-                   is_idr,
-                   SLICE_TYPE_I, 0, f + 1);
-}
-
-static void encode_p_picture(FILE *yuv_fp, FILE *avc_fp, int f)
-{
-    encode_picture(yuv_fp, avc_fp,
-                   enc_frame_number, f,
-                   0,
-                   SLICE_TYPE_P, 0, f + 1);
-}
-
-static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
+static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes, int next_f)
 {
     int i;
     encode_picture(yuv_fp, avc_fp,
@@ -1090,7 +1074,7 @@ static void encode_pb_pictures(FILE *yuv_fp, FILE *avc_fp, int f, int nbframes)
     encode_picture(yuv_fp, avc_fp,
                    enc_frame_number + 1, f + nbframes - 1,
                    0,
-                   SLICE_TYPE_B, 0, f + nbframes + 1);
+                   SLICE_TYPE_B, 0, next_f);
 }
 
 static void show_help()
@@ -1299,28 +1283,47 @@ int main(int argc, char *argv[])
 
     enc_frame_number = 0;
     for ( f = 0; f < frame_number; ) {		//picture level loop
-        int is_intra = i_frame_only?1:(enc_frame_number % intra_period == 0);
-        int is_idr = (f == 0);
-        int is_bslice = 0;
-		
-        if ( ! is_intra && pb_period > 0) {
-            is_bslice = i_p_frame_only?0:(f % pb_period == 1) && (f < frame_number - 1);	
-        }
-	
-        if ( is_intra ) {
-            encode_i_picture(yuv_fp, avc_fp, f, is_idr);
+        static int const frame_type_pattern[][2] = { {SLICE_TYPE_I,1}, 
+                                                     {SLICE_TYPE_P,3}, {SLICE_TYPE_P,3},{SLICE_TYPE_P,3},
+                                                     {SLICE_TYPE_P,3}, {SLICE_TYPE_P,3},{SLICE_TYPE_P,3},
+                                                     {SLICE_TYPE_P,3}, {SLICE_TYPE_P,3},{SLICE_TYPE_P,3},
+                                                     {SLICE_TYPE_P,2} };
+
+        if ( i_frame_only ) {
+            encode_picture(yuv_fp, avc_fp,enc_frame_number, f, f==0, SLICE_TYPE_I, 0, f+1);
             f++;
             enc_frame_number++;
-        } else if ( is_bslice) {
-            encode_pb_pictures(yuv_fp, avc_fp, f, 2);   //last parameter is continue B frames number
-            f += (1 + 2);
-            enc_frame_number++;
-        } else {
-            encode_p_picture(yuv_fp, avc_fp, f);
-            f++;
-            enc_frame_number++;
+        } else if ( i_p_frame_only ) {
+            if ( (f % intra_period) == 0 ) {
+                encode_picture(yuv_fp, avc_fp,enc_frame_number, f, f==0, SLICE_TYPE_I, 0, f+1);
+                f++;
+                enc_frame_number++;
+            } else {
+                encode_picture(yuv_fp, avc_fp,enc_frame_number, f, f==0, SLICE_TYPE_P, 0, f+1);
+                f++;
+                enc_frame_number++;
+            }
+        } else { // follow the i,p,b pattern
+            static int fcurrent = 0;
+            int fnext;
+            
+            fcurrent = fcurrent % sizeof(frame_type_pattern)/sizeof(int[2]);
+            fnext = (fcurrent+1) % sizeof(frame_type_pattern)/sizeof(int[2]);
+            
+            if ( frame_type_pattern[fcurrent][0] == SLICE_TYPE_I ) {
+                encode_picture(yuv_fp, avc_fp,enc_frame_number, f, f==0, SLICE_TYPE_I, 0, 
+                        f+frame_type_pattern[fnext][1]);
+                f++;
+                enc_frame_number++;
+            } else {
+                encode_pb_pictures(yuv_fp, avc_fp, f, frame_type_pattern[fcurrent][1]-1, 
+                        f + frame_type_pattern[fcurrent][1] + frame_type_pattern[fnext][1] -1 );
+                f += frame_type_pattern[fcurrent][1];
+                enc_frame_number++;
+            }
+ 
+            fcurrent++;
         }
-       
         printf("\r %d/%d ...", f+1, frame_number);
         fflush(stdout);
     }
