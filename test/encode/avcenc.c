@@ -256,6 +256,7 @@ static void alloc_encode_resource(FILE *yuv_fp)
 
 static void release_encode_resource()
 {
+    pthread_join(avcenc_context.upload_thread_id, NULL);
     free(newImageBuffer);
 
     // Release all the surfaces resource
