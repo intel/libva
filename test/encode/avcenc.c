@@ -108,14 +108,6 @@ struct upload_thread_param
 static void 
 upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
-struct packed_data_format
-{
-    unsigned int length_in_bits;
-    unsigned char flag;
-    unsigned char num_skip_bytes;
-    unsigned char pad[2];
-};
-
 struct {
     VAEncSequenceParameterBufferH264Ext seq_param;
     VAEncPictureParameterBufferH264Ext pic_param;
@@ -128,7 +120,9 @@ struct {
     VABufferID slice_param_buf_id[MAX_SLICES];  /* Slice level parameter, multil slices */
     VABufferID dec_ref_pic_marking_buf_id;
     VABufferID codedbuf_buf_id;                 /* Output buffer, compressed data */
+    VABufferID packed_seq_header_param_buf_id;
     VABufferID packed_seq_buf_id;
+    VABufferID packed_pic_header_param_buf_id;
     VABufferID packed_pic_buf_id;
     int num_slices;
     int codedbuf_i_size;
@@ -355,8 +349,8 @@ static void avcenc_update_slice_parameter(int slice_type)
     // Slice level
     i = 0;
     slice_param = &avcenc_context.slice_param[i];
-    slice_param->start_row_number = 0;
-    slice_param->slice_height = picture_height_in_mbs/16; /* Measured by MB */
+    slice_param->starting_macroblock_address = 0;
+    slice_param->number_of_mbs = picture_height_in_mbs * picture_width_in_mbs;
     slice_param->pic_parameter_set_id = 0;
     slice_param->slice_type = slice_type;
     slice_param->direct_spatial_mv_pred_flag = 0;
@@ -405,25 +399,55 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
         avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
 
     if (frame_num == 0) {
+        VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+        unsigned int length_in_bits, offset_in_bytes;
         unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL;
-        int seq_length, pic_length;
 
         assert(slice_type == SLICE_TYPE_I);
-        seq_length = build_packed_seq_buffer(&packed_seq_buffer);
+        length_in_bits = build_packed_seq_buffer(&packed_seq_buffer);
+        offset_in_bytes = 0;
+        packed_header_param_buffer.type = VAEncPackedHeaderSPS;
+        packed_header_param_buffer.insert_emulation_bytes = 1;
+        packed_header_param_buffer.skip_emulation_check_count = 5; /* ignore start code & nal type for emulation prevetion check */
+        packed_header_param_buffer.num_headers = 1;
+        packed_header_param_buffer.length_in_bits = &length_in_bits;
+        packed_header_param_buffer.offset_in_bytes = &offset_in_bytes;
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
-                                   VAEncPackedSequenceParameterBufferType,
-                                   (seq_length + 7) / 8, 1, packed_seq_buffer,
-                                   &avcenc_context.packed_seq_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+                                   VAEncPackedHeaderParameterBufferType,
+                                   sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                                   &avcenc_context.packed_seq_header_param_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
-        pic_length = build_packed_pic_buffer(&packed_pic_buffer);
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
-                                   VAEncPackedPictureParameterBufferType,
-                                   (pic_length + 7) / 8 , 1, packed_pic_buffer,
+                                   VAEncPackedHeaderDataBufferType,
+                                   (length_in_bits + 7) / 8, 1, packed_seq_buffer,
+                                   &avcenc_context.packed_seq_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+        length_in_bits = build_packed_pic_buffer(&packed_pic_buffer);
+        offset_in_bytes = 0;
+        packed_header_param_buffer.type = VAEncPackedHeaderPPS;
+        packed_header_param_buffer.insert_emulation_bytes = 1;
+        packed_header_param_buffer.skip_emulation_check_count = 5; /* ignore start code & nal type for emulation prevetion check */
+        packed_header_param_buffer.num_headers = 1;
+        packed_header_param_buffer.length_in_bits = &length_in_bits;
+        packed_header_param_buffer.offset_in_bytes = &offset_in_bytes;
+
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedHeaderParameterBufferType,
+                                   sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                                   &avcenc_context.packed_pic_header_param_buf_id);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+        va_status = vaCreateBuffer(va_dpy,
+                                   avcenc_context.context_id,
+                                   VAEncPackedHeaderDataBufferType,
+                                   (length_in_bits + 7) / 8, 1, packed_pic_buffer,
                                    &avcenc_context.packed_pic_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
         free(packed_seq_buffer);
         free(packed_pic_buffer);
@@ -456,8 +480,14 @@ int avcenc_render_picture()
     if (avcenc_context.dec_ref_pic_marking_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] = avcenc_context.dec_ref_pic_marking_buf_id;
 
+    if (avcenc_context.packed_seq_header_param_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] = avcenc_context.packed_seq_header_param_buf_id;
+
     if (avcenc_context.packed_seq_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] = avcenc_context.packed_seq_buf_id;
+
+    if (avcenc_context.packed_pic_header_param_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] = avcenc_context.packed_pic_header_param_buf_id;
 
     if (avcenc_context.packed_pic_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] = avcenc_context.packed_pic_buf_id;
@@ -527,7 +557,9 @@ static void end_picture(int slice_type, int next_is_bpic)
     avcenc_destroy_buffers(&avcenc_context.seq_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.pic_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.dec_ref_pic_marking_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_seq_header_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_seq_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_pic_header_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_pic_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.slice_param_buf_id[0], avcenc_context.num_slices);
     avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
@@ -579,7 +611,7 @@ bitstream_start(bitstream *bs)
 {
     bs->max_size_in_dword = BITSTREAM_ALLOCATE_STEPPING;
     bs->buffer = calloc(bs->max_size_in_dword * sizeof(int), 1);
-    bs->bit_offset = sizeof(struct packed_data_format) * 8; /* the first 64 bits used for format */
+    bs->bit_offset = 0;
 }
 
 static void
@@ -588,16 +620,10 @@ bitstream_end(bitstream *bs)
     int pos = (bs->bit_offset >> 5);
     int bit_offset = (bs->bit_offset & 0x1f);
     int bit_left = 32 - bit_offset;
-    struct packed_data_format *format;
 
     if (bit_offset) {
         bs->buffer[pos] = va_swap32((bs->buffer[pos] << bit_left));
     }
-
-    format = (struct packed_data_format *)bs->buffer;
-    format->length_in_bits = bs->bit_offset - sizeof(struct packed_data_format) * 8;
-    format->flag |= 1;
-    format->num_skip_bytes = 5; /* ignore start code & nal type for emulation prevetion check */
 }
  
 static void
@@ -1193,7 +1219,9 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.seq_param_buf_id = VA_INVALID_ID;
     avcenc_context.pic_param_buf_id = VA_INVALID_ID;
     avcenc_context.dec_ref_pic_marking_buf_id = VA_INVALID_ID;
+    avcenc_context.packed_seq_header_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_seq_buf_id = VA_INVALID_ID;
+    avcenc_context.packed_pic_header_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_pic_buf_id = VA_INVALID_ID;
     avcenc_context.codedbuf_buf_id = VA_INVALID_ID;
     avcenc_context.codedbuf_i_size = width * height;
