@@ -59,6 +59,8 @@ static char * profile_string(VAProfile profile)
             case VAProfileH263Baseline: return "VAProfileH263Baseline";
             case VAProfileH264ConstrainedBaseline: return "VAProfileH264ConstrainedBaseline";
             case VAProfileJPEGBaseline: return "VAProfileJPEGBaseline";
+            default:
+                break;
     }
     return "<unknown profile>";
 }
@@ -75,6 +77,8 @@ static char * entrypoint_string(VAEntrypoint entrypoint)
             case VAEntrypointEncSlice:return "VAEntrypointEncSlice";
             case VAEntrypointEncPicture:return "VAEntrypointEncPicture";
             case VAEntrypointVideoProc:return "VAEntrypointVideoProc";
+            default:
+                break;
     }
     return "<unknown entrypoint>";
 }
