@@ -1038,8 +1038,8 @@ typedef struct _VAPictureH264
     VASurfaceID picture_id;
     unsigned int frame_idx;
     unsigned int flags;
-    unsigned int TopFieldOrderCnt;
-    unsigned int BottomFieldOrderCnt;
+    signed int TopFieldOrderCnt;
+    signed int BottomFieldOrderCnt;
 } VAPictureH264;
 /* flags in VAPictureH264 could be OR of the following */
 #define VA_PICTURE_H264_INVALID			0x00000001
