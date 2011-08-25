@@ -1155,7 +1155,7 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264Ext *s
     }
 
     if (frame_bit_rate > 0)
-        seq_param->bits_per_second = 30 * frame_bit_rate;
+        seq_param->bits_per_second = 1024 * frame_bit_rate; /* use kbps as input */
     else
         seq_param->bits_per_second = 0;
 
