@@ -66,26 +66,42 @@ struct VADriverVTableTPI
                 unsigned int luma_offset, /* could be 0 */
                 unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
                 unsigned int chroma_v_offset
-        );
+                );
 
+        VAStatus (*vaCreateSurfaceFromKBuf)(
+                VADisplay dpy,
+                int width,
+                int height,
+                int format,
+                VASurfaceID *surface,       /* out */
+                unsigned int kbuf_handle, /* kernel buffer handle*/
+                unsigned size, /* kernel buffer size */
+                unsigned int kBuf_fourcc, /* expected fourcc */
+                unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+                unsigned int chroma_u_stride, /* chroma stride */
+                unsigned int chroma_v_stride,
+                unsigned int luma_offset, /* could be 0 */
+                unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+                unsigned int chroma_v_offset
+                );
 
-	VAStatus (*vaPutSurfaceBuf) (
-		VADriverContextP ctx,
-		VASurfaceID surface,
-		unsigned char* data,
-		int* data_len,
-		short srcx,
-		short srcy,
-		unsigned short srcw,
-		unsigned short srch,
-		short destx,
-		short desty,
-		unsigned short destw,
-		unsigned short desth,
-		VARectangle *cliprects, /* client supplied clip list */
-		unsigned int number_cliprects, /* number of clip rects in the clip list */
-		unsigned int flags /* de-interlacing flags */
-	);
+        VAStatus (*vaPutSurfaceBuf) (
+                VADriverContextP ctx,
+                VASurfaceID surface,
+                unsigned char* data,
+                int* data_len,
+                short srcx,
+                short srcy,
+                unsigned short srcw,
+                unsigned short srch,
+                short destx,
+                short desty,
+                unsigned short destw,
+                unsigned short desth,
+                VARectangle *cliprects, /* client supplied clip list */
+                unsigned int number_cliprects, /* number of clip rects in the clip list */
+                unsigned int flags /* de-interlacing flags */
+                );
 };
 
 

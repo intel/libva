@@ -137,7 +137,39 @@ VAStatus vaCreateSurfacesForUserPtr(
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
+/*
+ * Create surface from the Kernel buffer
+ */
+VAStatus vaCreateSurfaceFromKBuf(
+    VADisplay dpy,
+    int width,
+    int height,
+    int format,
+    VASurfaceID *surface,       /* out */
+    unsigned int kbuf_handle, /* kernel buffer handle*/
+    unsigned size, /* kernel buffer size */
+    unsigned int kBuf_fourcc, /* expected fourcc */
+    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+    unsigned int chroma_u_stride, /* chroma stride */
+    unsigned int chroma_v_stride,
+    unsigned int luma_offset, /* could be 0 */
+    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+    unsigned int chroma_v_offset
+)
+{
+  VADriverContextP ctx;
+  struct VADriverVTableTPI *tpi;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
 
+  tpi = (struct VADriverVTableTPI *)ctx->vtable_tpi;
+  if (tpi && tpi->vaCreateSurfaceFromKBuf) {
+      return tpi->vaCreateSurfaceFromKBuf( ctx, width, height, format, surface, kbuf_handle,
+                                              size, kBuf_fourcc, luma_stride, chroma_u_stride,
+                                              chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset );
+  } else
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+}
 
 
 VAStatus vaPutSurfaceBuf (

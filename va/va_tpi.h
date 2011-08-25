@@ -93,6 +93,27 @@ VAStatus vaCreateSurfacesForUserPtr(
     unsigned int chroma_v_offset
 );
 
+/*
+ * Create surface from the Kernel buffer
+ */
+VAStatus vaCreateSurfaceFromKbuf(
+    VADisplay dpy,
+    int width,
+    int height,
+    int format,
+    VASurfaceID *surface,       /* out */
+    unsigned int kbuf_handle, /* kernel buffer handle*/
+    unsigned size, /* kernel buffer size */
+    unsigned int kBuf_fourcc, /* expected fourcc */
+    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
+    unsigned int chroma_u_stride, /* chroma stride */
+    unsigned int chroma_v_stride,
+    unsigned int luma_offset, /* could be 0 */
+    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
+    unsigned int chroma_v_offset
+);
+
+
 #ifdef __cplusplus
 }
 #endif
