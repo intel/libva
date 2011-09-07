@@ -237,6 +237,7 @@ AC_OUTPUT([
     test/decode/Makefile
     test/encode/Makefile
     test/putsurface/Makefile
+    test/transcode/Makefile
     test/vainfo/Makefile
     va/Makefile
     va/dummy/Makefile
