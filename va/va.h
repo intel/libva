@@ -518,6 +518,8 @@ typedef enum
     VAImageBufferType			= 9,
     VAProtectedSliceDataBufferType	= 10,
     VAQMatrixBufferType                 = 11,
+    VAHuffmanTableBufferType            = 12,
+
 /* Following are encode buffer types */
     VAEncCodedBufferType		= 21,
     VAEncSequenceParameterBufferType	= 22,
@@ -636,6 +638,116 @@ typedef struct _VAEncPictureParameterBufferJPEG
     VABufferID coded_buf;
 } VAEncPictureParameterBufferJPEG;
 
+/* data struct for JPEG decoding */
+/* Indexes for JPEG QUANTIZER MATRIX */
+#define VA_JPEG_QUANTIZER_MATRIX_Y      0
+#define VA_JPEG_QUANTIZER_MATRIX_U      1
+#define VA_JPEG_QUANTIZER_MATRIX_V      2
+#define VA_JPEG_QUANTIZER_MATRIX_A      3
+
+/* Maskes for JPEG QUANTIZER MATRIX */
+#define VA_JPEG_QUANTIZER_MATRIX_Y_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_Y)
+#define VA_JPEG_QUANTIZER_MATRIX_U_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_U)
+#define VA_JPEG_QUANTIZER_MATRIX_V_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_V)
+#define VA_JPEG_QUANTIZER_MATRIX_A_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_A)
+
+typedef struct _VAIQMatrixBufferJPEG
+{
+    unsigned int quantizer_matrix_mask;
+    unsigned char quantizer_matrix[4][64];
+} VAIQMatrixBufferJPEG;
+
+#define VA_JPEG_SOF0    0xC0
+#define VA_JPEG_SOF1    0xC1
+#define VA_JPEG_SOF2    0xC2
+#define VA_JPEG_SOF3    0xC3
+#define VA_JPEG_SOF5    0xC5
+#define VA_JPEG_SOF6    0xC6
+#define VA_JPEG_SOF7    0xC7
+#define VA_JPEG_SOF9    0xC9
+#define VA_JPEG_SOF10   0xCA
+#define VA_JPEG_SOF11   0xCB
+#define VA_JPEG_SOF13   0xCD
+#define VA_JPEG_SOF14   0xCE
+
+#define VA_JPEG_COMPONENT_ID_Y  1
+#define VA_JPEG_COMPONENT_ID_U  2
+#define VA_JPEG_COMPONENT_ID_V  3
+#define VA_JPEG_COMPONENT_ID_A  4
+                 
+#define VA_JPEG_ROTATION_0      0       /* no rotation */
+#define VA_JPEG_ROTATION_90     1       /* rotate clockwise 90 degree */
+#define VA_JPEG_ROTATION_180    2       /* rotate 180 degree */
+#define VA_JPEG_ROTATION_270    3       /* rotate clockwise 270 degree */
+   
+/* JPEG Picture Parameter Buffer */
+typedef struct _VAPictureParameterBufferJPEG
+{
+    unsigned int type; /* SOFn */
+    unsigned int sample_precision;
+    unsigned int image_width;
+    unsigned int image_height;
+    unsigned int num_components;
+    struct {
+        unsigned char component_id;
+        unsigned char h_sampling_factor;
+        unsigned char v_sampling_factor;
+        unsigned char quantizer_table_index;
+    } components[4];
+
+    /* ROI (region of interest), for JPEG2000 */
+    struct {
+        int enabled;
+        int start_x;
+        int start_y;
+        int end_x;
+        int end_y;
+    } roi;
+
+    int rotation;
+} VAPictureParameterBufferJPEG;
+
+/* Indexes for JPEG HUFFMAN TABLE */
+#define VA_JPEG_HUFFMAN_TABLE_Y         0
+#define VA_JPEG_HUFFMAN_TABLE_U         1
+#define VA_JPEG_HUFFMAN_TABLE_V         2
+#define VA_JPEG_HUFFMAN_TABLE_A         3
+
+/* Maskes for JPEG HUFFMAN TABLE */
+#define VA_JPEG_HUFFMAN_TABLE_MASK_Y    (1 << VA_JPEG_HUFFMAN_TABLE_Y)
+#define VA_JPEG_HUFFMAN_TABLE_MASK_U    (1 << VA_JPEG_HUFFMAN_TABLE_U)
+#define VA_JPEG_HUFFMAN_TABLE_MASK_V    (1 << VA_JPEG_HUFFMAN_TABLE_V)
+#define VA_JPEG_HUFFMAN_TABLE_MASK_A    (1 << VA_JPEG_HUFFMAN_TABLE_A)
+
+typedef struct _VAHuffmanTableBufferJPEG
+{
+    unsigned int huffman_table_mask;
+    struct {
+        unsigned char dc_bits[12];
+        unsigned char dc_huffval[12];
+        unsigned char ac_bits[16];
+        unsigned char ac_huffval[256];  /* only the first 162 bytes are available */
+    } huffman_table[4];
+} VAHuffmanTableBufferJPEG;
+
+/* JPEG Scan Parameter Buffer, The Scan of is similar to 
+ * the Slice of other codecs */
+typedef struct _VASliceParameterBufferJPEG
+{
+    unsigned int slice_data_size;	/* number of bytes in the slice data buffer for this slice */
+    unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
+    unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
+    unsigned int slice_horizontal_position;
+    unsigned int slice_vertical_position;
+
+    unsigned int num_components;
+    struct {
+        int index;      /* index to the ARRAY components in VAPictureParameterBufferJPEG */
+    } components[4];
+
+    int restart_interval; /* specifies the number of MCUs in restart interval, defined in DRI marker */
+    int count_in_mcus; /* indicates the number of MCUs in a scan */
+} VASliceParameterBufferJPEG;
 
 /****************************
  * MPEG-2 data structures
