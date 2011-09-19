@@ -24,7 +24,7 @@ bin_PROGRAMS = h264encode avcenc
 
 INCLUDES = -I$(top_srcdir)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
+TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacorelib) -lpthread -lX11
 
 h264encode_LDADD = $(TEST_LIBS)
 h264encode_SOURCES = h264encode_x11.c

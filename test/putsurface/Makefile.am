@@ -24,7 +24,7 @@ bin_PROGRAMS = putsurface
 
 INCLUDES = -I$(top_srcdir)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) -lpthread
+TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacorelib) -lpthread -lX11
 
 putsurface_LDADD = $(TEST_LIBS)
 putsurface_SOURCES = putsurface_x11.c

@@ -24,7 +24,7 @@ bin_PROGRAMS = mpeg2vldemo
 
 INCLUDES = -I$(top_srcdir)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
+TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacorelib) -lX11
 
 mpeg2vldemo_LDADD = $(TEST_LIBS)
 mpeg2vldemo_SOURCES = mpeg2vldemo.cpp
