@@ -26,9 +26,6 @@ SUBDIRS = va test
 if BUILD_DUMMY_DRIVER
 SUBDIRS += dummy_drv_video
 endif
-if BUILD_I965_DRIVER
-SUBDIRS += i965_drv_video
-endif
 
 pcfiles = libva.pc libva-tpi.pc
 pcfiles += libva-x11.pc

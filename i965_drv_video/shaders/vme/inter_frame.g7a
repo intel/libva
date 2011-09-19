@@ -1,2 +1,0 @@
-include(`gen7_vme_header.inc')
-include(`inter_frame.asm')

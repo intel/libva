@@ -77,11 +77,6 @@ AC_ARG_ENABLE(dummy-backend,
                               [build dummy libva backend])],
               [], [enable_dummy_backend=no])
 
-AC_ARG_ENABLE(i965-driver,
-              [AC_HELP_STRING([--enable-i965-driver],
-                              [build i965 video driver])],
-              [], [enable_i965_driver=no])
-
 AC_ARG_WITH(drivers-path,
 	    [AC_HELP_STRING([--with-drivers-path=[[path]]], [drivers path])],,
 	    [with_drivers_path="$libdir/dri"])
@@ -104,13 +99,6 @@ PKG_CHECK_MODULES([DRM], [libdrm])
 
 PKG_CHECK_MODULES(GEN4ASM, [intel-gen4asm >= 1.2], [gen4asm=yes], [gen4asm=no])
 AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
-
-# Check for libdrm >= 2.4.23 (needed for i965_drv_video.so)
-if test x$enable_i965_driver = xyes && ! $PKG_CONFIG --atleast-version=2.4.23 libdrm; then
-    AC_MSG_WARN([libdrm < 2.4.23 found, disabling build of i965 video driver])
-    enable_i965_driver=no
-fi
-AM_CONDITIONAL(BUILD_I965_DRIVER, test x$enable_i965_driver = xyes)
 
 if test x$enable_dummy_backend = xyes; then
     PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
@@ -171,15 +159,6 @@ AC_OUTPUT([
 	va/egl/Makefile
 	va/dummy/Makefile
 	dummy_drv_video/Makefile
-	i965_drv_video/Makefile
-	i965_drv_video/shaders/Makefile
-	i965_drv_video/shaders/h264/Makefile
-	i965_drv_video/shaders/h264/mc/Makefile
-	i965_drv_video/shaders/mpeg2/Makefile
-	i965_drv_video/shaders/mpeg2/vld/Makefile
-	i965_drv_video/shaders/render/Makefile
-	i965_drv_video/shaders/post_processing/Makefile
-	i965_drv_video/shaders/vme/Makefile
 	test/Makefile
 	test/basic/Makefile
 	test/decode/Makefile
@@ -203,7 +182,6 @@ echo " • Global :"
 echo "     Prefix: ${prefix}"
 echo ""
 
-AS_IF([test x$enable_i965_driver = xyes], [DRIVERS="i965 $DRIVERS"]) 
 AS_IF([test x$enable_dummy_driver = xyes], [DRIVERS="dummy $DRIVERS"])
 
 echo " • Drivers: ${DRIVERS}"
