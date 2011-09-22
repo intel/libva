@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
+#include <fcntl.h>
 
 /*
  * Do dummy decode/encode, ignore the input data
@@ -46,42 +47,37 @@
  * We export env "VA_FOOL", with which, we can do fake decode/encode:
  *
  * LIBVA_FOOL_DECODE:
- * . if set, decode does nothing, but fill in some YUV data
- * LIBVA_FOOL_ENCODE=<clip name>:
- * . if set, encode does nothing, but fill in the coded buffer from a H264 clip.
- * . VA CONTEXT/CONFIG/SURFACE will call into drivers, but VA Buffer creation is done in here
- * . Bypass all "vaBeginPic/vaRenderPic/vaEndPic"
+ * . if set, decode does nothing
+ * LIBVA_FOOL_ENCODE=<framename>:
+ * . if set, encode does nothing, but fill in the coded buffer from the content of files with
+ *   name framename.0,framename.1,framename.2, ..., framename.N, framename.N,framename.N,...
+ * LIBVA_FOOL_JPEG=<framename>:fill the content of filename to codedbuf for jpeg encoding
  * LIBVA_FOOL_POSTP:
  * . if set, do nothing for vaPutSurface
  */
 
 
 /* global settings */
-
-/* LIBVA_FOOL_DECODE/LIBVA_FOOL_ENCODE/LIBVA_FOOL_POSTP */
-int fool_decode = 0;
-int fool_encode = 0;
+int fool_codec = 0;
 int fool_postp  = 0;
 
-
-
-#define NAL_BUF_SIZE  65536  // maximum NAL unit size
-#define RING_BUF_SIZE  8192  // input ring buffer size, MUST be a power of two!
-#define MAX_FRAME 16
-#define SLICE_NUM 4
-
 #define FOOL_CONTEXT_MAX 4
+
+#define FOOL_BUFID_MAGIC   0x12345600
+#define FOOL_BUFID_MASK    0xffffff00
 /* per context settings */
 static struct _fool_context {
     VADisplay dpy; /* should use context as the key */
 
-    VAProfile fool_profile; /* current profile for buffers */
-    VAEntrypoint fool_entrypoint; /* current entrypoint */
+    char *fn_enc;/* file pattern with codedbuf content for encode */
+    char *segbuf_enc; /* the segment buffer of coded buffer, load frome fn_enc */
+    int file_count;
 
-    FILE *fool_fp_codedclip; /* load a clip from disk for fooling encode*/
-    char *frame_buf;
-    VACodedBufferSegment *codebuf;
+    char *fn_jpg;/* file name of JPEG fool with codedbuf content */
+    char *segbuf_jpg; /* the segment buffer of coded buffer, load frome fn_jpg */
 
+    VAEntrypoint entrypoint; /* current entrypoint */
+    
     /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
      * the malloc-ed memory can be find by fool_buf[bufferID & 0xff]
@@ -89,18 +85,10 @@ static struct _fool_context {
      */
     char *fool_buf[VABufferTypeMax]; /* memory of fool buffers */
     unsigned int fool_buf_size[VABufferTypeMax]; /* size of memory of fool buffers */
+    unsigned int fool_buf_element[VABufferTypeMax]; /* element count of created buffers */
     unsigned int fool_buf_count[VABufferTypeMax]; /* count of created buffers */
     VAContextID context;
-} fool_context[FOOL_CONTEXT_MAX] = { {0} }; /* trace five context at the same time */
-
-#define FOOL_DECODE(idx) (fool_decode && (fool_context[idx].fool_entrypoint == VAEntrypointVLD))
-#define FOOL_ENCODE(idx)                                                \
-    (fool_encode                                                        \
-     && (fool_context[idx].fool_entrypoint == VAEntrypointEncSlice)     \
-     && (fool_context[idx].fool_profile >= VAProfileH264Baseline)       \
-     && (fool_context[idx].fool_profile <= VAProfileH264High))
-
-
+} fool_context[FOOL_CONTEXT_MAX]; /* trace five context at the same time */
 
 #define DPY2INDEX(dpy)                                  \
     int idx;                                            \
@@ -112,40 +100,12 @@ static struct _fool_context {
     if (idx == FOOL_CONTEXT_MAX)                        \
         return 0;  /* let driver go */
 
-
 /* Prototype declarations (functions defined in va.c) */
 
 void va_errorMessage(const char *msg, ...);
 void va_infoMessage(const char *msg, ...);
 
-int va_parseConfig(char *env, char *env_value);
-
-VAStatus vaBufferInfo(
-        VADisplay dpy,
-        VAContextID context,	/* in */
-        VABufferID buf_id,		/* in */
-        VABufferType *type,		/* out */
-        unsigned int *size,		/* out */
-        unsigned int *num_elements	/* out */
-);
-
-VAStatus vaLockSurface(VADisplay dpy,
-        VASurfaceID surface,
-        unsigned int *fourcc, /* following are output argument */
-        unsigned int *luma_stride,
-        unsigned int *chroma_u_stride,
-        unsigned int *chroma_v_stride,
-        unsigned int *luma_offset,
-        unsigned int *chroma_u_offset,
-        unsigned int *chroma_v_offset,
-        unsigned int *buffer_name,
-        void **buffer
-);
-
-VAStatus vaUnlockSurface(VADisplay dpy,
-        VASurfaceID surface
-);
-
+int  va_parseConfig(char *env, char *env_value);
 
 void va_FoolInit(VADisplay dpy)
 {
@@ -159,41 +119,30 @@ void va_FoolInit(VADisplay dpy)
     if (fool_index == FOOL_CONTEXT_MAX)
         return;
 
+    memset(&fool_context[fool_index], 0, sizeof(struct _fool_context));
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
         fool_postp = 1;
         va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
-
-
+    
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
-        fool_decode = 1;
+        fool_codec  |= VA_FOOL_FLAG_DECODE;
         va_infoMessage("LIBVA_FOOL_DECODE is on, dummy decode\n");
     }
-
-
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
-        fool_context[fool_index].fool_fp_codedclip = fopen(env_value, "r");
-
-        if (fool_context[fool_index].fool_fp_codedclip) {
-            fool_encode = 1;
-        } else
-            fool_encode = 0;
-
-        if (fool_encode) /* malloc the buffer for fake clip */
-        {
-            fool_context[fool_index].frame_buf = malloc(MAX_FRAME*SLICE_NUM*NAL_BUF_SIZE*sizeof(char));
-            fool_context[fool_index].codebuf = malloc(sizeof(VACodedBufferSegment));
-        }
-
-        if (fool_context[fool_index].frame_buf == NULL)
-            fool_encode = 0;
-
-        if (fool_encode)
-            va_infoMessage("LIBVA_FOOL_ENCODE is on, dummy encode\n");
-
+        fool_codec  |= VA_FOOL_FLAG_ENCODE;
+        fool_context[fool_index].fn_enc = strdup(env_value);
+        va_infoMessage("LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
+                       fool_context[fool_index].fn_enc);
     }
-
-    if (fool_encode || fool_decode)
+    if (va_parseConfig("LIBVA_FOOL_JPEG", &env_value[0]) == 0) {
+        fool_codec  |= VA_FOOL_FLAG_JPEG;
+        fool_context[fool_index].fn_jpg = strdup(env_value);
+        va_infoMessage("LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
+                       fool_context[fool_index].fn_jpg);
+    }
+    
+    if (fool_codec)
         fool_context[fool_index].dpy = dpy;
 }
 
@@ -201,29 +150,23 @@ void va_FoolInit(VADisplay dpy)
 int va_FoolEnd(VADisplay dpy)
 {
     int i;
-
     DPY2INDEX(dpy);
 
     for (i = 0; i < VABufferTypeMax; i++) {/* free memory */
         if (fool_context[idx].fool_buf[i])
             free(fool_context[idx].fool_buf[i]);
     }
-    if (fool_context[idx].fool_fp_codedclip)
-        fclose(fool_context[idx].fool_fp_codedclip);
-
-    if (fool_context[idx].frame_buf)
-        free(fool_context[idx].frame_buf);
+    if (fool_context[idx].segbuf_enc)
+        free(fool_context[idx].segbuf_enc);
+    if (fool_context[idx].segbuf_jpg)
+        free(fool_context[idx].segbuf_jpg);
+    if (fool_context[idx].fn_enc)
+        free(fool_context[idx].fn_enc);
+    if (fool_context[idx].fn_jpg)
+        free(fool_context[idx].fn_jpg);
     
-    if (fool_context[idx].codebuf)
-        free(fool_context[idx].codebuf);
-
     memset(&fool_context[idx], 0, sizeof(struct _fool_context));
-    return 0;
-}
-
-int va_FoolCodedBuf(VADisplay dpy)
-{
-    /* do nothing */
+    
     return 0;
 }
 
@@ -239,310 +182,175 @@ int va_FoolCreateConfig(
 {
     DPY2INDEX(dpy);
 
-    /* call into driver level to allocate real context/surface/buffers, etc */
-    fool_context[idx].fool_profile = profile;
-    fool_context[idx].fool_entrypoint = entrypoint;
+    fool_context[idx].entrypoint = entrypoint;
+    
+    /*
+     * check fool_codec to align with current context
+     * e.g. fool_codec = decode then for encode, the
+     * vaBegin/vaRender/vaEnd also run into fool path
+     * which is not desired
+     */
+    if (((fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
+        ((fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) ||
+        ((fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
+        ; /* the fool_codec is meaningful */
+    else
+        fool_codec = 0;
+
+    return 0; /* driver continue */
+}
+
+
+VAStatus va_FoolCreateBuffer(
+    VADisplay dpy,
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
+)
+{
+    unsigned int new_size = size * num_elements;
+    unsigned int old_size;
+    DPY2INDEX(dpy);
+
+    old_size = fool_context[idx].fool_buf_size[type] * fool_context[idx].fool_buf_element[type];
+
+    if (old_size < new_size)
+        fool_context[idx].fool_buf[type] = realloc(fool_context[idx].fool_buf[type], new_size);
+    
+    fool_context[idx].fool_buf_size[type] = size;
+    fool_context[idx].fool_buf_element[type] = num_elements;
+    fool_context[idx].fool_buf_count[type]++;
+    /* because we ignore the vaRenderPicture, 
+     * all buffers with same type share same real memory
+     * bufferID = (magic number) | type
+     */
+    *buf_id = FOOL_BUFID_MAGIC | type;
+
+    return 1; /* don't call into driver */
+}
+
+VAStatus va_FoolBufferInfo(
+    VADisplay dpy,
+    VABufferID buf_id,  /* in */
+    VABufferType *type, /* out */
+    unsigned int *size,         /* out */
+    unsigned int *num_elements /* out */
+)
+{
+    unsigned int magic = buf_id & FOOL_BUFID_MASK;
+    DPY2INDEX(dpy);
+
+    if (magic != FOOL_BUFID_MAGIC)
+        return 0;
+
+    *type = buf_id & 0xff;
+    *size = fool_context[idx].fool_buf_size[*type];
+    *num_elements = fool_context[idx].fool_buf_element[*type];;
+    
+    return 1; /* don't call into driver */
+}
+
+static int va_FoolFillCodedBufEnc(int idx)
+{
+    char file_name[1024];
+    struct stat file_stat;
+    VACodedBufferSegment *codedbuf;
+    int i, fd = -1;
+
+    /* try file_name.file_count, if fail, try file_name.file_count-- */
+    for (i=0; i<=1; i++) {
+        sprintf(file_name, "%s.%d",
+                fool_context[idx].fn_enc,
+                fool_context[idx].file_count);
+
+        if ((fd = open(file_name, O_RDONLY)) != -1) {
+            fstat(fd, &file_stat);
+            fool_context[idx].file_count++; /* open next file */
+            break;
+        }
+        
+        fool_context[idx].file_count--; /* fall back to previous file */
+        if (fool_context[idx].file_count < 0)
+            fool_context[idx].file_count = 0;
+    }
+    if (fd != -1) {
+        fool_context[idx].segbuf_enc = realloc(fool_context[idx].segbuf_enc, file_stat.st_size);
+        read(fd, fool_context[idx].segbuf_enc, file_stat.st_size);
+        close(fd);
+    }
+    codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
+    codedbuf->size = file_stat.st_size;
+    codedbuf->bit_offset = 0;
+    codedbuf->status = 0;
+    codedbuf->reserved = 0;
+    codedbuf->buf = fool_context[idx].segbuf_enc;
+    codedbuf->next = NULL;
+
     return 0;
 }
 
-static int yuvgen_planar(
-        int width, int height,
-        unsigned char *Y_start, int Y_pitch,
-        unsigned char *U_start, int U_pitch,
-        unsigned char *V_start, int V_pitch,
-        int UV_interleave, int box_width, int row_shift,
-        int field
-)
+
+static int va_FoolFillCodedBufJPG(int idx)
 {
-    int row;
+    struct stat file_stat;
+    VACodedBufferSegment *codedbuf;
+    int i, fd = -1;
 
-    /* copy Y plane */
-    for (row=0;row<height;row++) {
-        unsigned char *Y_row = Y_start + row * Y_pitch;
-        int jj, xpos, ypos;
-
-        ypos = (row / box_width) & 0x1;
-
-        /* fill garbage data into the other field */
-        if (((field == VA_TOP_FIELD) && (row &1))
-                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
-            memset(Y_row, 0xff, width);
-            continue;
-        }
-
-        for (jj=0; jj<width; jj++) {
-            xpos = ((row_shift + jj) / box_width) & 0x1;
-
-            if ((xpos == 0) && (ypos == 0))
-                Y_row[jj] = 0xeb;
-            if ((xpos == 1) && (ypos == 1))
-                Y_row[jj] = 0xeb;
-
-            if ((xpos == 1) && (ypos == 0))
-                Y_row[jj] = 0x10;
-            if ((xpos == 0) && (ypos == 1))
-                Y_row[jj] = 0x10;
-        }
+    if ((fd = open(fool_context[idx].fn_jpg, O_RDONLY)) != -1)
+        fstat(fd, &file_stat);
+        
+    if (fd != -1) {
+        fool_context[idx].segbuf_jpg = realloc(fool_context[idx].segbuf_jpg, file_stat.st_size);
+        read(fd, fool_context[idx].segbuf_jpg, file_stat.st_size);
+        close(fd);
     }
-
-    /* copy UV data */
-    for( row =0; row < height/2; row++) {
-        unsigned short value = 0x80;
-
-        /* fill garbage data into the other field */
-        if (((field == VA_TOP_FIELD) && (row &1))
-                || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
-            value = 0xff;
-        }
-
-        if (UV_interleave) {
-            unsigned short *UV_row = (unsigned short *)(U_start + row * U_pitch);
-
-            memset(UV_row, value, width);
-        } else {
-            unsigned char *U_row = U_start + row * U_pitch;
-            unsigned char *V_row = V_start + row * V_pitch;
-
-            memset (U_row,value,width/2);
-            memset (V_row,value,width/2);
-        }
-    }
+    codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
+    codedbuf->size = file_stat.st_size;
+    codedbuf->bit_offset = 0;
+    codedbuf->status = 0;
+    codedbuf->reserved = 0;
+    codedbuf->buf = fool_context[idx].segbuf_jpg;
+    codedbuf->next = NULL;
 
     return 0;
 }
 
 
-int va_FoolCreateSurfaces(
-        VADisplay dpy,
-        int width,
-        int height,
-        int format,
-        int num_surfaces,
-        VASurfaceID *surfaces	/* out */
-)
+static int va_FoolFillCodedBuf(int idx)
 {
-    int i;
-    unsigned int fourcc; /* following are output argument */
-    unsigned int luma_stride;
-    unsigned int chroma_u_stride;
-    unsigned int chroma_v_stride;
-    unsigned int luma_offset;
-    unsigned int chroma_u_offset;
-    unsigned int chroma_v_offset;
-    unsigned int buffer_name;
-    void *buffer = NULL;
-    unsigned char *Y_data, *U_data, *V_data;
-
-    int box_width = num_surfaces/2;
-    int row_shift = 0;
-    VAStatus va_status;
-
-    DPY2INDEX(dpy);
-
-    if (FOOL_DECODE(idx)) { 
-        /* call into driver level to allocate real context/surface/buffers, etc
-         * fill in the YUV data, will be overwrite if it is encode context
-         */
-        for (i = 0; i < num_surfaces; i++) {
-            /* fool decoder: fill with auto-generated YUV data */
-            va_status = vaLockSurface(dpy, surfaces[i], &fourcc,
-                    &luma_stride, &chroma_u_stride, &chroma_v_stride,
-                    &luma_offset, &chroma_u_offset, &chroma_v_offset,
-                    &buffer_name, &buffer);
-
-            if (va_status != VA_STATUS_SUCCESS)
-                return 0;
-
-            if (!buffer) {
-                vaUnlockSurface(dpy, surfaces[i]);
-                return 0;
-            }
-
-            Y_data = buffer;
-
-            /* UV should be same for NV12 */
-            U_data = buffer + chroma_u_offset;
-            V_data = buffer + chroma_v_offset;
-
-            yuvgen_planar(width, height,
-                    Y_data, luma_stride,
-                    U_data, chroma_v_stride,
-                    V_data, chroma_v_stride,
-                    (fourcc==VA_FOURCC_NV12),
-                    box_width, row_shift, 0);
-
-            vaUnlockSurface(dpy, surfaces[i]);
-
-            row_shift++;
-            if (row_shift==(2*box_width))
-                row_shift= 0;
-        }
-        return 0; /* the return value is ignored */
-    }
-    return 0; /* the return value is ignored */
-}
-
-VAStatus va_FoolCreateBuffer (
-        VADisplay dpy,
-        VAContextID context,	/* in */
-        VABufferType type,		/* in */
-        unsigned int size,		/* in */
-        unsigned int num_elements,	/* in */
-        void *data,			/* in */
-        VABufferID *buf_id		/* out */
-)
-{
-    DPY2INDEX(dpy);
-
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
-        int new_size = size * num_elements;
-
-        if (type == VAEncCodedBufferType) /* only a VACodedBufferSegment */
-            new_size = sizeof(VACodedBufferSegment);
-
-        if (fool_context[idx].fool_buf_size[type] == 0)
-            fool_context[idx].fool_buf[type] = calloc(1, new_size);
-        else if (fool_context[idx].fool_buf_size[type] <= new_size)
-            fool_context[idx].fool_buf[type] = realloc(fool_context[idx].fool_buf, new_size);
-
-        if (fool_context[idx].fool_buf[type] == NULL) {
-            va_FoolEnd(dpy);
-            return 0; /* let driver go */
-        }
-
-        /* because we ignore the vaRenderPicture, 
-         * all buffers with same type share same real memory
-         * bufferID = (buffer count << 8) | type
-         */
-        fool_context[idx].fool_buf_count[type]++;
-        *buf_id = (fool_context[idx].fool_buf_count[type] << 8) | type;
-
-        return 1; /* don't call into driver */
-    }
-
-    return 0; /* let driver go ... */
-}
-
-VAStatus va_FoolMapBuffer (
-        VADisplay dpy,
-        VABufferID buf_id,	/* in */
-        void **pbuf 	/* out */
-)
-{
-    VABufferType type;
-    unsigned int size,frame_size = 0;
-    unsigned int num_elements;
-    DPY2INDEX(dpy);
-
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { /* fool buffer creation */
-        unsigned int buf_idx = buf_id & 0xff;
-
-        /* Image buffer? */
-        vaBufferInfo(dpy, fool_context[idx].context, buf_id, &type, &size, &num_elements);
-        if (type == VAImageBufferType  && FOOL_ENCODE(idx))
-            return 0;
-
-        /* buf_id is the buffer type */
-        if (fool_context[idx].fool_buf[buf_idx] != NULL)
-            *pbuf = fool_context[idx].fool_buf[buf_idx];
-        else
-            *pbuf = NULL;
-
-        /* expect APP to MapBuffer when get the the coded data */
-        if (*pbuf && (buf_idx == VAEncCodedBufferType)) { /* it is coded buffer */
-            /* read from a clip */
-            frame_size = va_FoolGetFrame(fool_context[idx].fool_fp_codedclip,
-                    fool_context[idx].frame_buf);
-
-            memset(fool_context[idx].codebuf,0,sizeof(VACodedBufferSegment));
-            fool_context[idx].codebuf->size = frame_size;
-            fool_context[idx].codebuf->bit_offset = 0;
-            fool_context[idx].codebuf->status = 0;
-            fool_context[idx].codebuf->reserved = 0;
-            fool_context[idx].codebuf->buf = fool_context[idx].frame_buf;
-            fool_context[idx].codebuf->next = NULL;
-            *pbuf = fool_context[idx].codebuf;
-        }
-        return 1; /* don't call into driver */
-    }
-
-    return 0; /* let driver go ... */
-}
-
-
-int va_FoolBeginPicture(
-        VADisplay dpy,
-        VAContextID context,
-        VASurfaceID render_target
-)
-{
-    DPY2INDEX(dpy);
-
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) {
-        if (fool_context[idx].context == 0)
-            fool_context[idx].context = context;
-        return 1; /* don't call into driver level */
-    }
-
-    return 0; /* let driver go ... */
-}
-
-int va_FoolRenderPicture(
-        VADisplay dpy,
-        VAContextID context,
-        VABufferID *buffers,
-        int num_buffers
-)
-{
-    DPY2INDEX(dpy);
-
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
-        return 1; /* don't call into driver level */
-
-    return 0;  /* let driver go ... */
-}
-
-
-int va_FoolEndPicture(
-        VADisplay dpy,
-        VAContextID context
-)
-{
-    DPY2INDEX(dpy);
-
-    /* don't call into driver level */
-
-    /* do real fooling operation here */
-
-    /* only support H264 encoding currently */
-    if (FOOL_ENCODE(idx)) {
-        /* expect vaMapBuffer will handle it
-         * or else, need to save the codedbuf ID,
-         * and fool encode it here
-         */
-        /* va_FoolCodedBuf(dpy); */
-        return 1; /* don't call into driver level */
-    }
-
-    if (FOOL_DECODE(idx))
-        return 1;  /* don't call into driver level */
-
-    return 0; /* let driver go ... */
-}
-
-int va_FoolSyncSurface(
-        VADisplay dpy, 
-        VASurfaceID render_target
-)
-{
-    DPY2INDEX(dpy);
-
-    /*Fill in black and white squares. */
-    if (FOOL_DECODE(idx) || FOOL_DECODE(idx))
-        return 1;
-
+    if (fool_context[idx].entrypoint == VAEntrypointEncSlice)
+        va_FoolFillCodedBufEnc(idx);
+    else if (fool_context[idx].entrypoint == VAEntrypointEncPicture)
+        va_FoolFillCodedBufJPG(idx);
+        
     return 0;
+}
 
+
+VAStatus va_FoolMapBuffer(
+    VADisplay dpy,
+    VABufferID buf_id,	/* in */
+    void **pbuf 	/* out */
+)
+{
+    unsigned int buftype = buf_id & 0xff;
+    unsigned int magic = buf_id & FOOL_BUFID_MASK;
+    DPY2INDEX(dpy);
+
+    if (magic != FOOL_BUFID_MAGIC)
+        return 0;
+
+    /* buf_id is the buffer type */
+    *pbuf = fool_context[idx].fool_buf[buftype];
+
+    /* it is coded buffer, fill the fake segment buf from file */
+    if (*pbuf && (buftype == VAEncCodedBufferType))
+        va_FoolFillCodedBuf(idx);
+    
+    return 1; /* don't call into driver */
 }
 
 VAStatus va_FoolUnmapBuffer(
@@ -550,28 +358,10 @@ VAStatus va_FoolUnmapBuffer(
         VABufferID buf_id	/* in */
 )
 {
-    DPY2INDEX(dpy);
+    unsigned int magic = buf_id & FOOL_BUFID_MASK;
 
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx))
-        return 1; /* fool buffer creation */
+    if (magic != FOOL_BUFID_MAGIC)
+        return 0;
 
-    return 0;
+    return 1;
 }
-
-VAStatus va_FoolQuerySubpictureFormats(
-        VADisplay dpy,
-        VAImageFormat *format_list,
-        unsigned int *flags,
-        unsigned int *num_formats
-)
-{
-    DPY2INDEX(dpy);
-
-    if (FOOL_ENCODE(idx) || FOOL_DECODE(idx)) { 
-        if (num_formats)
-            *num_formats = 0;
-        return 1;
-    }
-    return 0;
-}
-

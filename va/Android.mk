@@ -35,8 +35,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
-	va_fool.c \
-	va_fool_getframe.c
+	va_fool.c
 
 LOCAL_CFLAGS += \
 	-DANDROID \
@@ -59,7 +58,7 @@ LOCAL_COPY_HEADERS_TO := libva/va
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva
 
-LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils
+LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils liblog
 
 include $(BUILD_SHARED_LIBRARY)
 

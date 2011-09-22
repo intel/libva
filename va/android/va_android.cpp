@@ -25,6 +25,8 @@
 #define _GNU_SOURCE 1
 #include "va.h"
 #include "va_backend.h"
+#include "va_trace.h"
+#include "va_fool.h"
 #include "va_android.h"
 #include "va_dricommon.h" /* needs some helper functions from this file */
 #include <stdio.h>
@@ -267,11 +269,6 @@ extern "C"  {
         );
 }
 
-#define VA_TRACE(trace_func,...)                \
-    if (trace_flag) {                           \
-        trace_func(__VA_ARGS__);                \
-    }
-
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
@@ -300,9 +297,9 @@ VAStatus vaPutSurface (
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    VA_TRACE(va_TracePutSurface, dpy, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
-             destx, desty, destw, desth,
-             cliprects, number_cliprects, flags );
+    VA_TRACE_LOG(va_TracePutSurface, dpy, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
+                 destx, desty, destw, desth,
+                 cliprects, number_cliprects, flags );
     
     return ctx->vtable->vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
                                      destx, desty, destw, desth,

@@ -34,7 +34,6 @@ LDADD = \
 libva_source_c = \
 	va.c			\
 	va_fool.c		\
-	va_fool_getframe.c	\
 	va_trace.c		\
 	$(NULL)
 

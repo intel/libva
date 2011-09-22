@@ -25,6 +25,35 @@
 #ifndef VA_TRACE_H
 #define VA_TRACE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern int trace_flag;
+
+#define VA_TRACE_FLAG_LOG             0x1
+#define VA_TRACE_FLAG_BUFDATA         0x2
+#define VA_TRACE_FLAG_CODEDBUF        0x4
+#define VA_TRACE_FLAG_SURFACE_DECODE  0x8
+#define VA_TRACE_FLAG_SURFACE_ENCODE  0x10
+#define VA_TRACE_FLAG_SURFACE_JPEG    0x20
+#define VA_TRACE_FLAG_SURFACE         (VA_TRACE_FLAG_SURFACE_DECODE | \
+                                       VA_TRACE_FLAG_SURFACE_ENCODE | \
+                                       VA_TRACE_FLAG_SURFACE_JPEG)
+
+#define VA_TRACE_FUNC(trace_func,...)           \
+    if (trace_flag) {                           \
+        trace_func(__VA_ARGS__);                \
+    }
+#define VA_TRACE_LOG(trace_func,...)            \
+    if (trace_flag & VA_TRACE_FLAG_LOG) {            \
+        trace_func(__VA_ARGS__);                \
+    }
+#define VA_TRACE_SURFACE(trace_func,...)        \
+    if (trace_flag & (VA_TRACE_FLAG_SURFACE | VA_TRACE_FLAG_CODEDBUF)) {  \
+        trace_func(__VA_ARGS__);                \
+    }
+
 void va_TraceInit(VADisplay dpy);
 void va_TraceEnd(VADisplay dpy);
 
@@ -92,7 +121,8 @@ void va_TraceRenderPicture(
 
 void va_TraceEndPicture(
     VADisplay dpy,
-    VAContextID context
+    VAContextID context,
+    int endpic_done
 );
 
 void va_TraceSyncSurface(
@@ -155,6 +185,9 @@ void va_TracePutSurface (
     unsigned int flags /* de-interlacing flags */
 );
 
-
+#ifdef __cplusplus
+}
+#endif
+    
 
 #endif /* VA_TRACE_H */

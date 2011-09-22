@@ -40,28 +40,24 @@
 #include <time.h>
 #include <errno.h>
 
-
 /*
  * Env. to debug some issue, e.g. the decode/encode issue in a video conference scenerio:
  * .LIBVA_TRACE=log_file: general VA parameters saved into log_file
  * .LIBVA_TRACE_BUFDATA: dump VA buffer data into log_file (if not set, just calculate a checksum)
  * .LIBVA_TRACE_CODEDBUF=coded_clip_file: save the coded clip into file coded_clip_file
- * .LIBVA_TRACE_SURFACE=decoded_yuv_file: save the decoded YUV file decoded_yuv_file
+ * .LIBVA_TRACE_SURFACE=yuv_file: save surface YUV into file yuv_file. Use file name to determine
+ *                                decode/encode or jpeg surfaces
  * .LIBVA_TRACE_LOGSIZE=numeric number: truncate the log_file or coded_clip_file, or decoded_yuv_file
  *                                      when the size is bigger than the number
  */
 
-
 /* global settings */
 
 /* LIBVA_TRACE */
-unsigned int trace_flag = 0;
+int trace_flag = 0;
 
 /* LIBVA_TRACE_LOGSIZE */
 static unsigned int trace_logsize = 0xffffffff; /* truncate the log when the size is bigger than it */
-
-/* LIBVA_TRACE_BUFDATA */
-static unsigned int trace_buffer_data; /* dump buffer data or not */
 
 #define TRACE_CONTEXT_MAX 4
 /* per context settings */
@@ -70,15 +66,15 @@ static struct _trace_context {
     
     /* LIBVA_TRACE */
     FILE *trace_fp_log; /* save the log into a file */
-    char trace_log_fn[1024]; /* file name */
+    char *trace_log_fn; /* file name */
     
     /* LIBVA_TRACE_CODEDBUF */
     FILE *trace_fp_codedbuf; /* save the encode result into a file */
-    char trace_codedbuf_fn[1024]; /* file name */
+    char *trace_codedbuf_fn; /* file name */
     
     /* LIBVA_TRACE_SURFACE */
     FILE *trace_fp_surface; /* save the surface YUV into a file */
-    char trace_surface_fn[1024]; /* file name */
+    char *trace_surface_fn; /* file name */
 
     VAContextID  trace_context; /* current context */
     
@@ -94,7 +90,7 @@ static struct _trace_context {
     unsigned int trace_frame_width; /* current frame width */
     unsigned int trace_frame_height; /* current frame height */
     unsigned int trace_sequence_start; /* get a new sequence for encoding or not */
-} trace_context[TRACE_CONTEXT_MAX] = { {0} }; /* trace five context at the same time */
+} trace_context[TRACE_CONTEXT_MAX]; /* trace five context at the same time */
 
 #define DPY2INDEX(dpy)                                  \
     int idx;                                            \
@@ -141,11 +137,22 @@ VAStatus vaUnlockSurface(VADisplay dpy,
                          VASurfaceID surface
                          );
 
+#define FILE_NAME_SUFFIX(env_value)                      \
+do {                                                    \
+    int tmp = strnlen(env_value, sizeof(env_value));    \
+    int left = sizeof(env_value) - tmp;                 \
+                                                        \
+    snprintf(env_value+tmp,                             \
+             left,                                      \
+             ".%04d.%05d",                              \
+             trace_index,                               \
+             suffix);                                   \
+} while (0)
 
 void va_TraceInit(VADisplay dpy)
 {
     char env_value[1024];
-    unsigned int suffix = 0xffff & ((unsigned int)time(NULL));
+    unsigned short suffix = 0xffff & ((unsigned int)time(NULL));
     int trace_index = 0;
     FILE *tmp;    
     
@@ -156,79 +163,59 @@ void va_TraceInit(VADisplay dpy)
     if (trace_index == TRACE_CONTEXT_MAX)
         return;
 
+    memset(&trace_context[trace_index], 0, sizeof(struct _trace_context));
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
-        trace_flag = 1;
-
-        /*Check if there is still room for suffix .%d.%d*/
-    if (strnlen(env_value, 1024) < (1024 - 8))
-        snprintf(env_value+strnlen(env_value, 1024),
-                 (1025 - 8 - strnlen(env_value, 1024)),
-                 ".%d.%d", trace_index, suffix);
-
+        FILE_NAME_SUFFIX(env_value);
+        trace_context[trace_index].trace_log_fn = strdup(env_value);
+        
         tmp = fopen(env_value, "w");
         if (tmp) {
             trace_context[trace_index].trace_fp_log = tmp;
-            strcpy(trace_context[trace_index].trace_log_fn, env_value);
-        } else {
+            va_infoMessage("LIBVA_TRACE is on, save log into %s\n", trace_context[trace_index].trace_log_fn);
+            trace_flag = VA_TRACE_FLAG_LOG;
+        } else
             va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
-            trace_context[trace_index].trace_fp_log = stderr;
-            strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
-        }
-        va_infoMessage("LIBVA_TRACE is on, save log into %s\n", trace_context[trace_index].trace_log_fn);
     }
-
-    if (trace_flag == 0)
-        return;
 
     /* may re-get the global settings for multiple context */
     if (va_parseConfig("LIBVA_TRACE_LOGSIZE", &env_value[0]) == 0) {
         trace_logsize = atoi(env_value);
         va_infoMessage("LIBVA_TRACE_LOGSIZE is on, size is %d\n", trace_logsize);
     }
-    
 
-    if (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0) {
-        trace_buffer_data = 1; /* dump buffer data */
+    if ((trace_flag & VA_TRACE_FLAG_LOG) && (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)) {
+        trace_flag |= VA_TRACE_FLAG_BUFDATA;
         va_infoMessage("LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
     }
-    
 
     /* per-context setting */
     if (va_parseConfig("LIBVA_TRACE_CODEDBUF", &env_value[0]) == 0) {
-        if (strnlen(env_value, 1024) < (1024 - 8))
-            snprintf(env_value+strnlen(env_value, 1024),
-                     (1025 - 8 - strnlen(env_value, 1024)),
-                     ".%d.%d", trace_index, suffix);
-
-        tmp = fopen(env_value, "w");
-        
-        if (tmp) {
-            trace_context[trace_index].trace_fp_codedbuf = tmp;
-            strcpy(trace_context[trace_index].trace_codedbuf_fn, env_value);
-        } else {
-            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
-            trace_context[trace_index].trace_fp_codedbuf = stderr;
-            strcpy(trace_context[trace_index].trace_codedbuf_fn, "/dev/stderr");
-        }
-
-        va_infoMessage("LIBVA_TRACE_CODEDBUF is on, save coded clip into %s\n", trace_context[trace_index].trace_codedbuf_fn);
+        FILE_NAME_SUFFIX(env_value);
+        trace_context[trace_index].trace_codedbuf_fn = strdup(env_value);
+        va_infoMessage("LIBVA_TRACE_CODEDBUF is on, save codedbuf into log file %s\n",
+                       trace_context[trace_index].trace_codedbuf_fn);
+        trace_flag |= VA_TRACE_FLAG_CODEDBUF;
     }
 
     if (va_parseConfig("LIBVA_TRACE_SURFACE", &env_value[0]) == 0) {
-        sprintf(env_value+strnlen(env_value, 1024), ".%d.%d", trace_index, suffix);
-
-        tmp = fopen(env_value, "w");
+        FILE_NAME_SUFFIX(env_value);
+        trace_context[trace_index].trace_surface_fn = strdup(env_value);
         
-        if (tmp) {
-            trace_context[trace_index].trace_fp_surface = tmp;
-            strcpy(trace_context[trace_index].trace_surface_fn, env_value);
-        } else {
-            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
-            trace_context[trace_index].trace_fp_surface = stderr;
-            strcpy(trace_context[trace_index].trace_surface_fn, "/dev/stderr");
-        }
+        va_infoMessage("LIBVA_TRACE_SURFACE is on, save surface into %s\n",
+                       trace_context[trace_index].trace_surface_fn);
 
-        va_infoMessage("LIBVA_TRACE_SURFACE is on, save coded clip into %s\n", trace_context[trace_index].trace_surface_fn);
+        /* for surface data dump, it is time-consume, and may
+         * cause some side-effect, so only trace the needed surfaces
+         * to trace encode surface, set the trace file name to sth like *enc*
+         * to trace decode surface, set the trace file name to sth like *dec*
+         * if no dec/enc in file name, set both
+         */
+        if (strstr(env_value, "dec"))
+            trace_flag |= VA_TRACE_FLAG_SURFACE_DECODE;
+        if (strstr(env_value, "enc"))
+            trace_flag |= VA_TRACE_FLAG_SURFACE_ENCODE;
+        if (strstr(env_value, "jpeg") || strstr(env_value, "jpg"))
+            trace_flag |= VA_TRACE_FLAG_SURFACE_JPEG;
     }
 
     trace_context[trace_index].dpy = dpy;
@@ -239,15 +226,24 @@ void va_TraceEnd(VADisplay dpy)
 {
     DPY2INDEX(dpy);
     
-    if (trace_context[idx].trace_fp_log && (trace_context[idx].trace_fp_log != stderr))
+    if (trace_context[idx].trace_fp_log)
         fclose(trace_context[idx].trace_fp_log);
     
-    if (trace_context[idx].trace_fp_codedbuf && (trace_context[idx].trace_fp_codedbuf != stderr))
+    if (trace_context[idx].trace_fp_codedbuf)
         fclose(trace_context[idx].trace_fp_codedbuf);
     
-    if (trace_context[idx].trace_fp_surface && (trace_context[idx].trace_fp_surface != stderr))
+    if (trace_context[idx].trace_fp_surface)
         fclose(trace_context[idx].trace_fp_surface);
 
+    if (trace_context[idx].trace_log_fn)
+        free(trace_context[idx].trace_log_fn);
+    
+    if (trace_context[idx].trace_codedbuf_fn)
+        free(trace_context[idx].trace_codedbuf_fn);
+    
+    if (trace_context[idx].trace_surface_fn)
+        free(trace_context[idx].trace_surface_fn);
+    
     memset(&trace_context[idx], 0, sizeof(struct _trace_context));
 }
 
@@ -272,9 +268,11 @@ void va_TraceMsg(int idx, const char *msg, ...)
 {
     va_list args;
 
+    if (!(trace_flag & VA_TRACE_FLAG_LOG))
+        return;
+
     if (file_size(trace_context[idx].trace_fp_log) >= trace_logsize)
         truncate_file(trace_context[idx].trace_fp_log);
-
     if (msg)  {
         va_start(args, msg);
         vfprintf(trace_context[idx].trace_fp_log, msg, args);
@@ -341,7 +339,7 @@ void va_TraceSurface(VADisplay dpy)
     VAStatus va_status;
     unsigned char check_sum = 0;
     DPY2INDEX(dpy);
-    
+
     va_TraceMsg(idx, "==========dump surface data in file %s\n", trace_context[idx].trace_surface_fn);
 
     if ((file_size(trace_context[idx].trace_fp_surface) >= trace_logsize)) {
@@ -388,21 +386,14 @@ void va_TraceSurface(VADisplay dpy)
 
     tmp = Y_data;
     for (i=0; i<trace_context[idx].trace_frame_height; i++) {
-        for (j=0; j<trace_context[idx].trace_frame_width; j++)
-            check_sum ^= tmp[j];
-
         if (trace_context[idx].trace_fp_surface)
             fwrite(tmp, trace_context[idx].trace_frame_width, 1, trace_context[idx].trace_fp_surface);
         
         tmp = Y_data + i * luma_stride;
     }
-
     tmp = UV_data;
     if (fourcc == VA_FOURCC_NV12) {
         for (i=0; i<trace_context[idx].trace_frame_height/2; i++) {
-            for (j=0; j<trace_context[idx].trace_frame_width; j++)
-                check_sum ^= tmp[j];
-            
             if (trace_context[idx].trace_fp_surface)
                 fwrite(tmp, trace_context[idx].trace_frame_width, 1, trace_context[idx].trace_fp_surface);
             
@@ -412,7 +403,6 @@ void va_TraceSurface(VADisplay dpy)
 
     vaUnlockSurface(dpy, trace_context[idx].trace_rendertarget);
 
-    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
     va_TraceMsg(idx, NULL);
 }
 
@@ -446,6 +436,7 @@ void va_TraceCreateConfig(
 )
 {
     int i;
+    int encode, decode, jpeg;
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
@@ -461,6 +452,40 @@ void va_TraceCreateConfig(
 
     trace_context[idx].trace_profile = profile;
     trace_context[idx].trace_entrypoint = entrypoint;
+
+    /* avoid to create so many empty files */
+    encode = (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice);
+    decode = (trace_context[idx].trace_entrypoint == VAEntrypointVLD);
+    jpeg = (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture);
+    if ((encode && (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE)) ||
+        (decode && (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE)) ||
+        (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG))) {
+        FILE *tmp = fopen(trace_context[idx].trace_surface_fn, "w");
+        
+        if (tmp)
+            trace_context[idx].trace_fp_surface = tmp;
+        else {
+            va_errorMessage("Open file %s failed (%s)\n",
+                            trace_context[idx].trace_surface_fn,
+                            strerror(errno));
+            trace_context[idx].trace_fp_surface = NULL;
+            trace_flag &= ~(VA_TRACE_FLAG_SURFACE);
+        }
+    }
+
+    if (encode && (trace_flag & VA_TRACE_FLAG_CODEDBUF)) {
+        FILE *tmp = fopen(trace_context[idx].trace_codedbuf_fn, "w");
+        
+        if (tmp)
+            trace_context[idx].trace_fp_codedbuf = tmp;
+        else {
+            va_errorMessage("Open file %s failed (%s)\n",
+                            trace_context[idx].trace_codedbuf_fn,
+                            strerror(errno));
+            trace_context[idx].trace_fp_codedbuf = NULL;
+            trace_flag &= ~VA_TRACE_FLAG_CODEDBUF;
+        }
+    }
 }
 
 
@@ -610,10 +635,10 @@ static void va_TraceVABuffers(
     for (i=0; i<size; i++) {
         unsigned char value =  p[i];
             
-        if ((trace_buffer_data) && ((i%16) == 0))
+        if ((trace_flag & VA_TRACE_FLAG_BUFDATA) && ((i%16) == 0))
             va_TraceMsg(idx, "\n0x%08x:", i);
 
-        if (trace_buffer_data)
+        if (trace_flag & VA_TRACE_FLAG_BUFDATA)
             va_TraceMsg(idx, " %02x", value);
 
         check_sum ^= value;
@@ -1901,7 +1926,7 @@ void va_TraceRenderPicture(
     va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(idx, "\tnum_buffers = %d\n", num_buffers);
     for (i = 0; i < num_buffers; i++) {
-        void *pbuf;
+        unsigned char *pbuf;
         unsigned int j;
         
         /* get buffer type information */
@@ -1913,7 +1938,7 @@ void va_TraceRenderPicture(
         va_TraceMsg(idx, "\t  size = %d\n", size);
         va_TraceMsg(idx, "\t  num_elements = %d\n", num_elements);
 
-        vaMapBuffer(dpy, buffers[i], &pbuf);
+        vaMapBuffer(dpy, buffers[i], (void **)&pbuf);
 
         switch (trace_context[idx].trace_profile) {
         case VAProfileMPEG2Simple:
@@ -1980,36 +2005,46 @@ void va_TraceRenderPicture(
     va_TraceMsg(idx, NULL);
 }
 
-
 void va_TraceEndPicture(
     VADisplay dpy,
-    VAContextID context
+    VAContextID context,
+    int endpic_done
 )
 {
+    int encode, decode, jpeg;
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
-    va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
-    va_TraceMsg(idx, "\trender_targets = 0x%08x\n", trace_context[idx].trace_rendertarget);
 
-    /* want to trace codedbuf, and it is encode */
-    if (trace_context[idx].trace_fp_codedbuf &&
-        ((trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) ||
-         (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture))) {
+    if (endpic_done == 0) {
+        va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
+        va_TraceMsg(idx, "\trender_targets = 0x%08x\n", trace_context[idx].trace_rendertarget);
+    }
+
+    encode = (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) &&
+        (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE);
+    decode = (trace_context[idx].trace_entrypoint == VAEntrypointVLD) &&
+        (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE);
+    jpeg = (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture) &&
+        (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG);
+    
+    /* want to trace encode source surface, do it before vaEndPicture */
+    if ((encode || jpeg) && (endpic_done == 0))
+        va_TraceSurface(dpy);
+    
+    /* want to trace encoode codedbuf, do it after vaEndPicture */
+    if ((encode || jpeg) && (endpic_done == 1)) {
         /* force the pipleline finish rendering */
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
         va_TraceCodedBuf(dpy);
     }
 
-    /* trace decoded surface for decoding, or the source sourface for encoding */
-    if (trace_context[idx].trace_fp_surface) {
+    /* want to trace decode dest surface, do it after vaEndPicture */
+    if (decode && (endpic_done == 1)) {
         /* force the pipleline finish rendering */
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
-        
         va_TraceSurface(dpy);
     }
-
     va_TraceMsg(idx, NULL);
 }
 

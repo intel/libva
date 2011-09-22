@@ -28,35 +28,40 @@
 
 #include <stdio.h>
 
-void va_FoolInit(VADisplay dpy);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+extern int fool_codec;
+extern int fool_postp;
+
+#define VA_FOOL_FLAG_DECODE  0x1
+#define VA_FOOL_FLAG_ENCODE  0x2
+#define VA_FOOL_FLAG_JPEG    0x4
+
+#define VA_FOOL_FUNC(fool_func,...)            \
+    if (fool_codec) {                          \
+        ret = fool_func(__VA_ARGS__);          \
+    }
+#define VA_FOOL_RETURN()                       \
+    if (fool_codec) {                          \
+        return VA_STATUS_SUCCESS;              \
+    }
+
+void va_FoolInit(VADisplay dpy);
 int va_FoolEnd(VADisplay dpy);
 
-
-int va_FoolGetFrame(FILE *input_fp, char *frame_buf);
-
-int va_FoolCodedBuf(VADisplay dpy);
-
-
 int va_FoolCreateConfig(
-    VADisplay dpy,
-    VAProfile profile, 
-    VAEntrypoint entrypoint, 
-    VAConfigAttrib *attrib_list,
-    int num_attribs,
-    VAConfigID *config_id /* out */
+        VADisplay dpy,
+        VAProfile profile, 
+        VAEntrypoint entrypoint, 
+        VAConfigAttrib *attrib_list,
+        int num_attribs,
+        VAConfigID *config_id /* out */
 );
 
-int va_FoolCreateSurfaces(
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    int num_surfaces,
-    VASurfaceID *surfaces	/* out */
-);
 
-VAStatus va_FoolCreateBuffer (
+VAStatus va_FoolCreateBuffer(
     VADisplay dpy,
     VAContextID context,	/* in */
     VABufferType type,		/* in */
@@ -72,41 +77,22 @@ VAStatus va_FoolMapBuffer (
     void **pbuf 	/* out */
 );
 
-int va_FoolBeginPicture(
+VAStatus va_FoolUnmapBuffer(
+        VADisplay dpy,
+        VABufferID buf_id	/* in */
+);
+
+VAStatus va_FoolBufferInfo (
     VADisplay dpy,
-    VAContextID context,
-    VASurfaceID render_target
+    VABufferID buf_id,  /* in */
+    VABufferType *type, /* out */
+    unsigned int *size,         /* out */
+    unsigned int *num_elements /* out */
 );
-
-int va_FoolRenderPicture(
-    VADisplay dpy,
-    VAContextID context,
-    VABufferID *buffers,
-    int num_buffers
-);
-
-int va_FoolEndPicture(
-    VADisplay dpy,
-    VAContextID context
-);
-
-VAStatus va_FoolUnmapBuffer (
-    VADisplay dpy,
-    VABufferID buf_id  /* in */
-);
-
-
-VAStatus va_FoolQuerySubpictureFormats (
-    VADisplay dpy,
-    VAImageFormat *format_list,
-    unsigned int *flags,
-    unsigned int *num_formats
-);
-int va_FoolSyncSurface(
-    VADisplay dpy, 
-    VASurfaceID render_target
-);
-
-
+    
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif
