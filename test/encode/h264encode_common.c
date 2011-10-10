@@ -202,7 +202,7 @@ static int do_h264_encoding(void)
         CHECK_VASTATUS(va_status,"vaBeginPicture");
 
         if (i == 0) {
-            VAEncSequenceParameterBufferH264Baseline seq_h264;
+            VAEncSequenceParameterBufferH264Baseline seq_h264 = {0};
             VABufferID seq_param_buf;
             
             seq_h264.level_idc = SH_LEVEL_3;
