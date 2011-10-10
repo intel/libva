@@ -1971,9 +1971,9 @@ static void
 upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
 struct {
-    VAEncSequenceParameterBufferH264Ext seq_param;
-    VAEncPictureParameterBufferH264Ext pic_param;
-    VAEncSliceParameterBufferH264Ext slice_param[MAX_SLICES];
+    VAEncSequenceParameterBufferH264 seq_param;
+    VAEncPictureParameterBufferH264 pic_param;
+    VAEncSliceParameterBufferH264 slice_param[MAX_SLICES];
     VAEncH264DecRefPicMarkingBuffer dec_ref_pic_marking;
     VAContextID context_id;
     VAConfigID config_id;
@@ -2128,7 +2128,7 @@ static void release_encode_resource()
 
 static void avcenc_update_picture_parameter(int slice_type, int frame_num, int display_num, int is_idr)
 {
-    VAEncPictureParameterBufferH264Ext *pic_param;
+    VAEncPictureParameterBufferH264 *pic_param;
     VAStatus va_status;
 
     // Picture level
@@ -2146,7 +2146,7 @@ static void avcenc_update_picture_parameter(int slice_type, int frame_num, int d
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncPictureParameterBufferExtType,
+                               VAEncPictureParameterBufferType,
                                sizeof(*pic_param), 1, pic_param,
                                &avcenc_context.pic_param_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
@@ -2215,7 +2215,7 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
 
 static void avcenc_update_slice_parameter(int slice_type)
 {
-    VAEncSliceParameterBufferH264Ext *slice_param;
+    VAEncSliceParameterBufferH264 *slice_param;
     VAStatus va_status;
     int i;
 
@@ -2243,7 +2243,7 @@ static void avcenc_update_slice_parameter(int slice_type)
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncSliceParameterBufferExtType,
+                               VAEncSliceParameterBufferType,
                                sizeof(*slice_param), 1, slice_param,
                                &avcenc_context.slice_param_buf_id[i]);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
@@ -2327,10 +2327,10 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     }
 
     /* sequence parameter set */
-    VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
+    VAEncSequenceParameterBufferH264 *seq_param = &avcenc_context.seq_param;
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
-                               VAEncSequenceParameterBufferExtType,
+                               VAEncSequenceParameterBufferType,
                                sizeof(*seq_param), 1, seq_param,
                                &avcenc_context.seq_param_buf_id);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
@@ -2596,7 +2596,7 @@ static void nal_header(bitstream *bs, int nal_ref_idc, int nal_unit_type)
 
 static void sps_rbsp(bitstream *bs)
 {
-    VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
+    VAEncSequenceParameterBufferH264 *seq_param = &avcenc_context.seq_param;
 
     bitstream_put_ui(bs, seq_param->profile_idc, 8);    /* profile_idc */
     bitstream_put_ui(bs, 0, 1);                         /* constraint_set0_flag */
@@ -2661,7 +2661,7 @@ static void build_nal_sps(FILE *avc_fp)
 
 static void pps_rbsp(bitstream *bs)
 {
-    VAEncPictureParameterBufferH264Ext *pic_param = &avcenc_context.pic_param;
+    VAEncPictureParameterBufferH264 *pic_param = &avcenc_context.pic_param;
 
     bitstream_put_ue(bs, pic_param->pic_parameter_set_id);      /* pic_parameter_set_id */
     bitstream_put_ue(bs, pic_param->seq_parameter_set_id);      /* seq_parameter_set_id */
@@ -2744,8 +2744,8 @@ build_packed_seq_buffer(unsigned char **header_buffer)
 static void 
 slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, int nal_ref_idc, int is_idr)
 {
-    VAEncSequenceParameterBufferH264Ext *seq_param = &avcenc_context.seq_param;
-    VAEncPictureParameterBufferH264Ext *pic_param = &avcenc_context.pic_param;
+    VAEncSequenceParameterBufferH264 *seq_param = &avcenc_context.seq_param;
+    VAEncPictureParameterBufferH264 *pic_param = &avcenc_context.pic_param;
     int is_cabac = (pic_param->pic_fields.bits.entropy_coding_mode_flag == ENTROPY_MODE_CABAC);
 
     bitstream_put_ue(bs, 0);                   /* first_mb_in_slice: 0 */
@@ -2998,7 +2998,7 @@ static void show_help()
     printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [qp=qpvalue|fb=framebitrate] [mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)\n");
 }
 
-static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264Ext *seq_param,
+static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_param,
                                           int width, int height)
 
 {
@@ -3064,7 +3064,7 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264Ext *s
     seq_param->vui_flag = 0;
 }
 
-static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264Ext *pic_param)
+static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_param)
 {
     pic_param->seq_parameter_set_id = 0;
     pic_param->pic_parameter_set_id = 0;
