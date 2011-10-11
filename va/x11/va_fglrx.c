@@ -78,23 +78,43 @@ static void ADL_Main_Memory_Free(void *arg)
     }
 }
 
-static int match_display(Display *x11_dpy, const char *display_name)
+static int get_display_name_length(const char *name)
+{
+    const char *m;
+
+    if (!name)
+        return 0;
+
+    /* Strip out screen number */
+    m = strchr(name, ':');
+    if (m) {
+        m = strchr(m, '.');
+        if (m)
+            return m - name;
+    }
+    return strlen(name);
+}
+
+static int match_display_name(Display *x11_dpy, const char *display_name)
 {
     Display *test_dpy;
     char *test_dpy_name, *x11_dpy_name;
+    int test_dpy_namelen, x11_dpy_namelen;
     int m;
 
     test_dpy = XOpenDisplay(display_name);
     if (!test_dpy)
         return 0;
 
-    test_dpy_name = XDisplayString(test_dpy);
-    x11_dpy_name  = XDisplayString(x11_dpy);
+    test_dpy_name    = XDisplayString(test_dpy);
+    test_dpy_namelen = get_display_name_length(test_dpy_name);
+    x11_dpy_name     = XDisplayString(x11_dpy);
+    x11_dpy_namelen  = get_display_name_length(x11_dpy_name);
 
-    if (x11_dpy_name && test_dpy_name)
-        m = strcmp(x11_dpy_name, test_dpy_name) == 0;
-    else
-        m = !x11_dpy_name && !test_dpy_name;
+    m = (test_dpy_namelen == x11_dpy_namelen &&
+         (test_dpy_namelen == 0 ||
+          (test_dpy_namelen > 0 &&
+           strncmp(test_dpy_name, x11_dpy_name, test_dpy_namelen) == 0)));
 
     XCloseDisplay(test_dpy);
     return m;
@@ -204,14 +224,15 @@ Bool VA_FGLRXGetClientDriverName( Display *dpy, int screen,
         printf("  iPresent: %d\n",         lpCurrAdapterInfo->iPresent);
         printf("  iXScreenNum: %d\n",      lpCurrXScreenInfo->iXScreenNum);
 #endif
-        if (match_display(dpy, lpCurrAdapterInfo->strDisplayName) &&
-            screen == lpCurrXScreenInfo->iXScreenNum) {
-            *clientDriverName = strdup("fglrx");
+        if (screen == lpCurrXScreenInfo->iXScreenNum &&
+            match_display_name(dpy, lpCurrAdapterInfo->strDisplayName)) {
+            if (clientDriverName)
+                *clientDriverName = strdup("fglrx");
+            success = True;
             break;
         }
     }
 
-    success = True;
 end:
     if (lpXScreenInfo)
         ADL_Main_Memory_Free(&lpXScreenInfo);
