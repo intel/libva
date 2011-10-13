@@ -812,6 +812,11 @@ static void pps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, pic_param->pic_fields.bits.deblocking_filter_control_present_flag, 1); /* deblocking_filter_control_present_flag */
     bitstream_put_ui(bs, 0, 1);                         /* constrained_intra_pred_flag */
     bitstream_put_ui(bs, 0, 1);                         /* redundant_pic_cnt_present_flag */
+    
+    /* more_rbsp_data */
+    bitstream_put_ui(bs, pic_param->pic_fields.bits.transform_8x8_mode_flag, 1);    /*transform_8x8_mode_flag */
+    bitstream_put_ui(bs, 0, 1);                         /* pic_scaling_matrix_present_flag */
+    bitstream_put_se(bs, pic_param->second_chroma_qp_index_offset );    /*second_chroma_qp_index_offset */
 
     rbsp_trailing_bits(bs);
 }
@@ -1208,7 +1213,7 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
     pic_param->pic_fields.bits.entropy_coding_mode_flag = ENTROPY_MODE_CABAC;
     pic_param->pic_fields.bits.weighted_pred_flag = 0;
     pic_param->pic_fields.bits.weighted_bipred_idc = 0;
-    pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
+    pic_param->pic_fields.bits.transform_8x8_mode_flag = 1;
     pic_param->pic_fields.bits.deblocking_filter_control_present_flag = 1;
 }
 
