@@ -97,9 +97,6 @@ PKG_CHECK_MODULES([XEXT],[xext])
 PKG_CHECK_MODULES([XFIXES], [xfixes])
 PKG_CHECK_MODULES([DRM], [libdrm])
 
-PKG_CHECK_MODULES(GEN4ASM, [intel-gen4asm >= 1.2], [gen4asm=yes], [gen4asm=no])
-AM_CONDITIONAL(HAVE_GEN4ASM, test x$gen4asm = xyes)
-
 if test x$enable_dummy_backend = xyes; then
     PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
 fi
