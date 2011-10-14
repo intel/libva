@@ -22,6 +22,7 @@
 
 INCLUDES = -I$(top_srcdir)
 
+if BUILD_DUMMY_DRIVER
 dummy_drv_video_la_LTLIBRARIES	= dummy_drv_video.la
 dummy_drv_video_ladir		= $(LIBVA_DRIVERS_PATH)
 dummy_drv_video_la_LDFLAGS	= -module -avoid-version -no-undefined -Wl,--no-undefined
@@ -29,3 +30,4 @@ dummy_drv_video_la_LIBADD	= $(top_builddir)/va/$(libvabackendlib)
 dummy_drv_video_la_DEPENDENCIES	= $(top_builddir)/va/$(libvabackendlib)
 dummy_drv_video_la_SOURCES	= dummy_drv_video.c object_heap.c
 noinst_HEADERS			= dummy_drv_video.h object_heap.h
+endif
