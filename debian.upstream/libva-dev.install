@@ -1,0 +1,3 @@
+debian/tmp/usr/include/va/va*.h
+debian/tmp/usr/lib/libva*.so
+debian/tmp/usr/lib/pkgconfig/libva*.pc

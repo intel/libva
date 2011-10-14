@@ -74,6 +74,9 @@ m4_define([libva_lt_revision],
 m4_define([libva_lt_age],
           [m4_eval(libva_binary_age - libva_interface_age)])
 
+# libdrm minimun version requirement
+m4_define([libdrm_version], [2.4])
+
 AC_PREREQ(2.57)
 AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)
 AC_CONFIG_SRCDIR([Makefile.am])
@@ -142,7 +145,11 @@ AC_SYS_LARGEFILE
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT],[xext])
 PKG_CHECK_MODULES([XFIXES], [xfixes])
-PKG_CHECK_MODULES([DRM], [libdrm])
+
+# Check for recent enough DRM
+LIBDRM_VERSION=libdrm_version
+PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
+AC_SUBST(LIBDRM_VERSION)
 
 if test x$enable_dummy_backend = xyes; then
     PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
@@ -188,6 +195,7 @@ AC_SUBST([libvabackendlib])
 
 AC_OUTPUT([
 	Makefile
+	debian.upstream/Makefile
 	va/Makefile
 	va/va_version.h
 	va/x11/Makefile
