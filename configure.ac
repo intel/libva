@@ -162,11 +162,12 @@ AC_OUTPUT([
 	test/putsurface/Makefile
 	test/encode/Makefile
 	test/vainfo/Makefile
-	libva.pc
-	libva-x11.pc
-	libva-glx.pc
-	libva-egl.pc
-	libva-tpi.pc
+	pkgconfig/libva-egl.pc
+	pkgconfig/libva-glx.pc
+	pkgconfig/libva-tpi.pc
+	pkgconfig/libva-x11.pc
+	pkgconfig/libva.pc
+        pkgconfig/Makefile
 ])
 
 # Print a small summary

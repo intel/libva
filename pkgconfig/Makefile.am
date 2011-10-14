@@ -20,9 +20,28 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AUTOMAKE_OPTIONS = foreign
-
-SUBDIRS = va pkgconfig test
-if BUILD_DUMMY_DRIVER
-SUBDIRS += dummy_drv_video
+pcfiles		 = libva.pc
+pcfiles		+= libva-tpi.pc
+pcfiles		+= libva-x11.pc
+if USE_GLX
+pcfiles		+= libva-glx.pc
 endif
+if USE_EGL
+pcfiles		+= libva-egl.pc
+endif
+
+all_pcfiles_in	 = libva.pc.in
+all_pcfiles_in	+= libva-tpi.pc.in
+all_pcfiles_in	+= libva-x11.pc.in
+all_pcfiles_in	+= libva-glx.pc.in
+all_pcfiles_in	+= libva-egl.pc.in
+
+pkgconfigdir = @pkgconfigdir@
+pkgconfig_DATA = $(pcfiles)
+
+EXTRA_DIST = $(all_pcfiles_in)
+
+DISTCLEANFILES = $(pcfiles)
+
+# Extra clean files so that maintainer-clean removes *everything*
+MAINTAINERCLEANFILES = Makefile.in
