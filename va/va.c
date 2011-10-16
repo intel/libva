@@ -380,7 +380,7 @@ VAStatus vaInitialize (
 
     va_FoolInit(dpy);
 
-    va_infoMessage("libva version %s\n", VA_VERSION_S);
+    va_infoMessage("VA-API version %s\n", VA_VERSION_S);
 
     driver_name_env = getenv("LIBVA_DRIVER_NAME");
     if (driver_name_env && geteuid() == getuid()) {
