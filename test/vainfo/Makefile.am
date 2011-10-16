@@ -23,12 +23,15 @@
 
 bin_PROGRAMS = vainfo
 
-INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/test/basic
+INCLUDES = \
+	-I$(top_srcdir)					\
+	-I$(top_srcdir)/test/basic			\
+	-DLIBVA_VERSION_S="\"${LIBVA_VERSION}\""	\
+	$(NULL)
 
 vainfo_LDADD = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib) -lX11
 
 vainfo_DEPENDENCIES =  $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
-vainfo_SOURCES = vainfo.c
 
 valgrind:	vainfo
 	valgrind --leak-check=full --show-reachable=yes .libs/vainfo; 

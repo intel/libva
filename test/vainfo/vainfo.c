@@ -116,7 +116,8 @@ int main(int argc, const char* argv[])
   va_status = vaInitialize(va_dpy, &major_version, &minor_version);
   CHECK_VASTATUS(va_status, "vaInitialize", 3);
   
-  printf("%s: VA API version: %d.%d\n", name, major_version, minor_version);
+  printf("%s: VA-API version: %d.%d (libva %s)\n",
+         name, major_version, minor_version, LIBVA_VERSION_S);
 
   driver = vaQueryVendorString(va_dpy);
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
