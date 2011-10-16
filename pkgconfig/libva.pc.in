@@ -6,6 +6,6 @@ driverdir=@LIBVA_DRIVERS_PATH@
 
 Name: libva
 Description: Userspace Video Acceleration (VA) core interface
-Version: @PACKAGE_VERSION@
+Version: @VA_API_VERSION@
 Libs: -L${libdir} -lva
 Cflags: -I${includedir}
