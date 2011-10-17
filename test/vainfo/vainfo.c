@@ -94,7 +94,7 @@ int main(int argc, const char* argv[])
       name = argv[0];
 
 #ifndef ANDROID
-  dpy = XOpenDisplay(":0.0");
+  dpy = XOpenDisplay(NULL);
 #else
   dpy = (Display*)malloc(sizeof(Display));
 #endif
