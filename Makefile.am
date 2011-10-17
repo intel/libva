@@ -22,4 +22,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = va dummy_drv_video pkgconfig test debian.upstream
+SUBDIRS = va dummy_drv_video pkgconfig test
