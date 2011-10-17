@@ -69,7 +69,7 @@ struct VADriverVTableTPI
                 );
 
         VAStatus (*vaCreateSurfaceFromKBuf)(
-                VADisplay dpy,
+                VADriverContextP ctx,
                 int width,
                 int height,
                 int format,
