@@ -28,7 +28,6 @@
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_fool.h"
-#include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
