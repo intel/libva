@@ -125,14 +125,6 @@ AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
 USE_EGL="yes"
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
-
-# Make sure drivers use the correctly versioned __vaDriverInit*() function name
-VA_DRIVER_INIT_FUNC="__vaDriverInit_${LIBVA_MAJOR_VERSION}_${LIBVA_MINOR_VERSION}"
-AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC], [$VA_DRIVER_INIT_FUNC],
-    [Defined to the versioned __vaDriverInit function name])
-AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC_S], ["$VA_DRIVER_INIT_FUNC"],
-    [Defined to the versioned __vaDriverInit function name (in string form)])
-
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"
 AC_SUBST(LIBVA_CFLAGS)

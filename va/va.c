@@ -149,6 +149,13 @@ static Bool va_checkString(const char* value, char *variable)
     return True;
 }
 
+static inline int
+va_getDriverInitName(char *name, int namelen, int major, int minor)
+{
+    int ret = snprintf(name, namelen, "__vaDriverInit_%d_%d", major, minor);
+    return ret > 0 && ret < namelen;
+}
+
 static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
@@ -193,10 +200,14 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
             if (0 == access( driver_path, F_OK))
                 va_errorMessage("dlopen of %s failed: %s\n", driver_path, dlerror());
         } else {
-            VADriverInit init_func;
-            init_func = (VADriverInit) dlsym(handle, VA_DRIVER_INIT_FUNC_S);
+            VADriverInit init_func = NULL;
+            char init_func_s[256];
+            if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
+                                     VA_MAJOR_VERSION, VA_MINOR_VERSION))
+                init_func = (VADriverInit) dlsym(handle, init_func_s);
             if (!init_func) {
-                va_errorMessage("%s has no function %s\n", driver_path, VA_DRIVER_INIT_FUNC_S);
+                va_errorMessage("%s has no function %s\n",
+                                driver_path, init_func_s);
                 dlclose(handle);
             } else {
                 struct VADriverVTable *vtable = ctx->vtable;
