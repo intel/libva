@@ -43,9 +43,13 @@ m4_define([va_api_version],
 m4_define([libva_major_version], [m4_eval(va_api_major_version + 1)])
 m4_define([libva_minor_version], [m4_eval(va_api_minor_version - 32)])
 m4_define([libva_micro_version], [14])
+m4_define([libva_pre_version],   [0])
 
 m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
+m4_if(libva_pre_version, [0], [], [
+m4_append([libva_version], libva_pre_version, [.pre])
+])
 
 # libva library version number (generated, do not change)
 # XXX: we want the SONAME to remain at libva.so.1 for VA-API major == 0
