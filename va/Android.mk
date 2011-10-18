@@ -64,8 +64,8 @@ include $(BUILD_SHARED_LIBRARY)
 GEN := $(LOCAL_PATH)/va_version.h
 $(GEN): SCRIPT := $(LOCAL_PATH)/../build/gen_version.sh
 $(GEN): PRIVATE_PATH := $(LOCAL_PATH)
-$(GEN): PRIVATE_CUSTOM_TOOL = sh $(SCRIPT) $(LOCAL_PATH)/.. $(LOCAL_PATH)/va_version.h.in > $@
-$(GEN): $(LOCAL_PATH)/%.h : $(LOCAL_PATH)/%.h.in
+$(GEN): PRIVATE_CUSTOM_TOOL = sh $(SCRIPT) $(PRIVATE_PATH)/.. $(PRIVATE_PATH)/va_version.h.in > $@
+$(GEN): $(LOCAL_PATH)/%.h : $(LOCAL_PATH)/%.h.in $(SCRIPT) $(LOCAL_PATH)/../configure.ac
 	$(transform-generated-source)
 LOCAL_GENERATED_SOURCES += $(GEN) 
 
