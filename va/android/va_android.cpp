@@ -125,7 +125,7 @@ static VAStatus va_DisplayContextGetDriverName (
     };
 
     memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->fd = open_device(DEVICE_NAME);
+    dri_state->fd = open_device((char *)DEVICE_NAME);
     
     if (dri_state->fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");

@@ -104,7 +104,7 @@ void test()
 {
     VABufferID buffer_ids[NUM_BUFFER_TYPES+1];
     uint32_t *input_data[NUM_BUFFER_TYPES];
-    int i, j;
+    unsigned int i, j;
     memset(buffer_ids, 0xff, sizeof(buffer_ids));
     for(i=0; i < NUM_BUFFER_TYPES; i++)
     {

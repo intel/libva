@@ -103,7 +103,7 @@ unsigned int buffer_sizes[] =
 void test()
 {
     VABufferID buffer_ids[NUM_BUFFER_TYPES+1];
-    int i;
+    unsigned int i;
     memset(buffer_ids, 0xff, sizeof(buffer_ids));
     for(i=0; i < NUM_BUFFER_TYPES; i++)
     {

@@ -96,12 +96,15 @@ const char *profile2string(VAProfile profile)
         PROFILE(MPEG4Simple)
         PROFILE(MPEG4AdvancedSimple)
         PROFILE(MPEG4Main)
+        PROFILE(H263Baseline)
         PROFILE(H264Baseline)
         PROFILE(H264Main)
         PROFILE(H264High)
+        PROFILE(H264ConstrainedBaseline)
         PROFILE(VC1Simple)
         PROFILE(VC1Main)
         PROFILE(VC1Advanced)
+        PROFILE(JPEGBaseline)
     }
     ASSERT(0);
     return "Unknown";
@@ -118,6 +121,8 @@ const char *entrypoint2string(VAEntrypoint entrypoint)
         ENTRYPOINT(IDCT)
         ENTRYPOINT(MoComp)
         ENTRYPOINT(Deblocking)
+        ENTRYPOINT(EncSlice)
+        ENTRYPOINT(EncPicture)
     }
     ASSERT(0);
     return "Unknown";

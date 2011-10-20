@@ -66,7 +66,7 @@ test_size_t test_sizes[] = {
 void test()
 {
     VASurfaceID surfaces[NUM_SIZES+1];
-    int i;    
+    unsigned int i;
     
     memset(surfaces, 0xff, sizeof(surfaces));
 
