@@ -603,7 +603,6 @@ VAStatus vaCreateSurfaces (
 {
   VADriverContextP ctx;
   VAStatus vaStatus;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -790,7 +789,6 @@ VAStatus vaBeginPicture (
 {
   VADriverContextP ctx;
   VAStatus va_status;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -811,7 +809,6 @@ VAStatus vaRenderPicture (
 )
 {
   VADriverContextP ctx;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -829,7 +826,6 @@ VAStatus vaEndPicture (
 {
   VAStatus va_status;
   VADriverContextP ctx;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -853,7 +849,6 @@ VAStatus vaSyncSurface (
 {
   VAStatus va_status;
   VADriverContextP ctx;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
@@ -1093,7 +1088,6 @@ VAStatus vaQuerySubpictureFormats (
 )
 {
   VADriverContextP ctx;
-  int ret = 0;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
