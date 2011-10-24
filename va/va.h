@@ -675,11 +675,6 @@ typedef struct _VAIQMatrixBufferJPEG
 #define VA_JPEG_COMPONENT_ID_V  3
 #define VA_JPEG_COMPONENT_ID_A  4
                  
-#define VA_JPEG_ROTATION_0      0       /* no rotation */
-#define VA_JPEG_ROTATION_90     1       /* rotate clockwise 90 degree */
-#define VA_JPEG_ROTATION_180    2       /* rotate 180 degree */
-#define VA_JPEG_ROTATION_270    3       /* rotate clockwise 270 degree */
-   
 /* JPEG Picture Parameter Buffer */
 typedef struct _VAPictureParameterBufferJPEG
 {
@@ -746,7 +741,7 @@ typedef struct _VASliceParameterBufferJPEG
     } components[4];
 
     int restart_interval; /* specifies the number of MCUs in restart interval, defined in DRI marker */
-    int count_in_mcus; /* indicates the number of MCUs in a scan */
+    int num_mcus;       /* indicates the number of MCUs in a scan */
 } VASliceParameterBufferJPEG;
 
 /****************************
