@@ -1,0 +1,32 @@
+libva NEWS -- summary of user visible changes.  2011-10-DD
+Copyright (C) 2009-2011 Intel Corporation
+
+Version 1.0.15 - DD.Oct.2011
+* API: make {Top,Bottom}FieldOrderCnt signed (Yi Wang)
+* Add auto-generated Debian packaging
+* Refine VA trace & VA fool utilities
+* Move i965 driver to a specific repository (vaapi/intel-driver)
+* Fix DSO link issue in tests
+* Fix fglrx driver name detection
+* Fix API vs. DSO vs. package versioning
+
+Version 1.0.14 - 28.Jul.2011
+* API: rename VA_DECODE_ERROR_TYPE to VADecodeErrorType
+* Fix memory leaks (Edgar Hucek)
+* Fix VA trace logs (Alexander Osin)
+* Fix vaTerminate() with some applications, e.g. GStreamer
+
+Version 1.0.13 - 30.May.2011
+* API: fix VA_ROTATION_270 definition
+* Add a simple H.264 encoder "avcenc" (Chang Zhou)
+* Fix VA tracer (Alexander Osin)
+* Fix vaBufferInfo() interface (Alexander Osin)
+
+Version 1.0.12 - 01.Apr.2011
+* API: add VARenderMode interface to select overlay or GPU rendering mode
+* API: add VARenderDevice interface to allow rendering to an external device
+* API: add VADisplayAttribOverlay{ColorKey,AutoPaintColorKey} interface
+* Fix build issues on Android 2.3
+
+Changes for older versions can be found in git log or previously
+released packages.
