@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2011-10-DD
+libva NEWS -- summary of user visible changes.  2011-10-28
 Copyright (C) 2009-2011 Intel Corporation
 
-Version 1.0.15 - DD.Oct.2011
+Version 1.0.15 - 28.Oct.2011
 * API: make {Top,Bottom}FieldOrderCnt signed (Yi Wang)
 * Add auto-generated Debian packaging
 * Refine VA trace & VA fool utilities
