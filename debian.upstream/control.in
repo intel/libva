@@ -50,3 +50,12 @@ Description: Video Acceleration (VA) API for Linux -- runtime
  The library loads a hardware dependendent driver.
  .
  This package contains the debug files.
+
+Package: vainfo
+Architecture: any
+Depends: libva1 (= ${Source-Version})
+Description: Video Acceleration (VA) API for Linux -- info program
+ The libva library implements the Video Acceleration (VA) API for Linux.
+ The library loads a hardware dependendent driver.
+ .
+ This package contains the `vainfo' program.

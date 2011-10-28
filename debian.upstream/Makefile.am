@@ -9,6 +9,7 @@ DEBIANFILES = \
 	libva1.dirs				\
 	libva1.install				\
 	rules					\
+	vainfo.install				\
 	$(NULL)
 
 DEBIANGENFILES =				\
