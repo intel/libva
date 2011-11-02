@@ -111,6 +111,11 @@ LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION"
 AC_SUBST(LIBVA_LT_VERSION)
 AC_SUBST(LIBVA_LT_LDFLAGS)
 
+AC_ARG_ENABLE(docs,
+    [AC_HELP_STRING([--enable-docs],
+                    [build Doxygen documentation @<:@default=no@:>@])],
+    [], [enable_docs="no"])
+
 AC_ARG_ENABLE(glx,
               [AC_HELP_STRING([--enable-glx],
                               [build with OpenGL for X11 support])],
@@ -145,6 +150,12 @@ AC_SYS_LARGEFILE
 PKG_CHECK_MODULES([X11], [x11])
 PKG_CHECK_MODULES([XEXT],[xext])
 PKG_CHECK_MODULES([XFIXES], [xfixes])
+
+# Check for Doxygen
+if test "$enable_docs" = "yes"; then
+    AC_CHECK_TOOL([DOXYGEN], [doxygen], [enable_docs="no"])
+fi
+AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
 
 # Check for recent enough DRM
 LIBDRM_VERSION=libdrm_version
@@ -214,6 +225,7 @@ AC_OUTPUT([
 	pkgconfig/libva-tpi.pc
 	pkgconfig/libva-x11.pc
 	pkgconfig/libva.pc
+        doc/Makefile
         pkgconfig/Makefile
 ])
 
@@ -239,4 +251,4 @@ AS_IF([test x$enable_dummy_backend = xyes], [BACKENDS="dummy
 $BACKENDS"])
 
 echo " • Winsys : ${BACKENDS}"
-
+echo " • Documentation : ${enable_docs}"

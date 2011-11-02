@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2007-2011 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -7,11 +7,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -20,26 +20,33 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AUTOMAKE_OPTIONS = foreign
+all: html
+install-data-local: install-html
 
-SUBDIRS = va dummy_drv_video pkgconfig test debian.upstream doc
+EXTRA_DIST = \
+	Doxyfile			\
+	$(NULL)
+
+VA_HEADER_DIR   = $(top_srcdir)/va
+VA_HEADER_FILES = \
+	$(NULL)
+
+export VA_HEADER_DIR
+export VA_HEADER_FILES
+html-out/index.html: Doxyfile $(VA_HEADER_FILES)
+	$(DOXYGEN) $<
+
+if ENABLE_DOCS
+html: html-out/index.html
+install-html-local:
+	install -d $(DESTDIR)$(docdir)/html
+	install -m 0644 html-out/* $(DESTDIR)$(docdir)/html
+uninstall-local:
+	rm -rf $(DESTDIR)$(docdir)/html
+endif
+
+clean-local:
+	rm -rf html-out
 
 # Extra clean files so that maintainer-clean removes *everything*
-MAINTAINERCLEANFILES = \
-	aclocal.m4 compile config.guess config.sub \
-	configure depcomp install-sh ltmain.sh     \
-	Makefile.in missing
-
-DEB_BUILDDIR = debian.build
-
-deb:
-	@[ -d debian ] || ln -s debian.upstream debian
-	dpkg-buildpackage -rfakeroot -uc -us
-
-deb.upstream: dist
-	-mkdir -p $(DEB_BUILDDIR)
-	cd $(DEB_BUILDDIR)				&& \
-	rm -rf $(PACKAGE)-$(VERSION)			&& \
-	tar zxvf ../$(PACKAGE)-$(VERSION).tar.gz	&& \
-	cd $(PACKAGE)-$(VERSION)			&& \
-	$(MAKE) deb -f Makefile.am
+MAINTAINERCLEANFILES = Makefile.in
