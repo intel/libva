@@ -231,25 +231,15 @@ AC_OUTPUT([
 ])
 
 # Print a small summary
-
-echo ""
-echo "libva - ${LIBVA_VERSION} (VA-API ${VA_API_VERSION})"
-echo ""
-
-echo " • Global :"
-echo "     Prefix: ${prefix}"
-echo ""
-
-AS_IF([test x$enable_dummy_driver = xyes], [DRIVERS="dummy $DRIVERS"])
-
-echo " • Drivers: ${DRIVERS}"
-
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
 AS_IF([test x$USE_EGL = xyes], [BACKENDS="egl $BACKENDS"])
 
-BACKENDS="x11 $BACKENDS"
-AS_IF([test x$enable_dummy_backend = xyes], [BACKENDS="dummy 
-$BACKENDS"])
-
-echo " • Winsys : ${BACKENDS}"
-echo " • Documentation : ${enable_docs}"
+echo
+echo "libva - ${LIBVA_VERSION} (VA-API ${VA_API_VERSION})"
+echo
+echo Installation prefix .............. : $prefix
+echo Default driver path .............. : $LIBVA_DRIVERS_PATH
+echo Extra window systems ............. : $BACKENDS
+echo Build dummy driver ............... : $enable_dummy_driver
+echo Build documentation .............. : $enable_docs
+echo
