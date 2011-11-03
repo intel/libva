@@ -117,24 +117,25 @@ AC_ARG_ENABLE(docs,
     [], [enable_docs="no"])
 
 AC_ARG_ENABLE(glx,
-              [AC_HELP_STRING([--enable-glx],
-                              [build with OpenGL for X11 support])],
-              [], [enable_glx=yes])
+    [AC_HELP_STRING([--enable-glx],
+                    [build with GLX support @<:@default=yes@:>@])],
+    [], [enable_glx="yes"])
 
 AC_ARG_ENABLE(dummy-driver,
-              [AC_HELP_STRING([--enable-dummy-driver],
-                              [build dummy video driver])],
-              [], [enable_dummy_driver=yes])
+    [AC_HELP_STRING([--enable-dummy-driver],
+                    [build dummy video driver @<:@default=yes@:>@])],
+    [], [enable_dummy_driver="yes"])
 AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
 
 AC_ARG_ENABLE(dummy-backend,
-              [AC_HELP_STRING([--enable-dummy-backend],
-                              [build dummy libva backend])],
-              [], [enable_dummy_backend=no])
+    [AC_HELP_STRING([--enable-dummy-backend],
+                    [build dummy libva backend])],
+    [], [enable_dummy_backend="no"])
 
 AC_ARG_WITH(drivers-path,
-	    [AC_HELP_STRING([--with-drivers-path=[[path]]], [drivers path])],,
-	    [with_drivers_path="$libdir/dri"])
+    [AC_HELP_STRING([--with-drivers-path=[[path]]],
+                    [drivers path])],
+    [], [with_drivers_path="$libdir/dri"])
 
 LIBVA_DRIVERS_PATH="$with_drivers_path"
 AC_SUBST(LIBVA_DRIVERS_PATH)
