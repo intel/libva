@@ -121,6 +121,11 @@ AC_ARG_ENABLE(glx,
                     [build with GLX support @<:@default=yes@:>@])],
     [], [enable_glx="yes"])
 
+AC_ARG_ENABLE(egl,
+    [AC_HELP_STRING([--enable-egl],
+                    [build with EGL support @<:@default=yes@:>@])],
+    [], [enable_egl="yes"])
+
 AC_ARG_ENABLE(dummy-driver,
     [AC_HELP_STRING([--enable-dummy-driver],
                     [build dummy video driver @<:@default=yes@:>@])],
@@ -171,7 +176,7 @@ if test x$libudev = xno; then
 fi
 AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 
-# Check for OpenGL (X11)
+# Check for GLX
 USE_GLX="no"
 GL_DEPS_CFLAGS=""
 GL_DEPS_LIBS=""
@@ -187,8 +192,19 @@ AC_SUBST(GL_DEPS_CFLAGS)
 AC_SUBST(GL_DEPS_LIBS)
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
 
-# TBD: Check for EGL
-USE_EGL="yes"
+# Check for EGL
+USE_EGL="no"
+EGL_DEPS_CFLAGS=""
+EGL_DEPS_LIBS=""
+if test "$enable_egl" = "yes"; then
+    AC_CHECK_HEADERS([EGL/egl.h])
+    AC_CHECK_LIB(EGL, eglGetDisplay, [
+        USE_EGL="yes"
+        EGL_DEPS_LIBS="-lEGL"
+    ])
+fi
+AC_SUBST(EGL_DEPS_CFLAGS)
+AC_SUBST(EGL_DEPS_LIBS)
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
 # We only need the headers, we don't link against the DRM libraries
