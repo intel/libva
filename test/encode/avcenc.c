@@ -167,7 +167,7 @@ static void alloc_encode_resource()
 
     //1. Create sequence parameter set
     {
-        VAEncSequenceParameterBufferH264 seq_h264 = {0};
+        VAEncSequenceParameterBufferH264Baseline seq_h264 = {0};
 
         seq_h264.level_idc = 30;
         seq_h264.picture_width_in_mbs = picture_width_in_mbs;
@@ -279,7 +279,7 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
 
 static void prepare_input(FILE * yuv_fp, int intra_slice)
 {
-    static VAEncPictureParameterBufferH264 pic_h264;
+    static VAEncPictureParameterBufferH264Baseline pic_h264;
     static VAEncSliceParameterBuffer slice_h264;
     VAStatus va_status;
     VABufferID tempID;	
