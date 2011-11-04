@@ -29,6 +29,7 @@ EXTRA_DIST = \
 
 VA_HEADER_DIR   = $(top_srcdir)/va
 VA_HEADER_FILES = \
+	$(VA_HEADER_DIR)/va.h		\
 	$(NULL)
 
 export VA_HEADER_DIR
