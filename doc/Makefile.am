@@ -30,6 +30,7 @@ EXTRA_DIST = \
 VA_HEADER_DIR   = $(top_srcdir)/va
 VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va.h		\
+	$(VA_HEADER_DIR)/va_enc_h264.h	\
 	$(NULL)
 
 VA_HTML_FOOTER		= va_footer.html

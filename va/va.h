@@ -285,7 +285,9 @@ typedef enum
     VAConfigAttribSpatialClipping	= 2,
     VAConfigAttribIntraResidual		= 3,
     VAConfigAttribEncryption		= 4,
-    VAConfigAttribRateControl		= 5
+    VAConfigAttribRateControl		= 5,
+    VAConfigAttribEncPackedHeaders      = 6, /**< Packed headers mode. */
+    VAConfigAttribEncInterlaced         = 7, /**< Interlaced mode. */
 } VAConfigAttribType;
 
 /*
@@ -310,6 +312,32 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CBR	0x00000002	
 #define VA_RC_VBR	0x00000004	
 #define VA_RC_VCM	0x00000008 /* video conference mode */
+
+/** @name Attribute values for VAConfigAttribuEncPackedHeaders */
+/**@{*/
+/** \brief Driver does not support any packed headers mode. */
+#define VA_ENC_PACKED_HEADER_NONE       0x00000000
+/** \brief Driver supports packed sequence headers. e.g. SPS for H.264. */
+#define VA_ENC_PACKED_HEADER_SEQUENCE   0x00000001
+/** \brief Driver supports packed picture headers. e.g. PPS for H.264. */
+#define VA_ENC_PACKED_HEADER_PICTURE    0x00000002
+/** \brief Driver supports packed slice headers. e.g. \c slice_header() for H.264. */
+#define VA_ENC_PACKED_HEADER_SLICE      0x00000004
+/**@}*/
+
+/** @name Attribute values for VAConfigAttributeEncInterlaced */
+/**@{*/
+/** \brief Driver does not support interlaced coding. */
+#define VA_ENC_INTERLACED_NONE          0x00000000
+/** \brief Driver supports interlaced frame coding. */
+#define VA_ENC_INTERLACED_FRAME         0x00000001
+/** \brief Driver supports interlaced field coding. */
+#define VA_ENC_INTERLACED_FIELD         0x00000002
+/** \brief Driver supports macroblock adaptive frame field coding. */
+#define VA_ENC_INTERLACED_MBAFF         0x00000004
+/** \brief Driver support picture adaptive frame field coding. */
+#define VA_ENC_INTERLACED_PAFF          0x00000008
+/**@}*/
 
 /*
  * if an attribute is not applicable for a given
@@ -566,6 +594,8 @@ typedef enum
     VAEncPictureParameterBufferType	= 23,
     VAEncSliceParameterBufferType	= 24,
     VAEncMiscParameterBufferType	= 27,
+    VAEncPackedHeaderParameterBufferType = 28,
+    VAEncPackedHeaderDataBufferType     = 29,
     VABufferTypeMax                     = 0xff
 } VABufferType;
 
@@ -576,6 +606,24 @@ typedef enum
     VAEncMiscParameterTypeMaxSliceSize	= 2,
     VAEncMiscParameterTypeAIR    	= 3,
 } VAEncMiscParameterType;
+
+/** \brief Packed header type. */
+typedef enum {
+    VAEncPackedHeaderSequence           = 1, /**< Packed sequence header. */
+    VAEncPackedHeaderPicture            = 2, /**< Packed picture header. */
+    VAEncPackedHeaderSlice              = 3, /**< Packed slice header. */
+} VAEncPackedHeaderType;
+
+/** \brief Packed header parameter. */
+typedef struct _VAEncPackedHeaderParameterBuffer {
+    /** Type of the packed header buffer. See #VAEncPackedHeaderType. */
+    VAEncPackedHeaderType       type;
+    /** \brief Size of the #VAEncPackedHeaderDataBuffer in bits. */
+    unsigned int                bit_length;
+    /** \brief Flag set to 1 if startcode emulation prevention bytes are to be inserted. */
+    /* XXX: does this mean the driver re-process the buffer? */
+    unsigned char               insert_emulation_bytes;
+} VAEncPackedHeaderParameterBuffer;
 
 /*
  *  For application, e.g. set a new bitrate
