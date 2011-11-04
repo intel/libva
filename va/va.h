@@ -68,6 +68,13 @@
  *  contributed to various aspects of the API.
  */
 
+/**
+ * \file va.h
+ * \brief The Core API
+ *
+ * This file contains the \ref api_core "Core API".
+ */
+
 #ifndef _VA_H_
 #define _VA_H_
 
@@ -76,6 +83,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * \defgroup api_core Core API
+ *
+ * @{
+ */
 
 /* 
 Overview 
@@ -2275,6 +2288,8 @@ VAStatus vaSetDisplayAttributes (
     VADisplayAttribute *attr_list,
     int num_attributes
 );
+
+/**@}*/
 
 #ifdef __cplusplus
 }
