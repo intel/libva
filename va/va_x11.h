@@ -9,13 +9,6 @@ extern "C" {
 #endif
 
 /*
- * Returns a suitable VADisplay for VA API
- */
-VADisplay vaGetDisplay (
-    Display *dpy
-);
-
-/*
  * Output rendering
  * Following is the rendering interface for X windows, 
  * to get the decode output surface to a X drawable

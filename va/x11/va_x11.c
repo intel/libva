@@ -163,7 +163,7 @@ static VAStatus va_DisplayContextGetDriverName (
 
 
 VADisplay vaGetDisplay (
-    Display *native_dpy /* implementation specific */
+    VANativeDisplay native_dpy /* implementation specific */
 )
 {
   VADisplay dpy = NULL;

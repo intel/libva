@@ -4,21 +4,6 @@
 #include <va/va.h>
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-/*
- * Returns a suitable VADisplay for VA API
- */
-VADisplay vaGetDisplay (
-    void *android_dpy
-);
-
-#ifdef __cplusplus
-}
-#endif
-
-#ifdef __cplusplus
 #ifdef ANDROID
 #include <surfaceflinger/ISurface.h>
 using namespace android;
