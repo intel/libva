@@ -180,7 +180,7 @@ const char *vaErrorStr(VAStatus error_status);
  * native window system.
  * For X Windows, native_dpy would be from XOpenDisplay()
  */
-typedef void* NativeDisplay;	/* window system dependent */
+typedef void* VANativeDisplay;	/* window system dependent */
 
 int vaDisplayIsValid(VADisplay dpy);
     
