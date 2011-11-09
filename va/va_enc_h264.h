@@ -242,7 +242,7 @@ typedef struct _VAEncPictureParameterBufferH264 {
     /** \brief The picture identifier.
      *   Range: 0 to \f$2^{log2\_max\_frame\_num\_minus4 + 4} - 1\f$, inclusive.
      */
-    unsigned short  frame_num;                       /* (0..65535) */
+    unsigned short  frame_num;
 
     /** \brief \c pic_init_qp_minus26 + 26. */
     unsigned char   pic_init_qp;
