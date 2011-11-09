@@ -86,8 +86,6 @@ extern "C" {
 typedef struct _VAEncSequenceParameterBufferH264 {
     /** \brief Same as the H.264 bitstream syntax element. */
     unsigned char   seq_parameter_set_id;
-    /** \brief XXX: implied by VA config. */
-    unsigned char   profile_idc;
     /** \brief Same as the H.264 bitstream syntax element. */
     unsigned char   level_idc;
     /** \brief Period between I frames. */
