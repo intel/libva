@@ -593,9 +593,9 @@ typedef enum
     VAEncSequenceParameterBufferType	= 22,
     VAEncPictureParameterBufferType	= 23,
     VAEncSliceParameterBufferType	= 24,
+    VAEncPackedHeaderParameterBufferType = 25,
+    VAEncPackedHeaderDataBufferType     = 26,
     VAEncMiscParameterBufferType	= 27,
-    VAEncPackedHeaderParameterBufferType = 28,
-    VAEncPackedHeaderDataBufferType     = 29,
     VABufferTypeMax                     = 0xff
 } VABufferType;
 
