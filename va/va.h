@@ -565,8 +565,6 @@ typedef enum
     VAEncSequenceParameterBufferType	= 22,
     VAEncPictureParameterBufferType	= 23,
     VAEncSliceParameterBufferType	= 24,
-    VAEncH264VUIBufferType		= 25,
-    VAEncH264SEIBufferType		= 26,
     VAEncMiscParameterBufferType	= 27,
     VABufferTypeMax                     = 0xff
 } VABufferType;
