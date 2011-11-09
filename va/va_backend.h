@@ -459,6 +459,16 @@ struct VADisplayContext
     );
 
     void *opaque; /* opaque for display extensions (e.g. GLX) */
+
+    VAStatus (*vaCreateNativePixmap) (
+        VADisplayContextP pDisplayContext,
+        unsigned int width,
+        unsigned int height,
+        void **native_pixmap);
+
+    VAStatus (*vaFreeNativePixmap) (
+        VADisplayContextP pDisplayContext,
+        void *native_pixmap);
 };
 
 typedef VAStatus (*VADriverInit) (
