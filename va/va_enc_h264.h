@@ -304,10 +304,29 @@ typedef struct _VAEncPictureParameterBufferH264 {
  *   VAEncPackedHeaderType::VAEncPackedHeaderSlice ;
  * - a #VAEncPackedHeaderDataBuffer which holds the actual packed
  *   header data.
+ *
+ * If per-macroblock encoder configuration is needed, \ref macroblock_info
+ * references a buffer of type #VAEncMacroblockParameterBufferH264. This
+ * buffer is not passed to vaRenderPicture(). i.e. it is not destroyed
+ * by subsequent calls to vaRenderPicture() and then can be re-used
+ * without re-allocating the whole buffer.
  */
 typedef struct _VAEncSliceParameterBufferH264 {
     /** \brief Starting MB address for this slice. */
     unsigned int    macroblock_address;
+    /**
+     * \brief Per-MB encoder configuration buffer, or \c VA_INVALID_ID.
+     *
+     * If per-MB encoder configuration is needed, then \ref macroblock_info
+     * references a buffer of type #VAEncMacroblockParameterBufferH264
+     * (\c VAEncMacroblockParameterBufferType). Otherwise, buffer id
+     * is set to \c VA_INVALID_ID and per-MB configuration is derived
+     * from this slice parameter.
+     *
+     * The \c macroblock_info buffer must hold \ref num_macroblocks
+     * elements.
+     */
+    VABufferID      macroblock_info;
     /** \brief Number of macroblocks in this slice. */
     unsigned int    num_macroblocks;
     /** \brief Slice type.
@@ -459,6 +478,84 @@ typedef struct _VAEncSliceParameterBufferH264 {
     signed char     slice_beta_offset_div2;
     /**@}*/
 } VAEncSliceParameterBufferH264;
+
+/**
+ * @name Macroblock neighbour availability bits
+ *
+ * \anchor api_enc_h264_mb_pred_avail_bits
+ * Definitions for macroblock neighbour availability bits used in
+ * intra prediction mode (non MBAFF only).
+ *
+ * @{
+ */
+/** \brief References macroblock in the top-left corner. */
+#define VA_MB_PRED_AVAIL_TOP_LEFT         (1 << 2)
+/** \brief References macroblock above the current macroblock. */
+#define VA_MB_PRED_AVAIL_TOP              (1 << 4)
+/** \brief References macroblock in the top-right corner. */
+#define VA_MB_PRED_AVAIL_TOP_RIGHT        (1 << 3)
+/** \brief References macroblock on the left of the current macroblock. */
+#define VA_MB_PRED_AVAIL_LEFT             (1 << 6)
+/**@}*/
+
+/**
+ * \brief Macroblock parameter for H.264 encoding in main & high profiles.
+ *
+ * This structure holds per-macroblock information. The buffer must be
+ * allocated with as many elements (macroblocks) as necessary to fit
+ * the slice to be encoded. Besides, the per-macroblock records must
+ * be written in a strict raster order and with no gap. i.e. every
+ * macroblock, regardless of its type, shall have an entry.
+ */
+typedef struct _VAEncMacroblockParameterBufferH264 {
+    /**
+     * \brief Quantization parameter.
+     *
+     * Requested quantization parameter. Range: 0 to 51, inclusive.
+     * If \ref qp is set to 0xff, then the actual value is derived
+     * from the slice-level value: \c pic_init_qp + \c slice_qp_delta.
+     */
+    unsigned char   qp;
+
+    union {
+        /** @name Data for intra macroblock */
+        /**@{*/
+        struct {
+            union {
+                /**
+                 * \brief Flag specified to override MB neighbour
+                 * availability bits from VME stage.
+                 *
+                 * This flag specifies that macroblock neighbour
+                 * availability bits from the VME stage are overriden
+                 * by the \ref pred_avail_flags hereunder.
+                 */
+                unsigned int    pred_avail_override_flag        : 1;
+                /**
+                 * \brief Bitwise representation of which macroblocks
+                 * are available for intra prediction.
+                 *
+                 * If the slice is intra-coded, this field represents
+                 * the macroblocks available for intra prediction.
+                 * See \ref api_enc_h264_mb_pred_avail_bits
+                 * "macroblock neighbour availability" bit definitions.
+                 */
+                unsigned int    pred_avail_flags                : 8;
+            } bits;
+            unsigned int value;
+        } intra_fields;
+        /**@}*/
+
+        /** @name Data for inter macroblock */
+        /**@{*/
+        struct {
+            union {
+            } bits;
+            unsigned int value;
+        } inter_fields;
+        /**@}*/
+    } info;
+} VAEncMacroblockParameterBufferH264;
 
 /**@}*/
 

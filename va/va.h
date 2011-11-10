@@ -596,6 +596,7 @@ typedef enum
     VAEncPackedHeaderParameterBufferType = 25,
     VAEncPackedHeaderDataBufferType     = 26,
     VAEncMiscParameterBufferType	= 27,
+    VAEncMacroblockParameterBufferType	= 28,
     VABufferTypeMax                     = 0xff
 } VABufferType;
 
