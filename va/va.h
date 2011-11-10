@@ -620,9 +620,8 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
     VAEncPackedHeaderType       type;
     /** \brief Size of the #VAEncPackedHeaderDataBuffer in bits. */
     unsigned int                bit_length;
-    /** \brief Flag set to 1 if startcode emulation prevention bytes are to be inserted. */
-    /* XXX: does this mean the driver re-process the buffer? */
-    unsigned char               insert_emulation_bytes;
+    /** \brief Flag: buffer contains start code emulation prevention bytes? */
+    unsigned char               has_emulation_bytes;
 } VAEncPackedHeaderParameterBuffer;
 
 /*
