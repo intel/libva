@@ -20,16 +20,22 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va -I$(top_srcdir)/va/x11
+INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va
 
 source_c = \
-	va_egl.c		
+	va_egl.c		\
+	va_egl_impl.c		\
+	$(NULL)
 
 source_h = \
 	va_egl.h		\
-	va_backend_egl.h
+	va_backend_egl.h	\
+	$(NULL)
 
-source_h_priv = 
+source_h_priv = \
+	va_egl_impl.h		\
+	va_egl_private.h	\
+	$(NULL) 
 
 noinst_LTLIBRARIES	 = libva_egl.la
 libva_eglincludedir	 = ${includedir}/va

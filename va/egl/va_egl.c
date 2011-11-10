@@ -53,13 +53,33 @@
  *
  * Bellow API vaGetEGLClientBufferFromSurface is for this purpose
  */
-
-#include "va.h"
-#include "va_backend_egl.h"
-#include "va_egl.h"
+#include "va_egl_private.h"
+#include "va_egl_impl.h"
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
+
+#define INIT_CONTEXT(ctx, dpy) do {                             \
+        if (!vaDisplayIsValid(dpy))                             \
+            return VA_STATUS_ERROR_INVALID_DISPLAY;             \
+                                                                \
+        ctx = ((VADisplayContextP)(dpy))->pDriverContext;       \
+        if (!(ctx))                                             \
+            return VA_STATUS_ERROR_INVALID_DISPLAY;             \
+                                                                \
+        status = va_egl_init_context(dpy);                      \
+        if (status != VA_STATUS_SUCCESS)                        \
+            return status;                                      \
+    } while (0)
+
+#define INVOKE(ctx, func, args) do {                            \
+        VADriverVTablePrivEGLP vtable;                          \
+        vtable = &VA_DRIVER_CONTEXT_EGL(ctx)->vtable;           \
+        if (!vtable->va##func##EGL)                             \
+            return VA_STATUS_ERROR_UNIMPLEMENTED;               \
+        status = vtable->va##func##EGL args;                    \
+    } while (0)
+
 
 VAStatus vaGetEGLClientBufferFromSurface (
     VADisplay dpy,
@@ -79,4 +99,154 @@ VAStatus vaGetEGLClientBufferFromSurface (
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
   
+// Destroy VA/EGL display context
+static void va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
+{
+    VADisplayContextEGLP pDisplayContextEGL;
+    VADriverContextP     pDriverContext;
+    VADriverContextEGLP  pDriverContextEGL;
+
+    if (!pDisplayContext)
+        return;
+
+    pDriverContext     = pDisplayContext->pDriverContext;
+    pDriverContextEGL  = pDriverContext->egl;
+    if (pDriverContextEGL) {
+        free(pDriverContextEGL);
+        pDriverContext->egl = NULL;
+    }
+
+    pDisplayContextEGL = pDisplayContext->opaque;
+    if (pDisplayContextEGL) {
+        vaDestroyFunc vaDestroy = pDisplayContextEGL->vaDestroy;
+        free(pDisplayContextEGL);
+        pDisplayContext->opaque = NULL;
+        if (vaDestroy)
+            vaDestroy(pDisplayContext);
+    }
+}
+
+// Return a suitable VADisplay for VA API
+VADisplay vaGetDisplayEGL(VANativeDisplay native_dpy,
+                          EGLDisplay egl_dpy)
+{
+    VADisplay            dpy                = NULL;
+    VADisplayContextP    pDisplayContext    = NULL;
+    VADisplayContextEGLP pDisplayContextEGL = NULL;
+    VADriverContextP     pDriverContext;
+    VADriverContextEGLP  pDriverContextEGL  = NULL;
+
+    dpy = vaGetDisplay(native_dpy);
+
+    if (!dpy)
+        return NULL;
+
+    if (egl_dpy == EGL_NO_DISPLAY)
+        goto error;
+
+    pDisplayContext = (VADisplayContextP)dpy;
+    pDriverContext  = pDisplayContext->pDriverContext;
+
+    pDisplayContextEGL = calloc(1, sizeof(*pDisplayContextEGL));
+    if (!pDisplayContextEGL)
+        goto error;
+
+    pDriverContextEGL = calloc(1, sizeof(*pDriverContextEGL));
+    if (!pDriverContextEGL)
+        goto error;
+
+    pDisplayContextEGL->vaDestroy = pDisplayContext->vaDestroy;
+    pDisplayContext->vaDestroy = va_DisplayContextDestroy;
+    pDisplayContext->opaque = pDisplayContextEGL;
+    pDriverContextEGL->egl_display = egl_dpy;
+    pDriverContext->egl = pDriverContextEGL;
+    return dpy;
+
+error:
+    free(pDriverContextEGL);
+    free(pDisplayContextEGL);
+    pDisplayContext->vaDestroy(pDisplayContext);
+    return NULL;
+}
+
+// Create a surface used for display to OpenGL
+VAStatus vaCreateSurfaceEGL(
+    VADisplay dpy,
+    GLenum target,
+    GLuint texture,
+    unsigned int width,
+    unsigned int height,
+    VASurfaceEGL *gl_surface
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    if (target != GL_TEXTURE_2D)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, CreateSurface, (dpy, target, texture, width, height, gl_surface));
+    return status;
+}
+
+// Destroy a VA/EGL surface
+VAStatus vaDestroySurfaceEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, DestroySurface, (dpy, egl_surface));
+    return status;
+}
+
+VAStatus vaAssociateSurfaceEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface,
+    VASurfaceID surface,
+    unsigned int flags
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, AssociateSurface, (dpy, egl_surface, surface, flags));
+    return status;
+}
+
+VAStatus vaUpdateAssociatedSurfaceEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, UpdateAssociatedSurface, (dpy, egl_surface));
+    return status;
+}
+
+VAStatus vaDeassociateSurfaceEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, DeassociateSurface, (dpy, egl_surface));
+    return status;
+}
   
