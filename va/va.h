@@ -147,6 +147,14 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_INVALID_IMAGE_FORMAT    0x00000016
 #define VA_STATUS_ERROR_DECODING_ERROR          0x00000017
 #define VA_STATUS_ERROR_ENCODING_ERROR          0x00000018
+/**
+ * \brief An invalid/unsupported value was supplied.
+ *
+ * This is a catch-all error code for invalid or unsupported values.
+ * e.g. value exceeding the valid range, invalid type in the context
+ * of generic attribute values.
+ */
+#define VA_STATUS_ERROR_INVALID_VALUE           0x00000019
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
@@ -432,6 +440,34 @@ typedef VAGenericID VASurfaceID;
 
 #define VA_INVALID_ID		0xffffffff
 #define VA_INVALID_SURFACE	VA_INVALID_ID
+
+/** \brief Generic value types. */
+typedef enum  {
+    VAGenericValueTypeInteger = 1,      /**< 32-bit signed integer. */
+    VAGenericValueTypeFloat,            /**< 32-bit floating-point value. */
+    VAGenericValueTypePointer,          /**< Generic pointer type */
+    VAGenericValueTypeFunc              /**< Pointer to function */
+} VAGenericValueType;
+
+/** \brief Generic function type. */
+typedef void (*VAGenericFunc)(void);
+
+/** \brief Generic value. */
+typedef struct _VAGenericValue {
+    /** \brief Value type. See #VAGenericValueType. */
+    VAGenericValueType  type;
+    /** \brief Value holder. */
+    union {
+        /** \brief 32-bit signed integer. */
+        int             i;
+        /** \brief 32-bit float. */
+        float           f;
+        /** \brief Generic pointer. */
+        void           *p;
+        /** \brief Pointer to function. */
+        VAGenericFunc   fn;
+    }                   value;
+} VAGenericValue;
 
 /* 
  * vaCreateSurfaces - Create an array of surfaces used for decode and display  
