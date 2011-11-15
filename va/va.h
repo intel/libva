@@ -288,6 +288,8 @@ typedef enum
     VAConfigAttribRateControl		= 5,
     VAConfigAttribEncPackedHeaders      = 6, /**< Packed headers mode. */
     VAConfigAttribEncInterlaced         = 7, /**< Interlaced mode. */
+    /** \brief Max number of reference frames (read-only). */
+    VAConfigAttribEncMaxRefFrames       = 8,
 } VAConfigAttribType;
 
 /*
