@@ -36,6 +36,8 @@
 extern "C" {
 #endif
 
+#include <va/va_enc.h>
+
 /**
  * \defgroup api_enc_h264 H.264 encoding API
  *
@@ -567,6 +569,85 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
         /**@}*/
     } info;
 } VAEncMacroblockParameterBufferH264;
+
+/** \brief Abstract representation of an H.264 bitstream writer. */
+typedef struct _VAEncBitstreamH264 VAEncBitstreamH264;
+
+/** \brief Bitstream writer attribute types specific to H.264 encoding. */
+typedef enum {
+    /**
+     * \brief Flag: specifies whether to insert emulation prevention
+     * bytes (integer).
+     */
+    VAEncBitstreamAttribEmulationPreventionH264 = (
+        VAEncBitstreamAttribMiscMask | 1),
+} VAEncBitstreamAttribTypeH264;
+
+/**
+ * \brief Allocates a new H.264 bitstream writer.
+ *
+ * Allocates a new bitstream writer. By default, libva allocates and
+ * maintains its own buffer. However, the user can pass down his own
+ * buffer with the \c VAEncBitstreamAttribBuffer attribute, along with
+ * the size of that buffer with the \c VAEncBitstreamAttribBufferSize
+ * attribute.
+ *
+ * By default, emulation prevention bytes are not inserted. However,
+ * the user can still request emulation prevention by setting the
+ * \c VAEncBitstreamAttribEmulationPreventionH264 attribute to 1.
+ *
+ * @param[in] attribs       the optional attributes, or NULL
+ * @param[in] num_attribs   the number of attributes available in \c attribs
+ * @return a new #VAEncBitstreamH264, or NULL if an error occurred
+ */
+VAEncBitstreamH264 *
+va_enc_h264_bitstream_new(
+    VAEncBitstreamAttrib *attribs,
+    unsigned int          num_attribs
+);
+
+/**
+ * \brief Destroys an H.264 bitstream writer.
+ *
+ * @param[in] bs            the bitstream writer to destroy
+ */
+void
+va_enc_h264_bitstream_destroy(VAEncBitstreamH264 *bs);
+
+/**
+ * \brief Writes an unsigned integer as \c ue(v).
+ *
+ * Writes a 32-bit unsigned int value by following \c ue(v) from the
+ * H.264 specification.
+ *
+ * @param[in] bs            the bitstream writer
+ * @param[in] value         the unsigned int value
+ * @return the number of bits written, or a negative value to indicate an error
+ */
+int
+va_enc_h264_bitstream_write_ue(VAEncBitstreamH264 *bs, unsigned int value);
+
+/**
+ * \brief Writes a signed integer as \c se(v).
+ *
+ * Writes a 32-bit signed int value by following \c se(v) from the
+ * H.264 specification.
+ *
+ * @param[in] bs            the bitstream writer
+ * @param[in] value         the signed int value
+ * @return the number of bits written, or a negative value to indicate an error
+ */
+int
+va_enc_h264_bitstream_write_se(VAEncBitstreamH264 *bs, int value);
+
+/**
+ * \brief Helper function to write trailing bits into the bitstream.
+ *
+ * @param[in] bs            the bitstream writer
+ * @return the number of bits written, or a negative value to indicate an error
+ */
+int
+va_enc_h264_bitstream_write_trailing_bits(VAEncBitstreamH264 *bs);
 
 /**@}*/
 
