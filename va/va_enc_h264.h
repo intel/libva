@@ -210,10 +210,21 @@ typedef struct _VAEncSequenceParameterBufferH264 {
  * \c vaRenderPicture() call as this picture parameter buffer.
  */
 typedef struct _VAEncPictureParameterBufferH264 {
-    /** \brief Information about the picture to be encoded. */
+    /**
+     * \brief Information about the picture to be encoded.
+     *
+     * See #VAPictureH264 for further description of each field.
+     * Note that CurrPic.picture_id represents the reconstructed
+     * (decoded) picture. User provides a scratch VA surface ID here.
+     */
     VAPictureH264   CurrPic;
-    /** \brief Decoded Picture Buffer (DPB).
-     *  XXX: is this really used?
+    /**
+     * \brief Decoded Picture Buffer (DPB).
+     *
+     * This array represents the list of reconstructed (decoded)
+     * frames used as reference. It is important to keep track of
+     * reconstructed frames so that they can be used later on as
+     * reference for P or B-frames encoding.
      */
     VAPictureH264   ReferenceFrames[16];
     /**
