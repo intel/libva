@@ -96,7 +96,7 @@ VAStatus vaCreateSurfacesForUserPtr(
 /*
  * Create surface from the Kernel buffer
  */
-VAStatus vaCreateSurfaceFromKbuf(
+VAStatus vaCreateSurfaceFromKBuf(
     VADisplay dpy,
     int width,
     int height,
