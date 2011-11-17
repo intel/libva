@@ -44,6 +44,7 @@ libva_source_h = \
 	va_dummy.h		\
 	va_tpi.h		\
 	va_version.h		\
+	va_vpp.h		\
 	va_x11.h		\
 	$(NULL)
 

@@ -172,6 +172,10 @@ typedef int VAStatus;	/* Return status type from functions */
  * of generic attribute values.
  */
 #define VA_STATUS_ERROR_INVALID_VALUE           0x00000019
+/** \brief An unsupported filter was supplied. */
+#define VA_STATUS_ERROR_UNSUPPORTED_FILTER      0x00000020
+/** \brief An invalid filter chain was supplied. */
+#define VA_STATUS_ERROR_INVALID_FILTER_CHAIN    0x00000021
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
@@ -264,6 +268,8 @@ VAPrivFunc vaGetLibFunc (
 /* Currently defined profiles */
 typedef enum
 {
+    /** \brief Profile ID used for video processing. */
+    VAProfileNone                       = -1,
     VAProfileMPEG2Simple		= 0,
     VAProfileMPEG2Main			= 1,
     VAProfileMPEG4Simple		= 2,
@@ -291,7 +297,8 @@ typedef enum
     VAEntrypointMoComp		= 4,
     VAEntrypointDeblocking	= 5,
     VAEntrypointEncSlice	= 6,	/* slice level encode */
-    VAEntrypointEncPicture 	= 7	/* pictuer encode, JPEG, etc */
+    VAEntrypointEncPicture 	= 7,	/* pictuer encode, JPEG, etc */
+    VAEntrypointVideoProc       = 10,   /**< Video pre/post-processing. */
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -705,6 +712,27 @@ typedef enum
     VAEncPackedHeaderDataBufferType     = 26,
     VAEncMiscParameterBufferType	= 27,
     VAEncMacroblockParameterBufferType	= 28,
+/* Following are video processing buffer types */
+    /**
+     * \brief Video processing pipeline parameter buffer.
+     *
+     * This buffer describes the video processing pipeline. See
+     * #VAProcPipelineParameterBuffer for details.
+     */
+    VAProcPipelineParameterBufferType   = 31,
+    /**
+     * \brief Video filter parameter buffer.
+     *
+     * This buffer describes the video filter parameters. All buffers
+     * inherit from #VAProcFilterParameterBufferBase, thus including
+     * a unique filter buffer type.
+     *
+     * The default buffer used by most filters is #VAProcFilterParameterBuffer.
+     * Filters requiring advanced parameters include, but are not limited to,
+     * deinterlacing (#VAProcFilterParameterBufferDeinterlacing),
+     * color balance (#VAProcFilterParameterBufferColorBalance), etc.
+     */
+    VAProcFilterParameterBufferType     = 32,
     VABufferTypeMax                     = 0xff
 } VABufferType;
 
