@@ -99,6 +99,7 @@ extern "C" {
  * - \ref api_core
  * - \ref api_enc_core
  * - \ref api_enc_h264
+ * - \ref api_vpp
  */
 
 /**

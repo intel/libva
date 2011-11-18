@@ -32,6 +32,7 @@ VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va.h		\
 	$(VA_HEADER_DIR)/va_enc.h	\
 	$(VA_HEADER_DIR)/va_enc_h264.h	\
+	$(VA_HEADER_DIR)/va_vpp.h	\
 	$(NULL)
 
 VA_HTML_FOOTER		= va_footer.html
