@@ -85,6 +85,23 @@ extern "C" {
 #endif
 
 /**
+ * \mainpage Video Acceleration (VA) API
+ *
+ * \section intro Introduction
+ *
+ * The main motivation for VA-API (Video Acceleration API) is to
+ * enable hardware accelerated video decode and encode at various
+ * entry-points (VLD, IDCT, Motion Compensation etc.) for the
+ * prevailing coding standards today (MPEG-2, MPEG-4 ASP/H.263, MPEG-4
+ * AVC/H.264, VC-1/VMW3, and JPEG).
+ *
+ * VA-API is split into several modules:
+ * - \ref api_core
+ * - \ref api_enc_core
+ * - \ref api_enc_h264
+ */
+
+/**
  * \defgroup api_core Core API
  *
  * @{
