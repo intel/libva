@@ -31,9 +31,13 @@ VA_HEADER_DIR   = $(top_srcdir)/va
 VA_HEADER_FILES = \
 	$(NULL)
 
+VA_HTML_FOOTER		= va_footer.html
+VA_HTML_FRAGMENTS	= $(VA_HTML_FOOTER)
+
 export VA_HEADER_DIR
 export VA_HEADER_FILES
-html-out/index.html: Doxyfile $(VA_HEADER_FILES)
+export VA_HTML_FOOTER
+html-out/index.html: Doxyfile $(VA_HEADER_FILES) $(VA_HTML_FRAGMENTS)
 	$(DOXYGEN) $<
 
 if ENABLE_DOCS
@@ -51,9 +55,6 @@ install-html-local:
 uninstall-local:
 	rm -rf $(DESTDIR)$(docdir)/html
 endif
-
-clean-local:
-	rm -rf html-out
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
