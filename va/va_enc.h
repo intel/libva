@@ -45,12 +45,9 @@ extern "C" {
 /** \brief Abstract representation of a bitstream writer. */
 typedef struct _VAEncBitstream VAEncBitstream;
 
-/** \brief Casts bitstream writer object to the base #VAEncBitstream object. */
-#define VA_ENC_BITSTREAM(bs) ((VAEncBitstream *)(bs))
-
 /** @name The set of all possible error codes */
 /**@{*/
-/** \brief An invalid bitstream writer was supplied. */
+/** \brief An invalid bitstream writer handle was supplied. */
 #define VA_ENC_STATUS_ERROR_INVALID_BITSTREAM_WRITER    (-1)
 /** \brief An invalid/unsupported parameter value was supplied. */
 #define VA_ENC_STATUS_ERROR_INVALID_VALUE               (-2)

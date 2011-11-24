@@ -518,9 +518,6 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
     } info;
 } VAEncMacroblockParameterBufferH264;
 
-/** \brief Abstract representation of an H.264 bitstream writer. */
-typedef struct _VAEncBitstreamH264 VAEncBitstreamH264;
-
 /** \brief Bitstream writer attribute types specific to H.264 encoding. */
 typedef enum {
     /**
@@ -546,10 +543,10 @@ typedef enum {
  *
  * @param[in] attribs       the optional attributes, or NULL
  * @param[in] num_attribs   the number of attributes available in \c attribs
- * @return a new #VAEncBitstreamH264, or NULL if an error occurred
+ * @return a new #VAEncBitstream, or NULL if an error occurred
  */
-VAEncBitstreamH264 *
-va_enc_h264_bitstream_new(
+VAEncBitstream *
+va_enc_bitstream_h264_new(
     VAEncBitstreamAttrib *attribs,
     unsigned int          num_attribs
 );
@@ -560,7 +557,7 @@ va_enc_h264_bitstream_new(
  * @param[in] bs            the bitstream writer to destroy
  */
 void
-va_enc_h264_bitstream_destroy(VAEncBitstreamH264 *bs);
+va_enc_bitstream_h264_destroy(VAEncBitstream *bs);
 
 /**
  * \brief Writes an unsigned integer as \c ue(v).
@@ -573,7 +570,7 @@ va_enc_h264_bitstream_destroy(VAEncBitstreamH264 *bs);
  * @return the number of bits written, or a negative value to indicate an error
  */
 int
-va_enc_h264_bitstream_write_ue(VAEncBitstreamH264 *bs, unsigned int value);
+va_enc_bitstream_h264_write_ue(VAEncBitstream *bs, unsigned int value);
 
 /**
  * \brief Writes a signed integer as \c se(v).
@@ -586,7 +583,7 @@ va_enc_h264_bitstream_write_ue(VAEncBitstreamH264 *bs, unsigned int value);
  * @return the number of bits written, or a negative value to indicate an error
  */
 int
-va_enc_h264_bitstream_write_se(VAEncBitstreamH264 *bs, int value);
+va_enc_bitstream_h264_write_se(VAEncBitstream *bs, int value);
 
 /**
  * \brief Helper function to write trailing bits into the bitstream.
@@ -595,7 +592,7 @@ va_enc_h264_bitstream_write_se(VAEncBitstreamH264 *bs, int value);
  * @return the number of bits written, or a negative value to indicate an error
  */
 int
-va_enc_h264_bitstream_write_trailing_bits(VAEncBitstreamH264 *bs);
+va_enc_bitstream_h264_write_trailing_bits(VAEncBitstream *bs);
 
 /**@}*/
 
