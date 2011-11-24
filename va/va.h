@@ -338,6 +338,30 @@ typedef enum
      * bits).
      */
     VAConfigAttribEncMaxRefFrames       = 13,
+    /**
+     * \brief Maximum number of slices per frame. Read-only.
+     *
+     * This attribute determines the maximum number of slices the
+     * driver can support to encode a single frame.
+     */
+    VAConfigAttribEncMaxSlices		= 14,
+    /**
+     * \brief Slice structure. Read-only.
+     *
+     * This attribute determines slice structures supported by the
+     * driver for encoding. This attribute is a hint to the user so
+     * that he can choose a suitable surface size and how to arrange
+     * the encoding process of multiple slices per frame.
+     *
+     * More specifically, for H.264 encoding, this attribute
+     * determines the range of accepted values to
+     * VAEncSliceParameterBufferH264::macroblock_address and
+     * VAEncSliceParameterBufferH264::num_macroblocks.
+     *
+     * See \c VA_ENC_SLICE_STRUCTURE_xxx for the supported slice
+     * structure types.
+     */
+    VAConfigAttribEncSliceStructure	= 15,
     /**@}*/
 } VAConfigAttribType;
 
@@ -388,6 +412,16 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_INTERLACED_MBAFF         0x00000004
 /** \brief Driver support picture adaptive frame field coding. */
 #define VA_ENC_INTERLACED_PAFF          0x00000008
+/**@}*/
+
+/** @name Attribute values for VAConfigAttribEncSliceStructure */
+/**@{*/
+/** \brief Driver supports an arbitrary number of rows per slice. */
+#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS		0x00000000
+/** \brief Driver supports a power-of-two number of rows per slice. */
+#define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
+/** \brief Driver supports an arbitrary number of rows per slice. */
+#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS	0x00000002
 /**@}*/
 
 /*
