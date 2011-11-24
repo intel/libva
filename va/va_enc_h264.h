@@ -67,6 +67,27 @@ extern "C" {
 /**@}*/
 
 /**
+ * \brief Packed header types specific to H.264 encoding.
+ *
+ * Types of packed headers generally used for H.264 encoding. Each
+ * associated packed header data buffer shall contain the start code
+ * prefix 0x000001 followed by the complete NAL unit, thus also
+ * including the \c nal_unit_type.
+ */
+typedef enum {
+    /**
+     * \brief Packed Supplemental Enhancement Information (SEI).
+     *
+     * The corresponding packed header data buffer shall contain the
+     * complete sei_rbsp() syntax element, thus including several
+     * sei_message() elements if necessary.
+     *
+     * Note: packed \c nal_unit_type shall be equal to 6.
+     */
+    VAEncPackedHeaderH264_SEI = (VAEncPackedHeaderMiscMask | 1),
+} VAEncPackedHeaderTypeH264;
+
+/**
  * \brief Sequence parameter for H.264 encoding in main & high profiles.
  *
  * This structure holds information for \c seq_parameter_set_data() as

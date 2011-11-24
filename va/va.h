@@ -418,6 +418,8 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_PACKED_HEADER_PICTURE    0x00000002
 /** \brief Driver supports packed slice headers. e.g. \c slice_header() for H.264. */
 #define VA_ENC_PACKED_HEADER_SLICE      0x00000004
+/** \brief Driver supports misc packed headers. e.g. SEI for H.264. */
+#define VA_ENC_PACKED_HEADER_MISC       0x00000008
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncInterlaced */
@@ -717,15 +719,20 @@ typedef enum
 
 /** \brief Packed header type. */
 typedef enum {
-    VAEncPackedHeaderSequence           = 1, /**< Packed sequence header. */
-    VAEncPackedHeaderPicture            = 2, /**< Packed picture header. */
-    VAEncPackedHeaderSlice              = 3, /**< Packed slice header. */
+    /** \brief Packed sequence header. */
+    VAEncPackedHeaderSequence   = 1,
+    /** \brief Packed picture header. */
+    VAEncPackedHeaderPicture    = 2,
+    /** \brief Packed slice header. */
+    VAEncPackedHeaderSlice      = 3,
+    /** \brief Misc packed header. See codec-specific definitions. */
+    VAEncPackedHeaderMiscMask   = 0x80000000,
 } VAEncPackedHeaderType;
 
 /** \brief Packed header parameter. */
 typedef struct _VAEncPackedHeaderParameterBuffer {
     /** Type of the packed header buffer. See #VAEncPackedHeaderType. */
-    VAEncPackedHeaderType       type;
+    unsigned int                type;
     /** \brief Size of the #VAEncPackedHeaderDataBuffer in bits. */
     unsigned int                bit_length;
     /** \brief Flag: buffer contains start code emulation prevention bytes? */
