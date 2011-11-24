@@ -92,6 +92,8 @@ typedef struct _VAEncSequenceParameterBufferH264 {
     unsigned char   level_idc;
     /** \brief Period between I frames. */
     unsigned int    intra_period;
+    /** \brief Period between IDR frames. */
+    unsigned int    intra_idr_period;
     /** \brief Period between I/P frames. */
     unsigned int    ip_period;
     /**
