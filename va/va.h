@@ -786,10 +786,12 @@ typedef struct _VAEncMiscParameterAIR
  * the \c status flag of #VACodedBufferSegment will contain
  * #VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW.
  */
-typedef struct _VAEncMiscParameterMaxFrameSize {
+typedef struct _VAEncMiscParameterBufferMaxFrameSize {
+    /** \brief Type. Shall be set to #VAEncMiscParameterTypeMaxFrameSize. */
+    VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in bits). */
-    unsigned int        max_frame_size;
-} VAEncMiscParameterMaxFrameSize;
+    unsigned int                max_frame_size;
+} VAEncMiscParameterBufferMaxFrameSize;
 
 /* 
  * There will be cases where the bitstream buffer will not have enough room to hold
