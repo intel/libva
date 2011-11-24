@@ -393,28 +393,6 @@ typedef struct _VAEncSliceParameterBufferH264 {
     VAPictureH264   RefPicList1[32];
     /**@}*/
 
-    /** @name ref_pic_list_modification() */
-    /**@{*/
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   ref_pic_list_modification_flag_l0;
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   ref_pic_list_modification_flag_l1;
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   modification_of_pic_nums_idc_l0[32];
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   modification_of_pic_nums_idc_l1[32];
-    /** \brief List 0 values for each \c modification_of_pic_nums_idc_l0. */
-    /**
-     * - If \c modification_of_pic_nums_idc == 0 or 1:
-     *   - \c modification_of_pic_nums_value is \c abs_diff_pic_num_minus1
-     * - If \c modification_of_pic_nums_idc == 2:
-     *   - \c modification_of_pic_nums_value is \c long_term_pic_num
-     */
-    unsigned int    modification_of_pic_nums_value_l0[32];
-    /** \brief Same as \c modification_of_pic_nums_value_l0 but for list 1. */
-    unsigned int    modification_of_pic_nums_value_l1[32];
-    /**@}*/
-
     /** @name pred_weight_table() */
     /**@{*/
     /** \brief Same as the H.264 bitstream syntax element. */
