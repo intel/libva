@@ -81,7 +81,7 @@ extern "C" {
  * - a #VAEncPackedHeaderDataBuffer which holds the actual packed
  *   header data.
  *
- * If \ref seq_scaling_matrix_present_flag is set to \c 1, then a
+ * If \c seq_scaling_matrix_present_flag is set to \c 1, then a
  * #VAIQMatrixBufferH264 buffer shall also be provided within the same
  * \c vaRenderPicture() call as this sequence parameter buffer.
  */
@@ -207,7 +207,7 @@ typedef struct _VAEncSequenceParameterBufferH264 {
  * - a #VAEncPackedHeaderDataBuffer which holds the actual packed
  *   header data.
  *
- * If \ref pic_scaling_matrix_present_flag is set to \c 1, then a
+ * If \c pic_scaling_matrix_present_flag is set to \c 1, then a
  * #VAIQMatrixBufferH264 buffer shall also be provided within the same
  * \c vaRenderPicture() call as this picture parameter buffer.
  */
@@ -318,7 +318,7 @@ typedef struct _VAEncPictureParameterBufferH264 {
  * - a #VAEncPackedHeaderDataBuffer which holds the actual packed
  *   header data.
  *
- * If per-macroblock encoder configuration is needed, \ref macroblock_info
+ * If per-macroblock encoder configuration is needed, \c macroblock_info
  * references a buffer of type #VAEncMacroblockParameterBufferH264. This
  * buffer is not passed to vaRenderPicture(). i.e. it is not destroyed
  * by subsequent calls to vaRenderPicture() and then can be re-used

@@ -327,7 +327,7 @@ typedef enum
      */
     VAConfigAttribEncInterlaced         = 11,
     /**
-     * \brief Max number of reference frames. Read-only.
+     * \brief Maximum number of reference frames. Read-only.
      *
      * This attribute determines the maximum number of reference
      * frames supported for encoding.
@@ -388,7 +388,7 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_VBR	0x00000004	
 #define VA_RC_VCM	0x00000008 /* video conference mode */
 
-/** @name Attribute values for VAConfigAttribuEncPackedHeaders */
+/** @name Attribute values for VAConfigAttribEncPackedHeaders */
 /**@{*/
 /** \brief Driver does not support any packed headers mode. */
 #define VA_ENC_PACKED_HEADER_NONE       0x00000000
@@ -400,7 +400,7 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_PACKED_HEADER_SLICE      0x00000004
 /**@}*/
 
-/** @name Attribute values for VAConfigAttributeEncInterlaced */
+/** @name Attribute values for VAConfigAttribEncInterlaced */
 /**@{*/
 /** \brief Driver does not support interlaced coding. */
 #define VA_ENC_INTERLACED_NONE          0x00000000
@@ -410,7 +410,7 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_INTERLACED_FIELD         0x00000002
 /** \brief Driver supports macroblock adaptive frame field coding. */
 #define VA_ENC_INTERLACED_MBAFF         0x00000004
-/** \brief Driver support picture adaptive frame field coding. */
+/** \brief Driver supports picture adaptive frame field coding. */
 #define VA_ENC_INTERLACED_PAFF          0x00000008
 /**@}*/
 
