@@ -325,7 +325,7 @@ typedef struct _VAProcFilterValueRange {
 } VAProcFilterValueRange;
 
 /** \brief Video processing pipeline configuration. */
-struct _VAProcPipelineParameterBuffer {
+typedef struct _VAProcPipelineParameterBuffer {
     /** \brief Source surface ID. */
     VASurfaceID         surface;
     /**
