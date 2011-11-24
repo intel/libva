@@ -699,6 +699,8 @@ typedef enum
     VAEncMiscParameterTypeRateControl  	= 1,
     VAEncMiscParameterTypeMaxSliceSize	= 2,
     VAEncMiscParameterTypeAIR    	= 3,
+    /** \brief Buffer type used to express a maximum frame size (in bits). */
+    VAEncMiscParameterTypeMaxFrameSize  = 4,
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -775,6 +777,19 @@ typedef struct _VAEncMiscParameterAIR
     unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
 } VAEncMiscParameterAIR;
 
+/**
+ * \brief Defines a maximum frame size (in bits).
+ *
+ * This misc parameter buffer defines the maximum size of a frame (in
+ * bits). The encoder will try to make sure that each frame does not
+ * exceed this size. Otherwise, if the frame size exceeds this size,
+ * the \c status flag of #VACodedBufferSegment will contain
+ * #VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW.
+ */
+typedef struct _VAEncMiscParameterMaxFrameSize {
+    /** \brief Maximum size of a frame (in bits). */
+    unsigned int        max_frame_size;
+} VAEncMiscParameterMaxFrameSize;
 
 /* 
  * There will be cases where the bitstream buffer will not have enough room to hold
@@ -1516,6 +1531,14 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_SLICE_OVERFLOW_MASK         0x200
 #define VA_CODED_BUF_STATUS_BITRATE_OVERFLOW		0x400
 #define VA_CODED_BUF_STATUS_BITRATE_HIGH		0x800
+/**
+ * \brief The frame has exceeded the maximum requested size.
+ *
+ * This flag indicates that the encoded frame size exceeds the value
+ * specified through a misc parameter buffer of type
+ * #VAEncMiscParameterTypeMaxFrameSize.
+ */
+#define VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW         0x1000
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /*
