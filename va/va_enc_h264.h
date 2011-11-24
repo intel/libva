@@ -425,38 +425,6 @@ typedef struct _VAEncSliceParameterBufferH264 {
     signed short    chroma_offset_l1[32][2];
     /**@}*/
 
-    /** @name dec_ref_pic_marking() */
-    /**@{*/
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   no_output_of_prior_pics_flag;
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   long_term_reference_flag;
-    /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   adaptive_ref_pic_marking_mode_flag;
-    /** \brief Same as the \c memory_management_control_operation syntax element. */
-    unsigned char   mmco[32];
-    /**
-     * \brief Values for each \c memory_management_control_operation.
-     *
-     * - If \c mmco == 1:
-     *   - \c mmco_value[0] is \c difference_of_pic_nums_minus1
-     *   - \c mmco_value[1] is not used
-     * - If \c mmco == 2:
-     *   - \c mmco_value[0] is \c long_term_pic_num
-     *   - \c mmco_value[1] is not used
-     * - If \c mmco == 3:
-     *   - \c mmco_value[0] is \c difference_of_pic_nums_minus1
-     *   - \c mmco_value[1] is \c long_term_frame_idx
-     * - If \c mmco == 4:
-     *   - \c mmco_value[0] is \c max_long_term_frame_idx_plus1
-     *   - \c mmco_value[1] is not used
-     * - If \c mmco == 6:
-     *   - \c mmco_value[0] is \c long_term_frame_idx
-     *   - \c mmco_value[1] is not used
-     */
-    unsigned int    mmco_value[32][2];
-    /**@}*/
-
     /** \brief Range: 0 to 2, inclusive. */
     unsigned char   cabac_init_idc;
     /** \brief Same as the H.264 bitstream syntax element. */
