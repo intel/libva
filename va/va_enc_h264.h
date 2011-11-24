@@ -73,8 +73,43 @@ extern "C" {
  * associated packed header data buffer shall contain the start code
  * prefix 0x000001 followed by the complete NAL unit, thus also
  * including the \c nal_unit_type.
+ *
+ * Note: the start code prefix can contain an arbitrary number of leading
+ * zeros. The driver will skip them for emulation prevention bytes insertion,
+ * if necessary.
  */
 typedef enum {
+    /**
+     * \brief Packed Sequence Parameter Set (SPS).
+     *
+     * The corresponding packed header data buffer shall contain the
+     * complete seq_parameter_set_rbsp() syntax element.
+     *
+     * Note: packed \c nal_unit_type shall be equal to 7.
+     */
+    VAEncPackedHeaderH264_SPS   = VAEncPackedHeaderSequence,
+    /**
+     * \brief Packed Picture Parameter Set (PPS).
+     *
+     * The corresponding packed header data buffer shall contain the
+     * complete pic_parameter_set_rbsp() syntax element.
+     *
+     * Note: packed \c nal_unit_type shall be equal to 8.
+     */
+    VAEncPackedHeaderH264_PPS   = VAEncPackedHeaderPicture,
+    /**
+     * \brief Packed slice header.
+     *
+     * The corresponding packed header data buffer shall contain the
+     * \c slice_header() syntax element only, along with any start
+     * code prefix and NAL unit type preceeding it. i.e. this means
+     * that the buffer does not contain any of the \c slice_data() or
+     * the \c rbsp_slice_trailing_bits().
+     *
+     * Note: packed \c nal_unit_type shall be equal to 1 (non-IDR
+     * picture), or 5 (IDR picture).
+     */
+    VAEncPackedHeaderH264_Slice = VAEncPackedHeaderSlice,
     /**
      * \brief Packed Supplemental Enhancement Information (SEI).
      *
@@ -84,7 +119,7 @@ typedef enum {
      *
      * Note: packed \c nal_unit_type shall be equal to 6.
      */
-    VAEncPackedHeaderH264_SEI = (VAEncPackedHeaderMiscMask | 1),
+    VAEncPackedHeaderH264_SEI   = (VAEncPackedHeaderMiscMask | 1),
 } VAEncPackedHeaderTypeH264;
 
 /**
