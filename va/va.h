@@ -303,10 +303,42 @@ typedef enum
     VAConfigAttribIntraResidual		= 3,
     VAConfigAttribEncryption		= 4,
     VAConfigAttribRateControl		= 5,
-    VAConfigAttribEncPackedHeaders      = 6, /**< Packed headers mode. */
-    VAConfigAttribEncInterlaced         = 7, /**< Interlaced mode. */
-    /** \brief Max number of reference frames (read-only). */
+
+    /** @name Attributes for encoding */
+    /**@{*/
+    /**
+     * \brief Packed headers mode. Read/write.
+     *
+     * This attribute determines what packed headers the driver supports,
+     * through vaGetConfigAttributes(); and what packed headers the user
+     * will be providing to the driver, through vaCreateConfig(), if the
+     * driver supports those.
+     *
+     * See \c VA_ENC_PACKED_HEADER_xxx for the list of packed headers.
+     */
+    VAConfigAttribEncPackedHeaders      = 6,
+    /**
+     * \brief Interlaced mode. Read/write.
+     *
+     * This attribute determines what kind of interlaced encoding mode
+     * the driver supports.
+     *
+     * See \c VA_ENC_INTERLACED_xxx for the list of interlaced modes.
+     */
+    VAConfigAttribEncInterlaced         = 7,
+    /**
+     * \brief Max number of reference frames. Read-only.
+     *
+     * This attribute determines the maximum number of reference
+     * frames supported for encoding.
+     *
+     * Note: for H.264 encoding, the value represents the maximum
+     * number of reference frames for both the reference picture list
+     * 0 (top 16 bits) and the reference picture list 1 (bottom 16
+     * bits).
+     */
     VAConfigAttribEncMaxRefFrames       = 8,
+    /**@}*/
 } VAConfigAttribType;
 
 /*
