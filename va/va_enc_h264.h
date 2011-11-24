@@ -387,9 +387,9 @@ typedef struct _VAEncSliceParameterBufferH264 {
      *  Range: 0 to 31, inclusive.
      */
     unsigned char   num_ref_idx_l1_active_minus1;
-    /** \brief XXX: is this really used? */
+    /** \brief Reference picture list 0 (for P slices). */
     VAPictureH264   RefPicList0[32];
-    /** \brief XXX: is this really used? */
+    /** \brief Reference picture list 1 (for B slices). */
     VAPictureH264   RefPicList1[32];
     /**@}*/
 
