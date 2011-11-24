@@ -316,7 +316,7 @@ typedef enum
      *
      * See \c VA_ENC_PACKED_HEADER_xxx for the list of packed headers.
      */
-    VAConfigAttribEncPackedHeaders      = 6,
+    VAConfigAttribEncPackedHeaders      = 10,
     /**
      * \brief Interlaced mode. Read/write.
      *
@@ -325,7 +325,7 @@ typedef enum
      *
      * See \c VA_ENC_INTERLACED_xxx for the list of interlaced modes.
      */
-    VAConfigAttribEncInterlaced         = 7,
+    VAConfigAttribEncInterlaced         = 11,
     /**
      * \brief Max number of reference frames. Read-only.
      *
@@ -337,7 +337,7 @@ typedef enum
      * 0 (top 16 bits) and the reference picture list 1 (bottom 16
      * bits).
      */
-    VAConfigAttribEncMaxRefFrames       = 8,
+    VAConfigAttribEncMaxRefFrames       = 13,
     /**@}*/
 } VAConfigAttribType;
 
