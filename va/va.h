@@ -362,6 +362,18 @@ typedef enum
      * structure types.
      */
     VAConfigAttribEncSliceStructure     = 15,
+    /**
+     * \brief Macroblock information. Read-only.
+     *
+     * This attribute determines whether the driver supports extra
+     * encoding information per-macroblock. e.g. QP.
+     *
+     * More specifically, for H.264 encoding, if the driver returns a non-zero
+     * value for this attribute, this means the application can create
+     * additional #VAEncMacroblockParameterBufferH264 buffers referenced
+     * through VAEncSliceParameterBufferH264::macroblock_info.
+     */
+    VAConfigAttribEncMacroblockInfo     = 16,
     /**@}*/
 } VAConfigAttribType;
 
