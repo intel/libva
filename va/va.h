@@ -344,7 +344,7 @@ typedef enum
      * This attribute determines the maximum number of slices the
      * driver can support to encode a single frame.
      */
-    VAConfigAttribEncMaxSlices		= 14,
+    VAConfigAttribEncMaxSlices          = 14,
     /**
      * \brief Slice structure. Read-only.
      *
@@ -361,7 +361,7 @@ typedef enum
      * See \c VA_ENC_SLICE_STRUCTURE_xxx for the supported slice
      * structure types.
      */
-    VAConfigAttribEncSliceStructure	= 15,
+    VAConfigAttribEncSliceStructure     = 15,
     /**@}*/
 } VAConfigAttribType;
 
@@ -385,15 +385,15 @@ typedef struct _VAConfigAttrib {
 /** @name Attribute values for VAConfigAttribRateControl */
 /**@{*/
 /** \brief Driver does not support any form of rate control. */
-#define VA_RC_NONE			0x00000001
+#define VA_RC_NONE                      0x00000001
 /** \brief Constant bitrate. */
-#define VA_RC_CBR			0x00000002
+#define VA_RC_CBR                       0x00000002
 /** \brief Variable bitrate. */
-#define VA_RC_VBR			0x00000004
-/** \brief Video conference mode. */	
-#define VA_RC_VCM			0x00000008
+#define VA_RC_VBR                       0x00000004
+/** \brief Video conference mode. */
+#define VA_RC_VCM                       0x00000008
 /** \brief Constant QP. */
-#define VA_RC_CQP			0x00000010
+#define VA_RC_CQP                       0x00000010
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
@@ -425,11 +425,11 @@ typedef struct _VAConfigAttrib {
 /** @name Attribute values for VAConfigAttribEncSliceStructure */
 /**@{*/
 /** \brief Driver supports an arbitrary number of rows per slice. */
-#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS		0x00000000
+#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000000
 /** \brief Driver supports a power-of-two number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
 /** \brief Driver supports an arbitrary number of rows per slice. */
-#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS	0x00000002
+#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
 /**@}*/
 
 /*
