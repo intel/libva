@@ -329,6 +329,8 @@ typedef struct _VAEncPictureParameterBufferH264 {
 typedef struct _VAEncSliceParameterBufferH264 {
     /** \brief Starting MB address for this slice. */
     unsigned int    macroblock_address;
+    /** \brief Number of macroblocks in this slice. */
+    unsigned int    num_macroblocks;
     /**
      * \brief Per-MB encoder configuration buffer, or \c VA_INVALID_ID.
      *
@@ -342,8 +344,6 @@ typedef struct _VAEncSliceParameterBufferH264 {
      * elements.
      */
     VABufferID      macroblock_info;
-    /** \brief Number of macroblocks in this slice. */
-    unsigned int    num_macroblocks;
     /** \brief Slice type.
      *  Range: 0..2, 5..7, i.e. no switching slices.
      */
