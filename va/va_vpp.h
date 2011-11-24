@@ -209,29 +209,6 @@ extern "C" {
  * \endcode
  */
 
-#if 0
-    /* Surfaces composition */
-    VAProcPipelineParameterBuffer *pipeline_param;
-    pipeline_param->surface                     = VA_INVALID_SURFACE;
-    pipeline_param->surface_region              = surface_region;
-    pipeline_param->output_region               = output_region;
-    pipeline_param->output_background_color     = output_background_color;
-    pipeline_param->flags                       = VA_FILTER_SCALING_HQ;
-    pipeline_param->filters                     = filters;
-    pipeline_param->num_filters                 = num_filters;
-
-    VAProcPipelineID vpp_proc;
-    VAProcPipelineParameterBuffer
-
-    VAProcFilterParameterBuffer filter;
-
-    vaBeginPicture(va_dpy, vpp_context, vpp_surface);
-    {
-        vaRenderPicture(va_dpy,
-    }
-    vaEndPicture(va_dpy, vpp_context);
-#endif
-
 /** \brief Video filter types. */
 typedef enum _VAProcFilterType {
     VAProcFilterNone = 0,
