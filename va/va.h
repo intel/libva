@@ -382,11 +382,19 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV444	0x00000004
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
-/* attribute value for VAConfigAttribRateControl */
-#define VA_RC_NONE	0x00000001	
-#define VA_RC_CBR	0x00000002	
-#define VA_RC_VBR	0x00000004	
-#define VA_RC_VCM	0x00000008 /* video conference mode */
+/** @name Attribute values for VAConfigAttribRateControl */
+/**@{*/
+/** \brief Driver does not support any form of rate control. */
+#define VA_RC_NONE			0x00000001
+/** \brief Constant bitrate. */
+#define VA_RC_CBR			0x00000002
+/** \brief Variable bitrate. */
+#define VA_RC_VBR			0x00000004
+/** \brief Video conference mode. */	
+#define VA_RC_VCM			0x00000008
+/** \brief Constant QP. */
+#define VA_RC_CQP			0x00000010
+/**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
 /**@{*/
