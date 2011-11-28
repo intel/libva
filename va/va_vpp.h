@@ -301,7 +301,35 @@ typedef struct _VAProcFilterValueRange {
     float               step;
 } VAProcFilterValueRange;
 
-/** \brief Video processing pipeline configuration. */
+/**
+ * \brief Video processing pipeline configuration.
+ *
+ * This buffers defines a video processing pipeline. As for any buffer
+ * passed to \c vaRenderPicture(), this is one-time usage model. However,
+ * the actual filters to be applied are provided in the \c filters field,
+ * so they can be re-used in other processing pipelines.
+ *
+ * The target surface is specified by the \c render_target argument of
+ * \c vaBeginPicture(). The general usage model is described as follows:
+ * - \c vaBeginPicture(): specify the target surface that receives the
+ *   processed output;
+ * - \c vaRenderPicture(): specify a surface to be processed and composed
+ *   into the \c render_target. Use as many \c vaRenderPicture() calls as
+ *   necessary surfaces to compose ;
+ * - \c vaEndPicture(): tell the driver to start processing the surfaces
+ *   with the requested filters.
+ *
+ * If a filter (e.g. noise reduction) needs to be applied with different
+ * values for multiple surfaces, the application needs to create as many
+ * filter parameter buffers as necessary. i.e. the filter parameters shall
+ * not change between two calls to \c vaRenderPicture().
+ *
+ * For composition usage models, the first surface to process will generally
+ * use an opaque background color, i.e. \c output_background_color set with
+ * the most significant byte set to \c 0xff. For instance, \c 0xff000000 for
+ * a black background. Then, subsequent surfaces would use a transparent
+ * background color.
+ */
 typedef struct _VAProcPipelineParameterBuffer {
     /** \brief Source surface ID. */
     VASurfaceID         surface;
