@@ -559,7 +559,7 @@ vaQueryVideoProcFilterCaps(
     VAContextID         context,
     VAProcFilterType    type,
     void               *filter_caps,
-    unsigned int        num_filter_caps
+    unsigned int       *num_filter_caps
 );
 
 /**@}*/
