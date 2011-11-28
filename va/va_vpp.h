@@ -331,7 +331,12 @@ typedef struct _VAProcFilterValueRange {
  * background color.
  */
 typedef struct _VAProcPipelineParameterBuffer {
-    /** \brief Source surface ID. */
+    /**
+     * \brief Source surface ID.
+     *
+     * ID of the source surface to process. If subpictures are associated with
+     * the video surfaces then they shall be rendered to the target surface.
+     */
     VASurfaceID         surface;
     /**
      * \brief Region within the source surface to be processed.
