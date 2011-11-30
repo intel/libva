@@ -28,7 +28,7 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_egl.h		\
+	../va_egl.h		\
 	va_backend_egl.h	\
 	$(NULL)
 
