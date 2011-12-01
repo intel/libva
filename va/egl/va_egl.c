@@ -169,11 +169,58 @@ error:
     return NULL;
 }
 
-// Create a surface used for display to OpenGL
+int vaMaxNumSurfaceTargetsEGL(
+    VADisplay dpy
+)
+{
+    VADriverContextP ctx;
+    struct VADriverVTableEGL *va_egl;
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    va_egl = (struct VADriverVTableEGL *)ctx->vtable_egl;
+
+    if (va_egl)
+        return va_egl->max_egl_surface_targets;
+    else
+        return 2;
+}
+
+int vaMaxNumSurfaceAttributesEGL(
+    VADisplay dpy
+)
+{
+    VADriverContextP ctx;
+    struct VADriverVTableEGL *va_egl;
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    va_egl = (struct VADriverVTableEGL *)ctx->vtable_egl;
+
+    if (va_egl)
+        return va_egl->max_egl_surface_attributes;
+    else
+        return 2;
+}
+
+VAStatus vaQuerySurfaceTargetsEGL(
+    VADisplay dpy,
+    EGLenum *target_list,       /* out */
+    int *num_targets		/* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, QuerySurfaceTargets, (dpy, target_list, num_targets));
+    return status;
+}
+
 VAStatus vaCreateSurfaceEGL(
     VADisplay dpy,
-    GLenum target,
-    GLuint texture,
+    EGLenum target,
     unsigned int width,
     unsigned int height,
     VASurfaceEGL *gl_surface
@@ -182,12 +229,9 @@ VAStatus vaCreateSurfaceEGL(
     VADriverContextP ctx;
     VAStatus status;
 
-    if (target != GL_TEXTURE_2D)
-        return VA_STATUS_ERROR_INVALID_PARAMETER;
-
     INIT_CONTEXT(ctx, dpy);
 
-    INVOKE(ctx, CreateSurface, (dpy, target, texture, width, height, gl_surface));
+    INVOKE(ctx, CreateSurface, (dpy, target, width, height, gl_surface));
     return status;
 }
 
@@ -222,7 +266,7 @@ VAStatus vaAssociateSurfaceEGL(
     return status;
 }
 
-VAStatus vaUpdateAssociatedSurfaceEGL(
+VAStatus vaSyncSurfaceEGL(
     VADisplay dpy,
     VASurfaceEGL egl_surface
 )
@@ -232,7 +276,25 @@ VAStatus vaUpdateAssociatedSurfaceEGL(
 
     INIT_CONTEXT(ctx, dpy);
 
-    INVOKE(ctx, UpdateAssociatedSurface, (dpy, egl_surface));
+    INVOKE(ctx, SyncSurface, (dpy, egl_surface));
+    return status;
+}
+
+VAStatus vaGetSurfaceInfoEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface,
+    EGLenum *target,            /* out, the type of <buffer> */
+    EGLClientBuffer *buffer,    /* out */
+    EGLint *attrib_list,        /* out, the last attribute must be EGL_NONE */
+    int *num_attribs            /* in/out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    INIT_CONTEXT(ctx, dpy);
+
+    INVOKE(ctx, GetSurfaceInfo, (dpy, egl_surface, target, buffer, attrib_list, num_attribs));
     return status;
 }
 

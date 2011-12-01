@@ -9,49 +9,6 @@
 #include "va_egl_private.h"
 #include "va_egl_impl.h"
 
-// Returns the OpenGL ES VTable
-static inline VAOpenGLESVTableP 
-gles_get_vtable(VADriverContextP ctx)
-{
-    return &VA_DRIVER_CONTEXT_EGL(ctx)->gles_vtable;
-}
-
-// Lookup for a EGL function
-typedef void (*EGLFuncPtr)(void);
-typedef EGLFuncPtr (*EGLGetProcAddressProc)(const char *);
-
-static EGLFuncPtr 
-get_proc_address_default(const char *name)
-{
-    return NULL;
-}
-
-static EGLGetProcAddressProc 
-get_proc_address_func(void)
-{
-    EGLGetProcAddressProc get_proc_func;
-
-    dlerror();
-    get_proc_func = (EGLGetProcAddressProc)
-        dlsym(RTLD_DEFAULT, "eglGetProcAddress");
-
-    if (!dlerror())
-        return get_proc_func;
-
-    return get_proc_address_default;
-}
-
-static inline EGLFuncPtr 
-get_proc_address(const char *name)
-{
-    static EGLGetProcAddressProc get_proc_func = NULL;
-
-    get_proc_func = get_proc_address_func();
-
-    return get_proc_func(name);
-}
-
-// Check for GLES extensions (TFP, FBO)
 static int 
 check_extension(const char *name, const char *exts)
 {
@@ -77,7 +34,7 @@ check_extension(const char *name, const char *exts)
 }
 
 static int 
-check_extensions(VADriverContextP ctx, EGLDisplay egl_display)
+check_pixmap_extensions(VADriverContextP ctx, EGLDisplay egl_display)
 {
     const char *exts;
 
@@ -85,34 +42,6 @@ check_extensions(VADriverContextP ctx, EGLDisplay egl_display)
 
     if (!check_extension("EGL_KHR_image_pixmap", exts))
         return 0;
-
-    exts = (const char *)glGetString(GL_EXTENSIONS);
-
-    if (!check_extension("GL_OES_EGL_image", exts))
-        return 0;
-
-#if 0
-    if (!check_extension("GL_OES_texture_npot", exts))
-        return 0;
-#endif
-
-    return 1;
-}
-
-static int 
-init_extensions(VADriverContextP ctx)
-{
-    VAOpenGLESVTableP pOpenGLESVTable = gles_get_vtable(ctx);
-
-    /* EGL_KHR_image_pixmap */
-    pOpenGLESVTable->egl_create_image_khr = 
-        (PFNEGLCREATEIMAGEKHRPROC)get_proc_address("eglCreateImageKHR");
-    pOpenGLESVTable->egl_destroy_image_khr =
-        (PFNEGLDESTROYIMAGEKHRPROC)get_proc_address("eglDestroyImageKHR");
-
-    /* GL_OES_EGL_image */
-    pOpenGLESVTable->gles_egl_image_target_texture_2d =
-        (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)get_proc_address("glEGLImageTargetTexture2DOES");
 
     return 1;
 }
@@ -134,16 +63,30 @@ init_extensions(VADriverContextP ctx)
             return status;                              \
     } while (0)
 
+
 static VAStatus
-vaCreateSurfaceEGL_impl_driver(VADisplay dpy,
-                               GLenum target,
-                               GLuint texture,
-                               unsigned int width,
-                               unsigned int height,
-                               VASurfaceEGL *egl_surface)
+vaQuerySurfaceTargetsEGL_impl_driver(VADisplay dpy,
+                                     EGLenum *target_list,
+                                     int *num_targets)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
-    INVOKE(ctx, CreateSurface, (ctx, target, texture, width, height, egl_surface));
+
+    INVOKE(ctx, QuerySurfaceTargets, (ctx, target_list, num_targets));
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus 
+vaCreateSurfaceEGL_impl_driver(VADisplay dpy,
+                               EGLenum target,
+                               unsigned int width,
+                               unsigned int height,
+                               VASurfaceEGL *gl_surface)
+{
+    VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+
+    INVOKE(ctx, CreateSurface, (ctx, target, width, height, gl_surface));
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -151,7 +94,9 @@ static VAStatus
 vaDestroySurfaceEGL_impl_driver(VADisplay dpy, VASurfaceEGL egl_surface)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+
     INVOKE(ctx, DestroySurface, (ctx, egl_surface));
+
     return VA_STATUS_SUCCESS;
 }
 
@@ -162,17 +107,34 @@ vaAssociateSurfaceEGL_impl_driver(VADisplay dpy,
                                   unsigned int flags)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+
     INVOKE(ctx, AssociateSurface, (ctx, egl_surface, surface, flags));
 
     return VA_STATUS_SUCCESS;
 }
 
 static VAStatus
-vaUpdateAssociatedSurfaceEGL_impl_driver(VADisplay dpy,
-                                         VASurfaceEGL egl_surface)
+vaSyncSurfaceEGL_impl_driver(VADisplay dpy,
+                             VASurfaceEGL egl_surface)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
-    INVOKE(ctx, UpdateAssociatedSurface, (ctx, egl_surface));
+
+    INVOKE(ctx, SyncSurface, (ctx, egl_surface));
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+vaGetSurfaceInfoEGL_impl_driver(VADisplay dpy,
+                                VASurfaceEGL egl_surface,
+                                EGLenum *target,
+                                EGLClientBuffer *buffer,
+                                EGLint *attrib_list,
+                                int *num_attribs)
+{
+    VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+
+    INVOKE(ctx, GetSurfaceInfo, (ctx, egl_surface, target, buffer, attrib_list, num_attribs));
 
     return VA_STATUS_SUCCESS;
 }
@@ -182,6 +144,7 @@ vaDeassociateSurfaceEGL_impl_driver(VADisplay dpy,
                                     VASurfaceEGL egl_surface)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+
     INVOKE(ctx, DeassociateSurface, (ctx, egl_surface));
 
     return VA_STATUS_SUCCESS;
@@ -193,17 +156,15 @@ vaDeassociateSurfaceEGL_impl_driver(VADisplay dpy,
 /* === VA/EGL helpers                                                    === */
 /* ========================================================================= */
 /** Unique VASurfaceImplEGL identifier */
-#define VA_SURFACE_IMPL_EGL_MAGIC VA_FOURCC('V','I','E','L')
+#define VA_SURFACE_IMPL_EGL_MAGIC VA_FOURCC('V','E','G','L')
 
 struct VASurfaceImplEGL {
     uint32_t            magic;      ///< Magic number identifying a VASurfaceImplEGL
     VASurfaceID         surface;    ///< Associated VA surface
-    GLenum              target;     ///< GL target to which the texture is bound
-    GLuint              texture;    ///< GL texture
+    EGLenum             target;     ///< EGL target
+    EGLClientBuffer     buffer;
     unsigned int        width;
     unsigned int        height;
-    void                *pixmap;
-    EGLImageKHR         img_khr;
     unsigned int        flags;
 };
 
@@ -230,82 +191,6 @@ destroy_native_pixmap(VADisplay dpy, void *native_pixmap)
     pDisplayContext->vaFreeNativePixmap(pDisplayContext, native_pixmap);
 }
 
-// Destroy VA/EGL surface
-static void
-destroy_surface(VADisplay dpy, VASurfaceImplEGLP pSurfaceImplEGL)
-{
-    VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
-    VADriverContextEGLP egl_ctx = VA_DRIVER_CONTEXT_EGL(ctx);
-    VAOpenGLESVTableP const pOpenGLESVTable = gles_get_vtable(ctx);
-
-    if (pSurfaceImplEGL->img_khr) {
-        pOpenGLESVTable->egl_destroy_image_khr(egl_ctx->egl_display,
-                                               pSurfaceImplEGL->img_khr);
-        pSurfaceImplEGL->img_khr = EGL_NO_IMAGE_KHR;
-    }
-
-    if (pSurfaceImplEGL->pixmap) {
-        destroy_native_pixmap(dpy, pSurfaceImplEGL->pixmap);
-        pSurfaceImplEGL->pixmap = 0;
-    }
-
-    free(pSurfaceImplEGL);
-}
-
-// Create VA/EGL surface
-static VASurfaceImplEGLP
-create_surface(VADisplay dpy,
-               GLenum target,
-               GLuint texture,
-               unsigned int width,
-               unsigned int height)
-{
-    VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
-    VADriverContextEGLP egl_ctx = VA_DRIVER_CONTEXT_EGL(ctx);
-    VAOpenGLESVTableP const pOpenGLESVTable = gles_get_vtable(ctx);
-    VASurfaceImplEGLP pSurfaceImplEGL = NULL;
-    int is_error = 1;
-    const EGLint img_attribs[] = {
-        EGL_IMAGE_PRESERVED_KHR, EGL_TRUE,
-        EGL_NONE
-    };
-
-    pSurfaceImplEGL = calloc(1, sizeof(*pSurfaceImplEGL));
-
-    if (!pSurfaceImplEGL)
-        goto end;
-
-    pSurfaceImplEGL->magic = VA_SURFACE_IMPL_EGL_MAGIC;
-    pSurfaceImplEGL->surface = VA_INVALID_SURFACE;
-    pSurfaceImplEGL->target = target;
-    pSurfaceImplEGL->texture = texture;
-    pSurfaceImplEGL->width = width;
-    pSurfaceImplEGL->height = height;
-    pSurfaceImplEGL->pixmap = create_native_pixmap(dpy, width, height);
-
-    if (!pSurfaceImplEGL->pixmap)
-        goto end;
-
-    pSurfaceImplEGL->img_khr = pOpenGLESVTable->egl_create_image_khr(egl_ctx->egl_display,
-                                                                 EGL_NO_CONTEXT,
-                                                                 EGL_NATIVE_PIXMAP_KHR,
-                                                                 (EGLClientBuffer)pSurfaceImplEGL->pixmap,
-                                                                 img_attribs);
-    
-    if (!pSurfaceImplEGL->img_khr)
-        goto end;
-
-    is_error = 0;
-
-end:
-    if (is_error && pSurfaceImplEGL) {
-        destroy_surface(dpy, pSurfaceImplEGL);
-        pSurfaceImplEGL = NULL;
-    }
-
-    return pSurfaceImplEGL;
-}
-
 // Check VASurfaceImplEGL is valid
 static inline int check_surface(VASurfaceImplEGLP pSurfaceImplEGL)
 {
@@ -327,7 +212,6 @@ associate_surface(VADriverContextP ctx,
                   unsigned int flags)
 {
     VAStatus status;
-
     status = deassociate_surface(ctx, pSurfaceImplEGL);
 
     if (status != VA_STATUS_SUCCESS)
@@ -349,9 +233,8 @@ sync_surface(VADriverContextP ctx, VASurfaceImplEGLP pSurfaceImplEGL)
 }
 
 static VAStatus
-update_accociated_surface(VADriverContextP ctx, VASurfaceImplEGLP pSurfaceImplEGL)
+sync_associated_surface(VADriverContextP ctx, VASurfaceImplEGLP pSurfaceImplEGL)
 {
-    VAOpenGLESVTableP pOpenGLESVTable = gles_get_vtable(ctx);
     VAStatus status;
 
     status = sync_surface(ctx, pSurfaceImplEGL);
@@ -359,20 +242,21 @@ update_accociated_surface(VADriverContextP ctx, VASurfaceImplEGLP pSurfaceImplEG
     if (status != VA_STATUS_SUCCESS)
         return status;
 
+    if (pSurfaceImplEGL->target != EGL_NATIVE_PIXMAP_KHR)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+
     status = ctx->vtable->vaPutSurface(
         ctx,
         pSurfaceImplEGL->surface,
-        (void *)pSurfaceImplEGL->pixmap,
+        (void *)pSurfaceImplEGL->buffer,
         0, 0, pSurfaceImplEGL->width, pSurfaceImplEGL->height,
         0, 0, pSurfaceImplEGL->width, pSurfaceImplEGL->height,
         NULL, 0,
         pSurfaceImplEGL->flags
-    );
+        );
 
     if (status == VA_STATUS_SUCCESS) {
         eglWaitNative(EGL_CORE_NATIVE_ENGINE);
-        pOpenGLESVTable->gles_egl_image_target_texture_2d(pSurfaceImplEGL->target,
-                                                          (GLeglImageOES)pSurfaceImplEGL->img_khr);
     }
 
     return status;
@@ -392,21 +276,41 @@ update_accociated_surface(VADriverContextP ctx, VASurfaceImplEGLP pSurfaceImplEG
     } while (0)
 
 static VAStatus
+vaQuerySurfaceTargetsEGL_impl_libva(VADisplay dpy,
+                                    EGLenum *target_list,
+                                    int *num_targets)
+{
+    int i = 0;
+
+    target_list[i++] = EGL_NATIVE_PIXMAP_KHR;
+    *num_targets = i;
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus 
 vaCreateSurfaceEGL_impl_libva(VADisplay dpy,
-                              GLenum target,
-                              GLuint texture,
+                              EGLenum target,
                               unsigned int width,
                               unsigned int height,
                               VASurfaceEGL *egl_surface)
 {
-    VASurfaceEGL pSurfaceEGL;
+    VASurfaceImplEGLP pSurfaceImplEGL = NULL;
 
-    pSurfaceEGL = create_surface(dpy, target, texture, width, height);
+    pSurfaceImplEGL = calloc(1, sizeof(*pSurfaceImplEGL));
 
-    if (!pSurfaceEGL)
+    if (!pSurfaceImplEGL) {
+        *egl_surface = 0;
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
+    }
 
-    *egl_surface = pSurfaceEGL;
+    pSurfaceImplEGL->magic = VA_SURFACE_IMPL_EGL_MAGIC;
+    pSurfaceImplEGL->surface = VA_INVALID_SURFACE;
+    pSurfaceImplEGL->target = target == 0 ? EGL_NATIVE_PIXMAP_KHR : target;
+    pSurfaceImplEGL->buffer = 0;
+    pSurfaceImplEGL->width = width;
+    pSurfaceImplEGL->height = height;
+    *egl_surface = (VASurfaceEGL)pSurfaceImplEGL;
 
     return VA_STATUS_SUCCESS;
 }
@@ -418,7 +322,14 @@ vaDestroySurfaceEGL_impl_libva(VADisplay dpy, VASurfaceEGL egl_surface)
 
     INIT_SURFACE(pSurfaceImplEGL, egl_surface);
 
-    destroy_surface(dpy, pSurfaceImplEGL);
+    if (pSurfaceImplEGL->target == EGL_NATIVE_PIXMAP_KHR) {
+        if (pSurfaceImplEGL->buffer) {
+            destroy_native_pixmap(dpy, pSurfaceImplEGL->buffer);
+            pSurfaceImplEGL->buffer = 0;
+        }
+    }
+
+    free(pSurfaceImplEGL);
 
     return VA_STATUS_SUCCESS;
 }
@@ -429,7 +340,7 @@ vaAssociateSurfaceEGL_impl_libva(
     VASurfaceEGL egl_surface,
     VASurfaceID surface,
     unsigned int flags
-)
+    )
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
     VASurfaceImplEGLP pSurfaceImplEGL;
@@ -437,33 +348,78 @@ vaAssociateSurfaceEGL_impl_libva(
 
     INIT_SURFACE(pSurfaceImplEGL, egl_surface);
 
-    status = associate_surface(ctx, egl_surface, surface, flags);
+    if (surface == VA_INVALID_SURFACE)
+        return VA_STATUS_ERROR_INVALID_SURFACE;
+
+    if (pSurfaceImplEGL->target == EGL_NATIVE_PIXMAP_KHR) {
+        if (pSurfaceImplEGL->buffer)
+            destroy_native_pixmap(dpy, pSurfaceImplEGL->buffer);
+
+        pSurfaceImplEGL->buffer = create_native_pixmap(dpy, pSurfaceImplEGL->width, pSurfaceImplEGL->height);
+    }
+
+    pSurfaceImplEGL->surface = surface;
+    pSurfaceImplEGL->flags = flags;
+
+    if (pSurfaceImplEGL->buffer)
+        return VA_STATUS_SUCCESS;
+    
+    return VA_STATUS_ERROR_UNKNOWN;
+}
+
+static VAStatus
+vaSyncSurfaceEGL_impl_libva(VADisplay dpy,
+                            VASurfaceEGL egl_surface)
+{
+    VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
+    VASurfaceImplEGLP pSurfaceImplEGL;
+    VAStatus status;
+
+    INIT_SURFACE(pSurfaceImplEGL, egl_surface);
+
+    status = sync_associated_surface(ctx, pSurfaceImplEGL);
 
     return status;
 }
 
 static VAStatus
-vaUpdateAssociatedSurfaceEGL_impl_libva(
-    VADisplay dpy,
-    VASurfaceEGL egl_surface
-)
+vaGetSurfaceInfoEGL_impl_libva(VADisplay dpy,
+                               VASurfaceEGL egl_surface,
+                               EGLenum *target,
+                               EGLClientBuffer *buffer,
+                               EGLint *attrib_list,
+                               int *num_attribs)
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
     VASurfaceImplEGLP pSurfaceImplEGL;
     VAStatus status;
+    int i = 0;
 
     INIT_SURFACE(pSurfaceImplEGL, egl_surface);
 
-    status = update_accociated_surface(ctx, egl_surface);
+    if (pSurfaceImplEGL->surface == VA_INVALID_SURFACE)
+        return VA_STATUS_ERROR_INVALID_SURFACE;
 
-    return status;
+    *target = pSurfaceImplEGL->target;
+    *buffer = pSurfaceImplEGL->buffer;
+
+    if (pSurfaceImplEGL->target == EGL_NATIVE_PIXMAP_KHR) {
+        attrib_list[i++] = EGL_IMAGE_PRESERVED_KHR;
+        attrib_list[i++] = EGL_TRUE;
+        attrib_list[i++] = EGL_NONE;
+    } else {
+        /* FIXME later */
+        attrib_list[i++] = EGL_NONE;
+    }
+
+    return VA_STATUS_SUCCESS;
 }
 
 static VAStatus
 vaDeassociateSurfaceEGL_impl_libva(
     VADisplay dpy,
     VASurfaceEGL egl_surface
-)
+    )
 {
     VADriverContextP ctx = ((VADisplayContextP)(dpy))->pDriverContext;
     VASurfaceImplEGLP pSurfaceImplEGL;
@@ -471,9 +427,16 @@ vaDeassociateSurfaceEGL_impl_libva(
 
     INIT_SURFACE(pSurfaceImplEGL, egl_surface);
 
-    status = deassociate_surface(ctx, egl_surface);
+    if (pSurfaceImplEGL->target == EGL_NATIVE_PIXMAP_KHR) {
+        if (pSurfaceImplEGL->buffer)
+            destroy_native_pixmap(dpy, pSurfaceImplEGL->buffer);
 
-    return status;
+        pSurfaceImplEGL->buffer = 0;
+    }
+
+    pSurfaceImplEGL->surface = VA_INVALID_SURFACE;
+
+    return VA_STATUS_SUCCESS;
 }
 
 #undef INIT_SURFACE
@@ -494,10 +457,12 @@ VAStatus va_egl_init_context(VADisplay dpy)
         return VA_STATUS_SUCCESS;
 
     if (ctx->vtable_egl && ctx->vtable_egl->vaCreateSurfaceEGL) {
+        vtable->vaQuerySurfaceTargetsEGL = vaQuerySurfaceTargetsEGL_impl_driver;
         vtable->vaCreateSurfaceEGL = vaCreateSurfaceEGL_impl_driver;
         vtable->vaDestroySurfaceEGL = vaDestroySurfaceEGL_impl_driver;
         vtable->vaAssociateSurfaceEGL = vaAssociateSurfaceEGL_impl_driver;
-        vtable->vaUpdateAssociatedSurfaceEGL = vaUpdateAssociatedSurfaceEGL_impl_driver;
+        vtable->vaSyncSurfaceEGL = vaSyncSurfaceEGL_impl_driver;
+        vtable->vaGetSurfaceInfoEGL = vaGetSurfaceInfoEGL_impl_driver;
         vtable->vaDeassociateSurfaceEGL = vaDeassociateSurfaceEGL_impl_driver;
     }
     else {
@@ -505,14 +470,16 @@ VAStatus va_egl_init_context(VADisplay dpy)
             pDisplayContext->vaFreeNativePixmap == NULL)
             return VA_STATUS_ERROR_UNIMPLEMENTED;
 
+        if (!check_pixmap_extensions(ctx, egl_ctx->egl_display))
+            return VA_STATUS_ERROR_UNIMPLEMENTED;
+
+        vtable->vaQuerySurfaceTargetsEGL = vaQuerySurfaceTargetsEGL_impl_libva;
         vtable->vaCreateSurfaceEGL = vaCreateSurfaceEGL_impl_libva;
         vtable->vaDestroySurfaceEGL = vaDestroySurfaceEGL_impl_libva;
         vtable->vaAssociateSurfaceEGL = vaAssociateSurfaceEGL_impl_libva;
-        vtable->vaUpdateAssociatedSurfaceEGL = vaUpdateAssociatedSurfaceEGL_impl_libva;
+        vtable->vaSyncSurfaceEGL = vaSyncSurfaceEGL_impl_libva;
+        vtable->vaGetSurfaceInfoEGL = vaGetSurfaceInfoEGL_impl_libva;
         vtable->vaDeassociateSurfaceEGL = vaDeassociateSurfaceEGL_impl_libva;
-
-        if (!check_extensions(ctx, egl_ctx->egl_display) || !init_extensions(ctx))
-            return VA_STATUS_ERROR_UNIMPLEMENTED;
     }
 
     egl_ctx->is_initialized = 1;

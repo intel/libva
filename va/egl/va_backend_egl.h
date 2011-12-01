@@ -35,15 +35,23 @@ struct VADriverVTableEGL {
         VASurfaceID surface,
         void **buffer
     );
+
     /* TBD: more APIs for EGL */
-    /* Optional: create a surface used for display to OpenGL */
+    int max_egl_surface_targets;
+    int max_egl_surface_attributes;
+
+    VAStatus (*vaQuerySurfaceTargetsEGL)(
+        VADriverContextP ctx,
+        EGLenum *target_list,           /* out */
+        int *num_targets		/* out */
+    );
+
     VAStatus (*vaCreateSurfaceEGL)(
         VADriverContextP ctx,
-        GLenum target,
-        GLuint texture,
+        EGLenum target,
         unsigned int width,
         unsigned int height,
-        VASurfaceEGL *egl_surface
+        VASurfaceEGL *gl_surface
     );
 
     /* Optional: destroy a VA/EGL surface */
@@ -59,9 +67,18 @@ struct VADriverVTableEGL {
         unsigned int flags
     );
 
-    VAStatus (*vaUpdateAssociatedSurfaceEGL)(
+    VAStatus (*vaSyncSurfaceEGL)(
         VADriverContextP ctx,
         VASurfaceEGL egl_surface
+    );
+
+    VAStatus (*vaGetSurfaceInfoEGL)(
+        VADisplay dpy,
+        VASurfaceEGL egl_surface,
+        EGLenum *target,
+        EGLClientBuffer *buffer,
+        EGLint *attrib_list,
+        int *num_attribs
     );
 
     VAStatus (*vaDeassociateSurfaceEGL)(

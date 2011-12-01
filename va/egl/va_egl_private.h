@@ -1,22 +1,10 @@
 #ifndef _VA_EGL_PRIVATE_H_
 #define _VA_EGL_PRIVATE_H_
 
-#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_egl.h"
 #include "va_backend_egl.h"
-
-typedef struct VAOpenGLESVTable *VAOpenGLESVTableP;
-
-struct VAOpenGLESVTable {
-    /* EGL_KHR_image_pixmap */
-    PFNEGLCREATEIMAGEKHRPROC            egl_create_image_khr;
-    PFNEGLDESTROYIMAGEKHRPROC           egl_destroy_image_khr;
-
-    /* GL_OES_EGL_image */
-    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC gles_egl_image_target_texture_2d;
-};
 
 typedef struct VADisplayContextEGL *VADisplayContextEGLP;
 typedef struct VADriverContextEGL  *VADriverContextEGLP;
@@ -32,13 +20,18 @@ struct VADisplayContextEGL {
 #define VA_DRIVER_CONTEXT_EGL(ctx) ((VADriverContextEGLP)((ctx)->egl))
 
 struct VADriverVTablePrivEGL {
+    VAStatus (*vaQuerySurfaceTargetsEGL)(
+        VADisplay dpy,
+        EGLenum *target_list,           /* out */
+        int *num_targets		/* out */
+    );
+
     VAStatus (*vaCreateSurfaceEGL)(
         VADisplay dpy,
-        GLenum target,
-        GLuint texture,
+        EGLenum target,
         unsigned int width,
         unsigned int height,
-        VASurfaceEGL *egl_surface
+        VASurfaceEGL *gl_surface
     );
 
     VAStatus (*vaDestroySurfaceEGL)(
@@ -53,9 +46,18 @@ struct VADriverVTablePrivEGL {
         unsigned int flags
     );
 
-    VAStatus (*vaUpdateAssociatedSurfaceEGL)(
+    VAStatus (*vaSyncSurfaceEGL)(
         VADisplay dpy,
         VASurfaceEGL egl_surface
+    );
+
+    VAStatus (*vaGetSurfaceInfoEGL)(
+        VADisplay dpy,
+        VASurfaceEGL egl_surface,
+        EGLenum *target,
+        EGLClientBuffer *buffer,
+        EGLint *attrib_list,
+        int *num_attribs
     );
 
     VAStatus (*vaDeassociateSurfaceEGL)(
@@ -66,7 +68,6 @@ struct VADriverVTablePrivEGL {
 
 struct VADriverContextEGL {
     struct VADriverVTablePrivEGL vtable;
-    struct VAOpenGLESVTable gles_vtable;
     unsigned int is_initialized : 1;
     EGLDisplay  egl_display;
 };
