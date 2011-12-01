@@ -20,6 +20,12 @@ struct va_egl_context
     EGLDisplay egl_dpy;
     EGLContext egl_ctx;
     EGLSurface egl_surf;
+    unsigned int egl_target;
+    EGLClientBuffer egl_buffer;
+    EGLImageKHR egl_image;
+    PFNEGLCREATEIMAGEKHRPROC egl_create_image_khr;
+    PFNEGLDESTROYIMAGEKHRPROC egl_destroy_image_hkr;
+    PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glegl_image_target_texture2d_oes;
 
     VADisplay va_dpy;
     VASurfaceID va_surface;
@@ -273,6 +279,39 @@ va_egl_make_window(struct va_egl_context *ctx, const char *title)
     XFree(visInfo);
 }
 
+static int
+va_egl_init_extension(struct va_egl_context *ctx)
+{
+   const char *exts;
+
+   exts = eglQueryString(ctx->egl_dpy, EGL_EXTENSIONS);
+   ctx->egl_create_image_khr =
+       (PFNEGLCREATEIMAGEKHRPROC)eglGetProcAddress("eglCreateImageKHR");
+   ctx->egl_destroy_image_hkr =
+       (PFNEGLDESTROYIMAGEKHRPROC)eglGetProcAddress("eglDestroyImageKHR");
+
+   if (!exts ||
+       !strstr(exts, "EGL_KHR_image_base") ||
+       !ctx->egl_create_image_khr ||
+       !ctx->egl_destroy_image_hkr) {
+       printf("EGL does not support EGL_KHR_image_base\n");
+       return -1;
+   }
+
+   exts = (const char *)glGetString(GL_EXTENSIONS);
+   ctx->glegl_image_target_texture2d_oes =
+       (PFNGLEGLIMAGETARGETTEXTURE2DOESPROC)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+
+   if (!exts ||
+       !strstr(exts, "GL_OES_EGL_image") ||
+       !ctx->glegl_image_target_texture2d_oes) {
+       printf("OpenGL ES does not support GL_OES_EGL_image\n");
+       return -1;
+   }
+
+   return 0;
+}
+
 static void
 va_egl_fini_gles(struct va_egl_context *ctx)
 {
@@ -300,6 +339,9 @@ va_egl_init_gles(struct va_egl_context *ctx)
 static void
 va_egl_fini_va_egl(struct va_egl_context *ctx)
 {
+    if (ctx->egl_image)
+        ctx->egl_destroy_image_hkr(ctx->egl_dpy, ctx->egl_image);
+
     vaDeassociateSurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
     vaDestroySurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
 }
@@ -308,9 +350,37 @@ static int
 va_egl_init_va_egl(struct va_egl_context *ctx)
 {
     VAStatus va_status;
+    int num_max_targets = 0, num_targets = 0;
+    int num_max_attributes = 0, num_attribs = 0;
+    unsigned int *target_list = NULL;
+    EGLint *img_attribs = NULL;
 
+    num_max_targets = vaMaxNumSurfaceTargetsEGL(ctx->va_dpy);
+    
+    if (num_max_targets < 1) {
+        printf("Error: vaMaxNumSurfaceTargetsEGL() returns %d\n", num_max_targets);
+        return -1;
+    }
+
+    num_max_attributes = vaMaxNumSurfaceAttributesEGL(ctx->va_dpy);
+
+    if (num_max_attributes < 1) {
+        printf("Error: vaMaxNumSurfaceAttributesEGL() returns %d\n", num_max_attributes);
+        return -1;
+    }
+
+    target_list = malloc(num_max_targets * sizeof(unsigned int));
+    va_status = vaQuerySurfaceTargetsEGL(ctx->va_dpy,
+                                         target_list,
+                                         &num_targets);
+    
+    if (va_status != VA_STATUS_SUCCESS || num_targets < 1) {
+        printf("Error: vaQuerySurfaceTargetsEGL() failed\n");
+        return -1;
+    }
+    
     va_status = vaCreateSurfaceEGL(ctx->va_dpy,
-                                   GL_TEXTURE_2D, ctx->texture,
+                                   target_list[0],
                                    ctx->width, ctx->height,
                                    &ctx->va_egl_surface);
 
@@ -323,13 +393,34 @@ va_egl_init_va_egl(struct va_egl_context *ctx)
                                       ctx->va_egl_surface,
                                       ctx->va_surface,
                                       0);
-
+ 
     if (va_status != VA_STATUS_SUCCESS) {
         printf("Error: vaAssociateSurfaceEGL() failed\n");
         return -1;
     }
 
-    vaUpdateAssociatedSurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
+    img_attribs = malloc(2 * num_max_attributes * sizeof(EGLint));
+    va_status = vaGetSurfaceInfoEGL(ctx->va_dpy,
+                                    ctx->va_egl_surface,
+                                    &ctx->egl_target,
+                                    &ctx->egl_buffer,
+                                    img_attribs,
+                                    &num_attribs);
+
+    if (va_status != VA_STATUS_SUCCESS) {
+        printf("Error: vaGetSurfaceInfoEGL() failed\n");
+        return -1;
+    }
+
+    ctx->egl_image = ctx->egl_create_image_khr(ctx->egl_dpy,
+                                               EGL_NO_CONTEXT,
+                                               ctx->egl_target,
+                                               ctx->egl_buffer,
+                                               img_attribs);
+
+    vaSyncSurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
+    ctx->glegl_image_target_texture2d_oes(GL_TEXTURE_2D,
+                                          (GLeglImageOES)ctx->egl_image);
 
     return 0;
 }
@@ -370,6 +461,7 @@ va_egl_init(struct va_egl_context *ctx, int argc, char **argv)
         return -1;
 
     va_egl_make_window(ctx, "VA/EGL");
+    va_egl_init_extension(ctx);
     va_egl_init_gles(ctx);
     va_egl_init_va_egl(ctx);
 
@@ -453,7 +545,9 @@ va_egl_event_loop(struct va_egl_context *ctx)
                 if (code == XK_y) {
                     ctx->ydata += 0x10;
                     va_egl_upload_surface(ctx);
-                    vaUpdateAssociatedSurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
+                    vaSyncSurfaceEGL(ctx->va_dpy, ctx->va_egl_surface);
+                    ctx->glegl_image_target_texture2d_oes(GL_TEXTURE_2D,
+                                                          (GLeglImageOES)ctx->egl_image);
                     redraw = 1;
                 } else {
                     XLookupString(&event.xkey, buffer, sizeof(buffer),
@@ -492,6 +586,8 @@ int
 main(int argc, char *argv[])
 {
     struct va_egl_context ctx;
+
+    printf("Usage: press 'y' to change Y plane \n\n");
 
     if (va_egl_init(&ctx, argc, argv) == 0) {
         va_egl_run(&ctx);
