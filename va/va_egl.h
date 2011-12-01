@@ -2,8 +2,6 @@
 #define _VA_EGL_H_
 
 #include <va/va.h>
-#include <GLES/gl.h>
-#include <GLES/glext.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -37,22 +35,58 @@ VADisplay vaGetDisplayEGL(
 );
 
 /**
- * Create a surface used for display to OpenGL ES
+ * Return maximum number of EGL targets supported by the implementation
  *
- * The application shall maintain the live EGL context itself.
+ * @param[in] dpy the VADisplay
+ * @return the maximum number of EGL Target
+ */
+int vaMaxNumSurfaceTargetsEGL(
+    VADisplay dpy
+);
+
+/**
+ * Return maximum number of EGL surface attributes supported by the implementation
  *
- * @param[in]  dpy        the VA display
- * @param[in]  target     the GL target to which the texture needs to be bound, must be GL_TEXTURE_2D
- * @param[in]  texture    the GL texture
- * @param[in]  width      the surface width
- * @param[in]  height     the surface height
+ * @param[in] dpy the VADisplay
+ * @return the maximum number of EGL surface attributes
+ */
+int vaMaxNumSurfaceAttributesEGL(
+    VADisplay dpy
+);
+
+/**
+ * Query supported EGL targets for eglCreateImageKHR(). 
+ *
+ * The caller must provide a "target_list" array that can hold at
+ * least vaMaxNumSurfaceTargetsEGL() entries. The actual number of
+ * targets returned in "target_list" is returned in "num_targets".
+ *
+ * @param[in]] dpy              the VADisplay
+ * @param[out] target_list      the array to hold target entries
+ * @param[out] num_targets      the actual number of targets
+ * @return VA_STATUS_SUCCESS if successful
+ */
+VAStatus vaQuerySurfaceTargetsEGL(
+    VADisplay dpy,
+    EGLenum *target_list,       /* out */
+    int *num_targets		/* out */
+);
+
+/**
+ * Creates a VA/EGL surface with the specified target
+ *
+ * If target is 0, this means the best efficient target by default.
+ *
+ * @param[in] dpy               the VADisplay
+ * @param[in] target            the specified EGL target
+ * @param[in] width             the surface width
+ * @param[in] height            the surface height
  * @param[out] gl_surface the VA/EGL surface
  * @return VA_STATUS_SUCCESS if successful
  */
 VAStatus vaCreateSurfaceEGL(
     VADisplay dpy,
-    GLenum target,
-    GLuint texture,
+    EGLenum target,
     unsigned int width,
     unsigned int height,
     VASurfaceEGL *gl_surface
@@ -73,7 +107,7 @@ VAStatus vaDestroySurfaceEGL(
 );
 
 /**
- * Associate a EGLClientBuffer with a VA surface
+ * Associate a EGL surface with a VA surface
  *
  * @param[in]  dpy         the VA display
  * @param[in]  egl_surface the VA/EGL destination surface
@@ -93,17 +127,41 @@ VAStatus vaAssociateSurfaceEGL(
  *
  * Changes to VA surface are committed to VA/EGL surface at this point.
  *
- * @param[in]  dpy         the VA display
- * @param[in]  egl_surface the VA/EGL destination surface
+ * @param[in] dpy         the VA display
+ * @param[in] egl_surface the VA/EGL surface that has been associated with a VA surface
  * @return VA_STATUS_SUCCESS if successful
  */
-VAStatus vaUpdateAssociatedSurfaceEGL(
+VAStatus vaSyncSurfaceEGL(
     VADisplay dpy,
     VASurfaceEGL egl_surface
 );
 
 /**
- * Deassociate a EGLClientBuffer
+ * Get the necessary information for eglCreateImageKHR()
+ *
+ * The caller must provide a "attrib_list" array that can hold at
+ * least (2 * vaMaxNumSurfaceAttributesEGL()) entries. The last attribute 
+ * specified in attrib_list must be EGL_NONE
+ *
+ * @param[in]  dpy         the VA display
+ * @param[in]  egl_surface the VA/EGL surface that has been associated with a VA surface
+ * @param[out] target      the type of <buffer> for eglCreateImageKHR()
+ * @param[out] buffer      the EGLClientBuffer for eglCreateImageKHR()
+ * @param[out] attrib_list the list of attribute-value pairs for eglCreateImageKHR()
+ * @param[in/out] num_attribs input: the number of allocated attribute-value pairs in attrib_list; output: the actual number of attribute-value pairs
+ * @return VA_STATUS_SUCCESS if successful
+ */
+VAStatus vaGetSurfaceInfoEGL(
+    VADisplay dpy,
+    VASurfaceEGL egl_surface,
+    EGLenum *target,            /* out, the type of <buffer> */
+    EGLClientBuffer *buffer,    /* out */
+    EGLint *attrib_list,        /* out, the last attribute must be EGL_NONE */
+    int *num_attribs            /* in/out, the number of attribute-value pairs */
+);
+
+/**
+ * Deassociate a EGL surface
  *
  * @param[in]  dpy         the VA display
  * @param[in]  egl_surface the VA/EGL destination surface
