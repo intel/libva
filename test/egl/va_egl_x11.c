@@ -355,14 +355,14 @@ va_egl_init_va_egl(struct va_egl_context *ctx)
     unsigned int *target_list = NULL;
     EGLint *img_attribs = NULL;
 
-    num_max_targets = vaMaxNumSurfaceTargetsEGL(ctx->va_dpy);
+    num_targets = num_max_targets = vaMaxNumSurfaceTargetsEGL(ctx->va_dpy);
     
     if (num_max_targets < 1) {
         printf("Error: vaMaxNumSurfaceTargetsEGL() returns %d\n", num_max_targets);
         return -1;
     }
 
-    num_max_attributes = vaMaxNumSurfaceAttributesEGL(ctx->va_dpy);
+    num_attribs = num_max_attributes = vaMaxNumSurfaceAttributesEGL(ctx->va_dpy);
 
     if (num_max_attributes < 1) {
         printf("Error: vaMaxNumSurfaceAttributesEGL() returns %d\n", num_max_attributes);
