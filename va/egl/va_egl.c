@@ -183,7 +183,7 @@ int vaMaxNumSurfaceTargetsEGL(
     if (va_egl)
         return va_egl->max_egl_surface_targets;
     else
-        return 2;
+        return IMPL_MAX_EGL_SURFACE_TARGETS;
 }
 
 int vaMaxNumSurfaceAttributesEGL(
@@ -200,7 +200,7 @@ int vaMaxNumSurfaceAttributesEGL(
     if (va_egl)
         return va_egl->max_egl_surface_attributes;
     else
-        return 2;
+        return IMPL_MAX_EGL_SURFACE_ATTRIBUTES;
 }
 
 VAStatus vaQuerySurfaceTargetsEGL(

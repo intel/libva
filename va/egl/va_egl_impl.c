@@ -282,8 +282,10 @@ vaQuerySurfaceTargetsEGL_impl_libva(VADisplay dpy,
 {
     int i = 0;
 
+    /* FIXME: support other targets ??? */
     target_list[i++] = EGL_NATIVE_PIXMAP_KHR;
     *num_targets = i;
+    assert(i <= IMPL_MAX_EGL_SURFACE_TARGETS);
 
     return VA_STATUS_SUCCESS;
 }
@@ -296,6 +298,10 @@ vaCreateSurfaceEGL_impl_libva(VADisplay dpy,
                               VASurfaceEGL *egl_surface)
 {
     VASurfaceImplEGLP pSurfaceImplEGL = NULL;
+
+    /* So far only support for EGL_NATIVE_PIXMAP_KHR */
+    if (target != 0 && target != EGL_NATIVE_PIXMAP_KHR)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
 
     pSurfaceImplEGL = calloc(1, sizeof(*pSurfaceImplEGL));
 
@@ -400,17 +406,22 @@ vaGetSurfaceInfoEGL_impl_libva(VADisplay dpy,
     if (pSurfaceImplEGL->surface == VA_INVALID_SURFACE)
         return VA_STATUS_ERROR_INVALID_SURFACE;
 
+    if (*num_attribs < IMPL_MAX_EGL_SURFACE_ATTRIBUTES)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
     *target = pSurfaceImplEGL->target;
     *buffer = pSurfaceImplEGL->buffer;
 
     if (pSurfaceImplEGL->target == EGL_NATIVE_PIXMAP_KHR) {
         attrib_list[i++] = EGL_IMAGE_PRESERVED_KHR;
-        attrib_list[i++] = EGL_TRUE;
+        attrib_list[i + 1] = EGL_TRUE;
         attrib_list[i++] = EGL_NONE;
     } else {
         /* FIXME later */
         attrib_list[i++] = EGL_NONE;
     }
+
+    *num_attribs = i;
 
     return VA_STATUS_SUCCESS;
 }
