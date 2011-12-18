@@ -473,7 +473,14 @@ struct VADriverContext
      */
     struct VADriverVTableWayland *vtable_wayland;
 
-    unsigned long reserved[43];         /* reserve for future add-ins, decrease the subscript accordingly */
+    /**
+     * \brief The VA/VPP implementation hooks.
+     *
+     * This structure is allocated from libva with calloc().
+     */
+    struct VADriverVTableVPP *vtable_vpp;
+
+    unsigned long reserved[42];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
