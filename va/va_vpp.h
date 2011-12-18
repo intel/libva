@@ -251,6 +251,12 @@ typedef enum _VAProcColorBalanceType {
     VAProcColorBalanceBrightness,
     /** \brief Contrast. */
     VAProcColorBalanceContrast,
+    /** \brief Automatically adjusted saturation. */
+    VAProcColorBalanceAutoSaturation,
+    /** \brief Automatically adjusted brightness. */
+    VAProcColorBalanceAutoBrightness,
+    /** \brief Automatically adjusted contrast. */
+    VAProcColorBalanceAutoContrast,
     /** \brief Max number of color balance operations. */
     VAProcColorBalanceCount
 } VAProcColorBalanceType;
@@ -496,7 +502,19 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
     VAProcFilterType            type;
     /** \brief Color balance attribute. */
     VAProcColorBalanceType      attrib;
-    /** \brief Color balance value. */
+    /**
+     * \brief Color balance value.
+     *
+     * Special case for automatically adjusted attributes. e.g. 
+     * #VAProcColorBalanceAutoSaturation,
+     * #VAProcColorBalanceAutoBrightness,
+     * #VAProcColorBalanceAutoContrast.
+     * - If \ref value is \c 1.0 +/- \c FLT_EPSILON, the attribute is
+     *   automatically adjusted and overrides any other attribute of
+     *   the same type that would have been set explicitly;
+     * - If \ref value is \c 0.0 +/- \c FLT_EPSILON, the attribute is
+     *   disabled and other attribute of the same type is used instead.
+     */
     float                       value;
 } VAProcFilterParameterBufferColorBalance;
 
