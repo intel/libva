@@ -423,7 +423,6 @@ typedef struct _VAProcFilterParameterBuffer {
     /** \brief Filter type. */
     VAProcFilterType    type;
     /** \brief Value. */
-    /* XXX: use VAGenericValue? */
     float               value;
 } VAProcFilterParameterBuffer;
 
