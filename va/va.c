@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_backend_vpp.h"
 #include "va_trace.h"
 #include "va_fool.h"
 
@@ -211,6 +212,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 dlclose(handle);
             } else {
                 struct VADriverVTable *vtable = ctx->vtable;
+                struct VADriverVTableVPP *vtable_vpp = ctx->vtable_vpp;
 
                 vaStatus = VA_STATUS_SUCCESS;
                 if (!vtable) {
@@ -219,6 +221,15 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
                 }
                 ctx->vtable = vtable;
+
+                if (!vtable_vpp) {
+                    vtable_vpp = calloc(1, sizeof(*vtable_vpp));
+                    if (vtable_vpp)
+                        vtable_vpp->version = VA_DRIVER_VTABLE_VPP_VERSION;
+                    else
+                        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+                }
+                ctx->vtable_vpp = vtable_vpp;
 
                 if (VA_STATUS_SUCCESS == vaStatus)
                     vaStatus = (*init_func)(ctx);
@@ -431,6 +442,8 @@ VAStatus vaTerminate (
   }
   free(old_ctx->vtable);
   old_ctx->vtable = NULL;
+  free(old_ctx->vtable_vpp);
+  old_ctx->vtable_vpp = NULL;
 
   if (VA_STATUS_SUCCESS == vaStatus)
       pDisplayContext->vaDestroy(pDisplayContext);
@@ -1349,4 +1362,80 @@ VAStatus vaUnlockSurface(VADisplay dpy,
   ctx = CTX(dpy);
 
   return ctx->vtable->vaUnlockSurface( ctx, surface );
+}
+
+/* Video Processing */
+#define VA_VPP_INIT_CONTEXT(ctx, dpy) do {              \
+        CHECK_DISPLAY(dpy);                             \
+        ctx = CTX(dpy);                                 \
+        if (!ctx)                                       \
+            return VA_STATUS_ERROR_INVALID_DISPLAY;     \
+    } while (0)
+
+#define VA_VPP_INVOKE(dpy, func, args) do {             \
+        if (!ctx->vtable_vpp->va##func)                 \
+            return VA_STATUS_ERROR_UNIMPLEMENTED;       \
+        status = ctx->vtable_vpp->va##func args;        \
+    } while (0)
+
+VAStatus
+vaQueryVideoProcFilters(
+    VADisplay           dpy,
+    VAContextID         context,
+    VAProcFilterType   *filters,
+    unsigned int       *num_filters
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_VPP_INIT_CONTEXT(ctx, dpy);
+    VA_VPP_INVOKE(
+        ctx,
+        QueryVideoProcFilters,
+        (ctx, context, filters, num_filters)
+    );
+    return status;
+}
+
+VAStatus
+vaQueryVideoProcFilterCaps(
+    VADisplay           dpy,
+    VAContextID         context,
+    VAProcFilterType    type,
+    void               *filter_caps,
+    unsigned int       *num_filter_caps
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_VPP_INIT_CONTEXT(ctx, dpy);
+    VA_VPP_INVOKE(
+        ctx,
+        QueryVideoProcFilterCaps,
+        (ctx, context, type, filter_caps, num_filter_caps)
+    );
+    return status;
+}
+
+VAStatus
+vaQueryVideoProcPipelineCaps(
+    VADisplay           dpy,
+    VAContextID         context,
+    VABufferID         *filters,
+    unsigned int        num_filters,
+    VAProcPipelineCaps *pipeline_caps
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_VPP_INIT_CONTEXT(ctx, dpy);
+    VA_VPP_INVOKE(
+        ctx,
+        QueryVideoProcPipelineCaps,
+        (ctx, context, filters, num_filters, pipeline_caps)
+    );
+    return status;
 }

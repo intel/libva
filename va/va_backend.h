@@ -434,7 +434,14 @@ struct VADriverContext
     void *dri_state;
     void *glx;				/* opaque for GLX code */
 
-    unsigned long reserved[45];         /* reserve for future add-ins, decrease the subscript accordingly */
+    /**
+     * \brief The VA/VPP implementation hooks.
+     *
+     * This structure is allocated from libva with calloc().
+     */
+    struct VADriverVTableVPP *vtable_vpp;
+
+    unsigned long reserved[44];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
