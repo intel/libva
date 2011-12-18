@@ -1563,16 +1563,35 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW         0x1000
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
-/*
- * device independent data structure for codedbuffer
+/**
+ * \brief Coded buffer segment.
+ *
+ * #VACodedBufferSegment is an element of a linked list describing
+ * some information on the coded buffer. The size of the linked list
+ * shall be equal to the number of returned NAL units. That is, there
+ * shall be as many coded buffer segments as NAL units.
  */
 typedef  struct _VACodedBufferSegment  {
-    unsigned int size;/* size of the data buffer in the coded buffer segment, in bytes */
-    unsigned int bit_offset; /* bit offset into the data buffer where valid bitstream data begins */
-    unsigned int status; /* status set by the driver on the coded buffer*/
-    unsigned int reserved; /* for future use */
-    void *buf; /* pointer to the beginning of the data buffer in the coded buffer segment */
-    void *next; /* pointer to the next VACodedBufferSegment */
+    /**
+     * \brief Size of the data buffer in this segment (in bytes).
+     *
+     * The size of the corresponding NAL unit can be obtained with
+     * \c size - \c bit_offset/8.
+     */
+    unsigned int        size;
+    /** \brief Bit offset into the data buffer where the NAL unit starts. */
+    unsigned int        bit_offset;
+    /** \brief Status set by the driver. See \c VA_CODED_BUF_STATUS_*. */
+    unsigned int        status;
+    /** \brief Reserved for future use. */
+    unsigned int        reserved;
+    /** \brief Pointer to the start of the data buffer. */
+    void               *buf;
+    /**
+     * \brief Pointer to the next #VACodedBufferSegment element,
+     * or \c NULL if there is none.
+     */
+    void               *next;
 } VACodedBufferSegment;
      
 /*
