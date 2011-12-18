@@ -189,7 +189,7 @@ extern "C" {
  *         pipeline_param->output_background_color = 0;
  *         if (first surface to render)
  *             pipeline_param->output_background_color = 0xff000000; // black
- *         pipeline_param->flags                = VA_FILTER_SCALING_HQ;
+ *         pipeline_param->filter_flags         = VA_FILTER_SCALING_HQ;
  *         pipeline_param->filters              = filter_bufs;
  *         pipeline_param->num_filters          = num_filter_bufs;
  *         vaUnmapBuffer(va_dpy, pipeline_buf);
@@ -290,6 +290,8 @@ typedef enum _VAProcColorStandardType {
 typedef struct _VAProcPipelineCaps {
     /** \brief Video filter flags. See video pipeline flags. */
     unsigned int        flags;
+    /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
+    unsigned int        filter_flags;
     /** \brief Number of forward reference frames that are needed. */
     unsigned int        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
@@ -382,9 +384,13 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     unsigned int        output_background_color;
     /**
-     * \brief Pipeline flags. See vaPutSurface() flags.
+     * \brief Extra filter flags. See vaPutSurface() flags.
      *
-     * Pipeline flags:
+     * Filter flags are used as a fast path, wherever possible, to use
+     * vaPutSurface() flags instead of explicit filter parameter buffers.
+     *
+     * Allowed filter flags API-wise. Use vaQueryVideoProcPipelineCaps()
+     * to check for implementation details:
      * - Bob-deinterlacing: \c VA_FRAME_PICTURE, \c VA_TOP_FIELD,
      *   \c VA_BOTTOM_FIELD. Note that any deinterlacing filter
      *   (#VAProcFilterDeinterlacing) will override those flags.
@@ -394,7 +400,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
      */
-    unsigned int        flags;
+    unsigned int        filter_flags;
     /**
      * \brief Array of filters to apply to the surface.
      *
