@@ -280,6 +280,23 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardGenericFilm,
 } VAProcColorStandardType;
 
+/** @name Video pipeline flags */
+/**@{*/
+/** \brief Specifies whether to apply subpictures when processing a surface. */
+#define VA_PROC_PIPELINE_SUBPICTURES    0x00000001
+/**
+ * \brief Specifies whether to apply power or performance
+ * optimizations to a pipeline.
+ *
+ * When processing several surfaces, it may be necessary to prioritize
+ * more certain pipelines than others. This flag is only a hint to the
+ * video processor so that it can omit certain filters to save power
+ * for example. Typically, this flag could be used with video surfaces
+ * decoded from a secondary bitstream.
+ */
+#define VA_PROC_PIPELINE_FAST           0x00000002
+/**@}*/
+
 /** @name Video filter flags */
 /**@{*/
 /** \brief Specifies whether the filter shall be present in the pipeline. */
@@ -290,6 +307,8 @@ typedef enum _VAProcColorStandardType {
 typedef struct _VAProcPipelineCaps {
     /** \brief Video filter flags. See video pipeline flags. */
     unsigned int        flags;
+    /** \brief Pipeline flags. See VAProcPipelineParameterBuffer::pipeline_flags. */
+    unsigned int        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
     unsigned int        filter_flags;
     /** \brief Number of forward reference frames that are needed. */
@@ -383,6 +402,14 @@ typedef struct _VAProcPipelineParameterBuffer {
      * temporary surface into the target surface.
      */
     unsigned int        output_background_color;
+    /**
+     * \brief Pipeline filters. See video pipeline flags.
+     *
+     * Flags to control the pipeline, like whether to apply subpictures
+     * or not, notify the driver that it can opt for power optimizations,
+     * should this be needed.
+     */
+    unsigned int        pipeline_flags;
     /**
      * \brief Extra filter flags. See vaPutSurface() flags.
      *
