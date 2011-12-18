@@ -405,6 +405,8 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_VCM                       0x00000008
 /** \brief Constant QP. */
 #define VA_RC_CQP                       0x00000010
+/** \brief Variable bitrate with peak rate higher than average bitrate. */
+#define VA_RC_VBR_CONSTRAINED           0x00000020
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
