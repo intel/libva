@@ -247,7 +247,7 @@ typedef enum _VAProcFilterType {
     VAProcFilterColorBalance,
     /** \brief Color standard conversion. */
     VAProcFilterColorStandard,
-    /** \brief Max number of video filters. */
+    /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
 
@@ -262,7 +262,7 @@ typedef enum _VAProcDeinterlacingType {
     VAProcDeinterlacingMotionAdaptive,
     /** \brief Motion compensated deinterlacing algorithm. */
     VAProcDeinterlacingMotionCompensated,
-    /** \brief Max number of deinterlacing algorithms. */
+    /** \brief Number of deinterlacing algorithms. */
     VAProcDeinterlacingCount
 } VAProcDeinterlacingType;
 
@@ -283,7 +283,7 @@ typedef enum _VAProcColorBalanceType {
     VAProcColorBalanceAutoBrightness,
     /** \brief Automatically adjusted contrast. */
     VAProcColorBalanceAutoContrast,
-    /** \brief Max number of color balance operations. */
+    /** \brief Number of color balance attributes. */
     VAProcColorBalanceCount
 } VAProcColorBalanceType;
 
@@ -304,7 +304,7 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardSMPTE240M,
     /** \brief Generic film. */
     VAProcColorStandardGenericFilm,
-    /** \brief Max number of color standard types. */
+    /** \brief Number of color standards. */
     VAProcColorStandardCount
 } VAProcColorStandardType;
 
