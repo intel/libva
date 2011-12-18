@@ -363,8 +363,9 @@ typedef struct _VAProcPipelineParameterBuffer {
     /**
      * \brief Source surface ID.
      *
-     * ID of the source surface to process. If subpictures are associated with
-     * the video surfaces then they shall be rendered to the target surface.
+     * ID of the source surface to process. If subpictures are associated
+     * with the video surfaces then they shall be rendered to the target
+     * surface, if the #VA_PROC_PIPELINE_SUBPICTURES pipeline flag is set.
      */
     VASurfaceID         surface;
     /**
