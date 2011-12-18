@@ -332,10 +332,9 @@ typedef enum
      * This attribute determines the maximum number of reference
      * frames supported for encoding.
      *
-     * Note: for H.264 encoding, the value represents the maximum
-     * number of reference frames for both the reference picture list
-     * 0 (top 16 bits) and the reference picture list 1 (bottom 16
-     * bits).
+     * Note: for H.264 encoding, the value represents the maximum number
+     * of reference frames for both the reference picture list 0 (bottom
+     * 16 bits) and the reference picture list 1 (top 16 bits).
      */
     VAConfigAttribEncMaxRefFrames       = 13,
     /**
