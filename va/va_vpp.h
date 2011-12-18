@@ -160,7 +160,13 @@ extern "C" {
  * unsigned int num_forward_references;
  * VASurfaceID *backward_references;
  * unsigned int num_backward_references;
+ * VAProcColorStandardType in_color_standards[VAProcColorStandardCount];
+ * VAProcColorStandardType out_color_standards[VAProcColorStandardCount];
  *
+ * pipeline_caps.input_color_standards      = NULL;
+ * pipeline_caps.num_input_color_standards  = ARRAY_ELEMS(in_color_standards);
+ * pipeline_caps.output_color_standards     = NULL;
+ * pipeline_caps.num_output_color_standards = ARRAY_ELEMS(out_color_standards);
  * vaQueryVideoProcPipelineCaps(va_dpy, vpp_ctx,
  *     filter_bufs, num_filter_bufs,
  *     &pipeline_caps
@@ -298,6 +304,8 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardSMPTE240M,
     /** \brief Generic film. */
     VAProcColorStandardGenericFilm,
+    /** \brief Max number of color standard types. */
+    VAProcColorStandardCount
 } VAProcColorStandardType;
 
 /** @name Video pipeline flags */
@@ -335,6 +343,14 @@ typedef struct _VAProcPipelineCaps {
     unsigned int        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
     unsigned int        num_backward_references;
+    /** \brief List of color standards supported on input. */
+    VAProcColorStandardType *input_color_standards;
+    /** \brief Number of elements in \ref input_color_standards array. */
+    unsigned int        num_input_color_standards;
+    /** \brief List of color standards supported on output. */
+    VAProcColorStandardType *output_color_standards;
+    /** \brief Number of elements in \ref output_color_standards array. */
+    unsigned int        num_output_color_standards;
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -397,6 +413,15 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     const VARectangle  *surface_region;
     /**
+     * \brief Requested input color primaries.
+     *
+     * Color primaries are implicitly converted throughout the processing
+     * pipeline. The video processor chooses the best moment to apply
+     * this conversion. The set of supported color primaries primaries
+     * for input shall be queried with vaQueryVideoProcPipelineCaps().
+     */
+    VAProcColorStandardType surface_color_standard;
+    /**
      * \brief Region within the output surface.
      *
      * Pointer to a #VARectangle defining the region within the output
@@ -423,6 +448,10 @@ typedef struct _VAProcPipelineParameterBuffer {
      * temporary surface into the target surface.
      */
     unsigned int        output_background_color;
+    /**
+     * \brief Requested output color primaries.
+     */
+    VAProcColorStandardType output_color_standard;
     /**
      * \brief Pipeline filters. See video pipeline flags.
      *
@@ -679,12 +708,20 @@ vaQueryVideoProcFilterCaps(
  * \c filters array defines the video processing pipeline and is an array
  * of buffers holding filter parameters.
  *
+ * Note: the #VAProcPipelineCaps structure contains user-provided arrays.
+ * If non-NULL, the corresponding \c num_* fields shall be filled in on
+ * input with the number of elements allocated. Upon successful return,
+ * the actual number of elements will be overwritten into the \c num_*
+ * fields. Otherwise, \c VA_STATUS_ERROR_MAX_NUM_EXCEEDED is returned
+ * and \c num_* fields are adjusted to the number of elements that would
+ * be returned if enough space was available.
+ *
  * @param[in] dpy               the VA display
  * @param[in] context           the video processing context
  * @param[in] filters           the array of VA buffers defining the video
  *      processing pipeline
  * @param[in] num_filters       the number of elements in filters
- * @param[out] pipeline_caps    the video processing pipeline capabilities
+ * @param[in,out] pipeline_caps the video processing pipeline capabilities
  */
 VAStatus
 vaQueryVideoProcPipelineCaps(
