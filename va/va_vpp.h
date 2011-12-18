@@ -305,10 +305,11 @@ typedef struct _VAProcFilterValueRange {
 /**
  * \brief Video processing pipeline configuration.
  *
- * This buffers defines a video processing pipeline. As for any buffer
- * passed to \c vaRenderPicture(), this is one-time usage model. However,
- * the actual filters to be applied are provided in the \c filters field,
- * so they can be re-used in other processing pipelines.
+ * This buffer defines a video processing pipeline. As for any buffer
+ * passed to \c vaRenderPicture(), this is a one-time usage model.
+ * However, the actual filters to be applied are provided in the
+ * \c filters field, so they can be re-used in other processing
+ * pipelines.
  *
  * The target surface is specified by the \c render_target argument of
  * \c vaBeginPicture(). The general usage model is described as follows:
@@ -364,6 +365,14 @@ typedef struct _VAProcPipelineParameterBuffer {
      * Background color used to fill in pixels that reside outside of the
      * specified \ref output_region. The color is specified in ARGB format:
      * [31:24] alpha, [23:16] red, [15:8] green, [7:0] blue.
+     *
+     * Unless the alpha value is zero or the \ref output_region represents
+     * the whole target surface size, implementations shall not render the
+     * source surface to the target surface directly. Rather, in order to
+     * maintain the exact semantics of \ref output_background_color, the
+     * driver shall use a temporary surface and fill it in with the
+     * appropriate background color. Next, the driver will blend this
+     * temporary surface into the target surface.
      */
     unsigned int        output_background_color;
     /**
