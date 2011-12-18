@@ -655,26 +655,65 @@ VAStatus vaQueryConfigAttributes (
   return ctx->vtable->vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
-VAStatus vaCreateSurfaces (
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    int num_surfaces,
-    VASurfaceID *surfaces	/* out */
+VAStatus
+vaGetSurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int        num_attribs
 )
 {
-  VADriverContextP ctx;
-  VAStatus vaStatus;
+    VADriverContextP ctx;
+    VAStatus vaStatus;
 
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if (!ctx)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
 
-  vaStatus = ctx->vtable->vaCreateSurfaces( ctx, width, height, format, num_surfaces, surfaces );
+    if (!ctx->vtable->vaGetSurfaceAttributes)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
 
-  VA_TRACE_LOG(va_TraceCreateSurface, dpy, width, height, format, num_surfaces, surfaces);
-  
-  return vaStatus;
+    vaStatus = ctx->vtable->vaGetSurfaceAttributes(ctx, config,
+                                                   attrib_list, num_attribs);
+    return vaStatus;
+}
+
+VAStatus
+vaCreateSurfaces(
+    VADisplay           dpy,
+    unsigned int        format,
+    unsigned int        width,
+    unsigned int        height,
+    VASurfaceID        *surfaces,
+    unsigned int        num_surfaces,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int        num_attribs
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if (!ctx)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
+
+    if (ctx->vtable->vaCreateSurfaces2)
+        return ctx->vtable->vaCreateSurfaces2(ctx, format, width, height,
+                                              surfaces, num_surfaces,
+                                              attrib_list, num_attribs);
+
+    if (attrib_list && num_attribs > 0)
+        return VA_STATUS_ERROR_ATTR_NOT_SUPPORTED;
+
+    vaStatus = ctx->vtable->vaCreateSurfaces(ctx, width, height, format,
+                                             num_surfaces, surfaces);
+
+    VA_TRACE_LOG(va_TraceCreateSurface,
+                 dpy, width, height, format, num_surfaces, surfaces);
+
+    return vaStatus;
 }
 
 
