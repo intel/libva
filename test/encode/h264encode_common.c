@@ -167,8 +167,12 @@ static int do_h264_encoding(void)
     int i;
 
 
-    va_status = vaCreateSurfaces(va_dpy,frame_width, frame_height,
-                                 VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
+    va_status = vaCreateSurfaces(
+        va_dpy,
+        VA_RT_FORMAT_YUV420, frame_width, frame_height,
+        &surface_id[0], SURFACE_NUM,
+        NULL, 0
+    );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
     
     /* upload RAW YUV data into all surfaces */
@@ -393,8 +397,12 @@ int main(int argc,char **argv)
                               &attrib[0], 2,&config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
     
-    va_status = vaCreateSurfaces(va_dpy,frame_width, frame_height,
-                                 VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
+    va_status = vaCreateSurfaces(
+        va_dpy,
+        VA_RT_FORMAT_YUV420, frame_width, frame_height,
+        &surface_id[0], SURFACE_NUM,
+        NULL, 0
+    );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
     
     /* Create a context for this decode pipe */

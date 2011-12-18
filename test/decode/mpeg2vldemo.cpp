@@ -220,8 +220,12 @@ int main(int argc,char **argv)
                               &attrib, 1,&config_id);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
-    va_status = vaCreateSurfaces(va_dpy,CLIP_WIDTH,CLIP_HEIGHT,
-                                VA_RT_FORMAT_YUV420, 1, &surface_id);
+    va_status = vaCreateSurfaces(
+        va_dpy,
+        VA_RT_FORMAT_YUV420, CLIP_WIDTH, CLIP_HEIGHT,
+        &surface_id, 1,
+        NULL, 0
+    );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* Create a context for this decode pipe */

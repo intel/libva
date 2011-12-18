@@ -337,8 +337,12 @@ int main(int argc,char **argv)
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
 
-    va_status = vaCreateSurfaces(va_dpy,surface_width, surface_height,
-                                VA_RT_FORMAT_YUV420, SURFACE_NUM, &surface_id[0]);
+    va_status = vaCreateSurfaces(
+        va_dpy,
+        VA_RT_FORMAT_YUV420, surface_width, surface_height,
+        &surface_id[0], SURFACE_NUM,
+        NULL, 0
+    );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
     if (multi_thread == 0) /* upload the content for all surfaces */
         upload_source_YUV_once_for_all();
