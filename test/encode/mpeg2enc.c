@@ -892,11 +892,13 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
     CHECK_VASTATUS(va_status, "vaCreateContext");
 
     va_status = vaCreateSurfaces(ctx->va_dpy,
+                                 VA_RT_FORMAT_YUV420,
                                  ctx->width,
                                  ctx->height,
-                                 VA_RT_FORMAT_YUV420,
+                                 surface_ids,
                                  SID_NUMBER,
-                                 surface_ids);
+                                 NULL,
+                                 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 }
 

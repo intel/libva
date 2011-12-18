@@ -578,10 +578,9 @@ int tinyjpeg_decode(struct jdec_private *priv)
                               &attrib, 1,&config_id);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
-    va_status = vaCreateSurfaces(va_dpy,
+    va_status = vaCreateSurfaces(va_dpy,VA_RT_FORMAT_YUV420,
                                  priv->width,priv->height, //alignment?
-                                 VA_RT_FORMAT_YUV420,
-                                 1, &surface_id);
+                                 &surface_id, 1, NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* Create a context for this decode pipe */

@@ -1030,19 +1030,18 @@ static int setup_encode()
 
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
-                                 frame_width, frame_height,
-                                 VA_RT_FORMAT_YUV420,
-                                 SRC_SURFACE_NUM,
-                                 &src_surface[0]);
+                                 VA_RT_FORMAT_YUV420, frame_width, frame_height,
+                                 &src_surface[0], SRC_SURFACE_NUM,
+                                 NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* create reference surfaces */
     va_status = vaCreateSurfaces(
-            va_dpy,
-            frame_width, frame_height,
-            VA_RT_FORMAT_YUV420,
-            h264_maxref,
-            &ref_surface[0]);
+        va_dpy,
+        VA_RT_FORMAT_YUV420, frame_width, frame_height,
+        &ref_surface[0], h264_maxref,
+        NULL, 0
+        );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     tmp_surfaceid = calloc(SRC_SURFACE_NUM + h264_maxref, sizeof(VASurfaceID));

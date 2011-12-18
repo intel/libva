@@ -250,8 +250,12 @@ static void alloc_encode_resource(FILE *yuv_fp)
     VAStatus va_status;
 
     // Create surface
-    va_status = vaCreateSurfaces(va_dpy, picture_width, picture_height,
-                                 VA_RT_FORMAT_YUV420, SID_NUMBER, &surface_ids[0]);
+    va_status = vaCreateSurfaces(
+            va_dpy,
+            VA_RT_FORMAT_YUV420, picture_width, picture_height,
+            &surface_ids[0], SID_NUMBER,
+            NULL, 0
+        );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     newImageBuffer = (unsigned char *)malloc(frame_size);
