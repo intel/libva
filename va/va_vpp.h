@@ -138,12 +138,6 @@ extern "C" {
  *             VAProcFilterParameterBufferDeinterlacing deint;
  *             deint.type                   = VAProcFilterDeinterlacing;
  *             deint.algorithm              = VAProcDeinterlacingMotionAdaptive;
- *             deint.forward_references     =
- *                 malloc(cap->num_forward_references * sizeof(VASurfaceID));
- *             deint.num_forward_references = 0; // none for now
- *             deint.backward_references    =
- *                 malloc(cap->num_backward_references * sizeof(VASurfaceID));
- *             deint.num_backward_references = 0; // none for now
  *             vaCreateBuffer(va_dpy, vpp_ctx,
  *                 VAProcFilterParameterBufferType, sizeof(deint), 1,
  *                 &deint, &deint_filter
@@ -152,6 +146,32 @@ extern "C" {
  *         }
  *     }
  * }
+ * \endcode
+ *
+ * Once the video processing pipeline is set up, the caller shall check the
+ * implied capabilities and requirements with vaQueryVideoProcPipelineCaps().
+ * This function can be used to validate the number of reference frames are
+ * needed by the specified deinterlacing algorithm, the supported color
+ * primaries, etc.
+ * \code
+ * // Create filters
+ * VAProcPipelineCaps pipeline_caps;
+ * VASurfaceID *forward_references;
+ * unsigned int num_forward_references;
+ * VASurfaceID *backward_references;
+ * unsigned int num_backward_references;
+ *
+ * vaQueryVideoProcPipelineCaps(va_dpy, vpp_ctx,
+ *     filter_bufs, num_filter_bufs,
+ *     &pipeline_caps
+ * );
+ *
+ * num_forward_references  = pipeline_caps.num_forward_references;
+ * forward_references      =
+ *     malloc(num__forward_references * sizeof(VASurfaceID));
+ * num_backward_references = pipeline_caps.num_backward_references;
+ * backward_references     =
+ *     malloc(num_backward_references * sizeof(VASurfaceID));
  * \endcode
  *
  * \section api_vpp_submit Send video processing parameters through VA buffers
@@ -194,11 +214,11 @@ extern "C" {
  *         pipeline_param->num_filters          = num_filter_bufs;
  *         vaUnmapBuffer(va_dpy, pipeline_buf);
  *
- *         VAProcFilterParameterBufferDeinterlacing *deint_param;
- *         vaMapBuffer(va_dpy, deint_filter, &deint_param);
- *         // Update deinterlacing parameters, if necessary
- *         ...
- *         vaUnmapBuffer(va_dpy, deint_filter);
+ *         // Update reference frames for deinterlacing, if necessary
+ *         pipeline_param->forward_references      = forward_references;
+ *         pipeline_param->num_forward_references  = num_forward_references_used;
+ *         pipeline_param->backward_references     = backward_references;
+ *         pipeline_param->num_backward_references = num_bacward_references_used;
  *
  *         // Apply filters
  *         vaRenderPicture(va_dpy, vpp_ctx, &pipeline_buf, 1);
@@ -448,6 +468,14 @@ typedef struct _VAProcPipelineParameterBuffer {
     VABufferID         *filters;
     /** \brief Actual number of filters. */
     unsigned int        num_filters;
+    /** \brief Array of forward reference frames. */
+    VASurfaceID        *forward_references;
+    /** \brief Number of forward reference frames that were supplied. */
+    unsigned int        num_forward_references;
+    /** \brief Array of backward reference frames. */
+    VASurfaceID        *backward_references;
+    /** \brief Number of backward reference frames that were supplied. */
+    unsigned int        num_backward_references;
 } VAProcPipelineParameterBuffer;
 
 /**
@@ -481,14 +509,6 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     VAProcFilterType            type;
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
-    /** \brief Array of forward reference frames. */
-    VASurfaceID                *forward_references;
-    /** \brief Number of forward reference frames that were supplied. */
-    unsigned int                num_forward_references;
-    /** \brief Array of backward reference frames. */
-    VASurfaceID                *backward_references;
-    /** \brief Number of backward reference frames that were supplied. */
-    unsigned int                num_backward_references;
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**
@@ -575,10 +595,6 @@ typedef struct _VAProcFilterCap {
 typedef struct _VAProcFilterCapDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     type;
-    /** \brief Number of forward references needed for deinterlacing. */
-    unsigned int                num_forward_references;
-    /** \brief Number of backward references needed for deinterlacing. */
-    unsigned int                num_backward_references;
 } VAProcFilterCapDeinterlacing;
 
 /** \brief Capabilities specification for the color balance filter. */
