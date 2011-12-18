@@ -377,6 +377,26 @@ struct VADriverVTable
 		VADriverContextP ctx,
                 VASurfaceID surface
         );
+
+        VAStatus
+        (*vaGetSurfaceAttributes)(
+            VADriverContextP    dpy,
+            VAConfigID          config,
+            VASurfaceAttrib    *attrib_list,
+            unsigned int        num_attribs
+        );
+
+        VAStatus
+        (*vaCreateSurfaces2)(
+            VADriverContextP    ctx,
+            unsigned int        format,
+            unsigned int        width,
+            unsigned int        height,
+            VASurfaceID        *surfaces,
+            unsigned int        num_surfaces,
+            VASurfaceAttrib    *attrib_list,
+            unsigned int        num_attribs
+        );
 };
 
 struct VADriverContext

@@ -612,24 +612,106 @@ typedef struct _VAGenericValue {
     }                   value;
 } VAGenericValue;
 
-/* 
- * vaCreateSurfaces - Create an array of surfaces used for decode and display  
- *  dpy: display
- *  width: surface width
- *  height: surface height
- *  format: VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422 or VA_RT_FORMAT_YUV444
- *  num_surfaces: number of surfaces to be created
- *  surfaces: array of surfaces created upon return
+/** @name Surface attribute flags */
+/**@{*/
+/** \brief Surface attribute is not supported. */
+#define VA_SURFACE_ATTRIB_NOT_SUPPORTED 0x00000000
+/** \brief Surface attribute can be got through vaQuerySurfaceAttributes(). */
+#define VA_SURFACE_ATTRIB_GETTABLE      0x00000001
+/** \brief Surface attribute can be set through vaCreateSurfaces(). */
+#define VA_SURFACE_ATTRIB_SETTABLE      0x00000002
+/**@}*/
+
+/** \brief Surface attribute types. */
+typedef enum {
+    VASurfaceAttribNone = 0,
+    /**
+     * \brief Pixel format (fourcc).
+     *
+     * The value is meaningful as input to vaQuerySurfaceAttributes().
+     * If zero, the driver returns the optimal pixel format for the
+     * specified config. Otherwise, if non-zero, the value represents
+     * a pixel format (FOURCC) that is kept as is on output, if the
+     * driver supports it. Otherwise, the driver sets the value to
+     * zero and drops the \c VA_SURFACE_ATTRIB_SETTABLE flag.
+     */
+    VASurfaceAttribPixelFormat,
+    /** \brief Minimal width in pixels (int, read/write). */
+    VASurfaceAttribMinWidth,
+    /** \brief Maximal width in pixels (int, read-only). */
+    VASurfaceAttribMaxWidth,
+    /** \brief Minimal height in pixels (int, read-only). */
+    VASurfaceAttribMinHeight,
+    /** \brief Maximal height in pixels (int, read-only). */
+    VASurfaceAttribMaxHeight,
+    /** \brief Number of surface attributes. */
+    VASurfaceAttribCount
+} VASurfaceAttribType;
+
+/** \brief Surface attribute. */
+typedef struct _VASurfaceAttrib {
+    /** \brief Type. */
+    VASurfaceAttribType type;
+    /** \brief Flags. See "Surface attribute flags". */
+    unsigned int        flags;
+    /** \brief Value. See "Surface attribute types" for the expected types. */
+    VAGenericValue      value;
+} VASurfaceAttrib;
+
+/**
+ * \brief Get surface attributes for the supplied config.
+ *
+ * This function retrieves the surface attributes matching the supplied
+ * config. The caller shall provide an \c attrib_list with all attributes
+ * to be retrieved. Upon successful return, the attributes in \c attrib_list
+ * are updated with the requested value. Unknown attributes or attributes
+ * that are not supported for the given config will have their \c flags
+ * field set to \c VA_SURFACE_ATTRIB_NOT_SUPPORTED.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] config            the config identifying a codec or a video
+ *     processing pipeline
+ * @param[in,out] attrib_list   the list of attributes on input, with at
+ *     least \c type fields filled in, and possibly \c value fields whenever
+ *     necessary. The updated list of attributes and flags on output
+ * @param[in] num_attribs       the number of attributes supplied in the
+ *     \c attrib_list array
  */
-VAStatus vaCreateSurfaces (
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    int num_surfaces,
-    VASurfaceID *surfaces	/* out */
+VAStatus
+vaGetSurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int        num_attribs
 );
 
+/**
+ * \brief Creates an array of surfaces
+ *
+ * Creates an array of surfaces. The optional list of attributes shall
+ * be constructed and verified through vaGetSurfaceAttributes().
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] format            the desired surface format. See \c VA_RT_FORMAT_*
+ * @param[in] width             the surface width
+ * @param[in] height            the surface height
+ * @param[out] surfaces         the array of newly created surfaces
+ * @param[in] num_surfaces      the number of surfaces to create
+ * @param[in] attrib_list       the list of (optional) attributes, or \c NULL
+ * @param[in] num_attribs       the number of attributes supplied in
+ *     \c attrib_list, or zero
+ */
+VAStatus
+vaCreateSurfaces(
+    VADisplay           dpy,
+    unsigned int        format,
+    unsigned int        width,
+    unsigned int        height,
+    VASurfaceID        *surfaces,
+    unsigned int        num_surfaces,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int        num_attribs
+);
     
 /*
  * vaDestroySurfaces - Destroy resources associated with surfaces. 
