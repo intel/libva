@@ -42,15 +42,16 @@ extern "C" {
  * @{
  *
  * The video processing API uses the same paradigm as for decoding:
- * - Query for supported capabilities;
+ * - Query for supported filters;
  * - Set up a video processing pipeline;
  * - Send video processing parameters through VA buffers.
  *
- * \section api_vpp_caps Query for supported capabilities
+ * \section api_vpp_caps Query for supported filters
  *
  * Checking whether video processing is supported can be performed
  * with vaQueryConfigEntrypoints() and the profile argument set to
- * #VAProfileNone.
+ * #VAProfileNone. If video processing is supported, then the list of
+ * returned entry-points will include #VAEntrypointVideoProc.
  *
  * \code
  * VAEntrypoint *entrypoints;
@@ -67,16 +68,15 @@ extern "C" {
  * }
  * \endcode
  *
- * Then, video processing pipeline capabilities, i.e. which video
- * filters does the driver support, can be checked with the
- * vaQueryVideoProcPipelineCaps() function.
+ * Then, the vaQueryVideoProcFilters() function is used to query the
+ * list of video processing filters.
  *
  * \code
- * VAProcPipelineCap pipeline_caps[VAProcFilterCount];
- * unsigned int num_pipeline_caps = VAProcFilterCount;
+ * VAProcFilterType filters[VAProcFilterCount];
+ * unsigned int num_filters = VAProcFilterCount;
  *
- * // num_pipeline_caps shall be initialized to the length of the array
- * vaQueryVideoProcPipelineCaps(va_dpy, vpp_ctx, &pipe_caps, &num_pipeline_caps);
+ * // num_filters shall be initialized to the length of the array
+ * vaQueryVideoProcFilters(va_dpy, vpp_ctx, &pipe_caps, &num_filters);
  * \endcode
  *
  * Finally, individual filter capabilities can be checked with
@@ -115,9 +115,8 @@ extern "C" {
  * VABufferID filter_bufs[VAProcFilterCount];
  * unsigned int num_filter_bufs;
  *
- * for (i = 0; i < num_pipeline_caps; i++) {
- *     VAProcPipelineCap * const pipeline_cap = &pipeline_caps[i];
- *     switch (pipeline_cap->type) {
+ * for (i = 0; i < num_filters; i++) {
+ *     switch (filters[i]) {
  *     case VAProcFilterNoiseReduction: {       // Noise reduction filter
  *         VAProcFilterParameterBuffer denoise;
  *         denoise.type  = VAProcFilterNoiseReduction;
@@ -282,12 +281,14 @@ typedef enum _VAProcColorStandardType {
 /**@}*/
 
 /** \brief Video processing pipeline capabilities. */
-typedef struct _VAProcPipelineCap {
-    /** \brief Video filter type. */
-    VAProcFilterType    type;
-    /** \brief Video filter flags. See video filter flags. */
+typedef struct _VAProcPipelineCaps {
+    /** \brief Video filter flags. See video pipeline flags. */
     unsigned int        flags;
-} VAProcPipelineCap;
+    /** \brief Number of forward reference frames that are needed. */
+    unsigned int        num_forward_references;
+    /** \brief Number of backward reference frames that are needed. */
+    unsigned int        num_backward_references;
+} VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
 typedef struct _VAProcFilterValueRange {
@@ -383,7 +384,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * \brief Array of filters to apply to the surface.
      *
      * The list of filters shall be ordered in the same way the driver expects
-     * them. i.e. as was returned from vaQueryVideoProcPipelineCaps().
+     * them. i.e. as was returned from vaQueryVideoProcFilters().
      * Otherwise, a #VA_STATUS_ERROR_INVALID_FILTER_CHAIN is returned
      * from vaRenderPicture() with this buffer.
      *
@@ -535,14 +536,14 @@ typedef struct _VAProcFilterCapColorStandard {
 } VAProcFilterCapColorStandard;
 
 /**
- * \brief Queries video processing pipeline capabilities.
+ * \brief Queries video processing filters.
  *
  * This function returns the list of video processing filters supported
- * by the driver. The \c pipeline_caps array is allocated by the user and
- * \c num_pipeline_caps shall be initialized to the number of allocated
+ * by the driver. The \c filters array is allocated by the user and
+ * \c num_filters shall be initialized to the number of allocated
  * elements in that array. Upon successful return, the actual number
- * of filters will be overwritten into \c num_pipeline_caps. Otherwise,
- * \c VA_STATUS_ERROR_MAX_NUM_EXCEEDED is returned and \c num_pipeline_caps
+ * of filters will be overwritten into \c num_filters. Otherwise,
+ * \c VA_STATUS_ERROR_MAX_NUM_EXCEEDED is returned and \c num_filters
  * is adjusted to the number of elements that would be returned if enough
  * space was available.
  *
@@ -555,16 +556,16 @@ typedef struct _VAProcFilterCapColorStandard {
  *
  * @param[in] dpy               the VA display
  * @param[in] context           the video processing context
- * @param[out] pipeline_caps    the output array of #VAProcPipelineCap elements
- * @param[in,out] num_pipeline_caps the number of elements allocated on input,
+ * @param[out] filters          the output array of #VAProcFilterType elements
+ * @param[in,out] num_filters the number of elements allocated on input,
  *      the number of elements actually filled in on output
  */
 VAStatus
-vaQueryVideoProcPipelineCaps(
+vaQueryVideoProcFilters(
     VADisplay           dpy,
     VAContextID         context,
-    VAProcPipelineCap  *pipeline_caps,
-    unsigned int       *num_pipeline_caps
+    VAProcFilterType   *filters,
+    unsigned int       *num_filters
 );
 
 /**
@@ -593,6 +594,29 @@ vaQueryVideoProcFilterCaps(
     VAProcFilterType    type,
     void               *filter_caps,
     unsigned int       *num_filter_caps
+);
+
+/**
+ * \brief Queries video processing pipeline capabilities.
+ *
+ * This function returns the video processing pipeline capabilities. The
+ * \c filters array defines the video processing pipeline and is an array
+ * of buffers holding filter parameters.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] context           the video processing context
+ * @param[in] filters           the array of VA buffers defining the video
+ *      processing pipeline
+ * @param[in] num_filters       the number of elements in filters
+ * @param[out] pipeline_caps    the video processing pipeline capabilities
+ */
+VAStatus
+vaQueryVideoProcPipelineCaps(
+    VADisplay           dpy,
+    VAContextID         context,
+    VABufferID         *filters,
+    unsigned int        num_filters,
+    VAProcPipelineCaps *pipeline_caps
 );
 
 /**@}*/
