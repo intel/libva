@@ -31,6 +31,7 @@ LDADD = \
 
 libva_source_c = \
 	va.c			\
+	va_compat.c		\
 	va_fool.c		\
 	va_trace.c		\
 	$(NULL)
@@ -40,6 +41,7 @@ libva_source_h = \
 	va_backend.h		\
 	va_backend_tpi.h	\
 	va_backend_vpp.h	\
+	va_compat.h		\
 	va_dec_jpeg.h		\
 	va_drmcommon.h		\
 	va_enc_h264.h		\
@@ -55,12 +57,18 @@ libva_source_h_priv = \
 	va_trace.h		\
 	$(NULL)
 
+libva_ldflags = \
+	$(LDADD) -no-undefined	\
+	-Wl,-version-script,libva.syms \
+	$(NULL)
+
 lib_LTLIBRARIES			= libva.la
 libvaincludedir			= ${includedir}/va
 libvainclude_HEADERS		= $(libva_source_h)
 noinst_HEADERS			= $(libva_source_h_priv)
 libva_la_SOURCES		= $(libva_source_c)
-libva_la_LDFLAGS		= $(LDADD) -no-undefined
+libva_la_LDFLAGS		= $(libva_ldflags)
+libva_la_DEPENDENCIES		= libva.syms
 libva_la_LIBADD			= $(LIBVA_LIBS) -ldl
 
 lib_LTLIBRARIES			+= libva-tpi.la
