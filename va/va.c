@@ -203,10 +203,30 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         } else {
             VADriverInit init_func = NULL;
             char init_func_s[256];
-            if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
-                                     VA_MAJOR_VERSION, VA_MINOR_VERSION))
-                init_func = (VADriverInit) dlsym(handle, init_func_s);
-            if (!init_func) {
+            int i;
+
+            static const struct {
+                int major;
+                int minor;
+            } compatible_versions[] = {
+                { VA_MAJOR_VERSION, VA_MINOR_VERSION },
+                { 0, 32 },
+                { -1, }
+            };
+
+            for (i = 0; compatible_versions[i].major >= 0; i++) {
+                if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
+                                         compatible_versions[i].major,
+                                         compatible_versions[i].minor)) {
+                    init_func = (VADriverInit)dlsym(handle, init_func_s);
+                    if (init_func) {
+                        va_infoMessage("Found init function %s\n", init_func_s);
+                        break;
+                    }
+                }
+            }
+
+            if (compatible_versions[i].major < 0) {
                 va_errorMessage("%s has no function %s\n",
                                 driver_path, init_func_s);
                 dlclose(handle);
