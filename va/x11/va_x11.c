@@ -29,7 +29,6 @@
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_x11.h"
-#include "va_dri.h"
 #include "va_dri2.h"
 #include "va_dricommon.h"
 #include "va_nvctrl.h"
@@ -87,19 +86,6 @@ static VAStatus va_DRI2GetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_DRIGetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    if (!isDRI1Connected(ctx, driver_name))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
 static VAStatus va_NVCTRL_GetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
@@ -152,8 +138,6 @@ static VAStatus va_DisplayContextGetDriverName (
 	*driver_name = NULL;
 
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)

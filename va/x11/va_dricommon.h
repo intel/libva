@@ -32,9 +32,6 @@ union dri_buffer
         unsigned int cpp;
         unsigned int flags;
     } dri2;
-
-    struct {
-    } dri1;
 };
 
 struct dri_drawable 
@@ -54,10 +51,6 @@ struct dri_state
     int fd;
     int driConnectedFlag; /* 0: disconnected, 1: DRI, 2: DRI2 */
 #ifndef ANDROID
-    drm_handle_t hSAREA;
-    drm_context_t hwContext;
-    drmAddress pSAREA;
-    XID hwContextID;
     struct dri_drawable *drawable_hash[DRAWABLE_HASH_SZ];
 
     struct dri_drawable *(*createDrawable)(VADriverContextP ctx, XID x_drawable);
@@ -69,7 +62,6 @@ struct dri_state
 };
 
 Bool isDRI2Connected(VADriverContextP ctx, char **driver_name);
-Bool isDRI1Connected(VADriverContextP ctx, char **driver_name);
 void free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable);
 void free_drawable_hashtable(VADriverContextP ctx);
 struct dri_drawable *dri_get_drawable(VADriverContextP ctx, XID drawable);

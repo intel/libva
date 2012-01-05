@@ -23,9 +23,7 @@
 INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va $(DRM_CFLAGS)
 
 source_c = \
-	dri1_util.c		\
 	dri2_util.c		\
-	va_dri.c		\
 	va_dri2.c		\
 	va_dricommon.c		\
 	va_fglrx.c		\
@@ -34,7 +32,6 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_dri.h		\
 	va_dri2.h		\
 	va_dricommon.h		\
 	$(NULL)
@@ -42,7 +39,6 @@ source_h = \
 source_h_priv = \
 	va_dri2str.h		\
 	va_dri2tokens.h		\
-	va_dristr.h		\
 	va_fglrx.h		\
 	va_nvctrl.h		\
 	$(NULL)
