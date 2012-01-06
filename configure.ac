@@ -202,10 +202,13 @@ if test "$enable_egl" = "yes"; then
         USE_EGL="yes"
         EGL_DEPS_LIBS="-lEGL"
     ])
+
+    PKG_CHECK_MODULES([GLESv1_CM], [glesv1_cm], [libglesv1_cm=yes], [libglesv1_cm=no])
 fi
 AC_SUBST(EGL_DEPS_CFLAGS)
 AC_SUBST(EGL_DEPS_LIBS)
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
+AM_CONDITIONAL(BUILD_EGL_TEST, test x$libglesv1_cm = xyes)
 
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"
