@@ -1056,7 +1056,7 @@ VAStatus dummy_PutSurface(
 	)
 {
     /* TODO */
-    Drawable drawable = (Drawable)draw;
+    void *drawable = (void *)draw;
 
     (void)drawable;
 

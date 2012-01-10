@@ -30,9 +30,6 @@
 #define _VA_BACKEND_H_
 
 #include <va/va.h>
-#ifndef ANDROID
-#include <X11/Xlib.h>
-#endif
 #include <linux/videodev2.h>
 
 typedef struct VADriverContext *VADriverContextP;

@@ -47,6 +47,9 @@
 #define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 #define CHECK_STRING(s, ctx, var) if (!va_checkString(ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
+#define Bool int
+#define True 1
+#define False 0
 
 /*
  * read a config "env" for libva.conf or from environment setting
