@@ -639,22 +639,12 @@ typedef struct _VAEncPictureParameterBufferJPEG
 } VAEncPictureParameterBufferJPEG;
 
 /* data struct for JPEG decoding */
-/* Indexes for JPEG QUANTIZER MATRIX */
-#define VA_JPEG_QUANTIZER_MATRIX_Y      0
-#define VA_JPEG_QUANTIZER_MATRIX_U      1
-#define VA_JPEG_QUANTIZER_MATRIX_V      2
-#define VA_JPEG_QUANTIZER_MATRIX_A      3
-
-/* Maskes for JPEG QUANTIZER MATRIX */
-#define VA_JPEG_QUANTIZER_MATRIX_Y_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_Y)
-#define VA_JPEG_QUANTIZER_MATRIX_U_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_U)
-#define VA_JPEG_QUANTIZER_MATRIX_V_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_V)
-#define VA_JPEG_QUANTIZER_MATRIX_A_MASK (1 << VA_JPEG_QUANTIZER_MATRIX_A)
-
 typedef struct _VAIQMatrixBufferJPEG
 {
-    unsigned int quantizer_matrix_mask;
-    unsigned char quantizer_matrix[4][64];
+    unsigned char quantiser_matrix[4][64];      /* quantiser_matrix[Tq][64] (Tq=0,1,2,3) specifies a 
+                                                 * quantization table for destination Tq in zig-zag
+                                                 * scan order
+                                                 */
 } VAIQMatrixBufferJPEG;
 
 #define VA_JPEG_SOF0    0xC0
@@ -687,7 +677,7 @@ typedef struct _VAPictureParameterBufferJPEG
         unsigned char component_id;
         unsigned char h_sampling_factor;
         unsigned char v_sampling_factor;
-        unsigned char quantizer_table_index;
+        unsigned char quantiser_table_selector; /* Tqi, quantization table destination selector */
     } components[4];
 
     /* ROI (region of interest), for JPEG2000 */
