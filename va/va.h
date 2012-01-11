@@ -639,11 +639,17 @@ typedef struct _VAEncPictureParameterBufferJPEG
 } VAEncPictureParameterBufferJPEG;
 
 /* data struct for JPEG decoding */
+
+/* Quantization table */
 typedef struct _VAIQMatrixBufferJPEG
 {
-    unsigned char quantiser_matrix[4][64];      /* quantiser_matrix[Tq][64] (Tq=0,1,2,3) specifies a 
+    int precision[4];                           /* valid value: 0(8-bits) , 1(16-bits), precision[Tq](Tq=0,1,2,3)
+                                                 * specifies precision for destination Tq 
+                                                 */
+    unsigned char quantiser_matrix[4][128];     /* quantiser_matrix[Tq](Tq=0,1,2,3) specifies a 
                                                  * quantization table for destination Tq in zig-zag
-                                                 * scan order
+                                                 * scan order. Only the first 64 bytes are valid for each 
+                                                 * table if precision
                                                  */
 } VAIQMatrixBufferJPEG;
 
