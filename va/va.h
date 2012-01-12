@@ -723,7 +723,7 @@ typedef struct _VASliceParameterBufferJPEG
 
     unsigned int num_components;
     struct {
-        int index;      /* index to the ARRAY components in VAPictureParameterBufferJPEG */
+        int component_id;               /* Csj, it must match one of component_ids specified in VAPictureParameterBufferJPEG */
         int dc_selector;                /* Tdj(0,1,2,3) */
         int ac_selector;                /* Taj(0,1,2,3) */
     } components[4];
