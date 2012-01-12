@@ -698,27 +698,17 @@ typedef struct _VAPictureParameterBufferJPEG
     int rotation;
 } VAPictureParameterBufferJPEG;
 
-/* Indexes for JPEG HUFFMAN TABLE */
-#define VA_JPEG_HUFFMAN_TABLE_Y         0
-#define VA_JPEG_HUFFMAN_TABLE_U         1
-#define VA_JPEG_HUFFMAN_TABLE_V         2
-#define VA_JPEG_HUFFMAN_TABLE_A         3
-
-/* Maskes for JPEG HUFFMAN TABLE */
-#define VA_JPEG_HUFFMAN_TABLE_MASK_Y    (1 << VA_JPEG_HUFFMAN_TABLE_Y)
-#define VA_JPEG_HUFFMAN_TABLE_MASK_U    (1 << VA_JPEG_HUFFMAN_TABLE_U)
-#define VA_JPEG_HUFFMAN_TABLE_MASK_V    (1 << VA_JPEG_HUFFMAN_TABLE_V)
-#define VA_JPEG_HUFFMAN_TABLE_MASK_A    (1 << VA_JPEG_HUFFMAN_TABLE_A)
-
 typedef struct _VAHuffmanTableBufferJPEG
 {
-    unsigned int huffman_table_mask;
     struct {
-        unsigned char dc_bits[12];
-        unsigned char dc_huffval[12];
-        unsigned char ac_bits[16];
-        unsigned char ac_huffval[256];  /* only the first 162 bytes are available */
-    } huffman_table[4];
+        unsigned char dc_bits[16];      /* Number of Huffman codes of length i for DC */
+        unsigned char dc_huffval[20];   /* Value associated with each Huffman code for DC */
+        unsigned char ac_bits[16];      /* Number of Huffman codes of length i for AC */
+        unsigned char ac_huffval[256];  /* Value associated with each Huffman code for AC */
+    } huffman_table[4];                 /* Up to 4 huffman tables, huffman_table[Th](Th=0,1,2,3)
+                                         * specifies a buffman table for destination Th.
+                                         */
+
 } VAHuffmanTableBufferJPEG;
 
 /* JPEG Scan Parameter Buffer, The Scan of is similar to 
@@ -734,6 +724,8 @@ typedef struct _VASliceParameterBufferJPEG
     unsigned int num_components;
     struct {
         int index;      /* index to the ARRAY components in VAPictureParameterBufferJPEG */
+        int dc_selector;                /* Tdj(0,1,2,3) */
+        int ac_selector;                /* Taj(0,1,2,3) */
     } components[4];
 
     int restart_interval; /* specifies the number of MCUs in restart interval, defined in DRI marker */
