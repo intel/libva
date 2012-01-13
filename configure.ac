@@ -197,12 +197,16 @@ USE_EGL="no"
 EGL_DEPS_CFLAGS=""
 EGL_DEPS_LIBS=""
 if test "$enable_egl" = "yes"; then
-    AC_CHECK_HEADERS([EGL/egl.h])
+    AC_CHECK_HEADERS([EGL/egl.h], [USE_EGL="yes"])
+fi
+
+if test "x$USE_EGL" = "xyes"; then
     AC_CHECK_LIB(EGL, eglGetDisplay, [
         USE_EGL="yes"
         EGL_DEPS_LIBS="-lEGL"
     ])
 fi
+
 AC_SUBST(EGL_DEPS_CFLAGS)
 AC_SUBST(EGL_DEPS_LIBS)
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
