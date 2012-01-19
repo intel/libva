@@ -666,11 +666,6 @@ typedef struct _VAIQMatrixBufferJPEG
 #define VA_JPEG_SOF13   0xCD
 #define VA_JPEG_SOF14   0xCE
 
-#define VA_JPEG_COMPONENT_ID_Y  1
-#define VA_JPEG_COMPONENT_ID_U  2
-#define VA_JPEG_COMPONENT_ID_V  3
-#define VA_JPEG_COMPONENT_ID_A  4
-                 
 /* JPEG Picture Parameter Buffer */
 typedef struct _VAPictureParameterBufferJPEG
 {
@@ -680,7 +675,7 @@ typedef struct _VAPictureParameterBufferJPEG
     unsigned int image_height;
     unsigned int num_components;
     struct {
-        unsigned char component_id;
+        unsigned char component_id;             /* Ci, the range is 0-255, see B.2.2 */
         unsigned char h_sampling_factor;
         unsigned char v_sampling_factor;
         unsigned char quantiser_table_selector; /* Tqi, quantization table destination selector */
