@@ -25,7 +25,7 @@
 #ifndef VA_BACKEND_EGL_H
 #define VA_BACKEND_EGL_H
 
-#include <va/va.h>
+#include <va/va_egl.h>
 #include <va/va_backend.h>
 
 struct VADriverVTableEGL {
