@@ -283,6 +283,10 @@ static void avcenc_update_picture_parameter(int slice_type, int frame_num, int d
     CHECK_VASTATUS(va_status,"vaCreateBuffer");
 }
 
+#ifndef VA_FOURCC_I420
+#define VA_FOURCC_I420          0x30323449
+#endif
+
 static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
 {
     VAImage surface_image;
@@ -331,9 +335,22 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
             u_src += (picture_width / 2);
             v_src += (picture_width / 2);
         }
-    } else {
-        /* FIXME: fix this later */
-        assert(0);
+    } else if (surface_image.format.fourcc == VA_FOURCC_YV12 ||
+               surface_image.format.fourcc == VA_FOURCC_I420) {
+        const int U = surface_image.format.fourcc == VA_FOURCC_I420 ? 1 : 2;
+        const int V = surface_image.format.fourcc == VA_FOURCC_I420 ? 2 : 1;
+
+        u_dst = surface_p + surface_image.offsets[U];
+        v_dst = surface_p + surface_image.offsets[V];
+
+        for (row = 0; row < surface_image.height / 2; row++) {
+            memcpy(u_dst, u_src, surface_image.width / 2);
+            memcpy(v_dst, v_src, surface_image.width / 2);
+            u_dst += surface_image.pitches[U];
+            v_dst += surface_image.pitches[V];
+            u_src += (picture_width / 2);
+            v_src += (picture_width / 2);
+        }
     }
 
     vaUnmapBuffer(va_dpy, surface_image.buf);
