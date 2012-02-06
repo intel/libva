@@ -367,7 +367,7 @@ static void avcenc_update_slice_parameter(int slice_type)
     i = 0;
     slice_param = &avcenc_context.slice_param[i];
     slice_param->starting_macroblock_address = 0;
-    slice_param->number_of_mbs = picture_height_in_mbs * picture_width_in_mbs;
+    slice_param->number_of_mbs = picture_height_in_mbs * picture_width_in_mbs; 
     slice_param->pic_parameter_set_id = 0;
     slice_param->slice_type = slice_type;
     slice_param->direct_spatial_mv_pred_flag = 0;
@@ -391,8 +391,37 @@ static void avcenc_update_slice_parameter(int slice_type)
                                sizeof(*slice_param), 1, slice_param,
                                &avcenc_context.slice_param_buf_id[i]);
     CHECK_VASTATUS(va_status,"vaCreateBuffer");;
-
     i++;
+
+#if 0
+    slice_param = &avcenc_context.slice_param[i];
+    slice_param->starting_macroblock_address = picture_height_in_mbs * picture_width_in_mbs / 2;
+    slice_param->number_of_mbs = picture_height_in_mbs * picture_width_in_mbs / 2;
+    slice_param->pic_parameter_set_id = 0;
+    slice_param->slice_type = slice_type;
+    slice_param->direct_spatial_mv_pred_flag = 0;
+    slice_param->num_ref_idx_l0_active_minus1 = 0;      /* FIXME: ??? */
+    slice_param->num_ref_idx_l1_active_minus1 = 0;
+    slice_param->cabac_init_idc = 0;
+    slice_param->slice_qp_delta = 0;
+    slice_param->disable_deblocking_filter_idc = 0;
+    slice_param->slice_alpha_c0_offset_div2 = 2;
+    slice_param->slice_beta_offset_div2 = 2;
+    slice_param->idr_pic_id = 0;
+
+    /* ref_pic_list_modification() */
+    slice_param->ref_pic_list_modification_flag_l0 = 0;
+    slice_param->ref_pic_list_modification_flag_l1 = 0;
+    /* FIXME: fill other fields */
+
+    va_status = vaCreateBuffer(va_dpy,
+                               avcenc_context.context_id,
+                               VAEncSliceParameterBufferType,
+                               sizeof(*slice_param), 1, slice_param,
+                               &avcenc_context.slice_param_buf_id[i]);
+    CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+    i++;
+#endif
 
     avcenc_context.num_slices = i;
 }
@@ -490,6 +519,7 @@ int avcenc_render_picture()
     VAStatus va_status;
     VABufferID va_buffers[8];
     unsigned int num_va_buffers = 0;
+    int i;
 
     va_buffers[num_va_buffers++] = avcenc_context.seq_param_buf_id;
     va_buffers[num_va_buffers++] = avcenc_context.pic_param_buf_id;
@@ -513,18 +543,20 @@ int avcenc_render_picture()
                                avcenc_context.context_id,
                                surface_ids[avcenc_context.current_input_surface]);
     CHECK_VASTATUS(va_status,"vaBeginPicture");
-
+    
     va_status = vaRenderPicture(va_dpy,
                                 avcenc_context.context_id,
                                 va_buffers,
                                 num_va_buffers);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
-
-    va_status = vaRenderPicture(va_dpy,
+    
+    for(i = 0; i < avcenc_context.num_slices; i++) {
+        va_status = vaRenderPicture(va_dpy,
                                 avcenc_context.context_id,
-                                &avcenc_context.slice_param_buf_id[0],
-                                avcenc_context.num_slices);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");
+                                &avcenc_context.slice_param_buf_id[i],
+                                1);
+        CHECK_VASTATUS(va_status,"vaRenderPicture");
+    }
 
     va_status = vaEndPicture(va_dpy, avcenc_context.context_id);
     CHECK_VASTATUS(va_status,"vaEndPicture");
@@ -785,8 +817,44 @@ static void sps_rbsp(bitstream *bs)
         bitstream_put_ue(bs, seq_param->frame_crop_top_offset);         /* frame_crop_top_offset */
         bitstream_put_ue(bs, seq_param->frame_crop_bottom_offset);      /* frame_crop_bottom_offset */
     }
+    
+    if ( frame_bit_rate < 0 ) {
+        bitstream_put_ui(bs, 0, 1); /* vui_parameters_present_flag */
+    } else {
+        bitstream_put_ui(bs, 1, 1); /* vui_parameters_present_flag */
+        bitstream_put_ui(bs, 0, 1); /* aspect_ratio_info_present_flag */
+        bitstream_put_ui(bs, 0, 1); /* overscan_info_present_flag */
+        bitstream_put_ui(bs, 0, 1); /* video_signal_type_present_flag */
+        bitstream_put_ui(bs, 0, 1); /* chroma_loc_info_present_flag */
+        bitstream_put_ui(bs, 1, 1); /* timing_info_present_flag */
+        {
+            bitstream_put_ui(bs, 15, 32);
+            bitstream_put_ui(bs, 900, 32);
+            bitstream_put_ui(bs, 1, 1);
+        }
+        bitstream_put_ui(bs, 1, 1); /* nal_hrd_parameters_present_flag */
+        {
+            // hrd_parameters 
+            bitstream_put_ue(bs, 0);    /* cpb_cnt_minus1 */
+            bitstream_put_ui(bs, 4, 4); /* bit_rate_scale */
+            bitstream_put_ui(bs, 6, 4); /* cpb_size_scale */
+           
+            bitstream_put_ue(bs, frame_bit_rate - 1); /* bit_rate_value_minus1[0] */
+            bitstream_put_ue(bs, frame_bit_rate*8 - 1); /* cpb_size_value_minus1[0] */
+            bitstream_put_ui(bs, 1, 1);  /* cbr_flag[0] */
 
-    bitstream_put_ui(bs, 0, 1); /* vui_parameters_present_flag */
+            bitstream_put_ui(bs, 23, 5);   /* initial_cpb_removal_delay_length_minus1 */
+            bitstream_put_ui(bs, 23, 5);   /* cpb_removal_delay_length_minus1 */
+            bitstream_put_ui(bs, 23, 5);   /* dpb_output_delay_length_minus1 */
+            bitstream_put_ui(bs, 23, 5);   /* time_offset_length  */
+        }
+        bitstream_put_ui(bs, 0, 1);   /* vcl_hrd_parameters_present_flag */
+        bitstream_put_ui(bs, 0, 1);   /* low_delay_hrd_flag */ 
+
+        bitstream_put_ui(bs, 0, 1); /* pic_struct_present_flag */
+        bitstream_put_ui(bs, 0, 1); /* bitstream_restriction_flag */
+    }
+
     rbsp_trailing_bits(bs);     /* rbsp_trailing_bits */
 }
 
@@ -1186,10 +1254,15 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
         seq_param->min_bits_per_second = 0;
     }
 
-    seq_param->initial_hrd_buffer_fullness = 0; /* FIXME: ??? */
-    seq_param->hrd_buffer_size = 0;             /* FIXME: ??? */
+	if ( frame_bit_rate > 0) {
+		seq_param->initial_hrd_buffer_fullness = frame_bit_rate * 1024 * 4;
+		seq_param->hrd_buffer_size = frame_bit_rate * 1024 * 8;
+	} else {
+		seq_param->initial_hrd_buffer_fullness = 0; 
+		seq_param->hrd_buffer_size = 0;             
+	}
     seq_param->time_scale = 900;
-    seq_param->num_units_in_tick = 15;
+    seq_param->num_units_in_tick = 15;			/* Tc = num_units_in_tick / time_sacle */
 
     if (height_in_mbs * 16 - height) {
         frame_cropping_flag = 1;
@@ -1208,8 +1281,11 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     
     seq_param->log2_max_frame_num_minus4 = 0;
     seq_param->log2_max_pic_order_cnt_lsb_minus4 = 2;
-
-    seq_param->vui_flag = 0;
+	
+	if ( frame_bit_rate > 0)
+		seq_param->vui_flag = 1;	//HRD info located in vui
+	else
+		seq_param->vui_flag = 0;
 }
 
 static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_param)
