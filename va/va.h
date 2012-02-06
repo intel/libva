@@ -649,7 +649,7 @@ typedef struct _VAIQMatrixBufferJPEG
     unsigned char quantiser_matrix[4][128];     /* quantiser_matrix[Tq](Tq=0,1,2,3) specifies a 
                                                  * quantization table for destination Tq in zig-zag
                                                  * scan order. Only the first 64 bytes are valid for each 
-                                                 * table if precision
+                                                 * table if precision is 0(8-bits).
                                                  */
 } VAIQMatrixBufferJPEG;
 
