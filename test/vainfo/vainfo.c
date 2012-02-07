@@ -123,7 +123,7 @@ int main(int argc, const char* argv[])
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
 
   printf("%s: Supported profile and entrypoints\n", name);
-  for	(profile = VAProfileMPEG2Simple; profile <= VAProfileH263Baseline; profile++) {
+  for	(profile = VAProfileMPEG2Simple; profile <= VAProfileH264ConstrainedBaseline; profile++) {
       char *profile_str;
 
       va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
