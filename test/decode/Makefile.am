@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = mpeg2vldemo
+bin_PROGRAMS = mpeg2vldemo loadjpeg
 
 INCLUDES = -I$(top_srcdir)
 
@@ -29,8 +29,15 @@ TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacore
 mpeg2vldemo_LDADD = $(TEST_LIBS)
 mpeg2vldemo_SOURCES = mpeg2vldemo.cpp
 
+loadjpeg_LDADD = $(TEST_LIBS)
+loadjpeg_SOURCES = loadjpeg.c tinyjpeg.c
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
 	done
+
+EXTRA_DIST = \
+	tinyjpeg.h		\
+	tinyjpeg-internal.h	\
+	$(NULL)

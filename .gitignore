@@ -39,6 +39,7 @@ TAGS
 /test/basic/test_09
 /test/basic/test_10
 /test/basic/test_11
+/test/decode/loadjpeg
 /test/decode/mpeg2vldemo
 /test/encode/h264encode
 /test/encode/avcenc
