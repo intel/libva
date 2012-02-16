@@ -41,6 +41,9 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <va/va.h>
+#include <va/va_enc_h264.h>
+#include <va/va_vpp.h>
+#include <va/va_compat.h>
 #include <pthread.h>
 #include <time.h>
 #include <sys/time.h>
@@ -1970,17 +1973,16 @@ struct upload_thread_param
 static void 
 upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
-struct {
+static struct {
+    VAProfile profile;
     VAEncSequenceParameterBufferH264 seq_param;
     VAEncPictureParameterBufferH264 pic_param;
     VAEncSliceParameterBufferH264 slice_param[MAX_SLICES];
-    VAEncH264DecRefPicMarkingBuffer dec_ref_pic_marking;
     VAContextID context_id;
     VAConfigID config_id;
     VABufferID seq_param_buf_id;                /* Sequence level parameter */
     VABufferID pic_param_buf_id;                /* Picture level parameter */
     VABufferID slice_param_buf_id[MAX_SLICES];  /* Slice level parameter, multil slices */
-    VABufferID dec_ref_pic_marking_buf_id;
     VABufferID codedbuf_buf_id;                 /* Output buffer, compressed data */
     VABufferID packed_seq_header_param_buf_id;
     VABufferID packed_seq_buf_id;
@@ -2010,7 +2012,7 @@ static void create_encode_pipe()
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
 #endif
-    vaQueryConfigEntrypoints(va_dpy, VAProfileH264Baseline, entrypoints, 
+    vaQueryConfigEntrypoints(va_dpy, avcenc_context.profile, entrypoints, 
                              &num_entrypoints);
 
     for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
@@ -2026,7 +2028,7 @@ static void create_encode_pipe()
     /* find out the format for the render target, and rate control mode */
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
-    vaGetConfigAttributes(va_dpy, VAProfileH264Baseline, VAEntrypointEncSlice,
+    vaGetConfigAttributes(va_dpy, avcenc_context.profile, VAEntrypointEncSlice,
                           &attrib[0], 2);
 
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
@@ -2043,7 +2045,7 @@ static void create_encode_pipe()
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = VA_RC_VBR; /* set to desired RC mode */
 
-    va_status = vaCreateConfig(va_dpy, VAProfileH264Baseline, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, avcenc_context.profile, VAEntrypointEncSlice,
                                &attrib[0], 2,&avcenc_context.config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
@@ -2139,7 +2141,7 @@ static void avcenc_update_picture_parameter(int slice_type, int frame_num, int d
     pic_param->ReferenceFrames[1].picture_id = surface_ids[SID_REFERENCE_PICTURE_L1];
     pic_param->ReferenceFrames[2].picture_id = VA_INVALID_ID;
     assert(avcenc_context.codedbuf_buf_id != VA_INVALID_ID);
-    pic_param->CodedBuf = avcenc_context.codedbuf_buf_id;
+    pic_param->coded_buf = avcenc_context.codedbuf_buf_id;
     pic_param->frame_num = frame_num;
     pic_param->pic_fields.bits.idr_pic_flag = !!is_idr;
     pic_param->pic_fields.bits.reference_pic_flag = (slice_type != SLICE_TYPE_B);
@@ -2191,7 +2193,8 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     }
 
     /* UV plane */
-	memcpy(u_dst, u_src, picture_width*picture_height/2);
+    memcpy(u_dst, u_src, picture_width*picture_height/2);
+
 #if 0
     if (surface_image.format.fourcc == VA_FOURCC_NV12) { /* UV plane */
         for (row = 0; row < surface_image.height / 2; row++) {
@@ -2222,8 +2225,8 @@ static void avcenc_update_slice_parameter(int slice_type)
     // Slice level
     i = 0;
     slice_param = &avcenc_context.slice_param[i];
-    slice_param->starting_macroblock_address = 0;
-    slice_param->number_of_mbs = picture_height_in_mbs * picture_width_in_mbs;
+    slice_param->macroblock_address = 0;
+    slice_param->num_macroblocks = picture_height_in_mbs * picture_width_in_mbs;
     slice_param->pic_parameter_set_id = 0;
     slice_param->slice_type = slice_type;
     slice_param->direct_spatial_mv_pred_flag = 0;
@@ -2236,9 +2239,6 @@ static void avcenc_update_slice_parameter(int slice_type)
     slice_param->slice_beta_offset_div2 = 2;
     slice_param->idr_pic_id = 0;
 
-    /* ref_pic_list_modification() */
-    slice_param->ref_pic_list_modification_flag_l0 = 0;
-    slice_param->ref_pic_list_modification_flag_l1 = 0;
     /* FIXME: fill other fields */
 
     va_status = vaCreateBuffer(va_dpy,
@@ -2279,12 +2279,9 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
         assert(slice_type == SLICE_TYPE_I);
         length_in_bits = build_packed_seq_buffer(&packed_seq_buffer);
         offset_in_bytes = 0;
-        packed_header_param_buffer.type = VAEncPackedHeaderSPS;
-        packed_header_param_buffer.insert_emulation_bytes = 1;
-        packed_header_param_buffer.skip_emulation_check_count = 5; /* ignore start code & nal type for emulation prevetion check */
-        packed_header_param_buffer.num_headers = 1;
-        packed_header_param_buffer.length_in_bits = &length_in_bits;
-        packed_header_param_buffer.offset_in_bytes = &offset_in_bytes;
+        packed_header_param_buffer.type = VAEncPackedHeaderSequence;
+        packed_header_param_buffer.has_emulation_bytes = 0;
+        packed_header_param_buffer.bit_length = length_in_bits;
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
                                    VAEncPackedHeaderParameterBufferType,
@@ -2301,12 +2298,9 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
 
         length_in_bits = build_packed_pic_buffer(&packed_pic_buffer);
         offset_in_bytes = 0;
-        packed_header_param_buffer.type = VAEncPackedHeaderPPS;
-        packed_header_param_buffer.insert_emulation_bytes = 1;
-        packed_header_param_buffer.skip_emulation_check_count = 5; /* ignore start code & nal type for emulation prevetion check */
-        packed_header_param_buffer.num_headers = 1;
-        packed_header_param_buffer.length_in_bits = &length_in_bits;
-        packed_header_param_buffer.offset_in_bytes = &offset_in_bytes;
+        packed_header_param_buffer.type = VAEncPackedHeaderPicture;
+        packed_header_param_buffer.has_emulation_bytes = 0;
+        packed_header_param_buffer.bit_length = length_in_bits;
 
         va_status = vaCreateBuffer(va_dpy,
                                    avcenc_context.context_id,
@@ -2349,9 +2343,6 @@ int avcenc_render_picture()
 
     va_buffers[num_va_buffers++] = avcenc_context.seq_param_buf_id;
     va_buffers[num_va_buffers++] = avcenc_context.pic_param_buf_id;
-
-    if (avcenc_context.dec_ref_pic_marking_buf_id != VA_INVALID_ID)
-        va_buffers[num_va_buffers++] = avcenc_context.dec_ref_pic_marking_buf_id;
 
     if (avcenc_context.packed_seq_header_param_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] = avcenc_context.packed_seq_header_param_buf_id;
@@ -2429,7 +2420,6 @@ static void end_picture(int slice_type, int next_is_bpic)
 
     avcenc_destroy_buffers(&avcenc_context.seq_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.pic_param_buf_id, 1);
-    avcenc_destroy_buffers(&avcenc_context.dec_ref_pic_marking_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_seq_header_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_seq_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_pic_header_param_buf_id, 1);
@@ -2597,8 +2587,14 @@ static void nal_header(bitstream *bs, int nal_ref_idc, int nal_unit_type)
 static void sps_rbsp(bitstream *bs)
 {
     VAEncSequenceParameterBufferH264 *seq_param = &avcenc_context.seq_param;
+    int profile_idc = PROFILE_IDC_BASELINE;
 
-    bitstream_put_ui(bs, seq_param->profile_idc, 8);    /* profile_idc */
+    if (avcenc_context.profile == VAProfileH264High)
+        profile_idc = PROFILE_IDC_HIGH;
+    else if (avcenc_context.profile == VAProfileH264Main)
+        profile_idc = PROFILE_IDC_MAIN;
+
+    bitstream_put_ui(bs, profile_idc, 8);               /* profile_idc */
     bitstream_put_ui(bs, 0, 1);                         /* constraint_set0_flag */
     bitstream_put_ui(bs, 1, 1);                         /* constraint_set1_flag */
     bitstream_put_ui(bs, 0, 1);                         /* constraint_set2_flag */
@@ -2607,16 +2603,11 @@ static void sps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, seq_param->level_idc, 8);      /* level_idc */
     bitstream_put_ue(bs, seq_param->seq_parameter_set_id);      /* seq_parameter_set_id */
 
-    if (seq_param->profile_idc >= PROFILE_IDC_HIGH) {
-        /* FIXME: fix for high profile */
-        assert(0);
-    }
+    bitstream_put_ue(bs, seq_param->seq_fields.bits.log2_max_frame_num_minus4); /* log2_max_frame_num_minus4 */
+    bitstream_put_ue(bs, seq_param->seq_fields.bits.pic_order_cnt_type);        /* pic_order_cnt_type */
 
-    bitstream_put_ue(bs, seq_param->log2_max_frame_num_minus4); /* log2_max_frame_num_minus4 */
-    bitstream_put_ue(bs, seq_param->pic_order_cnt_type);        /* pic_order_cnt_type */
-
-    if (seq_param->pic_order_cnt_type == 0)
-        bitstream_put_ue(bs, seq_param->log2_max_pic_order_cnt_lsb_minus4);     /* log2_max_pic_order_cnt_lsb_minus4 */
+    if (seq_param->seq_fields.bits.pic_order_cnt_type == 0)
+        bitstream_put_ue(bs, seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4);     /* log2_max_pic_order_cnt_lsb_minus4 */
     else {
         assert(0);
     }
@@ -2626,13 +2617,13 @@ static void sps_rbsp(bitstream *bs)
 
     bitstream_put_ue(bs, seq_param->picture_width_in_mbs - 1);  /* pic_width_in_mbs_minus1 */
     bitstream_put_ue(bs, seq_param->picture_height_in_mbs - 1); /* pic_height_in_map_units_minus1 */
-    bitstream_put_ui(bs, seq_param->frame_mbs_only_flag, 1);    /* frame_mbs_only_flag */
+    bitstream_put_ui(bs, seq_param->seq_fields.bits.frame_mbs_only_flag, 1);    /* frame_mbs_only_flag */
 
-    if (!seq_param->frame_mbs_only_flag) {
+    if (!seq_param->seq_fields.bits.frame_mbs_only_flag) {
         assert(0);
     }
 
-    bitstream_put_ui(bs, seq_param->direct_8x8_inference_flag, 1);      /* direct_8x8_inference_flag */
+    bitstream_put_ui(bs, seq_param->seq_fields.bits.direct_8x8_inference_flag, 1);      /* direct_8x8_inference_flag */
     bitstream_put_ui(bs, seq_param->frame_cropping_flag, 1);            /* frame_cropping_flag */
 
     if (seq_param->frame_cropping_flag) {
@@ -2751,10 +2742,10 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     bitstream_put_ue(bs, 0);                   /* first_mb_in_slice: 0 */
     bitstream_put_ue(bs, slice_type);          /* slice_type */
     bitstream_put_ue(bs, 0);                   /* pic_parameter_set_id: 0 */
-    bitstream_put_ui(bs, frame_num & 0x0F, seq_param->log2_max_frame_num_minus4 + 4);    /* frame_num */
+    bitstream_put_ui(bs, frame_num & 0x0F, seq_param->seq_fields.bits.log2_max_frame_num_minus4 + 4);    /* frame_num */
 
     /* frame_mbs_only_flag == 1 */
-    if (!seq_param->frame_mbs_only_flag) {
+    if (!seq_param->seq_fields.bits.frame_mbs_only_flag) {
         /* FIXME: */
         assert(0);
     }
@@ -2762,8 +2753,8 @@ slice_header(bitstream *bs, int frame_num, int display_frame, int slice_type, in
     if (is_idr)
         bitstream_put_ue(bs, 0);		/* idr_pic_id: 0 */
 
-    if (seq_param->pic_order_cnt_type == 0) {
-        bitstream_put_ui(bs, (display_frame*2) & 0x3F, seq_param->log2_max_pic_order_cnt_lsb_minus4 + 4);
+    if (seq_param->seq_fields.bits.pic_order_cnt_type == 0) {
+        bitstream_put_ui(bs, (display_frame*2) & 0x3F, seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 + 4);
         /* only support frame */
     } else {
         /* FIXME: */
@@ -3008,45 +2999,20 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     int frame_crop_bottom_offset = 0;
 
     seq_param->seq_parameter_set_id = 0;
-    seq_param->profile_idc = PROFILE_IDC_MAIN;
     seq_param->level_idc = 41;
     seq_param->intra_period = intra_period;
     seq_param->ip_period = 0;   /* FIXME: ??? */
     seq_param->max_num_ref_frames = 4;
     seq_param->picture_width_in_mbs = width_in_mbs;
     seq_param->picture_height_in_mbs = height_in_mbs;
-    seq_param->frame_mbs_only_flag = 1;
-    seq_param->target_usage = 1;
-    
-    /* 0:CBR, 1:VBR, 2:Constant QP */
-    if (qp_value == -1)
-        seq_param->rate_control_method = BR_CBR;
-    else if (qp_value == -2)
-        seq_param->rate_control_method = BR_VBR;
-    else {
-        assert(qp_value >= 0 && qp_value <= 51);
-        seq_param->rate_control_method = BR_CQP;
-    }
-
-    if (frame_bit_rate > 0)
-        seq_param->bits_per_second = frame_bit_rate * 1024; //30 * frame_bit_rate;
-    else
-        seq_param->bits_per_second = 0;
-
-    if (seq_param->rate_control_method == BR_VBR) {
-        seq_param->max_bits_per_second = 0;     /* FIXME: set it later */
-        seq_param->min_bits_per_second = 0;
-    }
-
-    seq_param->initial_hrd_buffer_fullness = 0; /* FIXME: ??? */
-    seq_param->hrd_buffer_size = 0;             /* FIXME: ??? */
+    seq_param->seq_fields.bits.frame_mbs_only_flag = 1;
     seq_param->time_scale = 900;
     seq_param->num_units_in_tick = 15;
 
     if (height_in_mbs * 16 - height) {
         frame_cropping_flag = 1;
         frame_crop_bottom_offset = 
-            (height_in_mbs * 16 - height) / (2 * (!seq_param->frame_mbs_only_flag + 1));
+            (height_in_mbs * 16 - height) / (2 * (!seq_param->seq_fields.bits.frame_mbs_only_flag + 1));
     }
 
     seq_param->frame_cropping_flag = frame_cropping_flag;
@@ -3055,13 +3021,13 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->frame_crop_top_offset = 0;
     seq_param->frame_crop_bottom_offset = frame_crop_bottom_offset;
 
-    seq_param->pic_order_cnt_type = 0;
-    seq_param->direct_8x8_inference_flag = 0;
+    seq_param->seq_fields.bits.pic_order_cnt_type = 0;
+    seq_param->seq_fields.bits.direct_8x8_inference_flag = 0;
     
-    seq_param->log2_max_frame_num_minus4 = 0;
-    seq_param->log2_max_pic_order_cnt_lsb_minus4 = 2;
+    seq_param->seq_fields.bits.log2_max_frame_num_minus4 = 0;
+    seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = 2;
 
-    seq_param->vui_flag = 0;
+    seq_param->vui_parameters_present_flag = 0;
 }
 
 static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_param)
@@ -3071,7 +3037,6 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
 
     pic_param->last_picture = 0;
     pic_param->frame_num = 0;
-    pic_param->coding_type = 0;
     
     pic_param->pic_init_qp = (qp_value >= 0 ?  qp_value : 26);
     pic_param->num_ref_idx_l0_active_minus1 = 0;
@@ -3090,9 +3055,9 @@ static void avcenc_context_init(int width, int height)
 {
     int i;
     memset(&avcenc_context, 0, sizeof(avcenc_context));
+    avcenc_context.profile = VAProfileH264Main;
     avcenc_context.seq_param_buf_id = VA_INVALID_ID;
     avcenc_context.pic_param_buf_id = VA_INVALID_ID;
-    avcenc_context.dec_ref_pic_marking_buf_id = VA_INVALID_ID;
     avcenc_context.packed_seq_header_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_seq_buf_id = VA_INVALID_ID;
     avcenc_context.packed_pic_header_param_buf_id = VA_INVALID_ID;
@@ -3122,12 +3087,14 @@ zoom_out_surface(VADisplay va_dpy,
     VAConfigID config_id;
     VASurfaceID vpp_surface_id = VA_INVALID_SURFACE;
     VAContextID context_id;
-    VAProcPipelineCap vpp_cap;
+    VAProcPipelineCaps vpp_cap;
     VABufferID pipeline_param_buf_id = VA_INVALID_ID;
-    VABufferID input_param_buf_id = VA_INVALID_ID;
     VAProcPipelineParameterBuffer pipeline_param;
-    VAProcInputParameterBuffer input_param;
     int num_entrypoints, proc_entrypoint;
+    VARectangle surface_region, output_region;
+    VABufferID filter_bufs[VAProcFilterCount];
+    unsigned int num_filter_bufs = 0;
+
 
     va_status = vaQueryConfigEntrypoints(va_dpy,
                                          VAProfileNone,
@@ -3183,16 +3150,27 @@ zoom_out_surface(VADisplay va_dpy,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
 
-    vaQueryVideoProcPipelineCap(va_dpy,
-                                context_id,
-                                &vpp_cap);
-    CHECK_VASTATUS(va_status, "vaQueryVideoProcPipelineCap");
+    vaQueryVideoProcPipelineCaps(va_dpy,
+                                 context_id,
+                                 filter_bufs, num_filter_bufs,
+                                 &vpp_cap);
+    CHECK_VASTATUS(va_status, "vaQueryVideoProcPipelineCaps");
+
+    surface_region.x = 0;
+    surface_region.y = 0;
+    surface_region.width = surface_width;
+    surface_region.height = surface_height;
+
+    output_region.x = 0;
+    output_region.y = 0;
+    output_region.width = surface_width * zoom_out;
+    output_region.height = surface_height * zoom_out;
 
     memset(&pipeline_param, 0, sizeof(pipeline_param));
-    pipeline_param.output_region.x = 0;
-    pipeline_param.output_region.y = 0;
-    pipeline_param.output_region.width = surface_width * zoom_out;
-    pipeline_param.output_region.height = surface_height * zoom_out;
+    pipeline_param.surface = in_surface_id;
+    pipeline_param.surface_region = &surface_region;
+    pipeline_param.output_region = &output_region;
+
     va_status = vaCreateBuffer(va_dpy,
                                context_id,
                                VAProcPipelineParameterBufferType,
@@ -3200,21 +3178,6 @@ zoom_out_surface(VADisplay va_dpy,
                                1,
                                &pipeline_param,
                                &pipeline_param_buf_id);
-    CHECK_VASTATUS(va_status, "vaCreateBuffer");
-
-    memset(&input_param, 0, sizeof(input_param));
-    input_param.surface = in_surface_id;
-    input_param.region.x = 0;
-    input_param.region.y = 0;
-    input_param.region.width = surface_width;
-    input_param.region.height = surface_height;
-    va_status = vaCreateBuffer(va_dpy,
-                               context_id,
-                               VAProcInputParameterBufferType,
-                               sizeof(input_param),
-                               1,
-                               &input_param,
-                               &input_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
     va_status = vaBeginPicture(va_dpy,
@@ -3228,17 +3191,9 @@ zoom_out_surface(VADisplay va_dpy,
                                 1);
     CHECK_VASTATUS(va_status, "vaRenderPicture");
 
-    va_status = vaRenderPicture(va_dpy,
-                                context_id,
-                                &input_param_buf_id,
-                                1);
-    CHECK_VASTATUS(va_status, "vaRenderPicture");
-
     va_status = vaEndPicture(va_dpy, context_id);
     CHECK_VASTATUS(va_status, "vaEndPicture");
 
-    vaDestroyBuffer(va_dpy, input_param_buf_id);
-    vaDestroyBuffer(va_dpy, pipeline_param_buf_id);
     vaDestroyContext(va_dpy, context_id);
     vaDestroyConfig(va_dpy, config_id);
 

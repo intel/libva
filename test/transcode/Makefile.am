@@ -24,7 +24,7 @@ bin_PROGRAMS = mpeg2transcode
 
 INCLUDES = -I$(top_srcdir)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib)
+TEST_LIBS = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
 
 mpeg2transcode_LDADD = $(TEST_LIBS)
 mpeg2transcode_SOURCES = mpeg2transcode.cpp
