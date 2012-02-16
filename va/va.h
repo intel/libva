@@ -688,6 +688,8 @@ typedef enum
     VAEncMiscParameterTypeAIR    	= 3,
     /** \brief Buffer type used to express a maximum frame size (in bits). */
     VAEncMiscParameterTypeMaxFrameSize  = 4,
+    /** \brief Buffer type used for HRD parameters. */
+    VAEncMiscParameterTypeHRD           = 5,
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -768,6 +770,12 @@ typedef struct _VAEncMiscParameterAIR
     unsigned int air_threshold;
     unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
 } VAEncMiscParameterAIR;
+
+typedef struct _VAEncMiscParameterHRD
+{
+    unsigned int initial_buffer_fullness;       /* in bits */
+    unsigned int buffer_size;                   /* in bits */
+} VAEncMiscParameterHRD;
 
 /**
  * \brief Defines a maximum frame size (in bits).
