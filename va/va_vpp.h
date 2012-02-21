@@ -76,7 +76,7 @@ extern "C" {
  * unsigned int num_filters = VAProcFilterCount;
  *
  * // num_filters shall be initialized to the length of the array
- * vaQueryVideoProcFilters(va_dpy, vpp_ctx, &pipe_caps, &num_filters);
+ * vaQueryVideoProcFilters(va_dpy, vpp_ctx, &filters, &num_filters);
  * \endcode
  *
  * Finally, individual filter capabilities can be checked with
@@ -196,7 +196,7 @@ extern "C" {
  *
  *         vaCreateBuffer(va_dpy, vpp_ctx,
  *             VAProcPipelineParameterBuffer, sizeof(*pipeline_param), 1,
- *             NULL, &pipeline_param
+ *             NULL, &pipeline_buf
  *         );
  *
  *         // Setup output region for this surface
