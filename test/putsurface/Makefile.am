@@ -22,12 +22,34 @@
 
 bin_PROGRAMS = putsurface
 
-INCLUDES = -I$(top_srcdir)
+INCLUDES = \
+	-I$(top_srcdir)		\
+	-I$(top_builddir)	\
+	$(NULL)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacorelib) -lpthread -lX11
+TEST_CFLAGS = \
+	-DIN_LIBVA		\
+	$(NULL)
 
-putsurface_LDADD = $(TEST_LIBS)
-putsurface_SOURCES = putsurface_x11.c
+TEST_LIBS = \
+	$(top_builddir)/va/$(libvacorelib)	\
+	-lpthread				\
+	$(NULL)
+
+putsurface_SOURCES		= putsurface_x11.c
+putsurface_CFLAGS		= $(X11_CFLAGS) $(TEST_CFLAGS)
+putsurface_LDADD		= $(X11_LIBS) $(TEST_LIBS)	\
+	$(top_builddir)/va/$(libvabackendlib)			\
+	$(NULL)
+
+if USE_WAYLAND
+bin_PROGRAMS			+= putsurface_wayland
+putsurface_wayland_SOURCES	= putsurface_wayland.c
+putsurface_wayland_CFLAGS	= $(WAYLAND_CFLAGS) $(TEST_CFLAGS)
+putsurface_wayland_LDADD	= $(WAYLAND_LIBS) $(TEST_LIBS)	\
+	$(top_builddir)/va/libva-wayland.la			\
+	$(NULL)
+endif
 
 EXTRA_DIST = putsurface_common.c
 
