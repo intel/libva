@@ -2036,14 +2036,14 @@ static void create_encode_pipe()
         assert(0);
     }
 
-    if ((attrib[1].value & VA_RC_VBR) == 0) {
+    if ((attrib[1].value & VA_RC_CQP) == 0) {
         /* Can't find matched RC mode */
-        printf("VBR mode doesn't found, exit\n");
+        printf("Can't find the desired RC mode, exit\n");
         assert(0);
     }
 
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
-    attrib[1].value = VA_RC_VBR; /* set to desired RC mode */
+    attrib[1].value = VA_RC_CQP; /* set to desired RC mode */
 
     va_status = vaCreateConfig(va_dpy, avcenc_context.profile, VAEntrypointEncSlice,
                                &attrib[0], 2,&avcenc_context.config_id);
