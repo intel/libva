@@ -1683,12 +1683,23 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /**
+ * \brief The coded buffer segment contains a single NAL unit. 
+ *
+ * This flag indicates that the coded buffer segment contains a
+ * single NAL unit. This flag might be useful to the user for 
+ * processing the coded buffer.
+ */
+#define VA_CODED_BUF_STATUS_SINGLE_NALU                 0x10000000	
+
+/**
  * \brief Coded buffer segment.
  *
  * #VACodedBufferSegment is an element of a linked list describing
- * some information on the coded buffer. The size of the linked list
- * shall be equal to the number of returned NAL units. That is, there
- * shall be as many coded buffer segments as NAL units.
+ * some information on the coded buffer. The coded buffer segment
+ * could contain either a single NAL unit, or more than one NAL unit. 
+ * It is recommended (but not required) to return a single NAL unit 
+ * in a coded buffer segment, and the implementation should set the 
+ * VA_CODED_BUF_STATUS_SINGLE_NALU status flag if that is the case.
  */
 typedef  struct _VACodedBufferSegment  {
     /**
