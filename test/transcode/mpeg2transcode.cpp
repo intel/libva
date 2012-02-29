@@ -1941,8 +1941,8 @@ static VASurfaceID zoom_surface_id = VA_INVALID_SURFACE;
 static Display *x11_display;
 static VADisplay va_dpy;
 
-static int picture_width = 1280, picture_width_in_mbs;
-static int picture_height = 960, picture_height_in_mbs;
+static int picture_width = 1280, picture_width_in_mbs = 80;
+static int picture_height = 960, picture_height_in_mbs = 60;
 static int frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
 static unsigned char *newImageBuffer = 0;
 
