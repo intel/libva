@@ -78,13 +78,15 @@ void va_TraceCreateConfig(
     VAConfigID *config_id /* out */
 );
 
-void va_TraceCreateSurface(
+void va_TraceCreateSurfaces(
     VADisplay dpy,
     int width,
     int height,
     int format,
     int num_surfaces,
-    VASurfaceID *surfaces	/* out */
+    VASurfaceID *surfaces,	/* out */
+    VASurfaceAttrib    *attrib_list,
+    unsigned int        num_attribs
 );
 
 void va_TraceCreateContext(
