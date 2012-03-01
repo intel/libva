@@ -710,8 +710,9 @@ vaCreateSurfaces(
     vaStatus = ctx->vtable->vaCreateSurfaces(ctx, width, height, format,
                                              num_surfaces, surfaces);
 
-    VA_TRACE_LOG(va_TraceCreateSurface,
-                 dpy, width, height, format, num_surfaces, surfaces);
+    VA_TRACE_LOG(va_TraceCreateSurfaces,
+                 dpy, width, height, format, num_surfaces, surfaces,
+                 attrib_list, num_attribs);
 
     return vaStatus;
 }
