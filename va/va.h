@@ -695,7 +695,7 @@ typedef enum
      * This buffer describes the video processing pipeline. See
      * #VAProcPipelineParameterBuffer for details.
      */
-    VAProcPipelineParameterBufferType   = 31,
+    VAProcPipelineParameterBufferType   = 41,
     /**
      * \brief Video filter parameter buffer.
      *
@@ -708,7 +708,7 @@ typedef enum
      * deinterlacing (#VAProcFilterParameterBufferDeinterlacing),
      * color balance (#VAProcFilterParameterBufferColorBalance), etc.
      */
-    VAProcFilterParameterBufferType     = 32,
+    VAProcFilterParameterBufferType     = 42,
     VABufferTypeMax                     = 0xff
 } VABufferType;
 
