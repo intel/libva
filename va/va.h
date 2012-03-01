@@ -1598,12 +1598,9 @@ VAStatus vaBufferSetNumElements (
 typedef  struct _VACodedBufferSegment  {
     /**
      * \brief Size of the data buffer in this segment (in bytes).
-     *
-     * The size of the corresponding NAL unit can be obtained with
-     * \c size - \c bit_offset/8.
      */
     unsigned int        size;
-    /** \brief Bit offset into the data buffer where the NAL unit starts. */
+    /** \brief Bit offset into the data buffer where the video data starts. */
     unsigned int        bit_offset;
     /** \brief Status set by the driver. See \c VA_CODED_BUF_STATUS_*. */
     unsigned int        status;
