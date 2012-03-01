@@ -2214,15 +2214,6 @@ typedef struct _VARectangle
  * attributes are supported by the driver, and then set the appropriate attributes
  * before calling vaPutSurface()
  */
-/* PowerVR IEP Lite attributes */
-typedef enum
-{
-    VADISPLAYATTRIB_BLE_OFF              = 0x00,
-    VADISPLAYATTRIB_BLE_LOW,
-    VADISPLAYATTRIB_BLE_MEDIUM,
-    VADISPLAYATTRIB_BLE_HIGH,
-    VADISPLAYATTRIB_BLE_NONE,
-} VADisplayAttribBLEMode;
 
 /* attribute value for VADisplayAttribRotation   */
 #define VA_ROTATION_NONE        0x00000000
@@ -2274,11 +2265,6 @@ typedef enum
     VADisplayAttribRotation            = 6,	
     VADisplayAttribOutofLoopDeblock    = 7,
 
-    /* PowerVR IEP Lite specific attributes */
-    VADisplayAttribBLEBlackMode        = 8,
-    VADisplayAttribBLEWhiteMode        = 9,
-    VADisplayAttribBlueStretch         = 10,
-    VADisplayAttribSkinColorCorrection = 11,
     /*
      * For type VADisplayAttribCSCMatrix, "value" field is a pointer to the color
      * conversion matrix. Each element in the matrix is float-point
