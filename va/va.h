@@ -142,6 +142,8 @@ typedef int VAStatus;	/* Return status type from functions */
  * of generic attribute values.
  */
 #define VA_STATUS_ERROR_INVALID_VALUE           0x00000019
+/** \brief Indicate HW busy (e.g. run multiple encoding simultaneously). */
+#define VA_STATUS_ERROR_HW_BUSY                 0x00000022
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
