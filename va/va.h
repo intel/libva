@@ -737,16 +737,35 @@ typedef struct _VAEncMiscParameterBuffer
     unsigned int data[0];
 } VAEncMiscParameterBuffer;
 
+
+/** \brief Rate control parameters */
 typedef struct _VAEncMiscParameterRateControl
 {
-    unsigned int bits_per_second; /* this is the maximum bit-rate to be constrained by the rate control implementation */
-    unsigned int target_percentage; /* this is the bit-rate the rate control is targeting, as a percentage of the maximum bit-rate */
-                                    /* for example if target_percentage is 95 then the rate control will target a bit-rate that is */
-                                    /* 95% of the maximum bit-rate */
-    unsigned int window_size; /* windows size in milliseconds. For example if this is set to 500, then the rate control will guarantee the */
-                              /* target bit-rate over a 500 ms window */
-    unsigned int initial_qp;  /* initial QP at I frames */
-    unsigned int min_qp;     
+    /* this is the maximum bit-rate to be constrained by the rate control implementation */
+    unsigned int bits_per_second;
+    /* this is the bit-rate the rate control is targeting, as a percentage of the maximum
+     * bit-rate for example if target_percentage is 95 then the rate control will target
+     * a bit-rate that is 95% of the maximum bit-rate
+     */
+    unsigned int target_percentage;
+    /* windows size in milliseconds. For example if this is set to 500,
+     * then the rate control will guarantee the target bit-rate over a 500 ms window
+     */
+    unsigned int window_size;
+    /* initial QP at I frames */
+    unsigned int initial_qp;
+    unsigned int min_qp;
+    unsigned int basic_unit_size;
+    union
+    {
+        struct
+        {
+            unsigned int reset : 1;
+            unsigned int disable_frame_skip : 1; /* Disable frame skip in rate control mode */
+            unsigned int disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
+        } bits;
+        unsigned int value;
+    } rc_flags;
 } VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
