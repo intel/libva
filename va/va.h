@@ -2250,18 +2250,6 @@ typedef enum
      * also it will blend with the decoded video color
      */
     VADisplayAttribBackgroundColor      = 4,
-    /*
-     * this is a gettable only attribute. For some implementations that use the
-     * hardware overlay, after PutSurface is called, the surface can not be    
-     * re-used until after the subsequent PutSurface call. If this is the case 
-     * then the value for this attribute will be set to 1 so that the client   
-     * will not attempt to re-use the surface right after returning from a call
-     * to PutSurface.
-     *
-     * Don't use it, use flag VASurfaceDisplaying of vaQuerySurfaceStatus since
-     * driver may use overlay or GPU alternatively
-     */
-    VADisplayAttribDirectSurface       = 5,
     VADisplayAttribRotation            = 6,	
     VADisplayAttribOutofLoopDeblock    = 7,
 
