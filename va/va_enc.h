@@ -36,6 +36,8 @@
 extern "C" {
 #endif
 
+#include <va/va.h>
+
 /**
  * \defgroup api_enc_core Core encoding API
  *
