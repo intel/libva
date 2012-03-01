@@ -177,6 +177,8 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_UNSUPPORTED_FILTER      0x00000020
 /** \brief An invalid filter chain was supplied. */
 #define VA_STATUS_ERROR_INVALID_FILTER_CHAIN    0x00000021
+/** \brief Indicate HW busy (e.g. run multiple encoding simultaneously). */
+#define VA_STATUS_ERROR_HW_BUSY	                0x00000022
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /* De-interlacing flags for vaPutSurface() */
