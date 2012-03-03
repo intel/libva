@@ -233,6 +233,8 @@ typedef struct _VAEncSequenceParameterBufferH264 {
     union {
         struct {
             /** \brief Same as the H.264 bitstream syntax element. */
+            unsigned int aspect_ratio_info_present_flag         : 1;
+            /** \brief Same as the H.264 bitstream syntax element. */
             unsigned int timing_info_present_flag               : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
             unsigned int bitstream_restriction_flag             : 1;
@@ -243,6 +245,12 @@ typedef struct _VAEncSequenceParameterBufferH264 {
         } bits;
         unsigned int value;
     } vui_fields;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    unsigned char   aspect_ratio_idc;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    unsigned int    sar_width;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    unsigned int    sar_height;
     /** \brief Same as the H.264 bitstream syntax element. */
     unsigned int    num_units_in_tick;
     /** \brief Same as the H.264 bitstream syntax element. */
