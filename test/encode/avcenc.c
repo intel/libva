@@ -793,6 +793,14 @@ static void sps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, seq_param->level_idc, 8);      /* level_idc */
     bitstream_put_ue(bs, seq_param->seq_parameter_set_id);      /* seq_parameter_set_id */
 
+    if ( profile_idc == PROFILE_IDC_HIGH) {
+        bitstream_put_ue(bs, 1);        /* chroma_format_idc = 1, 4:2:0 */ 
+        bitstream_put_ue(bs, 0);        /* bit_depth_luma_minus8 */
+        bitstream_put_ue(bs, 0);        /* bit_depth_chroma_minus8 */
+        bitstream_put_ui(bs, 0, 1);     /* qpprime_y_zero_transform_bypass_flag */
+        bitstream_put_ui(bs, 0, 1);     /* seq_scaling_matrix_present_flag */
+    }
+
     bitstream_put_ue(bs, seq_param->seq_fields.bits.log2_max_frame_num_minus4); /* log2_max_frame_num_minus4 */
     bitstream_put_ue(bs, seq_param->seq_fields.bits.pic_order_cnt_type);        /* pic_order_cnt_type */
 
