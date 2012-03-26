@@ -44,3 +44,5 @@ TAGS
 /test/encode/avcenc
 /test/putsurface/putsurface
 /test/vainfo
+test/v4l_h264/decode/decode
+test/v4l_h264/encode/encode

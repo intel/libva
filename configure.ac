@@ -246,6 +246,9 @@ AC_OUTPUT([
     test/encode/Makefile
     test/putsurface/Makefile
     test/vainfo/Makefile
+    test/v4l_h264/Makefile
+    test/v4l_h264/encode/Makefile
+    test/v4l_h264/decode/Makefile
     va/Makefile
     va/dummy/Makefile
     va/egl/Makefile

@@ -23,7 +23,7 @@
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x11
 
-SUBDIRS = basic decode encode putsurface vainfo
+SUBDIRS = basic decode encode putsurface vainfo v4l_h264
 
 if BUILD_EGL_TEST
 SUBDIRS += egl
