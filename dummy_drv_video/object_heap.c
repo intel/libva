@@ -44,17 +44,32 @@ static int object_heap_expand( object_heap_p heap )
     void *new_heap_index;
     int next_free;
     int new_heap_size = heap->heap_size + heap->heap_increment;
-    
-    new_heap_index = (void *) realloc( heap->heap_index, new_heap_size * heap->object_size );
+    int bucket_index = new_heap_size / heap->heap_increment - 1;
+
+    if (bucket_index >= heap->num_buckets) {
+        int new_num_buckets = heap->num_buckets + 8;
+        void **new_bucket;
+
+        new_bucket = realloc(heap->bucket, new_num_buckets * sizeof(void *));
+        if (NULL == new_bucket) {
+            return -1;
+        }
+
+        heap->num_buckets = new_num_buckets;
+        heap->bucket = new_bucket;
+    }
+
+    new_heap_index = (void *) malloc( heap->heap_increment * heap->object_size );
     if ( NULL == new_heap_index )
     {
         return -1; /* Out of memory */
     }
-    heap->heap_index = new_heap_index;
+
+    heap->bucket[bucket_index] = new_heap_index;
     next_free = heap->next_free;
     for(i = new_heap_size; i-- > heap->heap_size; )
     {
-        object_base_p obj = (object_base_p) (heap->heap_index + i * heap->object_size);
+        object_base_p obj = (object_base_p) (new_heap_index + (i - heap->heap_size) * heap->object_size);
         obj->id = i + heap->id_offset;
         obj->next_free = next_free;
         next_free = i;
@@ -73,8 +88,9 @@ int object_heap_init( object_heap_p heap, int object_size, int id_offset)
     heap->id_offset = id_offset & OBJECT_HEAP_OFFSET_MASK;
     heap->heap_size = 0;
     heap->heap_increment = 16;
-    heap->heap_index = NULL;
     heap->next_free = LAST_FREE;
+    heap->num_buckets = 0;
+    heap->bucket = NULL;
     return object_heap_expand(heap);
 }
 
@@ -85,6 +101,8 @@ int object_heap_init( object_heap_p heap, int object_size, int id_offset)
 int object_heap_allocate( object_heap_p heap )
 {
     object_base_p obj;
+    int bucket_index, obj_index;
+
     if ( LAST_FREE == heap->next_free )
     {
         if( -1 == object_heap_expand( heap ) )
@@ -93,8 +111,11 @@ int object_heap_allocate( object_heap_p heap )
         }
     }
     ASSERT( heap->next_free >= 0 );
-    
-    obj = (object_base_p) (heap->heap_index + heap->next_free * heap->object_size);
+
+    bucket_index = heap->next_free / heap->heap_increment;
+    obj_index = heap->next_free % heap->heap_increment;
+
+    obj = (object_base_p) (heap->bucket[bucket_index] + obj_index * heap->object_size);
     heap->next_free = obj->next_free;
     obj->next_free = ALLOCATED;
     return obj->id;
@@ -107,12 +128,16 @@ int object_heap_allocate( object_heap_p heap )
 object_base_p object_heap_lookup( object_heap_p heap, int id )
 {
     object_base_p obj;
+    int bucket_index, obj_index;
+
     if ( (id < heap->id_offset) || (id > (heap->heap_size+heap->id_offset)) )
     {
         return NULL;
     }
     id &= OBJECT_HEAP_ID_MASK;
-    obj = (object_base_p) (heap->heap_index + id * heap->object_size);
+    bucket_index = id / heap->heap_increment;
+    obj_index = id % heap->heap_increment;
+    obj = (object_base_p) (heap->bucket[bucket_index] + obj_index * heap->object_size);
 
 	/* Check if the object has in fact been allocated */
 	if ( obj->next_free != ALLOCATED )
@@ -139,10 +164,15 @@ object_base_p object_heap_first( object_heap_p heap, object_heap_iterator *iter 
 object_base_p object_heap_next( object_heap_p heap, object_heap_iterator *iter )
 {
     object_base_p obj;
+    int bucket_index, obj_index;
     int i = *iter + 1;
+
     while ( i < heap->heap_size)
     {
-        obj = (object_base_p) (heap->heap_index + i * heap->object_size);
+        bucket_index = i / heap->heap_increment;
+        obj_index = i % heap->heap_increment;
+
+        obj = (object_base_p) (heap->bucket[bucket_index] + obj_index * heap->object_size);
         if (obj->next_free == ALLOCATED)
         {
             *iter = i;
@@ -178,16 +208,24 @@ void object_heap_free( object_heap_p heap, object_base_p obj )
 void object_heap_destroy( object_heap_p heap )
 {
     object_base_p obj;
-    int i;
+    int bucket_index, obj_index, i;
+
     /* Check if heap is empty */
     for (i = 0; i < heap->heap_size; i++)
     {
         /* Check if object is not still allocated */
-        obj = (object_base_p) (heap->heap_index + i * heap->object_size);
+        bucket_index = i / heap->heap_increment;
+        obj_index = i % heap->heap_increment;
+        obj = (object_base_p) (heap->bucket[bucket_index] + obj_index * heap->object_size);
         ASSERT( obj->next_free != ALLOCATED );
     }
-    free(heap->heap_index);
+
+    for (i = 0; i < heap->heap_size / heap->heap_increment; i++) {
+        free(heap->bucket[i]);
+    }
+
+    free(heap->bucket);
+    heap->bucket = NULL;
     heap->heap_size = 0;
-    heap->heap_index = NULL;
     heap->next_free = LAST_FREE;
 }
