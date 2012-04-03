@@ -2327,11 +2327,23 @@ typedef struct _VARectangle
  * before calling vaPutSurface()
  */
 
-/* attribute value for VADisplayAttribRotation   */
+/**
+ * @name Rotation angles
+ *
+ * Those values could be used for VADisplayAttribRotation attribute or
+ * VAProcPipelineParameterBuffer::rotation_state. The rotation operation
+ * is clockwise.
+ */
+/**@{*/
+/** \brief No rotation. */
 #define VA_ROTATION_NONE        0x00000000
+/** \brief Rotation by 90° clockwise. */
 #define VA_ROTATION_90          0x00000001
+/** \brief Rotation by 180° clockwise. */
 #define VA_ROTATION_180         0x00000002
+/** \brief Rotation by 270° clockwise. */
 #define VA_ROTATION_270         0x00000003
+/**@}*/
 
 /* attribute value for VADisplayAttribOutOfLoopDeblock */
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000
