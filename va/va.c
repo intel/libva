@@ -239,6 +239,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 int minor;
             } compatible_versions[] = {
                 { VA_MAJOR_VERSION, VA_MINOR_VERSION },
+                { 0, 33 },
                 { 0, 32 },
                 { -1, }
             };
