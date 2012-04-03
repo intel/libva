@@ -333,8 +333,6 @@ typedef enum _VAProcColorStandardType {
 
 /** \brief Video processing pipeline capabilities. */
 typedef struct _VAProcPipelineCaps {
-    /** \brief Video filter flags. See video pipeline flags. */
-    unsigned int        flags;
     /** \brief Pipeline flags. See VAProcPipelineParameterBuffer::pipeline_flags. */
     unsigned int        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
