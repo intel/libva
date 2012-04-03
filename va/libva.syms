@@ -4,8 +4,13 @@ VA_API_0.32.0 {
 };
 
 VA_API_0.33.0 {
+    local:
+        vaCreateSurfaces_0_32_0;
+} VA_API_0.32.0;
+
+VA_API_0.34.0 {
     global:
         vaCreateSurfaces;
     local:
-        vaCreateSurfaces_0_33_0;
-} VA_API_0.32.0;
+        vaCreateSurfaces_0_34_0;
+} VA_API_0.33.0;
