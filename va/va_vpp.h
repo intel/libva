@@ -347,6 +347,32 @@ typedef struct _VAProcPipelineCaps {
     unsigned int        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
     unsigned int        filter_flags;
+    /**
+     * \brief Rotation flags.
+     *
+     * For each rotation angle supported by the underlying hardware,
+     * the corresponding bit is set in \ref rotation_flags. See
+     * "Rotation angles" for a description of rotation angles.
+     *
+     * A value of 0 means the underlying hardware does not support any
+     * rotation. Otherwise, a check for a specific rotation angle can be
+     * performed as follows:
+     *
+     * \code
+     * VAProcPipelineCaps pipeline_caps;
+     * ...
+     * vaQueryVideoProcPipelineCaps(va_dpy, vpp_ctx,
+     *     filter_bufs, num_filter_bufs,
+     *     &pipeline_caps
+     * );
+     * ...
+     * if (pipeline_caps.rotation_flags & (1 << VA_ROTATION_xxx)) {
+     *     // Clockwise rotation by xxx degrees is supported
+     *     ...
+     * }
+     * \endcode
+     */
+    unsigned int        rotation_flags;
     /** \brief Number of forward reference frames that are needed. */
     unsigned int        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
@@ -460,6 +486,31 @@ typedef struct _VAProcPipelineParameterBuffer {
      * \brief Requested output color primaries.
      */
     VAProcColorStandardType output_color_standard;
+    /**
+     * \brief Rotation state. See rotation angles.
+     *
+     * The rotation angle is clockwise. There is no specific rotation
+     * center for this operation. Rather, The source \ref surface is
+     * first rotated by the specified angle and then scaled to fit the
+     * \ref output_region.
+     *
+     * This means that the top-left hand corner (0,0) of the output
+     * (rotated) surface is expressed as follows:
+     * - \ref VA_ROTATION_NONE: (0,0) is the top left corner of the
+     *   source surface -- no rotation is performed ;
+     * - \ref VA_ROTATION_90: (0,0) is the bottom-left corner of the
+     *   source surface ;
+     * - \ref VA_ROTATION_180: (0,0) is the bottom-right corner of the
+     *   source surface -- the surface is flipped around the X axis ;
+     * - \ref VA_ROTATION_270: (0,0) is the top-right corner of the
+     *   source surface.
+     *
+     * Check VAProcPipelineCaps::rotation_flags first prior to
+     * defining a specific rotation angle. Otherwise, the hardware can
+     * perfectly ignore this variable if it does not support any
+     * rotation.
+     */
+    unsigned int        rotation_state;
     /**
      * \brief Pipeline filters. See video pipeline flags.
      *
