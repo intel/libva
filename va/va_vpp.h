@@ -312,6 +312,45 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardCount
 } VAProcColorStandardType;
 
+/** @name Video blending flags */
+/**@{*/
+/** \brief Global alpha blending. */
+#define VA_BLEND_GLOBAL_ALPHA           0x0002
+/** \brief Premultiplied alpha blending (RGBA surfaces only). */
+#define VA_BLEND_PREMULTIPLIED_ALPHA    0x0008
+/** \brief Luma color key (YUV surfaces only). */
+#define VA_BLEND_LUMA_KEY               0x0010
+/**@}*/
+
+/** \brief Video blending state definition. */
+typedef struct _VABlendState {
+    /** \brief Video blending flags. */
+    unsigned int        flags;
+    /**
+     * \brief Global alpha value.
+     *
+     * Valid if \flags has VA_BLEND_GLOBAL_ALPHA.
+     * Valid range is 0.0 to 1.0 inclusive.
+     */
+    float               global_alpha;
+    /**
+     * \brief Minimum luma value.
+     *
+     * Valid if \flags has VA_BLEND_LUMA_KEY.
+     * Valid range is 0.0 to 1.0 inclusive.
+     * \ref min_luma shall be set to a sensible value lower than \ref max_luma.
+     */
+    float               min_luma;
+    /**
+     * \brief Maximum luma value.
+     *
+     * Valid if \flags has VA_BLEND_LUMA_KEY.
+     * Valid range is 0.0 to 1.0 inclusive.
+     * \ref max_luma shall be set to a sensible value larger than \ref min_luma.
+     */
+    float               max_luma;
+} VABlendState;
+
 /** @name Video pipeline flags */
 /**@{*/
 /** \brief Specifies whether to apply subpictures when processing a surface. */
@@ -373,6 +412,8 @@ typedef struct _VAProcPipelineCaps {
      * \endcode
      */
     unsigned int        rotation_flags;
+    /** \brief Blend flags. See "Video blending flags". */
+    unsigned int        blend_flags;
     /** \brief Number of forward reference frames that are needed. */
     unsigned int        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
@@ -511,6 +552,25 @@ typedef struct _VAProcPipelineParameterBuffer {
      * rotation.
      */
     unsigned int        rotation_state;
+    /**
+     * \brief blending state. See "Video blending state definition".
+     *
+     * If \ref blend_state is NULL, then default operation mode depends
+     * on the source \ref surface format:
+     * - RGB: per-pixel alpha blending ;
+     * - YUV: no blending, i.e override the underlying pixels.
+     *
+     * Otherwise, \ref blend_state is a pointer to a #VABlendState
+     * structure that shall be live until vaEndPicture().
+     *
+     * Implementation note: the driver is responsible for checking the
+     * blend state flags against the actual source \ref surface format.
+     * e.g. premultiplied alpha blending is only applicable to RGB
+     * surfaces, and luma keying is only applicable to YUV surfaces.
+     * If a mismatch occurs, then #VA_STATUS_ERROR_INVALID_BLEND_STATE
+     * is returned.
+     */
+    const VABlendState *blend_state;
     /**
      * \brief Pipeline filters. See video pipeline flags.
      *
