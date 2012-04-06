@@ -188,7 +188,7 @@ static VAStatus va_FreeNativePixmap(
 }
 
 VADisplay vaGetDisplay (
-    VANativeDisplay native_dpy /* implementation specific */
+    Display *native_dpy /* implementation specific */
 )
 {
   VADisplay dpy = NULL;

@@ -182,13 +182,6 @@ const char *vaErrorStr(VAStatus error_status);
  */
 typedef void* VANativeDisplay;	/* window system dependent */
 
-/*
- * Returns a suitable VADisplay for VA API
- */
-VADisplay vaGetDisplay (
-    VANativeDisplay dpy
-);
-
 int vaDisplayIsValid(VADisplay dpy);
     
 /*
