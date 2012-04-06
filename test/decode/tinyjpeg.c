@@ -49,8 +49,7 @@
 #include <assert.h>
 #include <va/va.h>
 #include <va/va_dec_jpeg.h>
-#include <va/va_x11.h>
-#include <X11/Xlib.h>
+#include "va_display.h"
 
 
 #define cY	0
@@ -544,23 +543,13 @@ int tinyjpeg_decode(struct jdec_private *priv)
     VAContextID context_id;
     VABufferID pic_param_buf,iqmatrix_buf,huffmantable_buf,slice_param_buf,slice_data_buf;
     int major_ver, minor_ver;
-    Display *x11_display;
     VADisplay	va_dpy;
     VAStatus va_status;
     int max_h_factor, max_v_factor;
     int putsurface=1;
     unsigned int i, j;
 
-    x11_display = XOpenDisplay(":0.0");
-
-    if (x11_display == NULL) {
-      fprintf(stderr, "Can't connect X server!\n");
-      exit(-1);
-    }
-
-    assert(x11_display);
-    
-    va_dpy = vaGetDisplay(x11_display);
+    va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     assert(va_status == VA_STATUS_SUCCESS);
     
@@ -739,16 +728,16 @@ int tinyjpeg_decode(struct jdec_private *priv)
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     if (putsurface) {
-        Window  win;
-        win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
-                priv->width,priv->height, 0, 0, WhitePixel(x11_display, 0));
-        XMapWindow(x11_display, win);
-        XSync(x11_display, False);
-        va_status = vaPutSurface(va_dpy, surface_id, win,
-                                0,0,priv->width,priv->height,
-                                0,0,priv->width,priv->height,
-                                NULL,0,0);
-       CHECK_VASTATUS(va_status, "vaPutSurface");
+        VARectangle src_rect, dst_rect;
+
+        src_rect.x      = 0;
+        src_rect.y      = 0;
+        src_rect.width  = priv->width;
+        src_rect.height = priv->height;
+        dst_rect        = src_rect;
+
+        va_status = va_put_surface(va_dpy, surface_id, &src_rect, &dst_rect);
+        CHECK_VASTATUS(va_status, "vaPutSurface");
     }
     printf("press any key to exit\n");
     getchar();
@@ -758,8 +747,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
     vaDestroyContext(va_dpy,context_id);
 
     vaTerminate(va_dpy);
-    XCloseDisplay(x11_display);
-    
+    va_close_display(va_dpy);
     return 0;
 }
 const char *tinyjpeg_get_errorstring(struct jdec_private *priv)

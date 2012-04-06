@@ -20,18 +20,30 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 bin_PROGRAMS = vainfo
 
-INCLUDES = \
-	-I$(top_srcdir)					\
-	-I$(top_srcdir)/test/basic			\
-	-DLIBVA_VERSION_S="\"${LIBVA_VERSION}\""	\
+libva_helpers = \
+	$(top_builddir)/test/common/libva-display.la	\
 	$(NULL)
 
-vainfo_LDADD = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib) -lX11
+vainfo_cflags = \
+	-I$(top_srcdir)				\
+	-I$(top_srcdir)/test/common		\
+	-I$(top_builddir)			\
+	-DLIBVA_VERSION_S="\"$(LIBVA_VERSION)\"" \
+	$(NULL)
 
-vainfo_DEPENDENCIES =  $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
+vainfo_libs = \
+	$(top_builddir)/va/$(libvacorelib)	\
+	$(top_builddir)/va/$(libvabackendlib)	\
+	$(libva_helpers)			\
+	$(NULL)
+
+vainfo_SOURCES		= vainfo.c
+noinst_HEADERS		= $(source_h)
+vainfo_CFLAGS		= $(vainfo_cflags)
+vainfo_LDADD		= $(vainfo_libs)
+vainfo_DEPENDENCIES	= $(libva_helpers)
 
 valgrind:	vainfo
 	valgrind --leak-check=full --show-reachable=yes .libs/vainfo; 

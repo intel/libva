@@ -43,30 +43,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <va/va.h>
-
-#ifdef ANDROID
-#include <va/va_android.h>
-#include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <utils/Log.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <binder/MemoryHeapBase.h>
-#define Display unsigned int
-
-using namespace android;
-sp<SurfaceComposerClient> client;
-sp<Surface> android_surface;
-sp<ISurface> android_isurface;
-sp<SurfaceControl> surface_ctrl;
-#include "../android_winsys.cpp"
-#else
-#include <va/va_x11.h>
-#include <X11/Xlib.h>
-#endif
+#include "va_display.h"
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -169,28 +146,14 @@ int main(int argc,char **argv)
     VAContextID context_id;
     VABufferID pic_param_buf,iqmatrix_buf,slice_param_buf,slice_data_buf;
     int major_ver, minor_ver;
-    Display *x11_display;
     VADisplay	va_dpy;
     VAStatus va_status;
     int putsurface=0;
 
     if (argc > 1)
         putsurface=1;
-#ifdef ANDROID 
-    x11_display = (Display*)malloc(sizeof(Display));
-    *(x11_display ) = 0x18c34078;
-#else
-    x11_display = XOpenDisplay(":0.0");
-#endif
-
-    if (x11_display == NULL) {
-      fprintf(stderr, "Can't connect X server!\n");
-      exit(-1);
-    }
-
-    assert(x11_display);
     
-    va_dpy = vaGetDisplay(x11_display);
+    va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     assert(va_status == VA_STATUS_SUCCESS);
     
@@ -289,29 +252,20 @@ int main(int argc,char **argv)
     CHECK_VASTATUS(va_status, "vaSyncSurface");
 
     if (putsurface) {
-#ifdef ANDROID 
-        sp<ProcessState> proc(ProcessState::self());
-        ProcessState::self()->startThreadPool();
+        VARectangle src_rect, dst_rect;
 
-        printf("Create window0 for thread0\n");
-        SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, 0, 0, WIN_WIDTH, WIN_HEIGHT);
+        src_rect.x      = 0;
+        src_rect.y      = 0;
+        src_rect.width  = CLIP_WIDTH;
+        src_rect.height = CLIP_HEIGHT;
 
-        va_status = vaPutSurface(va_dpy, surface_id, android_isurface,
-                0,0,CLIP_WIDTH,CLIP_HEIGHT,
-                0,0,WIN_WIDTH,WIN_HEIGHT,
-                NULL,0,0);
-#else
-        Window  win;
-        win = XCreateSimpleWindow(x11_display, RootWindow(x11_display, 0), 0, 0,
-                WIN_WIDTH,WIN_HEIGHT, 0, 0, WhitePixel(x11_display, 0));
-        XMapWindow(x11_display, win);
-        XSync(x11_display, False);
-        va_status = vaPutSurface(va_dpy, surface_id, win,
-                                0,0,CLIP_WIDTH,CLIP_HEIGHT,
-                                0,0,WIN_WIDTH,WIN_HEIGHT,
-                                NULL,0,0);
-#endif
-       CHECK_VASTATUS(va_status, "vaPutSurface");
+        dst_rect.x      = 0;
+        dst_rect.y      = 0;
+        dst_rect.width  = WIN_WIDTH;
+        dst_rect.height = WIN_HEIGHT;
+
+        va_status = va_put_surface(va_dpy, surface_id, &src_rect, &dst_rect);
+        CHECK_VASTATUS(va_status, "vaPutSurface");
     }
     printf("press any key to exit\n");
     getchar();
@@ -321,11 +275,6 @@ int main(int argc,char **argv)
     vaDestroyContext(va_dpy,context_id);
 
     vaTerminate(va_dpy);
-#ifdef ANDROID
-    free(x11_display);
-#else
-    XCloseDisplay(x11_display);
-#endif
-    
+    va_close_display(va_dpy);
     return 0;
 }
