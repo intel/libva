@@ -59,7 +59,7 @@ dri1GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 static void
 dri1Close(VADriverContextP ctx)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
     free_drawable_hashtable(ctx);
     VA_DRIDestroyContext(ctx->native_dpy, ctx->x11_screen, dri_state->hwContextID);
@@ -73,7 +73,7 @@ dri1Close(VADriverContextP ctx)
 Bool 
 isDRI1Connected(VADriverContextP ctx, char **driver_name)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int direct_capable;
     int driver_major;
     int driver_minor;

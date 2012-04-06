@@ -95,10 +95,10 @@ static void va_DisplayContextDestroy (
         return;
 
     /* close the open-ed DRM fd */
-    dri_state = (struct dri_state *)pDisplayContext->pDriverContext->dri_state;
+    dri_state = (struct dri_state *)pDisplayContext->pDriverContext->drm_state;
     close(dri_state->base.fd);
 
-    free(pDisplayContext->pDriverContext->dri_state);
+    free(pDisplayContext->pDriverContext->drm_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
@@ -110,7 +110,7 @@ static VAStatus va_DisplayContextGetDriverName (
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     char *driver_name_env;
     int vendor_id, device_id;
     
@@ -149,7 +149,7 @@ static VAStatus va_DisplayContextGetDriverName (
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     char *driver_name_env;
     int vendor_id, device_id;
     int i = 0;
@@ -227,7 +227,7 @@ VADisplay vaGetDisplay (
             pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-            pDriverContext->dri_state 	     = dri_state;
+            pDriverContext->drm_state 	     = dri_state;
             dpy                              = (VADisplay)pDisplayContext;
         }
         else

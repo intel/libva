@@ -63,12 +63,12 @@ static void va_DisplayContextDestroy (
         return;
 
     ctx = pDisplayContext->pDriverContext;
-    dri_state = ctx->dri_state;
+    dri_state = ctx->drm_state;
 
     if (dri_state && dri_state->close)
         dri_state->close(ctx);
 
-    free(pDisplayContext->pDriverContext->dri_state);
+    free(pDisplayContext->pDriverContext->drm_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
@@ -190,7 +190,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
 	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
           pDisplayContext->opaque          = NULL;
-	  pDriverContext->dri_state 	   = dri_state;
+	  pDriverContext->drm_state 	   = dri_state;
 	  dpy                              = (VADisplay)pDisplayContext;
       }
       else

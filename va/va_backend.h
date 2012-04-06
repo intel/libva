@@ -450,8 +450,21 @@ struct VADriverContext
     const char *str_vendor;
 
     void *handle;			/* dlopen handle */
-    
-    void *dri_state;
+
+    /**
+     * \brief DRM state.
+     *
+     * This field holds driver specific data for DRM-based
+     * drivers. This structure is allocated from libva with
+     * calloc(). Do not deallocate from within VA driver
+     * implementations.
+     *
+     * All structures shall be derived from struct drm_state. So, for
+     * instance, this field holds a dri_state structure for VA/X11
+     * drivers that use the DRM protocol.
+     */
+    void *drm_state;
+
     void *glx;				/* opaque for GLX code */
 
     /**
