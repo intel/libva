@@ -185,6 +185,7 @@ VADisplay vaGetDisplay (
 	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
 	  pDriverContext->native_dpy       = (void *)native_dpy;
+          pDriverContext->display_type     = VA_DISPLAY_X11;
 	  pDisplayContext->pDriverContext  = pDriverContext;
 	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
 	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;

@@ -38,6 +38,19 @@
 typedef struct VADriverContext *VADriverContextP;
 typedef struct VADisplayContext *VADisplayContextP;
 
+/** \brief VA display types. */
+enum {
+    /** \brief Mask to major identifier for VA display type. */
+    VA_DISPLAY_MAJOR_MASK = 0xf0,
+
+    /** \brief VA/X11 API is used, through vaGetDisplay() entry-point. */
+    VA_DISPLAY_X11      = 0x10,
+    /** \brief VA/GLX API is used, through vaGetDisplayGLX() entry-point. */
+    VA_DISPLAY_GLX      = (VA_DISPLAY_X11 | (1 << 0)),
+    /** \brief VA/Android API is used, through vaGetDisplay() entry-point. */
+    VA_DISPLAY_ANDROID  = 0x20,
+};
+
 struct VADriverVTable
 {
 	VAStatus (*vaTerminate) ( VADriverContextP ctx );
@@ -474,7 +487,10 @@ struct VADriverContext
      */
     struct VADriverVTableVPP *vtable_vpp;
 
-    unsigned long reserved[44];         /* reserve for future add-ins, decrease the subscript accordingly */
+    /** \brief VA display type. */
+    unsigned long display_type;
+
+    unsigned long reserved[43];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
