@@ -32,18 +32,19 @@
 #endif
 
 #include <va/va_backend.h>
+#include <va/va_drmcommon.h>
 
 #ifdef ANDROID
 #define XID unsigned int
 #define Bool int
 #endif
 
-enum
-{
-    VA_NONE = 0,
-    VA_DRI1 = 1,
-    VA_DRI2 = 2,
-    VA_DUMMY = 3
+enum {
+    /* Compatibility. Do not use for newly-written code. */
+    VA_NONE     = VA_DRM_AUTH_NONE,
+    VA_DRI1     = VA_DRM_AUTH_DRI1,
+    VA_DRI2     = VA_DRM_AUTH_DRI2,
+    VA_DUMMY    = VA_DRM_AUTH_CUSTOM
 };
 
 union dri_buffer 
@@ -71,8 +72,7 @@ struct dri_drawable
 #define DRAWABLE_HASH_SZ 32
 struct dri_state 
 {
-    int fd;
-    int driConnectedFlag; /* 0: disconnected, 1: DRI, 2: DRI2 */
+    struct drm_state base;
 #ifndef ANDROID
     struct dri_drawable *drawable_hash[DRAWABLE_HASH_SZ];
 

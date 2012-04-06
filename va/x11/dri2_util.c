@@ -168,8 +168,8 @@ dri2Close(VADriverContextP ctx)
 
     free_drawable_hashtable(ctx);
 
-    if (dri_state->fd >= 0);
-	close(dri_state->fd);
+    if (dri_state->base.fd >= 0);
+	close(dri_state->base.fd);
 }
 
 Bool 
@@ -182,8 +182,8 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     char *device_name = NULL;
     drm_magic_t magic;        
     *driver_name = NULL;
-    dri_state->fd = -1;
-    dri_state->driConnectedFlag = VA_NONE;
+    dri_state->base.fd = -1;
+    dri_state->base.auth_type = VA_NONE;
     if (!VA_DRI2QueryExtension(ctx->native_dpy, &event_base, &error_base))
         goto err_out;
 
@@ -195,20 +195,20 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
                      driver_name, &device_name))
         goto err_out;
 
-    dri_state->fd = open(device_name, O_RDWR);
-    assert(dri_state->fd >= 0);
+    dri_state->base.fd = open(device_name, O_RDWR);
+    assert(dri_state->base.fd >= 0);
 
-    if (dri_state->fd < 0)
+    if (dri_state->base.fd < 0)
         goto err_out;
 
-    if (drmGetMagic(dri_state->fd, &magic))
+    if (drmGetMagic(dri_state->base.fd, &magic))
         goto err_out;
 
     if (!VA_DRI2Authenticate(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
                           magic))
         goto err_out;
 
-    dri_state->driConnectedFlag = VA_DRI2;
+    dri_state->base.auth_type = VA_DRI2;
     dri_state->createDrawable = dri2CreateDrawable;
     dri_state->destroyDrawable = dri2DestroyDrawable;
     dri_state->swapBuffer = dri2SwapBuffer;
@@ -228,11 +228,11 @@ err_out:
     if (*driver_name)
         Xfree(*driver_name);
 
-    if (dri_state->fd >= 0)
-        close(dri_state->fd);
+    if (dri_state->base.fd >= 0)
+        close(dri_state->base.fd);
 
     *driver_name = NULL;
-    dri_state->fd = -1;
+    dri_state->base.fd = -1;
     
     return False;
 }

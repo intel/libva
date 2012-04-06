@@ -96,7 +96,7 @@ static void va_DisplayContextDestroy (
 
     /* close the open-ed DRM fd */
     dri_state = (struct dri_state *)pDisplayContext->pDriverContext->dri_state;
-    close(dri_state->fd);
+    close(dri_state->base.fd);
 
     free(pDisplayContext->pDriverContext->dri_state);
     free(pDisplayContext->pDriverContext);
@@ -125,9 +125,9 @@ static VAStatus va_DisplayContextGetDriverName (
     };
 
     memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->fd = open_device((char *)DEVICE_NAME);
+    dri_state->base.fd = open_device((char *)DEVICE_NAME);
     
-    if (dri_state->fd < 0) {
+    if (dri_state->base.fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");
         return VA_STATUS_ERROR_UNKNOWN;
     }
@@ -137,7 +137,7 @@ static VAStatus va_DisplayContextGetDriverName (
     device_id = devices[0].device_id;
     *driver_name = strdup(devices[0].driver_name);
         
-    dri_state->driConnectedFlag = VA_DUMMY;
+    dri_state->base.auth_type = VA_DUMMY;
 
     return VA_STATUS_SUCCESS;
 }
@@ -164,9 +164,9 @@ static VAStatus va_DisplayContextGetDriverName (
     };
 
     memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->fd = drm_open_any(&vendor_id, &device_id);
+    dri_state->base.fd = drm_open_any(&vendor_id, &device_id);
     
-    if (dri_state->fd < 0) {
+    if (dri_state->base.fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");
         return VA_STATUS_ERROR_UNKNOWN;
     }
@@ -192,7 +192,7 @@ static VAStatus va_DisplayContextGetDriverName (
     printf("DRM device is opened, loading driver %s for device 0x%04x:0x%04x\n",
            driver_name, vendor_id, device_id);
     
-    dri_state->driConnectedFlag = VA_DUMMY;
+    dri_state->base.auth_type = VA_DUMMY;
 
     return VA_STATUS_SUCCESS;
 }
