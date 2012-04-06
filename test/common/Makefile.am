@@ -48,6 +48,12 @@ libva_display_cflags	+= $(DRM_CFLAGS)
 libva_display_libs	+= $(top_builddir)/va/libva-drm.la $(DRM_LIBS)
 endif
 
+if USE_WAYLAND
+source_c		+= va_display_wayland.c
+libva_display_cflags	+= $(WAYLAND_CFLAGS)
+libva_display_libs	+= $(top_builddir)/va/libva-wayland.la $(WAYLAND_LIBS)
+endif
+
 libva_display_la_SOURCES= $(source_c)
 noinst_HEADERS		= $(source_h)
 libva_display_la_CFLAGS	= $(libva_display_cflags)
