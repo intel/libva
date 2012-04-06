@@ -61,7 +61,7 @@ is_window(Display *dpy, Drawable drawable)
 static struct dri_drawable *
 do_drawable_hash(VADriverContextP ctx, XID drawable)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int index = drawable % DRAWABLE_HASH_SZ;
     struct dri_drawable *dri_drawable = dri_state->drawable_hash[index];
 
@@ -83,7 +83,7 @@ do_drawable_hash(VADriverContextP ctx, XID drawable)
 void
 free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int i = 0;
 
     while (i++ < DRAWABLE_HASH_SZ) {
@@ -97,7 +97,7 @@ free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
 void
 free_drawable_hashtable(VADriverContextP ctx)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int i;
     struct dri_drawable *dri_drawable, *prev;
 
@@ -123,7 +123,7 @@ dri_get_drawable(VADriverContextP ctx, XID drawable)
 void 
 dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
     dri_state->swapBuffer(ctx, dri_drawable);
 }
@@ -131,7 +131,7 @@ dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 union dri_buffer *
 dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     
     return dri_state->getRenderingBuffer(ctx, dri_drawable);
 }

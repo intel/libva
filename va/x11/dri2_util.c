@@ -164,7 +164,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 void
 dri2Close(VADriverContextP ctx)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
     free_drawable_hashtable(ctx);
 
@@ -175,7 +175,7 @@ dri2Close(VADriverContextP ctx)
 Bool 
 isDRI2Connected(VADriverContextP ctx, char **driver_name)
 {
-    struct dri_state *dri_state = (struct dri_state *)ctx->dri_state;
+    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int major, minor;
     int error_base;
     int event_base;
