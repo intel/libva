@@ -123,6 +123,16 @@ libva_egl_la_LIBADD		= $(libvacorelib) egl/libva_egl.la libva-x11.la \
 	$(GL_DEPS_LIBS) -ldl
 endif
 
+if USE_WAYLAND
+SUBDIRS				+= wayland
+lib_LTLIBRARIES			+= libva-wayland.la
+libva_wayland_la_SOURCES	=
+libva_wayland_la_LDFLAGS	= $(LDADD)
+libva_wayland_la_DEPENDENCIES	= $(libvacorelib) wayland/libva_wayland.la
+libva_wayland_la_LIBADD		= $(libvacorelib) wayland/libva_wayland.la \
+	$(WAYLAND_LIBS) $(DRM_LIBS) -ldl
+endif
+
 if BUILD_DUMMY_BACKEND
 SUBDIRS				+= dummy
 lib_LTLIBRARIES			+= libva-dummy.la
@@ -133,7 +143,7 @@ libva_dummy_la_LIBADD		= $(libvacorelib) dummy/libva_dummy.la \
 	$(LIBVA_LIBS) $(DRM_LIBS)
 endif
 
-DIST_SUBDIRS = x11 glx egl dummy drm
+DIST_SUBDIRS = x11 glx egl dummy drm wayland
 
 DISTCLEANFILES = \
 	va_version.h		\

@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (C) 2012 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,38 +20,35 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-pcfiles		 = libva.pc
-pcfiles		+= libva-tpi.pc
-if USE_DRM
-pcfiles		+= libva-drm.pc
-endif
-if USE_X11
-pcfiles		+= libva-x11.pc
-endif
-if USE_GLX
-pcfiles		+= libva-glx.pc
-endif
-if USE_EGL
-pcfiles		+= libva-egl.pc
-endif
-if USE_WAYLAND
-pcfiles		+= libva-wayland.pc
-endif
+INCLUDES = \
+	-DLINUX			\
+	-I$(top_srcdir)		\
+	-I$(top_srcdir)/va	\
+	$(WAYLAND_CFLAGS)	\
+	$(DRM_CFLAGS)		\
+	$(NULL)
 
-all_pcfiles_in	 = libva.pc.in
-all_pcfiles_in	+= libva-tpi.pc.in
-all_pcfiles_in	+= libva-drm.pc.in
-all_pcfiles_in	+= libva-x11.pc.in
-all_pcfiles_in	+= libva-glx.pc.in
-all_pcfiles_in	+= libva-egl.pc.in
-all_pcfiles_in	+= libva-wayland.pc.in
+source_c = \
+	va_wayland.c		\
+	va_wayland_drm.c	\
+	$(top_srcdir)/va/drm/va_drm_utils.c \
+	$(NULL)
 
-pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = $(pcfiles)
+source_h = \
+	va_backend_wayland.h	\
+	va_wayland.h		\
+	$(NULL)
 
-EXTRA_DIST = $(all_pcfiles_in)
+source_h_priv = \
+	va_wayland_drm.h	\
+	va_wayland_private.h	\
+	$(NULL)
 
-DISTCLEANFILES = $(pcfiles)
+noinst_LTLIBRARIES		= libva_wayland.la
+libva_waylandincludedir		= ${includedir}/va
+libva_waylandinclude_HEADERS	= $(source_h)
+libva_wayland_la_SOURCES	= $(source_c)
+noinst_HEADERS			= $(source_h_priv)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
