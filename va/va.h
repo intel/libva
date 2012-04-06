@@ -1495,12 +1495,12 @@ typedef struct _VASliceParameterBufferH264
     /**
      * \brief Bit offset from NAL Header Unit to the begining of slice_data().
      *
-     * This bit offset is relative from the NAL unit byte to the first
-     * bit of slice_data(), thus including any emulation prevention
-     * bytes in slice_header().
-     *
-     * Basically, this field represents the number of bits parsed in
-     * the slice_header() + 8 for the initial NAL unit byte.
+     * This bit offset is relative to and includes the NAL unit byte
+     * and represents the number of bits parsed in the slice_header()
+     * after the removal of any emulation prevention bytes in
+     * there. However, the slice data buffer passed to the hardware is
+     * the original bitstream, thus including any emulation prevention
+     * bytes.
      */
     unsigned short slice_data_bit_offset;
     unsigned short first_mb_in_slice;
