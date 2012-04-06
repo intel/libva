@@ -65,8 +65,8 @@ dri1Close(VADriverContextP ctx)
     VA_DRIDestroyContext(ctx->native_dpy, ctx->x11_screen, dri_state->hwContextID);
     assert(dri_state->pSAREA != MAP_FAILED);
     drmUnmap(dri_state->pSAREA, SAREA_MAX);
-    assert(dri_state->fd >= 0);
-    drmCloseOnce(dri_state->fd);
+    assert(dri_state->base.fd >= 0);
+    drmCloseOnce(dri_state->base.fd);
     VA_DRICloseConnection(ctx->native_dpy, ctx->x11_screen);
 }
 
@@ -83,9 +83,9 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
     drm_magic_t magic;        
 
     *driver_name = NULL;
-    dri_state->fd = -1;
+    dri_state->base.fd = -1;
     dri_state->pSAREA = MAP_FAILED;
-    dri_state->driConnectedFlag = VA_NONE;
+    dri_state->base.auth_type = VA_NONE;
 
     if (!VA_DRIQueryDirectRenderingCapable(ctx->native_dpy, 
                                            ctx->x11_screen, 
@@ -105,20 +105,20 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
         goto err_out0;
 
     
-    dri_state->fd = drmOpenOnce(NULL, BusID, &newlyopened);
+    dri_state->base.fd = drmOpenOnce(NULL, BusID, &newlyopened);
     XFree(BusID);
 
-    if (dri_state->fd < 0)
+    if (dri_state->base.fd < 0)
         goto err_out1;
 
 
-    if (drmGetMagic(dri_state->fd, &magic))
+    if (drmGetMagic(dri_state->base.fd, &magic))
         goto err_out1;
 
     if (newlyopened && !VA_DRIAuthConnection(ctx->native_dpy, ctx->x11_screen, magic))
         goto err_out1;
 
-    if (drmMap(dri_state->fd, dri_state->hSAREA, SAREA_MAX, &dri_state->pSAREA))
+    if (drmMap(dri_state->base.fd, dri_state->hSAREA, SAREA_MAX, &dri_state->pSAREA))
         goto err_out1;
 
     if (!VA_DRICreateContext(ctx->native_dpy, ctx->x11_screen,
@@ -126,7 +126,7 @@ isDRI1Connected(VADriverContextP ctx, char **driver_name)
                              &dri_state->hwContextID, &dri_state->hwContext))
         goto err_out1;
 
-    dri_state->driConnectedFlag = VA_DRI1;
+    dri_state->base.auth_type = VA_DRI1;
     dri_state->createDrawable = dri1CreateDrawable;
     dri_state->destroyDrawable = dri1DestroyDrawable;
     dri_state->swapBuffer = dri1SwapBuffer;
@@ -139,8 +139,8 @@ err_out1:
     if (dri_state->pSAREA != MAP_FAILED)
         drmUnmap(dri_state->pSAREA, SAREA_MAX);
 
-    if (dri_state->fd >= 0)
-        drmCloseOnce(dri_state->fd);
+    if (dri_state->base.fd >= 0)
+        drmCloseOnce(dri_state->base.fd);
 
     VA_DRICloseConnection(ctx->native_dpy, ctx->x11_screen);
 
@@ -149,7 +149,7 @@ err_out0:
         XFree(*driver_name);
 
     dri_state->pSAREA = MAP_FAILED;
-    dri_state->fd = -1;
+    dri_state->base.fd = -1;
     *driver_name = NULL;
     
     return False;
