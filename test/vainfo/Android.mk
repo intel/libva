@@ -6,7 +6,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-  vainfo.c
+	vainfo.c		\
+	../common/va_display.c	\
+	../common/va_display_android.cpp
 
 LOCAL_CFLAGS += \
   -DANDROID

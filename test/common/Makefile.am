@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2012 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,40 +20,29 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = mpeg2vldemo loadjpeg
+noinst_LTLIBRARIES = libva-display.la
 
-libva_helpers = \
-	$(top_builddir)/test/common/libva-display.la	\
-	$(NULL)
-
-INCLUDES = \
+libva_display_cflags = \
 	-I$(top_srcdir)				\
-	-I$(top_srcdir)/test/common		\
+	-I$(top_builddir)			\
 	$(NULL)
 
-TEST_LIBS = \
-	$(top_builddir)/va/$(libvabackendlib)	\
+libva_display_libs = \
 	$(top_builddir)/va/$(libvacorelib)	\
-	$(libva_helpers)			\
+	$(top_builddir)/va/$(libvabackendlib)	\
 	$(NULL)
 
-INCLUDES	+= $(X11_CFLAGS)
-TEST_LIBS	+= $(X11_LIBS)
+source_c		= va_display.c
+source_h		= va_display.h
 
-mpeg2vldemo_LDADD	= $(TEST_LIBS)
-mpeg2vldemo_SOURCES	= mpeg2vldemo.cpp
-mpeg2vldemo_DEPENDENCIES = $(libva_helpers)
+source_c		+= va_display_x11.c
+libva_display_cflags	+= $(X11_CFLAGS)
+libva_display_libs	+= $(X11_LIBS)
 
-loadjpeg_LDADD		= $(TEST_LIBS)
-loadjpeg_SOURCES	= loadjpeg.c tinyjpeg.c
-loadjpeg_DEPENDENCIES	= $(libva_helpers)
+libva_display_la_SOURCES= $(source_c)
+noinst_HEADERS		= $(source_h)
+libva_display_la_CFLAGS	= $(libva_display_cflags)
+libva_display_la_LIBADD	= $(libva_display_libs)
 
-valgrind:	$(bin_PROGRAMS)
-	for a in $(bin_PROGRAMS); do \
-		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
-	done
-
-EXTRA_DIST = \
-	tinyjpeg.h		\
-	tinyjpeg-internal.h	\
-	$(NULL)
+# Extra clean files so that maintainer-clean removes *everything*
+MAINTAINERCLEANFILES = Makefile.in
