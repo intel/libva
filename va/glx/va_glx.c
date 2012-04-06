@@ -98,6 +98,7 @@ VADisplay vaGetDisplayGLX(Display *native_dpy)
     if (!pDriverContextGLX)
         goto error;
 
+    pDriverContext->display_type  = VA_DISPLAY_GLX;
     pDisplayContextGLX->vaDestroy = pDisplayContext->vaDestroy;
     pDisplayContext->vaDestroy    = va_DisplayContextDestroy;
     pDisplayContext->opaque       = pDisplayContextGLX;
