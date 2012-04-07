@@ -180,13 +180,17 @@ AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 USE_GLX="no"
 GL_DEPS_CFLAGS=""
 GL_DEPS_LIBS=""
-if test x$enable_glx = xyes; then
+if test "$enable_glx" = "yes"; then
+    saved_CFLAGS="$CFLAGS"
+    saved_LIBS="$LIBS"
+    PKG_CHECK_MODULES([GL_DEPS], [gl], [], [GL_DEPS_LIBS="-lX11 -lGL"])
+    CFLAGS="$CFLAGS $GL_DEPS_CFLAGS"
+    LIBS="$LIBS $GL_DEPS_LIBS"
     AC_CHECK_HEADERS([GL/gl.h])
     AC_CHECK_HEADERS([GL/glx.h])
-    AC_CHECK_LIB(GL, glXCreateContext, [
-        USE_GLX="yes"
-        GL_DEPS_LIBS="-lX11 -lGL"
-    ])
+    AC_CHECK_LIB(GL, glXCreateContext, [USE_GLX="yes"])
+    CFLAGS="$saved_CFLAGS"
+    LIBS="$saved_LIBS"
 fi
 AC_SUBST(GL_DEPS_CFLAGS)
 AC_SUBST(GL_DEPS_LIBS)
@@ -197,16 +201,16 @@ USE_EGL="no"
 EGL_DEPS_CFLAGS=""
 EGL_DEPS_LIBS=""
 if test "$enable_egl" = "yes"; then
-    AC_CHECK_HEADERS([EGL/egl.h], [USE_EGL="yes"])
+    saved_CFLAGS="$CFLAGS"
+    saved_LIBS="$LIBS"
+    PKG_CHECK_MODULES([EGL_DEPS], [egl], [], [EGL_DEPS_LIBS="-lEGL"])
+    CFLAGS="$CFLAGS $EGL_DEPS_CFLAGS"
+    LIBS="$LIBS $EGL_DEPS_LIBS"
+    AC_CHECK_HEADERS([EGL/egl.h])
+    AC_CHECK_LIB(EGL, eglGetDisplay, [USE_EGL="yes"])
+    CFLAGS="$saved_CFLAGS"
+    LIBS="$saved_LIBS"
 fi
-
-if test "x$USE_EGL" = "xyes"; then
-    AC_CHECK_LIB(EGL, eglGetDisplay, [
-        USE_EGL="yes"
-        EGL_DEPS_LIBS="-lEGL"
-    ])
-fi
-
 AC_SUBST(EGL_DEPS_CFLAGS)
 AC_SUBST(EGL_DEPS_LIBS)
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
