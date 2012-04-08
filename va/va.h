@@ -1501,10 +1501,6 @@ typedef struct _VASliceParameterBufferH264
      *
      * Basically, this field represents the number of bits parsed in
      * the slice_header() + 8 for the initial NAL unit byte.
-     *
-     * See the "Emulation Prevention Bytes" section hereunder for more
-     * details about how slices with emulation prevention bytes need
-     * to be handled.
      */
     unsigned short slice_data_bit_offset;
     unsigned short first_mb_in_slice;
@@ -1533,37 +1529,6 @@ typedef struct _VASliceParameterBufferH264
     unsigned char chroma_weight_l1_flag;
     short chroma_weight_l1[32][2];
     short chroma_offset_l1[32][2];
-
-    /** @name Emulation Prevention Bytes */
-    /**@{*/
-    /**
-     * \brief Determines whether \ref num_emulation_prevention_bytes
-     * is set or not.
-     *
-     * \ref slice_data_bit_offset represents a bit offset from the NAL
-     * Header Unit to the begining of slice_data(). However, some VA
-     * drivers require a bit offset without emulation prevention bytes.
-     *
-     * If \ref emulation_prevention_bytes_flag is 1, then the driver
-     * will be able to determine this bit offset without parsing the
-     * slice_header() again. This is especially important for "protected
-     * slices" as once the data is uploaded to a VAProtectedSliceData
-     * buffer, the data in cyphered and no longer available to the
-     * driver.
-     *
-     * If \ref emulation_prevention_bytes_flag is 0, then the driver
-     * will parse the slice_header() and count the number of emulation
-     * prevention bytes itself and adjust the bit offset for the
-     * hardware accordingly.
-     *
-     * \ref emulation_prevention_bytes_flag shall always be set to 1
-     * for newly written code and \ref num_emulation_prevention_bytes
-     * shall be filled in appropriately.
-     */
-    unsigned char emulation_prevention_bytes_flag;
-    /** \brief Number of emulation prevention bytes in slice_header(). */
-    unsigned int num_emulation_prevention_bytes;
-    /**@}*/
 } VASliceParameterBufferH264;
 
 /****************************
