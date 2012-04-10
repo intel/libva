@@ -212,7 +212,7 @@ if test "$enable_egl" = "yes"; then
     LIBS="$saved_LIBS"
 
     libglesv1_cm="no"
-    PKG_CHECK_MODULES([GLESv1_CM], [glesv1_cm], [libglesv1_cm="yes"], [])
+    PKG_CHECK_MODULES([GLESv1_CM], [glesv1_cm], [libglesv1_cm="yes"], [libglesv1_cm="no"])
 fi
 AC_SUBST(EGL_DEPS_CFLAGS)
 AC_SUBST(EGL_DEPS_LIBS)
