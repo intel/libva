@@ -32,6 +32,6 @@ encode_SOURCES = capture.cpp avcenc.cpp TCPSocketClient.cpp
 capture_DEPENDENCIES =  $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
 
 valgrind:   $(bin_PROGRAMS)
-    for a in $(bin_PROGRAMS); do \
-        valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
-    done
+	for a in $(bin_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done
