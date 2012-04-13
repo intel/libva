@@ -36,6 +36,7 @@
 #include <getopt.h> /* getopt_long() */
 #include <fcntl.h> /* low-level i/o */
 #include <errno.h>
+#include <unistd.h>
 #include <malloc.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
