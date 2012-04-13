@@ -788,6 +788,7 @@ typedef enum
     VAImageBufferType			= 9,
     VAProtectedSliceDataBufferType	= 10,
     VAQMatrixBufferType                 = 11,
+    VAHuffmanTableBufferType            = 12,
 /* Following are encode buffer types */
     VAEncCodedBufferType		= 21,
     VAEncSequenceParameterBufferType	= 22,

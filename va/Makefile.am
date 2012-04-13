@@ -44,6 +44,7 @@ libva_source_h = \
 	va_backend_tpi.h	\
 	va_backend_vpp.h	\
 	va_compat.h		\
+	va_dec_jpeg.h		\
 	va_dummy.h		\
 	va_enc.h		\
 	va_enc_h264.h		\
