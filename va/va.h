@@ -511,6 +511,8 @@ typedef enum
     VAImageBufferType			= 9,
     VAProtectedSliceDataBufferType	= 10,
     VAQMatrixBufferType                 = 11,
+    VAHuffmanTableBufferType            = 12,
+
 /* Following are encode buffer types */
     VAEncCodedBufferType		= 21,
     VAEncSequenceParameterBufferType	= 22,
@@ -629,6 +631,7 @@ typedef struct _VAEncPictureParameterBufferJPEG
     VABufferID coded_buf;
 } VAEncPictureParameterBufferJPEG;
 
+#include <va/va_dec_jpeg.h>
 
 /****************************
  * MPEG-2 data structures
