@@ -20,7 +20,13 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va $(DRM_CFLAGS)
+INCLUDES = \
+	-DLINUX			\
+	-I$(top_srcdir)		\
+	-I$(top_srcdir)/va	\
+	$(X11_CFLAGS)		\
+	$(DRM_CFLAGS)		\
+	$(NULL)
 
 source_c = \
 	dri1_util.c		\
