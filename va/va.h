@@ -1917,6 +1917,8 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_YV12          0x32315659
 #define VA_FOURCC_P208          0x38303250
 #define VA_FOURCC_IYUV          0x56555949
+#define VA_FOURCC_YV24          0x34325659
+#define VA_FOURCC_YV32          0x32335659
 
 /* byte order */
 #define VA_LSB_FIRST		1
