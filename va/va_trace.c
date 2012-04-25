@@ -1145,40 +1145,7 @@ static void va_TraceVAIQMatrixBufferH264(
     va_TraceMsg(idx, NULL);
 }
 
-static void va_TraceVAEncSequenceParameterBufferH264Baseline(
-    VADisplay dpy,
-    VAContextID context,
-    VABufferID buffer,
-    VABufferType type,
-    unsigned int size,
-    unsigned int num_elements,
-    void *data)
-{
-    VAEncSequenceParameterBufferH264Baseline *p = (VAEncSequenceParameterBufferH264Baseline *)data;
-    DPY2INDEX(dpy);
-    
-    va_TraceMsg(idx, "VAEncSequenceParameterBufferH264Baseline\n");
-    
-    va_TraceMsg(idx, "\tseq_parameter_set_id = %d\n", p->seq_parameter_set_id);
-    va_TraceMsg(idx, "\tlevel_idc = %d\n", p->level_idc);
-    va_TraceMsg(idx, "\tintra_period = %d\n", p->intra_period);
-    va_TraceMsg(idx, "\tintra_idr_period = %d\n", p->intra_idr_period);
-    va_TraceMsg(idx, "\tmax_num_ref_frames = %d\n", p->max_num_ref_frames);
-    va_TraceMsg(idx, "\tpicture_width_in_mbs = %d\n", p->picture_width_in_mbs);
-    va_TraceMsg(idx, "\tpicture_height_in_mbs = %d\n", p->picture_height_in_mbs);
-    va_TraceMsg(idx, "\tbits_per_second = %d\n", p->bits_per_second);
-    va_TraceMsg(idx, "\tframe_rate = %d\n", p->frame_rate);
-    va_TraceMsg(idx, "\tinitial_qp = %d\n", p->initial_qp);
-    va_TraceMsg(idx, "\tmin_qp = %d\n", p->min_qp);
-    va_TraceMsg(idx, "\tbasic_unit_size = %d\n", p->basic_unit_size);
-    va_TraceMsg(idx, "\tvui_flag = %d\n", p->vui_flag);
-    va_TraceMsg(idx, NULL);
 
-    /* start a new sequce, coded log file can be truncated */
-    trace_context[idx].trace_sequence_start = 1;
-
-    return;
-}
 
 static void va_TraceVAEncSequenceParameterBufferH264(
     VADisplay dpy,
@@ -1245,31 +1212,6 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     return;
 }
 
-static void va_TraceVAEncPictureParameterBufferH264Baseline(
-    VADisplay dpy,
-    VAContextID context,
-    VABufferID buffer,
-    VABufferType type,
-    unsigned int size,
-    unsigned int num_elements,
-    void *data)
-{
-    VAEncPictureParameterBufferH264Baseline *p = (VAEncPictureParameterBufferH264Baseline *)data;
-    DPY2INDEX(dpy);
-    
-    va_TraceMsg(idx, "VAEncPictureParameterBufferH264Baseline\n");
-    va_TraceMsg(idx, "\treference_picture = 0x%08x\n", p->reference_picture);
-    va_TraceMsg(idx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
-    va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
-    va_TraceMsg(idx, "\tpicture_width = %d\n", p->picture_width);
-    va_TraceMsg(idx, "\tpicture_height = %d\n", p->picture_height);
-    va_TraceMsg(idx, "\tlast_picture = 0x%08x\n", p->last_picture);
-    va_TraceMsg(idx, NULL);
-
-    trace_context[idx].trace_codedbuf =  p->coded_buf;
-    
-    return;
-}
 
 static void va_TraceVAEncPictureParameterBufferH264(
     VADisplay dpy,
@@ -2048,16 +1990,10 @@ static void va_TraceH264Buf(
     case VAEncCodedBufferType:
         break;
     case VAEncSequenceParameterBufferType:
-        if (size == sizeof(VAEncSequenceParameterBufferH264Baseline))
-            va_TraceVAEncSequenceParameterBufferH264Baseline(dpy, context, buffer, type, size, num_elements, pbuf);
-        if (size == sizeof(VAEncSequenceParameterBufferH264))
-            va_TraceVAEncSequenceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAEncSequenceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncPictureParameterBufferType:
-        if (size == sizeof(VAEncPictureParameterBufferH264Baseline))
-            va_TraceVAEncPictureParameterBufferH264Baseline(dpy, context, buffer, type, size, num_elements, pbuf);
-        if (size == sizeof(VAEncPictureParameterBufferH264))
-            va_TraceVAEncPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAEncPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncSliceParameterBufferType:
         va_TraceVAEncSliceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);

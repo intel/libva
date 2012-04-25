@@ -49,7 +49,7 @@ sp<SurfaceComposerClient> client;
 sp<Surface> android_surface;
 sp<ISurface> android_isurface;
 sp<SurfaceControl> surface_ctrl;
-
+#if 0
 static int display_surface(int frame_id, int *exit_encode)
 {
     VAStatus va_status;
@@ -67,4 +67,4 @@ static int display_surface(int frame_id, int *exit_encode)
     *exit_encode = 0;
     return 0;
 }
-
+#endif

@@ -25,10 +25,8 @@
 /*
  * it is a real program to show how VAAPI encoding work,
  * It does H264 element stream level encoding on auto-generated YUV data
- *
  * gcc -o  h264encode  h264encode -lva -lva-x11
  * ./h264encode -w <width> -h <height> -n <frame_num>
- *
  */  
 #include <stdio.h>
 #include <string.h>
@@ -40,6 +38,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <va/va.h>
+#include <va/va_enc_h264.h>
 #ifdef ANDROID
 #include <va/va_android.h>
 #else
@@ -47,10 +46,10 @@
 #endif
 
 #define CHECK_VASTATUS(va_status,func)                                  \
-if (va_status != VA_STATUS_SUCCESS) {                                   \
-    fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
-    exit(1);                                                            \
-}
+    if (va_status != VA_STATUS_SUCCESS) {                                   \
+        fprintf(stderr,"%s:%s (%d) failed,exit\n", __func__, func, __LINE__); \
+        exit(1);                                                            \
+    }
 
 #include "../loadsurface.h"
 #define SURFACE_NUM 18 /* 16 surfaces for src, 2 surface for reconstructed/reference */
@@ -62,7 +61,7 @@ static  VAContextID context_id;
 static  Display *x11_display;
 static  int coded_fd;
 static  char coded_file[256];
-static  int frame_width,  frame_height;
+static  int frame_width=320,  frame_height=240;
 static  int win_width;
 static  int win_height;
 static  int frame_display = 0; /* display the frame during encoding */
@@ -82,11 +81,11 @@ static int upload_source_YUV_once_for_all()
     int box_width=8;
     int row_shift=0;
     int i;
-    
+
     for (i=0; i<SURFACE_NUM-2; i++) {
         printf("\rLoading data into surface %d.....", i);
         upload_surface(va_dpy, surface_id[i], box_width, row_shift, 0);
-        
+
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
     }
@@ -102,7 +101,7 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
     VACodedBufferSegment *buf_list = NULL;
     VAStatus va_status;
     unsigned int coded_size = 0;
-    
+
     va_status = vaMapBuffer(va_dpy,coded_buf,(void **)(&buf_list));
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     while (buf_list != NULL) {
@@ -132,7 +131,7 @@ static int save_coded_buf(VABufferID coded_buf, int current_frame, int frame_ski
         printf("(I)");
     else
         printf("(P)");
-    
+
     printf("(%06d bytes coded)",coded_size);
     if (frame_skipped)
         printf("(SKipped)");
@@ -155,7 +154,7 @@ enum {
 
 static int do_h264_encoding(void)
 {
-    VAEncPictureParameterBufferH264Baseline pic_h264;
+    VAEncPictureParameterBufferH264 pic_h264;
     VAEncSliceParameterBuffer slice_h264;
     VAStatus va_status;
     VABufferID seq_param_buf, pic_param_buf, slice_param_buf;
@@ -166,18 +165,9 @@ static int do_h264_encoding(void)
     int frame_skipped = 0;
     int i;
 
-
-    va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, frame_width, frame_height,
-        &surface_id[0], SURFACE_NUM,
-        NULL, 0
-    );
-    CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-    
     /* upload RAW YUV data into all surfaces */
     upload_source_YUV_once_for_all();
-    
+
     codedbuf_size = (frame_width * frame_height * 400) / (16*16);
 
     for (i = 0; i < CODEDBUF_NUM; i++) {
@@ -188,52 +178,61 @@ static int do_h264_encoding(void)
          * so VA won't maintain the coded buffer
          */
         va_status = vaCreateBuffer(va_dpy,context_id,VAEncCodedBufferType,
-                                   codedbuf_size, 1, NULL, &coded_buf[i]);
-        CHECK_VASTATUS(va_status,"vaBeginPicture");
+                codedbuf_size, 1, NULL, &coded_buf[i]);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
     }
 
     src_surface = 0;
     /* the last two frames are reference/reconstructed frame */
     dst_surface = SURFACE_NUM - 1;
     ref_surface = SURFACE_NUM - 2;
-    
+
     for (i = 0; i < frame_count; i++) {
         va_status = vaBeginPicture(va_dpy, context_id, surface_id[src_surface]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
 
         if (i == 0) {
-            VAEncSequenceParameterBufferH264Baseline seq_h264 = {0};
-            VABufferID seq_param_buf;
-            
+            VAEncSequenceParameterBufferH264 seq_h264;
+            VAEncMiscParameterRateControl rc_h264;
+            VABufferID seq_param_buf, rc_param_buf;
+
+
             seq_h264.level_idc = SH_LEVEL_3;
             seq_h264.picture_width_in_mbs = frame_width / 16;
             seq_h264.picture_height_in_mbs = frame_height / 16;
             seq_h264.bits_per_second = frame_bitrate;
-            seq_h264.frame_rate = frame_rate;
-            seq_h264.initial_qp = initial_qp;
-            seq_h264.min_qp = minimal_qp;
-            seq_h264.basic_unit_size = 0;
+            //seq_h264.frame_rate = frame_rate;
+            rc_h264.initial_qp = initial_qp;
+            rc_h264.min_qp = minimal_qp;
+            rc_h264.basic_unit_size = 0;
+
             seq_h264.intra_period = intra_count;
-            
+
             va_status = vaCreateBuffer(va_dpy, context_id,
-                                       VAEncSequenceParameterBufferType,
-                                       sizeof(seq_h264),1,&seq_h264,&seq_param_buf);
+                    VAEncSequenceParameterBufferType,
+                    sizeof(seq_h264),1,&seq_h264,&seq_param_buf);
             CHECK_VASTATUS(va_status,"vaCreateBuffer");;
+            va_status = vaCreateBuffer(va_dpy, context_id,
+                    VAEncMiscParameterBufferType,
+                    sizeof(rc_h264),1,&rc_h264,&rc_param_buf);
+            CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
             va_status = vaRenderPicture(va_dpy,context_id, &seq_param_buf, 1);
             CHECK_VASTATUS(va_status,"vaRenderPicture");;
+            va_status = vaRenderPicture(va_dpy,context_id, &rc_param_buf, 1);
+            CHECK_VASTATUS(va_status,"vaRenderPicture");;        
         }
 
 
-        pic_h264.reference_picture = surface_id[ref_surface];
-        pic_h264.reconstructed_picture= surface_id[dst_surface];
+        pic_h264.ReferenceFrames[0].picture_id= surface_id[ref_surface];
+        pic_h264.CurrPic.picture_id= surface_id[dst_surface];
         pic_h264.coded_buf = coded_buf[codedbuf_idx];
-        pic_h264.picture_width = frame_width;
-        pic_h264.picture_height = frame_height;
+        //pic_h264.picture_width = frame_width;
+        //pic_h264.picture_height = frame_height;
         pic_h264.last_picture = (i==frame_count);
-        
+
         va_status = vaCreateBuffer(va_dpy, context_id,VAEncPictureParameterBufferType,
-                                   sizeof(pic_h264),1,&pic_h264,&pic_param_buf);
+                sizeof(pic_h264),1,&pic_h264,&pic_param_buf);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");;
 
         va_status = vaRenderPicture(va_dpy,context_id, &pic_param_buf, 1);
@@ -245,12 +244,12 @@ static int do_h264_encoding(void)
         slice_h264.slice_flags.bits.is_intra = ((i % intra_count) == 0);
         slice_h264.slice_flags.bits.disable_deblocking_filter_idc = 0;
         va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
-                                   sizeof(slice_h264),1,&slice_h264,&slice_param_buf);
+                sizeof(slice_h264),1,&slice_h264,&slice_param_buf);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");;
-        
+
         va_status = vaRenderPicture(va_dpy,context_id, &slice_param_buf, 1);
         CHECK_VASTATUS(va_status,"vaRenderPicture");
-        
+
         va_status = vaEndPicture(va_dpy,context_id);
         CHECK_VASTATUS(va_status,"vaEndPicture");;
 
@@ -262,7 +261,7 @@ static int do_h264_encoding(void)
         frame_skipped = (surface_status & VASurfaceSkipped);
 
         save_coded_buf(coded_buf[codedbuf_idx], i, frame_skipped);
-        
+#if 0        
         /* should display reconstructed frame, but just diplay source frame */
         if (frame_display) {
             int exit_encode = 0;
@@ -271,7 +270,7 @@ static int do_h264_encoding(void)
             if (exit_encode)
                 frame_count = i;
         }
-        
+#endif        
         /* use next surface */
         src_surface++;
         if (src_surface == (SURFACE_NUM - 2))
@@ -281,7 +280,7 @@ static int do_h264_encoding(void)
         codedbuf_idx++;
         if (codedbuf_idx == (CODEDBUF_NUM - 1))
             codedbuf_idx = 0;
-        
+
         /* if a frame is skipped, current frame still use last reference frame */
         if (frame_skipped == 0) {
             /* swap ref/dst */
@@ -304,55 +303,55 @@ int main(int argc,char **argv)
     VAStatus va_status;
     char c;
 
-    strcpy(coded_file, "/tmp/demo.264");
+    strcpy(coded_file, "/sdcard/1.264");
     while ((c =getopt(argc,argv,"w:h:n:p:f:r:q:s:o:d?") ) != EOF) {
         switch (c) {
-                case 'w':
-                    frame_width = atoi(optarg);
-                    break;
-                case 'h':
-                    frame_height = atoi(optarg);
-                    break;
-                case 'n':
-                    frame_count = atoi(optarg);
-                    break;
-                case 'p':
-                    intra_count = atoi(optarg);
-                    break;
-                case 'f':
-                    frame_rate = atoi(optarg);
-                    break;
-                case 'b':
-                    frame_bitrate = atoi(optarg);
-                    break;
-                case 'q':
-                    initial_qp = atoi(optarg);
-                    break;
-                case 's':
-                    minimal_qp = atoi(optarg);
-                    break;
-                case 'd':
-                    frame_display = 1;
-                    break;
-                case 'o':
-                    strcpy(coded_file, optarg);
-                    break;
-                case ':':
-                case '?':
-                    printf("./h264encode <options>\n");
-                    printf("   -w -h: resolution\n");
-                    printf("   -n frame number\n"); 
-                    printf("   -d display the source frame\n");
-                    printf("   -p P frame count between two I frames\n");
-                    printf("   -f frame rate\n");
-                    printf("   -r bit rate\n");
-                    printf("   -q initial QP\n");
-                    printf("   -s maximum QP\n");
-                    printf("   -o coded file\n");
-                    exit(0);
+            case 'w':
+                frame_width = atoi(optarg);
+                break;
+            case 'h':
+                frame_height = atoi(optarg);
+                break;
+            case 'n':
+                frame_count = atoi(optarg);
+                break;
+            case 'p':
+                intra_count = atoi(optarg);
+                break;
+            case 'f':
+                frame_rate = atoi(optarg);
+                break;
+            case 'b':
+                frame_bitrate = atoi(optarg);
+                break;
+            case 'q':
+                initial_qp = atoi(optarg);
+                break;
+            case 's':
+                minimal_qp = atoi(optarg);
+                break;
+            case 'd':
+                frame_display = 1;
+                break;
+            case 'o':
+                strcpy(coded_file, optarg);
+                break;
+            case ':':
+            case '?':
+                printf("./h264encode <options>\n");
+                printf("   -w -h: resolution\n");
+                printf("   -n frame number\n"); 
+                printf("   -d display the source frame\n");
+                printf("   -p P frame count between two I frames\n");
+                printf("   -f frame rate\n");
+                printf("   -r bit rate\n");
+                printf("   -q initial QP\n");
+                printf("   -s maximum QP\n");
+                printf("   -o coded file\n");
+                exit(0);
         }
     }
-    
+
 #ifdef ANDROID
     x11_display = (Display*)malloc(sizeof(Display));
     *(x11_display) = 0x18c34078;
@@ -366,7 +365,7 @@ int main(int argc,char **argv)
     CHECK_VASTATUS(va_status, "vaInitialize");
 
     vaQueryConfigEntrypoints(va_dpy, VAProfileH264Baseline, entrypoints, 
-                             &num_entrypoints);
+            &num_entrypoints);
     for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
         if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice)
             break;
@@ -380,7 +379,7 @@ int main(int argc,char **argv)
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
     vaGetConfigAttributes(va_dpy, VAProfileH264Baseline, VAEntrypointEncSlice,
-                          &attrib[0], 2);
+            &attrib[0], 2);
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
         /* not find desired YUV420 RT format */
         assert(0);
@@ -392,23 +391,23 @@ int main(int argc,char **argv)
     }
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = VA_RC_VBR; /* set to desired RC mode */
-    
+
     va_status = vaCreateConfig(va_dpy, VAProfileH264Baseline, VAEntrypointEncSlice,
-                              &attrib[0], 2,&config_id);
+            &attrib[0], 2,&config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
-    
+
     va_status = vaCreateSurfaces(
-        va_dpy,
-        VA_RT_FORMAT_YUV420, frame_width, frame_height,
-        &surface_id[0], SURFACE_NUM,
-        NULL, 0
-    );
+            va_dpy,
+            VA_RT_FORMAT_YUV420, frame_width, frame_height,
+            &surface_id[0], SURFACE_NUM,
+            NULL, 0
+            );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
-    
+
     /* Create a context for this decode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
-                                frame_width, ((frame_height+15)/16)*16,
-                                VA_PROGRESSIVE,&surface_id[0],SURFACE_NUM,&context_id);
+            frame_width, ((frame_height+15)/16)*16,
+            VA_PROGRESSIVE,&surface_id[0],SURFACE_NUM,&context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
 
     /* store coded data into a file */
@@ -419,22 +418,22 @@ int main(int argc,char **argv)
     }
 
     printf("Coded %d frames, %dx%d, save the coded file into %s\n",
-           frame_count, frame_width, frame_height, coded_file);
+            frame_count, frame_width, frame_height, coded_file);
     do_h264_encoding();
 
     printf("\n\n");
-    
+
     vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);
     vaDestroyContext(va_dpy,context_id);
     vaDestroyConfig(va_dpy,config_id);
-    
+
     vaTerminate(va_dpy);
-    
+
 #ifdef ANDROID
     free(x11_display);
 #else
     XCloseDisplay(x11_display);
 #endif
-    
+
     return 0;
 }

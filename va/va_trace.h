@@ -29,6 +29,8 @@
 extern "C" {
 #endif
 
+#include "va/va.h"
+
 extern int trace_flag;
 
 #define VA_TRACE_FLAG_LOG             0x1

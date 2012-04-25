@@ -51,7 +51,11 @@ static  VASurfaceID surface_id[SURFACE_NUM];
 static  Window display_win = 0;
 static  int win_width;
 static  int win_height;
-static  int frame_width=352, frame_height=288;
+
+static int display_surface(int frame_id, int *exit_encode);
+
+#include "h264encode_common.c"
+
 
 static int display_surface(int frame_id, int *exit_encode)
 {
@@ -96,4 +100,3 @@ static int display_surface(int frame_id, int *exit_encode)
     return 0;
 }
 
-#include "h264encode_common.c"

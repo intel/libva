@@ -1558,38 +1558,6 @@ typedef struct _VAEncSliceParameterBuffer
     } slice_flags;
 } VAEncSliceParameterBuffer;
 
-/****************************
- * H.264 specific encode data structures
- ****************************/
-
-typedef struct _VAEncSequenceParameterBufferH264Baseline
-{
-    unsigned char seq_parameter_set_id;
-    unsigned char level_idc;
-    unsigned int intra_period;
-    unsigned int intra_idr_period;
-    unsigned int max_num_ref_frames;
-    unsigned int picture_width_in_mbs;
-    unsigned int picture_height_in_mbs;
-    unsigned int bits_per_second;
-    unsigned int frame_rate;
-    unsigned int initial_qp;
-    unsigned int min_qp;
-    unsigned int basic_unit_size;
-    unsigned char vui_flag;
-} VAEncSequenceParameterBufferH264Baseline;
-
-#define H264_LAST_PICTURE_EOSEQ     0x01 /* the last picture in the sequence */
-#define H264_LAST_PICTURE_EOSTREAM  0x02 /* the last picture in the stream */
-typedef struct _VAEncPictureParameterBufferH264Baseline
-{
-    VASurfaceID reference_picture;
-    VASurfaceID reconstructed_picture;
-    VABufferID coded_buf;
-    unsigned short picture_width;
-    unsigned short picture_height;
-    unsigned char last_picture;
-} VAEncPictureParameterBufferH264Baseline;
 
 /****************************
  * H.263 specific encode data structures
