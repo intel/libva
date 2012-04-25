@@ -62,11 +62,13 @@ LOCAL_C_INCLUDES += \
 LOCAL_COPY_HEADERS := \
 	va.h \
 	va_backend.h \
+	va_backend_vpp.h
 	va_dec_jpeg.h \
 	va_drmcommon.h \
 	va_enc.h \
 	va_enc_h264.h \
-	va_version.h
+	va_version.h \
+	va_vpp.h
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
