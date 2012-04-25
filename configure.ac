@@ -257,6 +257,7 @@ echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
+echo build dummy backend .............. : $enable_dummy_backend
 echo Build dummy driver ............... : $enable_dummy_driver
 echo Build documentation .............. : $enable_docs
 echo
