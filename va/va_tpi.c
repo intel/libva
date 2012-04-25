@@ -39,88 +39,18 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-/* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
- * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
- * of the frame, and to determine if the frame can be wrapped as a VA surface
- *
- * Application should make sure the frame is idle before the frame is passed into VA stack
- * and also a vaSyncSurface should be called before application tries to access the frame
- * from CI stack
- */
-VAStatus vaCreateSurfaceFromCIFrame (
-    VADisplay dpy,
-    unsigned long frame_id,
-    VASurfaceID *surface	/* out */
-)
-{
-  VADriverContextP ctx;
-  struct VADriverVTableTPI *tpi;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-  
-  tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
-  if (tpi && tpi->vaCreateSurfaceFromCIFrame) {
-      return tpi->vaCreateSurfaceFromCIFrame( ctx, frame_id, surface );
-  } else
-      return VA_STATUS_ERROR_UNIMPLEMENTED;
-  
-}
-
-/* Wrap a V4L2 buffer as a VA surface, so that V4L2 camera, VA encode
- * can share the data without copy
- * The VA driver should query the camera device from v4l2_fd to see
- * if camera device memory/buffer can be wrapped into a VA surface
- * Buffer information is passed in by v4l2_fmt and v4l2_buf structure,
- * VA driver also needs do further check if the buffer can meet encode
- * hardware requirement, such as dimension, fourcc, stride, etc
- *
- * Application should make sure the buffer is idle before the frame into VA stack
- * and also a vaSyncSurface should be called before application tries to access the frame
- * from V4L2 stack
- */
-VAStatus vaCreateSurfaceFromV4L2Buf(
-    VADisplay dpy,
-    int v4l2_fd,         /* file descriptor of V4L2 device */
-    struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
-    struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
-    VASurfaceID *surface	       /* out */
-)
-{
-  VADriverContextP ctx;
-  struct VADriverVTableTPI *tpi;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-  
-  tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
-  if (tpi && tpi->vaCreateSurfaceFromV4L2Buf) {
-      return tpi->vaCreateSurfaceFromV4L2Buf( ctx, v4l2_fd, v4l2_fmt, v4l2_buf, surface );
-  } else
-      return VA_STATUS_ERROR_UNIMPLEMENTED;
-}
-
 
 /*
- * The surfaces could be shared and accessed with extern devices
- * which has special requirements, e.g. stride alignment
- * This API is used to force libVA video surfaces are allocated
- * according to these external requirements
- * Special API for V4L2 user pointer support
+ * Create surfaces with special inputs/requirements
  */
-VAStatus vaCreateSurfacesForUserPtr(
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    int num_surfaces,
-    VASurfaceID *surfaces,       /* out */
-    unsigned size, /* total buffer size need to be allocated */
-    unsigned int fourcc, /* expected fourcc */
-    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
-    unsigned int chroma_u_stride, /* chroma stride */
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset, /* could be 0 */
-    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
-    unsigned int chroma_v_offset
+VAStatus vaCreateSurfacesWithAttribute (
+        VADisplay dpy,
+        int width,
+        int height,
+        int format,
+        int num_surfaces,
+        VASurfaceID *surfaces,       /* out */
+        VASurfaceAttributeTPI *attribute_tpi
 )
 {
   VADriverContextP ctx;
@@ -129,44 +59,8 @@ VAStatus vaCreateSurfacesForUserPtr(
   ctx = CTX(dpy);
 
   tpi = (struct VADriverVTableTPI *)ctx->vtable_tpi;
-  if (tpi && tpi->vaCreateSurfacesForUserPtr) {
-      return tpi->vaCreateSurfacesForUserPtr( ctx, width, height, format, num_surfaces,
-                                              surfaces,size, fourcc, luma_stride, chroma_u_stride,
-                                              chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset );
-  } else
-      return VA_STATUS_ERROR_UNIMPLEMENTED;
-}
-
-/*
- * Create surface from the Kernel buffer
- */
-VAStatus vaCreateSurfaceFromKBuf(
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    VASurfaceID *surface,       /* out */
-    unsigned int kbuf_handle, /* kernel buffer handle*/
-    unsigned size, /* kernel buffer size */
-    unsigned int kBuf_fourcc, /* expected fourcc */
-    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
-    unsigned int chroma_u_stride, /* chroma stride */
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset, /* could be 0 */
-    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
-    unsigned int chroma_v_offset
-)
-{
-  VADriverContextP ctx;
-  struct VADriverVTableTPI *tpi;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-
-  tpi = (struct VADriverVTableTPI *)ctx->vtable_tpi;
-  if (tpi && tpi->vaCreateSurfaceFromKBuf) {
-      return tpi->vaCreateSurfaceFromKBuf( ctx, width, height, format, surface, kbuf_handle,
-                                              size, kBuf_fourcc, luma_stride, chroma_u_stride,
-                                              chroma_v_stride, luma_offset, chroma_u_offset, chroma_v_offset );
+  if (tpi && tpi->vaCreateSurfacesWithAttribute) {
+      return tpi->vaCreateSurfacesWithAttribute( ctx, width, height, format, num_surfaces, surfaces, attribute_tpi);
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
@@ -198,7 +92,7 @@ VAStatus vaPutSurfaceBuf (
   tpi = ( struct VADriverVTableTPI *)ctx->vtable_tpi;
   if (tpi && tpi->vaPutSurfaceBuf) {
       return tpi->vaPutSurfaceBuf( ctx, surface, data, data_len, srcx, srcy, srcw, srch,
-                                      destx, desty, destw, desth, cliprects, number_cliprects, flags );
+                                  destx, desty, destw, desth, cliprects, number_cliprects, flags );
   } else
       return VA_STATUS_ERROR_UNIMPLEMENTED;
 }

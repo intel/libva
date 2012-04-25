@@ -21,34 +21,51 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+#ifndef _VA_TPI_H_
+#define _VA_TPI_H_
 
-/* Wrap a CI (camera imaging) frame as a VA surface to share captured video between camear
- * and VA encode. With frame_id, VA driver need to call CI interfaces to get the information
- * of the frame, and to determine if the frame can be wrapped as a VA surface
- *
- * Application should make sure the frame is idle before the frame is passed into VA stack
- * and also a vaSyncSurface should be called before application tries to access the frame
- * from CI stack
- */
 #include <va/va.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-VAStatus vaCreateSurfaceFromCIFrame (
-    VADisplay dpy,
-    unsigned long frame_id,
-    VASurfaceID *surface	/* out */
-);
 
-VAStatus vaCreateSurfaceFromV4L2Buf(
-    VADisplay dpy,
-    int v4l2_fd,         /* file descriptor of V4L2 device */
-    struct v4l2_format *v4l2_fmt,       /* format of V4L2 */
-    struct v4l2_buffer *v4l2_buf,       /* V4L2 buffer */
-    VASurfaceID *surface	/* out */
-);
+typedef enum {
+    VAExternalMemoryNULL, /* it is not external buffer, but requires the implementation allocates
+                           * the surface with the input attribute
+                           */
+    VAExternalMemoryV4L2Buffer,
+    VAExternalMemoryCIFrame, /* the memory is from camera frames and buffers points the frame ID list */
+    VAExternalMemoryUserPointer, /* the memory is malloc-ed and buffers points to the buffers */
+    VAExternalMemoryKernelDRMBufffer, /* the memory is from kernel DRM buffers and buffers points the
+                                       * DRM buffer handle list
+                                       */
+    VAExternalMemoryAndroidGrallocBuffer, /* the memory is from Android Gralloc memory, and buffers points
+                                           * the gralloc native_handle_t list
+                                           */
+} VASurfaceMemoryType;
+
+typedef struct _VASurfaceAttributeTPI {
+    VASurfaceMemoryType type;
+    unsigned int width;
+    unsigned int height;
+    unsigned int size;
+    unsigned int pixel_format; /* buffer format */
+    unsigned int tiling; /* the memory is tiling or not */
+    unsigned int luma_stride; /* luma stride, could be width aligned with a special value */
+    unsigned int chroma_u_stride; /* chroma stride */
+    unsigned int chroma_v_stride;
+    unsigned int luma_offset; /* could be 0 */
+    unsigned int chroma_u_offset; /* U offset from the beginning of the memory */
+    unsigned int chroma_v_offset; /* V offset from the beginning of the memory */
+    unsigned int count; /* buffer count for surface creation */
+    unsigned int *buffers; /* buffer handles or user pointers */
+    unsigned int reserved[4]; /* used to pass additional information, like
+                               * Android native window pointer
+                               */
+} VASurfaceAttributeTPI;
+
 
 VAStatus vaPutSurfaceBuf (
     VADisplay dpy,
@@ -69,51 +86,18 @@ VAStatus vaPutSurfaceBuf (
 );
 
 
-/*
- * The surfaces could be shared and accessed with extern devices
- * which has special requirements, e.g. stride alignment
- * This API is used to force libVA video surfaces are allocated
- * according to these external requirements
- * Special API for V4L2 user pointer support
- */
-VAStatus vaCreateSurfacesForUserPtr(
+VAStatus vaCreateSurfacesWithAttribute (
     VADisplay dpy,
     int width,
     int height,
     int format,
     int num_surfaces,
     VASurfaceID *surfaces,       /* out */
-    unsigned size, /* total buffer size need to be allocated */
-    unsigned int fourcc, /* expected fourcc */
-    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
-    unsigned int chroma_u_stride, /* chroma stride */
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset, /* could be 0 */
-    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
-    unsigned int chroma_v_offset
+    VASurfaceAttributeTPI *attribute_tpi
 );
-
-/*
- * Create surface from the Kernel buffer
- */
-VAStatus vaCreateSurfaceFromKBuf(
-    VADisplay dpy,
-    int width,
-    int height,
-    int format,
-    VASurfaceID *surface,       /* out */
-    unsigned int kbuf_handle, /* kernel buffer handle*/
-    unsigned size, /* kernel buffer size */
-    unsigned int kBuf_fourcc, /* expected fourcc */
-    unsigned int luma_stride, /* luma stride, could be width aligned with a special value */
-    unsigned int chroma_u_stride, /* chroma stride */
-    unsigned int chroma_v_stride,
-    unsigned int luma_offset, /* could be 0 */
-    unsigned int chroma_u_offset, /* UV offset from the beginning of the memory */
-    unsigned int chroma_v_offset
-);
-
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif 
