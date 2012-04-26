@@ -239,6 +239,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterNone = 0,
     /** \brief Noise reduction filter. */
     VAProcFilterNoiseReduction,
+    /** \brief Deblocking filter. */
+    VAProcFilterDeblocking,
     /** \brief Deinterlacing filter. */
     VAProcFilterDeinterlacing,
     /** \brief Sharpening filter. */
@@ -247,6 +249,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterColorBalance,
     /** \brief Color standard conversion. */
     VAProcFilterColorStandard,
+    /** \brief Frame rate conversion. */
+    VAProcFilterFrameRateConversion,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -606,6 +610,23 @@ typedef struct _VAProcFilterParameterBufferColorStandard {
     /** \brief Color standard to use. */
     VAProcColorStandardType     standard;
 } VAProcFilterParameterBufferColorStandard;
+
+/** \brief Frame rate conversion filter parametrization. */
+typedef struct _VAProcFilterParamterBufferFrameRateConversion {
+    /** \brief filter type. Shall be set to #VAProcFilterFrameRateConversion. */
+    VAProcFilterType            type;
+    /** \brief FPS of input sequence. */
+    unsigned int                input_fps;
+    /** \brief FPS of output sequence. */
+    unsigned int                output_fps;
+    /** \brief Number of output frames in addition to the first output frame. */
+    unsigned int num_output_frames;
+    /** 
+     * \brief Array to store output frames in addition to the first one. 
+     * The first output frame is stored in the render target from vaBeginPicture(). 
+     */
+    VASurfaceID* output_frames;
+} VAProcFilterParameterBufferFrameRateConversion;
 
 /**
  * \brief Default filter cap specification (single range value).
