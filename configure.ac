@@ -206,8 +206,12 @@ if test "$enable_egl" = "yes"; then
     PKG_CHECK_MODULES([EGL_DEPS], [egl], [], [EGL_DEPS_LIBS="-lEGL"])
     CFLAGS="$CFLAGS $EGL_DEPS_CFLAGS"
     LIBS="$LIBS $EGL_DEPS_LIBS"
-    AC_CHECK_HEADERS([EGL/egl.h])
-    AC_CHECK_LIB(EGL, eglGetDisplay, [USE_EGL="yes"])
+    AC_CHECK_HEADERS([EGL/egl.h], [USE_EGL="yes"], [USE_EGL="no"])
+
+    if test "x$USE_EGL" = "xyes"; then
+        AC_CHECK_LIB(EGL, eglGetDisplay, [USE_EGL="yes"], [USE_EGL="no"])
+    fi
+        
     CFLAGS="$saved_CFLAGS"
     LIBS="$saved_LIBS"
 
