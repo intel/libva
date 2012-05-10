@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va
+INCLUDES = -DLINUX -I$(top_srcdir) -I$(top_srcdir)/va $(EGL_DEPS_CFLAGS)
 
 source_c = \
 	va_egl.c		\
