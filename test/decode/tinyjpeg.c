@@ -84,7 +84,7 @@
 
 /* Global variable to return the last error found while deconding */
 static char error_string[256];
-static VAHuffmanTableParameterBufferJPEG default_huffman_table_param={
+static VAHuffmanTableBufferJPEG default_huffman_table_param={
     huffman_table:
     {
         // lumiance component
@@ -630,11 +630,11 @@ int tinyjpeg_decode(struct jdec_private *priv)
                               &pic_param_buf);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAIQMatrixParameterBufferJPEG iq_matrix;
+    VAIQMatrixBufferJPEG iq_matrix;
     const unsigned int num_quant_tables =
         MIN(COMPONENTS, ARRAY_ELEMS(iq_matrix.load_quantiser_table));
     // todo, only mask it if non-default quant matrix is used. do we need build default quant matrix?
-    memset(&iq_matrix, 0, sizeof(VAIQMatrixParameterBufferJPEG));
+    memset(&iq_matrix, 0, sizeof(VAIQMatrixBufferJPEG));
     for (i = 0; i < num_quant_tables; i++) {
         if (!priv->Q_tables_valid[i])
             continue;
@@ -643,16 +643,16 @@ int tinyjpeg_decode(struct jdec_private *priv)
             iq_matrix.quantiser_table[i][j] = priv->Q_tables[i][j];
     }
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAIQMatrixBufferType, // VAIQMatrixParameterBufferJPEG?
-                              sizeof(VAIQMatrixParameterBufferJPEG),
+                              VAIQMatrixBufferType, // VAIQMatrixBufferJPEG?
+                              sizeof(VAIQMatrixBufferJPEG),
                               1, &iq_matrix,
                               &iqmatrix_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAHuffmanTableParameterBufferJPEG huffman_table;
+    VAHuffmanTableBufferJPEG huffman_table;
     const unsigned int num_huffman_tables =
         MIN(COMPONENTS, ARRAY_ELEMS(huffman_table.load_huffman_table));
-    memset(&huffman_table, 0, sizeof(VAHuffmanTableParameterBufferJPEG));
+    memset(&huffman_table, 0, sizeof(VAHuffmanTableBufferJPEG));
     assert(sizeof(huffman_table.huffman_table[0].num_dc_codes) ==
            sizeof(priv->HTDC[0].bits));
     assert(sizeof(huffman_table.huffman_table[0].dc_values[0]) ==
@@ -672,8 +672,8 @@ int tinyjpeg_decode(struct jdec_private *priv)
     }
 
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAHuffmanTableBufferType, // VAHuffmanTableParameterBufferJPEG?
-                              sizeof(VAHuffmanTableParameterBufferJPEG),
+                              VAHuffmanTableBufferType, // VAHuffmanTableBufferJPEG?
+                              sizeof(VAHuffmanTableBufferJPEG),
                               1, &huffman_table,
                               &huffmantable_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");

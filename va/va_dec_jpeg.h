@@ -101,12 +101,12 @@ typedef struct _VAPictureParameterBufferJPEG {
  * WIP: this is work-in-progress API subject to change, and only
  * suitable to Baseline profile.
  */
-typedef struct _VAIQMatrixParameterBufferJPEG {
+typedef struct _VAIQMatrixBufferJPEG {
     /** \brief Specifies which #quantiser_table is valid. */
     unsigned char       load_quantiser_table[4];
     /** \brief Quanziation tables indexed by table identifier (Tqi). */
     unsigned char       quantiser_table[4][64];
-} VAIQMatrixParameterBufferJPEG;
+} VAIQMatrixBufferJPEG;
 
 /**
  * \brief Huffman table for JPEG decoding.
@@ -123,7 +123,7 @@ typedef struct _VAIQMatrixParameterBufferJPEG {
  * WIP: this is work-in-progress API subject to change, and only
  * suitable to Baseline profile.
  */
-typedef struct _VAHuffmanTableParameterBufferJPEG {
+typedef struct _VAHuffmanTableBufferJPEG {
     /** \brief Specifies which #huffman_table is valid. */
     unsigned char       load_huffman_table[2];
     /** \brief Huffman tables indexed by table identifier (Th). */
@@ -143,7 +143,7 @@ typedef struct _VAHuffmanTableParameterBufferJPEG {
         unsigned char   ac_values[162];
         /**@}*/
     }                   huffman_table[2];
-} VAHuffmanTableParameterBufferJPEG;
+} VAHuffmanTableBufferJPEG;
 
 /**
  * \brief Slice parameter for JPEG decoding.
