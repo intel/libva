@@ -48,6 +48,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <va/va.h>
+#include <va/va_dec_jpeg.h>
 #include <va/va_x11.h>
 #include <X11/Xlib.h>
 
@@ -59,6 +60,14 @@
 #define BLACK_Y 0
 #define BLACK_U 127
 #define BLACK_V 127
+
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#define ARRAY_ELEMS(a) (sizeof(a) / sizeof((a)[0]))
 
 #if DEBUG
 #define trace(fmt, args...) do { \
@@ -75,15 +84,15 @@
 
 /* Global variable to return the last error found while deconding */
 static char error_string[256];
-static VAHuffmanTableBufferJPEG default_huffman_table_param={
+static VAHuffmanTableParameterBufferJPEG default_huffman_table_param={
     huffman_table:
     {
         // lumiance component
         {
-            dc_bits:{0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
-            dc_huffval:{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
-            ac_bits:{0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
-            ac_huffval:{
+            num_dc_codes:{0,1,5,1,1,1,1,1,1,0,0,0}, // 12 bits is ok for baseline profile
+            dc_values:{0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b},
+            num_ac_codes:{0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125},
+            ac_values:{
               0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
               0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
               0x22, 0x71, 0x14, 0x32, 0x81, 0x91, 0xa1, 0x08,
@@ -109,10 +118,10 @@ static VAHuffmanTableBufferJPEG default_huffman_table_param={
         },
         // chrom component
         {
-            dc_bits:{0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
-            dc_huffval:{0,1,2,3,4,5,6,7,8,9,0xa,0xb},
-            ac_bits:{0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
-            ac_huffval:{
+            num_dc_codes:{0,3,1,1,1,1,1,1,1,1,1,0}, // 12 bits is ok for baseline profile
+            dc_values:{0,1,2,3,4,5,6,7,8,9,0xa,0xb},
+            num_ac_codes:{0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119},
+            ac_values:{
               0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
               0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
               0x13, 0x22, 0x32, 0x81, 0x08, 0x14, 0x42, 0x91,
@@ -149,10 +158,10 @@ static int build_default_huffman_tables(struct jdec_private *priv)
 		return 0;
 
     for (i = 0; i < 4; i++) {
-        memcpy(priv->HTDC[i].bits, default_huffman_table_param.huffman_table[i].dc_bits, 16);
-        memcpy(priv->HTDC[i].values, default_huffman_table_param.huffman_table[i].dc_huffval, 16);
-        memcpy(priv->HTAC[i].bits, default_huffman_table_param.huffman_table[i].ac_bits, 16);
-        memcpy(priv->HTAC[i].values, default_huffman_table_param.huffman_table[i].ac_huffval, 256);
+        memcpy(priv->HTDC[i].bits, default_huffman_table_param.huffman_table[i].num_dc_codes, 16);
+        memcpy(priv->HTDC[i].values, default_huffman_table_param.huffman_table[i].dc_values, 16);
+        memcpy(priv->HTAC[i].bits, default_huffman_table_param.huffman_table[i].num_ac_codes, 16);
+        memcpy(priv->HTAC[i].values, default_huffman_table_param.huffman_table[i].ac_values, 256);
     }
 	priv->default_huffman_table_initialized = 1;
 	return 0;
@@ -203,6 +212,7 @@ static int parse_DQT(struct jdec_private *priv, const unsigned char *stream)
        error("No more 4 quantization table is supported (got %d)\n", qi);
 #endif
      memcpy(priv->Q_tables[qi&0x0F], stream, 64);
+     priv->Q_tables_valid[qi & 0x0f] = 1;
      stream += 64;
    }
   trace("< DQT marker\n");
@@ -314,9 +324,11 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
      Th = index & 0x0f;
      if (Tc) {
         memcpy(priv->HTAC[index & 0xf].bits, stream, 16);
+        priv->HTAC_valid[index & 0xf] = 1;
      }
      else {
          memcpy(priv->HTDC[index & 0xf].bits, stream, 12);
+         priv->HTDC_valid[index & 0xf] = 1;
      }
 
      count = 0;
@@ -535,7 +547,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
     VAStatus va_status;
     int max_h_factor, max_v_factor;
     int putsurface=1;
-    unsigned int i;
+    unsigned int i, j;
 
     x11_display = XOpenDisplay(":0.0");
 
@@ -576,8 +588,9 @@ int tinyjpeg_decode(struct jdec_private *priv)
                               &attrib, 1,&config_id);
     CHECK_VASTATUS(va_status, "vaQueryConfigEntrypoints");
 
-    va_status = vaCreateSurfaces(va_dpy,priv->width,priv->height, //alignment?
-                                VA_RT_FORMAT_YUV420, 1, &surface_id);
+    va_status = vaCreateSurfaces(va_dpy,VA_RT_FORMAT_YUV420,
+                                 priv->width,priv->height, //alignment?
+                                 &surface_id, 1, NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
     /* Create a context for this decode pipe */
@@ -588,14 +601,12 @@ int tinyjpeg_decode(struct jdec_private *priv)
                                1,
                                &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
-
     
     VAPictureParameterBufferJPEG pic_param;
     memset(&pic_param, 0, sizeof(pic_param));
-    pic_param.type = VA_JPEG_SOF0; // tinyjpeg support baseline profile only, does it match va capability?
     pic_param.sample_precision = 8; // tinyjpeg support baseline profile only, does it match va capability?
-    pic_param.image_width = priv->width;
-    pic_param.image_height = priv->height;
+    pic_param.picture_width = priv->width;
+    pic_param.picture_height = priv->height;
     pic_param.num_components = priv->nf_components;
 
     for (i=0; i<pic_param.num_components; i++) { // tinyjpeg support 3 components only, does it match va?
@@ -605,12 +616,12 @@ int tinyjpeg_decode(struct jdec_private *priv)
         pic_param.components[i].quantiser_table_selector = priv->component_infos[i].quant_table_index;
     }
     
-    pic_param.roi.enabled = 0;
-    pic_param.roi.start_x = 0;
-    pic_param.roi.start_y = 0;
-    pic_param.roi.end_x = 0;
-    pic_param.roi.end_y = 0;
-    pic_param.rotation = 0;
+    pic_param.frame_cropping_flag = 0;
+    pic_param.frame_crop_left_offset = 0;
+    pic_param.frame_crop_top_offset = 0;
+    pic_param.frame_crop_right_offset = 0;
+    pic_param.frame_crop_bottom_offset = 0;
+    pic_param.rotation = VA_ROTATION_NONE;
 
     va_status = vaCreateBuffer(va_dpy, context_id,
                               VAPictureParameterBufferType, // VAPictureParameterBufferJPEG?
@@ -619,32 +630,50 @@ int tinyjpeg_decode(struct jdec_private *priv)
                               &pic_param_buf);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAIQMatrixBufferJPEG iq_matrix;
+    VAIQMatrixParameterBufferJPEG iq_matrix;
+    const unsigned int num_quant_tables =
+        MIN(COMPONENTS, ARRAY_ELEMS(iq_matrix.load_quantiser_table));
     // todo, only mask it if non-default quant matrix is used. do we need build default quant matrix?
-    memset(&iq_matrix, 0, sizeof(VAIQMatrixBufferJPEG));
-    for (i = 0; i < COMPONENTS; i++) {
-        iq_matrix.precision[i] = 0;
-        memcpy(iq_matrix.quantiser_matrix[i], priv->Q_tables[i], 64);
+    memset(&iq_matrix, 0, sizeof(VAIQMatrixParameterBufferJPEG));
+    for (i = 0; i < num_quant_tables; i++) {
+        if (!priv->Q_tables_valid[i])
+            continue;
+        iq_matrix.load_quantiser_table[i] = 1;
+        for (j = 0; j < 64; j++)
+            iq_matrix.quantiser_table[i][j] = priv->Q_tables[i][j];
     }
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAIQMatrixBufferType, // VAIQMatrixBufferJPEG?
-                              sizeof(VAIQMatrixBufferJPEG),
+                              VAIQMatrixBufferType, // VAIQMatrixParameterBufferJPEG?
+                              sizeof(VAIQMatrixParameterBufferJPEG),
                               1, &iq_matrix,
                               &iqmatrix_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAHuffmanTableBufferJPEG huffman_table;
-    memset(&huffman_table, 0, sizeof(VAHuffmanTableBufferJPEG));
-    for (i = 0; i < COMPONENTS; i++) {
-        memcpy(huffman_table.huffman_table[i].dc_bits, priv->HTDC[i].bits, 16);
-        memcpy(huffman_table.huffman_table[i].dc_huffval, priv->HTDC[i].values, 16);
-        memcpy(huffman_table.huffman_table[i].ac_bits, priv->HTAC[i].bits, 16);
-        memcpy(huffman_table.huffman_table[i].ac_huffval, priv->HTAC[i].values, 256);
+    VAHuffmanTableParameterBufferJPEG huffman_table;
+    const unsigned int num_huffman_tables =
+        MIN(COMPONENTS, ARRAY_ELEMS(huffman_table.load_huffman_table));
+    memset(&huffman_table, 0, sizeof(VAHuffmanTableParameterBufferJPEG));
+    assert(sizeof(huffman_table.huffman_table[0].num_dc_codes) ==
+           sizeof(priv->HTDC[0].bits));
+    assert(sizeof(huffman_table.huffman_table[0].dc_values[0]) ==
+           sizeof(priv->HTDC[0].values[0]));
+    for (i = 0; i < num_huffman_tables; i++) {
+        if (!priv->HTDC_valid[i] || !priv->HTAC_valid[i])
+            continue;
+        huffman_table.load_huffman_table[i] = 1;
+        memcpy(huffman_table.huffman_table[i].num_dc_codes, priv->HTDC[i].bits,
+               sizeof(huffman_table.huffman_table[i].num_dc_codes));
+        memcpy(huffman_table.huffman_table[i].dc_values, priv->HTDC[i].values,
+               sizeof(huffman_table.huffman_table[i].dc_values));
+        memcpy(huffman_table.huffman_table[i].num_ac_codes, priv->HTAC[i].bits,
+               sizeof(huffman_table.huffman_table[i].num_ac_codes));
+        memcpy(huffman_table.huffman_table[i].ac_values, priv->HTAC[i].values,
+               sizeof(huffman_table.huffman_table[i].ac_values));
     }
 
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAHuffmanTableBufferType, // VAHuffmanTableBufferJPEG?
-                              sizeof(VAHuffmanTableBufferJPEG),
+                              VAHuffmanTableBufferType, // VAHuffmanTableParameterBufferJPEG?
+                              sizeof(VAHuffmanTableParameterBufferJPEG),
                               1, &huffman_table,
                               &huffmantable_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
@@ -660,9 +689,9 @@ int tinyjpeg_decode(struct jdec_private *priv)
     slice_param.slice_vertical_position = 0;    
     slice_param.num_components = priv->cur_sos.nr_components;
     for (i = 0; i < slice_param.num_components; i++) {
-        slice_param.components[i].component_id = priv->cur_sos.components[i].component_id; /* FIXME: set to values specified in SOS  */
-        slice_param.components[i].dc_selector = priv->cur_sos.components[i].dc_selector;  /* FIXME: set to values specified in SOS  */
-        slice_param.components[i].ac_selector = priv->cur_sos.components[i].ac_selector;  /* FIXME: set to values specified in SOS  */
+        slice_param.components[i].component_selector = priv->cur_sos.components[i].component_id; /* FIXME: set to values specified in SOS  */
+        slice_param.components[i].dc_table_selector = priv->cur_sos.components[i].dc_selector;  /* FIXME: set to values specified in SOS  */
+        slice_param.components[i].ac_table_selector = priv->cur_sos.components[i].ac_selector;  /* FIXME: set to values specified in SOS  */
     }
     slice_param.restart_interval = priv->restart_interval;
     slice_param.num_mcus = ((priv->width+max_h_factor*8-1)/(max_h_factor*8))*
