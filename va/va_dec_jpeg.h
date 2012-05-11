@@ -75,11 +75,11 @@ typedef struct _VAPictureParameterBufferJPEG {
 
     /** @name Cropping (JPEG-2000) */
     /**@{*/
-    unsigned char   frame_cropping_flag;
-    unsigned short  frame_crop_left_offset;
-    unsigned short  frame_crop_right_offset;
-    unsigned short  frame_crop_top_offset;
-    unsigned short  frame_crop_bottom_offset;
+    unsigned char       frame_cropping_flag;
+    unsigned short      frame_crop_left_offset;
+    unsigned short      frame_crop_right_offset;
+    unsigned short      frame_crop_top_offset;
+    unsigned short      frame_crop_bottom_offset;
     /**@}*/
 
     /** \brief Rotation (JPEG-2000). See \c VA_ROTATION_xxx. */
