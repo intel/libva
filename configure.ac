@@ -287,6 +287,10 @@ if test "$enable_wayland" = "yes"; then
 fi
 AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
 
+m4_ifdef([WAYLAND_SCANNER_RULES],
+    [WAYLAND_SCANNER_RULES(['$(top_srcdir)/va/wayland/protocol'])],
+    [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
+
 # We only need the headers, we don't link against the DRM libraries
 LIBVA_CFLAGS="$DRM_CFLAGS"
 AC_SUBST(LIBVA_CFLAGS)
@@ -339,6 +343,7 @@ AC_OUTPUT([
     va/glx/Makefile
     va/va_version.h
     va/wayland/Makefile
+    va/wayland/protocol/Makefile
     va/x11/Makefile
 ])
 
