@@ -20,45 +20,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = protocol
-
-INCLUDES = \
-	-DLINUX			\
-	-I$(top_srcdir)		\
-	-I$(top_srcdir)/va	\
-	$(WAYLAND_CFLAGS)	\
-	$(DRM_CFLAGS)		\
+EXTRA_DIST = \
+	wayland-drm.xml		\
 	$(NULL)
-
-source_c = \
-	va_wayland.c		\
-	va_wayland_drm.c	\
-	$(top_srcdir)/va/drm/va_drm_utils.c \
-	$(NULL)
-
-source_h = \
-	va_backend_wayland.h	\
-	va_wayland.h		\
-	$(NULL)
-
-source_h_priv = \
-	va_wayland_drm.h	\
-	va_wayland_private.h	\
-	$(NULL)
-
-protocol_source_h = \
-	wayland-drm-client-protocol.h	\
-	$(NULL)
-
-noinst_LTLIBRARIES		= libva_wayland.la
-libva_waylandincludedir		= ${includedir}/va
-libva_waylandinclude_HEADERS	= $(source_h)
-libva_wayland_la_SOURCES	= $(source_c) $(protocol_source_h)
-noinst_HEADERS			= $(source_h_priv)
-
-# Wayland protocol
-va_wayland_drm.c: $(protocol_source_h)
-@wayland_scanner_rules@
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
