@@ -28,12 +28,13 @@
  * ./avcenc <width> <height> <input file> <output file> [qp]
  */  
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#include <X11/Xlib.h>
-
 #include <unistd.h>
 
 #include <sys/types.h>
@@ -43,7 +44,7 @@
 #include <time.h>
 
 #include <va/va.h>
-#include <va/va_x11.h>
+#include "va_display.h"
 
 #define NAL_REF_IDC_NONE        0
 #define NAL_REF_IDC_LOW         1
@@ -72,7 +73,6 @@
         exit(1);                                                        \
     }
 
-static Display *x11_display;
 static VADisplay va_dpy;
 static VAContextID context_id;
 static VAConfigID config_id;
@@ -100,10 +100,7 @@ static void create_encode_pipe()
     int major_ver, minor_ver;
     VAStatus va_status;
 
-    x11_display = XOpenDisplay(":0.0");
-    assert(x11_display);
-
-    va_dpy = vaGetDisplay(x11_display);
+    va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
 
@@ -158,7 +155,7 @@ static void destory_encode_pipe()
     vaDestroyContext(va_dpy,context_id);
     vaDestroyConfig(va_dpy,config_id);
     vaTerminate(va_dpy);
-    XCloseDisplay(x11_display);
+    va_close_display(va_dpy);
 }
 
 /***************************************************
