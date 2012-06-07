@@ -25,6 +25,7 @@ noinst_LTLIBRARIES = libva-display.la
 libva_display_cflags = \
 	-I$(top_srcdir)				\
 	-I$(top_builddir)			\
+	-DIN_LIBVA				\
 	$(NULL)
 
 libva_display_libs = \
@@ -38,6 +39,12 @@ source_h		= va_display.h
 source_c		+= va_display_x11.c
 libva_display_cflags	+= $(X11_CFLAGS)
 libva_display_libs	+= $(X11_LIBS)
+
+if USE_DRM
+source_c		+= va_display_drm.c
+libva_display_cflags	+= $(DRM_CFLAGS)
+libva_display_libs	+= $(top_builddir)/va/libva-drm.la $(DRM_LIBS)
+endif
 
 libva_display_la_SOURCES= $(source_c)
 noinst_HEADERS		= $(source_h)
