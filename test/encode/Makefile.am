@@ -22,15 +22,27 @@
 
 bin_PROGRAMS = h264encode avcenc
 
-INCLUDES = -I$(top_srcdir)
+libva_helpers = \
+	$(top_builddir)/test/common/libva-display.la	\
+	$(NULL)
 
-TEST_LIBS = $(top_builddir)/va/$(libvabackendlib) $(top_builddir)/va/$(libvacorelib) -lpthread -lX11
+INCLUDES = \
+	-I$(top_srcdir)				\
+	-I$(top_srcdir)/test/common		\
+	$(NULL)
+
+TEST_LIBS = \
+	$(top_builddir)/va/$(libvabackendlib)	\
+	$(top_builddir)/va/$(libvacorelib)	\
+	$(libva_helpers)			\
+	$(NULL)
 
 h264encode_LDADD = $(TEST_LIBS)
 h264encode_SOURCES = h264encode_x11.c
 
-avcenc_LDADD= $(TEST_LIBS)
-avcenc_SOURCES= avcenc.c
+avcenc_LDADD		= $(TEST_LIBS)
+avcenc_SOURCES		= avcenc.c
+avcenc_DEPENDENCIES	= $(libva_helpers)
 
 EXTRA_DIST = h264encode_common.c
 

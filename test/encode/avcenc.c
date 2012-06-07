@@ -28,13 +28,13 @@
  * ./avcenc <width> <height> <input file> <output file> [qp]
  */  
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
-#ifndef ANDROID
-#include <X11/Xlib.h>
-#endif
 #include <unistd.h>
 
 #include <sys/time.h>
@@ -48,12 +48,7 @@
 
 #include <va/va.h>
 #include <va/va_enc_h264.h>
-#ifdef ANDROID
-#include <va/va_android.h>
-#define Display unsigned int
-#else
-#include <va/va_x11.h>
-#endif
+#include "va_display.h"
 
 #define NAL_REF_IDC_NONE        0
 #define NAL_REF_IDC_LOW         1
@@ -82,7 +77,6 @@
         exit(1);                                                        \
     }
 
-static Display *x11_display;
 static VADisplay va_dpy;
 
 static int picture_width, picture_width_in_mbs;
@@ -148,15 +142,7 @@ static void create_encode_pipe()
     int major_ver, minor_ver;
     VAStatus va_status;
 
-#ifdef ANDROID
-    x11_display = (Display*)malloc(sizeof(Display));
-    *(x11_display ) = 0x18c34078;
-#else
-    x11_display = XOpenDisplay(":0.0");
-#endif
-    assert(x11_display);
-
-    va_dpy = vaGetDisplay(x11_display);
+    va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
 
@@ -211,7 +197,7 @@ static void destory_encode_pipe()
     vaDestroyContext(va_dpy,avcenc_context.context_id);
     vaDestroyConfig(va_dpy,avcenc_context.config_id);
     vaTerminate(va_dpy);
-    XCloseDisplay(x11_display);
+    va_close_display(va_dpy);
 }
 
 /***************************************************
