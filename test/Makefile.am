@@ -23,6 +23,9 @@
 
 AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x11
 
-SUBDIRS = common basic decode encode putsurface vainfo transcode
+SUBDIRS = common decode encode vainfo
+if USE_X11
+SUBDIRS += basic putsurface transcode
+endif
 
 EXTRA_DIST = loadsurface.h loadsurface_yuv.h

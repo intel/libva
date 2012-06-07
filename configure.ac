@@ -121,6 +121,11 @@ AC_ARG_ENABLE(drm,
                     [build with VA/DRM API support @<:@default=yes@:>@])],
     [], [enable_drm="yes"])
 
+AC_ARG_ENABLE(x11,
+    [AC_HELP_STRING([--enable-x11],
+                    [build with VA/X11 API support @<:@default=yes@:>@])],
+    [], [enable_x11="yes"])
+
 AC_ARG_ENABLE(glx,
     [AC_HELP_STRING([--enable-glx],
                     [build with GLX support @<:@default=yes@:>@])],
@@ -155,19 +160,27 @@ AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_PROG_CXX
 AM_PROG_CC_C_O
+PKG_PROG_PKG_CONFIG
 
 AC_HEADER_STDC
 AC_SYS_LARGEFILE
-
-PKG_CHECK_MODULES([X11], [x11])
-PKG_CHECK_MODULES([XEXT],[xext])
-PKG_CHECK_MODULES([XFIXES], [xfixes])
 
 # Check for Doxygen
 if test "$enable_docs" = "yes"; then
     AC_CHECK_TOOL([DOXYGEN], [doxygen], [enable_docs="no"])
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
+
+# Check for X11
+USE_X11="no"
+if test "$enable_x11" = "yes"; then
+    PKG_CHECK_MODULES([X11],    [x11])
+    PKG_CHECK_MODULES([XEXT],   [xext])
+    PKG_CHECK_MODULES([XFIXES], [xfixes])
+    USE_X11="yes"
+    AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is built])
+fi
+AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
 
 # Check for DRM
 LIBDRM_VERSION=libdrm_version
@@ -193,7 +206,7 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 USE_GLX="no"
 GL_DEPS_CFLAGS=""
 GL_DEPS_LIBS=""
-if test "$enable_glx" = "yes"; then
+if test "$USE_X11:$enable_glx" = "yes:yes"; then
     saved_CFLAGS="$CFLAGS"
     saved_LIBS="$LIBS"
     PKG_CHECK_MODULES([GL_DEPS], [gl], [], [GL_DEPS_LIBS="-lX11 -lGL"])
@@ -240,7 +253,15 @@ AC_SUBST(LIBVA_LIBS)
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
-LIBVA_DISPLAY=x11
+# Check for builds without backend
+if test "$USE_X11:$USE_DRM" = "no:no"; then
+    AC_MSG_ERROR([Please select at least VA/X11 or VA/DRM backend])
+fi
+
+LIBVA_DISPLAY="drm"
+if test "$USE_X11" = "yes"; then
+    LIBVA_DISPLAY="x11"
+fi
 libvacorelib=libva.la
 libvabackendlib=libva-$LIBVA_DISPLAY.la
 AC_SUBST([libvacorelib])
@@ -277,6 +298,7 @@ AC_OUTPUT([
 
 # Print a small summary
 AS_IF([test x$USE_DRM = xyes], [BACKENDS="drm $BACKENDS"])
+AS_IF([test x$USE_X11 = xyes], [BACKENDS="x11 $BACKENDS"])
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
 AS_IF([test x$USE_EGL = xyes], [BACKENDS="egl $BACKENDS"])
 

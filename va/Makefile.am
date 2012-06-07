@@ -54,7 +54,6 @@ libva_source_h = \
 	va_tpi.h		\
 	va_version.h		\
 	va_vpp.h		\
-	va_x11.h		\
 	$(NULL)
 
 libva_source_h_priv = \
@@ -83,13 +82,16 @@ libva_tpi_la_LDFLAGS		= $(LDADD) -no-undefined
 libva_tpi_la_DEPENDENCIES	= $(libvacorelib) 
 libva_tpi_la_LIBADD		= $(libvacorelib) -ldl
 
+if USE_X11
 SUBDIRS				+= x11
 lib_LTLIBRARIES			+= libva-x11.la
+libva_source_h			+= va_x11.h
 libva_x11_la_SOURCES		= 
 libva_x11_la_LDFLAGS		= $(LDADD)
 libva_x11_la_DEPENDENCIES	= $(libvacorelib) x11/libva_x11.la
 libva_x11_la_LIBADD		= $(libvacorelib) x11/libva_x11.la \
 	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS) -ldl
+endif
 
 if USE_DRM
 SUBDIRS				+= drm

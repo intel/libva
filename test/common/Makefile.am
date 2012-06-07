@@ -36,9 +36,11 @@ libva_display_libs = \
 source_c		= va_display.c
 source_h		= va_display.h
 
+if USE_X11
 source_c		+= va_display_x11.c
 libva_display_cflags	+= $(X11_CFLAGS)
 libva_display_libs	+= $(X11_LIBS)
+endif
 
 if USE_DRM
 source_c		+= va_display_drm.c

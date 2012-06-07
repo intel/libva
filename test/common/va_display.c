@@ -41,7 +41,9 @@ static const VADisplayHooks *g_display_hooks_available[] = {
 #ifdef ANDROID
     &va_display_hooks_android,
 #else
+#ifdef HAVE_VA_X11
     &va_display_hooks_x11,
+#endif
 #ifdef HAVE_VA_DRM
     &va_display_hooks_drm,
 #endif
