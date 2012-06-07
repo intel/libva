@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (C) 2012 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -20,32 +20,29 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-pcfiles		 = libva.pc
-pcfiles		+= libva-tpi.pc
-if USE_DRM
-pcfiles		+= libva-drm.pc
-endif
-pcfiles		+= libva-x11.pc
-if USE_GLX
-pcfiles		+= libva-glx.pc
-endif
-if USE_EGL
-pcfiles		+= libva-egl.pc
-endif
+INCLUDES = \
+	-DLINUX			\
+	-I$(top_srcdir)		\
+	-I$(top_srcdir)/va	\
+	$(DRM_CFLAGS)		\
+	$(NULL)
 
-all_pcfiles_in	 = libva.pc.in
-all_pcfiles_in	+= libva-tpi.pc.in
-all_pcfiles_in	+= libva-drm.pc.in
-all_pcfiles_in	+= libva-x11.pc.in
-all_pcfiles_in	+= libva-glx.pc.in
-all_pcfiles_in	+= libva-egl.pc.in
+source_c = \
+	va_drm.c		\
+	$(NULL)
 
-pkgconfigdir = @pkgconfigdir@
-pkgconfig_DATA = $(pcfiles)
+source_h = \
+	va_drm.h		\
+	$(NULL)
 
-EXTRA_DIST = $(all_pcfiles_in)
+source_h_priv = \
+	$(NULL)
 
-DISTCLEANFILES = $(pcfiles)
+noinst_LTLIBRARIES		= libva_drm.la
+libva_drmincludedir		= ${includedir}/va
+libva_drminclude_HEADERS	= $(source_h)
+libva_drm_la_SOURCES		= $(source_c)
+noinst_HEADERS			= $(source_h_priv)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
