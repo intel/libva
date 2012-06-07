@@ -20,7 +20,10 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = h264encode avcenc
+bin_PROGRAMS = avcenc
+if USE_X11
+bin_PROGRAMS += h264encode
+endif
 
 libva_helpers = \
 	$(top_builddir)/test/common/libva-display.la	\

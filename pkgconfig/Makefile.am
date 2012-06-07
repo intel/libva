@@ -25,7 +25,9 @@ pcfiles		+= libva-tpi.pc
 if USE_DRM
 pcfiles		+= libva-drm.pc
 endif
+if USE_X11
 pcfiles		+= libva-x11.pc
+endif
 if USE_GLX
 pcfiles		+= libva-glx.pc
 endif
