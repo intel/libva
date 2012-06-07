@@ -116,6 +116,11 @@ AC_ARG_ENABLE(docs,
                     [build Doxygen documentation @<:@default=no@:>@])],
     [], [enable_docs="no"])
 
+AC_ARG_ENABLE(drm,
+    [AC_HELP_STRING([--enable-drm],
+                    [build with VA/DRM API support @<:@default=yes@:>@])],
+    [], [enable_drm="yes"])
+
 AC_ARG_ENABLE(glx,
     [AC_HELP_STRING([--enable-glx],
                     [build with GLX support @<:@default=yes@:>@])],
@@ -164,7 +169,7 @@ if test "$enable_docs" = "yes"; then
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
 
-# Check for recent enough DRM
+# Check for DRM
 LIBDRM_VERSION=libdrm_version
 PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
 AC_SUBST(LIBDRM_VERSION)
@@ -176,6 +181,13 @@ if test x$libudev = xno; then
    enable_dummy_backend=no
 fi
 AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
+
+USE_DRM="no"
+if test "$enable_drm" = "yes"; then
+    USE_DRM="yes"
+    AC_DEFINE([HAVE_VA_DRM], [1], [Defined to 1 if VA/DRM API is built])
+fi
+AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 
 # Check for GLX
 USE_GLX="no"
@@ -240,6 +252,7 @@ AC_OUTPUT([
     doc/Makefile
     dummy_drv_video/Makefile
     pkgconfig/Makefile
+    pkgconfig/libva-drm.pc
     pkgconfig/libva-egl.pc
     pkgconfig/libva-glx.pc
     pkgconfig/libva-tpi.pc
@@ -254,6 +267,7 @@ AC_OUTPUT([
     test/transcode/Makefile
     test/vainfo/Makefile
     va/Makefile
+    va/drm/Makefile
     va/dummy/Makefile
     va/egl/Makefile
     va/glx/Makefile
@@ -262,6 +276,7 @@ AC_OUTPUT([
 ])
 
 # Print a small summary
+AS_IF([test x$USE_DRM = xyes], [BACKENDS="drm $BACKENDS"])
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
 AS_IF([test x$USE_EGL = xyes], [BACKENDS="egl $BACKENDS"])
 

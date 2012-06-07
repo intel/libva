@@ -91,6 +91,16 @@ libva_x11_la_DEPENDENCIES	= $(libvacorelib) x11/libva_x11.la
 libva_x11_la_LIBADD		= $(libvacorelib) x11/libva_x11.la \
 	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS) -ldl
 
+if USE_DRM
+SUBDIRS				+= drm
+lib_LTLIBRARIES			+= libva-drm.la
+libva_drm_la_SOURCES		=
+libva_drm_la_LDFLAGS		= $(LDADD)
+libva_drm_la_DEPENDENCIES	= $(libvacorelib) drm/libva_drm.la
+libva_drm_la_LIBADD		= $(libvacorelib) drm/libva_drm.la \
+	$(LIBVA_LIBS) $(DRM_LIBS)  -ldl
+endif
+
 if USE_GLX
 SUBDIRS				+= glx
 lib_LTLIBRARIES			+= libva-glx.la
@@ -121,7 +131,7 @@ libva_dummy_la_LIBADD		= $(libvacorelib) dummy/libva_dummy.la \
 	$(LIBVA_LIBS) $(DRM_LIBS)
 endif
 
-DIST_SUBDIRS = x11 glx egl dummy
+DIST_SUBDIRS = x11 glx egl dummy drm
 
 DISTCLEANFILES = \
 	va_version.h		\
