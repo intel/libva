@@ -158,8 +158,10 @@ static int build_default_huffman_tables(struct jdec_private *priv)
 		return 0;
 
     for (i = 0; i < 4; i++) {
+        priv->HTDC_valid[i] = 1;
         memcpy(priv->HTDC[i].bits, default_huffman_table_param.huffman_table[i].num_dc_codes, 16);
         memcpy(priv->HTDC[i].values, default_huffman_table_param.huffman_table[i].dc_values, 16);
+        priv->HTAC_valid[i] = 1;
         memcpy(priv->HTAC[i].bits, default_huffman_table_param.huffman_table[i].num_ac_codes, 16);
         memcpy(priv->HTAC[i].values, default_huffman_table_param.huffman_table[i].ac_values, 256);
     }
