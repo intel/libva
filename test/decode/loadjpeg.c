@@ -87,7 +87,7 @@ int convert_one_image(const char *infilename)
   /* Get the size of the image */
   tinyjpeg_get_size(jdec, &width, &height);
 
-  printf("Decoding JPEG image %xx%x...\n", width, height);
+  printf("Decoding JPEG image %dx%d...\n", width, height);
   if (tinyjpeg_decode(jdec) < 0)
     exitmessage(tinyjpeg_get_errorstring(jdec));
 
