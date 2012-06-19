@@ -47,6 +47,27 @@ extern "C" {
 /** \brief Abstract representation of a bitstream writer. */
 typedef struct _VAEncBitstream VAEncBitstream;
 
+/**
+ * @name Picture flags
+ *
+ * Those flags flags are meant to signal when a picture marks the end
+ * of a sequence, a stream, or even both at once.
+ *
+ * @{
+ */
+/**
+ * \brief Marks the last picture in the sequence.
+ *
+ */
+#define VA_ENC_LAST_PICTURE_EOSEQ       0x01
+/**
+ * \brief Marks the last picture in the stream.
+ *
+ */
+#define VA_ENC_LAST_PICTURE_EOSTREAM    0x02
+/**@}*/
+
+
 /** @name The set of all possible error codes */
 /**@{*/
 /** \brief An invalid bitstream writer handle was supplied. */

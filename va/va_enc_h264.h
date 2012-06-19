@@ -57,13 +57,13 @@ extern "C" {
  *
  * i.e. the driver appends \c end_of_seq() NAL unit to the encoded frame.
  */
-#define H264_LAST_PICTURE_EOSEQ     0x01
+#define H264_LAST_PICTURE_EOSEQ     VA_ENC_LAST_PICTURE_EOSEQ
 /**
  * \brief Marks the last picture in the stream.
  *
  * i.e. the driver appends \c end_of_stream() NAL unit to the encoded frame.
  */
-#define H264_LAST_PICTURE_EOSTREAM  0x02
+#define H264_LAST_PICTURE_EOSTREAM  VA_ENC_LAST_PICTURE_EOSTREAM
 /**@}*/
 
 /**
