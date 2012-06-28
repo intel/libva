@@ -21,3 +21,7 @@
 # USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 SUBDIRS = encode decode
+
+EXTRA_DIST = \
+	README.txt		\
+	$(NULL)
