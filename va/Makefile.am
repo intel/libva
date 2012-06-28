@@ -128,4 +128,5 @@ DISTCLEANFILES = \
 
 EXTRA_DIST = \
 	va_version.h.in		\
+	libva.syms		\
 	$(NULL)
