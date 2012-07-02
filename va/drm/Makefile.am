@@ -38,7 +38,13 @@ source_h = \
 
 source_h_priv = \
 	va_drm_auth.h		\
+	va_drm_auth_x11.h	\
 	$(NULL)
+
+if USE_X11
+source_c			+= va_drm_auth_x11.c
+INCLUDES			+= $(X11_CFLAGS)
+endif
 
 noinst_LTLIBRARIES		= libva_drm.la
 libva_drmincludedir		= ${includedir}/va

@@ -22,40 +22,13 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "sysdeps.h"
-#include <unistd.h>
-#include <xf86drm.h>
-#include "va_drm_auth.h"
-#include "va_drm_auth_x11.h"
+#ifndef VA_DRM_AUTH_X11_H
+#define VA_DRM_AUTH_X11_H
 
-/* Checks whether DRM connection is authenticated */
+#include <stdint.h>
+#include <stdbool.h>
+
 bool
-va_drm_is_authenticated(int fd)
-{
-    pid_t client_pid;
-    int i, auth, pid, uid;
-    unsigned long magic, iocs;
-    bool is_authenticated = false;
+va_drm_authenticate_x11(int fd, uint32_t magic);
 
-    client_pid = getpid();
-    for (i = 0; !is_authenticated; i++) {
-        if (drmGetClient(fd, i, &auth, &pid, &uid, &magic, &iocs) != 0)
-            break;
-        is_authenticated = auth && pid == client_pid;
-    }
-    return is_authenticated;
-}
-
-/* Try to authenticate the DRM connection with the supplied magic id */
-bool
-va_drm_authenticate(int fd, uint32_t magic)
-{
-    /* XXX: try to authenticate through Wayland, etc. */
-#ifdef HAVE_VA_X11
-    if (va_drm_authenticate_x11(fd, magic))
-        return true;
-#endif
-
-    /* Default: root + master privs are needed for the following call */
-    return drmAuthMagic(fd, magic) == 0;
-}
+#endif /* VA_DRM_AUTH_X11_H */
