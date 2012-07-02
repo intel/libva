@@ -27,6 +27,7 @@
 #include "va_drm.h"
 #include "va_backend.h"
 #include "va_drmcommon.h"
+#include "va_drm_auth.h"
 
 static int
 va_DisplayContextIsValid(VADisplayContextP pDisplayContext)
@@ -74,6 +75,7 @@ va_DisplayContextGetDriverName(
     char *driver_name = NULL;
     const struct driver_name_map *m;
     drm_magic_t magic;
+    int ret;
 
     *driver_name_ptr = NULL;
 
@@ -97,8 +99,16 @@ va_DisplayContextGetDriverName(
 
     *driver_name_ptr = driver_name;
 
-    drmGetMagic(drm_state->fd, &magic);
-    drmAuthMagic(drm_state->fd, magic);
+    ret = drmGetMagic(drm_state->fd, &magic);
+    if (ret < 0)
+        return VA_STATUS_ERROR_OPERATION_FAILED;
+
+    if (!va_drm_is_authenticated(drm_state->fd)) {
+        if (!va_drm_authenticate(drm_state->fd, magic))
+            return VA_STATUS_ERROR_OPERATION_FAILED;
+        if (!va_drm_is_authenticated(drm_state->fd))
+            return VA_STATUS_ERROR_OPERATION_FAILED;
+    }
 
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
 

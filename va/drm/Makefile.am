@@ -29,6 +29,7 @@ INCLUDES = \
 
 source_c = \
 	va_drm.c		\
+	va_drm_auth.c		\
 	$(NULL)
 
 source_h = \
@@ -36,6 +37,7 @@ source_h = \
 	$(NULL)
 
 source_h_priv = \
+	va_drm_auth.h		\
 	$(NULL)
 
 noinst_LTLIBRARIES		= libva_drm.la
