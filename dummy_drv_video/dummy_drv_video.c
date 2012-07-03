@@ -1056,10 +1056,6 @@ VAStatus dummy_PutSurface(
 	)
 {
     /* TODO */
-    Drawable drawable = (Drawable)draw;
-
-    (void)drawable;
-
     return VA_STATUS_ERROR_UNKNOWN;
 }
 

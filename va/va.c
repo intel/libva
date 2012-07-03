@@ -123,31 +123,31 @@ void va_infoMessage(const char *msg, ...)
     va_end(args);
 }
 
-static Bool va_checkVtable(void *ptr, char *function)
+static bool va_checkVtable(void *ptr, char *function)
 {
     if (!ptr) {
         va_errorMessage("No valid vtable entry for va%s\n", function);
-        return False;
+        return false;
     }
-    return True;
+    return true;
 }
 
-static Bool va_checkMaximum(int value, char *variable)
+static bool va_checkMaximum(int value, char *variable)
 {
     if (!value) {
         va_errorMessage("Failed to define max_%s in init\n", variable);
-        return False;
+        return false;
     }
-    return True;
+    return true;
 }
 
-static Bool va_checkString(const char* value, char *variable)
+static bool va_checkString(const char* value, char *variable)
 {
     if (!value) {
         va_errorMessage("Failed to define str_%s in init\n", variable);
-        return False;
+        return false;
     }
-    return True;
+    return true;
 }
 
 static inline int
