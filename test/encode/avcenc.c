@@ -391,7 +391,7 @@ get_coded_bitsteam_length(unsigned char *buffer, int buffer_length)
 }
 
 static unsigned int 
-swap32(unsigned int val)
+va_swap32(unsigned int val)
 {
     unsigned char *pval = (unsigned char *)&val;
 
@@ -419,7 +419,7 @@ bitstream_end(bitstream *bs, FILE *avc_fp)
     size_t w_items;
 
     if (bit_offset) {
-        bs->buffer[pos] = swap32((bs->buffer[pos] << bit_left));
+        bs->buffer[pos] = va_swap32((bs->buffer[pos] << bit_left));
     }
 
     do {
@@ -446,7 +446,7 @@ bitstream_put_ui(bitstream *bs, unsigned int val, int size_in_bits)
     } else {
         size_in_bits -= bit_left;
         bs->buffer[pos] = (bs->buffer[pos] << bit_left) | (val >> size_in_bits);
-        bs->buffer[pos] = swap32(bs->buffer[pos]);
+        bs->buffer[pos] = va_swap32(bs->buffer[pos]);
 
         if (pos + 1 == bs->max_size_in_dword) {
             bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
