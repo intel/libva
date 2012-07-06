@@ -10,7 +10,7 @@ LOCAL_SRC_FILES := \
   #h264encode_x11.c	\
 
 LOCAL_CFLAGS += \
-    -DANDROID  
+    -DANDROID
 
 LOCAL_C_INCLUDES += \
   $(TARGET_OUT_HEADERS)/libva	\

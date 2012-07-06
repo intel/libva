@@ -9,7 +9,7 @@ LOCAL_SRC_FILES := \
   mpeg2vldemo.cpp	\
 
 LOCAL_CFLAGS += \
-    -DANDROID  
+    -DANDROID
 
 LOCAL_C_INCLUDES += \
   $(TARGET_OUT_HEADERS)/libva	\
