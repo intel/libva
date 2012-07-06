@@ -47,7 +47,7 @@ void pre()
     surfaces = malloc(total_surfaces * sizeof(VASurfaceID));
 
     // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
-    va_status = vaCreateSurfaces(va_dpy, width, height, VA_RT_FORMAT_YUV420, total_surfaces, surfaces, NULL, 0);
+    va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420, width, height, surfaces, total_surfaces, NULL, 0);
     ASSERT( VA_STATUS_SUCCESS == va_status );
     
     status("vaCreateContext with config %08x\n", config);

@@ -74,7 +74,7 @@ void test()
     {
         status("vaCreateSurfaces create %dx%d surface\n", test_sizes[i].w, test_sizes[i].h);
         surfaces[i+1] = DEAD_SURFACE_ID;
-        va_status = vaCreateSurfaces(va_dpy,  test_sizes[i].w, test_sizes[i].h, VA_RT_FORMAT_YUV420, 1, &surfaces[i], NULL, 0);
+        va_status = vaCreateSurfaces(va_dpy,  VA_RT_FORMAT_YUV420, test_sizes[i].w, test_sizes[i].h, &surfaces[i], 1, NULL, 0);
         ASSERT( VA_STATUS_SUCCESS == va_status );
         ASSERT( DEAD_SURFACE_ID == surfaces[i+1] );
     }
