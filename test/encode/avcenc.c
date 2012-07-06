@@ -32,8 +32,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <getopt.h>
+#ifndef ANDROID
 #include <X11/Xlib.h>
-
+#endif
 #include <unistd.h>
 
 #include <sys/time.h>
@@ -47,7 +48,12 @@
 
 #include <va/va.h>
 #include <va/va_enc_h264.h>
+#ifdef ANDROID
+#include <va/va_android.h>
+#define Display unsigned int
+#else
 #include <va/va_x11.h>
+#endif
 
 #define NAL_REF_IDC_NONE        0
 #define NAL_REF_IDC_LOW         1
@@ -142,7 +148,12 @@ static void create_encode_pipe()
     int major_ver, minor_ver;
     VAStatus va_status;
 
+#ifdef ANDROID
+    x11_display = (Display*)malloc(sizeof(Display));
+    *(x11_display ) = 0x18c34078;
+#else
     x11_display = XOpenDisplay(":0.0");
+#endif
     assert(x11_display);
 
     va_dpy = vaGetDisplay(x11_display);
