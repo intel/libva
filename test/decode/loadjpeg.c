@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "va_display.h"
 
 static void exitmessage(const char *message) __attribute__((noreturn));
 static void exitmessage(const char *message)
@@ -113,6 +114,8 @@ int main(int argc, char *argv[])
   clock_t start_time, finish_time;
   unsigned int duration;
   int current_argument;
+
+  va_init_display_args(&argc, argv);
 
   if (argc < 2)
     usage();

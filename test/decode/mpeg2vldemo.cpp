@@ -150,6 +150,8 @@ int main(int argc,char **argv)
     VAStatus va_status;
     int putsurface=0;
 
+    va_init_display_args(&argc, argv);
+
     if (argc > 1)
         putsurface=1;
     

@@ -132,6 +132,7 @@ va_put_surface_x11(
 }
 
 const VADisplayHooks va_display_hooks_x11 = {
+    "x11",
     va_open_display_x11,
     va_close_display_x11,
     va_put_surface_x11,
