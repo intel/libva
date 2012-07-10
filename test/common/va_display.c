@@ -25,7 +25,10 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 #include <va/va.h>
 #include "va_display.h"
 
@@ -42,6 +45,66 @@ static const VADisplayHooks *g_display_hooks_available[] = {
     NULL
 };
 
+static const char *g_display_name;
+
+static const char *
+get_display_name(int argc, char *argv[])
+{
+    const char *display_name = NULL;
+    int i;
+
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--display") != 0)
+            continue;
+        argv[i] = NULL;
+
+        if (++i < argc) {
+            display_name = argv[i];
+            argv[i] = NULL;
+        }
+    }
+    return display_name;
+}
+
+static void
+print_display_names(void)
+{
+    const VADisplayHooks **h;
+
+    printf("Available displays:\n");
+    for (h = g_display_hooks_available; *h != NULL; h++)
+        printf("  %s\n", (*h)->name);
+}
+
+static void
+sanitize_args(int *argc, char *argv[])
+{
+    char **out_args = argv;
+    int i, n = *argc;
+
+    for (i = 0; i < n; i++) {
+        if (argv[i])
+            *out_args++ = argv[i];
+    }
+    *out_args = NULL;
+    *argc = out_args - argv;
+}
+
+void
+va_init_display_args(int *argc, char *argv[])
+{
+    const char *display_name;
+
+    display_name = get_display_name(*argc, argv);
+    if (display_name && strcmp(display_name, "help") == 0) {
+        print_display_names();
+        exit(0);
+    }
+    g_display_name = display_name;
+
+    sanitize_args(argc, argv);
+}
+
 VADisplay
 va_open_display(void)
 {
@@ -50,9 +113,20 @@ va_open_display(void)
 
     for (i = 0; !va_dpy && g_display_hooks_available[i]; i++) {
         g_display_hooks = g_display_hooks_available[i];
+        if (g_display_name &&
+            strcmp(g_display_name, g_display_hooks->name) != 0)
+            continue;
         if (!g_display_hooks->open_display)
             continue;
         va_dpy = g_display_hooks->open_display();
+    }
+
+    if (!va_dpy)  {
+        fprintf(stderr, "error: failed to initialize display");
+        if (g_display_name)
+            fprintf(stderr, " '%s'", g_display_name);
+        fprintf(stderr, "\n");
+        abort();
     }
     return va_dpy;
 }
