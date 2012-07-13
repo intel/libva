@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include "va_wayland.h"
 #include "va_wayland_drm.h"
+#include "va_wayland_emgd.h"
 #include "va_wayland_private.h"
 #include "va_backend.h"
 #include "va_backend_wayland.h"
@@ -106,6 +107,8 @@ struct va_wayland_backend {
 static const struct va_wayland_backend g_backends[] = {
     { va_wayland_drm_create,
       va_wayland_drm_destroy },
+    { va_wayland_emgd_create,
+      va_wayland_emgd_destroy },
     { NULL, }
 };
 
