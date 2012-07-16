@@ -770,6 +770,8 @@ int main(int argc, char *argv[])
     clock_t start_clock, end_clock;
     float encoding_time;
 
+    va_init_display_args(&argc, argv);
+
     if(argc != 5 && argc != 6) {
         printf("Usage: %s <width> <height> <input_yuvfile> <output_avcfile> [qp]\n", argv[0]);
         return -1;
