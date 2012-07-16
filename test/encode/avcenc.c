@@ -1363,6 +1363,9 @@ int main(int argc, char *argv[])
     int mode_value;
     struct timeval tpstart,tpend; 
     float  timeuse;
+
+    va_init_display_args(&argc, argv);
+
     //TODO may be we should using option analytics library
     if(argc != 5 && argc != 6 && argc != 7) {
         show_help();
