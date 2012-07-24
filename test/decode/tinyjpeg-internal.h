@@ -106,8 +106,11 @@ struct jdec_private
   struct component component_infos[COMPONENTS];
   unsigned int nf_components;
   unsigned char Q_tables[COMPONENTS][64];		/* quantization tables, zigzag*/
+  unsigned char Q_tables_valid[COMPONENTS];
   struct huffman_table HTDC[HUFFMAN_TABLES];	/* DC huffman tables   */
+  unsigned char HTDC_valid[HUFFMAN_TABLES];
   struct huffman_table HTAC[HUFFMAN_TABLES];	/* AC huffman tables   */
+  unsigned char HTAC_valid[HUFFMAN_TABLES];
   struct jpeg_sos cur_sos;  /* current sos values*/
   int default_huffman_table_initialized;
   int restart_interval;
