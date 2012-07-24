@@ -52,7 +52,7 @@ extern "C" {
  * This structure holds information from the frame header, along with
  * definitions from additional segments.
  */
-typedef struct _VAPictureParameterBufferJPEG {
+typedef struct _VAPictureParameterBufferJPEGBaseline {
     /** \brief Picture width in pixels. */
     unsigned short      picture_width;
     /** \brief Picture height in pixels. */
@@ -84,7 +84,7 @@ typedef struct _VAPictureParameterBufferJPEG {
 
     /** \brief Rotation (JPEG-2000). See \c VA_ROTATION_xxx. */
     unsigned int        rotation;
-} VAPictureParameterBufferJPEG;
+} VAPictureParameterBufferJPEGBaseline;
 
 /**
  * \brief Quantization table for JPEG decoding.
@@ -101,12 +101,12 @@ typedef struct _VAPictureParameterBufferJPEG {
  * WIP: this is work-in-progress API subject to change, and only
  * suitable to Baseline profile.
  */
-typedef struct _VAIQMatrixBufferJPEG {
+typedef struct _VAIQMatrixBufferJPEGBaseline {
     /** \brief Specifies which #quantiser_table is valid. */
     unsigned char       load_quantiser_table[4];
     /** \brief Quanziation tables indexed by table identifier (Tqi). */
     unsigned char       quantiser_table[4][64];
-} VAIQMatrixBufferJPEG;
+} VAIQMatrixBufferJPEGBaseline;
 
 /**
  * \brief Huffman table for JPEG decoding.
@@ -123,7 +123,7 @@ typedef struct _VAIQMatrixBufferJPEG {
  * WIP: this is work-in-progress API subject to change, and only
  * suitable to Baseline profile.
  */
-typedef struct _VAHuffmanTableBufferJPEG {
+typedef struct _VAHuffmanTableBufferJPEGBaseline {
     /** \brief Specifies which #huffman_table is valid. */
     unsigned char       load_huffman_table[2];
     /** \brief Huffman tables indexed by table identifier (Th). */
@@ -143,7 +143,7 @@ typedef struct _VAHuffmanTableBufferJPEG {
         unsigned char   ac_values[162];
         /**@}*/
     }                   huffman_table[2];
-} VAHuffmanTableBufferJPEG;
+} VAHuffmanTableBufferJPEGBaseline;
 
 /**
  * \brief Slice parameter for JPEG decoding.
@@ -152,7 +152,7 @@ typedef struct _VAHuffmanTableBufferJPEG {
  * definitions from additional segments. The associated slice data
  * buffer holds all entropy coded segments (ECS) in the scan.
  */
-typedef struct _VASliceParameterBufferJPEG {
+typedef struct _VASliceParameterBufferJPEGBaseline {
     /** @name Codec-independent Slice Parameter Buffer base. */
     /**@{*/
     /** \brief Number of bytes in the slice data buffer for this slice. */
@@ -183,7 +183,7 @@ typedef struct _VASliceParameterBufferJPEG {
     unsigned short      restart_interval;
     /** \brief Number of MCUs in a scan. */
     unsigned int        num_mcus;
-} VASliceParameterBufferJPEG;
+} VASliceParameterBufferJPEGBaseline;
 
 /**@}*/
 
