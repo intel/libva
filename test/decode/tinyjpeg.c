@@ -83,7 +83,7 @@
 
 /* Global variable to return the last error found while deconding */
 static char error_string[256];
-static VAHuffmanTableBufferJPEG default_huffman_table_param={
+static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
     huffman_table:
     {
         // lumiance component
@@ -593,9 +593,8 @@ int tinyjpeg_decode(struct jdec_private *priv)
                                &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
     
-    VAPictureParameterBufferJPEG pic_param;
+    VAPictureParameterBufferJPEGBaseline pic_param;
     memset(&pic_param, 0, sizeof(pic_param));
-    pic_param.sample_precision = 8; // tinyjpeg support baseline profile only, does it match va capability?
     pic_param.picture_width = priv->width;
     pic_param.picture_height = priv->height;
     pic_param.num_components = priv->nf_components;
@@ -606,26 +605,19 @@ int tinyjpeg_decode(struct jdec_private *priv)
         pic_param.components[i].v_sampling_factor = priv->component_infos[i].Vfactor;
         pic_param.components[i].quantiser_table_selector = priv->component_infos[i].quant_table_index;
     }
-    
-    pic_param.frame_cropping_flag = 0;
-    pic_param.frame_crop_left_offset = 0;
-    pic_param.frame_crop_top_offset = 0;
-    pic_param.frame_crop_right_offset = 0;
-    pic_param.frame_crop_bottom_offset = 0;
-    pic_param.rotation = VA_ROTATION_NONE;
 
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAPictureParameterBufferType, // VAPictureParameterBufferJPEG?
-                              sizeof(VAPictureParameterBufferJPEG),
+                              VAPictureParameterBufferType, // VAPictureParameterBufferJPEGBaseline?
+                              sizeof(VAPictureParameterBufferJPEGBaseline),
                               1, &pic_param,
                               &pic_param_buf);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAIQMatrixBufferJPEG iq_matrix;
+    VAIQMatrixBufferJPEGBaseline iq_matrix;
     const unsigned int num_quant_tables =
         MIN(COMPONENTS, ARRAY_ELEMS(iq_matrix.load_quantiser_table));
     // todo, only mask it if non-default quant matrix is used. do we need build default quant matrix?
-    memset(&iq_matrix, 0, sizeof(VAIQMatrixBufferJPEG));
+    memset(&iq_matrix, 0, sizeof(VAIQMatrixBufferJPEGBaseline));
     for (i = 0; i < num_quant_tables; i++) {
         if (!priv->Q_tables_valid[i])
             continue;
@@ -634,16 +626,16 @@ int tinyjpeg_decode(struct jdec_private *priv)
             iq_matrix.quantiser_table[i][j] = priv->Q_tables[i][j];
     }
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAIQMatrixBufferType, // VAIQMatrixBufferJPEG?
-                              sizeof(VAIQMatrixBufferJPEG),
+                              VAIQMatrixBufferType, // VAIQMatrixBufferJPEGBaseline?
+                              sizeof(VAIQMatrixBufferJPEGBaseline),
                               1, &iq_matrix,
                               &iqmatrix_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
-    VAHuffmanTableBufferJPEG huffman_table;
+    VAHuffmanTableBufferJPEGBaseline huffman_table;
     const unsigned int num_huffman_tables =
         MIN(COMPONENTS, ARRAY_ELEMS(huffman_table.load_huffman_table));
-    memset(&huffman_table, 0, sizeof(VAHuffmanTableBufferJPEG));
+    memset(&huffman_table, 0, sizeof(VAHuffmanTableBufferJPEGBaseline));
     assert(sizeof(huffman_table.huffman_table[0].num_dc_codes) ==
            sizeof(priv->HTDC[0].bits));
     assert(sizeof(huffman_table.huffman_table[0].dc_values[0]) ==
@@ -663,8 +655,8 @@ int tinyjpeg_decode(struct jdec_private *priv)
     }
 
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VAHuffmanTableBufferType, // VAHuffmanTableBufferJPEG?
-                              sizeof(VAHuffmanTableBufferJPEG),
+                              VAHuffmanTableBufferType, // VAHuffmanTableBufferJPEGBaseline?
+                              sizeof(VAHuffmanTableBufferJPEGBaseline),
                               1, &huffman_table,
                               &huffmantable_buf );
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
@@ -672,7 +664,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
     // one slice for whole image?
     max_h_factor = priv->component_infos[0].Hfactor;
     max_v_factor = priv->component_infos[0].Vfactor;
-    static VASliceParameterBufferJPEG slice_param;
+    static VASliceParameterBufferJPEGBaseline slice_param;
     slice_param.slice_data_size = priv->stream_end - priv->stream;
     slice_param.slice_data_offset = 0;
     slice_param.slice_data_flag = VA_SLICE_DATA_FLAG_ALL;
@@ -689,8 +681,8 @@ int tinyjpeg_decode(struct jdec_private *priv)
                           ((priv->height+max_v_factor*8-1)/(max_v_factor*8)); // ?? 720/16?
 
     va_status = vaCreateBuffer(va_dpy, context_id,
-                              VASliceParameterBufferType, // VASliceParameterBufferJPEG?
-                              sizeof(VASliceParameterBufferJPEG),
+                              VASliceParameterBufferType, // VASliceParameterBufferJPEGBaseline?
+                              sizeof(VASliceParameterBufferJPEGBaseline),
                               1,
                               &slice_param, &slice_param_buf);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
