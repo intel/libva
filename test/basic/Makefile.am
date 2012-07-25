@@ -60,7 +60,7 @@ test_10_SOURCES = test_10.c
 test_11_LDADD = $(TEST_LIBS)
 test_11_SOURCES = test_11.c
 
-EXTRA_DIST = test_common.c
+EXTRA_DIST = test_common.c test_x11.c
 
 valgrind:	$(noinst_PROGRAMS)
 	for a in $(noinst_PROGRAMS); do \
