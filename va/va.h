@@ -1195,6 +1195,8 @@ typedef struct _VASliceParameterBufferBase
     unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
 } VASliceParameterBufferBase;
 
+#include <va/va_dec_jpeg.h>
+
 /****************************
  * MPEG-2 data structures
  ****************************/
