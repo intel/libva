@@ -36,12 +36,12 @@
 extern "C" {
 #endif
 
-#include <va/va_enc.h>
+#include <va/va.h>
 
 /**
  * \defgroup api_dec_jpeg JPEG decoding API
  *
- * WIP: this is work-in-progress API subject to change.
+ * This JPEG decoding API supports Baseline profile only.
  *
  * @{
  */
@@ -97,9 +97,6 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
  * The #load_quantization_table array can be used as a hint to notify
  * the VA driver implementation about which table(s) actually changed
  * since the last submission of this buffer.
- *
- * WIP: this is work-in-progress API subject to change, and only
- * suitable to Baseline profile.
  */
 typedef struct _VAIQMatrixBufferJPEGBaseline {
     /** \brief Specifies which #quantiser_table is valid. */
@@ -119,9 +116,6 @@ typedef struct _VAIQMatrixBufferJPEGBaseline {
  * The #load_huffman_table array can be used as a hint to notify the
  * VA driver implementation about which table(s) actually changed
  * since the last submission of this buffer.
- *
- * WIP: this is work-in-progress API subject to change, and only
- * suitable to Baseline profile.
  */
 typedef struct _VAHuffmanTableBufferJPEGBaseline {
     /** \brief Specifies which #huffman_table is valid. */
