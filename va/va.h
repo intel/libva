@@ -999,6 +999,7 @@ typedef struct _VAEncPictureParameterBufferJPEG
     VABufferID coded_buf;
 } VAEncPictureParameterBufferJPEG;
 
+#include <va/va_dec_jpeg.h>
 
 /****************************
  * MPEG-2 data structures
