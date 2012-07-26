@@ -340,8 +340,14 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     if (!cs)
         goto error;
 
-    cs->display = ctx->native_dpy;
-    cs->window  = parent ? parent->window : None;
+    if (parent) {
+        cs->display = parent->display;
+        cs->window  = parent->window;
+    }
+    else {
+        cs->display = ctx->native_dpy;
+        cs->window  = None;
+    }
     cs->context = NULL;
 
     if (parent && parent->context) {
@@ -357,8 +363,8 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
             goto choose_fbconfig;
 
         fbconfigs = glXGetFBConfigs(
-            ctx->native_dpy,
-            ctx->x11_screen,
+            parent->display,
+            DefaultScreen(parent->display),
             &n_fbconfigs
         );
         if (!fbconfigs)
@@ -367,7 +373,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
         /* Find out a GLXFBConfig compatible with the parent context */
         for (n = 0; n < n_fbconfigs; n++) {
             status = glXGetFBConfigAttrib(
-                ctx->native_dpy,
+                cs->display,
                 fbconfigs[n],
                 GLX_FBCONFIG_ID, &val
             );
@@ -392,7 +398,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     }
 
     cs->context = glXCreateNewContext(
-        ctx->native_dpy,
+        cs->display,
         fbconfigs[n],
         GLX_RGBA_TYPE,
         parent ? parent->context : NULL,
