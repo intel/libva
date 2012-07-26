@@ -57,8 +57,6 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
     unsigned short      picture_width;
     /** \brief Picture height in pixels. */
     unsigned short      picture_height;
-    /** \brief Sample precision (P). */
-    unsigned char       sample_precision;
 
     struct {
         /** \brief Component identifier (Ci). */
