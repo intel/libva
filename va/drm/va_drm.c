@@ -28,6 +28,7 @@
 #include "va_backend.h"
 #include "va_drmcommon.h"
 #include "va_drm_auth.h"
+#include "va_drm_utils.h"
 
 static int
 va_DisplayContextIsValid(VADisplayContextP pDisplayContext)
@@ -49,19 +50,6 @@ va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
     free(pDisplayContext);
 }
 
-struct driver_name_map {
-    const char *key;
-    int         key_len;
-    const char *name;
-};
-
-static const struct driver_name_map g_driver_name_map[] = {
-    { "i915",       4, "i965"   }, // Intel OTC GenX driver
-    { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
-    { "emgd",       4, "emgd"   }, // Intel ECG PVR driver
-    { NULL, }
-};
-
 static VAStatus
 va_DisplayContextGetDriverName(
     VADisplayContextP pDisplayContext,
@@ -71,33 +59,13 @@ va_DisplayContextGetDriverName(
 
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct drm_state * const drm_state = ctx->drm_state;
-    drmVersionPtr drm_version;
-    char *driver_name = NULL;
-    const struct driver_name_map *m;
     drm_magic_t magic;
+    VAStatus status;
     int ret;
 
-    *driver_name_ptr = NULL;
-
-    drm_version = drmGetVersion(drm_state->fd);
-    if (!drm_version)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    for (m = g_driver_name_map; m->key != NULL; m++) {
-        if (drm_version->name_len >= m->key_len &&
-            strncmp(drm_version->name, m->key, m->key_len) == 0)
-            break;
-    }
-    drmFreeVersion(drm_version);
-
-    if (!m->name)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    driver_name = strdup(m->name);
-    if (!driver_name)
-        return VA_STATUS_ERROR_ALLOCATION_FAILED;
-
-    *driver_name_ptr = driver_name;
+    status = VA_DRM_GetDriverName(ctx, driver_name_ptr);
+    if (status != VA_STATUS_SUCCESS)
+        return status;
 
     ret = drmGetMagic(drm_state->fd, &magic);
     if (ret < 0)

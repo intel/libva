@@ -30,6 +30,7 @@ INCLUDES = \
 source_c = \
 	va_drm.c		\
 	va_drm_auth.c		\
+	va_drm_utils.c		\
 	$(NULL)
 
 source_h = \
@@ -39,6 +40,7 @@ source_h = \
 source_h_priv = \
 	va_drm_auth.h		\
 	va_drm_auth_x11.h	\
+	va_drm_utils.h		\
 	$(NULL)
 
 if USE_X11
