@@ -121,6 +121,8 @@ typedef struct _VAHuffmanTableBufferJPEGBaseline {
         unsigned char   num_ac_codes[16];
         /** \brief Value associated with each Huffman code (Vij). */
         unsigned char   ac_values[162];
+        /** \brief Padding to 4-byte boundaries. Must be set to zero. */
+        unsigned char   pad[2];
         /**@}*/
     }                   huffman_table[2];
 } VAHuffmanTableBufferJPEGBaseline;
