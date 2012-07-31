@@ -325,11 +325,9 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
      Th = index & 0x0f;
      if (Tc) {
         memcpy(priv->HTAC[index & 0xf].bits, stream, 16);
-        priv->HTAC_valid[index & 0xf] = 1;
      }
      else {
-         memcpy(priv->HTDC[index & 0xf].bits, stream, 12);
-         priv->HTDC_valid[index & 0xf] = 1;
+         memcpy(priv->HTDC[index & 0xf].bits, stream, 16);
      }
 
      count = 0;
@@ -347,9 +345,11 @@ static int parse_DHT(struct jdec_private *priv, const unsigned char *stream)
 
      if (Tc) {
         memcpy(priv->HTAC[index & 0xf].values, stream, count);
+        priv->HTAC_valid[index & 0xf] = 1;
      }
      else {
         memcpy(priv->HTDC[index & 0xf].values, stream, count);
+        priv->HTDC_valid[index & 0xf] = 1;
      }
 
      length -= 1;
@@ -652,6 +652,8 @@ int tinyjpeg_decode(struct jdec_private *priv)
                sizeof(huffman_table.huffman_table[i].num_ac_codes));
         memcpy(huffman_table.huffman_table[i].ac_values, priv->HTAC[i].values,
                sizeof(huffman_table.huffman_table[i].ac_values));
+        memset(huffman_table.huffman_table[i].pad, 0,
+               sizeof(huffman_table.huffman_table[i].pad));
     }
 
     va_status = vaCreateBuffer(va_dpy, context_id,
