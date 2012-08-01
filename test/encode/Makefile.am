@@ -43,7 +43,7 @@ TEST_LIBS = \
 h264encode_LDADD = $(TEST_LIBS)
 h264encode_SOURCES = h264encode_x11.c
 
-avcenc_LDADD		= $(TEST_LIBS)
+avcenc_LDADD		= $(TEST_LIBS) -lpthread
 avcenc_SOURCES		= avcenc.c
 avcenc_DEPENDENCIES	= $(libva_helpers)
 
