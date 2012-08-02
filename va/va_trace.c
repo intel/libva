@@ -2175,10 +2175,8 @@ void va_TraceEndPicture(
 
     TRACE_FUNCNAME(idx);
 
-    if (endpic_done == 0) {
-        va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
-        va_TraceMsg(idx, "\trender_targets = 0x%08x\n", trace_context[idx].trace_rendertarget);
-    }
+    va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
+    va_TraceMsg(idx, "\trender_targets = 0x%08x\n", trace_context[idx].trace_rendertarget);
 
     encode = (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) &&
         (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE);
@@ -2186,26 +2184,26 @@ void va_TraceEndPicture(
         (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE);
     jpeg = (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture) &&
         (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG);
-    
-    /* want to trace encode source surface, do it before vaEndPicture */
-    if ((encode || jpeg) && (endpic_done == 0))
+
+    /* trace encode source surface, can do it before HW completes rendering */
+    if (encode || jpeg)
         va_TraceSurface(dpy);
     
-    /* want to trace encoode codedbuf, do it after vaEndPicture */
-    if ((encode || jpeg) && (endpic_done == 1)) {
-        /* force the pipleline finish rendering */
+    /* trace coded buffer, do it after HW completes rendering */
+    if ((encode || jpeg) && (trace_flag & VA_TRACE_FLAG_CODEDBUF)) {
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
         va_TraceCodedBuf(dpy);
     }
 
-    /* want to trace decode dest surface, do it after vaEndPicture */
-    if (decode && (endpic_done == 1)) {
-        /* force the pipleline finish rendering */
+    /* trace decoded surface, do it after HW completes rendering */
+    if (decode) {
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
         va_TraceSurface(dpy);
     }
+
     va_TraceMsg(idx, NULL);
 }
+
 
 void va_TraceSyncSurface(
     VADisplay dpy,
