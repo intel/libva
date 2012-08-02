@@ -309,7 +309,7 @@ void va_TraceCodedBuf(VADisplay dpy)
         unsigned int i;
         
         va_TraceMsg(idx, "\tsize = %d\n", buf_list->size);
-        if (trace_context[idx].trace_fp_log)
+        if (trace_context[idx].trace_fp_codedbuf)
             fwrite(buf_list->buf, buf_list->size, 1, trace_context[idx].trace_fp_codedbuf);
 
         for (i=0; i<buf_list->size; i++)
