@@ -934,19 +934,16 @@ VAStatus vaEndPicture (
     VAContextID context
 )
 {
-  VAStatus va_status;
+  VAStatus va_status = VA_STATUS_SUCCESS;
   VADriverContextP ctx;
 
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  /* dump encode source surface */
-  VA_TRACE_SURFACE(va_TraceEndPicture, dpy, context, 0);
-  /* return directly if do dummy operation */
-  VA_FOOL_RETURN();
-  
-  va_status = ctx->vtable->vaEndPicture( ctx, context );
-  /* dump decode dest surface */
+  if (fool_codec == 0)
+      va_status = ctx->vtable->vaEndPicture( ctx, context );
+
+  /* dump surface content */
   VA_TRACE_SURFACE(va_TraceEndPicture, dpy, context, 1);
 
   return va_status;
