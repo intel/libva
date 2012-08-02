@@ -40,6 +40,30 @@
 # define Bool  int
 # define True  1
 # define False 0
+
+/* Android logging utilities */
+# define LOG_TAG "lib-va"
+# include <utils/Log.h>
+
+# ifdef ANDROID_ALOG
+#  define va_log_error(buffer)  do { ALOGE("%s", buffer); } while (0)
+#  define va_log_info(buffer)   do { ALOGI("%s", buffer); } while (0)
+# elif ANDROID_LOG
+#  define va_log_error(buffer)  do { LOGE("%s", buffer); } while (0)
+#  define va_log_info(buffer)   do { LOGI("%s", buffer); } while (0)
+# endif
+#endif
+
+#ifndef va_log_error
+#define va_log_error(buffer) do {                       \
+        fprintf(stderr, "libva error: %s", buffer);     \
+    } while (0)
+#endif
+
+#ifndef va_log_info
+#define va_log_info(buffer) do {                        \
+        fprintf(stderr, "libva info: %s", buffer);      \
+    } while (0)
 #endif
 
 #if defined __GNUC__ && defined HAVE_GNUC_VISIBILITY_ATTRIBUTE
