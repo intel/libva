@@ -282,7 +282,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 }
                 ctx->vtable_vpp = vtable_vpp;
 
-                if (VA_STATUS_SUCCESS == vaStatus)
+                if (init_func && VA_STATUS_SUCCESS == vaStatus)
                     vaStatus = (*init_func)(ctx);
 
                 if (VA_STATUS_SUCCESS == vaStatus) {
