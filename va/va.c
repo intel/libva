@@ -105,22 +105,52 @@ int vaDisplayIsValid(VADisplay dpy)
 
 void va_errorMessage(const char *msg, ...)
 {
+    char buf[512], *dynbuf;
     va_list args;
+    int n, len;
 
-    fprintf(stderr, "libva error: ");
     va_start(args, msg);
-    vfprintf(stderr, msg, args);
+    len = vsnprintf(buf, sizeof(buf), msg, args);
     va_end(args);
+
+    if (len >= (int)sizeof(buf)) {
+        dynbuf = malloc(len + 1);
+        if (!dynbuf)
+            return;
+        va_start(args, msg);
+        n = vsnprintf(dynbuf, len + 1, msg, args);
+        va_end(args);
+        if (n == len)
+            va_log_error(dynbuf);
+        free(dynbuf);
+    }
+    else if (len > 0)
+        va_log_error(buf);
 }
 
 void va_infoMessage(const char *msg, ...)
 {
+    char buf[512], *dynbuf;
     va_list args;
+    int n, len;
 
-    fprintf(stderr, "libva: ");
     va_start(args, msg);
-    vfprintf(stderr, msg, args);
+    len = vsnprintf(buf, sizeof(buf), msg, args);
     va_end(args);
+
+    if (len >= (int)sizeof(buf)) {
+        dynbuf = malloc(len + 1);
+        if (!dynbuf)
+            return;
+        va_start(args, msg);
+        n = vsnprintf(dynbuf, len + 1, msg, args);
+        va_end(args);
+        if (n == len)
+            va_log_info(dynbuf);
+        free(dynbuf);
+    }
+    else if (len > 0)
+        va_log_info(buf);
 }
 
 static bool va_checkVtable(void *ptr, char *function)
