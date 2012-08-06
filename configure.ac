@@ -171,6 +171,28 @@ if test "$enable_docs" = "yes"; then
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
 
+# Check for __attribute__((visibility()))
+AC_CACHE_CHECK([whether __attribute__((visibility())) is supported],
+    ac_cv_have_gnuc_visibility_attribute,
+    [cat > conftest.c <<EOF
+int foo __attribute__ ((visibility ("hidden"))) = 1;
+int bar __attribute__ ((visibility ("protected"))) = 1;
+EOF
+    ac_cv_have_gnuc_visibility_attribute="no"
+    if ${CC-cc} -Werror -S conftest.c -o conftest.s >/dev/null 2>&1; then
+        if grep '\.hidden.*foo' conftest.s >/dev/null; then
+            if grep '\.protected.*bar' conftest.s >/dev/null; then
+                ac_cv_have_gnuc_visibility_attribute="yes"
+            fi
+        fi
+    fi
+    rm -f conftest.[cs]
+])
+if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
+    AC_DEFINE([HAVE_GNUC_VISIBILITY_ATTRIBUTE], [1],
+              [Defined to 1 if GCC visibility attribute is supported])
+fi
+
 # Check for X11
 USE_X11="no"
 if test "$enable_x11" = "yes"; then

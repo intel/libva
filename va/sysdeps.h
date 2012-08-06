@@ -42,4 +42,12 @@
 # define False 0
 #endif
 
+#if defined __GNUC__ && defined HAVE_GNUC_VISIBILITY_ATTRIBUTE
+# define DLL_HIDDEN __attribute__((visibility("hidden")))
+# define DLL_EXPORT __attribute__((visibility("default")))
+#else
+# define DLL_HIDDEN
+# define DLL_EXPORT
+#endif
+
 #endif /* SYSDEPS_H */
