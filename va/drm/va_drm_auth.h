@@ -28,9 +28,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+DLL_HIDDEN
 bool
 va_drm_is_authenticated(int fd);
 
+DLL_HIDDEN
 bool
 va_drm_authenticate(int fd, uint32_t magic);
 

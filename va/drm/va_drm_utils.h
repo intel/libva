@@ -60,6 +60,7 @@ extern "C" {
  * @return VA_STATUS_SUCCESS if operation is successful, or another
  *     #VAStatus value otherwise.
  */
+DLL_HIDDEN
 VAStatus
 VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr);
 

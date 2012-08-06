@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+DLL_HIDDEN
 bool
 va_drm_authenticate_x11(int fd, uint32_t magic);
 
