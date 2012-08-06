@@ -246,25 +246,17 @@ AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
 
 # Check for EGL
 USE_EGL="no"
-EGL_DEPS_CFLAGS=""
-EGL_DEPS_LIBS=""
 if test "$enable_egl" = "yes"; then
-    saved_CFLAGS="$CFLAGS"
+    saved_CPPFLAGS="$CPPFLAGS"
     saved_LIBS="$LIBS"
-    PKG_CHECK_MODULES([EGL_DEPS], [egl], [], [EGL_DEPS_LIBS="-lEGL"])
-    CFLAGS="$CFLAGS $EGL_DEPS_CFLAGS"
+    PKG_CHECK_MODULES([EGL_DEPS], [egl], [USE_EGL="yes"], [USE_EGL="no"])
+    CPPFLAGS="$CPPFLAGS $EGL_DEPS_CFLAGS"
     LIBS="$LIBS $EGL_DEPS_LIBS"
-    AC_CHECK_HEADERS([EGL/egl.h], [USE_EGL="yes"], [USE_EGL="no"])
-
-    if test "x$USE_EGL" = "xyes"; then
-        AC_CHECK_LIB(EGL, eglGetDisplay, [USE_EGL="yes"], [USE_EGL="no"])
-    fi
-        
-    CFLAGS="$saved_CFLAGS"
+    AC_CHECK_HEADERS([EGL/egl.h], [:], [USE_EGL="no"])
+    AC_CHECK_LIB([EGL], [eglGetDisplay], [:], [USE_EGL="no"])
+    CPPFLAGS="$saved_CPPFLAGS"
     LIBS="$saved_LIBS"
 fi
-AC_SUBST(EGL_DEPS_CFLAGS)
-AC_SUBST(EGL_DEPS_LIBS)
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
 # We only need the headers, we don't link against the DRM libraries
