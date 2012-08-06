@@ -172,7 +172,7 @@ va_put_surface_wayland(
     if (!ensure_window(va_dpy, dst_rect->width, dst_rect->height))
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
-    va_status = vaGetSurfaceBufferWl(va_dpy, surface, &buffer);
+    va_status = vaGetSurfaceBufferWl(va_dpy, surface, VA_FRAME_PICTURE, &buffer);
     if (va_status != VA_STATUS_SUCCESS)
         return va_status;
 

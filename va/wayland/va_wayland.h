@@ -75,8 +75,15 @@ vaGetDisplayWl(struct wl_display *display);
  * color conversion be needed, then VA/VPP API can fulfill this
  * purpose.
  *
+ * The @flags describe the desired picture structure. This is useful
+ * to expose a de-interlaced buffer. If the VA driver does not support
+ * any of the supplied flags, then #VA_STATUS_ERROR_FLAG_NOT_SUPPORTED
+ * is returned. The following flags are allowed: \c VA_FRAME_PICTURE,
+ * \c VA_TOP_FIELD, \c VA_BOTTOM_FIELD.
+ *
  * @param[in]   dpy         the VA display
  * @param[in]   surface     the VA surface
+ * @param[in]   flags       the deinterlacing flags
  * @param[out]  out_buffer  a wl_buffer wrapping the VA @surface
  * @return VA_STATUS_SUCCESS if successful
  */
@@ -84,6 +91,7 @@ VAStatus
 vaGetSurfaceBufferWl(
     VADisplay           dpy,
     VASurfaceID         surface,
+    unsigned int        flags,
     struct wl_buffer  **out_buffer
 );
 
@@ -97,8 +105,12 @@ vaGetSurfaceBufferWl(
  * color conversion be needed, then VA/VPP API can fulfill this
  * purpose.
  *
+ * The @flags describe the desired picture structure. See
+ * vaGetSurfaceBufferWl() description for more details.
+ *
  * @param[in]   dpy         the VA display
  * @param[in]   image       the VA image
+ * @param[in]   flags       the deinterlacing flags
  * @param[out]  out_buffer  a wl_buffer wrapping the VA @image
  * @return VA_STATUS_SUCCESS if successful
  */
@@ -106,6 +118,7 @@ VAStatus
 vaGetImageBufferWl(
     VADisplay           dpy,
     VAImageID           image,
+    unsigned int        flags,
     struct wl_buffer  **out_buffer
 );
 

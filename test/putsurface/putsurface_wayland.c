@@ -156,7 +156,7 @@ va_put_surface(
             wl_display_iterate(wl_drawable->display, WL_DISPLAY_READABLE);
     }
 
-    va_status = vaGetSurfaceBufferWl(va_dpy, va_surface, &buffer);
+    va_status = vaGetSurfaceBufferWl(va_dpy, va_surface, VA_FRAME_PICTURE, &buffer);
     if (va_status != VA_STATUS_SUCCESS)
         return va_status;
 

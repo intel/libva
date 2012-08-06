@@ -49,6 +49,7 @@ struct VADriverVTableWayland {
     VAStatus (*vaGetSurfaceBufferWl)(
         struct VADriverContext *ctx,
         VASurfaceID             surface,
+        unsigned int            flags,
         struct wl_buffer      **out_buffer
     );
 
@@ -56,6 +57,7 @@ struct VADriverVTableWayland {
     VAStatus (*vaGetImageBufferWl)(
         struct VADriverContext *ctx,
         VAImageID               image,
+        unsigned int            flags,
         struct wl_buffer      **out_buffer
     );
 };

@@ -163,6 +163,7 @@ VAStatus
 vaGetSurfaceBufferWl(
     VADisplay           dpy,
     VASurfaceID         surface,
+    unsigned int        flags,
     struct wl_buffer  **out_buffer
 )
 {
@@ -172,13 +173,15 @@ vaGetSurfaceBufferWl(
         return VA_STATUS_ERROR_INVALID_DISPLAY;
     if (!ctx->vtable_wayland || !ctx->vtable_wayland->vaGetSurfaceBufferWl)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
-    return ctx->vtable_wayland->vaGetSurfaceBufferWl(ctx, surface, out_buffer);
+    return ctx->vtable_wayland->vaGetSurfaceBufferWl(ctx, surface, flags,
+                                                     out_buffer);
 }
 
 VAStatus
 vaGetImageBufferWl(
     VADisplay           dpy,
     VAImageID           image,
+    unsigned int        flags,
     struct wl_buffer  **out_buffer
 )
 {
@@ -188,5 +191,6 @@ vaGetImageBufferWl(
         return VA_STATUS_ERROR_INVALID_DISPLAY;
     if (!ctx->vtable_wayland || !ctx->vtable_wayland->vaGetImageBufferWl)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
-    return ctx->vtable_wayland->vaGetImageBufferWl(ctx, image, out_buffer);
+    return ctx->vtable_wayland->vaGetImageBufferWl(ctx, image, flags,
+                                                   out_buffer);
 }
