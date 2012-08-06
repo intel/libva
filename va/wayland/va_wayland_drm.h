@@ -41,6 +41,7 @@
  * @param[in]   pDisplayContext the VA display context
  * @return true if successful
  */
+DLL_HIDDEN
 bool
 va_wayland_drm_init(VADisplayContextP pDisplayContext);
 

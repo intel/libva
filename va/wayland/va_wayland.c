@@ -24,8 +24,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "sysdeps.h"
 #include <stdarg.h>
 #include "va_wayland.h"
 #include "va_wayland_drm.h"

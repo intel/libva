@@ -45,6 +45,7 @@ typedef struct _VADisplayContextWayland {
     VADisplayContextFinalizeFunc        finalize;
 } VADisplayContextWayland, *VADisplayContextWaylandP;
 
+DLL_HIDDEN
 void
 va_wayland_error(const char *format, ...);
 
