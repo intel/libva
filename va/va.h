@@ -271,6 +271,7 @@ typedef enum
     VAEntrypointEncSlice	= 6,	/* slice level encode */
     VAEntrypointEncPicture 	= 7,	/* pictuer encode, JPEG, etc */
     VAEntrypointVideoProc       = 10,   /**< Video pre/post-processing. */
+    VAEntrypointMax
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */
@@ -353,6 +354,7 @@ typedef enum
      */
     VAConfigAttribEncMacroblockInfo     = 16,
     /**@}*/
+    VAConfigAttribTypeMax
 } VAConfigAttribType;
 
 /*
@@ -709,7 +711,7 @@ typedef enum
      * color balance (#VAProcFilterParameterBufferColorBalance), etc.
      */
     VAProcFilterParameterBufferType     = 42,
-    VABufferTypeMax                     = 0xff
+    VABufferTypeMax
 } VABufferType;
 
 typedef enum
