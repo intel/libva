@@ -44,7 +44,8 @@ LOCAL_SRC_FILES := \
 
 LOCAL_CFLAGS += \
 	-DANDROID \
-	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\"" \
+	-DLOG_TAG=\"libva\"
 
 # Android Jelly Bean defined ALOGx, older versions use LOGx
 ifeq ($(ALOG_VERSION), $(ALOG_VERSION_REQ))
@@ -90,7 +91,7 @@ LOCAL_SRC_FILES := \
 	android/va_android.cpp
 
 LOCAL_CFLAGS += \
-	-DANDROID 
+	-DANDROID -DLOG_TAG=\"libva-android\"
 
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_HEADERS)/libva \
@@ -117,7 +118,7 @@ LOCAL_SRC_FILES := \
 	egl/va_egl.c
 
 LOCAL_CFLAGS += \
-	-DANDROID
+	-DANDROID -DLOG_TAG=\"libva-egl\"
 
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_HEADERS)/libva \
@@ -142,7 +143,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := va_tpi.c
 
-LOCAL_CFLAGS += -DANDROID
+LOCAL_CFLAGS += -DANDROID -DLOG_TAG=\"libva-tpi\"
 
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_HEADERS)/libva \
