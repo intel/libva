@@ -42,7 +42,6 @@
 # define False 0
 
 /* Android logging utilities */
-# define LOG_TAG "lib-va"
 # include <utils/Log.h>
 
 # ifdef ANDROID_ALOG
