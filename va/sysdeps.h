@@ -41,6 +41,9 @@
 # define True  1
 # define False 0
 
+/* Macros generated from configure */
+# define LIBVA_VERSION_S "1.2.0.pre1"
+
 /* Android logging utilities */
 # include <utils/Log.h>
 

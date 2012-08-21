@@ -15,14 +15,12 @@ LOCAL_CFLAGS += \
 
 LOCAL_C_INCLUDES += \
   $(LOCAL_PATH)/../common \
-  $(TARGET_OUT_HEADERS)/libva	\
-  $(TOPDIR)/hardware/intel/libva/va/	\
-  $(TARGET_OUT_HEADERS)/X11	
+  $(TARGET_OUT_HEADERS)/libva
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	mpeg2vldemo
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
 

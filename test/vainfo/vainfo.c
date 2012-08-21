@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "va_display.h"
+#include "va/sysdeps.h"
 
 #define CHECK_VASTATUS(va_status,func, ret)                             \
 if (va_status != VA_STATUS_SUCCESS) {                                   \

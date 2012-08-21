@@ -66,7 +66,7 @@ LOCAL_COPY_HEADERS := \
 	va_enc.h \
 	va_enc_h264.h \
 	va_backend.h \
-	x11/va_dricommon.h \
+	va_drmcommon.h \
 	va_vpp.h \
 	va_backend_vpp.h
 
