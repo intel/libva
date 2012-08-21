@@ -14,12 +14,14 @@ LOCAL_CFLAGS += \
   -DANDROID
 
 LOCAL_C_INCLUDES += \
-  $(TARGET_OUT_HEADERS)/libva
+  $(LOCAL_PATH)/../../va \
+  $(LOCAL_PATH)/../common \
+  $(LOCAL_PATH)/../.. \
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := vainfo
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
 

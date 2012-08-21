@@ -24,12 +24,6 @@
 #include <ui/DisplayInfo.h>
 
 namespace android {
-    class Test {
-        public:
-                static const sp<ISurface>& getISurface(const sp<Surface>& s) {
-                            return s->getISurface();
-                }
-    };
 };
 
 #define min(a,b) (a<b?a:b)
@@ -44,21 +38,14 @@ do {                                                                    \
     /*h = min(win_height, info.h);*/                                    \
     w = win_width, h = win_height;                                      \
                                                                         \
-    surface_ctrl = client->createSurface(getpid(), 0, w, h, PIXEL_FORMAT_RGB_565, ISurfaceComposer::ePushBuffers); \
+    surface_ctrl = client->createSurface(getpid(), 0, w, h, PIXEL_FORMAT_RGB_565); \
     android_surface = surface_ctrl->getSurface();                       \
-    android_isurface = Test::getISurface(android_surface);              \
                                                                         \
-    client->openTransaction();                                          \
+    client->openGlobalTransaction();                                          \
     surface_ctrl->setPosition(x, y);                                    \
-    client->closeTransaction();                                         \
-                                                                        \
-    client->openTransaction();                                          \
     surface_ctrl->setSize(w, h);                                        \
-    client->closeTransaction();                                         \
-                                                                        \
-    client->openTransaction();                                          \
     surface_ctrl->setLayer(0x100000);                                   \
-    client->closeTransaction();                                         \
+    client->closeGlobalTransaction();                                         \
 } while (0)
 
 

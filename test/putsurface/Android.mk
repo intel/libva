@@ -18,7 +18,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := putsurface
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libgui
 
 include $(BUILD_EXECUTABLE)
 
