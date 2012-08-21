@@ -23,29 +23,25 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_android.h"
-#include "va_dricommon.h" /* needs some helper functions from this file */
-#include <stdio.h>
-#include <stdlib.h>
+#include "va_drmcommon.h"
+#include "va_drm_utils.h"
 #include <stdarg.h>
-#include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dlfcn.h>
 #include <errno.h>
-#ifndef ANDROID
-#include <libudev.h>
-#include "drmtest.h"
-#endif
+
 
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
-#define DEVICE_NAME "/dev/card0"
+#define DEVICE_NAME "/dev/dri/card0"
 
 static int open_device (char *dev_name)
 {
@@ -89,114 +85,40 @@ static void va_DisplayContextDestroy (
     VADisplayContextP pDisplayContext
 )
 {
-    struct dri_state *dri_state;
+    struct drm_state *drm_state;
 
     if (pDisplayContext == NULL)
         return;
 
     /* close the open-ed DRM fd */
-    dri_state = (struct dri_state *)pDisplayContext->pDriverContext->drm_state;
-    close(dri_state->base.fd);
+    drm_state = (struct drm_state *)pDisplayContext->pDriverContext->drm_state;
+    close(drm_state->fd);
 
     free(pDisplayContext->pDriverContext->drm_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
 
-#ifdef ANDROID
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
     char **driver_name
 )
 {
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
-    char *driver_name_env;
-    int vendor_id, device_id;
-    
-    struct {
-        int vendor_id;
-        int device_id;
-        char driver_name[64];
-    } devices[] = {
-        { 0x8086, 0x4100, "pvr" },
-        { 0x8086, 0x0130, "pvr" },
-        { 0x0,    0x0,    "\0" },
-    };
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
 
-    memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->base.fd = open_device((char *)DEVICE_NAME);
-    
-    if (dri_state->base.fd < 0) {
+    memset(drm_state, 0, sizeof(*drm_state));
+    drm_state->fd = open_device((char *)DEVICE_NAME);
+
+    if (drm_state->fd < 0) {
         fprintf(stderr,"can't open DRM devices\n");
         return VA_STATUS_ERROR_UNKNOWN;
     }
+    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
 
-    /* TBD: other vendor driver names */
-    vendor_id = devices[0].vendor_id;
-    device_id = devices[0].device_id;
-    *driver_name = strdup(devices[0].driver_name);
-        
-    dri_state->base.auth_type = VA_DUMMY;
-
-    return VA_STATUS_SUCCESS;
+    return VA_DRM_GetDriverName(ctx, driver_name);
 }
-#else
-static VAStatus va_DisplayContextGetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-    struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
-    char *driver_name_env;
-    int vendor_id, device_id;
-    int i = 0;
-    
-    struct {
-        int vendor_id;
-        int device_id;
-        char driver_name[64];
-    } devices[] = {
-        { 0x8086, 0x4100, "pvr" },
-        { 0x8086, 0x0130, "pvr" },
-        { 0x0,    0x0,    "\0" },
-    };
 
-    memset(dri_state, 0, sizeof(*dri_state));
-    dri_state->base.fd = drm_open_any(&vendor_id, &device_id);
-    
-    if (dri_state->base.fd < 0) {
-        fprintf(stderr,"can't open DRM devices\n");
-        return VA_STATUS_ERROR_UNKNOWN;
-    }
-    
-    /* TBD: other vendor driver names */
-
-    while (devices[i].device_id != 0) {
-        if ((devices[i].vendor_id == vendor_id) &&
-            (devices[i].device_id == device_id))
-            break;
-        i++;
-    }
-
-    if (devices[i].device_id != 0)
-        *driver_name = strdup(devices[i].driver_name);
-    else {
-        fprintf(stderr,"device (0x%04x:0x%04x) is not supported\n",
-                vendor_id, device_id);
-        
-        return VA_STATUS_ERROR_UNKNOWN;
-    }            
-
-    printf("DRM device is opened, loading driver %s for device 0x%04x:0x%04x\n",
-           driver_name, vendor_id, device_id);
-    
-    dri_state->base.auth_type = VA_DUMMY;
-
-    return VA_STATUS_SUCCESS;
-}
-#endif
 
 VADisplay vaGetDisplay (
     void *native_dpy /* implementation specific */
@@ -211,12 +133,12 @@ VADisplay vaGetDisplay (
     if (!dpy)
     {
         /* create new entry */
-        VADriverContextP pDriverContext;
-        struct dri_state *dri_state;
+        VADriverContextP pDriverContext = 0;
+        struct drm_state *drm_state = 0;
         pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
         pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
-        dri_state       = (struct dri_state*)calloc(1, sizeof(*dri_state));
-        if (pDisplayContext && pDriverContext && dri_state)
+        drm_state       = (struct drm_state*)calloc(1, sizeof(*drm_state));
+        if (pDisplayContext && pDriverContext && drm_state)
         {
             pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
 
@@ -226,7 +148,7 @@ VADisplay vaGetDisplay (
             pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-            pDriverContext->drm_state 	     = dri_state;
+            pDriverContext->drm_state 	     = drm_state;
             dpy                              = (VADisplay)pDisplayContext;
         }
         else
@@ -235,8 +157,8 @@ VADisplay vaGetDisplay (
                 free(pDisplayContext);
             if (pDriverContext)
                 free(pDriverContext);
-            if (dri_state)
-                free(dri_state);
+            if (drm_state)
+                free(drm_state);
         }
     }
   
@@ -247,7 +169,6 @@ VADisplay vaGetDisplay (
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 
-#ifdef ANDROID
 extern "C"  {
     extern int fool_postp; /* do nothing for vaPutSurface if set */
     extern int trace_flag; /* trace vaPutSurface parameters */
@@ -306,4 +227,3 @@ VAStatus vaPutSurface (
                                      destx, desty, destw, desth,
                                      cliprects, number_cliprects, flags );
 }
-#endif

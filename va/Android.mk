@@ -89,14 +89,16 @@ LOCAL_GENERATED_SOURCES += $(GEN)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-	android/va_android.cpp
+	android/va_android.cpp \
+	drm/va_drm_utils.c
 
 LOCAL_CFLAGS += \
 	-DANDROID -DLOG_TAG=\"libva-android\"
 
 LOCAL_C_INCLUDES += \
 	$(TARGET_OUT_HEADERS)/libva \
-	$(LOCAL_PATH)/x11
+	$(TARGET_OUT_HEADERS)/libdrm \
+	$(LOCAL_PATH)/drm
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
@@ -105,7 +107,7 @@ LOCAL_COPY_HEADERS := va_android.h
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
 
-LOCAL_SHARED_LIBRARIES := libva
+LOCAL_SHARED_LIBRARIES := libva libdrm
 
 include $(BUILD_SHARED_LIBRARY)
 
