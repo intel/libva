@@ -403,6 +403,8 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV420	0x00000001	
 #define VA_RT_FORMAT_YUV422	0x00000002
 #define VA_RT_FORMAT_YUV444	0x00000004
+#define VA_RT_FORMAT_RGB16	0x00010000
+#define VA_RT_FORMAT_RGB32	0x00020000
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
 /** @name Attribute values for VAConfigAttribRateControl */
