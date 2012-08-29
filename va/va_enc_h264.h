@@ -121,7 +121,8 @@ typedef enum {
 } VAEncPackedHeaderTypeH264;
 
 /**
- * \brief Sequence parameter for H.264 encoding in main & high profiles.
+ * \brief Sequence parameter for H.264 encoding in baseline, main & high 
+ * profiles.
  *
  * This structure holds information for \c seq_parameter_set_data() as
  * defined by the H.264 specification.
@@ -257,7 +258,8 @@ typedef struct _VAEncSequenceParameterBufferH264 {
 } VAEncSequenceParameterBufferH264;
 
 /**
- * \brief Picture parameter for H.264 encoding in main & high profiles.
+ * \brief Picture parameter for H.264 encoding in baseline, main & high 
+ * profiles.
  *
  * This structure holds information for \c pic_parameter_set_rbsp() as
  * defined by the H.264 specification.
@@ -367,7 +369,7 @@ typedef struct _VAEncPictureParameterBufferH264 {
 } VAEncPictureParameterBufferH264;
 
 /**
- * \brief Slice parameter for H.264 encoding in main & high profiles.
+ * \brief Slice parameter for H.264 encoding in baseline, main & high profiles.
  *
  * This structure holds information for \c
  * slice_layer_without_partitioning_rbsp() as defined by the H.264
@@ -522,7 +524,8 @@ typedef struct _VAEncSliceParameterBufferH264 {
 /**@}*/
 
 /**
- * \brief Macroblock parameter for H.264 encoding in main & high profiles.
+ * \brief Macroblock parameter for H.264 encoding in baseline, main & high 
+ * profiles.
  *
  * This structure holds per-macroblock information. The buffer must be
  * allocated with as many elements (macroblocks) as necessary to fit
