@@ -120,7 +120,7 @@ libva_egl_la_SOURCES		=
 libva_egl_la_LDFLAGS		= $(LDADD)
 libva_egl_la_DEPENDENCIES	= $(libvacorelib) egl/libva_egl.la libva-x11.la
 libva_egl_la_LIBADD		= $(libvacorelib) egl/libva_egl.la libva-x11.la \
-	$(GL_DEPS_LIBS) -ldl
+	$(EGL_DEPS_LIBS) -ldl
 endif
 
 if USE_WAYLAND
