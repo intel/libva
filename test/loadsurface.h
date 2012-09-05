@@ -220,21 +220,43 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
     VAImage surface_image;
     void *surface_p=NULL, *U_start,*V_start;
     VAStatus va_status;
+    unsigned int pitches[3];
     
     va_status = vaDeriveImage(va_dpy,surface_id,&surface_image);
     CHECK_VASTATUS(va_status,"vaDeriveImage");
 
     vaMapBuffer(va_dpy,surface_image.buf,&surface_p);
     assert(VA_STATUS_SUCCESS == va_status);
-        
-    U_start = (char *)surface_p + surface_image.offsets[1];
-    V_start = (char *)surface_p + surface_image.offsets[2];
+
+    pitches[0] = surface_image.pitches[0];
+    switch (surface_image.format.fourcc) {
+    case VA_FOURCC_NV12:
+        U_start = (char *)surface_p + surface_image.offsets[1];
+        V_start = U_start + 1;
+        pitches[1] = surface_image.pitches[1];
+        pitches[2] = surface_image.pitches[1];
+        break;
+    case VA_FOURCC_IYUV:
+        U_start = (char *)surface_p + surface_image.offsets[1];
+        V_start = (char *)surface_p + surface_image.offsets[2];
+        pitches[1] = surface_image.pitches[1];
+        pitches[2] = surface_image.pitches[2];
+        break;
+    case VA_FOURCC_YV12:
+        U_start = (char *)surface_p + surface_image.offsets[2];
+        V_start = (char *)surface_p + surface_image.offsets[1];
+        pitches[1] = surface_image.pitches[2];
+        pitches[2] = surface_image.pitches[1];
+        break;
+    default:
+        assert(0);
+    }
 
     /* assume surface is planar format */
     yuvgen_planar(surface_image.width, surface_image.height,
-                  (unsigned char *)surface_p, surface_image.pitches[0],
-                  (unsigned char *)U_start, surface_image.pitches[1],
-                  (unsigned char *)V_start, surface_image.pitches[2],
+                  (unsigned char *)surface_p, pitches[0],
+                  (unsigned char *)U_start, pitches[1],
+                  (unsigned char *)V_start, pitches[2],
                   (surface_image.format.fourcc==VA_FOURCC_NV12),
                   box_width, row_shift, field);
         
