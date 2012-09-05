@@ -88,16 +88,22 @@ static int YUV_blend_with_pic(int width, int height,
     /* begin blend */
 
     /* Y plane */
-    for (row=0; row<height; row++) 
-        for (col=0; col<width; col++) {
-            unsigned char *p = Y_start + row * Y_pitch + col;
-            unsigned char *q = pic_y + row * width + col;
-            
+    int Y_pixel_stride = 1;
+    if (fourcc == VA_FOURCC_YUY2) 
+        Y_pixel_stride = 2;
+         
+    for (row=0; row<height; row++) {
+        unsigned char *p = Y_start + row * Y_pitch;
+        unsigned char *q = pic_y + row * width;
+        for (col=0; col<width; col++, q++) {
             *p  = *p * (100 - alpha) / 100 + *q * alpha/100;
+            p += Y_pixel_stride;
         }
+    }
 
     /* U/V plane */
     int U_pixel_stride, V_pixel_stride;
+    int v_factor_to_nv12 = 1;
     switch (fourcc) {
     case VA_FOURCC_YV12:
         U_pixel_stride = V_pixel_stride = 1;
@@ -105,14 +111,18 @@ static int YUV_blend_with_pic(int width, int height,
     case VA_FOURCC_NV12:
         U_pixel_stride = V_pixel_stride = 2;
         break;
+    case VA_FOURCC_YUY2:
+        U_pixel_stride = V_pixel_stride = 4;
+        v_factor_to_nv12 = 2;
+        break;
     default:
         break;
     }
-    for (row=0; row<height/2; row++) {
+    for (row=0; row<height/2*v_factor_to_nv12; row++) {
         unsigned char *pU = U_start + row * U_pitch;
         unsigned char *pV = V_start + row * V_pitch;
-        unsigned char *qU = pic_u + row * width/2;
-        unsigned char *qV = pic_v + row * width/2;
+        unsigned char *qU = pic_u + row/v_factor_to_nv12 * width/2;
+        unsigned char *qV = pic_v + row/v_factor_to_nv12 * width/2;
             
         for (col=0; col<width/2; col++, qU++, qV++) {
             *pU  = *pU * (100 - alpha) / 100 + *qU * alpha/100;
@@ -141,8 +151,11 @@ static int yuvgen_planar(int width, int height,
                          int field)
 {
     int row, alpha;
+    unsigned char uv_value = 0x80;
 
     /* copy Y plane */
+    int y_factor = 1;
+	if (fourcc == VA_FOURCC_YUY2) y_factor = 2;
     for (row=0;row<height;row++) {
         unsigned char *Y_row = Y_start + row * Y_pitch;
         int jj, xpos, ypos;
@@ -159,32 +172,38 @@ static int yuvgen_planar(int width, int height,
         for (jj=0; jj<width; jj++) {
             xpos = ((row_shift + jj) / box_width) & 0x1;
             if (xpos == ypos)
-                Y_row[jj] = 0xeb;
+                Y_row[jj*y_factor] = 0xeb;
             else 
-                Y_row[jj] = 0x10;
+                Y_row[jj*y_factor] = 0x10;
+
+            if (fourcc == VA_FOURCC_YUY2) {
+                Y_row[jj*y_factor+1] = uv_value; // it is for UV
+		    }
         }
     }
   
     /* copy UV data */
     for( row =0; row < height/2; row++) {
-        unsigned short value = 0x80;
 
         /* fill garbage data into the other field */
         if (((field == VA_TOP_FIELD) && (row &1))
             || ((field == VA_BOTTOM_FIELD) && ((row &1)==0))) {
-            value = 0xff;
+            uv_value = 0xff;
         }
 
         unsigned char *U_row = U_start + row * U_pitch;
         unsigned char *V_row = V_start + row * V_pitch;
         switch (fourcc) {
         case VA_FOURCC_NV12:
-            memset(U_row, value, width);
+            memset(U_row, uv_value, width);
 			break;
         case VA_FOURCC_YV12:
-            memset (U_row,value,width/2);
-            memset (V_row,value,width/2);
+            memset (U_row,uv_value,width/2);
+            memset (V_row,uv_value,width/2);
 			break;
+        case VA_FOURCC_YUY2:
+            // see above. it is set with Y update.
+            break;
         default:
             printf("unsupported fourcc in loadsurface.h\n");
             assert(0);
@@ -242,6 +261,12 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
         V_start = (char *)surface_p + surface_image.offsets[1];
         pitches[1] = surface_image.pitches[2];
         pitches[2] = surface_image.pitches[1];
+        break;
+    case VA_FOURCC_YUY2:
+        U_start = surface_p + 1;
+        V_start = surface_p + 3;
+        pitches[1] = surface_image.pitches[0];
+        pitches[2] = surface_image.pitches[0];
         break;
     default:
         assert(0);
