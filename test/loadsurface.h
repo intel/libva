@@ -39,10 +39,10 @@ static int scale_2dimage(unsigned char *src_img, int src_imgw, int src_imgh,
 
 
 static int YUV_blend_with_pic(int width, int height,
-                  unsigned char *Y_start, int Y_pitch,
-		  unsigned char *U_start, int U_pitch,
-                  unsigned char *V_start, int V_pitch,
-		  int UV_interleave, int fixed_alpha)
+            unsigned char *Y_start, int Y_pitch,
+            unsigned char *U_start, int U_pitch,
+            unsigned char *V_start, int V_pitch,
+            unsigned int fourcc, int fixed_alpha)
 {
     /* PIC YUV format */
     unsigned char *pic_y_old = yuvga_pic;
@@ -96,33 +96,31 @@ static int YUV_blend_with_pic(int width, int height,
             *p  = *p * (100 - alpha) / 100 + *q * alpha/100;
         }
 
-    if (UV_interleave == 0) {
-        for (row=0; row<height/2; row++) 
-            for (col=0; col<width/2; col++) {
-                unsigned char *p = U_start + row * U_pitch + col;
-                unsigned char *q = pic_u + row * width/2 + col;
+    /* U/V plane */
+    int U_pixel_stride, V_pixel_stride;
+    switch (fourcc) {
+    case VA_FOURCC_YV12:
+        U_pixel_stride = V_pixel_stride = 1;
+        break;
+    case VA_FOURCC_NV12:
+        U_pixel_stride = V_pixel_stride = 2;
+        break;
+    default:
+        break;
+    }
+    for (row=0; row<height/2; row++) {
+        unsigned char *pU = U_start + row * U_pitch;
+        unsigned char *pV = V_start + row * V_pitch;
+        unsigned char *qU = pic_u + row * width/2;
+        unsigned char *qV = pic_v + row * width/2;
             
-                *p  = *p * (100 - alpha) / 100 + *q * alpha/100;
-            }
-    
-        for (row=0; row<height/2; row++) 
-            for (col=0; col<width/2; col++) {
-                unsigned char *p = V_start + row * V_pitch + col;
-                unsigned char *q = pic_v + row * width/2 + col;
-            
-                *p  = *p * (100 - alpha) / 100 + *q * alpha/100;
-            }
-    }  else { /* NV12 */
-        for (row=0; row<height/2; row++) 
-            for (col=0; col<width/2; col++) {
-                unsigned char *pU = U_start + row * U_pitch + col*2;
-                unsigned char *qU = pic_u + row * width/2 + col;
-                unsigned char *pV = pU + 1;
-                unsigned char *qV = pic_v + row * width/2 + col;
-            
-                *pU  = *pU * (100 - alpha) / 100 + *qU * alpha/100;
-                *pV  = *pV * (100 - alpha) / 100 + *qV * alpha/100;
-            }
+        for (col=0; col<width/2; col++, qU++, qV++) {
+            *pU  = *pU * (100 - alpha) / 100 + *qU * alpha/100;
+            *pV  = *pV * (100 - alpha) / 100 + *qV * alpha/100;
+
+            pU += U_pixel_stride;
+            pV += V_pixel_stride;
+        }
     }
         
     
@@ -139,7 +137,7 @@ static int yuvgen_planar(int width, int height,
                          unsigned char *Y_start, int Y_pitch,
                          unsigned char *U_start, int U_pitch,
                          unsigned char *V_start, int V_pitch,
-                         int UV_interleave, int box_width, int row_shift,
+                         unsigned int fourcc, int box_width, int row_shift,
                          int field)
 {
     int row, alpha;
@@ -160,15 +158,9 @@ static int yuvgen_planar(int width, int height,
         
         for (jj=0; jj<width; jj++) {
             xpos = ((row_shift + jj) / box_width) & 0x1;
-                        
-            if ((xpos == 0) && (ypos == 0))
+            if (xpos == ypos)
                 Y_row[jj] = 0xeb;
-            if ((xpos == 1) && (ypos == 1))
-                Y_row[jj] = 0xeb;
-                        
-            if ((xpos == 1) && (ypos == 0))
-                Y_row[jj] = 0x10;
-            if ((xpos == 0) && (ypos == 1))
+            else 
                 Y_row[jj] = 0x10;
         }
     }
@@ -183,16 +175,19 @@ static int yuvgen_planar(int width, int height,
             value = 0xff;
         }
 
-        if (UV_interleave) {
-            unsigned short *UV_row = (unsigned short *)(U_start + row * U_pitch);
-
-            memset(UV_row, value, width);
-        } else {
-            unsigned char *U_row = U_start + row * U_pitch;
-            unsigned char *V_row = V_start + row * V_pitch;
-            
+        unsigned char *U_row = U_start + row * U_pitch;
+        unsigned char *V_row = V_start + row * V_pitch;
+        switch (fourcc) {
+        case VA_FOURCC_NV12:
+            memset(U_row, value, width);
+			break;
+        case VA_FOURCC_YV12:
             memset (U_row,value,width/2);
             memset (V_row,value,width/2);
+			break;
+        default:
+            printf("unsupported fourcc in loadsurface.h\n");
+            assert(0);
         }
     }
 
@@ -208,7 +203,7 @@ static int yuvgen_planar(int width, int height,
                        Y_start, Y_pitch,
                        U_start, U_pitch,
                        V_start, V_pitch,
-                       UV_interleave, alpha);
+                       fourcc, alpha);
     
     return 0;
 }
@@ -257,7 +252,7 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
                   (unsigned char *)surface_p, pitches[0],
                   (unsigned char *)U_start, pitches[1],
                   (unsigned char *)V_start, pitches[2],
-                  (surface_image.format.fourcc==VA_FOURCC_NV12),
+                  surface_image.format.fourcc,
                   box_width, row_shift, field);
         
     vaUnmapBuffer(va_dpy,surface_image.buf);
