@@ -646,7 +646,7 @@ typedef enum {
      * zero and drops the \c VA_SURFACE_ATTRIB_SETTABLE flag.
      */
     VASurfaceAttribPixelFormat,
-    /** \brief Minimal width in pixels (int, read/write). */
+    /** \brief Minimal width in pixels (int, read-only). */
     VASurfaceAttribMinWidth,
     /** \brief Maximal width in pixels (int, read-only). */
     VASurfaceAttribMaxWidth,
@@ -654,6 +654,10 @@ typedef enum {
     VASurfaceAttribMinHeight,
     /** \brief Maximal height in pixels (int, read-only). */
     VASurfaceAttribMaxHeight,
+    /** \brief Surface memory type in fourcc (int, read/write). */
+    VASurfaceAttribMemoryType,
+    /** \brief External buffer descriptor (pointer, write). */
+    VASurfaceAttribExternalBufferDescriptor,
     /** \brief Number of surface attributes. */
     VASurfaceAttribCount
 } VASurfaceAttribType;
@@ -667,6 +671,51 @@ typedef struct _VASurfaceAttrib {
     /** \brief Value. See "Surface attribute types" for the expected types. */
     VAGenericValue      value;
 } VASurfaceAttrib;
+
+/** @name VASurfaceAttribMemoryType values in fourcc */
+/**@{*/
+/** \brief VA memory type (default) is supported. VAVA in fourcc */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_VA			0x41564156
+/** \brief V4L2 buffer memory type is supported. V4L2 in fourcc */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_V4L2			0x324C3456
+/** \brief User pointer memory type is supported. UPTR in fourcc */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR		0x52545055
+/**@}*/
+
+/** 
+ * \brief VASurfaceAttribExternalBuffers structure for 
+ * the VASurfaceAttribExternalBufferDescriptor attribute.
+ */
+typedef struct _VASurfaceAttribExternalBuffers {
+    /** \brief pixel format in fourcc. */
+    unsigned int pixel_format;
+    /** \brief width in pixels. */
+    unsigned int width;
+    /** \brief height in pixels. */
+    unsigned int height;
+    /** \brief total size of the buffer in bytes. */
+    unsigned int data_size;
+    /** \brief number of planes for planar layout */
+    unsigned int num_planes;
+    /** \brief pitch for each plane in bytes */
+    unsigned int pitches[4];
+    /** \brief offset for each plane in bytes */
+    unsigned int offsets[4];
+    /** \brief buffer handles or user pointers */
+    unsigned long *buffers;
+    /** \brief number of elements in the "buffers" array */
+    unsigned int num_buffers;
+    /** \brief flags. See "Surface external buffer descriptor flags". */
+    unsigned int flags;
+    /** \brief reserved for passing private data */
+    void *private_data;
+} VASurfaceAttribExternalBuffers;
+
+/** @name VASurfaceAttribExternalBuffers flags */
+/**@{*/
+/** \brief Enable memory tiling */
+#define VA_SURFACE_EXTBUF_DESC_ENABLE_TILING	0x00000001
+/**@}*/
 
 /**
  * \brief Get surface attributes for the supplied config.

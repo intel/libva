@@ -68,4 +68,9 @@ struct drm_state {
     int         auth_type;
 };
 
+/** \brief Kernel DRM buffer memory type "KDRM" in fourcc */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM		0x4D52444B
+/** \brief DRM PRIME memory type "DPRI" in fourcc */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME		0x49525044
+
 #endif /* VA_DRM_COMMON_H */
