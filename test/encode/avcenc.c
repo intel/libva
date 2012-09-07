@@ -107,6 +107,7 @@ upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id);
 
 static struct {
     VAProfile profile;
+    int constraint_set_flag;
     VAEncSequenceParameterBufferH264 seq_param;
     VAEncPictureParameterBufferH264 pic_param;
     VAEncSliceParameterBufferH264 slice_param[MAX_SLICES];
@@ -798,10 +799,10 @@ static void sps_rbsp(bitstream *bs)
         profile_idc = PROFILE_IDC_MAIN;
 
     bitstream_put_ui(bs, profile_idc, 8);               /* profile_idc */
-    bitstream_put_ui(bs, 0, 1);                         /* constraint_set0_flag */
-    bitstream_put_ui(bs, 1, 1);                         /* constraint_set1_flag */
-    bitstream_put_ui(bs, 0, 1);                         /* constraint_set2_flag */
-    bitstream_put_ui(bs, 0, 1);                         /* constraint_set3_flag */
+    bitstream_put_ui(bs, !!(avcenc_context.constraint_set_flag & 1), 1);                         /* constraint_set0_flag */
+    bitstream_put_ui(bs, !!(avcenc_context.constraint_set_flag & 2), 1);                         /* constraint_set1_flag */
+    bitstream_put_ui(bs, !!(avcenc_context.constraint_set_flag & 4), 1);                         /* constraint_set2_flag */
+    bitstream_put_ui(bs, !!(avcenc_context.constraint_set_flag & 8), 1);                         /* constraint_set3_flag */
     bitstream_put_ui(bs, 0, 4);                         /* reserved_zero_4bits */
     bitstream_put_ui(bs, seq_param->level_idc, 8);      /* level_idc */
     bitstream_put_ue(bs, seq_param->seq_parameter_set_id);      /* seq_parameter_set_id */
@@ -1307,7 +1308,12 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
     pic_param->pic_fields.bits.entropy_coding_mode_flag = ENTROPY_MODE_CABAC;
     pic_param->pic_fields.bits.weighted_pred_flag = 0;
     pic_param->pic_fields.bits.weighted_bipred_idc = 0;
-    pic_param->pic_fields.bits.transform_8x8_mode_flag = 1;
+    
+    if (avcenc_context.constraint_set_flag & 0x7)
+        pic_param->pic_fields.bits.transform_8x8_mode_flag = 0;
+    else
+        pic_param->pic_fields.bits.transform_8x8_mode_flag = 1;
+
     pic_param->pic_fields.bits.deblocking_filter_control_present_flag = 1;
 }
 
@@ -1316,6 +1322,24 @@ static void avcenc_context_init(int width, int height)
     int i;
     memset(&avcenc_context, 0, sizeof(avcenc_context));
     avcenc_context.profile = VAProfileH264Main;
+
+    switch (avcenc_context.profile) {
+    case VAProfileH264Baseline:
+        avcenc_context.constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
+        break;
+
+    case VAProfileH264Main:
+        avcenc_context.constraint_set_flag |= (1 << 1); /* Annex A.2.2 */
+        break;
+
+    case VAProfileH264High:
+        avcenc_context.constraint_set_flag |= (1 << 3); /* Annex A.2.4 */
+        break;
+        
+    default:
+        break;
+    }
+        
     avcenc_context.seq_param_buf_id = VA_INVALID_ID;
     avcenc_context.pic_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_seq_header_param_buf_id = VA_INVALID_ID;
