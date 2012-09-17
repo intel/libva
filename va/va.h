@@ -656,7 +656,7 @@ typedef enum {
     VASurfaceAttribMinHeight,
     /** \brief Maximal height in pixels (int, read-only). */
     VASurfaceAttribMaxHeight,
-    /** \brief Surface memory type in fourcc (int, read/write). */
+    /** \brief Surface memory type expressed in bit fields (int, read/write). */
     VASurfaceAttribMemoryType,
     /** \brief External buffer descriptor (pointer, write). */
     VASurfaceAttribExternalBufferDescriptor,
@@ -674,14 +674,19 @@ typedef struct _VASurfaceAttrib {
     VAGenericValue      value;
 } VASurfaceAttrib;
 
-/** @name VASurfaceAttribMemoryType values in fourcc */
+/** 
+ * @name VASurfaceAttribMemoryType values in bit fields. 
+ * Bit 0:7 are reserved for generic types, Bit 31:28 are reserved for 
+ * Linux DRM, Bit 23:20 are reserved for Android. DRM and Android specific
+ * types are defined in DRM and Android header files.
+ */
 /**@{*/
-/** \brief VA memory type (default) is supported. VAVA in fourcc */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_VA			0x41564156
-/** \brief V4L2 buffer memory type is supported. V4L2 in fourcc */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_V4L2			0x324C3456
-/** \brief User pointer memory type is supported. UPTR in fourcc */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR		0x52545055
+/** \brief VA memory type (default) is supported. */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_VA			0x00000001
+/** \brief V4L2 buffer memory type is supported. */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_V4L2			0x00000002
+/** \brief User pointer memory type is supported. */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR		0x00000004
 /**@}*/
 
 /** 

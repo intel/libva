@@ -26,8 +26,8 @@
 
 #include <va/va.h>
 
-/** \brief Android Gralloc buffer memory type "AGRA" in fourcc */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_GRALLOC	0x41524741
+/** \brief Android Gralloc buffer memory type. */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_GRALLOC	0x00100000
 
 #ifdef __cplusplus
 extern "C" {
