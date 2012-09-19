@@ -25,6 +25,8 @@
 #ifndef _OBJECT_HEAP_H_
 #define _OBJECT_HEAP_H_
 
+#include <pthread.h>
+
 #define OBJECT_HEAP_OFFSET_MASK		0x7F000000
 #define OBJECT_HEAP_ID_MASK			0x00FFFFFF
 
@@ -37,6 +39,7 @@ struct object_base {
 };
 
 struct object_heap {
+    pthread_mutex_t mutex;
     int	object_size;
     int id_offset;
     int next_free;

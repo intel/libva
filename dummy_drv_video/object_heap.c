@@ -22,12 +22,9 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "object_heap.h"
-
-#include "assert.h"
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <assert.h>
+#include "object_heap.h"
 
 #define ASSERT	assert
 
@@ -84,6 +81,7 @@ static int object_heap_expand( object_heap_p heap )
  */
 int object_heap_init( object_heap_p heap, int object_size, int id_offset)
 {
+    pthread_mutex_init(&heap->mutex, NULL);
     heap->object_size = object_size;
     heap->id_offset = id_offset & OBJECT_HEAP_OFFSET_MASK;
     heap->heap_size = 0;
@@ -98,7 +96,7 @@ int object_heap_init( object_heap_p heap, int object_size, int id_offset)
  * Allocates an object
  * Returns the object ID on success, returns -1 on error
  */
-int object_heap_allocate( object_heap_p heap )
+static int object_heap_allocate_unlocked( object_heap_p heap )
 {
     object_base_p obj;
     int bucket_index, obj_index;
@@ -121,11 +119,21 @@ int object_heap_allocate( object_heap_p heap )
     return obj->id;
 }
 
+int object_heap_allocate( object_heap_p heap )
+{
+    int ret;
+
+    pthread_mutex_lock(&heap->mutex);
+    ret = object_heap_allocate_unlocked(heap);
+    pthread_mutex_unlock(&heap->mutex);
+    return ret;
+}
+
 /*
  * Lookup an object by object ID
  * Returns a pointer to the object on success, returns NULL on error
  */
-object_base_p object_heap_lookup( object_heap_p heap, int id )
+static object_base_p object_heap_lookup_unlocked( object_heap_p heap, int id )
 {
     object_base_p obj;
     int bucket_index, obj_index;
@@ -147,6 +155,16 @@ object_base_p object_heap_lookup( object_heap_p heap, int id )
     return obj;
 }
 
+object_base_p object_heap_lookup( object_heap_p heap, int id )
+{
+    object_base_p obj;
+
+    pthread_mutex_lock(&heap->mutex);
+    obj = object_heap_lookup_unlocked(heap, id);
+    pthread_mutex_unlock(&heap->mutex);
+    return obj;
+}
+
 /*
  * Iterate over all objects in the heap.
  * Returns a pointer to the first object on the heap, returns NULL if heap is empty.
@@ -161,7 +179,8 @@ object_base_p object_heap_first( object_heap_p heap, object_heap_iterator *iter 
  * Iterate over all objects in the heap.
  * Returns a pointer to the next object on the heap, returns NULL if heap is empty.
  */
-object_base_p object_heap_next( object_heap_p heap, object_heap_iterator *iter )
+static object_base_p
+object_heap_next_unlocked( object_heap_p heap, object_heap_iterator *iter )
 {
     object_base_p obj;
     int bucket_index, obj_index;
@@ -184,22 +203,38 @@ object_base_p object_heap_next( object_heap_p heap, object_heap_iterator *iter )
     return NULL;
 }
 
+object_base_p
+object_heap_next( object_heap_p heap, object_heap_iterator *iter )
+{
+    object_base_p obj;
 
+    pthread_mutex_lock(&heap->mutex);
+    obj = object_heap_next_unlocked(heap, iter);
+    pthread_mutex_unlock(&heap->mutex);
+    return obj;
+}
 
 /*
  * Frees an object
  */
-void object_heap_free( object_heap_p heap, object_base_p obj )
+static void
+object_heap_free_unlocked( object_heap_p heap, object_base_p obj )
 {
-    /* Don't complain about NULL pointers */
-    if (NULL != obj)
-    {
-        /* Check if the object has in fact been allocated */
-        ASSERT( obj->next_free == ALLOCATED );
+    /* Check if the object has in fact been allocated */
+    ASSERT( obj->next_free == ALLOCATED );
     
-        obj->next_free = heap->next_free;
-        heap->next_free = obj->id & OBJECT_HEAP_ID_MASK;
-    }
+    obj->next_free = heap->next_free;
+    heap->next_free = obj->id & OBJECT_HEAP_ID_MASK;
+}
+
+void
+object_heap_free( object_heap_p heap, object_base_p obj )
+{
+    if (!obj)
+        return;
+    pthread_mutex_lock(&heap->mutex);
+    object_heap_free_unlocked(heap, obj);
+    pthread_mutex_unlock(&heap->mutex);
 }
 
 /*
@@ -223,6 +258,8 @@ void object_heap_destroy( object_heap_p heap )
     for (i = 0; i < heap->heap_size / heap->heap_increment; i++) {
         free(heap->bucket[i]);
     }
+
+    pthread_mutex_destroy(&heap->mutex);
 
     free(heap->bucket);
     heap->bucket = NULL;
