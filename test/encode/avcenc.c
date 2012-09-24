@@ -59,6 +59,7 @@
 #define NAL_IDR                 5
 #define NAL_SPS                 7
 #define NAL_PPS                 8
+#define NAL_SEI			6
 
 #define SLICE_TYPE_P            0
 #define SLICE_TYPE_B            1
@@ -98,6 +99,16 @@ build_packed_pic_buffer(unsigned char **header_buffer);
 static int
 build_packed_seq_buffer(unsigned char **header_buffer);
 
+static int 
+build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
+				unsigned int init_cpb_removal_delay,
+				unsigned int init_cpb_removal_delay_offset,
+				unsigned int cpb_removal_length,
+				unsigned int cpb_removal_delay,
+				unsigned int dpb_output_length,
+				unsigned int dpb_output_delay,
+				unsigned char **sei_buffer);
+
 struct upload_thread_param
 {
     FILE *yuv_fp;
@@ -123,6 +134,8 @@ static struct {
     VABufferID packed_seq_buf_id;
     VABufferID packed_pic_header_param_buf_id;
     VABufferID packed_pic_buf_id;
+    VABufferID packed_sei_header_param_buf_id;   /* the SEI buffer */
+    VABufferID packed_sei_buf_id;
     VABufferID misc_parameter_hrd_buf_id;
 
     int num_slices;
@@ -133,6 +146,11 @@ static struct {
     struct upload_thread_param upload_thread_param;
     pthread_t upload_thread_id;
     int upload_thread_value;
+    int i_initial_cpb_removal_delay;
+    int i_initial_cpb_removal_delay_length;
+    int i_cpb_removal_delay;
+    int i_cpb_removal_delay_length;
+    int i_dpb_output_delay_length;
 } avcenc_context;
 
 static void create_encode_pipe()
@@ -262,6 +280,45 @@ static void release_encode_resource()
 
     // Release all the surfaces resource
     vaDestroySurfaces(va_dpy, &surface_ids[0], SID_NUMBER);	
+}
+
+static void avcenc_update_sei_param(int frame_num)
+{
+	VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+	unsigned int length_in_bits, offset_in_bytes;
+	unsigned char *packed_sei_buffer = NULL;
+	VAStatus va_status;
+
+	length_in_bits = build_packed_sei_buffer_timing(
+				avcenc_context.i_initial_cpb_removal_delay_length,
+				avcenc_context.i_initial_cpb_removal_delay,
+				0,
+				avcenc_context.i_cpb_removal_delay_length,
+				avcenc_context.i_cpb_removal_delay * frame_num,
+				avcenc_context.i_dpb_output_delay_length,
+				0,
+				&packed_sei_buffer);
+
+	offset_in_bytes = 0;
+	packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
+	packed_header_param_buffer.bit_length = length_in_bits;
+	packed_header_param_buffer.has_emulation_bytes = 0;
+
+	va_status = vaCreateBuffer(va_dpy,
+				avcenc_context.context_id,
+				VAEncPackedHeaderParameterBufferType,
+				sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+				&avcenc_context.packed_sei_header_param_buf_id);
+	CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+	va_status = vaCreateBuffer(va_dpy,
+				avcenc_context.context_id,
+				VAEncPackedHeaderDataBufferType,
+				(length_in_bits + 7) / 8, 1, packed_sei_buffer,
+				&avcenc_context.packed_sei_buf_id);
+	CHECK_VASTATUS(va_status,"vaCreateBuffer");
+	free(packed_sei_buffer);
+	return;
 }
 
 static void avcenc_update_picture_parameter(int slice_type, int frame_num, int display_num, int is_idr)
@@ -541,7 +598,7 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
 int avcenc_render_picture()
 {
     VAStatus va_status;
-    VABufferID va_buffers[8];
+    VABufferID va_buffers[10];
     unsigned int num_va_buffers = 0;
     int i;
 
@@ -559,6 +616,12 @@ int avcenc_render_picture()
 
     if (avcenc_context.packed_pic_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] = avcenc_context.packed_pic_buf_id;
+
+    if (avcenc_context.packed_sei_header_param_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] = avcenc_context.packed_sei_header_param_buf_id;
+
+    if (avcenc_context.packed_sei_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] = avcenc_context.packed_sei_buf_id;
 
     if (avcenc_context.misc_parameter_hrd_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] =  avcenc_context.misc_parameter_hrd_buf_id;
@@ -633,6 +696,8 @@ static void end_picture(int slice_type, int next_is_bpic)
     avcenc_destroy_buffers(&avcenc_context.packed_seq_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_pic_header_param_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.packed_pic_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_sei_header_param_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.packed_sei_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.slice_param_buf_id[0], avcenc_context.num_slices);
     avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.misc_parameter_hrd_buf_id, 1);
@@ -990,6 +1055,71 @@ build_packed_seq_buffer(unsigned char **header_buffer)
     return bs.bit_offset;
 }
 
+static int 
+build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
+				unsigned int init_cpb_removal_delay,
+				unsigned int init_cpb_removal_delay_offset,
+				unsigned int cpb_removal_length,
+				unsigned int cpb_removal_delay,
+				unsigned int dpb_output_length,
+				unsigned int dpb_output_delay,
+				unsigned char **sei_buffer)
+{
+    unsigned char *byte_buf;
+    int bp_byte_size, i, pic_byte_size;
+
+    bitstream nal_bs;
+    bitstream sei_bp_bs, sei_pic_bs;
+
+    bitstream_start(&sei_bp_bs);
+    bitstream_put_ue(&sei_bp_bs, 0);       /*seq_parameter_set_id*/
+    bitstream_put_ui(&sei_bp_bs, init_cpb_removal_delay, cpb_removal_length); 
+    bitstream_put_ui(&sei_bp_bs, init_cpb_removal_delay_offset, cpb_removal_length); 
+    if ( sei_bp_bs.bit_offset & 0x7) {
+        bitstream_put_ui(&sei_bp_bs, 1, 1);
+    }
+    bitstream_end(&sei_bp_bs);
+    bp_byte_size = (sei_bp_bs.bit_offset + 7) / 8;
+    
+    bitstream_start(&sei_pic_bs);
+    bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length); 
+    bitstream_put_ui(&sei_pic_bs, dpb_output_delay, dpb_output_length); 
+    if ( sei_pic_bs.bit_offset & 0x7) {
+        bitstream_put_ui(&sei_pic_bs, 1, 1);
+    }
+    bitstream_end(&sei_pic_bs);
+    pic_byte_size = (sei_pic_bs.bit_offset + 7) / 8;
+    
+    bitstream_start(&nal_bs);
+    nal_start_code_prefix(&nal_bs);
+    nal_header(&nal_bs, NAL_REF_IDC_NONE, NAL_SEI);
+
+	/* Write the SEI buffer period data */    
+    bitstream_put_ui(&nal_bs, 0, 8);
+    bitstream_put_ui(&nal_bs, bp_byte_size, 8);
+    
+    byte_buf = (unsigned char *)sei_bp_bs.buffer;
+    for(i = 0; i < bp_byte_size; i++) {
+        bitstream_put_ui(&nal_bs, byte_buf[i], 8);
+    }
+    free(byte_buf);
+	/* write the SEI timing data */
+    bitstream_put_ui(&nal_bs, 0x01, 8);
+    bitstream_put_ui(&nal_bs, pic_byte_size, 8);
+    
+    byte_buf = (unsigned char *)sei_pic_bs.buffer;
+    for(i = 0; i < pic_byte_size; i++) {
+        bitstream_put_ui(&nal_bs, byte_buf[i], 8);
+    }
+    free(byte_buf);
+
+    rbsp_trailing_bits(&nal_bs);
+    bitstream_end(&nal_bs);
+
+    *sei_buffer = (unsigned char *)nal_bs.buffer; 
+   
+    return nal_bs.bit_offset;
+}
 
 #if 0
 static void 
@@ -1214,6 +1344,9 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         /* picture parameter set */
         avcenc_update_picture_parameter(slice_type, frame_num, display_num, is_idr);
 
+	if (avcenc_context.rate_control_method == VA_RC_CBR)
+		avcenc_update_sei_param(frame_num);
+
         avcenc_render_picture();
 
         ret = store_coded_buffer(avc_fp, slice_type);
@@ -1324,6 +1457,22 @@ static void avcenc_context_pic_param_init(VAEncPictureParameterBufferH264 *pic_p
     pic_param->pic_fields.bits.deblocking_filter_control_present_flag = 1;
 }
 
+static void avcenc_context_sei_init()
+{
+	int init_cpb_size;
+	int target_bit_rate;
+
+	/* it comes for the bps defined in SPS */
+	target_bit_rate = avcenc_context.seq_param.bits_per_second;
+	init_cpb_size = (target_bit_rate * 8) >> 10;
+	avcenc_context.i_initial_cpb_removal_delay = init_cpb_size * 0.5 * 1024 / target_bit_rate * 90000;
+
+	avcenc_context.i_cpb_removal_delay = 2;
+	avcenc_context.i_initial_cpb_removal_delay_length = 24;
+	avcenc_context.i_cpb_removal_delay_length = 24;
+	avcenc_context.i_dpb_output_delay_length = 24;
+}
+
 static void avcenc_context_init(int width, int height)
 {
     int i;
@@ -1359,6 +1508,8 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.codedbuf_pb_size = 0;
     avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
     avcenc_context.upload_thread_value = -1;
+    avcenc_context.packed_sei_header_param_buf_id = VA_INVALID_ID;
+    avcenc_context.packed_sei_buf_id = VA_INVALID_ID;
 
     if (qp_value == -1)
         avcenc_context.rate_control_method = VA_RC_CBR;
@@ -1375,6 +1526,8 @@ static void avcenc_context_init(int width, int height)
 
     avcenc_context_seq_param_init(&avcenc_context.seq_param, width, height);
     avcenc_context_pic_param_init(&avcenc_context.pic_param);
+    if (avcenc_context.rate_control_method == VA_RC_CBR)
+	avcenc_context_sei_init();
 }
 
 int main(int argc, char *argv[])
