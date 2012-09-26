@@ -93,7 +93,7 @@ libva_egl_la_SOURCES		=
 libva_egl_la_LDFLAGS		= $(LDADD)
 libva_egl_la_DEPENDENCIES	= $(libvacorelib) egl/libva_egl.la libva-x11.la
 libva_egl_la_LIBADD		= $(libvacorelib) egl/libva_egl.la libva-x11.la \
-	$(EGL_DEPS_LIBS) -ldl
+	$(GL_DEPS_LIBS) -ldl
 endif
 
 if BUILD_DUMMY_BACKEND

@@ -25,8 +25,4 @@ AM_CFLAGS = -I$(top_srcdir)/va -I$(top_srcdir)/test/basic -I$(top_srcdir)/src/x1
 
 SUBDIRS = basic decode encode putsurface vainfo v4l_h264
 
-if BUILD_EGL_TEST
-SUBDIRS += egl
-endif
-
 EXTRA_DIST = loadsurface.h loadsurface_yuv.h

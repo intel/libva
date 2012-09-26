@@ -430,8 +430,8 @@ struct VADriverContext
     
     void *dri_state;
     void *glx;				/* opaque for GLX code */
-    void *egl;
-    unsigned long reserved[44];         /* reserve for future add-ins, decrease the subscript accordingly */
+
+    unsigned long reserved[45];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
@@ -456,16 +456,6 @@ struct VADisplayContext
     );
 
     void *opaque; /* opaque for display extensions (e.g. GLX) */
-
-    VAStatus (*vaCreateNativePixmap) (
-        VADisplayContextP pDisplayContext,
-        unsigned int width,
-        unsigned int height,
-        void **native_pixmap);
-
-    VAStatus (*vaFreeNativePixmap) (
-        VADisplayContextP pDisplayContext,
-        void *native_pixmap);
 };
 
 typedef VAStatus (*VADriverInit) (

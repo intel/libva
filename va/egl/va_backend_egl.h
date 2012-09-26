@@ -25,7 +25,7 @@
 #ifndef VA_BACKEND_EGL_H
 #define VA_BACKEND_EGL_H
 
-#include <va/va_egl.h>
+#include <va/va.h>
 #include <va/va_backend.h>
 
 struct VADriverVTableEGL {
@@ -35,56 +35,7 @@ struct VADriverVTableEGL {
         VASurfaceID surface,
         void **buffer
     );
-
     /* TBD: more APIs for EGL */
-    int max_egl_surface_targets;
-    int max_egl_surface_attributes;
-
-    VAStatus (*vaQuerySurfaceTargetsEGL)(
-        VADriverContextP ctx,
-        EGLenum *target_list,           /* out */
-        int *num_targets		/* out */
-    );
-
-    VAStatus (*vaCreateSurfaceEGL)(
-        VADriverContextP ctx,
-        EGLenum target,
-        unsigned int width,
-        unsigned int height,
-        VASurfaceEGL *gl_surface
-    );
-
-    /* Optional: destroy a VA/EGL surface */
-    VAStatus (*vaDestroySurfaceEGL)(
-        VADriverContextP ctx,
-        VASurfaceEGL egl_surface
-    );
-
-    VAStatus (*vaAssociateSurfaceEGL)(
-        VADriverContextP ctx,
-        VASurfaceEGL egl_surface,
-        VASurfaceID surface,
-        unsigned int flags
-    );
-
-    VAStatus (*vaSyncSurfaceEGL)(
-        VADriverContextP ctx,
-        VASurfaceEGL egl_surface
-    );
-
-    VAStatus (*vaGetSurfaceInfoEGL)(
-        VADisplay dpy,
-        VASurfaceEGL egl_surface,
-        EGLenum *target,
-        EGLClientBuffer *buffer,
-        EGLint *attrib_list,
-        int *num_attribs
-    );
-
-    VAStatus (*vaDeassociateSurfaceEGL)(
-        VADriverContextP ctx,
-        VASurfaceEGL egl_surface
-    );
 };
 
 #endif /* VA_BACKEND_EGL_H */
