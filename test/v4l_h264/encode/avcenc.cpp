@@ -280,7 +280,7 @@ void encoder_close()
 
 
 /* 8x8 font 0-9 only - asm type format */
-unsigned char mydigits[80] {
+unsigned char mydigits[80] = {
         // 0
         0x0E,0x11,0x13,0x15,0x19,0x11,0x0E,0x00,
         // 1
