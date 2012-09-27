@@ -68,6 +68,16 @@ libva_tpi_la_LDFLAGS		= $(LDADD) -no-undefined
 libva_tpi_la_DEPENDENCIES	= $(libvacorelib) 
 libva_tpi_la_LIBADD		= $(libvacorelib) -ldl
 
+if USE_DRM
+SUBDIRS				+= drm
+lib_LTLIBRARIES			+= libva-drm.la
+libva_drm_la_SOURCES		=
+libva_drm_la_LDFLAGS		= $(LDADD)
+libva_drm_la_DEPENDENCIES	= $(libvacorelib) drm/libva_drm.la
+libva_drm_la_LIBADD		= $(libvacorelib) drm/libva_drm.la \
+	$(LIBVA_LIBS) $(DRM_LIBS) -ldl
+endif
+
 if USE_X11
 SUBDIRS				+= x11
 lib_LTLIBRARIES			+= libva-x11.la
@@ -76,17 +86,7 @@ libva_x11_la_SOURCES		=
 libva_x11_la_LDFLAGS		= $(LDADD)
 libva_x11_la_DEPENDENCIES	= $(libvacorelib) x11/libva_x11.la
 libva_x11_la_LIBADD		= $(libvacorelib) x11/libva_x11.la \
-	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(DRM_LIBS) $(XFIXES_LIBS) -ldl
-endif
-
-if USE_DRM
-SUBDIRS				+= drm
-lib_LTLIBRARIES			+= libva-drm.la
-libva_drm_la_SOURCES		=
-libva_drm_la_LDFLAGS		= $(LDADD)
-libva_drm_la_DEPENDENCIES	= $(libvacorelib) drm/libva_drm.la
-libva_drm_la_LIBADD		= $(libvacorelib) drm/libva_drm.la \
-	$(LIBVA_LIBS) $(DRM_LIBS)  -ldl
+	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(XFIXES_LIBS) $(DRM_LIBS) -ldl
 endif
 
 if USE_GLX
@@ -96,7 +96,7 @@ libva_glx_la_SOURCES		=
 libva_glx_la_LDFLAGS		= $(LDADD)
 libva_glx_la_DEPENDENCIES	= $(libvacorelib) glx/libva_glx.la libva-x11.la
 libva_glx_la_LIBADD		= $(libvacorelib) glx/libva_glx.la libva-x11.la \
-	$(GL_DEPS_LIBS) -ldl
+	$(GLX_LIBS) -ldl
 endif
 
 if USE_EGL
@@ -106,7 +106,7 @@ libva_egl_la_SOURCES		=
 libva_egl_la_LDFLAGS		= $(LDADD)
 libva_egl_la_DEPENDENCIES	= $(libvacorelib) egl/libva_egl.la libva-x11.la
 libva_egl_la_LIBADD		= $(libvacorelib) egl/libva_egl.la libva-x11.la \
-	$(GL_DEPS_LIBS) -ldl
+	$(EGL_LIBS) -ldl
 endif
 
 if USE_WAYLAND

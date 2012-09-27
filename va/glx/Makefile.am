@@ -26,7 +26,7 @@ INCLUDES = \
 	-I$(top_srcdir)/va	\
 	-I$(top_srcdir)/va/x11	\
 	$(X11_CFLAGS)		\
-	$(GL_DEPS_CFLAGS)	\
+	$(GLX_CFLAGS)		\
 	$(NULL)
 
 source_c = \

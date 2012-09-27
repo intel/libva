@@ -24,7 +24,7 @@ INCLUDES = \
 	-DLINUX			\
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
-	$(EGL_DEPS_CFLAGS)	\
+	$(EGL_CFLAGS)		\
 	$(NULL)
 
 source_c = \
