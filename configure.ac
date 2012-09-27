@@ -296,15 +296,6 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
-LIBVA_DISPLAY="drm"
-if test "$USE_X11" = "yes"; then
-    LIBVA_DISPLAY="x11"
-fi
-libvacorelib=libva.la
-libvabackendlib=libva-$LIBVA_DISPLAY.la
-AC_SUBST([libvacorelib])
-AC_SUBST([libvabackendlib])
-
 AC_OUTPUT([
     Makefile
     debian.upstream/Makefile

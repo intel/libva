@@ -29,8 +29,7 @@ libva_display_cflags = \
 	$(NULL)
 
 libva_display_libs = \
-	$(top_builddir)/va/$(libvacorelib)	\
-	$(top_builddir)/va/$(libvabackendlib)	\
+	$(top_builddir)/va/libva.la		\
 	$(NULL)
 
 source_c		= va_display.c
@@ -39,7 +38,7 @@ source_h		= va_display.h
 if USE_X11
 source_c		+= va_display_x11.c
 libva_display_cflags	+= $(X11_CFLAGS)
-libva_display_libs	+= $(X11_LIBS)
+libva_display_libs	+= $(top_builddir)/va/libva-x11.la $(X11_LIBS)
 endif
 
 if USE_DRM
