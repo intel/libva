@@ -128,17 +128,17 @@ AC_ARG_ENABLE(x11,
 
 AC_ARG_ENABLE(glx,
     [AC_HELP_STRING([--enable-glx],
-                    [build with GLX support @<:@default=yes@:>@])],
+                    [build with VA/GLX API support @<:@default=yes@:>@])],
     [], [enable_glx="yes"])
 
 AC_ARG_ENABLE(egl,
     [AC_HELP_STRING([--enable-egl],
-                    [build with EGL support @<:@default=yes@:>@])],
+                    [build with VA/EGL API support @<:@default=yes@:>@])],
     [], [enable_egl="yes"])
 
 AC_ARG_ENABLE([wayland],
     [AC_HELP_STRING([--enable-wayland],
-                    [build with Wayland support @<:@default=yes@:>@])],
+                    [build with VA/Wayland API support @<:@default=yes@:>@])],
     [], [enable_wayland="yes"])
 
 AC_ARG_ENABLE(dummy-driver,
@@ -198,22 +198,7 @@ if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
               [Defined to 1 if GCC visibility attribute is supported])
 fi
 
-# Check for X11
-USE_X11="no"
-if test "$enable_x11" = "yes"; then
-    PKG_CHECK_MODULES([X11],    [x11])
-    PKG_CHECK_MODULES([XEXT],   [xext])
-    PKG_CHECK_MODULES([XFIXES], [xfixes])
-    USE_X11="yes"
-    AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is built])
-fi
-AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
-
-# Check for DRM
-LIBDRM_VERSION=libdrm_version
-PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
-AC_SUBST(LIBDRM_VERSION)
-
+# Dummy backend
 if test x$enable_dummy_backend = xyes; then
     PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
 fi
@@ -222,6 +207,11 @@ if test x$libudev = xno; then
 fi
 AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 
+# Check for DRM (mandatory)
+LIBDRM_VERSION=libdrm_version
+PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
+AC_SUBST(LIBDRM_VERSION)
+
 USE_DRM="no"
 if test "$enable_drm" = "yes"; then
     USE_DRM="yes"
@@ -229,38 +219,52 @@ if test "$enable_drm" = "yes"; then
 fi
 AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 
+# Check for X11
+USE_X11="no"
+if test "$enable_x11" = "yes"; then
+    USE_X11="yes"
+    PKG_CHECK_MODULES([X11],    [x11],    [:], [USE_X11="no"])
+    PKG_CHECK_MODULES([XEXT],   [xext],   [:], [USE_X11="no"])
+    PKG_CHECK_MODULES([XFIXES], [xfixes], [:], [USE_X11="no"])
+    if test "$USE_X11" = "yes"; then
+        AC_DEFINE([HAVE_VA_X11], [1], [Defined to 1 if VA/X11 API is built])
+    fi
+fi
+AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
+
 # Check for GLX
 USE_GLX="no"
-GL_DEPS_CFLAGS=""
-GL_DEPS_LIBS=""
 if test "$USE_X11:$enable_glx" = "yes:yes"; then
-    saved_CFLAGS="$CFLAGS"
+    PKG_CHECK_MODULES([GLX], [gl x11], [USE_GLX="yes"], [:])
+    saved_CPPFLAGS="$CPPFLAGS"
     saved_LIBS="$LIBS"
-    PKG_CHECK_MODULES([GL_DEPS], [gl], [], [GL_DEPS_LIBS="-lX11 -lGL"])
-    CFLAGS="$CFLAGS $GL_DEPS_CFLAGS"
-    LIBS="$LIBS $GL_DEPS_LIBS"
-    AC_CHECK_HEADERS([GL/gl.h])
-    AC_CHECK_HEADERS([GL/glx.h])
-    AC_CHECK_LIB(GL, glXCreateContext, [USE_GLX="yes"])
-    CFLAGS="$saved_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $GLX_CFLAGS"
+    LIBS="$LIBS $GLX_LIBS"
+    AC_CHECK_HEADERS([GL/gl.h GL/glx.h], [:], [USE_GLX="no"])
+    AC_CHECK_LIB([GL], [glXCreateContext], [:] [USE_GLX="no"])
+    CPPFLAGS="$saved_CPPFLAGS"
     LIBS="$saved_LIBS"
+    if test "$USE_GLX" = "yes"; then
+        AC_DEFINE([HAVE_VA_GLX], [1], [Defined to 1 if VA/GLX API is built])
+    fi
 fi
-AC_SUBST(GL_DEPS_CFLAGS)
-AC_SUBST(GL_DEPS_LIBS)
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
 
 # Check for EGL
 USE_EGL="no"
 if test "$enable_egl" = "yes"; then
+    PKG_CHECK_MODULES([EGL], [egl], [USE_EGL="yes"], [:])
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LIBS="$LIBS"
-    PKG_CHECK_MODULES([EGL_DEPS], [egl], [USE_EGL="yes"], [USE_EGL="no"])
-    CPPFLAGS="$CPPFLAGS $EGL_DEPS_CFLAGS"
-    LIBS="$LIBS $EGL_DEPS_LIBS"
+    CPPFLAGS="$CPPFLAGS $EGL_CFLAGS"
+    LIBS="$LIBS $EGL_LIBS"
     AC_CHECK_HEADERS([EGL/egl.h], [:], [USE_EGL="no"])
     AC_CHECK_LIB([EGL], [eglGetDisplay], [:], [USE_EGL="no"])
     CPPFLAGS="$saved_CPPFLAGS"
     LIBS="$saved_LIBS"
+    if test "$USE_EGL" = "yes"; then
+        AC_DEFINE([HAVE_VA_EGL], [1], [Defined to 1 if VA/EGL API is built])
+    fi
 fi
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
@@ -288,8 +292,8 @@ pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
 # Check for builds without backend
-if test "$USE_X11:$USE_DRM" = "no:no"; then
-    AC_MSG_ERROR([Please select at least VA/X11 or VA/DRM backend])
+if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
+    AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
 LIBVA_DISPLAY="drm"

@@ -25,6 +25,8 @@ INCLUDES = \
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	$(X11_CFLAGS)		\
+	$(XEXT_CFLAGS)		\
+	$(XFIXES_CFLAGS)	\
 	$(DRM_CFLAGS)		\
 	$(NULL)
 
