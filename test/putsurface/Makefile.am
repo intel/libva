@@ -32,14 +32,14 @@ TEST_CFLAGS = \
 	$(NULL)
 
 TEST_LIBS = \
-	$(top_builddir)/va/$(libvacorelib)	\
+	$(top_builddir)/va/libva.la	\
 	-lpthread				\
 	$(NULL)
 
 putsurface_SOURCES		= putsurface_x11.c
 putsurface_CFLAGS		= $(X11_CFLAGS) $(TEST_CFLAGS)
 putsurface_LDADD		= $(X11_LIBS) $(TEST_LIBS)	\
-	$(top_builddir)/va/$(libvabackendlib)			\
+	$(top_builddir)/va/libva-x11.la			\
 	$(NULL)
 
 if USE_WAYLAND

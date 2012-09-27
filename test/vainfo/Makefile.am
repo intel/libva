@@ -34,8 +34,8 @@ vainfo_cflags = \
 	$(NULL)
 
 vainfo_libs = \
-	$(top_builddir)/va/$(libvacorelib)	\
-	$(top_builddir)/va/$(libvabackendlib)	\
+	$(top_builddir)/va/libva.la	\
+	$(top_builddir)/va/libva-x11.la	\
 	$(libva_helpers)			\
 	$(NULL)
 

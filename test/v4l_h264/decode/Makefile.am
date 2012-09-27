@@ -24,12 +24,12 @@ noinst_PROGRAMS = decode
 
 INCLUDES = -I$(top_srcdir)
 
-TEST_LIBS = $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib) -lX11 -ldl
+TEST_LIBS = $(top_builddir)/va/libva.la $(top_builddir)/va/libva-x11.la -lX11 -ldl
 
 decode_LDADD = $(TEST_LIBS)
 decode_SOURCES = decode_x11.cpp TCPSocketServer.cpp
 
-decode_DEPENDENCIES =   $(top_builddir)/va/$(libvacorelib) $(top_builddir)/va/$(libvabackendlib)
+decode_DEPENDENCIES =   $(top_builddir)/va/libva.la $(top_builddir)/va/libva-x11.la
 
 valgrind:   $(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
