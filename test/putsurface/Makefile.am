@@ -32,8 +32,8 @@ TEST_CFLAGS = \
 	$(NULL)
 
 TEST_LIBS = \
-	$(top_builddir)/va/libva.la	\
-	-lpthread				\
+	$(top_builddir)/va/libva.la \
+	-lpthread		\
 	$(NULL)
 
 putsurface_SOURCES		= putsurface_x11.c
