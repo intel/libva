@@ -80,6 +80,7 @@ m4_define([libdrm_version], [2.4])
 AC_PREREQ(2.57)
 AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)
 AC_CONFIG_SRCDIR([Makefile.am])
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([dist-bzip2])
 
 AM_CONFIG_HEADER([config.h])
@@ -283,11 +284,6 @@ m4_ifdef([WAYLAND_SCANNER_RULES],
     [WAYLAND_SCANNER_RULES(['$(top_srcdir)/va/wayland/protocol'])],
     [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
 
-# We only need the headers, we don't link against the DRM libraries
-LIBVA_CFLAGS="$DRM_CFLAGS"
-AC_SUBST(LIBVA_CFLAGS)
-AC_SUBST(LIBVA_LIBS)
-
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
@@ -331,11 +327,12 @@ AC_OUTPUT([
 ])
 
 # Print a small summary
-AS_IF([test x$USE_DRM = xyes], [BACKENDS="drm $BACKENDS"])
-AS_IF([test x$USE_X11 = xyes], [BACKENDS="x11 $BACKENDS"])
-AS_IF([test x$USE_GLX = xyes], [BACKENDS="glx $BACKENDS"])
-AS_IF([test x$USE_EGL = xyes], [BACKENDS="egl $BACKENDS"])
-AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="wayland $BACKENDS"])
+BACKENDS=""
+AS_IF([test x$USE_DRM = xyes], [BACKENDS="$BACKENDS drm"])
+AS_IF([test x$USE_X11 = xyes], [BACKENDS="$BACKENDS x11"])
+AS_IF([test x$USE_GLX = xyes], [BACKENDS="$BACKENDS glx"])
+AS_IF([test x$USE_EGL = xyes], [BACKENDS="$BACKENDS egl"])
+AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="$BACKENDS wayland"])
 
 echo
 echo "libva - ${LIBVA_VERSION} (VA-API ${VA_API_VERSION})"
