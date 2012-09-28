@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "sysdeps.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>

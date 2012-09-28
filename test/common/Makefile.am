@@ -24,6 +24,7 @@ noinst_LTLIBRARIES = libva-display.la
 
 libva_display_cflags = \
 	-I$(top_srcdir)				\
+	-I$(top_srcdir)/va			\
 	-I$(top_builddir)			\
 	-DIN_LIBVA				\
 	$(NULL)
