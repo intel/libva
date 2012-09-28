@@ -24,6 +24,7 @@ bin_PROGRAMS = vainfo
 
 vainfo_cflags = \
 	-I$(top_srcdir)				\
+	-I$(top_srcdir)/va			\
 	-I$(top_srcdir)/test/common		\
 	-I$(top_builddir)			\
 	-DLIBVA_VERSION_S="\"$(LIBVA_VERSION)\"" \

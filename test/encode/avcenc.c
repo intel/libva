@@ -28,9 +28,7 @@
  * ./avcenc <width> <height> <input file> <output file> [qp]
  */  
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif
+#include "sysdeps.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>

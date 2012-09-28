@@ -25,14 +25,18 @@ if USE_X11
 bin_PROGRAMS += h264encode
 endif
 
+INCLUDES = \
+	-I$(top_srcdir)			\
+	-I$(top_srcdir)/va		\
+	$(NULL)
+
 h264encode_SOURCES	= h264encode_x11.c
-h264encode_CFLAGS	= -I$(top_srcdir)
 h264encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/va/libva-x11.la
 
 avcenc_SOURCES		= avcenc.c
-avcenc_CFLAGS		= -I$(top_srcdir) -I$(top_srcdir)/test/common
+avcenc_CFLAGS		= -I$(top_srcdir)/test/common
 avcenc_LDADD		= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la
