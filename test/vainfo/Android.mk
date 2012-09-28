@@ -14,6 +14,7 @@ LOCAL_CFLAGS += \
   -DANDROID
 
 LOCAL_C_INCLUDES += \
+  $(LOCAL_PATH)/../../va \
   $(LOCAL_PATH)/../common \
   $(LOCAL_PATH)/../.. \
 
