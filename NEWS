@@ -1,5 +1,17 @@
-libva NEWS -- summary of user visible changes.  2011-10-28
+libva NEWS -- summary of user visible changes.  2012-10-DD
 Copyright (C) 2009-2011 Intel Corporation
+
+Version 1.1.0 - DD.Oct.2012
+* API: add Wayland support
+* API: add raw DRM support for headless pipelines
+* Fix generic VA/GLX implementation for newer cluttersink versions
+* Fix threading issues in VA objects reference code (+Krzysztof Kotlenga)
+* Fix build on Android Ice Cream Sandwich (+Haitao Huang, Daniel Charles)
+
+Version 1.0.16 - 02.Aug.2012
+* API: data structures for JPEG Baseline decoding
+* API: clarify the definition of slice_data_bit_offset
+* Add a simple test case for JPEG decoding
 
 Version 1.0.15 - 28.Oct.2011
 * API: make {Top,Bottom}FieldOrderCnt signed (Yi Wang)
