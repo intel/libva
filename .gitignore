@@ -14,6 +14,7 @@ Makefile.in
 TAGS
 aclocal.m4
 autom4te.cache
+compile
 config.guess
 config.h
 config.h.in
@@ -33,6 +34,7 @@ depcomp
 install-sh
 libtool
 ltmain.sh
+/m4
 missing
 stamp-h1
 /test/basic/test_01
@@ -52,6 +54,7 @@ stamp-h1
 /test/encode/avcenc
 /test/encode/h264encode
 /test/putsurface/putsurface
+/test/putsurface/putsurface_wayland
 /test/transcode/mpeg2transcode
 /test/v4l_h264/decode/decode
 /test/v4l_h264/encode/encode
