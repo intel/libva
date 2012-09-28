@@ -31,7 +31,6 @@ vainfo_cflags = \
 
 vainfo_libs = \
 	$(top_builddir)/va/libva.la		\
-	$(top_builddir)/va/libva-x11.la		\
 	$(top_builddir)/test/common/libva-display.la	\
 	$(NULL)
 
