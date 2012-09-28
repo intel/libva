@@ -20,13 +20,5 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AM_CFLAGS = -DLINUX -I$(top_srcdir)/va -I$(top_srcdir)/va/x11 $(DRM_CFLAGS)
-
-noinst_LTLIBRARIES = libva_dummy.la	
-
-libva_dummy_la_LIBADD = $(LIBVA_LIBS) -ldl -ludev
-
-libva_dummyincludedir = ${includedir}/va
-
-libva_dummy_la_SOURCES = va_dummy.c drmtest.c
-
+# Extra clean files so that maintainer-clean removes *everything*
+MAINTAINERCLEANFILES = Makefile.in

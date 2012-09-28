@@ -41,7 +41,6 @@ libva_source_h = \
 	va_backend_tpi.h	\
 	va_dec_jpeg.h		\
 	va_drmcommon.h		\
-	va_dummy.h		\
 	va_tpi.h		\
 	va_version.h		\
 	$(NULL)
@@ -117,17 +116,7 @@ libva_wayland_la_LIBADD		= libva.la wayland/libva_wayland.la \
 	$(WAYLAND_LIBS) $(DRM_LIBS) -ldl
 endif
 
-if BUILD_DUMMY_BACKEND
-SUBDIRS				+= dummy
-lib_LTLIBRARIES			+= libva-dummy.la
-libva_dummy_la_SOURCES		= 
-libva_dummy_la_LDFLAGS		= $(LDADD)
-libva_dummy_la_DEPENDENCIES	= libva.la dummy/libva_dummy.la
-libva_dummy_la_LIBADD		= libva.la dummy/libva_dummy.la \
-	$(LIBVA_LIBS) $(DRM_LIBS)
-endif
-
-DIST_SUBDIRS = x11 glx egl dummy drm wayland
+DIST_SUBDIRS = x11 glx egl drm wayland
 
 DISTCLEANFILES = \
 	va_version.h		\
