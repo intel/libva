@@ -35,7 +35,7 @@
 
 #define ASSERT	assert
 
-#define INIT_DRIVER_DATA	struct dummy_driver_data *driver_data = (struct dummy_driver_data *) ctx->pDriverData;
+#define INIT_DRIVER_DATA	struct dummy_driver_data * const driver_data = (struct dummy_driver_data *) ctx->pDriverData;
 
 #define CONFIG(id)  ((object_config_p) object_heap_lookup( &driver_data->config_heap, id ))
 #define CONTEXT(id) ((object_context_p) object_heap_lookup( &driver_data->context_heap, id ))
@@ -73,7 +73,6 @@ VAStatus dummy_QueryConfigProfiles(
 		int *num_profiles			/* out */
 	)
 {
-    INIT_DRIVER_DATA
     int i = 0;
 
     profile_list[i++] = VAProfileMPEG2Simple;
@@ -102,8 +101,6 @@ VAStatus dummy_QueryConfigEntrypoints(
 		int *num_entrypoints		/* out */
 	)
 {
-    INIT_DRIVER_DATA
-
     switch (profile) {
         case VAProfileMPEG2Simple:
         case VAProfileMPEG2Main:
@@ -151,8 +148,6 @@ VAStatus dummy_GetConfigAttributes(
 		int num_attribs
 	)
 {
-    INIT_DRIVER_DATA
-
     int i;
 
     /* Other attributes don't seem to be defined */
@@ -433,8 +428,6 @@ VAStatus dummy_QueryImageFormats(
 	int *num_formats           /* out */
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -447,8 +440,6 @@ VAStatus dummy_CreateImage(
 	VAImage *image     /* out */
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -459,8 +450,6 @@ VAStatus dummy_DeriveImage(
 	VAImage *image     /* out */
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -470,8 +459,6 @@ VAStatus dummy_DestroyImage(
 	VAImageID image
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -482,8 +469,6 @@ VAStatus dummy_SetImagePalette(
 	unsigned char *palette
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -498,8 +483,6 @@ VAStatus dummy_GetImage(
 	VAImageID image
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -519,8 +502,6 @@ VAStatus dummy_PutImage(
 	unsigned int dest_height
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -532,8 +513,6 @@ VAStatus dummy_QuerySubpictureFormats(
 	unsigned int *num_formats  /* out */
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -544,8 +523,6 @@ VAStatus dummy_CreateSubpicture(
 	VASubpictureID *subpicture   /* out */
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -555,8 +532,6 @@ VAStatus dummy_DestroySubpicture(
 	VASubpictureID subpicture
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -567,8 +542,6 @@ VAStatus dummy_SetSubpictureImage(
         VAImageID image
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -584,8 +557,6 @@ VAStatus dummy_SetSubpicturePalette(
 	unsigned char *palette
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -598,8 +569,6 @@ VAStatus dummy_SetSubpictureChromakey(
 	unsigned int chromakey_mask
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -610,8 +579,6 @@ VAStatus dummy_SetSubpictureGlobalAlpha(
 	float global_alpha 
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -637,8 +604,6 @@ VAStatus dummy_AssociateSubpicture(
 	unsigned int flags
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -650,8 +615,6 @@ VAStatus dummy_DeassociateSubpicture(
 	int num_surfaces
 )
 {
-    INIT_DRIVER_DATA
-    
     /* TODO */
     return VA_STATUS_SUCCESS;
 }
@@ -1153,8 +1116,6 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
 {
     INIT_DRIVER_DATA
     object_buffer_p obj_buffer;
-    object_surface_p obj_surface;
-    object_context_p obj_context;
     object_config_p obj_config;
     object_heap_iterator iter;
 
@@ -1192,10 +1153,8 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
 VAStatus VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
 {
     struct VADriverVTable * const vtable = ctx->vtable;
-    object_base_p obj;
     int result;
     struct dummy_driver_data *driver_data;
-    int i;
 
     ctx->version_major = VA_MAJOR_VERSION;
     ctx->version_minor = VA_MINOR_VERSION;
