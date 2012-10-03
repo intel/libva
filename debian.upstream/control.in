@@ -18,7 +18,7 @@ Section: libs
 Package: libva-dev
 Section: libdevel
 Architecture: any
-Depends: libva1 (= ${binary:Version}),
+Depends: libva@LIBVA_MAJOR_VERSION@ (= ${binary:Version}),
          libdrm-dev (>= @LIBDRM_VERSION@),
          libgl-dev,
          pkg-config
@@ -28,7 +28,7 @@ Description: Video Acceleration (VA) API for Linux -- development files
  .
  This package provides the development environment for libva.
 
-Package: libva1
+Package: libva@LIBVA_MAJOR_VERSION@
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -36,10 +36,10 @@ Description: Video Acceleration (VA) API for Linux -- runtime
  The libva library implements the Video Acceleration (VA) API for Linux.
  The library loads a hardware dependendent driver.
 
-Package: libva1-dbg
+Package: libva@LIBVA_MAJOR_VERSION@-dbg
 Section: libdevel
 Architecture: any
-Depends: libva1 (= ${Source-Version})
+Depends: libva@LIBVA_MAJOR_VERSION@ (= ${Source-Version})
 Description: Video Acceleration (VA) API for Linux -- runtime
  The libva library implements the Video Acceleration (VA) API for Linux.
  The library loads a hardware dependendent driver.
@@ -48,7 +48,7 @@ Description: Video Acceleration (VA) API for Linux -- runtime
 
 Package: vainfo
 Architecture: any
-Depends: libva1 (= ${Source-Version})
+Depends: libva@LIBVA_MAJOR_VERSION@ (= ${Source-Version})
 Description: Video Acceleration (VA) API for Linux -- info program
  The libva library implements the Video Acceleration (VA) API for Linux.
  The library loads a hardware dependendent driver.

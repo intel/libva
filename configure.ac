@@ -86,6 +86,9 @@ AM_INIT_AUTOMAKE([dist-bzip2])
 AM_CONFIG_HEADER([config.h])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
+TODAY="`LC_ALL=C date +'%a, %d %b %Y %X %z'`"
+AC_SUBST(TODAY)
+
 VA_API_MAJOR_VERSION=va_api_major_version
 VA_API_MINOR_VERSION=va_api_minor_version
 VA_API_MICRO_VERSION=va_api_micro_version
@@ -281,6 +284,10 @@ fi
 AC_OUTPUT([
     Makefile
     debian.upstream/Makefile
+    debian.upstream/changelog
+    debian.upstream/control
+    debian.upstream/libva$LIBVA_MAJOR_VERSION.install:\
+debian.upstream/libva.install.in
     doc/Makefile
     dummy_drv_video/Makefile
     pkgconfig/Makefile
