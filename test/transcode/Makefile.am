@@ -25,9 +25,11 @@ bin_PROGRAMS = mpeg2transcode
 INCLUDES = -I$(top_srcdir)
 
 mpeg2transcode_SOURCES	= mpeg2transcode.cpp
+mpeg2transcode_CFLAGS	= -I$(top_srcdir) $(X11_CFLAGS)
 mpeg2transcode_LDADD	= \
 	$(top_builddir)/va/libva.la \
-	$(top_builddir)/va/libva-x11.la
+	$(top_builddir)/va/libva-x11.la \
+	$(X11_LIBS)
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \

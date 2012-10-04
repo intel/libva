@@ -37,11 +37,13 @@ noinst_PROGRAMS = \
 AM_CFLAGS = \
 	-DIN_LIBVA		\
 	-I$(top_srcdir)		\
+	$(X11_CFLAGS)		\
 	$(NULL)
 
 TEST_LIBS = \
 	$(top_builddir)/va/libva.la	\
 	$(top_builddir)/va/libva-x11.la	\
+	$(X11_LIBS)			\
 	$(NULL)
 
 test_01_LDADD = $(TEST_LIBS)

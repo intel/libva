@@ -31,9 +31,11 @@ INCLUDES = \
 	$(NULL)
 
 h264encode_SOURCES	= h264encode_x11.c
+h264encode_CFLAGS	= $(X11_CFLAGS)
 h264encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
-	$(top_builddir)/va/libva-x11.la
+	$(top_builddir)/va/libva-x11.la \
+	$(X11_LIBS)
 
 avcenc_SOURCES		= avcenc.c
 avcenc_CFLAGS		= -I$(top_srcdir)/test/common
