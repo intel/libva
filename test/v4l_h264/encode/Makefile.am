@@ -23,10 +23,11 @@
 noinst_PROGRAMS = encode
 
 encode_SOURCES	= capture.cpp avcenc.cpp TCPSocketClient.cpp
-encode_CFLAGS	= -I$(top_srcdir)
+encode_CFLAGS	= -I$(top_srcdir) $(X11_CFLAGS)
 encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
-	$(top_builddir)/va/libva-x11.la
+	$(top_builddir)/va/libva-x11.la \
+	$(X11_LIBS)
 
 valgrind:   $(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \

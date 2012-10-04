@@ -23,10 +23,11 @@
 noinst_PROGRAMS = decode
 
 decode_SOURCES	= decode_x11.cpp TCPSocketServer.cpp
-decode_CFLAGS	= -I$(top_srcdir)
+decode_CFLAGS	= -I$(top_srcdir) $(X11_CFLAGS)
 decode_LDADD	= \
 	$(top_builddir)/va/libva.la \
-	$(top_builddir)/va/libva-x11.la
+	$(top_builddir)/va/libva-x11.la \
+	$(X11_LIBS)
 
 valgrind:   $(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
