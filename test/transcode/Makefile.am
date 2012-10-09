@@ -29,7 +29,8 @@ mpeg2transcode_CFLAGS	= -I$(top_srcdir) $(X11_CFLAGS)
 mpeg2transcode_LDADD	= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/va/libva-x11.la \
-	$(X11_LIBS)
+	$(X11_LIBS) \
+	-lpthread
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
