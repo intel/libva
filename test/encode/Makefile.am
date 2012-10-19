@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = avcenc
+bin_PROGRAMS = avcenc mpeg2enc
 if USE_X11
 bin_PROGRAMS += h264encode
 endif
@@ -40,6 +40,13 @@ h264encode_LDADD	= \
 avcenc_SOURCES		= avcenc.c
 avcenc_CFLAGS		= -I$(top_srcdir)/test/common
 avcenc_LDADD		= \
+	$(top_builddir)/va/libva.la \
+	$(top_builddir)/test/common/libva-display.la \
+	-lpthread
+
+mpeg2enc_SOURCES	= mpeg2enc.c
+mpeg2enc_CFLAGS		= -I$(top_srcdir)/test/common
+mpeg2enc_LDADD		= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
 	-lpthread
