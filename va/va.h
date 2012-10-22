@@ -906,6 +906,14 @@ typedef enum {
     VAEncPackedHeaderPicture    = 2,
     /** \brief Packed slice header. */
     VAEncPackedHeaderSlice      = 3,
+    /** 
+     * \brief Packed raw header. 
+     * 
+     * Packed raw data header can be used by the client to insert a header  
+     * into the bitstream data buffer at the point it is passed, without 
+     * any handling or interpretation by the implementation.  
+     */
+    VAEncPackedHeaderRawData    = 4,
     /** \brief Misc packed header. See codec-specific definitions. */
     VAEncPackedHeaderMiscMask   = 0x80000000,
 } VAEncPackedHeaderType;
