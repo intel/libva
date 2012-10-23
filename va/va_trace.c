@@ -1348,6 +1348,8 @@ static void va_TraceVAEncSliceParameterBufferH264(
     DPY2INDEX(dpy);
     int i;
 
+    if (!p)
+        return;
     va_TraceMsg(idx, "VAEncSliceParameterBufferH264\n");
     va_TraceMsg(idx, "\tmacroblock_address = %d\n", p->macroblock_address);
     va_TraceMsg(idx, "\tnum_macroblocks = %d\n", p->num_macroblocks);
@@ -1366,12 +1368,12 @@ static void va_TraceVAEncSliceParameterBufferH264(
 
     if (p->slice_type == 0 || p->slice_type == 1) {
         va_TraceMsg(idx, "\tRefPicList0 =");
-        for (i = 0; i < p->num_ref_idx_l0_active_minus1 + 1; i++) {
+        for (i = 0; i < p->num_ref_idx_l0_active_minus1 + 1 && i < 32; i++) {
             va_TraceMsg(idx, "%d-%d-0x%08x-%d\n", p->RefPicList0[i].TopFieldOrderCnt, p->RefPicList0[i].BottomFieldOrderCnt, p->RefPicList0[i].picture_id, p->RefPicList0[i].frame_idx);
         }
         if (p->slice_type == 1) {
             va_TraceMsg(idx, "\tRefPicList1 =");
-            for (i = 0; i < p->num_ref_idx_l1_active_minus1 + 1; i++)
+            for (i = 0; i < p->num_ref_idx_l1_active_minus1 + 1 && i < 32; i++)
             {
                 va_TraceMsg(idx, "%d-%d-0x%08x-%d\n", p->RefPicList1[i].TopFieldOrderCnt, p->RefPicList1[i].BottomFieldOrderCnt, p->RefPicList1[i].picture_id, p->RefPicList1[i].frame_idx);
             }
@@ -1381,7 +1383,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
     va_TraceMsg(idx, "\tluma_log2_weight_denom = %d\n", p->luma_log2_weight_denom);
     va_TraceMsg(idx, "\tchroma_log2_weight_denom = %d\n", p->chroma_log2_weight_denom);
     va_TraceMsg(idx, "\tluma_weight_l0_flag = %d\n", p->luma_weight_l0_flag);
-    if (p->luma_weight_l0_flag) {
+    if (p->luma_weight_l0_flag && p->num_ref_idx_l0_active_minus1 < 32) {
         for (i = 0; i <=  p->num_ref_idx_l0_active_minus1; i++) {
             va_TraceMsg(idx, "\t%d ", p->luma_weight_l0[i]);
             va_TraceMsg(idx, "\t%d ", p->luma_offset_l0[i]);
@@ -1389,7 +1391,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
     }
 
     va_TraceMsg(idx, "\tchroma_weight_l0_flag = %d\n", p->chroma_weight_l0_flag);
-    if (p->chroma_weight_l0_flag) {
+    if (p->chroma_weight_l0_flag && p->num_ref_idx_l0_active_minus1 < 32) {
         for (i = 0; i <= p->num_ref_idx_l0_active_minus1; i++) {
             va_TraceMsg(idx, "\t\t%d ", p->chroma_weight_l0[i][0]);
             va_TraceMsg(idx, "\t\t%d ", p->chroma_offset_l0[i][0]);
@@ -1399,7 +1401,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
     }
 
     va_TraceMsg(idx, "\tluma_weight_l1_flag = %d\n", p->luma_weight_l1_flag);
-    if (p->luma_weight_l1_flag) {
+    if (p->luma_weight_l1_flag && p->num_ref_idx_l1_active_minus1 < 32) {
         for (i = 0; i <=  p->num_ref_idx_l1_active_minus1; i++) {
             va_TraceMsg(idx, "\t\t%d ", p->luma_weight_l1[i]);
             va_TraceMsg(idx, "\t\t%d ", p->luma_offset_l1[i]);
@@ -1407,7 +1409,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
     }
 
     va_TraceMsg(idx, "\tchroma_weight_l1_flag = %d\n", p->chroma_weight_l1_flag);
-    if (p->chroma_weight_l1_flag) {
+    if (p->chroma_weight_l1_flag && p->num_ref_idx_l1_active_minus1 < 32) {
         for (i = 0; i <= p->num_ref_idx_l1_active_minus1; i++) {
             va_TraceMsg(idx, "\t\t%d ", p->chroma_weight_l1[i][0]);
             va_TraceMsg(idx, "\t\t%d ", p->chroma_offset_l1[i][0]);
@@ -2031,7 +2033,10 @@ static void va_TraceH264Buf(
         va_TraceVAEncPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncSliceParameterBufferType:
-        va_TraceVAEncSliceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
+        if (size == sizeof(VAEncSliceParameterBuffer))
+            va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        else
+            va_TraceVAEncSliceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
