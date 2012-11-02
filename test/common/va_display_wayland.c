@@ -33,42 +33,39 @@
 
 struct display {
     struct wl_display          *display;
+    struct wl_registry         *registry;
     struct wl_compositor       *compositor;
     struct wl_shell            *shell;
     struct wl_shell_surface    *shell_surface;
     struct wl_surface          *surface;
     unsigned int                ref_count;
     int                         event_fd;
-    unsigned int                event_mask;
 };
 
 static struct display *g_display;
 
 static void
-display_handle_global(
-    struct wl_display *display,
-    uint32_t           id,
-    const char        *interface,
-    uint32_t           version,
-    void              *data
+registry_handle_global(
+    void               *data,
+    struct wl_registry *registry,
+    uint32_t            id,
+    const char         *interface,
+    uint32_t            version
 )
 {
     struct display * const d = data;
 
     if (strcmp(interface, "wl_compositor") == 0)
-        d->compositor = wl_display_bind(display, id, &wl_compositor_interface);
+        d->compositor =
+            wl_registry_bind(registry, id, &wl_compositor_interface, 1);
     else if (strcmp(interface, "wl_shell") == 0)
-        d->shell = wl_display_bind(display, id, &wl_shell_interface);
+        d->shell = wl_registry_bind(registry, id, &wl_shell_interface, 1);
 }
 
-static int
-event_mask_update(uint32_t mask, void *data)
-{
-    struct display * const d = data;
-
-    d->event_mask = mask;
-    return 0;
-}
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_global,
+    NULL,
+};
 
 static VADisplay
 va_open_display_wayland(void)
@@ -91,9 +88,10 @@ va_open_display_wayland(void)
             return NULL;
         }
         wl_display_set_user_data(d->display, d);
-        wl_display_add_global_listener(d->display, display_handle_global, d);
-        d->event_fd = wl_display_get_fd(d->display, event_mask_update, d);
-        wl_display_iterate(d->display, d->event_mask);
+        d->registry = wl_display_get_registry(d->display);
+        wl_registry_add_listener(d->registry, &registry_listener, d);
+        d->event_fd = wl_display_get_fd(d->display);
+        wl_display_dispatch(d->display);
 
         d->ref_count = 1;
         g_display = d;
@@ -182,6 +180,7 @@ va_put_surface_wayland(
          dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height
      );
 
+    wl_surface_commit(d->surface);
     wl_display_flush(d->display);
     return VA_STATUS_SUCCESS;
 }

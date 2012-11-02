@@ -102,7 +102,7 @@ struct display {
     struct wl_display  *display;
     struct wl_compositor *compositor;
     struct wl_shell    *shell;
-    uint32_t            mask;
+    struct wl_registry *registry;
     int                 event_fd;
 };
 
@@ -153,7 +153,7 @@ va_put_surface(
     if (wl_drawable->redraw_pending) {
         wl_display_flush(d->display);
         while (wl_drawable->redraw_pending)
-            wl_display_iterate(wl_drawable->display, WL_DISPLAY_READABLE);
+            wl_display_dispatch(wl_drawable->display);
     }
 
     va_status = vaGetSurfaceBufferWl(va_dpy, va_surface, VA_FRAME_PICTURE, &buffer);
@@ -169,35 +169,33 @@ va_put_surface(
     wl_display_flush(d->display);
     wl_drawable->redraw_pending = 1;
     callback = wl_surface_frame(wl_drawable->surface);
+    wl_surface_commit(wl_drawable->surface);
     wl_callback_add_listener(callback, &frame_callback_listener, wl_drawable);
     return VA_STATUS_SUCCESS;
 }
 
 static void
-display_handle_global(
-    struct wl_display *display,
-    uint32_t           id,
-    const char        *interface,
-    uint32_t           version,
-    void              *data
+registry_handle_global(
+    void               *data,
+    struct wl_registry *registry,
+    uint32_t            id,
+    const char         *interface,
+    uint32_t            version
 )
 {
     struct display * const d = data;
 
     if (strcmp(interface, "wl_compositor") == 0)
-        d->compositor = wl_display_bind(display, id, &wl_compositor_interface);
+        d->compositor =
+            wl_registry_bind(registry, id, &wl_compositor_interface, 1);
     else if (strcmp(interface, "wl_shell") == 0)
-        d->shell = wl_display_bind(display, id, &wl_shell_interface);
+        d->shell = wl_registry_bind(registry, id, &wl_shell_interface, 1);
 }
 
-static int
-event_mask_update(uint32_t mask, void *data)
-{
-    struct display * const d = data;
-
-    d->mask = mask;
-    return 0;
-}
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_global,
+    NULL,
+};
 
 static void *
 open_display(void)
@@ -213,9 +211,10 @@ open_display(void)
         return NULL;
 
     wl_display_set_user_data(d->display, d);
-    wl_display_add_global_listener(d->display, display_handle_global, d);
-    d->event_fd = wl_display_get_fd(d->display, event_mask_update, d);
-    wl_display_iterate(d->display, d->mask);
+    d->registry = wl_display_get_registry(d->display);
+    wl_registry_add_listener(d->registry, &registry_listener, d);
+    d->event_fd = wl_display_get_fd(d->display);
+    wl_display_dispatch(d->display);
     return d->display;
 }
 
@@ -298,9 +297,6 @@ check_window_event(
     if (check_event == 0)
         return 0;
 
-    if (!(d->mask & WL_DISPLAY_READABLE))
-        return 0;
-
     tv.tv_sec  = 0;
     tv.tv_usec = 0;
     do {
@@ -313,7 +309,7 @@ check_window_event(
             break;
         }
         if (retval == 1)
-            wl_display_iterate(d->display, WL_DISPLAY_READABLE);
+            wl_display_dispatch(d->display);
     } while (retval > 0);
 
 #if 0
