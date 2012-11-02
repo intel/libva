@@ -40,6 +40,7 @@ typedef struct va_wayland_emgd_context {
     struct wl_emgd             *emgd;
     void                       *emgd_interface;
     unsigned int                is_created      : 1;
+    struct wl_registry         *registry;
 } VADisplayContextWaylandEMGD;
 
 static inline void
@@ -86,6 +87,28 @@ va_wayland_emgd_destroy(VADisplayContextP pDisplayContext)
     }
 }
 
+static void
+registry_handle_global(
+    void               *data,
+    struct wl_registry *registry,
+    uint32_t            id,
+    const char         *interface,
+    uint32_t            version
+)
+{
+    VADisplayContextWaylandEMGD *wl_emgd_ctx = data;
+
+    if (strcmp(interface, "wl_emgd") == 0) {
+        wl_emgd_ctx->emgd =
+            wl_registry_bind(registry, id, wl_emgd_ctx->emgd_interface, 1);
+    }
+}
+
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_global,
+    NULL,
+};
+
 bool
 va_wayland_emgd_create(VADisplayContextP pDisplayContext)
 {
@@ -112,14 +135,6 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
     drm_state->auth_type = 0;
     ctx->drm_state       = drm_state;
 
-    id = wl_display_get_global(ctx->native_dpy, "wl_emgd", 1);
-    if (!id) {
-        wl_display_roundtrip(ctx->native_dpy);
-        id = wl_display_get_global(ctx->native_dpy, "wl_emgd", 1);
-        if (!id)
-            return false;
-    }
-
     wl_emgd_ctx->handle = dlopen(LIBWAYLAND_EMGD_NAME, RTLD_LAZY|RTLD_LOCAL);
     if (!wl_emgd_ctx->handle)
         return false;
@@ -129,8 +144,13 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
     if (!wl_emgd_ctx->emgd_interface)
         return false;
 
-    wl_emgd_ctx->emgd =
-        wl_display_bind(ctx->native_dpy, id, wl_emgd_ctx->emgd_interface);
+    wl_emgd_ctx->registry = wl_display_get_registry(ctx->native_dpy);
+    wl_registry_add_listener(wl_emgd_ctx->registry, &registry_listener, wl_emgd_ctx);
+    wl_display_roundtrip(ctx->native_dpy);
+
+    /* registry_handle_global should have been called by the
+     * wl_display_roundtrip above
+     */
     if (!wl_emgd_ctx->emgd)
         return false;
     return true;

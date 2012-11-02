@@ -78,7 +78,7 @@ m4_define([libva_lt_age],
 m4_define([libdrm_version], [2.4])
 
 # Wayland minimum version number
-m4_define([wayland_api_version], [0.95.0])
+m4_define([wayland_api_version], [1.0.0])
 
 AC_PREREQ(2.57)
 AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)

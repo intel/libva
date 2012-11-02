@@ -44,6 +44,7 @@ typedef struct va_wayland_drm_context {
     struct va_wayland_context   base;
     void                       *handle;
     struct wl_drm              *drm;
+    struct wl_registry         *registry;
     void                       *drm_interface;
     unsigned int                is_authenticated        : 1;
 } VADisplayContextWaylandDRM;
@@ -142,6 +143,28 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
     }
 }
 
+static void
+registry_handle_global(
+    void               *data,
+    struct wl_registry *registry,
+    uint32_t            id,
+    const char         *interface,
+    uint32_t            version
+)
+{
+    struct va_wayland_drm_context *wl_drm_ctx = data;
+
+    if (strcmp(interface, "wl_drm") == 0) {
+        wl_drm_ctx->drm =
+            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface, 1);
+    }
+}
+
+static const struct wl_registry_listener registry_listener = {
+    registry_handle_global,
+    NULL,
+};
+
 bool
 va_wayland_drm_create(VADisplayContextP pDisplayContext)
 {
@@ -168,14 +191,6 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     drm_state->auth_type = 0;
     ctx->drm_state       = drm_state;
 
-    id = wl_display_get_global(ctx->native_dpy, "wl_drm", 1);
-    if (!id) {
-        wl_display_roundtrip(ctx->native_dpy);
-        id = wl_display_get_global(ctx->native_dpy, "wl_drm", 1);
-        if (!id)
-            return false;
-    }
-
     wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
     if (!wl_drm_ctx->handle)
         return false;
@@ -185,8 +200,14 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     if (!wl_drm_ctx->drm_interface)
         return false;
 
-    wl_drm_ctx->drm =
-        wl_display_bind(ctx->native_dpy, id, wl_drm_ctx->drm_interface);
+    wl_drm_ctx->registry = wl_display_get_registry(ctx->native_dpy);
+    wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx);
+    wl_display_roundtrip(ctx->native_dpy);
+
+    /* registry_handle_global should have been called by the
+     * wl_display_roundtrip above
+     */
+
     if (!wl_drm_ctx->drm)
         return false;
 
