@@ -190,7 +190,7 @@ static void* putsurface_thread(void *data)
         while (surface_id == VA_INVALID_SURFACE)
             surface_id = get_next_free_surface(&index);
 
-        if (verbose) printf("Thread %x Display surface 0x%p,\n", (unsigned int)drawable, (void *)surface_id);
+        if (verbose) printf("Thread: %p Display surface 0x%x,\n", drawable, surface_id);
 
         if (multi_thread)
             upload_surface(va_dpy, surface_id, box_width, row_shift, display_field);
