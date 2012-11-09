@@ -2218,15 +2218,14 @@ void va_TraceEndPicture(
     va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(idx, "\trender_targets = 0x%08x\n", trace_context[idx].trace_rendertarget);
 
-    encode = (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice) &&
-        (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE);
-    decode = (trace_context[idx].trace_entrypoint == VAEntrypointVLD) &&
-        (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE);
-    jpeg = (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture) &&
-        (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG);
+    /* avoid to create so many empty files */
+    encode = (trace_context[idx].trace_entrypoint == VAEntrypointEncSlice);
+    decode = (trace_context[idx].trace_entrypoint == VAEntrypointVLD);
+    jpeg = (trace_context[idx].trace_entrypoint == VAEntrypointEncPicture);
 
     /* trace encode source surface, can do it before HW completes rendering */
-    if (encode || jpeg)
+    if ((encode && (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE))||
+	    (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
         va_TraceSurface(dpy);
     
     /* trace coded buffer, do it after HW completes rendering */
@@ -2236,7 +2235,7 @@ void va_TraceEndPicture(
     }
 
     /* trace decoded surface, do it after HW completes rendering */
-    if (decode) {
+    if (decode && ((trace_flag & VA_TRACE_FLAG_SURFACE_DECODE))) {
         vaSyncSurface(dpy, trace_context[idx].trace_rendertarget);
         va_TraceSurface(dpy);
     }
