@@ -77,6 +77,9 @@ m4_define([libva_lt_age],
 # libdrm minimun version requirement
 m4_define([libdrm_version], [2.4])
 
+# Wayland minimum version number
+m4_define([wayland_api_version], [0.95.0])
+
 AC_PREREQ(2.57)
 AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)
 AC_CONFIG_SRCDIR([Makefile.am])
@@ -269,9 +272,13 @@ fi
 AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
 
 # Check for Wayland
+WAYLAND_API_VERSION=wayland_api_version
+AC_SUBST(WAYLAND_API_VERSION)
+
 USE_WAYLAND="no"
 if test "$enable_wayland" = "yes"; then
-    PKG_CHECK_MODULES([WAYLAND], [wayland-client], [USE_WAYLAND="yes"], [:])
+    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version],
+        [USE_WAYLAND="yes"], [:])
     if test "$USE_WAYLAND" = "yes"; then
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is built])

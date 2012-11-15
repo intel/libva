@@ -37,16 +37,23 @@
 #include "va_wayland_private.h"
 #include "wayland-drm-client-protocol.h"
 
-/* XXX: wayland-drm currently lives in libEGL.so.* library */
-#define LIBEGL_NAME "libEGL.so.1"
+/* XXX: Wayland/DRM support currently lives in Mesa libEGL.so.* library */
+#define LIBWAYLAND_DRM_NAME "libEGL.so.1"
+
+typedef struct va_wayland_drm_context {
+    struct va_wayland_context   base;
+    void                       *handle;
+    struct wl_drm              *drm;
+    void                       *drm_interface;
+    unsigned int                is_authenticated        : 1;
+} VADisplayContextWaylandDRM;
 
 static void
 drm_handle_device(void *data, struct wl_drm *drm, const char *device)
 {
     VADisplayContextP const pDisplayContext = data;
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VADisplayContextWaylandP const wl_ctx = pDisplayContext->opaque;
-    VADisplayContextWaylandDRM * const wl_drm_ctx = &wl_ctx->backend.drm;
+    VADisplayContextWaylandDRM * const wl_drm_ctx = pDisplayContext->opaque;
     struct drm_state * const drm_state = ctx->drm_state;
     drm_magic_t magic;
     struct stat st;
@@ -83,11 +90,11 @@ drm_handle_authenticated(void *data, struct wl_drm *drm)
 {
     VADisplayContextP const pDisplayContext = data;
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VADisplayContextWaylandP const wl_ctx = pDisplayContext->opaque;
+    VADisplayContextWaylandDRM * const wl_drm_ctx = pDisplayContext->opaque;
     struct drm_state * const drm_state = ctx->drm_state;
 
-    wl_ctx->backend.drm.is_authenticated = 1;
-    drm_state->auth_type                 = VA_DRM_AUTH_CUSTOM;
+    wl_drm_ctx->is_authenticated = 1;
+    drm_state->auth_type         = VA_DRM_AUTH_CUSTOM;
 }
 
 static const struct wl_drm_listener drm_listener = {
@@ -107,12 +114,11 @@ va_DisplayContextGetDriverName(
     return VA_DRM_GetDriverName(ctx, driver_name_ptr);
 }
 
-static void
-va_wayland_drm_finalize(VADisplayContextP pDisplayContext)
+void
+va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VADisplayContextWaylandP const wl_ctx = pDisplayContext->opaque;
-    VADisplayContextWaylandDRM * const wl_drm_ctx = &wl_ctx->backend.drm;
+    struct va_wayland_drm_context * const wl_drm_ctx = pDisplayContext->opaque;
     struct drm_state * const drm_state = ctx->drm_state;
 
     if (wl_drm_ctx->drm) {
@@ -121,9 +127,9 @@ va_wayland_drm_finalize(VADisplayContextP pDisplayContext)
     }
     wl_drm_ctx->is_authenticated = 0;
 
-    if (wl_drm_ctx->libEGL_handle) {
-        dlclose(wl_drm_ctx->libEGL_handle);
-        wl_drm_ctx->libEGL_handle = NULL;
+    if (wl_drm_ctx->handle) {
+        dlclose(wl_drm_ctx->handle);
+        wl_drm_ctx->handle = NULL;
     }
 
     if (drm_state) {
@@ -137,17 +143,22 @@ va_wayland_drm_finalize(VADisplayContextP pDisplayContext)
 }
 
 bool
-va_wayland_drm_init(VADisplayContextP pDisplayContext)
+va_wayland_drm_create(VADisplayContextP pDisplayContext)
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VADisplayContextWaylandP const wl_ctx = pDisplayContext->opaque;
-    VADisplayContextWaylandDRM * const wl_drm_ctx = &wl_ctx->backend.drm;
+    struct va_wayland_drm_context *wl_drm_ctx;
     struct drm_state *drm_state;
     uint32_t id;
 
+    wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
+    if (!wl_drm_ctx)
+        return false;
+    wl_drm_ctx->base.destroy            = va_wayland_drm_destroy;
+    wl_drm_ctx->handle                  = NULL;
     wl_drm_ctx->drm                     = NULL;
+    wl_drm_ctx->drm_interface           = NULL;
     wl_drm_ctx->is_authenticated        = 0;
-    wl_ctx->finalize                    = va_wayland_drm_finalize;
+    pDisplayContext->opaque             = wl_drm_ctx;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
 
     drm_state = calloc(1, sizeof(struct drm_state));
@@ -165,12 +176,12 @@ va_wayland_drm_init(VADisplayContextP pDisplayContext)
             return false;
     }
 
-    wl_drm_ctx->libEGL_handle = dlopen(LIBEGL_NAME, RTLD_LAZY|RTLD_LOCAL);
-    if (!wl_drm_ctx->libEGL_handle)
+    wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
+    if (!wl_drm_ctx->handle)
         return false;
 
     wl_drm_ctx->drm_interface =
-        dlsym(wl_drm_ctx->libEGL_handle, "wl_drm_interface");
+        dlsym(wl_drm_ctx->handle, "wl_drm_interface");
     if (!wl_drm_ctx->drm_interface)
         return false;
 

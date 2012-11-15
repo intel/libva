@@ -43,6 +43,10 @@
  */
 DLL_HIDDEN
 bool
-va_wayland_drm_init(VADisplayContextP pDisplayContext);
+va_wayland_drm_create(VADisplayContextP pDisplayContext);
+
+DLL_HIDDEN
+void
+va_wayland_drm_destroy(VADisplayContextP pDisplayContext);
 
 #endif /* VA_WAYLAND_DRM_H */

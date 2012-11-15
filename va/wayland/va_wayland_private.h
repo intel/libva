@@ -27,22 +27,14 @@
 #ifndef VA_WAYLAND_PRIVATE_H
 #define VA_WAYLAND_PRIVATE_H
 
-typedef bool (*VADisplayContextInitFunc)(VADisplayContextP pDisplayContext);
-typedef void (*VADisplayContextFinalizeFunc)(VADisplayContextP pDisplayContext);
+struct va_wayland_context;
 
-typedef struct _VADisplayContextWaylandDRM {
-    /* XXX: wayland-drm lives in libEGL.so.* for now */
-    void                               *libEGL_handle;
-    struct wl_drm                      *drm;
-    void                               *drm_interface;
-    unsigned int                        is_authenticated        : 1;
-} VADisplayContextWaylandDRM;
+typedef bool (*VADisplayContextCreateFunc)(VADisplayContextP pDisplayContext);
+typedef void (*VADisplayContextDestroyFunc)(VADisplayContextP pDisplayContext);
 
-typedef struct _VADisplayContextWayland {
-    union {
-        VADisplayContextWaylandDRM      drm;
-    } backend;
-    VADisplayContextFinalizeFunc        finalize;
+/* VA/Wayland base display context */
+typedef struct va_wayland_context {
+    VADisplayContextDestroyFunc destroy;
 } VADisplayContextWayland, *VADisplayContextWaylandP;
 
 DLL_HIDDEN

@@ -65,21 +65,23 @@ static void
 va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
 {
     VADriverContextP pDriverContext;
+    VADisplayContextWaylandP pDisplayContextWl;
 
     if (!pDisplayContext)
         return;
 
+    pDisplayContextWl = pDisplayContext->opaque;
+    if (pDisplayContextWl && pDisplayContextWl->destroy)
+        pDisplayContextWl->destroy(pDisplayContext);
+
     pDriverContext = pDisplayContext->pDriverContext;
     if (pDriverContext) {
-        VADisplayContextWaylandP const pDisplayContextWl =
-            pDisplayContext->opaque;
-        if (pDisplayContextWl && pDisplayContextWl->finalize)
-            pDisplayContextWl->finalize(pDisplayContext);
         free(pDriverContext->vtable_wayland);
         pDriverContext->vtable_wayland = NULL;
         free(pDriverContext);
         pDisplayContext->pDriverContext = NULL;
     }
+
     free(pDisplayContext->opaque);
     pDisplayContext->opaque = NULL;
     free(pDisplayContext);
@@ -96,18 +98,22 @@ va_DisplayContextGetDriverName(VADisplayContextP pDisplayContext, char **name)
 /* --- Public interface                                                   --- */
 /* -------------------------------------------------------------------------- */
 
-static const VADisplayContextInitFunc g_display_context_init_funcs[] = {
-    va_wayland_drm_init,
-    NULL
+struct va_wayland_backend {
+    VADisplayContextCreateFunc  create;
+    VADisplayContextDestroyFunc destroy;
+};
+
+static const struct va_wayland_backend g_backends[] = {
+    { va_wayland_drm_create,
+      va_wayland_drm_destroy },
+    { NULL, }
 };
 
 VADisplay
 vaGetDisplayWl(struct wl_display *display)
 {
     VADisplayContextP pDisplayContext = NULL;
-    VADisplayContextWaylandP pDisplayContextWl;
     VADriverContextP pDriverContext;
-    VADisplayContextInitFunc init_backend;
     struct VADriverVTableWayland *vtable;
     unsigned int i;
 
@@ -135,22 +141,12 @@ vaGetDisplayWl(struct wl_display *display)
 
     vtable->version                     = VA_WAYLAND_API_VERSION;
 
-    pDisplayContextWl = calloc(1, sizeof(*pDisplayContextWl));
-    if (!pDisplayContextWl)
-        goto error;
-    pDisplayContext->opaque = pDisplayContextWl;
-
-    init_backend = NULL;
-    for (i = 0; g_display_context_init_funcs[i] != NULL; i++) {
-        init_backend = g_display_context_init_funcs[i];
-        if (init_backend(pDisplayContext))
+    for (i = 0; g_backends[i].create != NULL; i++) {
+        if (g_backends[i].create(pDisplayContext))
             break;
-        if (pDisplayContextWl->finalize)
-            pDisplayContextWl->finalize(pDisplayContext);
-        init_backend = NULL;
+        g_backends[i].destroy(pDisplayContext);
     }
-    if (!init_backend)
-        goto error;
+
     return (VADisplay)pDisplayContext;
 
 error:
