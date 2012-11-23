@@ -838,7 +838,7 @@ mpeg2enc_update_slice_parameter(struct mpeg2enc_context *ctx, VAEncPictureType p
         slice_param = &ctx->slice_param[i];
         slice_param->macroblock_address = i * width_in_mbs;
         slice_param->num_macroblocks = width_in_mbs;
-        slice_param->is_intra_slice = 0;
+        slice_param->is_intra_slice = (picture_type == VAEncPictureTypeIntra);
         slice_param->quantiser_scale_code = ctx->qp / 2;
     }
 
