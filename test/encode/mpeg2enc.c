@@ -100,7 +100,7 @@ struct mpeg2enc_context {
     VABufferID packed_seq_buf_id;
     VABufferID packed_pic_header_param_buf_id;
     VABufferID packed_pic_buf_id;
-    int num_slices;
+    int num_slice_groups;
     int codedbuf_i_size;
     int codedbuf_pb_size;
 
@@ -832,6 +832,7 @@ mpeg2enc_update_slice_parameter(struct mpeg2enc_context *ctx, VAEncPictureType p
     seq_param = &ctx->seq_param;
     width_in_mbs = (seq_param->picture_width + 15) / 16;
     height_in_mbs = (seq_param->picture_height + 15) / 16;
+    ctx->num_slice_groups = 1;
 
     for (i = 0; i < height_in_mbs; i++) {
         slice_param = &ctx->slice_param[i];
@@ -849,8 +850,6 @@ mpeg2enc_update_slice_parameter(struct mpeg2enc_context *ctx, VAEncPictureType p
                                ctx->slice_param,
                                ctx->slice_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");;
-
-    ctx->num_slices = height_in_mbs;
 }
 
 static int 
@@ -974,7 +973,7 @@ mpeg2enc_render_picture(struct mpeg2enc_context *ctx)
     va_status = vaRenderPicture(ctx->va_dpy,
                                 ctx->context_id,
                                 &ctx->slice_param_buf_id[0],
-                                ctx->num_slices);
+                                ctx->num_slice_groups);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
 
     va_status = vaEndPicture(ctx->va_dpy, ctx->context_id);
@@ -1030,10 +1029,10 @@ end_picture(struct mpeg2enc_context *ctx, VAEncPictureType picture_type, int nex
     mpeg2enc_destroy_buffers(ctx, &ctx->packed_seq_buf_id, 1);
     mpeg2enc_destroy_buffers(ctx, &ctx->packed_pic_header_param_buf_id, 1);
     mpeg2enc_destroy_buffers(ctx, &ctx->packed_pic_buf_id, 1);
-    mpeg2enc_destroy_buffers(ctx, &ctx->slice_param_buf_id[0], ctx->num_slices);
+    mpeg2enc_destroy_buffers(ctx, &ctx->slice_param_buf_id[0], ctx->num_slice_groups);
     mpeg2enc_destroy_buffers(ctx, &ctx->codedbuf_buf_id, 1);
     memset(ctx->slice_param, 0, sizeof(ctx->slice_param));
-    ctx->num_slices = 0;
+    ctx->num_slice_groups = 0;
 }
 
 static int
