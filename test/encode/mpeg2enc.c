@@ -62,8 +62,6 @@
         exit(1);                                                        \
     }
 
-#define INTRA_PERIOD            30
-
 static int const picture_type_patter[][2] = {{VAEncPictureTypeIntra, 1}, 
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
@@ -793,7 +791,12 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
     ctx->codedbuf_buf_id = VA_INVALID_ID;
     ctx->codedbuf_i_size = ctx->frame_size;
     ctx->codedbuf_pb_size = 0;
-    ctx->intra_period = INTRA_PERIOD;
+
+    if (ctx->mode == 0)
+        ctx->intra_period = 1;
+    else
+        ctx->intra_period = 16;
+
     ctx->bit_rate = -1;
 
     for (i = 0; i < MAX_SLICES; i++) {
@@ -1210,10 +1213,9 @@ static void
 mpeg2enc_run(struct mpeg2enc_context *ctx)
 {
     int display_order = 0, coded_order = 0;
-    int i_frame_only = 1, i_p_frame_only = 1;
 
     for (display_order = 0; display_order < ctx->num_pictures;) {
-        if (i_frame_only) {
+        if (ctx->mode == 0) {
             encode_picture(ctx,
                            coded_order,
                            display_order,
@@ -1222,7 +1224,8 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
                            display_order + 1);
             display_order++;
             coded_order++;
-        } else if (i_p_frame_only) {
+        } else if (ctx->mode == 1) {
+            assert(0);
             if ((display_order % ctx->intra_period) == 0) {
                 encode_picture(ctx,
                                coded_order,
@@ -1245,6 +1248,8 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
         } else { // follow the i,p,b pattern
             static int fcurrent = 0;
             int fnext;
+
+            assert(0);
             
             fcurrent = fcurrent % (sizeof(picture_type_patter)/sizeof(int[2]));
             fnext = (fcurrent+1) % (sizeof(picture_type_patter)/sizeof(int[2]));
