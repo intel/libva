@@ -873,6 +873,9 @@ begin_picture(struct mpeg2enc_context *ctx,
 {
     VAStatus va_status;
     int tmp;
+    VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+    unsigned int length_in_bits;
+    unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL;
 
     if (ctx->upload_thread_value != 0) {
         fprintf(stderr, "FATAL error!!!\n");
@@ -887,10 +890,6 @@ begin_picture(struct mpeg2enc_context *ctx,
     ctx->current_upload_surface = tmp;
 
     if (coded_order == 0) {
-        VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
-        unsigned int length_in_bits;
-        unsigned char *packed_seq_buffer = NULL, *packed_pic_buffer = NULL;
-
         assert(picture_type == VAEncPictureTypeIntra);
         length_in_bits = build_packed_seq_buffer(&ctx->seq_param, &packed_seq_buffer);
         packed_header_param_buffer.type = VAEncPackedHeaderMPEG2_SPS;
@@ -910,28 +909,29 @@ begin_picture(struct mpeg2enc_context *ctx,
                                    &ctx->packed_seq_buf_id);
         CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
-        length_in_bits = build_packed_pic_buffer(&ctx->seq_param, &ctx->pic_param, &packed_pic_buffer);
-        packed_header_param_buffer.type = VAEncPackedHeaderMPEG2_PPS;
-        packed_header_param_buffer.has_emulation_bytes = 0;
-        packed_header_param_buffer.bit_length = length_in_bits;
-
-        va_status = vaCreateBuffer(ctx->va_dpy,
-                                   ctx->context_id,
-                                   VAEncPackedHeaderParameterBufferType,
-                                   sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
-                                   &ctx->packed_pic_header_param_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
-
-        va_status = vaCreateBuffer(ctx->va_dpy,
-                                   ctx->context_id,
-                                   VAEncPackedHeaderDataBufferType,
-                                   (length_in_bits + 7) / 8, 1, packed_pic_buffer,
-                                   &ctx->packed_pic_buf_id);
-        CHECK_VASTATUS(va_status,"vaCreateBuffer");
-
         free(packed_seq_buffer);
-        free(packed_pic_buffer);
     }
+
+    length_in_bits = build_packed_pic_buffer(&ctx->seq_param, &ctx->pic_param, &packed_pic_buffer);
+    packed_header_param_buffer.type = VAEncPackedHeaderMPEG2_PPS;
+    packed_header_param_buffer.has_emulation_bytes = 0;
+    packed_header_param_buffer.bit_length = length_in_bits;
+
+    va_status = vaCreateBuffer(ctx->va_dpy,
+                               ctx->context_id,
+                               VAEncPackedHeaderParameterBufferType,
+                               sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                               &ctx->packed_pic_header_param_buf_id);
+    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+    va_status = vaCreateBuffer(ctx->va_dpy,
+                               ctx->context_id,
+                               VAEncPackedHeaderDataBufferType,
+                               (length_in_bits + 7) / 8, 1, packed_pic_buffer,
+                               &ctx->packed_pic_buf_id);
+    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+    free(packed_pic_buffer);
 
     /* sequence parameter set */
     VAEncSequenceParameterBufferMPEG2 *seq_param = &ctx->seq_param;
