@@ -664,7 +664,7 @@ mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
 
     pic_param->picture_coding_extension.bits.intra_dc_precision = 0; /* 8bits */
     pic_param->picture_coding_extension.bits.picture_structure = 3; /* frame picture */
-    pic_param->picture_coding_extension.bits.top_field_first = 1; 
+    pic_param->picture_coding_extension.bits.top_field_first = 0; 
     pic_param->picture_coding_extension.bits.frame_pred_frame_dct = 1; /* FIXME */
     pic_param->picture_coding_extension.bits.concealment_motion_vectors = 0;
     pic_param->picture_coding_extension.bits.q_scale_type = 0;
