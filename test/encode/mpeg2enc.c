@@ -620,7 +620,7 @@ mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
 
     seq_param->frame_rate = ctx->fps;
     seq_param->aspect_ratio_information = 1;
-    seq_param->vbv_buffer_size = 0x10000;
+    seq_param->vbv_buffer_size = 3; /* B = 16 * 1024 * vbv_buffer_size */
 
     seq_param->sequence_extension.bits.profile_and_level_indication = 4 << 4 | 0x8; /* FIXME: Main/Main ??? */
     seq_param->sequence_extension.bits.progressive_sequence = 1; /* progressive frame-pictures */
