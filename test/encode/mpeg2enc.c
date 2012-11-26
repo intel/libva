@@ -657,10 +657,10 @@ mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
     pic_param->picture_type = VAEncPictureTypeIntra;
 
     pic_param->temporal_reference = 0;
-    pic_param->f_code[0][0] = 1;
-    pic_param->f_code[0][1] = 1;
-    pic_param->f_code[1][0] = 1;
-    pic_param->f_code[1][1] = 1;
+    pic_param->f_code[0][0] = 0xf;
+    pic_param->f_code[0][1] = 0xf;
+    pic_param->f_code[1][0] = 0xf;
+    pic_param->f_code[1][1] = 0xf;
 
     pic_param->picture_coding_extension.bits.intra_dc_precision = 0; /* 8bits */
     pic_param->picture_coding_extension.bits.picture_structure = 3; /* frame picture */
