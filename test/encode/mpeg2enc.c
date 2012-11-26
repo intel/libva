@@ -274,13 +274,6 @@ sps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
     bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_d, 5);
 
     bitstream_byte_aligning(bs, 0);
-
-    bitstream_put_ui(bs, START_CODE_GOP, 32);
-    bitstream_put_ui(bs, seq_param->gop_header.bits.time_code, 25);
-    bitstream_put_ui(bs, seq_param->gop_header.bits.closed_gop, 1);
-    bitstream_put_ui(bs, seq_param->gop_header.bits.broken_link, 1);
-
-    bitstream_byte_aligning(bs, 0);
 }
 
 static void 
@@ -290,6 +283,15 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
 {
     int i;
     int chroma_420_type;
+
+    if (pic_param->temporal_reference == 0) {
+        bitstream_put_ui(bs, START_CODE_GOP, 32);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.time_code, 25);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.closed_gop, 1);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.broken_link, 1);
+
+        bitstream_byte_aligning(bs, 0);
+    }
 
     if (seq_param->sequence_extension.bits.chroma_format == CHROMA_FORMAT_420)
         chroma_420_type = pic_param->picture_coding_extension.bits.progressive_frame;
@@ -831,7 +833,7 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
     // Picture level
     pic_param = &ctx->pic_param;
     pic_param->picture_type = picture_type;
-    pic_param->temporal_reference = display_order;
+    pic_param->temporal_reference = display_order % ctx->intra_period;
     pic_param->reconstructed_picture = surface_ids[SID_RECON_PICTURE];
     pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
     pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
