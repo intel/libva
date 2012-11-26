@@ -233,6 +233,7 @@ find_frame_rate_code(const VAEncSequenceParameterBufferMPEG2 *seq_param)
 
         if (abs(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value) < delta) {
             code = frame_rate_tab[i].code;
+            delta = abs(1000 * frame_rate_tab[i].value - 1000 * frame_rate_value);
         }
     }
 
