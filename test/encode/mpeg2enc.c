@@ -74,6 +74,7 @@ struct mpeg2enc_context {
     /* args */
     int rate_control_mode;
     int fps;
+    int mode; /* 0:I, 1:I/P, 2:I/P/B */
     int width;
     int height;
     int frame_size;
@@ -500,6 +501,7 @@ usage(char *program)
     fprintf(stderr, "where options include:\n");
     fprintf(stderr, "\t--cqp <QP>       const qp mode with specified <QP>\n");
     fprintf(stderr, "\t--fps <FPS>      specify the frame rate\n");
+    fprintf(stderr, "\t--mode <MODE>    specify the mode 0 (I), 1 (I/P) and 2 (I/P/B)\n");
 }
 
 static void 
@@ -512,6 +514,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
         {"help",        no_argument,            0,      'h'},
         {"cqp",         required_argument,      0,      'c'},
         {"fps",         required_argument,      0,      'f'},
+        {"mode",        required_argument,      0,      'm'},
         { NULL,         0,                      NULL,   0 }
     };
 
@@ -558,6 +561,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
     ctx->fps = 30;
     ctx->qp = 28;
     ctx->rate_control_mode = VA_RC_CQP;
+    ctx->mode = 1;
 
     optind = 5;
 
@@ -594,6 +598,16 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
                 ctx->fps = tmp;
 
             ctx->rate_control_mode = VA_RC_CBR;
+
+            break;
+
+        case 'm':
+            tmp = atoi(optarg);
+            
+            if (tmp < 0 || tmp > 2)
+                fprintf(stderr, "Waning: MODE must be 0, 1, or 2\n");
+            else
+                ctx->mode = tmp;
 
             break;
 
