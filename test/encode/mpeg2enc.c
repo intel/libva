@@ -258,6 +258,8 @@ sps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
     bitstream_put_ui(bs, 0, 1); /* load_intra_quantiser_matrix */
     bitstream_put_ui(bs, 0, 1); /* load_non_intra_quantiser_matrix */
 
+    bitstream_byte_aligning(bs, 0);
+
     bitstream_put_ui(bs, START_CODE_EXT, 32);
     bitstream_put_ui(bs, 1, 4); /* sequence_extension id */
     bitstream_put_ui(bs, seq_param->sequence_extension.bits.profile_and_level_indication, 8);
@@ -272,10 +274,14 @@ sps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
     bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_n, 2);
     bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_d, 5);
 
+    bitstream_byte_aligning(bs, 0);
+
     bitstream_put_ui(bs, START_CODE_GOP, 32);
     bitstream_put_ui(bs, seq_param->gop_header.bits.time_code, 25);
     bitstream_put_ui(bs, seq_param->gop_header.bits.closed_gop, 1);
     bitstream_put_ui(bs, seq_param->gop_header.bits.broken_link, 1);
+
+    bitstream_byte_aligning(bs, 0);
 }
 
 static void 
@@ -311,6 +317,8 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
      
     bitstream_put_ui(bs, 0, 1); /* extra_bit_picture, 0 */
 
+    bitstream_byte_aligning(bs, 0);
+
     bitstream_put_ui(bs, START_CODE_EXT, 32);
     bitstream_put_ui(bs, 8, 4); /* Picture Coding Extension ID: 8 */
     bitstream_put_ui(bs, pic_param->f_code[0][0], 4);
@@ -331,12 +339,16 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
     bitstream_put_ui(bs, pic_param->picture_coding_extension.bits.progressive_frame, 1);
     bitstream_put_ui(bs, pic_param->picture_coding_extension.bits.composite_display_flag, 1);
 
+    bitstream_byte_aligning(bs, 0);
+
     if (pic_param->user_data_length) {
         bitstream_put_ui(bs, START_CODE_USER, 32);
 
         for (i = 0; i < pic_param->user_data_length; i++) {
             bitstream_put_ui(bs, pic_param->user_data[i], 8);
         }
+
+        bitstream_byte_aligning(bs, 0);
     }
 }
 
