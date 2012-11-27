@@ -818,6 +818,39 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
                                               ctx);
 }
 
+static int 
+mpeg2enc_time_code(VAEncSequenceParameterBufferMPEG2 *seq_param,
+                   int num_frames)
+{
+    int fps = (int)(seq_param->frame_rate + 0.5);
+    int time_code = 0;
+    int time_code_pictures, time_code_seconds, time_code_minutes, time_code_hours;
+    int drop_frame_flag = 0;
+
+    assert(fps <= 60);
+
+    time_code_seconds = num_frames / fps;
+    time_code_pictures = num_frames % fps;
+    time_code |= time_code_pictures;
+
+    time_code_minutes = time_code_minutes / 60;
+    time_code_seconds = time_code_minutes % 60;
+    time_code |= (time_code_seconds << 6);
+
+    time_code_hours = time_code_minutes / 60;
+    time_code_minutes = time_code_minutes % 60;
+
+    time_code |= (1 << 12);     /* marker_bit */
+    time_code |= (time_code_minutes << 13);
+
+    time_code_hours = time_code_hours % 24;
+    time_code |= (time_code_hours << 19);
+
+    time_code |= (drop_frame_flag << 24);
+
+    return time_code;
+}
+
 /*
  * run
  */
@@ -827,6 +860,7 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
                                  int coded_order,
                                  int display_order)
 {
+    VAEncSequenceParameterBufferMPEG2 *seq_param;
     VAEncPictureParameterBufferMPEG2 *pic_param;
     VAStatus va_status;
 
@@ -847,6 +881,12 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
                                pic_param,
                                &ctx->pic_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    seq_param = &ctx->seq_param;
+
+    if (pic_param->temporal_reference == 0) {   /* I frame */
+        seq_param->gop_header.bits.time_code = mpeg2enc_time_code(seq_param, display_order); /* bit12: marker_bit */
+    }
 }
 
 static void 
