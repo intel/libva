@@ -854,25 +854,46 @@ mpeg2enc_time_code(VAEncSequenceParameterBufferMPEG2 *seq_param,
 /*
  * run
  */
-static void 
-mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
-                                 VAEncPictureType picture_type,
-                                 int coded_order,
-                                 int display_order)
+static void
+mpeg2enc_update_sequence_parameter(struct mpeg2enc_context *ctx,
+                                   VAEncPictureType picture_type,
+                                   int coded_order,
+                                   int display_order)
 {
-    VAEncSequenceParameterBufferMPEG2 *seq_param;
-    VAEncPictureParameterBufferMPEG2 *pic_param;
-    VAStatus va_status;
+    VAEncSequenceParameterBufferMPEG2 *seq_param = &ctx->seq_param;
 
-    // Picture level
-    pic_param = &ctx->pic_param;
+    /* update the GOP info for the new GOP */
+    if (display_order % ctx->intra_period == 0) {
+        seq_param->gop_header.bits.time_code = mpeg2enc_time_code(seq_param, display_order);
+    }
+}
+
+static void
+mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
+                                  VAEncPictureType picture_type,
+                                  int coded_order,
+                                  int display_order)
+{
+    VAEncPictureParameterBufferMPEG2 *pic_param = &ctx->pic_param;
+
     pic_param->picture_type = picture_type;
     pic_param->temporal_reference = display_order % ctx->intra_period;
     pic_param->reconstructed_picture = surface_ids[SID_RECON_PICTURE];
     pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
     pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
-    pic_param->coded_buf = ctx->codedbuf_buf_id;
+}
 
+static void
+mpeg2enc_update_picture_parameter_buffer(struct mpeg2enc_context *ctx,
+                                         VAEncPictureType picture_type,
+                                         int coded_order,
+                                         int display_order)
+{
+    VAEncPictureParameterBufferMPEG2 *pic_param = &ctx->pic_param;
+    VAStatus va_status;
+
+    /* update the coded buffer id */
+    pic_param->coded_buf = ctx->codedbuf_buf_id;
     va_status = vaCreateBuffer(ctx->va_dpy,
                                ctx->context_id,
                                VAEncPictureParameterBufferType,
@@ -881,12 +902,6 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
                                pic_param,
                                &ctx->pic_param_buf_id);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
-
-    seq_param = &ctx->seq_param;
-
-    if (pic_param->temporal_reference == 0) {   /* I frame */
-        seq_param->gop_header.bits.time_code = mpeg2enc_time_code(seq_param, display_order); /* bit12: marker_bit */
-    }
 }
 
 static void 
@@ -947,6 +962,9 @@ begin_picture(struct mpeg2enc_context *ctx,
     tmp = ctx->current_input_surface;
     ctx->current_input_surface = ctx->current_upload_surface;
     ctx->current_upload_surface = tmp;
+
+    mpeg2enc_update_sequence_parameter(ctx, picture_type, coded_order, display_order);
+    mpeg2enc_update_picture_parameter(ctx, picture_type, coded_order, display_order);
 
     if (coded_order == 0) {
         assert(picture_type == VAEncPictureTypeIntra);
@@ -1208,7 +1226,7 @@ encode_picture(struct mpeg2enc_context *ctx,
         CHECK_VASTATUS(va_status,"vaCreateBuffer");
 
         /* picture parameter set */
-        mpeg2enc_update_picture_parameter(ctx, picture_type, coded_order, display_order);
+        mpeg2enc_update_picture_parameter_buffer(ctx, picture_type, coded_order, display_order);
 
         mpeg2enc_render_picture(ctx);
 
