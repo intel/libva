@@ -559,7 +559,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 
     opterr = 0;
     ctx->fps = 30;
-    ctx->qp = 28;
+    ctx->qp = 8;
     ctx->rate_control_mode = VA_RC_CQP;
     ctx->mode = 1;
 
