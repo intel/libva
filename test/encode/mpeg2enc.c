@@ -62,6 +62,12 @@ enum {
     MPEG2_MODE_IPB,
 };
 
+enum {
+    MPEG2_LEVEL_LOW = 0,
+    MPEG2_LEVEL_MAIN,
+    MPEG2_LEVEL_HIGH,
+};
+
 #define CHECK_VASTATUS(va_status, func)                                 \
     if (va_status != VA_STATUS_SUCCESS) {                               \
         fprintf(stderr, "%s:%s (%d) failed, exit\n", __func__, func, __LINE__); \
@@ -74,11 +80,18 @@ static int const picture_type_pattern[][2] = {{VAEncPictureTypeIntra, 1},
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
                                              {VAEncPictureTypePredictive, 2}};
 
+static VAProfile mpeg2_va_profiles[] = {
+    VAProfileMPEG2Simple,
+    VAProfileMPEG2Main
+};
+
 struct mpeg2enc_context {
     /* args */
     int rate_control_mode;
     int fps;
     int mode; /* 0:I, 1:I/P, 2:I/P/B */
+    VAProfile profile;
+    int level;
     int width;
     int height;
     int frame_size;
@@ -508,6 +521,8 @@ usage(char *program)
     fprintf(stderr, "\t--cqp <QP>       const qp mode with specified <QP>\n");
     fprintf(stderr, "\t--fps <FPS>      specify the frame rate\n");
     fprintf(stderr, "\t--mode <MODE>    specify the mode 0 (I), 1 (I/P) and 2 (I/P/B)\n");
+    fprintf(stderr, "\t--profile <PROFILE>      specify the profile 0(Simple), or 1(Main, default)\n");
+    fprintf(stderr, "\t--level <LEVEL>  specify the level 0(Low), 1(Main, default) or 2(High)\n");    
 }
 
 static void 
@@ -521,6 +536,8 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
         {"cqp",         required_argument,      0,      'c'},
         {"fps",         required_argument,      0,      'f'},
         {"mode",        required_argument,      0,      'm'},
+        {"profile",     required_argument,      0,      'p'},
+        {"level",       required_argument,      0,      'l'},
         { NULL,         0,                      NULL,   0 }
     };
 
@@ -568,6 +585,8 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
     ctx->qp = 8;
     ctx->rate_control_mode = VA_RC_CQP;
     ctx->mode = MPEG2_MODE_IP;
+    ctx->profile = VAProfileMPEG2Main;
+    ctx->level = MPEG2_LEVEL_MAIN;
 
     optind = 5;
 
@@ -614,6 +633,26 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
                 fprintf(stderr, "Waning: MODE must be 0, 1, or 2\n");
             else
                 ctx->mode = tmp;
+
+            break;
+
+        case 'p':
+            tmp = atoi(optarg);
+            
+            if (tmp < 0 || tmp > 1)
+                fprintf(stderr, "Waning: PROFILE must be 0 or 1\n");
+            else
+                ctx->profile = mpeg2_va_profiles[tmp];
+
+            break;
+
+        case 'l':
+            tmp = atoi(optarg);
+            
+            if (tmp < MPEG2_LEVEL_LOW || tmp > MPEG2_LEVEL_HIGH)
+                fprintf(stderr, "Waning: LEVEL must be 0, 1, or 2\n");
+            else
+                ctx->level = tmp;
 
             break;
 
