@@ -679,6 +679,40 @@ static void
 mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
                                 VAEncSequenceParameterBufferMPEG2 *seq_param)
 {
+    int profile = 4, level = 8;
+
+    switch (ctx->profile) {
+    case VAProfileMPEG2Simple:
+        profile = 5;
+        break;
+
+    case VAProfileMPEG2Main:
+        profile = 4;
+        break;
+
+    default:
+        assert(0);
+        break;
+    }
+
+    switch (ctx->level) {
+    case MPEG2_LEVEL_LOW:
+        level = 10;
+        break;
+
+    case MPEG2_LEVEL_MAIN:
+        level = 8;
+        break;
+
+    case MPEG2_LEVEL_HIGH:
+        level = 4;
+        break;
+
+    default:
+        assert(0);
+        break;
+    }
+        
     seq_param->intra_period = ctx->intra_period;
     seq_param->ip_period = 0;   /* FIXME: ??? */
     seq_param->picture_width = ctx->width;
@@ -693,7 +727,7 @@ mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
     seq_param->aspect_ratio_information = 1;
     seq_param->vbv_buffer_size = 3; /* B = 16 * 1024 * vbv_buffer_size */
 
-    seq_param->sequence_extension.bits.profile_and_level_indication = 4 << 4 | 0x8; /* FIXME: Main/Main ??? */
+    seq_param->sequence_extension.bits.profile_and_level_indication = profile << 4 | level;
     seq_param->sequence_extension.bits.progressive_sequence = 1; /* progressive frame-pictures */
     seq_param->sequence_extension.bits.chroma_format = CHROMA_FORMAT_420; /* 4:2:0 */
     seq_param->sequence_extension.bits.low_delay = 0; /* FIXME */
@@ -754,7 +788,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
     max_entrypoints = vaMaxNumEntrypoints(ctx->va_dpy);
     entrypoint_list = malloc(max_entrypoints * sizeof(VAEntrypoint));
     vaQueryConfigEntrypoints(ctx->va_dpy,
-                             VAProfileMPEG2Simple,
+                             ctx->profile,
                              entrypoint_list,
                              &num_entrypoints);
 
@@ -774,7 +808,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
     attrib_list[0].type = VAConfigAttribRTFormat;
     attrib_list[1].type = VAConfigAttribRateControl;
     vaGetConfigAttributes(ctx->va_dpy,
-                          VAProfileMPEG2Simple,
+                          ctx->profile,
                           VAEntrypointEncSlice,
                           &attrib_list[0],
                           2);
@@ -794,7 +828,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
     attrib_list[1].value = ctx->rate_control_mode; /* set to desired RC mode */
 
     va_status = vaCreateConfig(ctx->va_dpy,
-                               VAProfileMPEG2Simple,
+                               ctx->profile,
                                VAEntrypointEncSlice,
                                attrib_list,
                                2,
