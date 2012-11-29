@@ -1383,7 +1383,6 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
             display_order++;
             coded_order++;
         } else if (ctx->mode == MPEG2_MODE_IP) {
-            assert(0);
             if ((display_order % ctx->intra_period) == 0) {
                 encode_picture(ctx,
                                coded_order,
