@@ -62,7 +62,7 @@
         exit(1);                                                        \
     }
 
-static int const picture_type_patter[][2] = {{VAEncPictureTypeIntra, 1}, 
+static int const picture_type_pattern[][2] = {{VAEncPictureTypeIntra, 1}, 
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
                                              {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
@@ -1311,25 +1311,25 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
 
             assert(0);
             
-            fcurrent = fcurrent % (sizeof(picture_type_patter)/sizeof(int[2]));
-            fnext = (fcurrent+1) % (sizeof(picture_type_patter)/sizeof(int[2]));
+            fcurrent = fcurrent % (sizeof(picture_type_pattern)/sizeof(int[2]));
+            fnext = (fcurrent+1) % (sizeof(picture_type_pattern)/sizeof(int[2]));
             
-            if ( picture_type_patter[fcurrent][0] == VAEncPictureTypeIntra ) {
+            if ( picture_type_pattern[fcurrent][0] == VAEncPictureTypeIntra ) {
                 encode_picture(ctx,
                                coded_order,
                                display_order,
                                VAEncPictureTypeIntra,
                                0, 
-                               display_order + picture_type_patter[fnext][1]);
+                               display_order + picture_type_pattern[fnext][1]);
                 display_order++;
                 coded_order++;
             } else {
                 encode_pb_pictures(ctx,
                                    coded_order,
                                    display_order,
-                                   picture_type_patter[fcurrent][1] - 1, 
-                                   display_order + picture_type_patter[fcurrent][1] + picture_type_patter[fnext][1] - 1);
-                display_order += picture_type_patter[fcurrent][1];
+                                   picture_type_pattern[fcurrent][1] - 1, 
+                                   display_order + picture_type_pattern[fcurrent][1] + picture_type_pattern[fnext][1] - 1);
+                display_order += picture_type_pattern[fcurrent][1];
                 coded_order++;
             }
  
