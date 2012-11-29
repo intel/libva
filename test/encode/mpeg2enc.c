@@ -56,6 +56,12 @@
 
 #define MAX_SLICES              128
 
+enum {
+    MPEG2_MODE_I = 0,
+    MPEG2_MODE_IP,
+    MPEG2_MODE_IPB,
+};
+
 #define CHECK_VASTATUS(va_status, func)                                 \
     if (va_status != VA_STATUS_SUCCESS) {                               \
         fprintf(stderr, "%s:%s (%d) failed, exit\n", __func__, func, __LINE__); \
@@ -561,7 +567,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
     ctx->fps = 30;
     ctx->qp = 8;
     ctx->rate_control_mode = VA_RC_CQP;
-    ctx->mode = 1;
+    ctx->mode = MPEG2_MODE_IP;
 
     optind = 5;
 
@@ -604,7 +610,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
         case 'm':
             tmp = atoi(optarg);
             
-            if (tmp < 0 || tmp > 2)
+            if (tmp < MPEG2_MODE_I || tmp > MPEG2_MODE_IPB)
                 fprintf(stderr, "Waning: MODE must be 0, 1, or 2\n");
             else
                 ctx->mode = tmp;
@@ -794,7 +800,7 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
     ctx->codedbuf_i_size = ctx->frame_size;
     ctx->codedbuf_pb_size = 0;
 
-    if (ctx->mode == 0)
+    if (ctx->mode == MPEG2_MODE_I)
         ctx->intra_period = 1;
     else
         ctx->intra_period = 16;
@@ -1275,7 +1281,7 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
     int display_order = 0, coded_order = 0;
 
     for (display_order = 0; display_order < ctx->num_pictures;) {
-        if (ctx->mode == 0) {
+        if (ctx->mode == MPEG2_MODE_I) {
             encode_picture(ctx,
                            coded_order,
                            display_order,
@@ -1284,7 +1290,7 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
                            display_order + 1);
             display_order++;
             coded_order++;
-        } else if (ctx->mode == 1) {
+        } else if (ctx->mode == MPEG2_MODE_IP) {
             assert(0);
             if ((display_order % ctx->intra_period) == 0) {
                 encode_picture(ctx,
