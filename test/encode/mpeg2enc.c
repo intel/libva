@@ -101,6 +101,7 @@ struct mpeg2enc_context {
     FILE *ofp;
     unsigned char *frame_data_buffer;
     int intra_period;
+    int ip_period;
     int bit_rate; /* in kbps */
 
     /* VA resource */
@@ -714,7 +715,7 @@ mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
     }
         
     seq_param->intra_period = ctx->intra_period;
-    seq_param->ip_period = 0;   /* FIXME: ??? */
+    seq_param->ip_period = ctx->ip_period;   /* FIXME: ??? */
     seq_param->picture_width = ctx->width;
     seq_param->picture_height = ctx->height;
 
@@ -872,6 +873,7 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
     ctx->codedbuf_buf_id = VA_INVALID_ID;
     ctx->codedbuf_i_size = ctx->frame_size;
     ctx->codedbuf_pb_size = 0;
+    ctx->ip_period = 2;
 
     if (ctx->mode == MPEG2_MODE_I)
         ctx->intra_period = 1;
