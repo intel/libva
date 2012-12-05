@@ -1461,9 +1461,9 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(idx, "\tinitial_qp = %d\n", p->initial_qp);
         va_TraceMsg(idx, "\tmin_qp = %d\n", p->min_qp);
         va_TraceMsg(idx, "\tbasic_unit_size = %d\n", p->basic_unit_size);
-        va_TraceMsg(idx, "\trc_flags.reset = %d \n", p->rc_flags.reset);
-        va_TraceMsg(idx, "\trc_flags.disable_frame_skip = %d\n", p->rc_flags.disable_frame_skip);
-        va_TraceMsg(idx, "\trc_flags.disable_bit_stuffing = %d\n", p->rc_flags.disable_bit_stuffing);
+        va_TraceMsg(idx, "\trc_flags.reset = %d \n", p->rc_flags.bits.reset);
+        va_TraceMsg(idx, "\trc_flags.disable_frame_skip = %d\n", p->rc_flags.bits.disable_frame_skip);
+        va_TraceMsg(idx, "\trc_flags.disable_bit_stuffing = %d\n", p->rc_flags.bits.disable_bit_stuffing);
         break;
     }
     case VAEncMiscParameterTypeMaxSliceSize:
