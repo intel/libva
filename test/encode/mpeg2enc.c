@@ -966,16 +966,23 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
         pic_param->f_code[0][1] = 0xf;
         pic_param->f_code[1][0] = 0xf;
         pic_param->f_code[1][1] = 0xf;
+        pic_param->forward_reference_picture = VA_INVALID_SURFACE;
+        pic_param->backward_reference_picture = VA_INVALID_SURFACE;
+
     } else if (pic_param->picture_type == VAEncPictureTypePredictive) {
         pic_param->f_code[0][0] = 0x1;
         pic_param->f_code[0][1] = 0x1;
         pic_param->f_code[1][0] = 0xf;
         pic_param->f_code[1][1] = 0xf;
+        pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
+        pic_param->backward_reference_picture = VA_INVALID_SURFACE;
     } else if (pic_param->picture_type == VAEncPictureTypeBidirectional) {
         pic_param->f_code[0][0] = 0x1;
         pic_param->f_code[0][1] = 0x1;
         pic_param->f_code[1][0] = 0x1;
         pic_param->f_code[1][1] = 0x1;
+        pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
+        pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
     } else {
         assert(0);
     }
