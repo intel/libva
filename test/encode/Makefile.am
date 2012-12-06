@@ -26,6 +26,7 @@ bin_PROGRAMS += h264encode
 endif
 
 INCLUDES = \
+	-Wall				\
 	-I$(top_srcdir)			\
 	-I$(top_srcdir)/va		\
 	$(NULL)
