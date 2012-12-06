@@ -526,7 +526,7 @@ usage(char *program)
 static void 
 parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 {
-    int c, tmp, i = 0;
+    int c, tmp;
     int option_index = 0;
     long file_size;
     static struct option long_options[] = {
@@ -920,7 +920,7 @@ mpeg2enc_time_code(VAEncSequenceParameterBufferMPEG2 *seq_param,
     time_code_pictures = num_frames % fps;
     time_code |= time_code_pictures;
 
-    time_code_minutes = time_code_minutes / 60;
+    time_code_minutes = time_code_seconds / 60;
     time_code_seconds = time_code_minutes % 60;
     time_code |= (time_code_seconds << 6);
 
