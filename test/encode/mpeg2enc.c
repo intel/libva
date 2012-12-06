@@ -329,7 +329,8 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
                      3);
     bitstream_put_ui(bs, 0xFFFF, 16); /* vbv_delay, always 0xFFFF */
     
-    if (pic_param->picture_type == VAEncPictureTypePredictive) {
+    if (pic_param->picture_type == VAEncPictureTypePredictive ||
+        pic_param->picture_type == VAEncPictureTypeBidirectional) {
         bitstream_put_ui(bs, 0, 1); /* full_pel_forward_vector, always 0 for MPEG-2 */
         bitstream_put_ui(bs, 7, 3); /* forward_f_code, always 7 for MPEG-2 */
     }
