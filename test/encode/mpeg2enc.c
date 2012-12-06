@@ -74,12 +74,6 @@ enum {
         exit(1);                                                        \
     }
 
-static int const picture_type_pattern[][2] = {{VAEncPictureTypeIntra, 1}, 
-                                             {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
-                                             {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
-                                             {VAEncPictureTypePredictive, 3}, {VAEncPictureTypePredictive, 3},{VAEncPictureTypePredictive, 3},
-                                             {VAEncPictureTypePredictive, 2}};
-
 static VAProfile mpeg2_va_profiles[] = {
     VAProfileMPEG2Simple,
     VAProfileMPEG2Main
@@ -103,6 +97,9 @@ struct mpeg2enc_context {
     int intra_period;
     int ip_period;
     int bit_rate; /* in kbps */
+    VAEncPictureType next_type;
+    int next_display_order;
+    int next_bframes;
 
     /* VA resource */
     VADisplay va_dpy;
@@ -873,12 +870,21 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
     ctx->codedbuf_buf_id = VA_INVALID_ID;
     ctx->codedbuf_i_size = ctx->frame_size;
     ctx->codedbuf_pb_size = 0;
-    ctx->ip_period = 2;
+    ctx->next_display_order = 0;
+    ctx->next_type = VAEncPictureTypeIntra;
 
-    if (ctx->mode == MPEG2_MODE_I)
+    if (ctx->mode == MPEG2_MODE_I) {
         ctx->intra_period = 1;
-    else
+        ctx->ip_period = 0;
+    } else if (ctx->mode == MPEG2_MODE_IP) {
         ctx->intra_period = 16;
+        ctx->ip_period = 0;
+    } else {
+        ctx->intra_period = 16;
+        ctx->ip_period = 2;
+    }
+
+    ctx->next_bframes = ctx->ip_period;
 
     ctx->bit_rate = -1;
 
@@ -1344,105 +1350,71 @@ encode_picture(struct mpeg2enc_context *ctx,
 }
 
 static void
-encode_pb_pictures(struct mpeg2enc_context *ctx,
-                   int coded_order,
-                   int f, 
-                   int nbframes,
-                   int next_f)
+update_next_frame_info(struct mpeg2enc_context *ctx,
+                       VAEncPictureType curr_type,
+                       int curr_coded_order,
+                       int curr_display_order)
 {
-    int i;
-
-    encode_picture(ctx,
-                   coded_order,
-                   f + nbframes,
-                   VAEncPictureTypePredictive,
-                   1,
-                   f);
-
-    for( i = 0; i < nbframes - 1; i++) {
-        encode_picture(ctx,
-                       coded_order + 1,
-                       f + i,
-                       VAEncPictureTypeBidirectional,
-                       1,
-                       f + i + 1);
+    if (((curr_coded_order + 1) % ctx->intra_period) == 0) {
+        ctx->next_type = VAEncPictureTypeIntra;
+        ctx->next_display_order = curr_coded_order + 1;
+        
+        return;
     }
-    
-    encode_picture(ctx,
-                   coded_order + 1,
-                   f + nbframes - 1,
-                   VAEncPictureTypeBidirectional,
-                   0,
-                   next_f);
-}
 
+    if (curr_type == VAEncPictureTypeIntra) {
+        assert(curr_display_order == curr_coded_order);
+        ctx->next_type = VAEncPictureTypePredictive;
+        ctx->next_bframes = ctx->ip_period;
+        ctx->next_display_order = curr_display_order + ctx->next_bframes + 1;
+    } else if (curr_type == VAEncPictureTypePredictive) {
+        if (ctx->ip_period == 0) {
+            assert(curr_display_order == curr_coded_order);
+            ctx->next_type = VAEncPictureTypePredictive;
+            ctx->next_display_order = curr_display_order + 1;
+        } else {
+            ctx->next_type = VAEncPictureTypeBidirectional;
+            ctx->next_display_order = curr_display_order - ctx->next_bframes;
+            ctx->next_bframes--;
+        }
+    } else if (curr_type == VAEncPictureTypeBidirectional) {
+        if (ctx->next_bframes == 0) {
+            ctx->next_type = VAEncPictureTypePredictive;
+            ctx->next_bframes = ctx->ip_period;
+            ctx->next_display_order = curr_display_order + ctx->next_bframes + 2;
+        } else {
+            ctx->next_type = VAEncPictureTypeBidirectional;
+            ctx->next_display_order = curr_display_order + 1;
+            ctx->next_bframes--;
+        }
+    }
+
+    if (ctx->next_display_order >= ctx->num_pictures) {
+        int rtmp = ctx->next_display_order - (ctx->num_pictures - 1);
+        ctx->next_display_order = ctx->num_pictures - 1;
+        ctx->next_bframes -= rtmp;
+    }
+}
 static void
 mpeg2enc_run(struct mpeg2enc_context *ctx)
 {
     int display_order = 0, coded_order = 0;
+    VAEncPictureType type;
 
-    for (display_order = 0; display_order < ctx->num_pictures;) {
-        if (ctx->mode == MPEG2_MODE_I) {
-            encode_picture(ctx,
-                           coded_order,
-                           display_order,
-                           VAEncPictureTypeIntra,
-                           0,
-                           display_order + 1);
-            display_order++;
-            coded_order++;
-        } else if (ctx->mode == MPEG2_MODE_IP) {
-            if ((display_order % ctx->intra_period) == 0) {
-                encode_picture(ctx,
-                               coded_order,
-                               display_order,
-                               VAEncPictureTypeIntra,
-                               0,
-                               display_order + 1);
-                display_order++;
-                coded_order++;
-            } else {
-                encode_picture(ctx,
-                               coded_order,
-                               display_order,
-                               VAEncPictureTypePredictive,
-                               0,
-                               display_order + 1);
-                display_order++;
-                coded_order++;
-            }
-        } else { // follow the i,p,b pattern
-            static int fcurrent = 0;
-            int fnext;
+    while (coded_order < ctx->num_pictures) {
+        type = ctx->next_type;
+        display_order = ctx->next_display_order;
+        /* follow the IPBxxBPBxxB mode */
+        update_next_frame_info(ctx, type, coded_order, display_order);
+        encode_picture(ctx,
+                       coded_order,
+                       display_order,
+                       type,
+                       ctx->next_type == VAEncPictureTypeBidirectional,
+                       ctx->next_display_order);
+        coded_order++;
 
-            assert(0);
-            
-            fcurrent = fcurrent % (sizeof(picture_type_pattern)/sizeof(int[2]));
-            fnext = (fcurrent+1) % (sizeof(picture_type_pattern)/sizeof(int[2]));
-            
-            if ( picture_type_pattern[fcurrent][0] == VAEncPictureTypeIntra ) {
-                encode_picture(ctx,
-                               coded_order,
-                               display_order,
-                               VAEncPictureTypeIntra,
-                               0, 
-                               display_order + picture_type_pattern[fnext][1]);
-                display_order++;
-                coded_order++;
-            } else {
-                encode_pb_pictures(ctx,
-                                   coded_order,
-                                   display_order,
-                                   picture_type_pattern[fcurrent][1] - 1, 
-                                   display_order + picture_type_pattern[fcurrent][1] + picture_type_pattern[fnext][1] - 1);
-                display_order += picture_type_pattern[fcurrent][1];
-                coded_order++;
-            }
- 
-            fcurrent++;
-        }
-
-        fprintf(stderr, "\r %d/%d ...", display_order + 1, ctx->num_pictures);
+        fprintf(stderr, "\r %d/%d ...", coded_order, ctx->num_pictures);
         fflush(stdout);
     }
 }
