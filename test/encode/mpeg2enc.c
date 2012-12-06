@@ -100,6 +100,9 @@ struct mpeg2enc_context {
     VAEncPictureType next_type;
     int next_display_order;
     int next_bframes;
+    int new_sequence;
+    int new_gop_header;
+    int gop_header_in_display_order;
 
     /* VA resource */
     VADisplay va_dpy;
@@ -257,40 +260,52 @@ find_frame_rate_code(const VAEncSequenceParameterBufferMPEG2 *seq_param)
 }
 
 static void 
-sps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
+sps_rbsp(struct mpeg2enc_context *ctx,
+         const VAEncSequenceParameterBufferMPEG2 *seq_param,
          bitstream *bs)
 {
     int frame_rate_code = find_frame_rate_code(seq_param);
 
-    bitstream_put_ui(bs, START_CODE_SEQ, 32);
-    bitstream_put_ui(bs, seq_param->picture_width, 12);
-    bitstream_put_ui(bs, seq_param->picture_height, 12);
-    bitstream_put_ui(bs, seq_param->aspect_ratio_information, 4);
-    bitstream_put_ui(bs, frame_rate_code, 4); /* frame_rate_code */
-    bitstream_put_ui(bs, (seq_param->bits_per_second + 399) / 400, 18); /* the low 18 bits of bit_rate */
-    bitstream_put_ui(bs, 1, 1); /* marker_bit */
-    bitstream_put_ui(bs, seq_param->vbv_buffer_size, 10);
-    bitstream_put_ui(bs, 0, 1); /* constraint_parameter_flag, always 0 for MPEG-2 */
-    bitstream_put_ui(bs, 0, 1); /* load_intra_quantiser_matrix */
-    bitstream_put_ui(bs, 0, 1); /* load_non_intra_quantiser_matrix */
+    if (ctx->new_sequence) {
+        bitstream_put_ui(bs, START_CODE_SEQ, 32);
+        bitstream_put_ui(bs, seq_param->picture_width, 12);
+        bitstream_put_ui(bs, seq_param->picture_height, 12);
+        bitstream_put_ui(bs, seq_param->aspect_ratio_information, 4);
+        bitstream_put_ui(bs, frame_rate_code, 4); /* frame_rate_code */
+        bitstream_put_ui(bs, (seq_param->bits_per_second + 399) / 400, 18); /* the low 18 bits of bit_rate */
+        bitstream_put_ui(bs, 1, 1); /* marker_bit */
+        bitstream_put_ui(bs, seq_param->vbv_buffer_size, 10);
+        bitstream_put_ui(bs, 0, 1); /* constraint_parameter_flag, always 0 for MPEG-2 */
+        bitstream_put_ui(bs, 0, 1); /* load_intra_quantiser_matrix */
+        bitstream_put_ui(bs, 0, 1); /* load_non_intra_quantiser_matrix */
 
-    bitstream_byte_aligning(bs, 0);
+        bitstream_byte_aligning(bs, 0);
 
-    bitstream_put_ui(bs, START_CODE_EXT, 32);
-    bitstream_put_ui(bs, 1, 4); /* sequence_extension id */
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.profile_and_level_indication, 8);
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.progressive_sequence, 1);
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.chroma_format, 2);
-    bitstream_put_ui(bs, seq_param->picture_width >> 12, 2);
-    bitstream_put_ui(bs, seq_param->picture_height >> 12, 2);
-    bitstream_put_ui(bs, ((seq_param->bits_per_second + 399) / 400) >> 18, 12); /* bit_rate_extension */
-    bitstream_put_ui(bs, 1, 1); /* marker_bit */
-    bitstream_put_ui(bs, seq_param->vbv_buffer_size >> 10, 8);
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.low_delay, 1);
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_n, 2);
-    bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_d, 5);
+        bitstream_put_ui(bs, START_CODE_EXT, 32);
+        bitstream_put_ui(bs, 1, 4); /* sequence_extension id */
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.profile_and_level_indication, 8);
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.progressive_sequence, 1);
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.chroma_format, 2);
+        bitstream_put_ui(bs, seq_param->picture_width >> 12, 2);
+        bitstream_put_ui(bs, seq_param->picture_height >> 12, 2);
+        bitstream_put_ui(bs, ((seq_param->bits_per_second + 399) / 400) >> 18, 12); /* bit_rate_extension */
+        bitstream_put_ui(bs, 1, 1); /* marker_bit */
+        bitstream_put_ui(bs, seq_param->vbv_buffer_size >> 10, 8);
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.low_delay, 1);
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_n, 2);
+        bitstream_put_ui(bs, seq_param->sequence_extension.bits.frame_rate_extension_d, 5);
 
-    bitstream_byte_aligning(bs, 0);
+        bitstream_byte_aligning(bs, 0);
+    }
+
+    if (ctx->new_gop_header) {
+        bitstream_put_ui(bs, START_CODE_GOP, 32);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.time_code, 25);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.closed_gop, 1);
+        bitstream_put_ui(bs, seq_param->gop_header.bits.broken_link, 1);
+
+        bitstream_byte_aligning(bs, 0);
+    }
 }
 
 static void 
@@ -300,15 +315,6 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
 {
     int i;
     int chroma_420_type;
-
-    if (pic_param->temporal_reference == 0) {
-        bitstream_put_ui(bs, START_CODE_GOP, 32);
-        bitstream_put_ui(bs, seq_param->gop_header.bits.time_code, 25);
-        bitstream_put_ui(bs, seq_param->gop_header.bits.closed_gop, 1);
-        bitstream_put_ui(bs, seq_param->gop_header.bits.broken_link, 1);
-
-        bitstream_byte_aligning(bs, 0);
-    }
 
     if (seq_param->sequence_extension.bits.chroma_format == CHROMA_FORMAT_420)
         chroma_420_type = pic_param->picture_coding_extension.bits.progressive_frame;
@@ -386,13 +392,14 @@ build_packed_pic_buffer(const VAEncSequenceParameterBufferMPEG2 *seq_param,
 }
 
 static int
-build_packed_seq_buffer(const VAEncSequenceParameterBufferMPEG2 *seq_param,
+build_packed_seq_buffer(struct mpeg2enc_context *ctx,
+                        const VAEncSequenceParameterBufferMPEG2 *seq_param,
                         unsigned char **header_buffer)
 {
     bitstream bs;
 
     bitstream_start(&bs);
-    sps_rbsp(seq_param, &bs);
+    sps_rbsp(ctx, seq_param, &bs);
     bitstream_end(&bs);
 
     *header_buffer = (unsigned char *)bs.buffer;
@@ -886,6 +893,10 @@ mpeg2enc_init(struct mpeg2enc_context *ctx)
 
     ctx->next_bframes = ctx->ip_period;
 
+    ctx->new_sequence = 1;
+    ctx->new_gop_header = 1;
+    ctx->gop_header_in_display_order = 0;
+
     ctx->bit_rate = -1;
 
     for (i = 0; i < MAX_SLICES; i++) {
@@ -949,8 +960,8 @@ mpeg2enc_update_sequence_parameter(struct mpeg2enc_context *ctx,
 {
     VAEncSequenceParameterBufferMPEG2 *seq_param = &ctx->seq_param;
 
-    /* update the GOP info for the new GOP */
-    if (display_order % ctx->intra_period == 0) {
+    /* update the time_code info for the new GOP */
+    if (ctx->new_gop_header) {
         seq_param->gop_header.bits.time_code = mpeg2enc_time_code(seq_param, display_order);
     }
 }
@@ -964,7 +975,7 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
     VAEncPictureParameterBufferMPEG2 *pic_param = &ctx->pic_param;
 
     pic_param->picture_type = picture_type;
-    pic_param->temporal_reference = display_order % ctx->intra_period;
+    pic_param->temporal_reference = (display_order - ctx->gop_header_in_display_order) & 0x3FF;
     pic_param->reconstructed_picture = surface_ids[SID_RECON_PICTURE];
     pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
     pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
@@ -1079,9 +1090,9 @@ begin_picture(struct mpeg2enc_context *ctx,
     mpeg2enc_update_sequence_parameter(ctx, picture_type, coded_order, display_order);
     mpeg2enc_update_picture_parameter(ctx, picture_type, coded_order, display_order);
 
-    if (coded_order == 0) {
+    if (ctx->new_sequence || ctx->new_gop_header) {
         assert(picture_type == VAEncPictureTypeIntra);
-        length_in_bits = build_packed_seq_buffer(&ctx->seq_param, &packed_seq_buffer);
+        length_in_bits = build_packed_seq_buffer(ctx, &ctx->seq_param, &packed_seq_buffer);
         packed_header_param_buffer.type = VAEncPackedHeaderMPEG2_SPS;
         packed_header_param_buffer.has_emulation_bytes = 0;
         packed_header_param_buffer.bit_length = length_in_bits;
@@ -1395,11 +1406,16 @@ update_next_frame_info(struct mpeg2enc_context *ctx,
         ctx->next_bframes -= rtmp;
     }
 }
+
 static void
 mpeg2enc_run(struct mpeg2enc_context *ctx)
 {
     int display_order = 0, coded_order = 0;
     VAEncPictureType type;
+
+    ctx->new_sequence = 1;
+    ctx->new_gop_header = 1;
+    ctx->gop_header_in_display_order = display_order;
 
     while (coded_order < ctx->num_pictures) {
         type = ctx->next_type;
@@ -1412,6 +1428,14 @@ mpeg2enc_run(struct mpeg2enc_context *ctx)
                        type,
                        ctx->next_type == VAEncPictureTypeBidirectional,
                        ctx->next_display_order);
+
+        /* update gop_header */
+        ctx->new_sequence = 0;
+        ctx->new_gop_header = ctx->next_type == VAEncPictureTypeIntra;
+
+        if (ctx->new_gop_header)
+            ctx->gop_header_in_display_order += ctx->intra_period;
+
         coded_order++;
 
         fprintf(stderr, "\r %d/%d ...", coded_order, ctx->num_pictures);
