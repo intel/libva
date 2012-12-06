@@ -932,7 +932,7 @@ mpeg2enc_time_code(VAEncSequenceParameterBufferMPEG2 *seq_param,
     time_code |= time_code_pictures;
 
     time_code_minutes = time_code_seconds / 60;
-    time_code_seconds = time_code_minutes % 60;
+    time_code_seconds = time_code_seconds % 60;
     time_code |= (time_code_seconds << 6);
 
     time_code_hours = time_code_minutes / 60;
