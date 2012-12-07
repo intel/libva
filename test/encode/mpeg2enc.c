@@ -79,6 +79,23 @@ static VAProfile mpeg2_va_profiles[] = {
     VAProfileMPEG2Main
 };
 
+static struct _mpeg2_sampling_density
+{
+    int samplers_per_line;
+    int line_per_frame;
+    int frame_per_sec;
+} mpeg2_upper_samplings[2][3] = {
+    { { 0, 0, 0 },
+      { 720, 576, 30 },
+      { 0, 0, 0 },
+    },
+
+    { { 352, 288, 30 },
+      { 720, 576, 30 },
+      { 1920, 1152, 60 },
+    }
+};
+
 struct mpeg2enc_context {
     /* args */
     int rate_control_mode;
@@ -531,12 +548,44 @@ usage(char *program)
     fprintf(stderr, "\t--level <LEVEL>  specify the level 0(Low), 1(Main, default) or 2(High)\n");    
 }
 
+void
+mpeg2_profile_level(struct mpeg2enc_context *ctx,
+                    int profile,
+                    int level)
+{
+    int l = 2, p;
+
+    for (p = profile; p < 2; p++) {
+        for (l = level; l < 3; l++) {
+            if (ctx->width <= mpeg2_upper_samplings[p][l].samplers_per_line &&
+                ctx->height <= mpeg2_upper_samplings[p][l].line_per_frame &&
+                ctx->fps <= mpeg2_upper_samplings[p][l].frame_per_sec) {
+                
+                goto __find;
+                break;
+            }
+        }
+    }
+
+    if (p == 2) {
+        fprintf(stderr, "Warning: can't find a proper profile and level for the specified width/height/fps\n");
+        p = 1;
+        l = 2;
+    }
+
+__find:    
+    ctx->profile = mpeg2_va_profiles[p];
+    ctx->level = l;
+}
+
 static void 
 parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
 {
     int c, tmp;
     int option_index = 0;
     long file_size;
+    int profile = 1, level = 1;
+
     static struct option long_options[] = {
         {"help",        no_argument,            0,      'h'},
         {"cqp",         required_argument,      0,      'c'},
@@ -648,7 +697,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
             if (tmp < 0 || tmp > 1)
                 fprintf(stderr, "Waning: PROFILE must be 0 or 1\n");
             else
-                ctx->profile = mpeg2_va_profiles[tmp];
+                profile = tmp;
 
             break;
 
@@ -658,7 +707,7 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
             if (tmp < MPEG2_LEVEL_LOW || tmp > MPEG2_LEVEL_HIGH)
                 fprintf(stderr, "Waning: LEVEL must be 0, 1, or 2\n");
             else
-                ctx->level = tmp;
+                level = tmp;
 
             break;
 
@@ -669,6 +718,8 @@ parse_args(struct mpeg2enc_context *ctx, int argc, char **argv)
             goto print_usage;
         }
     }
+
+    mpeg2_profile_level(ctx, profile, level);
 
     return;
 
@@ -681,7 +732,7 @@ err_exit:
 /*
  * init
  */
-static void
+void
 mpeg2enc_init_sequence_parameter(struct mpeg2enc_context *ctx,
                                 VAEncSequenceParameterBufferMPEG2 *seq_param)
 {
