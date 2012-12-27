@@ -88,7 +88,8 @@ int va_parseConfig(char *env, char *env_value)
     /* no setting in config file, use env setting */
     value = getenv(env);
     if (value) {
-        strncpy(env_value, value, 1024);
+        if (env_value)
+            strncpy(env_value, value, 1024);
         return 0;
     }
     
