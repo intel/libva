@@ -32,6 +32,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
@@ -50,7 +51,7 @@
  * . if set, decode does nothing
  * LIBVA_FOOL_ENCODE=<framename>:
  * . if set, encode does nothing, but fill in the coded buffer from the content of files with
- *   name framename.0,framename.1,framename.2, ..., framename.N, framename.N,framename.N,...
+ *   name framename.0,framename.1,..., framename.N, framename.0,..., framename.N,...repeatly
  * LIBVA_FOOL_JPEG=<framename>:fill the content of filename to codedbuf for jpeg encoding
  * LIBVA_FOOL_POSTP:
  * . if set, do nothing for vaPutSurface
@@ -256,31 +257,30 @@ VAStatus va_FoolBufferInfo(
 static int va_FoolFillCodedBufEnc(int idx)
 {
     char file_name[1024];
-    struct stat file_stat;
+    struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
 
     /* try file_name.file_count, if fail, try file_name.file_count-- */
     for (i=0; i<=1; i++) {
-        sprintf(file_name, "%s.%d",
-                fool_context[idx].fn_enc,
-                fool_context[idx].file_count);
+        snprintf(file_name, 1024, "%s.%d",
+                 fool_context[idx].fn_enc,
+                 fool_context[idx].file_count);
 
         if ((fd = open(file_name, O_RDONLY)) != -1) {
             fstat(fd, &file_stat);
             fool_context[idx].file_count++; /* open next file */
             break;
-        }
-        
-        fool_context[idx].file_count--; /* fall back to previous file */
-        if (fool_context[idx].file_count < 0)
+        } else /* fall back to the first file file */
             fool_context[idx].file_count = 0;
     }
     if (fd != -1) {
         fool_context[idx].segbuf_enc = realloc(fool_context[idx].segbuf_enc, file_stat.st_size);
         read(fd, fool_context[idx].segbuf_enc, file_stat.st_size);
         close(fd);
-    }
+    } else
+        va_errorMessage("Open file %s failed:%s\n", file_name, strerror(errno));
+
     codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
     codedbuf->bit_offset = 0;
@@ -295,18 +295,18 @@ static int va_FoolFillCodedBufEnc(int idx)
 
 static int va_FoolFillCodedBufJPG(int idx)
 {
-    struct stat file_stat;
+    struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
 
-    if ((fd = open(fool_context[idx].fn_jpg, O_RDONLY)) != -1)
+    if ((fd = open(fool_context[idx].fn_jpg, O_RDONLY)) != -1) {
         fstat(fd, &file_stat);
-        
-    if (fd != -1) {
         fool_context[idx].segbuf_jpg = realloc(fool_context[idx].segbuf_jpg, file_stat.st_size);
         read(fd, fool_context[idx].segbuf_jpg, file_stat.st_size);
         close(fd);
-    }
+    } else
+        va_errorMessage("Open file %s failed:%s\n", fool_context[idx].fn_jpg, strerror(errno));
+
     codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
     codedbuf->bit_offset = 0;

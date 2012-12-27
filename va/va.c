@@ -86,10 +86,9 @@ int va_parseConfig(char *env, char *env_value)
         fclose(fp);
 
     /* no setting in config file, use env setting */
-    if (getenv(env)) {
-        if (env_value)
-            strncpy(env_value, getenv(env), 1024);
-
+    value = getenv(env);
+    if (value) {
+        strncpy(env_value, value, 1024);
         return 0;
     }
     
@@ -214,6 +213,12 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         char *driver_path = (char *) malloc( strlen(driver_dir) +
                                              strlen(driver_name) +
                                              strlen(DRIVER_EXTENSION) + 2 );
+        if (!driver_path) {
+            va_errorMessage("%s L%d Out of memory!n",
+                                __FUNCTION__, __LINE__);
+            return VA_STATUS_ERROR_ALLOCATION_FAILED;
+        }
+
         strncpy( driver_path, driver_dir, strlen(driver_dir) + 1);
         strncat( driver_path, "/", strlen("/") );
         strncat( driver_path, driver_name, strlen(driver_name) );
