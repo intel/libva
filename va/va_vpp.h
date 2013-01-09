@@ -651,12 +651,28 @@ typedef struct _VAProcFilterParameterBuffer {
     float               value;
 } VAProcFilterParameterBuffer;
 
+/** @name De-interlacing flags */
+/**@{*/
+/** 
+ * \brief Bottom field first in the input frame. 
+ * if this is not set then assums top field first.
+ */
+#define VA_DEINTERLACING_INPUT_BOTTOM_FIELD_FIRST	0x0001
+/** 
+ * \brief Bottom field used in BOB deinterlacing. 
+ * if this is not set then assums top field is used.
+ */
+#define VA_DEINTERLACING_BOB_BOTTOM_FIELD		0x0002
+/**@}*/
+
 /** \brief Deinterlacing filter parametrization. */
 typedef struct _VAProcFilterParameterBufferDeinterlacing {
     /** \brief Filter type. Shall be set to #VAProcFilterDeinterlacing. */
     VAProcFilterType            type;
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
+    /** \brief Deinterlacing flags. */
+    unsigned int     		flags;
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**
