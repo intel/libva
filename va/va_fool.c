@@ -340,7 +340,7 @@ VAStatus va_FoolMapBuffer(
     unsigned int magic = buf_id & FOOL_BUFID_MASK;
     DPY2INDEX(dpy);
 
-    if (magic != FOOL_BUFID_MAGIC)
+    if (magic != FOOL_BUFID_MAGIC || buftype >= VABufferTypeMax || !pbuf)
         return 0;
 
     /* buf_id is the buffer type */
