@@ -136,7 +136,9 @@ static VAStatus va_DisplayContextGetDriverName (
 
     if (driver_name)
 	*driver_name = NULL;
-
+    else
+        return VA_STATUS_ERROR_UNKNOWN;
+    
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
