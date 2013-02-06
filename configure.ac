@@ -174,7 +174,10 @@ AC_SYS_LARGEFILE
 
 # Check for Doxygen
 if test "$enable_docs" = "yes"; then
-    AC_CHECK_TOOL([DOXYGEN], [doxygen], [enable_docs="no"])
+    AC_CHECK_TOOL([DOXYGEN], [doxygen], [no])
+    if test "$DOXYGEN" = "no"; then
+       enable_docs="no"
+    fi
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
 
