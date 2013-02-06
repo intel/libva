@@ -41,7 +41,7 @@ static int check_window_event(void *x11_display, void *drawable, int *width, int
 
 static void *open_display(void)
 {
-    return XOpenDisplay(":0.0");
+    return XOpenDisplay(NULL);
 }
 
 static void close_display(void *win_display)
