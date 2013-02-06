@@ -48,7 +48,14 @@ if ENABLE_DOCS
 html: html-out/index.html
 install-html-local:
 	install -d $(DESTDIR)$(docdir)/html
-	install -m 0644 html-out/* $(DESTDIR)$(docdir)/html
+	for file in `ls html-out/` ; do \
+	    if test -f html-out/$$file ; then \
+		install -m 0644 html-out/$$file $(DESTDIR)$(docdir)/html ; \
+	    else \
+		install -d $(DESTDIR)$(docdir)/html/$$file ; \
+		install -m 0644 html-out/$$file/* $(DESTDIR)$(docdir)/html/$$file; \
+	    fi ; \
+	done
 uninstall-local:
 	rm -rf $(DESTDIR)$(docdir)/html
 endif
