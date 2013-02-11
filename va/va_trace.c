@@ -602,11 +602,20 @@ static char * buffer_type_to_string(int type)
     case VAResidualDataBufferType: return "VAResidualDataBufferType";
     case VADeblockingParameterBufferType: return "VADeblockingParameterBufferType";
     case VAImageBufferType: return "VAImageBufferType";
+    case VAQMatrixBufferType: return "VAQMatrixBufferType";
+    case VAHuffmanTableBufferType: return "VAHuffmanTableBufferType";
+    case VAProbabilityBufferType: return "VAProbabilityBufferType";
+/* Following are encode buffer types */
     case VAEncCodedBufferType: return "VAEncCodedBufferType";
     case VAEncSequenceParameterBufferType: return "VAEncSequenceParameterBufferType";
     case VAEncPictureParameterBufferType: return "VAEncPictureParameterBufferType";
     case VAEncSliceParameterBufferType: return "VAEncSliceParameterBufferType";
+    case VAEncPackedHeaderParameterBufferType: return "VAEncPackedHeaderParameterBufferType";
+    case VAEncPackedHeaderDataBufferType: return "VAEncPackedHeaderDataBufferType";
     case VAEncMiscParameterBufferType: return "VAEncMiscParameterBufferType";
+    case VAEncMacroblockParameterBufferType: return "VAEncMacroblockParameterBufferType";
+    case VAProcPipelineParameterBufferType: return "VAProcPipelineParameterBufferType";
+    case VAProcFilterParameterBufferType: return "VAProcFilterParameterBufferType";
     default: return "UnknowBuffer";
     }
 }
