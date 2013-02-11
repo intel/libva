@@ -604,6 +604,7 @@ static char * buffer_type_to_string(int type)
     case VAImageBufferType: return "VAImageBufferType";
     case VAQMatrixBufferType: return "VAQMatrixBufferType";
     case VAHuffmanTableBufferType: return "VAHuffmanTableBufferType";
+    case VAProbabilityBufferType: return "VAProbabilityBufferType";
 /* Following are encode buffer types */
     case VAEncCodedBufferType: return "VAEncCodedBufferType";
     case VAEncSequenceParameterBufferType: return "VAEncSequenceParameterBufferType";
