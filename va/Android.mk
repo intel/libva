@@ -68,7 +68,8 @@ LOCAL_COPY_HEADERS := \
 	va_backend.h \
 	va_drmcommon.h \
 	va_vpp.h \
-	va_backend_vpp.h
+	va_backend_vpp.h \
+	va_enc_mpeg2.h \
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
