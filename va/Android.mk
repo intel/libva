@@ -67,6 +67,7 @@ LOCAL_COPY_HEADERS := \
 	va_drmcommon.h \
 	va_enc.h \
 	va_enc_h264.h \
+	va_enc_mpeg2.h \
 	va_version.h \
 	va_vpp.h
 
