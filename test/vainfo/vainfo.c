@@ -54,6 +54,8 @@ static char * profile_string(VAProfile profile)
             case VAProfileH263Baseline: return "VAProfileH263Baseline";
             case VAProfileH264ConstrainedBaseline: return "VAProfileH264ConstrainedBaseline";
             case VAProfileJPEGBaseline: return "VAProfileJPEGBaseline";
+            case VAProfileVP8Version0_3: return "VAProfileVP8Version0_3";
+
             default:
                 break;
     }
@@ -111,7 +113,7 @@ int main(int argc, const char* argv[])
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
 
   printf("%s: Supported profile and entrypoints\n", name);
-  for	(profile = VAProfileNone; profile <= VAProfileH264ConstrainedBaseline; profile++) {
+  for	(profile = VAProfileNone; profile <= VAProfileVP8Version0_3; profile++) {
       char *profile_str;
 
       va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
