@@ -20,10 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = avcenc mpeg2enc
-if USE_X11
-bin_PROGRAMS += h264encode
-endif
+bin_PROGRAMS = avcenc mpeg2enc h264encode
 
 AM_CPPFLAGS = \
 	-Wall				\
@@ -31,15 +28,15 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/va		\
 	$(NULL)
 
-h264encode_SOURCES	= h264encode_x11.c
-h264encode_CFLAGS	= $(X11_CFLAGS)
+h264encode_SOURCES	= h264encode.c
+h264encode_CFLAGS	= -I$(top_srcdir)/test/common -g
 h264encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
-	$(top_builddir)/va/libva-x11.la \
-	$(X11_LIBS)
+	$(top_builddir)/test/common/libva-display.la \
+	-lpthread
 
 avcenc_SOURCES		= avcenc.c
-avcenc_CFLAGS		= -I$(top_srcdir)/test/common
+avcenc_CFLAGS		= -I$(top_srcdir)/test/common -g
 avcenc_LDADD		= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
@@ -51,8 +48,6 @@ mpeg2enc_LDADD		= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
 	-lpthread
-
-EXTRA_DIST = h264encode_common.c
 
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
