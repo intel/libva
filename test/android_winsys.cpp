@@ -32,20 +32,28 @@ do {                                                                    \
     client = new SurfaceComposerClient();                               \
     android::DisplayInfo info;                                          \
     int w, h;                                                           \
-                                                                        \
-    client->getDisplayInfo(android::DisplayID(0), &info);               \
+    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(        \
+                  ISurfaceComposer::eDisplayIdMain));                   \
+    client->getDisplayInfo(dtoken, &info);                              \
     /*w = min(win_width, info.w);*/                                     \
     /*h = min(win_height, info.h);*/                                    \
     w = win_width, h = win_height;                                      \
                                                                         \
-    surface_ctrl = client->createSurface(getpid(), 0, w, h, PIXEL_FORMAT_RGB_565); \
+    surface_ctrl = client->createSurface(String8("libVA"), w, h, PIXEL_FORMAT_RGB_888); \
     android_surface = surface_ctrl->getSurface();                       \
                                                                         \
-    client->openGlobalTransaction();                                          \
-    surface_ctrl->setPosition(x, y);                                    \
+    SurfaceComposerClient::openGlobalTransaction();                     \
+    surface_ctrl->setLayer(0x7FFFFFFF);                                 \
+    surface_ctrl->show();                                               \
+    SurfaceComposerClient::closeGlobalTransaction();                    \
+                                                                        \
+    SurfaceComposerClient::openGlobalTransaction();                     \
+    surface_ctrl->setPosition(0, 0);                                    \
+    SurfaceComposerClient::closeGlobalTransaction();                    \
+                                                                        \
+    SurfaceComposerClient::openGlobalTransaction();                     \
     surface_ctrl->setSize(w, h);                                        \
-    surface_ctrl->setLayer(0x100000);                                   \
-    client->closeGlobalTransaction();                                         \
+    SurfaceComposerClient::closeGlobalTransaction();                    \
 } while (0)
 
 

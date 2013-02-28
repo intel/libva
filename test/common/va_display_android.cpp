@@ -29,15 +29,17 @@
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <utils/Log.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/ISurfaceComposer.h>
+#include <ui/PixelFormat.h>
+#include <ui/DisplayInfo.h>
 #include <binder/MemoryHeapBase.h>
 
 static unsigned int fake_display = 0xdeada01d;
 
 using namespace android;
+
 sp<SurfaceComposerClient> client;
 sp<Surface> android_surface;
 sp<ISurface> android_isurface;
@@ -63,9 +65,9 @@ va_put_surface_android(
     const VARectangle *dst_rect
 )
 {
-    sp<ProcessState> proc(ProcessState::self());
-    ProcessState::self()->startThreadPool();
-
+    //sp<ProcessState> proc(ProcessState::self());
+    //ProcessState::self()->startThreadPool();
+    
     printf("Create window0 for thread0\n");
     SURFACE_CREATE(
         client,
