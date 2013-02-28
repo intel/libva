@@ -386,6 +386,18 @@ typedef struct _VAProcPipelineCaps {
     unsigned int        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
     unsigned int        filter_flags;
+    /** \brief Number of forward reference frames that are needed. */
+    unsigned int        num_forward_references;
+    /** \brief Number of backward reference frames that are needed. */
+    unsigned int        num_backward_references;
+    /** \brief List of color standards supported on input. */
+    VAProcColorStandardType *input_color_standards;
+    /** \brief Number of elements in \ref input_color_standards array. */
+    unsigned int        num_input_color_standards;
+    /** \brief List of color standards supported on output. */
+    VAProcColorStandardType *output_color_standards;
+    /** \brief Number of elements in \ref output_color_standards array. */
+    unsigned int        num_output_color_standards;
     /**
      * \brief Rotation flags.
      *
@@ -414,18 +426,6 @@ typedef struct _VAProcPipelineCaps {
     unsigned int        rotation_flags;
     /** \brief Blend flags. See "Video blending flags". */
     unsigned int        blend_flags;
-    /** \brief Number of forward reference frames that are needed. */
-    unsigned int        num_forward_references;
-    /** \brief Number of backward reference frames that are needed. */
-    unsigned int        num_backward_references;
-    /** \brief List of color standards supported on input. */
-    VAProcColorStandardType *input_color_standards;
-    /** \brief Number of elements in \ref input_color_standards array. */
-    unsigned int        num_input_color_standards;
-    /** \brief List of color standards supported on output. */
-    VAProcColorStandardType *output_color_standards;
-    /** \brief Number of elements in \ref output_color_standards array. */
-    unsigned int        num_output_color_standards;
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -528,50 +528,6 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     VAProcColorStandardType output_color_standard;
     /**
-     * \brief Rotation state. See rotation angles.
-     *
-     * The rotation angle is clockwise. There is no specific rotation
-     * center for this operation. Rather, The source \ref surface is
-     * first rotated by the specified angle and then scaled to fit the
-     * \ref output_region.
-     *
-     * This means that the top-left hand corner (0,0) of the output
-     * (rotated) surface is expressed as follows:
-     * - \ref VA_ROTATION_NONE: (0,0) is the top left corner of the
-     *   source surface -- no rotation is performed ;
-     * - \ref VA_ROTATION_90: (0,0) is the bottom-left corner of the
-     *   source surface ;
-     * - \ref VA_ROTATION_180: (0,0) is the bottom-right corner of the
-     *   source surface -- the surface is flipped around the X axis ;
-     * - \ref VA_ROTATION_270: (0,0) is the top-right corner of the
-     *   source surface.
-     *
-     * Check VAProcPipelineCaps::rotation_flags first prior to
-     * defining a specific rotation angle. Otherwise, the hardware can
-     * perfectly ignore this variable if it does not support any
-     * rotation.
-     */
-    unsigned int        rotation_state;
-    /**
-     * \brief blending state. See "Video blending state definition".
-     *
-     * If \ref blend_state is NULL, then default operation mode depends
-     * on the source \ref surface format:
-     * - RGB: per-pixel alpha blending ;
-     * - YUV: no blending, i.e override the underlying pixels.
-     *
-     * Otherwise, \ref blend_state is a pointer to a #VABlendState
-     * structure that shall be live until vaEndPicture().
-     *
-     * Implementation note: the driver is responsible for checking the
-     * blend state flags against the actual source \ref surface format.
-     * e.g. premultiplied alpha blending is only applicable to RGB
-     * surfaces, and luma keying is only applicable to YUV surfaces.
-     * If a mismatch occurs, then #VA_STATUS_ERROR_INVALID_BLEND_STATE
-     * is returned.
-     */
-    const VABlendState *blend_state;
-    /**
      * \brief Pipeline filters. See video pipeline flags.
      *
      * Flags to control the pipeline, like whether to apply subpictures
@@ -624,6 +580,50 @@ typedef struct _VAProcPipelineParameterBuffer {
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
     unsigned int        num_backward_references;
+    /**
+     * \brief Rotation state. See rotation angles.
+     *
+     * The rotation angle is clockwise. There is no specific rotation
+     * center for this operation. Rather, The source \ref surface is
+     * first rotated by the specified angle and then scaled to fit the
+     * \ref output_region.
+     *
+     * This means that the top-left hand corner (0,0) of the output
+     * (rotated) surface is expressed as follows:
+     * - \ref VA_ROTATION_NONE: (0,0) is the top left corner of the
+     *   source surface -- no rotation is performed ;
+     * - \ref VA_ROTATION_90: (0,0) is the bottom-left corner of the
+     *   source surface ;
+     * - \ref VA_ROTATION_180: (0,0) is the bottom-right corner of the
+     *   source surface -- the surface is flipped around the X axis ;
+     * - \ref VA_ROTATION_270: (0,0) is the top-right corner of the
+     *   source surface.
+     *
+     * Check VAProcPipelineCaps::rotation_flags first prior to
+     * defining a specific rotation angle. Otherwise, the hardware can
+     * perfectly ignore this variable if it does not support any
+     * rotation.
+     */
+    unsigned int        rotation_state;
+    /**
+     * \brief blending state. See "Video blending state definition".
+     *
+     * If \ref blend_state is NULL, then default operation mode depends
+     * on the source \ref surface format:
+     * - RGB: per-pixel alpha blending ;
+     * - YUV: no blending, i.e override the underlying pixels.
+     *
+     * Otherwise, \ref blend_state is a pointer to a #VABlendState
+     * structure that shall be live until vaEndPicture().
+     *
+     * Implementation note: the driver is responsible for checking the
+     * blend state flags against the actual source \ref surface format.
+     * e.g. premultiplied alpha blending is only applicable to RGB
+     * surfaces, and luma keying is only applicable to YUV surfaces.
+     * If a mismatch occurs, then #VA_STATUS_ERROR_INVALID_BLEND_STATE
+     * is returned.
+     */
+    const VABlendState *blend_state;
 } VAProcPipelineParameterBuffer;
 
 /**
