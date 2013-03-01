@@ -724,6 +724,15 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /**@{*/
 /** \brief Enable memory tiling */
 #define VA_SURFACE_EXTBUF_DESC_ENABLE_TILING	0x00000001
+/** \brief Memory is cacheable */
+#define VA_SURFACE_EXTBUF_DESC_CACHED		0x00000002
+/** \brief Memory is non-cacheable */
+#define VA_SURFACE_EXTBUF_DESC_UNCACHED		0x00000004
+/** \brief Memory is write-combined */
+#define VA_SURFACE_EXTBUF_DESC_WC		0x00000008
+/** \brief Memory is protected */
+#define VA_SURFACE_EXTBUF_DESC_PROTECTED        0x80000000
+
 /**@}*/
 
 /**
