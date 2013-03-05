@@ -85,7 +85,7 @@ static  VAContextID context_id;
 static  VAEncSequenceParameterBufferH264 seq_param;
 static  VAEncPictureParameterBufferH264 pic_param;
 static  VAEncSliceParameterBufferH264 slice_param;
-static  VAPictureH264 LLastCurrPic, LastCurrPic, CurrentCurrPic; /* One reference for P and two for B */
+static  VAPictureH264 LLastCurrPic={picture_id:VA_INVALID_SURFACE}, LastCurrPic={picture_id:VA_INVALID_SURFACE}, CurrentCurrPic; /* One reference for P and two for B */
 
 static  int constraint_set_flag = 0;
 static  int h264_packedheader = 0; /* support pack header? */
@@ -108,7 +108,7 @@ static  int intra_period = 30;
 static  int intra_idr_period = 60;
 static  int ip_period = 1;
 static  int rc_mode = VA_RC_VBR;
-static  int slice_refoverride = 0;
+static  int slice_refoverride = 1; /* use VAEncSliceParameterBufferH264:RefPicList0/1 */
 static  unsigned long long current_frame_encoding = 0;
 static  unsigned long long current_frame_display = 0;
 static  int current_frame_num = 0;
@@ -617,13 +617,13 @@ static int string_to_fourcc(char *str)
 {
     int fourcc;
     
-    if (strncmp(str, "NV12", 4))
+    if (!strncmp(str, "NV12", 4))
         fourcc = VA_FOURCC_NV12;
-    else if (strncmp(str, "IYUV", 4))
+    else if (!strncmp(str, "IYUV", 4))
         fourcc = VA_FOURCC_IYUV;
-    else if (strncmp(str, "YV12", 4))
+    else if (!strncmp(str, "YV12", 4))
         fourcc = VA_FOURCC_YV12;
-    else if (strncmp(str, "UYVY", 4))
+    else if (!strncmp(str, "UYVY", 4))
         fourcc = VA_FOURCC_UYVY;
     else {
         printf("Unknow FOURCC\n");
@@ -657,17 +657,17 @@ static int string_to_rc(char *str)
 {
     int rc_mode;
     
-    if (strncmp(str, "NONE", 4))
+    if (!strncmp(str, "NONE", 4))
         rc_mode = VA_RC_NONE;
-    else if (strncmp(str, "CBR", 3))
+    else if (!strncmp(str, "CBR", 3))
         rc_mode = VA_RC_CBR;
-    else if (strncmp(str, "VBR", 3))
+    else if (!strncmp(str, "VBR", 3))
         rc_mode = VA_RC_VBR;
-    else if (strncmp(str, "VCM", 3))
+    else if (!strncmp(str, "VCM", 3))
         rc_mode = VA_RC_VCM;
-    else if (strncmp(str, "CQP", 3))
+    else if (!strncmp(str, "CQP", 3))
         rc_mode = VA_RC_CQP;
-    else if (strncmp(str, "VBR_CONSTRAINED", 15))
+    else if (!strncmp(str, "VBR_CONSTRAINED", 15))
         rc_mode = VA_RC_VBR_CONSTRAINED;
     else {
         printf("Unknow RC mode\n");
@@ -710,7 +710,7 @@ static int process_cmdline(int argc, char *argv[])
         {"idr_period", required_argument, NULL, 5 },
         {"ip_period", required_argument, NULL, 6 },
         {"rcmode", required_argument, NULL, 7 },
-        {"refoverride", no_argument, NULL, 8 },
+        {"refoverride",  required_argument, NULL, 8 },
         {"srcyuv", required_argument, NULL, 9 },
         {"fourcc", required_argument, NULL, 10 },
         {"syncmode", no_argument, NULL, 11 },
@@ -760,7 +760,7 @@ static int process_cmdline(int argc, char *argv[])
             }
             break;
         case 8:
-            slice_refoverride = 1;
+            slice_refoverride = atoi(optarg);
             break;
         case 9:
             srcyuv_fn = strdup(optarg);
@@ -1076,7 +1076,7 @@ static int setup_encode()
 
 static int render_sequence(void)
 {
-    VABufferID seq_param_buf, rc_param_buf;
+    VABufferID seq_param_buf, rc_param_buf, render_id[2];
     VAStatus va_status;
     VAEncMiscParameterBuffer *misc_param;
     VAEncMiscParameterRateControl *misc_rate_ctrl;
@@ -1118,10 +1118,10 @@ static int render_sequence(void)
     misc_rate_ctrl->basic_unit_size = 0;
     vaUnmapBuffer(va_dpy, rc_param_buf);
 
-    va_status = vaRenderPicture(va_dpy,context_id, &seq_param_buf, 1);
-    CHECK_VASTATUS(va_status,"vaRenderPicture");;
-
-    va_status = vaRenderPicture(va_dpy,context_id, &rc_param_buf, 1);
+    render_id[0] = seq_param_buf;
+    render_id[1] = rc_param_buf;
+    
+    va_status = vaRenderPicture(va_dpy,context_id, &render_id[0], 2);
     CHECK_VASTATUS(va_status,"vaRenderPicture");;
 
     return 0;
@@ -1135,13 +1135,13 @@ static int render_picture(void)
 
     /* use frame_num as reference frame index */
     pic_param.CurrPic.picture_id = ref_surface[current_frame_num % h264_maxref];
-//    pic_param.CurrPic.frame_idx = current_frame_num % h264_maxref;
+    //pic_param.CurrPic.frame_idx = current_frame_num % h264_maxref;
     pic_param.CurrPic.flags = 0;
     pic_param.CurrPic.TopFieldOrderCnt = 2 * current_frame_display;
     pic_param.CurrPic.BottomFieldOrderCnt = 0;
     if (current_frame_type != FRAME_B)
         CurrentCurrPic = pic_param.CurrPic; /* save it */
-    
+
     if (slice_refoverride) {
         /* always setup all reference frame into encoder */
         for (i = 0; i < h264_maxref; i++) {
@@ -1151,19 +1151,30 @@ static int render_picture(void)
             if (pic_param.CurrPic.picture_id == pic_param.ReferenceFrames[i].picture_id) {
                 pic_param.ReferenceFrames[i].TopFieldOrderCnt = 2 * current_frame_encoding;
                 //pic_param.ReferenceFrames[i].picture_id = VA_INVALID_SURFACE;
-                //pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;            
+                //pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;
             }
             pic_param.ReferenceFrames[i].BottomFieldOrderCnt = 0;
         }
-    } else {
+    } else  {
         if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR)
             i = 0;
         else if (current_frame_type == FRAME_P) {
-            pic_param.ReferenceFrames[0].picture_id = LastCurrPic.picture_id;
+            pic_param.ReferenceFrames[0] = LastCurrPic;
+            pic_param.ReferenceFrames[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
             i = 1;
+            //#if 0
+            if (LLastCurrPic.picture_id == VA_INVALID_SURFACE)
+                pic_param.ReferenceFrames[1] = LastCurrPic;
+            else
+                pic_param.ReferenceFrames[1] = LLastCurrPic;
+            pic_param.ReferenceFrames[1].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
+            i = 2;
+            //#endif
         } else if (current_frame_type == FRAME_B) {
             pic_param.ReferenceFrames[0] = LLastCurrPic;
+            pic_param.ReferenceFrames[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
             pic_param.ReferenceFrames[1] = LastCurrPic;
+            pic_param.ReferenceFrames[1].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
             i = 2;
         }
     }
@@ -1226,6 +1237,8 @@ static int render_packedsequence(void)
     render_id[1] = packedseq_data_bufid;
     va_status = vaRenderPicture(va_dpy,context_id, render_id, 2);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
+
+    free(packedseq_buffer);
     
     return 0;
 }
@@ -1262,7 +1275,108 @@ static int render_packedpicture(void)
     render_id[1] = packedpic_data_bufid;
     va_status = vaRenderPicture(va_dpy,context_id, render_id, 2);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
+
+    free(packedpic_buffer);
     
+    return 0;
+}
+
+static void render_packedsei(void)
+{
+    VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
+    VABufferID packed_sei_header_param_buf_id, packed_sei_buf_id, render_id[2];
+    unsigned int length_in_bits, offset_in_bytes;
+    unsigned char *packed_sei_buffer = NULL;
+    VAStatus va_status;
+    int init_cpb_size, target_bit_rate, i_initial_cpb_removal_delay_length, i_initial_cpb_removal_delay;
+    int i_cpb_removal_delay, i_dpb_output_delay_length, i_cpb_removal_delay_length;
+
+    /* it comes for the bps defined in SPS */
+    target_bit_rate = frame_bitrate;
+    init_cpb_size = (target_bit_rate * 8) >> 10;
+    i_initial_cpb_removal_delay = init_cpb_size * 0.5 * 1024 / target_bit_rate * 90000;
+
+    i_cpb_removal_delay = 2;
+    i_initial_cpb_removal_delay_length = 24;
+    i_cpb_removal_delay_length = 24;
+    i_dpb_output_delay_length = 24;
+    
+
+    length_in_bits = build_packed_sei_buffer_timing(
+        i_initial_cpb_removal_delay_length,
+        i_initial_cpb_removal_delay,
+        0,
+        i_cpb_removal_delay_length,
+        i_cpb_removal_delay * current_frame_encoding,
+        i_dpb_output_delay_length,
+        0,
+        &packed_sei_buffer);
+
+    offset_in_bytes = 0;
+    packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
+    packed_header_param_buffer.bit_length = length_in_bits;
+    packed_header_param_buffer.has_emulation_bytes = 0;
+
+    va_status = vaCreateBuffer(va_dpy,
+                               context_id,
+                               VAEncPackedHeaderParameterBufferType,
+                               sizeof(packed_header_param_buffer), 1, &packed_header_param_buffer,
+                               &packed_sei_header_param_buf_id);
+    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+    va_status = vaCreateBuffer(va_dpy,
+                               context_id,
+                               VAEncPackedHeaderDataBufferType,
+                               (length_in_bits + 7) / 8, 1, packed_sei_buffer,
+                               &packed_sei_buf_id);
+    CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+
+    render_id[0] = packed_sei_header_param_buf_id;
+    render_id[1] = packed_sei_buf_id;
+    va_status = vaRenderPicture(va_dpy,context_id, render_id, 2);
+    CHECK_VASTATUS(va_status,"vaRenderPicture");
+
+    
+    free(packed_sei_buffer);
+        
+    return;
+}
+
+
+static int render_hrd(void)
+{
+    VABufferID misc_parameter_hrd_buf_id;
+    VAStatus va_status;
+    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterHRD *misc_hrd_param;
+    
+    va_status = vaCreateBuffer(va_dpy, context_id,
+                   VAEncMiscParameterBufferType,
+                   sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterHRD),
+                   1,
+                   NULL, 
+                   &misc_parameter_hrd_buf_id);
+    CHECK_VASTATUS(va_status, "vaCreateBuffer");
+
+    vaMapBuffer(va_dpy,
+                misc_parameter_hrd_buf_id,
+                (void **)&misc_param);
+    misc_param->type = VAEncMiscParameterTypeHRD;
+    misc_hrd_param = (VAEncMiscParameterHRD *)misc_param->data;
+
+    if (frame_bitrate > 0) {
+        misc_hrd_param->initial_buffer_fullness = frame_bitrate * 1024 * 4;
+        misc_hrd_param->buffer_size = frame_bitrate * 1024 * 8;
+    } else {
+        misc_hrd_param->initial_buffer_fullness = 0;
+        misc_hrd_param->buffer_size = 0;
+    }
+    vaUnmapBuffer(va_dpy, misc_parameter_hrd_buf_id);
+
+    va_status = vaRenderPicture(va_dpy,context_id, &misc_parameter_hrd_buf_id, 1);
+    CHECK_VASTATUS(va_status,"vaRenderPicture");;
+
     return 0;
 }
 
@@ -1285,21 +1399,19 @@ static int render_slice(void)
     }
 
     /* cause issue on some implementation if slice_refoverride = 1 */
+    //slice_param.num_ref_idx_active_override_flag = 1;
     if (slice_refoverride) {
         /* set the real reference frame */
-        slice_param.num_ref_idx_active_override_flag = 1;
         if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR) {
-            slice_param.num_ref_idx_l0_active_minus1 = 0;
-            slice_param.num_ref_idx_l1_active_minus1 = 0;
+            ;
         } else if (current_frame_type == FRAME_P) {
-            slice_param.num_ref_idx_l0_active_minus1 = 0;
-            slice_param.num_ref_idx_l1_active_minus1 = 0;
             slice_param.RefPicList0[0] = LastCurrPic;
+            slice_param.RefPicList0[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
         } else if (current_frame_type == FRAME_B) {
-            slice_param.num_ref_idx_l0_active_minus1 = 0;
-            slice_param.num_ref_idx_l1_active_minus1 = 0;
             slice_param.RefPicList0[0] = LLastCurrPic;
+            slice_param.RefPicList0[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
             slice_param.RefPicList1[0] = LastCurrPic;
+            slice_param.RefPicList1[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
         }
     }
     slice_param.slice_alpha_c0_offset_div2 = 2;
@@ -1403,8 +1515,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     /* copy Y plane */
     for (row=0;row<surface_image.height;row++) {
         unsigned char *Y_row = Y_start + row * Y_pitch;
-
-        fread(Y_row, 1, surface_image.width, srcyuv_fp);
+        (void)fread(Y_row, 1, surface_image.width, srcyuv_fp);
     }
   
     /* copy UV data, reset file pointer,
@@ -1420,7 +1531,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
         switch (surface_image.format.fourcc) {
         case VA_FOURCC_NV12:
             if (srcyuv_fourcc == VA_FOURCC_NV12)
-                fread(U_row, 1, surface_image.width, srcyuv_fp);
+                (void)fread(U_row, 1, surface_image.width, srcyuv_fp);
             else if (srcyuv_fourcc == VA_FOURCC_IYUV) {
                 /* tbd */
             }
@@ -1550,7 +1661,7 @@ static void storage_task(unsigned long long display_order, unsigned long encode_
     /* reload a new frame data */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL)
-        load_surface(src_surface[display_order % SRC_SURFACE_NUM], display_order);
+        load_surface(src_surface[display_order % SRC_SURFACE_NUM], display_order + SRC_SURFACE_NUM);
     UploadPictureTicks += GetTickCount() - tmp;
 
     pthread_mutex_lock(&encode_mutex);
@@ -1630,9 +1741,15 @@ static int encode_frames(void)
                 render_packedsequence();
                 render_packedpicture();
             }
+            //if (rc_mode == VA_RC_CBR)
+            //    render_packedsei();
+            //render_hrd();
         } else {
             //render_sequence();
             render_picture();
+            //if (rc_mode == VA_RC_CBR)
+            //    render_packedsei();
+            //render_hrd();
         }
         render_slice();
         RenderPictureTicks += GetTickCount() - tmp;
