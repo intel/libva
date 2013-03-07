@@ -93,7 +93,7 @@ static  int h264_maxref = 3;
 static  char *coded_fn = NULL, *srcyuv_fn = NULL, *recyuv_fn = NULL;
 static  FILE *coded_fp = NULL, *srcyuv_fp = NULL, *recyuv_fp = NULL;
 static  unsigned long long srcyuv_frames = 0;
-static  unsigned int srcyuv_fourcc = VA_FOURCC_NV12;
+static  int srcyuv_fourcc = VA_FOURCC_NV12;
 
 static  int frame_width = 176;
 static  int frame_height = 144;
@@ -767,7 +767,7 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 10:
             srcyuv_fourcc = string_to_fourcc(optarg);
-            if (srcyuv_fourcc < 0) {
+            if (srcyuv_fourcc <= 0) {
                 print_help();
                 exit(1);
             }
@@ -841,7 +841,7 @@ static int init_va(void)
     int support_encode = 0;    
     int major_ver, minor_ver;
     VAStatus va_status;
-    int i;
+    unsigned int i;
 
     va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
@@ -1463,8 +1463,8 @@ static int upload_source_YUV_once_for_all()
 static int load_surface(VASurfaceID surface_id, unsigned long long display_order)
 {
     VAImage surface_image;
-    unsigned char *surface_p, *Y_start, *U_start,*V_start;
-    int Y_pitch, U_pitch, row, V_pitch;
+    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL,*V_start=NULL;
+    int Y_pitch=0, U_pitch=0, row, V_pitch;
     VAStatus va_status;
 
     if (srcyuv_fp == NULL)
