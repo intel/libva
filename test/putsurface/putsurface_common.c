@@ -78,13 +78,13 @@ static  int box_width = 32;
 static  int multi_thread = 0;
 static  int verbose = 0;
 static  int test_color_conversion = 0;
-static  int csc_src_fourcc = 0, csc_dst_fourcc = 0;
+static  unsigned int csc_src_fourcc = 0, csc_dst_fourcc = 0;
 static  VAImage csc_dst_fourcc_image;
 static  VASurfaceID csc_render_surface;
 
 
 typedef struct {
-    char* fmt_str;
+    char * fmt_str;
     unsigned int fourcc;
 } fourcc_map;
 fourcc_map va_fourcc_map[] = {
@@ -99,7 +99,7 @@ fourcc_map va_fourcc_map[] = {
 };
 unsigned int map_str_to_vafourcc (char * str)
 {
-    int i;
+    unsigned int i;
     for (i=0; i< sizeof(va_fourcc_map)/sizeof(fourcc_map); i++) {
         if (!strcmp(va_fourcc_map[i].fmt_str, str)) {
             return va_fourcc_map[i].fourcc;
@@ -112,7 +112,7 @@ unsigned int map_str_to_vafourcc (char * str)
 char* map_vafourcc_to_str (unsigned int format)
 {
     static char unknown_format[] = "unknown-format";
-    int i;
+    unsigned int i;
     for (i=0; i< sizeof(va_fourcc_map)/sizeof(fourcc_map); i++) {
         if (va_fourcc_map[i].fourcc == format) {
             return va_fourcc_map[i].fmt_str;
@@ -346,7 +346,7 @@ static void* putsurface_thread(void *data)
                                     0, 0, surface_width, surface_height, 
                                     0, 0, surface_width, surface_height);
             CHECK_VASTATUS(vaStatus,"vaPutImage");
-            
+
             // render the temp surface, it should be same with original surface without color conversion test
             vaStatus = vaPutSurface(va_dpy, csc_render_surface, CAST_DRAWABLE(drawable),
                                     0,0,surface_width,surface_height,
@@ -355,7 +355,6 @@ static void* putsurface_thread(void *data)
                                     (test_clip==0)?0:2,
                                     display_field);
             CHECK_VASTATUS(vaStatus,"vaPutSurface");
-    
         }
         else {
             vaStatus = vaPutSurface(va_dpy, surface_id, CAST_DRAWABLE(drawable),

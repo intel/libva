@@ -25,26 +25,17 @@
 #include <va/va_android.h>
 #include "va_display.h"
 
-#include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <utils/Log.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/ISurfaceComposer.h>
-#include <ui/PixelFormat.h>
-#include <ui/DisplayInfo.h>
-#include <binder/MemoryHeapBase.h>
 
 static unsigned int fake_display = 0xdeada01d;
 
 using namespace android;
 
-sp<SurfaceComposerClient> client;
-sp<Surface> android_surface;
-sp<ISurface> android_isurface;
-sp<SurfaceControl> surface_ctrl;
-#include "../android_winsys.cpp"
+static sp<SurfaceComposerClient> client = NULL;
+static sp<SurfaceControl> surface_ctr = NULL;
+static sp<ANativeWindow> anw = NULL;
 
 static VADisplay
 va_open_display_android(void)
@@ -57,6 +48,34 @@ va_close_display_android(VADisplay va_dpy)
 {
 }
 
+static int create_window(int x, int y, int width, int height)
+{
+    client = new SurfaceComposerClient();
+    
+    surface_ctr = client->createSurface(
+        String8("Test Surface"),
+        width, height,
+        PIXEL_FORMAT_RGB_888, 0);
+
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctr->setLayer(0x7FFFFFFF);
+    surface_ctr->show();
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctr->setPosition(x, y);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctr->setSize(width, height);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    anw = surface_ctr->getSurface();
+    
+    return 0;
+}
+
+
 static VAStatus
 va_put_surface_android(
     VADisplay          va_dpy,
@@ -65,18 +84,10 @@ va_put_surface_android(
     const VARectangle *dst_rect
 )
 {
-    //sp<ProcessState> proc(ProcessState::self());
-    //ProcessState::self()->startThreadPool();
-    
-    printf("Create window0 for thread0\n");
-    SURFACE_CREATE(
-        client,
-        surface_ctrl,
-        android_surface,
-        android_isurface,
-        dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height);
+    if (anw == NULL)
+        create_window(dst_rect->x, dst_rect->y, dst_rect->width, dst_rect->height);
 
-    return vaPutSurface(va_dpy, surface, android_isurface,
+    return vaPutSurface(va_dpy, surface, anw,
                         src_rect->x, src_rect->y,
                         src_rect->width, src_rect->height,
                         dst_rect->x, dst_rect->y,

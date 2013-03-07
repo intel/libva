@@ -18,7 +18,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_001
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -39,7 +39,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_02_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -60,7 +60,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_03_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -81,7 +81,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_04_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -102,7 +102,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_05_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -123,7 +123,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_06_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -144,7 +144,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_07_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -165,7 +165,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_08_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -186,7 +186,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_09_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -207,7 +207,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_10_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 
@@ -228,7 +228,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	test_11_android
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger_client
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm libcutils libutils libui libsurfaceflinger
 
 include $(BUILD_EXECUTABLE)
 

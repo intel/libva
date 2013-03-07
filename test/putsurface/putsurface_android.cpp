@@ -24,39 +24,30 @@
 #include <stdio.h>
 #include <va/va.h>
 #include <va/va_android.h>
-#include <binder/IPCThreadState.h>
-#include <binder/ProcessState.h>
-#include <binder/IServiceManager.h>
-#include <utils/Log.h>
-#include <surfaceflinger/ISurfaceComposer.h>
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/ISurface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <binder/MemoryHeapBase.h>
+#include <gui/Surface.h>
+#include <gui/SurfaceComposerClient.h>
+#include <gui/ISurfaceComposer.h>
 #include <assert.h>
 #include <pthread.h>
 
+using namespace android;
+
 static  int android_display=0;
 
-using namespace android;
-#include "../android_winsys.cpp"
+static sp<SurfaceComposerClient> client0 = NULL;
+static sp<SurfaceControl> surface_ctrl0 = NULL;
+static sp<ANativeWindow> anw0 = NULL;
 
-sp<SurfaceComposerClient> client;
-sp<Surface> android_surface;
-sp<ISurface> android_isurface;
-sp<SurfaceControl> surface_ctrl;
-
-sp<SurfaceComposerClient> client1;
-sp<Surface> android_surface1;
-sp<ISurface> android_isurface1;
-sp<SurfaceControl> surface_ctrl1;
+static sp<SurfaceComposerClient> client1 = NULL;
+static sp<SurfaceControl> surface_ctrl1 = NULL;
+static sp<ANativeWindow> anw1 = NULL;
 
 static void *open_display(void);
 static void close_display(void *win_display);
 static int create_window(void *win_display, int x, int y, int width, int height);
 static int check_window_event(void *x11_display, void *win, int *width, int *height, int *quit);
 
-#define CAST_DRAWABLE(a)  static_cast<ISurface*>((void *)(*(unsigned int *)a))
+#define CAST_DRAWABLE(a)  static_cast<ANativeWindow *>((void *)(*(unsigned int *)a))
 #include "putsurface_common.c"
 
 static void *open_display()
@@ -71,20 +62,56 @@ static void close_display(void *win_display)
 
 static int create_window(void *win_display, int x, int y, int width, int height)
 {
-    sp<ProcessState> proc(ProcessState::self());
-    ProcessState::self()->startThreadPool();
+    client0 = new SurfaceComposerClient();
+    
+    surface_ctrl0 = client1->createSurface(
+        String8("Test Surface"),
+        width, height,
+        PIXEL_FORMAT_RGB_888, 0);
 
-    printf("Create window0 for thread0\n");
-    SURFACE_CREATE(client,surface_ctrl,android_surface, android_isurface, x, y, width, height);
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl0->setLayer(0x7FFFFFFF);
+    surface_ctrl0->show();
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl0->setPosition(x, y);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl0->setSize(width, height);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    anw0 = surface_ctrl0->getSurface();
 
-    drawable_thread0 = static_cast<void*>(&android_isurface);
+    drawable_thread0 = static_cast<void*>(&anw0);
     if (multi_thread == 0)
         return 0;
 
     printf("Create window1 for thread1\n");
-    /* need to modify here jgl*/
-    SURFACE_CREATE(client1,surface_ctrl1,android_surface1, android_isurface1, x, y, width, height);
-    drawable_thread1 = static_cast<void *>(&android_isurface);
+    client1 = new SurfaceComposerClient();
+    
+    surface_ctrl1 = client1->createSurface(
+        String8("Test Surface"),
+        width, height,
+        PIXEL_FORMAT_RGB_888, 0);
+
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl1->setLayer(0x7FFFFFFF);
+    surface_ctrl1->show();
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl1->setPosition(x*2, y*2);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    SurfaceComposerClient::openGlobalTransaction();
+    surface_ctrl1->setSize(width, height);
+    SurfaceComposerClient::closeGlobalTransaction();
+    
+    anw1 = surface_ctrl1->getSurface();
+
+    drawable_thread1 = static_cast<void *>(&anw1);
     
     return 0;
 }
