@@ -102,7 +102,7 @@ static int YUV_blend_with_pic(int width, int height,
     }
 
     /* U/V plane */
-    int U_pixel_stride, V_pixel_stride;
+    int U_pixel_stride = 0, V_pixel_stride = 0;
     int v_factor_to_nv12 = 1;
     switch (fourcc) {
     case VA_FOURCC_YV12:
@@ -232,9 +232,9 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
                           int field)
 {
     VAImage surface_image;
-    void *surface_p=NULL, *U_start,*V_start;
+    void *surface_p=NULL, *U_start = NULL,*V_start = NULL;
     VAStatus va_status;
-    unsigned int pitches[3];
+    unsigned int pitches[3]={0,0,0};
     
     va_status = vaDeriveImage(va_dpy,surface_id,&surface_image);
     CHECK_VASTATUS(va_status,"vaDeriveImage");
@@ -246,7 +246,7 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
     switch (surface_image.format.fourcc) {
     case VA_FOURCC_NV12:
         U_start = (char *)surface_p + surface_image.offsets[1];
-        V_start = U_start + 1;
+        V_start = (char *)U_start + 1;
         pitches[1] = surface_image.pitches[1];
         pitches[2] = surface_image.pitches[1];
         break;
@@ -263,8 +263,8 @@ static int upload_surface(VADisplay va_dpy, VASurfaceID surface_id,
         pitches[2] = surface_image.pitches[1];
         break;
     case VA_FOURCC_YUY2:
-        U_start = surface_p + 1;
-        V_start = surface_p + 3;
+        U_start = (char *)surface_p + 1;
+        V_start = (char *)surface_p + 3;
         pitches[1] = surface_image.pitches[0];
         pitches[2] = surface_image.pitches[0];
         break;
