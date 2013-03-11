@@ -407,6 +407,8 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV400	0x00000010
 #define VA_RT_FORMAT_RGB16	0x00010000
 #define VA_RT_FORMAT_RGB32	0x00020000
+/* RGBP covers RGBP and BGRP fourcc */ 
+#define VA_RT_FORMAT_RGBP	0x00100000
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
 /** @name Attribute values for VAConfigAttribRateControl */
@@ -1983,6 +1985,7 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_444P          0x50343434
 #define VA_FOURCC_RGBP          0x50424752
 #define VA_FOURCC_BGRP          0x50524742
+#define VA_FOURCC_411R          0x52313134 /* rotated 411P */
 
 /* byte order */
 #define VA_LSB_FIRST		1
