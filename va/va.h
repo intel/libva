@@ -322,6 +322,21 @@ typedef enum
     VAConfigAttribEncryption		= 4,
     VAConfigAttribRateControl		= 5,
 
+    /** @name Attributes for decoding */
+    /**@{*/
+    /**
+     * \brief Slice Decoding mode. Read/write.
+     *
+     * This attribute determines what mode the driver supports for slice
+     * decoding, through vaGetConfigAttributes(); and what mode the user
+     * will be providing to the driver, through vaCreateConfig(), if the
+     * driver supports those. If this attribute is not set by the user then
+     * it is assumed that VA_DEC_SLICE_MODE_NORMAL mode is used.
+     *
+     * See \c VA_DEC_SLICE_MODE_xxx for the list of slice decoding modes.
+     */
+    VAConfigAttribDecSliceMode		= 6,
+
     /** @name Attributes for encoding */
     /**@{*/
     /**
@@ -449,6 +464,14 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CQP                       0x00000010
 /** \brief Variable bitrate with peak rate higher than average bitrate. */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
+/**@}*/
+
+/** @name Attribute values for VAConfigAttribDecSliceMode */
+/**@{*/
+/** \brief Driver supports normal mode for slice decoding */
+#define VA_DEC_SLICE_MODE_NORMAL       0x00000001
+/** \brief Driver supports base mode for slice decoding */
+#define VA_DEC_SLICE_MODE_BASE         0x00000002
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
