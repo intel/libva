@@ -876,19 +876,25 @@ vaCreateSurfaceGLX_impl_libva(
     gl_get_current_context(&old_cs);
     new_cs = gl_create_context(ctx, &old_cs);
     if (!new_cs)
-        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+        goto error;
     if (!gl_set_current_context(new_cs, NULL))
-        return VA_STATUS_ERROR_OPERATION_FAILED;
+        goto error;
 
     pSurfaceGLX = create_surface(ctx, target, texture);
     if (!pSurfaceGLX)
-        return VA_STATUS_ERROR_ALLOCATION_FAILED;
+        goto error;
 
     pSurfaceGLX->gl_context = new_cs;
     *gl_surface = pSurfaceGLX;
 
     gl_set_current_context(&old_cs, NULL);
     return VA_STATUS_SUCCESS;
+
+error:
+    if (new_cs)
+        gl_destroy_context(new_cs);
+
+    return VA_STATUS_ERROR_ALLOCATION_FAILED;    
 }
 
 static VAStatus

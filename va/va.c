@@ -218,6 +218,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         if (!driver_path) {
             va_errorMessage("%s L%d Out of memory!n",
                                 __FUNCTION__, __LINE__);
+            free(search_path);    
             return VA_STATUS_ERROR_ALLOCATION_FAILED;
         }
 
