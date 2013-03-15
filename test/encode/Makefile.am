@@ -25,7 +25,7 @@ if USE_X11
 bin_PROGRAMS += h264encode
 endif
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)			\
 	-I$(top_srcdir)/va		\
 	$(NULL)

@@ -22,7 +22,7 @@
 
 SUBDIRS =
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir) \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 

@@ -22,7 +22,7 @@
 
 SUBDIRS = protocol
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-DLINUX			\
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\

@@ -22,7 +22,7 @@
 
 bin_PROGRAMS = mpeg2vldemo loadjpeg
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)				\
 	-I$(top_srcdir)/test/common		\
 	$(NULL)
