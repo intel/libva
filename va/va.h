@@ -1586,12 +1586,8 @@ typedef struct _VAPictureParameterBufferH264
         unsigned int value;
     } pic_fields;
     unsigned short frame_num;
-    /*
-     * The following two fields will be used for base mode slice decoding. 
-     * For normal mode the fields in the slice parameter structure will be used.
-     */ 
-    unsigned char num_ref_idx_l0_active_minus1;
-    unsigned char num_ref_idx_l1_active_minus1;
+    unsigned char num_ref_idx_l0_default_active_minus1;
+    unsigned char num_ref_idx_l1_default_active_minus1;
 } VAPictureParameterBufferH264;
 
 /* H.264 Inverse Quantization Matrix Buffer */
