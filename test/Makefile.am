@@ -23,7 +23,7 @@
 SUBDIRS = common decode encode vainfo
 
 if USE_X11
-SUBDIRS += basic putsurface v4l_h264
+SUBDIRS += basic putsurface
 endif
 
 EXTRA_DIST = loadsurface.h loadsurface_yuv.h
