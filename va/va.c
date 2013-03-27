@@ -449,24 +449,30 @@ VAStatus vaInitialize (
 
     va_infoMessage("VA-API version %s\n", VA_VERSION_S);
 
+    vaStatus = va_getDriverName(dpy, &driver_name);
+    va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
+
     driver_name_env = getenv("LIBVA_DRIVER_NAME");
-    if (driver_name_env && geteuid() == getuid()) {
+    if ((VA_STATUS_SUCCESS == vaStatus) &&
+        driver_name_env && (geteuid() == getuid())) {
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
+        if (driver_name) /* memory is allocated in va_getDriverName */
+            free(driver_name);
+        
         driver_name = strdup(driver_name_env);
         vaStatus = VA_STATUS_SUCCESS;
         va_infoMessage("User requested driver '%s'\n", driver_name);
-    } else {
-        vaStatus = va_getDriverName(dpy, &driver_name);
-        va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
     }
 
-    if (VA_STATUS_SUCCESS == vaStatus) {
+    if ((VA_STATUS_SUCCESS == vaStatus) && (driver_name != NULL)) {
         vaStatus = va_openDriver(dpy, driver_name);
         va_infoMessage("va_openDriver() returns %d\n", vaStatus);
 
         *major_version = VA_MAJOR_VERSION;
         *minor_version = VA_MINOR_VERSION;
-    }
+    } else
+        va_errorMessage("va_getDriverName() failed with %s,driver_name=%s\n",
+                        vaErrorStr(vaStatus), driver_name);
 
     if (driver_name)
         free(driver_name);
