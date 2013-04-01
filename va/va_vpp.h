@@ -655,14 +655,19 @@ typedef struct _VAProcFilterParameterBuffer {
 /**@{*/
 /** 
  * \brief Bottom field first in the input frame. 
- * if this is not set then assums top field first.
+ * if this is not set then assumes top field first.
  */
-#define VA_DEINTERLACING_INPUT_BOTTOM_FIELD_FIRST	0x0001
+#define VA_DEINTERLACING_BOTTOM_FIELD_FIRST	0x0001
 /** 
- * \brief Bottom field used in BOB deinterlacing. 
- * if this is not set then assums top field is used.
+ * \brief Bottom field used in deinterlacing. 
+ * if this is not set then assumes top field is used.
  */
-#define VA_DEINTERLACING_BOB_BOTTOM_FIELD		0x0002
+#define VA_DEINTERLACING_BOTTOM_FIELD		0x0002
+/** 
+ * \brief A single field is stored in the input frame. 
+ * if this is not set then assumes the frame contains two interleaved fields.
+ */
+#define VA_DEINTERLACING_ONE_FIELD		0x0004
 /**@}*/
 
 /** \brief Deinterlacing filter parametrization. */
