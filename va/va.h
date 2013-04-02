@@ -763,37 +763,48 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /**@}*/
 
 /**
- * \brief Get surface attributes for the supplied config.
+ * \brief Queries surface attributes for the supplied config.
  *
- * This function retrieves the surface attributes matching the supplied
- * config. The caller shall provide an \c attrib_list with all attributes
- * to be retrieved. Upon successful return, the attributes in \c attrib_list
- * are updated with the requested value. Unknown attributes or attributes
- * that are not supported for the given config will have their \c flags
- * field set to \c VA_SURFACE_ATTRIB_NOT_SUPPORTED.
+ * Unlike vaGetSurfaceAttributes(), this function queries for all
+ * supported attributes for the supplied VA @config. In particular, if
+ * the underlying hardware supports the creation of VA surfaces in
+ * various formats, then this function will enumerate all pixel
+ * formats that are supported.
+ *
+ * The \c attrib_list array is allocated by the user and \c
+ * num_attribs shall be initialized to the number of allocated
+ * elements in that array. Upon successful return, the actual number
+ * of attributes will be overwritten into \c num_attribs. Otherwise,
+ * \c VA_STATUS_ERROR_MAX_NUM_EXCEEDED is returned and \c num_attribs
+ * is adjusted to the number of elements that would be returned if
+ * enough space was available.
+ *
+ * Note: it is perfectly valid to pass NULL to the \c attrib_list
+ * argument when vaQuerySurfaceAttributes() is used to determine the
+ * actual number of elements that need to be allocated.
  *
  * @param[in] dpy               the VA display
  * @param[in] config            the config identifying a codec or a video
  *     processing pipeline
- * @param[in,out] attrib_list   the list of attributes on input, with at
- *     least \c type fields filled in, and possibly \c value fields whenever
- *     necessary. The updated list of attributes and flags on output
- * @param[in] num_attribs       the number of attributes supplied in the
- *     \c attrib_list array
+ * @param[out] attrib_list      the output array of #VASurfaceAttrib elements
+ * @param[in,out] num_attribs   the number of elements allocated on
+ *      input, the number of elements actually filled in output
  */
 VAStatus
-vaGetSurfaceAttributes(
+vaQuerySurfaceAttributes(
     VADisplay           dpy,
     VAConfigID          config,
     VASurfaceAttrib    *attrib_list,
-    unsigned int        num_attribs
+    unsigned int       *num_attribs
 );
 
 /**
  * \brief Creates an array of surfaces
  *
  * Creates an array of surfaces. The optional list of attributes shall
- * be constructed and verified through vaGetSurfaceAttributes().
+ * be constructed and validated through vaGetSurfaceAttributes() or
+ * constructed based based on what the underlying hardware could
+ * expose through vaQuerySurfaceAttributes().
  *
  * @param[in] dpy               the VA display
  * @param[in] format            the desired surface format. See \c VA_RT_FORMAT_*
