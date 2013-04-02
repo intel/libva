@@ -392,6 +392,7 @@ struct VADriverVTable
                 VASurfaceID surface
         );
 
+        /* DEPRECATED */
         VAStatus
         (*vaGetSurfaceAttributes)(
             VADriverContextP    dpy,
@@ -410,6 +411,14 @@ struct VADriverVTable
             unsigned int        num_surfaces,
             VASurfaceAttrib    *attrib_list,
             unsigned int        num_attribs
+        );
+
+        VAStatus
+        (*vaQuerySurfaceAttributes)(
+            VADriverContextP    dpy,
+            VAConfigID          config,
+            VASurfaceAttrib    *attrib_list,
+            unsigned int       *num_attribs
         );
 };
 

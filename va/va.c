@@ -656,11 +656,11 @@ VAStatus vaQueryConfigAttributes (
 }
 
 VAStatus
-vaGetSurfaceAttributes(
+vaQuerySurfaceAttributes(
     VADisplay           dpy,
     VAConfigID          config,
     VASurfaceAttrib    *attrib_list,
-    unsigned int        num_attribs
+    unsigned int       *num_attribs
 )
 {
     VADriverContextP ctx;
@@ -671,11 +671,11 @@ vaGetSurfaceAttributes(
     if (!ctx)
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
-    if (!ctx->vtable->vaGetSurfaceAttributes)
+    if (!ctx->vtable->vaQuerySurfaceAttributes)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
 
-    vaStatus = ctx->vtable->vaGetSurfaceAttributes(ctx, config,
-                                                   attrib_list, num_attribs);
+    vaStatus = ctx->vtable->vaQuerySurfaceAttributes(ctx, config,
+        attrib_list, num_attribs);
     return vaStatus;
 }
 
