@@ -636,17 +636,14 @@ void va_TraceMapBuffer (
     DPY2INDEX(dpy);
 
     vaBufferInfo(dpy, trace_context[idx].trace_context, buf_id, &type, &size, &num_elements);    
-    /*
-      va_TraceMsg(idx, "\tbuf_id=0x%x\n", buf_id);
-      va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
-      va_TraceMsg(idx, "\tbuf_size=%s\n", size);
-      va_TraceMsg(idx, "\tbuf_elements=%s\n", &num_elements);
-    */
     
     /* only trace CodedBuffer */
     if (type != VAEncCodedBufferType)
         return;
-    
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(idx, "\tbuf_id=0x%x\n", buf_id);
+    va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
     buf_list = (VACodedBufferSegment *)(*pbuf);
     while (buf_list != NULL) {
         va_TraceMsg(idx, "\tCodedbuf[%d] =\n", i++);
@@ -1890,6 +1887,7 @@ static void va_TraceH263Buf(
         va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
@@ -1929,6 +1927,7 @@ static void va_TraceJPEGBuf(
         va_TraceVAEncQMatrixBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
@@ -1987,6 +1986,7 @@ static void va_TraceMPEG4Buf(
         va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
@@ -2055,6 +2055,7 @@ static void va_TraceH264Buf(
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
@@ -2116,6 +2117,7 @@ static void va_TraceVC1Buf(
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
