@@ -245,6 +245,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterSharpening,
     /** \brief Color balance parameters. */
     VAProcFilterColorBalance,
+    /** \brief Skin Tone Enhancement. */
+    VAProcFilterSkinToneEnhancement,
     VAProcFilterCount
 } VAProcFilterType;
 
