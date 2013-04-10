@@ -886,6 +886,7 @@ typedef enum
     VAEncPackedHeaderDataBufferType     = 26,
     VAEncMiscParameterBufferType	= 27,
     VAEncMacroblockParameterBufferType	= 28,
+    VAEncMacroblockMapBufferType        = 29,
 /* Following are video processing buffer types */
     /**
      * \brief Video processing pipeline parameter buffer.
