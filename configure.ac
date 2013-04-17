@@ -150,10 +150,6 @@ AC_ARG_ENABLE(dummy-driver,
     [], [enable_dummy_driver="yes"])
 AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
 
-AC_ARG_ENABLE(dummy-backend,
-    [AC_HELP_STRING([--enable-dummy-backend],
-                    [build dummy libva backend])],
-    [], [enable_dummy_backend="no"])
 
 AC_ARG_WITH(drivers-path,
     [AC_HELP_STRING([--with-drivers-path=[[path]]],
@@ -204,14 +200,6 @@ if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
               [Defined to 1 if GCC visibility attribute is supported])
 fi
 
-# Dummy backend
-if test x$enable_dummy_backend = xyes; then
-    PKG_CHECK_MODULES([UDEV], [libudev], [libudev=yes], [libudev=no])
-fi
-if test x$libudev = xno; then
-   enable_dummy_backend=no
-fi
-AM_CONDITIONAL(BUILD_DUMMY_BACKEND, test x$enable_dummy_backend = xyes)
 
 # Check for DRM (mandatory)
 LIBDRM_VERSION=libdrm_version
@@ -329,7 +317,6 @@ AC_OUTPUT([
     test/vainfo/Makefile
     va/Makefile
     va/drm/Makefile
-    va/dummy/Makefile
     va/egl/Makefile
     va/glx/Makefile
     va/va_version.h
@@ -351,7 +338,6 @@ echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
-echo build dummy backend .............. : $enable_dummy_backend
 echo Build dummy driver ............... : $enable_dummy_driver
 echo Build documentation .............. : $enable_docs
 echo
