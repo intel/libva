@@ -28,7 +28,7 @@
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_enc_h264.h"
-
+#include "va_dec_jpeg.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -794,6 +794,132 @@ static void va_TraceVASliceParameterBufferMPEG2(
     return;
 }
 
+static void va_TraceVAPictureParameterBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    int i;
+    VAPictureParameterBufferJPEGBaseline *p=(VAPictureParameterBufferJPEGBaseline *)data;
+    DPY2INDEX(dpy);
+
+    va_TraceMsg(idx,"*VAPictureParameterBufferJPEG\n");
+    va_TraceMsg(idx,"\tpicture_width = %u\n", p->picture_width);
+    va_TraceMsg(idx,"\tpicture_height = %u\n", p->picture_height);
+    va_TraceMsg(idx,"\tcomponents = \n");
+    for (i = 0; i < p->num_components && i < 255; ++i) {
+        va_TraceMsg(idx,"\t\t[%d] component_id = %u\n", i, p->components[i].component_id);
+        va_TraceMsg(idx,"\t\t[%d] h_sampling_factor = %u\n", i, p->components[i].h_sampling_factor);
+        va_TraceMsg(idx,"\t\t[%d] v_sampling_factor = %u\n", i, p->components[i].v_sampling_factor);
+        va_TraceMsg(idx,"\t\t[%d] quantiser_table_selector = %u\n", i, p->components[i].quantiser_table_selector);
+    }
+}
+
+static void va_TraceVAIQMatrixBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    int i, j;
+    static char tmp[1024];
+    VAIQMatrixBufferJPEGBaseline *p=(VAIQMatrixBufferJPEGBaseline *)data;
+    DPY2INDEX(dpy);
+    va_TraceMsg(idx,"*VAIQMatrixParameterBufferJPEG\n");
+    va_TraceMsg(idx,"\tload_quantiser_table =\n");
+    for (i = 0; i < 4; ++i) {
+        va_TraceMsg(idx,"\t\t[%d] = %u\n", i, p->load_quantiser_table[i]);
+    }
+    va_TraceMsg(idx,"\tquantiser_table =\n");
+    for (i = 0; i < 4; ++i) {
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 64; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->quantiser_table[i][j]);
+        }
+        va_TraceMsg(idx,"\t\t[%d] = %s\n", i, tmp);
+    }
+}
+
+static void va_TraceVASliceParameterBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    int i;
+    VASliceParameterBufferJPEGBaseline *p=(VASliceParameterBufferJPEGBaseline *)data;
+    DPY2INDEX(dpy);
+    va_TraceMsg(idx,"*VASliceParameterBufferJPEG\n");
+    va_TraceMsg(idx,"\tslice_data_size = %u\n", p->slice_data_size);
+    va_TraceMsg(idx,"\tslice_data_offset = %u\n", p->slice_data_offset);
+    va_TraceMsg(idx,"\tslice_data_flag = %u\n", p->slice_data_flag);
+    va_TraceMsg(idx,"\tslice_horizontal_position = %u\n", p->slice_horizontal_position);
+    va_TraceMsg(idx,"\tslice_vertical_position = %u\n", p->slice_vertical_position);
+    va_TraceMsg(idx,"\tcomponents = \n");
+    for (i = 0; i < p->num_components && i < 4; ++i) {
+        va_TraceMsg(idx,"\t\t[%d] component_selector = %u\n", i, p->components[i].component_selector);
+        va_TraceMsg(idx,"\t\t[%d] dc_table_selector = %u\n", i, p->components[i].dc_table_selector);
+        va_TraceMsg(idx,"\t\t[%d] ac_table_selector = %u\n", i, p->components[i].ac_table_selector);
+    }
+    va_TraceMsg(idx,"\trestart_interval = %u\n", p->restart_interval);
+    va_TraceMsg(idx,"\tnum_mcus = %u\n", p->num_mcus);
+}
+
+static void va_TraceVAHuffmanTableBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    int i, j;
+    static char tmp[1024];
+    VAHuffmanTableBufferJPEGBaseline *p=(VAHuffmanTableBufferJPEGBaseline *)data;
+    DPY2INDEX(dpy);
+    va_TraceMsg(idx,"*VAHuffmanTableBufferJPEG\n");
+
+    for (i = 0; i < 2; ++i) {
+        va_TraceMsg(idx,"\tload_huffman_table[%d] =%u\n", i, p->load_huffman_table[0]);
+        va_TraceMsg(idx,"\thuffman_table[%d] =\n", i);
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 16; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].num_dc_codes[j]);
+        }
+        va_TraceMsg(idx,"\t\tnum_dc_codes =%s\n", tmp);
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 12; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].dc_values[j]);
+        }
+        va_TraceMsg(idx,"\t\tdc_values =%s\n", tmp);
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 16; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].num_ac_codes[j]);
+        }
+        va_TraceMsg(idx,"\t\tnum_dc_codes =%s\n", tmp);
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 162; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].ac_values[j]);
+        }
+        va_TraceMsg(idx,"\t\tnum_dc_codes =%s\n", tmp);
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 2; ++j) {
+            sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].pad[j]);
+        }
+        va_TraceMsg(idx,"\t\tnum_dc_codes =%s\n", tmp);
+    }
+}
 
 static void va_TraceVAPictureParameterBufferMPEG4(
     VADisplay dpy,
@@ -1928,11 +2054,8 @@ static void va_TraceJPEGBuf(
 )
 {
     switch (type) {
-    case VAPictureParameterBufferType:/* print MPEG4 buffer */
-    case VAIQMatrixBufferType:/* print MPEG4 buffer */
-    case VABitPlaneBufferType:/* print MPEG4 buffer */
+    case VABitPlaneBufferType:
     case VASliceGroupMapBufferType:
-    case VASliceParameterBufferType:/* print MPEG4 buffer */
     case VASliceDataBufferType:
     case VAMacroblockParameterBufferType:
     case VAResidualDataBufferType:
@@ -1943,6 +2066,18 @@ static void va_TraceJPEGBuf(
     case VAEncSequenceParameterBufferType:
     case VAEncSliceParameterBufferType:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAPictureParameterBufferType:
+        va_TraceVAPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAIQMatrixBufferType:
+        va_TraceVAIQMatrixBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VASliceParameterBufferType:
+        va_TraceVASliceParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAHuffmanTableBufferType:
+        va_TraceVAHuffmanTableBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncPictureParameterBufferType:
         va_TraceVAEncPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
