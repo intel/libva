@@ -256,9 +256,9 @@ VAStatus vaPutSurface (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
   
-  VA_TRACE_FUNC(va_TracePutSurface, dpy, surface, (void *)draw, srcx, srcy, srcw, srch,
-                destx, desty, destw, desth,
-           cliprects, number_cliprects, flags );
+  VA_TRACE_LOG(va_TracePutSurface, dpy, surface, (void *)draw, srcx, srcy, srcw, srch,
+               destx, desty, destw, desth,
+               cliprects, number_cliprects, flags );
   
   return ctx->vtable->vaPutSurface( ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
                                    destx, desty, destw, desth,
