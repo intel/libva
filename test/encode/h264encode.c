@@ -601,7 +601,7 @@ static char *fourcc_to_string(int fourcc)
 {
     switch (fourcc) {
     case VA_FOURCC_NV12:
-        return "NONE";
+        return "NV12";
     case VA_FOURCC_IYUV:
         return "IYUV";
     case VA_FOURCC_YV12:
@@ -1822,13 +1822,13 @@ static int print_input()
     printf("INPUT: IpPeriod     : %d\n", ip_period);
     printf("INPUT: Initial QP   : %d\n", initial_qp);
     printf("INPUT: Min QP       : %d\n", minimal_qp);
-    printf("INPUT: Source YUV   : %s", srcyuv_fn?"FILE":"AUTO generated");
+    printf("INPUT: Source YUV   : %s", srcyuv_fp?"FILE":"AUTO generated");
     if (srcyuv_fp) 
         printf(":%s (fourcc %s)\n", srcyuv_fn, fourcc_to_string(srcyuv_fourcc));
     else
         printf("\n");
     printf("INPUT: Coded Clip   : %s\n", coded_fn);
-    if (srcyuv_fp == NULL)
+    if (recyuv_fp == NULL)
         printf("INPUT: Rec   Clip   : %s\n", "Not save reconstructed frame");
     else
         printf("INPUT: Rec   Clip   : Save reconstructed frame into %s (fourcc %s)\n", recyuv_fn,
@@ -1871,11 +1871,13 @@ static int print_performance(unsigned int PictureCount)
     printf("PERFORMANCE:     SavePicture        : %d ms (%.2f, %.2f%% percent)\n",
            (int) SavePictureTicks, ((double)  SavePictureTicks) / (double) PictureCount,
            SavePictureTicks/(double) TotalTicks/0.01);
-
     printf("PERFORMANCE:     Others             : %d ms (%.2f, %.2f%% percent)\n",
            (int) others, ((double) others) / (double) PictureCount,
            others/(double) TotalTicks/0.01);
-    
+
+    if (encode_syncmode == 0)
+        printf("(Multithread enabled, the profiling is only for reference)\n");
+        
     return 0;
 }
 

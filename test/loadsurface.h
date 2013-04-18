@@ -210,7 +210,7 @@ static int yuvgen_planar(int width, int height,
         }
     }
 
-    if (getenv("AUTO_NOUV"))
+    if (getenv("AUTO_UV") == 0)
         return 0;
 
     if (getenv("AUTO_ALPHA"))
