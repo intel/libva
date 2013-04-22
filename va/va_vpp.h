@@ -791,18 +791,18 @@ typedef struct _VAProcFilterParamterBufferFrameRateConversion {
 typedef struct _VAProcFilterParamterBufferTotalColorCorrection {
     /** \brief filter type. Shall be set to #VAProcFilterTotalColorCorrection. */
     VAProcFilterType            type;
-    /** \brief TCC Red Saturation (0-255).   */
-    unsigned int        red;
-    /** \brief TCC Green Saturation (0-255). */
-    unsigned int        green;
-    /** \brief TCC Blue Saturation (0-255).  */
-    unsigned int        blue;
-    /** \brief TCC cyan Saturation (0-255).  */
-    unsigned int        cyan;
-    /** \brief TCC Magent Saturation (0-255).*/
-    unsigned int        magenta;
-    /** \brief TCC Yello Saturation (0-255). */
-    unsigned int        yellow;
+    /** \brief TCC Red Saturation. */
+    float        red;
+    /** \brief TCC Green Saturation. */
+    float        green;
+    /** \brief TCC Blue Saturation. */
+    float        blue;
+    /** \brief TCC cyan Saturation. */
+    float        cyan;
+    /** \brief TCC Magenta Saturation. */
+    float        magenta;
+    /** \brief TCC Yello Saturation. */
+    float        yellow;
 } VAProcFilterParameterBufferTotalColorCorrection;
 
 /**
@@ -835,6 +835,22 @@ typedef struct _VAProcFilterCapColorStandard {
     /** \brief Color standard type. */
     VAProcColorStandardType     type;
 } VAProcFilterCapColorStandard;
+
+/** \brief Capabilities specification for the Total Color Correction filter. */
+typedef struct _VAProcFilterCapTotalColorCorrection {
+    /** \brief Range of supported values for red saturation. */
+    VAProcFilterValueRange      red_range;
+    /** \brief Range of supported values for green saturation. */
+    VAProcFilterValueRange      green_range;
+    /** \brief Range of supported values for blue saturation. */
+    VAProcFilterValueRange      blue_range;
+    /** \brief Range of supported values for cyan saturation. */
+    VAProcFilterValueRange      cyan_range;
+    /** \brief Range of supported values for magenta saturation. */
+    VAProcFilterValueRange      magenta_range;
+    /** \brief Range of supported values for yellow saturation. */
+    VAProcFilterValueRange      yellow_range;
+} VAProcFilterCapTotalColorCorrection;
 
 /**
  * \brief Queries video processing filters.
