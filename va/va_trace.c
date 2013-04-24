@@ -1011,17 +1011,18 @@ static void va_TraceVAPictureParameterBufferH264(
     va_TraceMsg(idx, "\tCurrPic.TopFieldOrderCnt = %d\n", p->CurrPic.TopFieldOrderCnt);
     va_TraceMsg(idx, "\tCurrPic.BottomFieldOrderCnt = %d\n", p->CurrPic.BottomFieldOrderCnt);
 
-    va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx:\n");
+    va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags:\n");
     for (i = 0; i < 16; i++)
     {
         if (p->ReferenceFrames[i].flags != VA_PICTURE_H264_INVALID) {
-            va_TraceMsg(idx, "\t\t%d-%d-0x%08x-%d\n",
+            va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
                         p->ReferenceFrames[i].picture_id,
-                        p->ReferenceFrames[i].frame_idx);
+                        p->ReferenceFrames[i].frame_idx,
+                        p->ReferenceFrames[i].flags);
         } else
-            va_TraceMsg(idx, "\t\tinv-inv-inv-inv\n");
+            va_TraceMsg(idx, "\t\tinv-inv-inv-inv-inv\n");
     }
     va_TraceMsg(idx, "\n");
     
@@ -1096,13 +1097,13 @@ static void va_TraceVASliceParameterBufferH264(
     if (p->slice_type == 0 || p->slice_type == 1) {
         va_TraceMsg(idx, "\tRefPicList0 =");
         for (i = 0; (i < p->num_ref_idx_l0_active_minus1 + 1 && i < 32); i++) {
-            va_TraceMsg(idx, "%d-%d-0x%08x-%d\n", p->RefPicList0[i].TopFieldOrderCnt, p->RefPicList0[i].BottomFieldOrderCnt, p->RefPicList0[i].picture_id, p->RefPicList0[i].frame_idx);
+            va_TraceMsg(idx, "%08d-%08d-0x%08x-%08d-0x%08x\n", p->RefPicList0[i].TopFieldOrderCnt, p->RefPicList0[i].BottomFieldOrderCnt, p->RefPicList0[i].picture_id, p->RefPicList0[i].frame_idx,  p->RefPicList0[i].flags);
         }
         if (p->slice_type == 1) {
             va_TraceMsg(idx, "\tRefPicList1 =");
             for (i = 0; (i < p->num_ref_idx_l1_active_minus1 + 1 && i < 32); i++)
             {
-                va_TraceMsg(idx, "%d-%d-0x%08x-%d\n", p->RefPicList1[i].TopFieldOrderCnt, p->RefPicList1[i].BottomFieldOrderCnt, p->RefPicList1[i].picture_id, p->RefPicList1[i].frame_idx);
+                va_TraceMsg(idx, "%08d-%08d-0x%08x-%08d-0x%08x\n", p->RefPicList1[i].TopFieldOrderCnt, p->RefPicList1[i].BottomFieldOrderCnt, p->RefPicList1[i].picture_id, p->RefPicList1[i].frame_idx, p->RefPicList1[i].flags);
             }
         }
     }
@@ -1274,15 +1275,17 @@ static void va_TraceVAEncPictureParameterBufferH264(
     va_TraceMsg(idx, "\tCurrPic.flags = %d\n", p->CurrPic.flags);
     va_TraceMsg(idx, "\tCurrPic.TopFieldOrderCnt = %d\n", p->CurrPic.TopFieldOrderCnt);
     va_TraceMsg(idx, "\tCurrPic.BottomFieldOrderCnt = %d\n", p->CurrPic.BottomFieldOrderCnt);
-    va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx):\n");
+    va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
     for (i = 0; i < 16; i++)
     {
         if (p->ReferenceFrames[i].flags != VA_PICTURE_H264_INVALID) {
-            va_TraceMsg(idx, "\t\t%d-%d-0x%08x-%d\n",
+            va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
                         p->ReferenceFrames[i].picture_id,
-                        p->ReferenceFrames[i].frame_idx);
+                        p->ReferenceFrames[i].frame_idx,
+                        p->ReferenceFrames[i].flags
+                        );
         } else
             va_TraceMsg(idx, "\t\tinv-inv-inv-inv\n");
     }
@@ -1373,28 +1376,31 @@ static void va_TraceVAEncSliceParameterBufferH264(
     va_TraceMsg(idx, "\tslice_beta_offset_div2 = %d\n", p->slice_beta_offset_div2);
 
     if (p->slice_type == 0 || p->slice_type == 1) {
-        va_TraceMsg(idx, "\tRefPicList0 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx):\n");
+        va_TraceMsg(idx, "\tRefPicList0 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
         for (i = 0; i < 32; i++) {
             if (p->RefPicList0[i].flags != VA_PICTURE_H264_INVALID) {
-                va_TraceMsg(idx, "\t\t%d-%d-0x%08x-%d\n",
+                va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                             p->RefPicList0[i].TopFieldOrderCnt,
                             p->RefPicList0[i].BottomFieldOrderCnt,
                             p->RefPicList0[i].picture_id,
-                            p->RefPicList0[i].frame_idx);
+                            p->RefPicList0[i].frame_idx,
+                            p->RefPicList0[i].flags);
             } else
                 break;
         }
     }
     
     if (p->slice_type == 1) {
-        va_TraceMsg(idx, "\tRefPicList1 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx):\n");
+        va_TraceMsg(idx, "\tRefPicList1 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
         for (i = 0; i < 32; i++) {
             if (p->RefPicList1[i].flags != VA_PICTURE_H264_INVALID)
-                va_TraceMsg(idx, "\t\t%d-%d-0x%08x-%d\n",
+                va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08d\n",
                             p->RefPicList1[i].TopFieldOrderCnt,
                             p->RefPicList1[i].BottomFieldOrderCnt,
                             p->RefPicList1[i].picture_id,
-                            p->RefPicList1[i].frame_idx);
+                            p->RefPicList1[i].frame_idx,
+                            p->RefPicList1[i].flags
+                            );
             else
                 break;
         }
