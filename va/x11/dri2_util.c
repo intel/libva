@@ -192,7 +192,7 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
 
 
     if (!VA_DRI2Connect(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                     driver_name, &device_name))
+                     driver_name, &device_name) || !device_name)
         goto err_out;
 
     dri_state->base.fd = open(device_name, O_RDWR);
@@ -216,8 +216,7 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
     dri_state->close = dri2Close;
     gsDRI2SwapAvailable = (minor >= 2);
 
-    if (device_name)
-        Xfree(device_name);
+    Xfree(device_name);
 
     return True;
 
