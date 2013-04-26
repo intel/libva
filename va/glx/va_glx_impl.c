@@ -151,12 +151,12 @@ static GLXGetProcAddressProc get_proc_address_func(void)
     dlerror();
     get_proc_func = (GLXGetProcAddressProc)
         dlsym(RTLD_DEFAULT, "glXGetProcAddress");
-    if (!dlerror())
+    if (!dlerror() && get_proc_func)
         return get_proc_func;
 
     get_proc_func = (GLXGetProcAddressProc)
         dlsym(RTLD_DEFAULT, "glXGetProcAddressARB");
-    if (!dlerror())
+    if (!dlerror() && get_proc_func)
         return get_proc_func;
 
     return get_proc_address_default;
