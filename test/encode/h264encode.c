@@ -70,26 +70,34 @@
 #define BITSTREAM_ALLOCATE_STEPPING     4096
 
 
-#define SRC_SURFACE_NUM 16 /* 16 surfaces for source YUV */
-#define REF_SURFACE_NUM 16 /* 16 surfaces for reference */
+#define SURFACE_NUM 16 /* 16 surfaces for source YUV */
+#define SURFACE_NUM 16 /* 16 surfaces for reference */
 static  VADisplay va_dpy;
 static  VAProfile h264_profile;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
 static  VAConfigAttrib config_attrib[VAConfigAttribTypeMax];
 static  int config_attrib_num = 0;
-static  VASurfaceID src_surface[SRC_SURFACE_NUM];
-static  VABufferID coded_buf[SRC_SURFACE_NUM];
-static  VASurfaceID ref_surface[REF_SURFACE_NUM];
+static  VASurfaceID src_surface[SURFACE_NUM];
+static  VABufferID  coded_buf[SURFACE_NUM];
+static  VASurfaceID ref_surface[SURFACE_NUM];
 static  VAConfigID config_id;
 static  VAContextID context_id;
 static  VAEncSequenceParameterBufferH264 seq_param;
 static  VAEncPictureParameterBufferH264 pic_param;
 static  VAEncSliceParameterBufferH264 slice_param;
-static  VAPictureH264 LLastCurrPic={picture_id:VA_INVALID_SURFACE}, LastCurrPic={picture_id:VA_INVALID_SURFACE}, CurrentCurrPic; /* One reference for P and two for B */
+static  VAPictureH264 CurrentCurrPic;
+static  VAPictureH264 ReferenceFrames[16], RefPicList0_P[32], RefPicList0_B[32], RefPicList1_B[32];
 
+static  unsigned int MaxFrameNum = (2<<16);
+static  unsigned int MaxPicOrderCntLsb = (2<<8);
+static  unsigned int Log2MaxFrameNum = 16;
+static  unsigned int Log2MaxPicOrderCntLsb = 8;
+
+static  unsigned int num_ref_frames = 2;
+static  unsigned int numShortTerm = 0;
 static  int constraint_set_flag = 0;
 static  int h264_packedheader = 0; /* support pack header? */
-static  int h264_maxref = 3;
+static  int h264_maxref = (1<<16|1);
 static  char *coded_fn = NULL, *srcyuv_fn = NULL, *recyuv_fn = NULL;
 static  FILE *coded_fp = NULL, *srcyuv_fp = NULL, *recyuv_fp = NULL;
 static  unsigned long long srcyuv_frames = 0;
@@ -108,11 +116,11 @@ static  int intra_period = 30;
 static  int intra_idr_period = 60;
 static  int ip_period = 1;
 static  int rc_mode = VA_RC_VBR;
-static  int slice_refoverride = 1; /* use VAEncSliceParameterBufferH264:RefPicList0/1 */
 static  unsigned long long current_frame_encoding = 0;
 static  unsigned long long current_frame_display = 0;
 static  int current_frame_num = 0;
 static  int current_frame_type;
+#define current_slot (current_frame_display % SURFACE_NUM)
 
 /* thread to save coded data/upload source YUV */
 struct storage_task_t {
@@ -123,12 +131,12 @@ struct storage_task_t {
 static  struct storage_task_t *storage_task_header = NULL, *storage_task_tail = NULL;
 #define SRC_SURFACE_IN_ENCODING 0
 #define SRC_SURFACE_IN_STORAGE  1
-static  int srcsurface_status[SRC_SURFACE_NUM];
+static  int srcsurface_status[SURFACE_NUM];
 static  int encode_syncmode = 0;
 static  pthread_mutex_t encode_mutex = PTHREAD_MUTEX_INITIALIZER;
 static  pthread_cond_t  encode_cond = PTHREAD_COND_INITIALIZER;
 static  pthread_t encode_thread;
-
+    
 /* for performance profiling */
 static unsigned int UploadPictureTicks=0;
 static unsigned int BeginPictureTicks=0;
@@ -670,7 +678,7 @@ static int string_to_rc(char *str)
     else if (!strncmp(str, "VBR_CONSTRAINED", 15))
         rc_mode = VA_RC_VBR_CONSTRAINED;
     else {
-        printf("Unknow RC mode\n");
+        printf("Unknown RC mode\n");
         rc_mode = -1;
     }
     return rc_mode;
@@ -691,7 +699,6 @@ static int print_help(void)
     printf("   --initialqp <number>\n");
     printf("   --minqp <number>\n");
     printf("   --rcmode <NONE|CBR|VBR|VCM|CQP|VBR_CONTRAINED>\n");
-    printf("   --refoverride: use VAEncSliceParameterBufferH264 to override reference frames\n");
     printf("   --syncmode: sequentially upload source, encoding, save result, no multi-thread\n");
     printf("   --srcyuv <filename> load YUV from a file\n");
     printf("   --fourcc <NV12|IYUV|I420|YV12> source YUV fourcc\n");
@@ -710,7 +717,6 @@ static int process_cmdline(int argc, char *argv[])
         {"idr_period", required_argument, NULL, 5 },
         {"ip_period", required_argument, NULL, 6 },
         {"rcmode", required_argument, NULL, 7 },
-        {"refoverride",  required_argument, NULL, 8 },
         {"srcyuv", required_argument, NULL, 9 },
         {"fourcc", required_argument, NULL, 10 },
         {"syncmode", no_argument, NULL, 11 },
@@ -759,9 +765,6 @@ static int process_cmdline(int argc, char *argv[])
                 exit(1);
             }
             break;
-        case 8:
-            slice_refoverride = atoi(optarg);
-            break;
         case 9:
             srcyuv_fn = strdup(optarg);
             break;
@@ -795,10 +798,9 @@ static int process_cmdline(int argc, char *argv[])
         exit(0);        
     }
 
-    if (frame_bitrate == 0) {
+    if (frame_bitrate == 0)
         frame_bitrate = frame_width * frame_height * 12 * frame_rate / 50;
-        printf("Set bitrate to %dbps\n", frame_bitrate);
-    }
+        
     /* open source file */
     if (srcyuv_fn) {
         srcyuv_fp = fopen(srcyuv_fn,"r");
@@ -1031,7 +1033,7 @@ static int setup_encode()
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
                                  VA_RT_FORMAT_YUV420, frame_width, frame_height,
-                                 &src_surface[0], SRC_SURFACE_NUM,
+                                 &src_surface[0], SURFACE_NUM,
                                  NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
@@ -1039,27 +1041,27 @@ static int setup_encode()
     va_status = vaCreateSurfaces(
         va_dpy,
         VA_RT_FORMAT_YUV420, frame_width, frame_height,
-        &ref_surface[0], h264_maxref,
+        &ref_surface[0], SURFACE_NUM,
         NULL, 0
         );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
-    tmp_surfaceid = calloc(SRC_SURFACE_NUM + h264_maxref, sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid, src_surface, SRC_SURFACE_NUM * sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid + SRC_SURFACE_NUM, ref_surface, h264_maxref * sizeof(VASurfaceID));
+    tmp_surfaceid = calloc(2 * SURFACE_NUM, sizeof(VASurfaceID));
+    memcpy(tmp_surfaceid, src_surface, SURFACE_NUM * sizeof(VASurfaceID));
+    memcpy(tmp_surfaceid + SURFACE_NUM, ref_surface, SURFACE_NUM * sizeof(VASurfaceID));
     
     /* Create a context for this encode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
                                 frame_width, frame_height,
                                 VA_PROGRESSIVE,
-                                tmp_surfaceid, SRC_SURFACE_NUM + h264_maxref,
+                                tmp_surfaceid, 2 * SURFACE_NUM,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
     free(tmp_surfaceid);
 
     codedbuf_size = (frame_width * frame_height * 400) / (16*16);
 
-    for (i = 0; i < SRC_SURFACE_NUM; i++) {
+    for (i = 0; i < SURFACE_NUM; i++) {
         /* create coded buffer once for all
          * other VA buffers which won't be used again after vaRenderPicture.
          * so APP can always vaCreateBuffer for every frame
@@ -1073,6 +1075,122 @@ static int setup_encode()
     
     return 0;
 }
+
+
+
+#define partition(ref, field, key, ascending)   \
+    while (i <= j) {                            \
+        if (ascending) {                        \
+            while (ref[i].field < key)          \
+                i++;                            \
+            while (ref[j].field > key)          \
+                j--;                            \
+        } else {                                \
+            while (ref[i].field > key)          \
+                i++;                            \
+            while (ref[j].field < key)          \
+                j--;                            \
+        }                                       \
+        if (i <= j) {                           \
+            tmp = ref[i];                       \
+            ref[i] = ref[j];                    \
+            ref[j] = tmp;                       \
+            i++;                                \
+            j--;                                \
+        }                                       \
+    }                                           \
+
+static void sort_one(VAPictureH264 ref[], int left, int right,
+                     int ascending, int frame_idx)
+{
+    int i = left, j = right;
+    unsigned int key;
+    VAPictureH264 tmp;
+
+    if (frame_idx) {
+        key = ref[(left + right) / 2].frame_idx;
+        partition(ref, frame_idx, key, ascending);
+    } else {
+        key = ref[(left + right) / 2].TopFieldOrderCnt;
+        partition(ref, TopFieldOrderCnt, key, ascending);
+    }
+    
+    /* recursion */
+    if (left < j)
+        sort_one(ref, left, j, ascending, frame_idx);
+    
+    if (i < right)
+        sort_one(ref, i, right, ascending, frame_idx);
+}
+
+static void sort_two(VAPictureH264 ref[], int left, int right, int key, int frame_idx,
+                       int divide_ascending, int list0_ascending, int list1_ascending)
+{
+    int i = left, j = right;
+    VAPictureH264 tmp;
+
+    if (frame_idx) {
+        partition(ref, frame_idx, key, divide_ascending);
+    } else {
+        partition(ref, TopFieldOrderCnt, key, divide_ascending);
+    }
+    
+
+    sort_one(ref, left, i-1, list0_ascending, frame_idx);
+    sort_one(ref, j+1, right, list1_ascending, frame_idx);
+}
+
+static int update_ReferenceFrames(void)
+{
+    int i;
+    
+    if (current_frame_type == FRAME_B)
+        return 0;
+
+    CurrentCurrPic.flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
+    numShortTerm++;
+    if (numShortTerm > num_ref_frames)
+        numShortTerm = num_ref_frames;
+    for (i=numShortTerm-1; i>0; i--)
+        ReferenceFrames[i] = ReferenceFrames[i-1];
+    ReferenceFrames[0] = CurrentCurrPic;
+    
+    if (current_frame_type != FRAME_B)
+        current_frame_num++;
+    if (current_frame_num > MaxFrameNum)
+        current_frame_num = 0;
+    
+    return 0;
+}
+
+static int update_RefPicList(void)
+{
+    unsigned int current_poc = CurrentCurrPic.TopFieldOrderCnt;
+
+    if (current_frame_type == FRAME_IDR) {
+        numShortTerm = 0;
+        current_frame_num = 0;
+        return 0;
+    }
+    
+    if (current_frame_type == FRAME_P) {
+        memcpy(RefPicList0_P, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
+        sort_one(RefPicList0_P, 0, numShortTerm-1, 0, 1);
+    }
+    
+    if (current_frame_type == FRAME_B) {
+        memcpy(RefPicList0_B, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
+        sort_two(RefPicList0_B, 0, numShortTerm-1, current_poc, 0,
+                 1, 0, 1);
+
+        memcpy(RefPicList1_B, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
+        sort_two(RefPicList1_B, 0, numShortTerm-1, current_poc, 0,
+                 0, 1, 0);
+    }
+    
+    return 0;
+}
+
 
 static int render_sequence(void)
 {
@@ -1090,11 +1208,12 @@ static int render_sequence(void)
     seq_param.intra_idr_period = intra_idr_period;
     seq_param.ip_period = ip_period;
 
-    seq_param.max_num_ref_frames = h264_maxref;
+    seq_param.max_num_ref_frames = num_ref_frames;
     seq_param.seq_fields.bits.frame_mbs_only_flag = 1;
     seq_param.time_scale = 900;
     seq_param.num_units_in_tick = 15; /* Tc = num_units_in_tick / time_sacle */
-    seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = 2;
+    seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = Log2MaxPicOrderCntLsb - 4;
+    seq_param.seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;;
     seq_param.seq_fields.bits.frame_mbs_only_flag = 1;
     
     va_status = vaCreateBuffer(va_dpy, context_id,
@@ -1127,61 +1246,58 @@ static int render_sequence(void)
     return 0;
 }
 
+static unsigned int calc_poc(unsigned int pic_order_cnt_lsb)
+{
+    static unsigned int prevPicOrderCntMsb = 0, prevPicOrderCntLsb = 0;
+    static unsigned int PicOrderCntMsb = 0;
+    unsigned int TopFieldOrderCnt;
+    
+    if (current_frame_type == FRAME_IDR)
+        prevPicOrderCntMsb = prevPicOrderCntLsb = 0;
+    
+    prevPicOrderCntMsb = PicOrderCntMsb;
+    if ((pic_order_cnt_lsb < prevPicOrderCntLsb) &&
+        ((prevPicOrderCntLsb - pic_order_cnt_lsb) >= (MaxPicOrderCntLsb / 2)))
+        PicOrderCntMsb = prevPicOrderCntMsb + MaxPicOrderCntLsb;
+    else if ((pic_order_cnt_lsb > prevPicOrderCntLsb) &&
+             ((pic_order_cnt_lsb - prevPicOrderCntLsb) > (MaxPicOrderCntLsb / 2)))
+        PicOrderCntMsb = prevPicOrderCntMsb - MaxPicOrderCntLsb;
+    else
+        PicOrderCntMsb = prevPicOrderCntMsb;
+    
+    TopFieldOrderCnt = PicOrderCntMsb + pic_order_cnt_lsb;
+
+    return TopFieldOrderCnt;
+}
+
 static int render_picture(void)
 {
     VABufferID pic_param_buf;
     VAStatus va_status;
     int i = 0;
 
-    /* use frame_num as reference frame index */
-    pic_param.CurrPic.picture_id = ref_surface[current_frame_num % h264_maxref];
-    //pic_param.CurrPic.frame_idx = current_frame_num % h264_maxref;
+    pic_param.CurrPic.picture_id = ref_surface[current_slot];
+    pic_param.CurrPic.frame_idx = current_frame_num;
     pic_param.CurrPic.flags = 0;
-    pic_param.CurrPic.TopFieldOrderCnt = 2 * current_frame_display;
-    pic_param.CurrPic.BottomFieldOrderCnt = 0;
-    if (current_frame_type != FRAME_B)
-        CurrentCurrPic = pic_param.CurrPic; /* save it */
+    pic_param.CurrPic.TopFieldOrderCnt = calc_poc(current_frame_display % MaxPicOrderCntLsb);
+    pic_param.CurrPic.BottomFieldOrderCnt = pic_param.CurrPic.TopFieldOrderCnt;
+    CurrentCurrPic = pic_param.CurrPic;
 
-    if (slice_refoverride) {
-        /* always setup all reference frame into encoder */
-        for (i = 0; i < h264_maxref; i++) {
-            pic_param.ReferenceFrames[i].picture_id = ref_surface[i];
-            pic_param.ReferenceFrames[i].frame_idx = i;
-            pic_param.ReferenceFrames[i].flags = 0;
-            if (pic_param.CurrPic.picture_id == pic_param.ReferenceFrames[i].picture_id) {
-                pic_param.ReferenceFrames[i].TopFieldOrderCnt = 2 * current_frame_encoding;
-                //pic_param.ReferenceFrames[i].picture_id = VA_INVALID_SURFACE;
-                //pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;
-            }
-            pic_param.ReferenceFrames[i].BottomFieldOrderCnt = 0;
-        }
-    } else  {
-        if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR)
-            i = 0;
-        else if (current_frame_type == FRAME_P) {
-            pic_param.ReferenceFrames[0] = LastCurrPic;
-            pic_param.ReferenceFrames[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-            i = 1;
-            //#if 0
-            if (LLastCurrPic.picture_id == VA_INVALID_SURFACE)
-                pic_param.ReferenceFrames[1] = LastCurrPic;
-            else
-                pic_param.ReferenceFrames[1] = LLastCurrPic;
-            pic_param.ReferenceFrames[1].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-            i = 2;
-            //#endif
+    if (getenv("TO_DEL")) {
+        update_RefPicList();
+        memset(pic_param.ReferenceFrames, 1, 16 * sizeof(VAPictureH264));
+        if (current_frame_type == FRAME_P) {
+            pic_param.ReferenceFrames[0] = RefPicList0_P[0];
         } else if (current_frame_type == FRAME_B) {
-            pic_param.ReferenceFrames[0] = LLastCurrPic;
-            pic_param.ReferenceFrames[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-            pic_param.ReferenceFrames[1] = LastCurrPic;
-            pic_param.ReferenceFrames[1].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-            i = 2;
+            pic_param.ReferenceFrames[0] = RefPicList0_B[0];
+            pic_param.ReferenceFrames[1] = RefPicList1_B[0];
         }
-    }
-    
-    for (; i < REF_SURFACE_NUM; i++) {
-        pic_param.ReferenceFrames[i].picture_id = VA_INVALID_SURFACE;
-        pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;
+    } else {
+        memcpy(pic_param.ReferenceFrames, ReferenceFrames, numShortTerm*sizeof(VAPictureH264));
+        for (i = numShortTerm; i < SURFACE_NUM; i++) {
+            pic_param.ReferenceFrames[i].picture_id = VA_INVALID_SURFACE;
+            pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;
+        }
     }
     
     pic_param.pic_fields.bits.idr_pic_flag = (current_frame_type == FRAME_IDR);
@@ -1189,9 +1305,7 @@ static int render_picture(void)
     pic_param.pic_fields.bits.entropy_coding_mode_flag = 1;
     pic_param.pic_fields.bits.deblocking_filter_control_present_flag = 1;
     pic_param.frame_num = current_frame_num;
-    if (current_frame_type != FRAME_B)
-        current_frame_num++;
-    pic_param.coded_buf = coded_buf[current_frame_display % SRC_SURFACE_NUM];
+    pic_param.coded_buf = coded_buf[current_slot];
     pic_param.last_picture = (current_frame_encoding == frame_count);
     pic_param.pic_init_qp = initial_qp;
 
@@ -1385,38 +1499,51 @@ static int render_slice(void)
     VABufferID slice_param_buf;
     VAStatus va_status;
     int i;
+
+    update_RefPicList();
     
     /* one frame, one slice */
     slice_param.macroblock_address = 0;
     slice_param.num_macroblocks = frame_width*frame_height/(16*16); /* Measured by MB */
     slice_param.slice_type = (current_frame_type == FRAME_IDR)?2:current_frame_type;
+    if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR) {
+        ;
+    } else if (current_frame_type == FRAME_P) {
+        int refpiclist0_max = h264_maxref & 0xffff;
+        memcpy(slice_param.RefPicList0, RefPicList0_P, refpiclist0_max*sizeof(VAPictureH264));
 
-    for (i = 0; i < 32; i++) {
-        slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
-        slice_param.RefPicList0[i].flags = VA_PICTURE_H264_INVALID;
-        slice_param.RefPicList1[i].picture_id = VA_INVALID_SURFACE;
-        slice_param.RefPicList1[i].flags = VA_PICTURE_H264_INVALID;
-    }
+        for (i = refpiclist0_max; i < 32; i++) {
+            slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
+            slice_param.RefPicList0[i].flags = VA_PICTURE_H264_INVALID;
+        }
+    } else if (current_frame_type == FRAME_B) {
+        int refpiclist0_max = h264_maxref & 0xffff;
+        int refpiclist1_max = (h264_maxref >> 16) & 0xffff;
 
-    /* cause issue on some implementation if slice_refoverride = 1 */
-    //slice_param.num_ref_idx_active_override_flag = 1;
-    if (slice_refoverride) {
-        /* set the real reference frame */
-        if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR) {
-            ;
-        } else if (current_frame_type == FRAME_P) {
-            slice_param.RefPicList0[0] = LastCurrPic;
-            slice_param.RefPicList0[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-        } else if (current_frame_type == FRAME_B) {
-            slice_param.RefPicList0[0] = LLastCurrPic;
-            slice_param.RefPicList0[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
-            slice_param.RefPicList1[0] = LastCurrPic;
-            slice_param.RefPicList1[0].flags = VA_PICTURE_H264_SHORT_TERM_REFERENCE;
+        memcpy(slice_param.RefPicList0, RefPicList0_B, refpiclist0_max*sizeof(VAPictureH264));
+        for (i = refpiclist0_max; i < 32; i++) {
+            slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
+            slice_param.RefPicList0[i].flags = VA_PICTURE_H264_INVALID;
+        }
+
+        memcpy(slice_param.RefPicList1, RefPicList1_B, refpiclist1_max*sizeof(VAPictureH264));
+        for (i = refpiclist1_max; i < 32; i++) {
+            slice_param.RefPicList1[i].picture_id = VA_INVALID_SURFACE;
+            slice_param.RefPicList1[i].flags = VA_PICTURE_H264_INVALID;
         }
     }
+
+    if (getenv("NOREF")) {
+        for (i = 0; i < 32; i++) {
+            slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
+            slice_param.RefPicList1[i].picture_id = VA_INVALID_SURFACE;
+        }
+    }
+    
+    
     slice_param.slice_alpha_c0_offset_div2 = 2;
     slice_param.slice_beta_offset_div2 = 2;
-    slice_param.pic_order_cnt_lsb = current_frame_display % 64;
+    slice_param.pic_order_cnt_lsb = current_frame_display % MaxPicOrderCntLsb;
     
     va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
                                sizeof(slice_param),1,&slice_param,&slice_param_buf);
@@ -1429,25 +1556,13 @@ static int render_slice(void)
 }
 
 
-static int update_reflist(void)
-{
-    if (current_frame_type == FRAME_B)
-        return 0;
-
-    LLastCurrPic = LastCurrPic;
-    LastCurrPic = CurrentCurrPic;
-
-    return 0;
-}
-
-
 static int upload_source_YUV_once_for_all()
 {
     int box_width=8;
     int row_shift=0;
     int i;
 
-    for (i = 0; i < SRC_SURFACE_NUM; i++) {
+    for (i = 0; i < SURFACE_NUM; i++) {
         printf("\rLoading data into surface %d.....", i);
         upload_surface(va_dpy, src_surface[i], box_width, row_shift, 0);
 
@@ -1463,8 +1578,8 @@ static int upload_source_YUV_once_for_all()
 static int load_surface(VASurfaceID surface_id, unsigned long long display_order)
 {
     VAImage surface_image;
-    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL,*V_start=NULL;
-    int Y_pitch=0, U_pitch=0, row, V_pitch;
+    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL,*V_start=NULL, *uv_ptr;
+    int Y_pitch=0, U_pitch=0, row, V_pitch, uv_size;
     VAStatus va_status;
 
     if (srcyuv_fp == NULL)
@@ -1524,30 +1639,42 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     fseek(srcyuv_fp,
           display_order * frame_width * frame_height * 1.5 + frame_width * frame_height,
           SEEK_SET);
+
+    uv_size = 2 * (frame_width/2) * (frame_height/2);
+    uv_ptr = malloc(uv_size);
+    fread(uv_ptr, uv_size, 1, srcyuv_fp);
     
     for (row =0; row < surface_image.height/2; row++) {
         unsigned char *U_row = U_start + row * U_pitch;
-        //unsigned char *V_row = V_start + row * V_pitch;
+        unsigned char *u_ptr, *v_ptr;
+        int j;
         switch (surface_image.format.fourcc) {
         case VA_FOURCC_NV12:
-            if (srcyuv_fourcc == VA_FOURCC_NV12)
-                (void)fread(U_row, 1, surface_image.width, srcyuv_fp);
-            else if (srcyuv_fourcc == VA_FOURCC_IYUV) {
-                /* tbd */
+            if (srcyuv_fourcc == VA_FOURCC_NV12) {
+                memcpy(U_row, uv_ptr + row * frame_width, frame_width);
+                break;
+            } else if (srcyuv_fourcc == VA_FOURCC_IYUV) {
+                u_ptr = uv_ptr + row * (frame_width/2);
+                v_ptr = uv_ptr + (frame_width/2) * (frame_height/2) + row * (frame_width/2);
+            } else if (srcyuv_fourcc == VA_FOURCC_YV12) {
+                v_ptr = uv_ptr + row * (frame_height/2);
+                u_ptr = uv_ptr + (frame_width/2) * (frame_height/2) + row * (frame_width/2);
+            }
+            for(j = 0; j < frame_width/2; j++) {
+                U_row[2*j] = u_ptr[j];
+                U_row[2*j+1] = v_ptr[j];
             }
             break;
+        case VA_FOURCC_IYUV:
         case VA_FOURCC_YV12:
-            /* tbd */
-            break;
         case VA_FOURCC_YUY2:
-            // see above. it is set with Y update.
-            break;
         default:
             printf("unsupported fourcc in load_surface\n");
             assert(0);
         }
     }
-        
+    free(uv_ptr);
+    
     vaUnmapBuffer(va_dpy,surface_image.buf);
 
     vaDestroyImage(va_dpy,surface_image.image_id);
@@ -1562,13 +1689,13 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     VAStatus va_status;
     unsigned int coded_size = 0;
 
-    va_status = vaMapBuffer(va_dpy,coded_buf[display_order % SRC_SURFACE_NUM],(void **)(&buf_list));
+    va_status = vaMapBuffer(va_dpy,coded_buf[display_order % SURFACE_NUM],(void **)(&buf_list));
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     while (buf_list != NULL) {
         coded_size += fwrite(buf_list->buf, 1, buf_list->size, coded_fp);
         buf_list = (VACodedBufferSegment *) buf_list->next;
     }
-    vaUnmapBuffer(va_dpy,coded_buf[display_order % SRC_SURFACE_NUM]);
+    vaUnmapBuffer(va_dpy,coded_buf[display_order % SURFACE_NUM]);
 
     printf("\r      "); /* return back to startpoint */
     switch (encode_order % 4) {
@@ -1636,7 +1763,7 @@ static int storage_task_queue(unsigned long long display_order, unsigned long lo
         storage_task_tail = tmp;
     }
 
-    srcsurface_status[display_order % SRC_SURFACE_NUM] = SRC_SURFACE_IN_STORAGE;
+    srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_STORAGE;
     pthread_cond_signal(&encode_cond);
     
     pthread_mutex_unlock(&encode_mutex);
@@ -1650,7 +1777,7 @@ static void storage_task(unsigned long long display_order, unsigned long encode_
     VAStatus va_status;
     
     tmp = GetTickCount();
-    va_status = vaSyncSurface(va_dpy, src_surface[display_order % SRC_SURFACE_NUM]);
+    va_status = vaSyncSurface(va_dpy, src_surface[display_order % SURFACE_NUM]);
     CHECK_VASTATUS(va_status,"vaSyncSurface");
     SyncPictureTicks += GetTickCount() - tmp;
     tmp = GetTickCount();
@@ -1661,11 +1788,11 @@ static void storage_task(unsigned long long display_order, unsigned long encode_
     /* reload a new frame data */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL)
-        load_surface(src_surface[display_order % SRC_SURFACE_NUM], display_order + SRC_SURFACE_NUM);
+        load_surface(src_surface[display_order % SURFACE_NUM], display_order + SURFACE_NUM);
     UploadPictureTicks += GetTickCount() - tmp;
 
     pthread_mutex_lock(&encode_mutex);
-    srcsurface_status[display_order % SRC_SURFACE_NUM] = SRC_SURFACE_IN_ENCODING;
+    srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_ENCODING;
     pthread_mutex_unlock(&encode_mutex);
 }
 
@@ -1705,7 +1832,7 @@ static int encode_frames(void)
     /* upload RAW YUV data into all surfaces */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL) {
-        for (i = 0; i < SRC_SURFACE_NUM; i++)
+        for (i = 0; i < SURFACE_NUM; i++)
             load_surface(src_surface[i], i);
     } else
         upload_source_YUV_once_for_all();
@@ -1726,10 +1853,10 @@ static int encode_frames(void)
                                &current_frame_display, &current_frame_type);
 
         /* check if the source frame is ready */
-        while (srcsurface_status[current_frame_display % SRC_SURFACE_NUM] != SRC_SURFACE_IN_ENCODING);
+        while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING);
 
         tmp = GetTickCount();
-        va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_frame_display % SRC_SURFACE_NUM]);
+        va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
         BeginPictureTicks += GetTickCount() - tmp;
         
@@ -1766,11 +1893,10 @@ static int encode_frames(void)
 
         /* how to process skipped frames
            surface_status = (VASurfaceStatus) 0;
-           va_status = vaQuerySurfaceStatus(va_dpy, src_surface[i%SRC_SURFACE_NUM],&surface_status);
+           va_status = vaQuerySurfaceStatus(va_dpy, src_surface[i%SURFACE_NUM],&surface_status);
            frame_skipped = (surface_status & VASurfaceSkipped);
         */
-
-        update_reflist();        
+        update_ReferenceFrames();        
     }
 
     if (encode_syncmode == 0) {
@@ -1786,10 +1912,10 @@ static int release_encode()
 {
     int i;
     
-    vaDestroySurfaces(va_dpy,&src_surface[0],SRC_SURFACE_NUM);
-    vaDestroySurfaces(va_dpy,&ref_surface[0],h264_maxref);
+    vaDestroySurfaces(va_dpy,&src_surface[0],SURFACE_NUM);
+    vaDestroySurfaces(va_dpy,&ref_surface[0],SURFACE_NUM);
 
-    for (i = 0; i < SRC_SURFACE_NUM; i++)
+    for (i = 0; i < SURFACE_NUM; i++)
         vaDestroyBuffer(va_dpy,coded_buf[i]);
     
     vaDestroyContext(va_dpy,context_id);
