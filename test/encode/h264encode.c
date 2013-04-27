@@ -1283,9 +1283,9 @@ static int render_picture(void)
     pic_param.CurrPic.BottomFieldOrderCnt = pic_param.CurrPic.TopFieldOrderCnt;
     CurrentCurrPic = pic_param.CurrPic;
 
-    if (getenv("TO_DEL")) {
-        update_RefPicList();
-        memset(pic_param.ReferenceFrames, 1, 16 * sizeof(VAPictureH264));
+    if (getenv("TO_DEL")) { /* set RefPicList into ReferenceFrames */
+        update_RefPicList(); /* calc RefPicList */
+        memset(pic_param.ReferenceFrames, 0xff, 16 * sizeof(VAPictureH264)); /* invalid all */
         if (current_frame_type == FRAME_P) {
             pic_param.ReferenceFrames[0] = RefPicList0_P[0];
         } else if (current_frame_type == FRAME_B) {
@@ -1533,14 +1533,6 @@ static int render_slice(void)
         }
     }
 
-    if (getenv("NOREF")) {
-        for (i = 0; i < 32; i++) {
-            slice_param.RefPicList0[i].picture_id = VA_INVALID_SURFACE;
-            slice_param.RefPicList1[i].picture_id = VA_INVALID_SURFACE;
-        }
-    }
-    
-    
     slice_param.slice_alpha_c0_offset_div2 = 2;
     slice_param.slice_beta_offset_div2 = 2;
     slice_param.pic_order_cnt_lsb = current_frame_display % MaxPicOrderCntLsb;
