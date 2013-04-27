@@ -110,6 +110,7 @@ static  unsigned int frame_count = 60;
 static  unsigned int frame_coded = 0;
 static  unsigned int frame_bitrate = 0;
 static  unsigned int frame_slices = 1;
+static  double frame_size = 0;
 static  int initial_qp = 28;
 static  int minimal_qp = 0;
 static  int intra_period = 30;
@@ -296,7 +297,7 @@ static void sps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, !!(constraint_set_flag & 8), 1);                         /* constraint_set3_flag */
     bitstream_put_ui(bs, 0, 4);                         /* reserved_zero_4bits */
     bitstream_put_ui(bs, seq_param.level_idc, 8);      /* level_idc */
-    bitstream_put_ue(bs, seq_param.seq_parameter_set_id);      /* seq_parameter_set_id */
+    bitstream_put_ue(bs, seq_param.seq_parameter_set_id++);      /* seq_parameter_set_id */
 
     if ( profile_idc == PROFILE_IDC_HIGH) {
         bitstream_put_ue(bs, 1);        /* chroma_format_idc = 1, 4:2:0 */ 
@@ -380,8 +381,8 @@ static void sps_rbsp(bitstream *bs)
 
 static void pps_rbsp(bitstream *bs)
 {
-    bitstream_put_ue(bs, pic_param.pic_parameter_set_id);      /* pic_parameter_set_id */
-    bitstream_put_ue(bs, pic_param.seq_parameter_set_id);      /* seq_parameter_set_id */
+    bitstream_put_ue(bs, pic_param.pic_parameter_set_id++);      /* pic_parameter_set_id */
+    bitstream_put_ue(bs, pic_param.seq_parameter_set_id++);      /* seq_parameter_set_id */
 
     bitstream_put_ui(bs, pic_param.pic_fields.bits.entropy_coding_mode_flag, 1);  /* entropy_coding_mode_flag */
 
@@ -1163,15 +1164,10 @@ static int update_ReferenceFrames(void)
     return 0;
 }
 
+
 static int update_RefPicList(void)
 {
     unsigned int current_poc = CurrentCurrPic.TopFieldOrderCnt;
-
-    if (current_frame_type == FRAME_IDR) {
-        numShortTerm = 0;
-        current_frame_num = 0;
-        return 0;
-    }
     
     if (current_frame_type == FRAME_P) {
         memcpy(RefPicList0_P, ReferenceFrames, numShortTerm * sizeof(VAPictureH264));
@@ -1246,16 +1242,19 @@ static int render_sequence(void)
     return 0;
 }
 
-static unsigned int calc_poc(unsigned int pic_order_cnt_lsb)
+static int calc_poc(unsigned int pic_order_cnt_lsb)
 {
-    static unsigned int prevPicOrderCntMsb = 0, prevPicOrderCntLsb = 0;
-    static unsigned int PicOrderCntMsb = 0;
-    unsigned int TopFieldOrderCnt;
+    static int PicOrderCntMsb_ref = 0, pic_order_cnt_lsb_ref = 0;
+    int prevPicOrderCntMsb, prevPicOrderCntLsb;
+    int PicOrderCntMsb, TopFieldOrderCnt;
     
     if (current_frame_type == FRAME_IDR)
         prevPicOrderCntMsb = prevPicOrderCntLsb = 0;
+    else {
+        prevPicOrderCntMsb = PicOrderCntMsb_ref;
+        prevPicOrderCntLsb = pic_order_cnt_lsb_ref;
+    }
     
-    prevPicOrderCntMsb = PicOrderCntMsb;
     if ((pic_order_cnt_lsb < prevPicOrderCntLsb) &&
         ((prevPicOrderCntLsb - pic_order_cnt_lsb) >= (MaxPicOrderCntLsb / 2)))
         PicOrderCntMsb = prevPicOrderCntMsb + MaxPicOrderCntLsb;
@@ -1267,6 +1266,11 @@ static unsigned int calc_poc(unsigned int pic_order_cnt_lsb)
     
     TopFieldOrderCnt = PicOrderCntMsb + pic_order_cnt_lsb;
 
+    if (current_frame_type != FRAME_B) {
+        PicOrderCntMsb_ref = PicOrderCntMsb;
+        pic_order_cnt_lsb_ref = pic_order_cnt_lsb;
+    }
+    
     return TopFieldOrderCnt;
 }
 
@@ -1686,6 +1690,8 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     while (buf_list != NULL) {
         coded_size += fwrite(buf_list->buf, 1, buf_list->size, coded_fp);
         buf_list = (VACodedBufferSegment *) buf_list->next;
+
+        frame_size += coded_size;
     }
     vaUnmapBuffer(va_dpy,coded_buf[display_order % SURFACE_NUM]);
 
@@ -1843,17 +1849,19 @@ static int encode_frames(void)
     for (current_frame_encoding = 0; current_frame_encoding < frame_count; current_frame_encoding++) {
         encoding2display_order(current_frame_encoding, intra_period, intra_idr_period, ip_period,
                                &current_frame_display, &current_frame_type);
-
+        if (current_frame_type == FRAME_IDR) {
+            numShortTerm = 0;
+            current_frame_num = 0;
+        }
         /* check if the source frame is ready */
         while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING);
-
         tmp = GetTickCount();
         va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
         BeginPictureTicks += GetTickCount() - tmp;
         
         tmp = GetTickCount();
-        if (current_frame_encoding  == 0) {
+        if (current_frame_type == FRAME_IDR) {
             render_sequence();
             render_picture();            
             if (h264_packedheader) {
@@ -1961,15 +1969,17 @@ static int print_input()
 static int print_performance(unsigned int PictureCount)
 {
     unsigned int others = 0;
+    double total_size = frame_width * frame_height * 1.5 * frame_count;
 
     others = TotalTicks - UploadPictureTicks - BeginPictureTicks
         - RenderPictureTicks - EndPictureTicks - SyncPictureTicks - SavePictureTicks;
-    
+
     printf("\n\n");
 
     printf("PERFORMANCE:   Frame Rate           : %.2f fps (%d frames, %d ms (%.2f ms per frame))\n",
            (double) 1000*PictureCount / TotalTicks, PictureCount,
            TotalTicks, ((double)  TotalTicks) / (double) PictureCount);
+    printf("PERFORMANCE:   Compression ratio    : %d:1\n", (unsigned int)(total_size / frame_size));
 
     printf("PERFORMANCE:     UploadPicture      : %d ms (%.2f, %.2f%% percent)\n",
            (int) UploadPictureTicks, ((double)  UploadPictureTicks) / (double) PictureCount,
