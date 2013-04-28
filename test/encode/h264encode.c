@@ -1625,7 +1625,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     }
 
     /* copy Y plane */
-    for (row=0;row<surface_image.height;row++) {
+    for (row=0;row<frame_height;row++) {
         unsigned char *Y_row = Y_start + row * Y_pitch;
         (void)fread(Y_row, 1, surface_image.width, srcyuv_fp);
     }
@@ -1641,7 +1641,7 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     uv_ptr = malloc(uv_size);
     fread(uv_ptr, uv_size, 1, srcyuv_fp);
     
-    for (row =0; row < surface_image.height/2; row++) {
+    for (row =0; row < frame_height/2; row++) {
         unsigned char *U_row = U_start + row * U_pitch;
         unsigned char *u_ptr, *v_ptr;
         int j;
@@ -1770,7 +1770,7 @@ static int storage_task_queue(unsigned long long display_order, unsigned long lo
     return 0;
 }
 
-static void storage_task(unsigned long long display_order, unsigned long encode_order)
+static void storage_task(unsigned long long display_order, unsigned long long encode_order)
 {
     unsigned int tmp;
     VAStatus va_status;
