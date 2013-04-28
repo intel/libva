@@ -1013,7 +1013,8 @@ static void va_TraceVAPictureParameterBufferH264(
     va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags:\n");
     for (i = 0; i < 16; i++)
     {
-        if (p->ReferenceFrames[i].flags != VA_PICTURE_H264_INVALID) {
+        if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
+            ((p->ReferenceFrames[i].flags & VA_PICTURE_H264_INVALID) == 0)) {
             va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
@@ -1277,7 +1278,8 @@ static void va_TraceVAEncPictureParameterBufferH264(
     va_TraceMsg(idx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
     for (i = 0; i < 16; i++)
     {
-        if (p->ReferenceFrames[i].flags != VA_PICTURE_H264_INVALID) {
+        if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
+            ((p->ReferenceFrames[i].flags & VA_PICTURE_H264_INVALID) == 0)) {
             va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
@@ -1286,7 +1288,7 @@ static void va_TraceVAEncPictureParameterBufferH264(
                         p->ReferenceFrames[i].flags
                         );
         } else
-            va_TraceMsg(idx, "\t\tinv-inv-inv-inv\n");
+            va_TraceMsg(idx, "\t\tinv-inv-inv-inv-inv\n");
     }
     va_TraceMsg(idx, "\tcoded_buf = %08x\n", p->coded_buf);
     va_TraceMsg(idx, "\tpic_parameter_set_id = %d\n", p->pic_parameter_set_id);
@@ -1377,14 +1379,15 @@ static void va_TraceVAEncSliceParameterBufferH264(
     if (p->slice_type == 0 || p->slice_type == 1) {
         va_TraceMsg(idx, "\tRefPicList0 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
         for (i = 0; i < 32; i++) {
-            if (p->RefPicList0[i].flags != VA_PICTURE_H264_INVALID) {
+            if ((p->RefPicList0[i].picture_id != VA_INVALID_SURFACE) &&
+                ((p->RefPicList0[i].flags & VA_PICTURE_H264_INVALID) == 0))
                 va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
                             p->RefPicList0[i].TopFieldOrderCnt,
                             p->RefPicList0[i].BottomFieldOrderCnt,
                             p->RefPicList0[i].picture_id,
                             p->RefPicList0[i].frame_idx,
                             p->RefPicList0[i].flags);
-            } else
+            else
                 break;
         }
     }
@@ -1392,7 +1395,8 @@ static void va_TraceVAEncSliceParameterBufferH264(
     if (p->slice_type == 1) {
         va_TraceMsg(idx, "\tRefPicList1 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
         for (i = 0; i < 32; i++) {
-            if (p->RefPicList1[i].flags != VA_PICTURE_H264_INVALID)
+            if ((p->RefPicList1[i].picture_id != VA_INVALID_SURFACE) &&
+                ((p->RefPicList1[i].flags & VA_PICTURE_H264_INVALID) == 0))
                 va_TraceMsg(idx, "\t\t%08d-%08d-0x%08x-%08d-0x%08d\n",
                             p->RefPicList1[i].TopFieldOrderCnt,
                             p->RefPicList1[i].BottomFieldOrderCnt,
