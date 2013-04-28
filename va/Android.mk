@@ -64,6 +64,7 @@ LOCAL_COPY_HEADERS := \
 	va_backend.h \
 	va_backend_vpp.h \
 	va_dec_jpeg.h \
+	va_dec_vp8.h \
 	va_drmcommon.h \
 	va_enc.h \
 	va_enc_h264.h \
