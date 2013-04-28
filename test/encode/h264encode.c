@@ -119,6 +119,7 @@ static  int ip_period = 1;
 static  int rc_mode = VA_RC_VBR;
 static  unsigned long long current_frame_encoding = 0;
 static  unsigned long long current_frame_display = 0;
+static  unsigned long long current_IDR_display = 0;
 static  int current_frame_num = 0;
 static  int current_frame_type;
 #define current_slot (current_frame_display % SURFACE_NUM)
@@ -297,7 +298,7 @@ static void sps_rbsp(bitstream *bs)
     bitstream_put_ui(bs, !!(constraint_set_flag & 8), 1);                         /* constraint_set3_flag */
     bitstream_put_ui(bs, 0, 4);                         /* reserved_zero_4bits */
     bitstream_put_ui(bs, seq_param.level_idc, 8);      /* level_idc */
-    bitstream_put_ue(bs, seq_param.seq_parameter_set_id++);      /* seq_parameter_set_id */
+    bitstream_put_ue(bs, seq_param.seq_parameter_set_id);      /* seq_parameter_set_id */
 
     if ( profile_idc == PROFILE_IDC_HIGH) {
         bitstream_put_ue(bs, 1);        /* chroma_format_idc = 1, 4:2:0 */ 
@@ -381,8 +382,8 @@ static void sps_rbsp(bitstream *bs)
 
 static void pps_rbsp(bitstream *bs)
 {
-    bitstream_put_ue(bs, pic_param.pic_parameter_set_id++);      /* pic_parameter_set_id */
-    bitstream_put_ue(bs, pic_param.seq_parameter_set_id++);      /* seq_parameter_set_id */
+    bitstream_put_ue(bs, pic_param.pic_parameter_set_id);      /* pic_parameter_set_id */
+    bitstream_put_ue(bs, pic_param.seq_parameter_set_id);      /* seq_parameter_set_id */
 
     bitstream_put_ui(bs, pic_param.pic_fields.bits.entropy_coding_mode_flag, 1);  /* entropy_coding_mode_flag */
 
@@ -1283,7 +1284,7 @@ static int render_picture(void)
     pic_param.CurrPic.picture_id = ref_surface[current_slot];
     pic_param.CurrPic.frame_idx = current_frame_num;
     pic_param.CurrPic.flags = 0;
-    pic_param.CurrPic.TopFieldOrderCnt = calc_poc(current_frame_display % MaxPicOrderCntLsb);
+    pic_param.CurrPic.TopFieldOrderCnt = calc_poc((current_frame_display - current_IDR_display) % MaxPicOrderCntLsb);
     pic_param.CurrPic.BottomFieldOrderCnt = pic_param.CurrPic.TopFieldOrderCnt;
     CurrentCurrPic = pic_param.CurrPic;
 
@@ -1852,6 +1853,7 @@ static int encode_frames(void)
         if (current_frame_type == FRAME_IDR) {
             numShortTerm = 0;
             current_frame_num = 0;
+            current_IDR_display = current_frame_display;
         }
         /* check if the source frame is ready */
         while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING);
