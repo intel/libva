@@ -119,8 +119,8 @@ SUBDIRS				+= egl
 lib_LTLIBRARIES			+= libva-egl.la
 libva_egl_la_SOURCES		=
 libva_egl_la_LDFLAGS		= $(LDADD)
-libva_egl_la_DEPENDENCIES	= libva.la egl/libva_egl.la libva-x11.la
-libva_egl_la_LIBADD		= libva.la egl/libva_egl.la libva-x11.la \
+libva_egl_la_DEPENDENCIES	= libva.la egl/libva_egl.la 
+libva_egl_la_LIBADD		= libva.la egl/libva_egl.la \
 	$(EGL_LIBS) -ldl
 endif
 
