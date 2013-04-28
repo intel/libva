@@ -109,6 +109,7 @@ const char *profile2string(VAProfile profile)
         PROFILE(VC1Advanced)
         PROFILE(JPEGBaseline)
         PROFILE(VP8Version0_3)
+        default:return "Unknow";
     }
     ASSERT(0);
     return "Unknown";
@@ -128,6 +129,7 @@ const char *entrypoint2string(VAEntrypoint entrypoint)
         ENTRYPOINT(EncSlice)
         ENTRYPOINT(EncPicture)
         ENTRYPOINT(VideoProc)
+        default:return "Unknow";
     }
     ASSERT(0);
     return "Unknown";
