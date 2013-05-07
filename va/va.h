@@ -1828,6 +1828,16 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_SINGLE_NALU                 0x10000000	
 
 /**
+ * \brief The coded buffer segment contains a private data. 
+ *
+ * This flag indicates that the coded buffer segment contains 
+ * private data. This flag can be used to exchange private data
+ * between the client and the driver. Private data should follow
+ * regular coded data in the coded buffer segement list. 
+ */
+#define VA_CODED_BUF_STATUS_PRIVATE_DATA                 0x80000000	
+
+/**
  * \brief Coded buffer segment.
  *
  * #VACodedBufferSegment is an element of a linked list describing
