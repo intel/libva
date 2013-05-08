@@ -21,7 +21,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE :=	h264encode
 
-LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm  libcutils libutils libgui
+LOCAL_SHARED_LIBRARIES := libva-android libva libdl libdrm  libcutils libutils libgui libm
 
 include $(BUILD_EXECUTABLE)
 

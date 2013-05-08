@@ -33,7 +33,7 @@ h264encode_CFLAGS	= -I$(top_srcdir)/test/common -g
 h264encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
-	-lpthread
+	-lpthread -lm
 
 avcenc_SOURCES		= avcenc.c
 avcenc_CFLAGS		= -I$(top_srcdir)/test/common -g
