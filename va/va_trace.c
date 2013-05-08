@@ -1585,6 +1585,31 @@ static void va_TraceVAEncSliceParameterBufferH264(
     return;
 }
 
+
+static void va_TraceVAEncPackedHeaderParameterBufferType(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncPackedHeaderParameterBuffer* p = (VAEncPackedHeaderParameterBuffer*)data;
+    DPY2INDEX(dpy);
+    int i;
+
+    if (!p)
+        return;
+    va_TraceMsg(idx, "VAEncPackedHeaderParameterBuffer\n");
+    va_TraceMsg(idx, "\ttype=%d = %d\n", p->type);
+    va_TraceMsg(idx, "\tbit_length = %d\n", p->bit_length);
+    va_TraceMsg(idx, "\thas_emulation_bytes = %d = %d\n", p->has_emulation_bytes);
+    va_TraceMsg(idx, NULL);
+
+    return;
+}
+
 static void va_TraceVAEncMiscParameterBuffer(
     VADisplay dpy,
     VAContextID context,
@@ -2034,6 +2059,9 @@ static void va_TraceH263Buf(
         break;
     case VAEncSliceParameterBufferType:
         va_TraceVAEncSliceParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncPackedHeaderParameterBufferType:
+        va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
