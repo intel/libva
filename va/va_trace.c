@@ -1602,9 +1602,9 @@ static void va_TraceVAEncPackedHeaderParameterBufferType(
     if (!p)
         return;
     va_TraceMsg(idx, "VAEncPackedHeaderParameterBuffer\n");
-    va_TraceMsg(idx, "\ttype=%d = %d\n", p->type);
+    va_TraceMsg(idx, "\ttype = 0x%08x\n", p->type);
     va_TraceMsg(idx, "\tbit_length = %d\n", p->bit_length);
-    va_TraceMsg(idx, "\thas_emulation_bytes = %d = %d\n", p->has_emulation_bytes);
+    va_TraceMsg(idx, "\thas_emulation_bytes = %d\n", p->has_emulation_bytes);
     va_TraceMsg(idx, NULL);
 
     return;
@@ -2237,6 +2237,10 @@ static void va_TraceH264Buf(
         else
             va_TraceVAEncSliceParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncPackedHeaderParameterBufferType:
+        va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+        
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
