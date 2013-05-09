@@ -151,6 +151,8 @@ static struct {
     int i_dpb_output_delay_length;
 } avcenc_context;
 
+static  VAPictureH264 ReferenceFrames[16], RefPicList0[32], RefPicList1[32];
+
 static void create_encode_pipe()
 {
     VAEntrypoint entrypoints[5];
@@ -443,6 +445,23 @@ static void avcenc_update_slice_parameter(int slice_type)
     slice_param->idr_pic_id = 0;
 
     /* FIXME: fill other fields */
+    if ((slice_type == SLICE_TYPE_P) || (slice_type == SLICE_TYPE_B)) {
+	int j;
+	slice_param->RefPicList0[0].picture_id = surface_ids[SID_REFERENCE_PICTURE_L0];
+	for (j = 1; j < 32; j++) {
+	    slice_param->RefPicList0[j].picture_id = VA_INVALID_SURFACE;
+	    slice_param->RefPicList0[j].flags = VA_PICTURE_H264_INVALID;
+	}
+    }
+
+    if ((slice_type == SLICE_TYPE_B)) {
+	int j;
+	slice_param->RefPicList1[0].picture_id = surface_ids[SID_REFERENCE_PICTURE_L1];
+	for (j = 1; j < 32; j++) {
+	    slice_param->RefPicList1[j].picture_id = VA_INVALID_SURFACE;
+	    slice_param->RefPicList1[j].flags = VA_PICTURE_H264_INVALID;
+	}
+    }
 
     va_status = vaCreateBuffer(va_dpy,
                                avcenc_context.context_id,
