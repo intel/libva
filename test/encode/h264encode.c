@@ -1841,7 +1841,6 @@ static void storage_task(unsigned long long display_order, unsigned long long en
 
     pthread_mutex_lock(&encode_mutex);
     srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_ENCODING;
-    pthread_cond_signal(&encode_cond);
     pthread_mutex_unlock(&encode_mutex);
 }
 
@@ -1908,9 +1907,7 @@ static int encode_frames(void)
 
         /* check if the source frame is ready */
         while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING) {
-            pthread_mutex_lock(&encode_mutex);
-            pthread_cond_wait(&encode_cond, &encode_mutex);
-            pthread_mutex_unlock(&encode_mutex);
+            usleep(1);
         }
         
         tmp = GetTickCount();
