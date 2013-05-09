@@ -947,7 +947,7 @@ static int init_va(void)
     if (attrib[VAConfigAttribRateControl].value != VA_ATTRIB_NOT_SUPPORTED) {
         int tmp = attrib[VAConfigAttribRateControl].value;
 
-        printf("Supporte rate control mode (0x%x):", tmp);
+        printf("Support rate control mode (0x%x):", tmp);
         
         if (tmp & VA_RC_NONE)
             printf("NONE ");
@@ -1539,8 +1539,8 @@ static int render_slice(void)
     slice_param.macroblock_address = 0;
     slice_param.num_macroblocks = frame_width*frame_height/(16*16); /* Measured by MB */
     slice_param.slice_type = (current_frame_type == FRAME_IDR)?2:current_frame_type;
-    if (current_frame_type == FRAME_I || current_frame_type == FRAME_IDR) {
-        ;
+    if (current_frame_type == FRAME_IDR) {
+        ++slice_param.idr_pic_id;
     } else if (current_frame_type == FRAME_P) {
         int refpiclist0_max = h264_maxref & 0xffff;
         memcpy(slice_param.RefPicList0, RefPicList0_P, refpiclist0_max*sizeof(VAPictureH264));
