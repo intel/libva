@@ -1594,7 +1594,7 @@ static int upload_source_YUV_once_for_all()
         row_shift++;
         if (row_shift==(2*box_width)) row_shift= 0;
     }
-    printf("Completed surface loading\n");
+    printf("Complete surface loading\n");
 
     return 0;
 }
@@ -1774,7 +1774,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
 }
 
 
-static struct storage_task_t * storage_task_dequque(void)
+static struct storage_task_t * storage_task_dequeue(void)
 {
     struct storage_task_t *header;
 
@@ -1841,6 +1841,7 @@ static void storage_task(unsigned long long display_order, unsigned long long en
 
     pthread_mutex_lock(&encode_mutex);
     srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_ENCODING;
+    pthread_cond_signal(&encode_cond);
     pthread_mutex_unlock(&encode_mutex);
 }
 
@@ -1850,7 +1851,7 @@ static void * storage_task_thread(void *t)
     while (1) {
         struct storage_task_t *current;
         
-        current = storage_task_dequque();
+        current = storage_task_dequeue();
         if (current == NULL) {
             pthread_mutex_lock(&encode_mutex);
             pthread_cond_wait(&encode_cond, &encode_mutex);
@@ -1904,8 +1905,14 @@ static int encode_frames(void)
             current_frame_num = 0;
             current_IDR_display = current_frame_display;
         }
+
         /* check if the source frame is ready */
-        while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING);
+        while (srcsurface_status[current_slot] != SRC_SURFACE_IN_ENCODING) {
+            pthread_mutex_lock(&encode_mutex);
+            pthread_cond_wait(&encode_cond, &encode_mutex);
+            pthread_mutex_unlock(&encode_mutex);
+        }
+        
         tmp = GetTickCount();
         va_status = vaBeginPicture(va_dpy, context_id, src_surface[current_slot]);
         CHECK_VASTATUS(va_status,"vaBeginPicture");
