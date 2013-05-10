@@ -330,7 +330,6 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
          const VAEncPictureParameterBufferMPEG2 *pic_param,
          bitstream *bs)
 {
-    int i;
     int chroma_420_type;
 
     if (seq_param->sequence_extension.bits.chroma_format == CHROMA_FORMAT_420)
@@ -382,16 +381,6 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
     bitstream_put_ui(bs, pic_param->picture_coding_extension.bits.composite_display_flag, 1);
 
     bitstream_byte_aligning(bs, 0);
-
-    if (pic_param->user_data_length) {
-        bitstream_put_ui(bs, START_CODE_USER, 32);
-
-        for (i = 0; i < pic_param->user_data_length; i++) {
-            bitstream_put_ui(bs, pic_param->user_data[i], 8);
-        }
-
-        bitstream_byte_aligning(bs, 0);
-    }
 }
 
 static int
@@ -823,8 +812,6 @@ mpeg2enc_init_picture_parameter(struct mpeg2enc_context *ctx,
     pic_param->picture_coding_extension.bits.repeat_first_field = 0;
     pic_param->picture_coding_extension.bits.progressive_frame = 1;
     pic_param->picture_coding_extension.bits.composite_display_flag = 0;
-
-    pic_param->user_data_length = 0;
 }
 
 static void 

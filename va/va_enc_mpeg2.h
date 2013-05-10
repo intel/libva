@@ -265,16 +265,6 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
         } bits;
         unsigned int value;
     } composite_display;
-
-    /** \brief The length of user data
-     *
-     * Append user data after picture coding extension
-     * if user_data_length isn't 0.
-     *
-     */
-    unsigned int user_data_length;
-    /** \brief User data */
-    unsigned char user_data[16];
 } VAEncPictureParameterBufferMPEG2;
 
 /**
