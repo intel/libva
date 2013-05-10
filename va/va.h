@@ -393,6 +393,8 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_PACKED_HEADER_SLICE      0x00000004
 /** \brief Driver supports misc packed headers. e.g. SEI for H.264. */
 #define VA_ENC_PACKED_HEADER_MISC       0x00000008
+/** \brief Driver supports raw packed header, see VAEncPackedHeaderRawData */
+#define VA_ENC_PACKED_HEADER_RAW_DATA   0x0000000C
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncInterlaced */
@@ -706,8 +708,9 @@ typedef enum {
      * \brief Packed raw header. 
      * 
      * Packed raw data header can be used by the client to insert a header  
-     * into the bitstream data buffer at the point it is passed, without 
-     * any handling or interpretation by the implementation.  
+     * into the bitstream data buffer at the point it is passed, the driver 
+     * will handle the raw packed header based on "has_emulation_bytes" field
+     * in the packed header parameter structure.
      */
     VAEncPackedHeaderRawData    = 4,
     /** \brief Misc packed header. See codec-specific definitions. */
