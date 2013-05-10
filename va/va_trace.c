@@ -2349,7 +2349,6 @@ void va_TraceRenderPicture(
         case VAProfileMPEG2Simple:
         case VAProfileMPEG2Main:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG2Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
@@ -2358,7 +2357,6 @@ void va_TraceRenderPicture(
         case VAProfileMPEG4AdvancedSimple:
         case VAProfileMPEG4Main:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 va_TraceMPEG4Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
@@ -2368,7 +2366,6 @@ void va_TraceRenderPicture(
         case VAProfileH264High:
         case VAProfileH264ConstrainedBaseline:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceH264Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
@@ -2378,7 +2375,6 @@ void va_TraceRenderPicture(
         case VAProfileVC1Main:
         case VAProfileVC1Advanced:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceVC1Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
@@ -2386,7 +2382,6 @@ void va_TraceRenderPicture(
             break;
         case VAProfileH263Baseline:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceH263Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
@@ -2394,7 +2389,6 @@ void va_TraceRenderPicture(
             break;
         case VAProfileJPEGBaseline:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(idx, "\t---------------------------\n", j);
                 va_TraceMsg(idx, "\telement[%d] = ", j);
                 
                 va_TraceJPEGBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
