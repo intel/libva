@@ -1025,7 +1025,8 @@ static int init_va(void)
     if (attrib[VAConfigAttribEncMaxRefFrames].value != VA_ATTRIB_NOT_SUPPORTED) {
         h264_maxref = attrib[VAConfigAttribEncMaxRefFrames].value;
         
-        printf("Support %d reference frames\n", h264_maxref);
+        printf("Support %d RefPicList0 and %d RefPicList1\n",
+               h264_maxref & 0xffff, (h264_maxref >> 16) & 0xffff );
     }
 
     if (attrib[VAConfigAttribEncMaxSlices].value != VA_ATTRIB_NOT_SUPPORTED)
