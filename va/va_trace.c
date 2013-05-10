@@ -1675,7 +1675,8 @@ static void va_TraceVAEncMiscParameterBuffer(
         break;
     }
     default:
-        va_TraceMsg(idx, "invalid VAEncMiscParameterBuffer type = %d\n", tmp->type);
+        va_TraceMsg(idx, "Unknown VAEncMiscParameterBuffer(type = %d):", tmp->type);
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
         break;
     }
     va_TraceMsg(idx, NULL);
