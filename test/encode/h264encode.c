@@ -1568,7 +1568,7 @@ static int render_slice(void)
 
     slice_param.slice_alpha_c0_offset_div2 = 2;
     slice_param.slice_beta_offset_div2 = 2;
-    slice_param.pic_order_cnt_lsb = current_frame_display % MaxPicOrderCntLsb;
+    slice_param.pic_order_cnt_lsb = (current_frame_display - current_IDR_display) % MaxPicOrderCntLsb;
     
     va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
                                sizeof(slice_param),1,&slice_param,&slice_param_buf);
