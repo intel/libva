@@ -673,13 +673,13 @@ static void va_TraceVABuffers(
     unsigned char  check_sum = 0;
     DPY2INDEX(dpy);
     
-    va_TraceMsg(idx, "%s\n",  buffer_type_to_string(type));
+    va_TraceMsg(idx, "%s",  buffer_type_to_string(type));
 
     for (i=0; i<size; i++) {
         unsigned char value =  p[i];
             
         if ((trace_flag & VA_TRACE_FLAG_BUFDATA) && ((i%16) == 0))
-            va_TraceMsg(idx, "\n0x%08x:", i);
+            va_TraceMsg(idx, "\n\t0x%08x:", i);
 
         if (trace_flag & VA_TRACE_FLAG_BUFDATA)
             va_TraceMsg(idx, " %02x", value);
@@ -687,7 +687,7 @@ static void va_TraceVABuffers(
         check_sum ^= value;
     }
 
-    va_TraceMsg(idx, "\tchecksum = 0x%02x\n", check_sum & 0xff);
+    va_TraceMsg(idx, "\n\tchecksum = 0x%02x\n", check_sum & 0xff);
     va_TraceMsg(idx, NULL);
 
     return;
