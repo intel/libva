@@ -247,8 +247,6 @@ typedef enum _VAProcFilterType {
     VAProcFilterSharpening,
     /** \brief Color balance parameters. */
     VAProcFilterColorBalance,
-    /** \brief Color standard conversion. */
-    VAProcFilterColorStandard,
     /** \brief Frame rate conversion. */
     VAProcFilterFrameRateConversion,
     /** \brief Skin Tone Enhancement. */
@@ -560,8 +558,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   \c VA_BOTTOM_FIELD. Note that any deinterlacing filter
      *   (#VAProcFilterDeinterlacing) will override those flags.
      * - Color space conversion: \c VA_SRC_BT601, \c VA_SRC_BT709,
-     *   \c VA_SRC_SMPTE_240. Note that any color standard filter
-     *   (#VAProcFilterColorStandard) will override those flags.
+     *   \c VA_SRC_SMPTE_240. 
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
      */
@@ -762,14 +759,6 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
     float                       value;
 } VAProcFilterParameterBufferColorBalance;
 
-/** \brief Color standard filter parametrization. */
-typedef struct _VAProcFilterParameterBufferColorStandard {
-    /** \brief Filter type. Shall be set to #VAProcFilterColorStandard. */
-    VAProcFilterType            type;
-    /** \brief Color standard to use. */
-    VAProcColorStandardType     standard;
-} VAProcFilterParameterBufferColorStandard;
-
 /** \brief Frame rate conversion filter parametrization. */
 typedef struct _VAProcFilterParamterBufferFrameRateConversion {
     /** \brief filter type. Shall be set to #VAProcFilterFrameRateConversion. */
@@ -829,12 +818,6 @@ typedef struct _VAProcFilterCapColorBalance {
     /** \brief Range of supported values for the specified operation. */
     VAProcFilterValueRange      range;
 } VAProcFilterCapColorBalance;
-
-/** \brief Capabilities specification for the color standard filter. */
-typedef struct _VAProcFilterCapColorStandard {
-    /** \brief Color standard type. */
-    VAProcColorStandardType     type;
-} VAProcFilterCapColorStandard;
 
 /** \brief Capabilities specification for the Total Color Correction filter. */
 typedef struct _VAProcFilterCapTotalColorCorrection {
