@@ -108,6 +108,8 @@ static  int calc_psnr = 0;
 
 static  int frame_width = 176;
 static  int frame_height = 144;
+static  int frame_width_mbaligned;
+static  int frame_height_mbaligned;
 static  int frame_rate = 30;
 static  unsigned int frame_count = 60;
 static  unsigned int frame_coded = 0;
@@ -126,6 +128,9 @@ static  unsigned long long current_IDR_display = 0;
 static  unsigned int current_frame_num = 0;
 static  int current_frame_type;
 #define current_slot (current_frame_display % SURFACE_NUM)
+
+static  int misc_priv_type = 0;
+static  int misc_priv_value = 0;
 
 #define MIN(a, b) ((a)>(b)?(b):(a))
 #define MAX(a, b) ((a)>(b)?(a):(b))
@@ -733,6 +738,8 @@ static int process_cmdline(int argc, char *argv[])
         {"fourcc", required_argument, NULL, 11 },
         {"syncmode", no_argument, NULL, 12 },
         {"enablePSNR", no_argument, NULL, 13 },
+        {"privt", required_argument, NULL, 14 },
+        {"privv", required_argument, NULL, 15 },
         {NULL, no_argument, NULL, 0 }};
     int long_index;
     
@@ -800,6 +807,12 @@ static int process_cmdline(int argc, char *argv[])
         case 13:
             calc_psnr = 1;
             break;
+        case 14:
+            misc_priv_type = strtol(optarg, NULL, 0);
+            break;
+        case 15:
+            misc_priv_value = strtol(optarg, NULL, 0);
+            break;
         case ':':
         case '?':
             print_help();
@@ -861,6 +874,15 @@ static int process_cmdline(int argc, char *argv[])
         exit(1);
     }
 
+    frame_width_mbaligned = (frame_width + 15) & (~15);
+    frame_height_mbaligned = (frame_height + 15) & (~15);
+    if (frame_width != frame_width_mbaligned ||
+        frame_height != frame_height_mbaligned) {
+        printf("Source frame is %dx%d and will code clip to %dx%d with crop\n",
+               frame_width, frame_height,
+               frame_width_mbaligned, frame_height_mbaligned
+               );
+    }
     
     return 0;
 }
@@ -1063,7 +1085,7 @@ static int setup_encode()
 
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
-                                 VA_RT_FORMAT_YUV420, frame_width, frame_height,
+                                 VA_RT_FORMAT_YUV420, frame_width_mbaligned, frame_height_mbaligned,
                                  &src_surface[0], SURFACE_NUM,
                                  NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
@@ -1071,7 +1093,7 @@ static int setup_encode()
     /* create reference surfaces */
     va_status = vaCreateSurfaces(
             va_dpy,
-            VA_RT_FORMAT_YUV420, frame_width, frame_height,
+            VA_RT_FORMAT_YUV420, frame_width_mbaligned, frame_height_mbaligned,
             &ref_surface[0], SURFACE_NUM,
             NULL, 0
             );
@@ -1083,14 +1105,14 @@ static int setup_encode()
     
     /* Create a context for this encode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
-                                frame_width, frame_height,
+                                frame_width_mbaligned, frame_height_mbaligned,
                                 VA_PROGRESSIVE,
                                 tmp_surfaceid, 2 * SURFACE_NUM,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
     free(tmp_surfaceid);
 
-    codedbuf_size = (frame_width * frame_height * 400) / (16*16);
+    codedbuf_size = (frame_width_mbaligned * frame_height_mbaligned * 400) / (16*16);
 
     for (i = 0; i < SURFACE_NUM; i++) {
         /* create coded buffer once for all
@@ -1220,14 +1242,14 @@ static int update_RefPicList(void)
 
 static int render_sequence(void)
 {
-    VABufferID seq_param_buf, rc_param_buf, render_id[2];
+    VABufferID seq_param_buf, rc_param_buf, misc_param_tmpbuf, render_id[2];
     VAStatus va_status;
-    VAEncMiscParameterBuffer *misc_param;
+    VAEncMiscParameterBuffer *misc_param, *misc_param_tmp;
     VAEncMiscParameterRateControl *misc_rate_ctrl;
     
     seq_param.level_idc = 41 /*SH_LEVEL_3*/;
-    seq_param.picture_width_in_mbs = frame_width / 16;
-    seq_param.picture_height_in_mbs = frame_height / 16;
+    seq_param.picture_width_in_mbs = frame_width_mbaligned / 16;
+    seq_param.picture_height_in_mbs = frame_height_mbaligned / 16;
     seq_param.bits_per_second = frame_bitrate;
 
     seq_param.intra_period = intra_period;
@@ -1241,6 +1263,15 @@ static int render_sequence(void)
     seq_param.seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = Log2MaxPicOrderCntLsb - 4;
     seq_param.seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;;
     seq_param.seq_fields.bits.frame_mbs_only_flag = 1;
+    seq_param.seq_fields.bits.chroma_format_idc = 1;
+    if (frame_width != frame_width_mbaligned ||
+        frame_height != frame_height_mbaligned) {
+        seq_param.frame_cropping_flag = 1;
+        seq_param.frame_crop_left_offset = 0;
+        seq_param.frame_crop_right_offset = (frame_width_mbaligned - frame_width)/2;
+        seq_param.frame_crop_top_offset = 0;
+        seq_param.frame_crop_bottom_offset = (frame_height_mbaligned - frame_height)/2;
+    }
     
     va_status = vaCreateBuffer(va_dpy, context_id,
                                VAEncSequenceParameterBufferType,
@@ -1269,6 +1300,20 @@ static int render_sequence(void)
     va_status = vaRenderPicture(va_dpy,context_id, &render_id[0], 2);
     CHECK_VASTATUS(va_status,"vaRenderPicture");;
 
+    if (misc_priv_type != 0) {
+        va_status = vaCreateBuffer(va_dpy, context_id,
+                                   VAEncMiscParameterBufferType,
+                                   sizeof(VAEncMiscParameterBuffer),
+                                   1, NULL, &misc_param_tmpbuf);
+        CHECK_VASTATUS(va_status,"vaCreateBuffer");
+        vaMapBuffer(va_dpy, misc_param_tmpbuf,(void **)&misc_param_tmp);
+        misc_param_tmp->type = misc_priv_type;
+        misc_param_tmp->data[0] = misc_priv_value;
+        vaUnmapBuffer(va_dpy, misc_param_tmpbuf);
+    
+        va_status = vaRenderPicture(va_dpy,context_id, &misc_param_tmpbuf, 1);
+    }
+    
     return 0;
 }
 
@@ -1538,7 +1583,7 @@ static int render_slice(void)
     
     /* one frame, one slice */
     slice_param.macroblock_address = 0;
-    slice_param.num_macroblocks = frame_width*frame_height/(16*16); /* Measured by MB */
+    slice_param.num_macroblocks = frame_width_mbaligned * frame_height_mbaligned/(16*16); /* Measured by MB */
     slice_param.slice_type = (current_frame_type == FRAME_IDR)?2:current_frame_type;
     if (current_frame_type == FRAME_IDR) {
         ++slice_param.idr_pic_id;
