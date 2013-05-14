@@ -702,7 +702,9 @@ static int print_help(void)
 {
     printf("./h264encode <options>\n");
     printf("   -w <width> -h <height>\n");
+    printf("   -framecount <frame number>\n");
     printf("   -n <frame number>\n");
+    printf("      if set to 0 and srcyuv is set, the frame count is from srcuv file\n");
     printf("   -o <coded file>\n");
     printf("   -f <frame rate>\n");
     printf("   --intra_period <number>\n");
@@ -738,8 +740,9 @@ static int process_cmdline(int argc, char *argv[])
         {"fourcc", required_argument, NULL, 11 },
         {"syncmode", no_argument, NULL, 12 },
         {"enablePSNR", no_argument, NULL, 13 },
-        {"privt", required_argument, NULL, 14 },
-        {"privv", required_argument, NULL, 15 },
+        {"prit", required_argument, NULL, 14 },
+        {"priv", required_argument, NULL, 15 },
+        {"framecount", required_argument, NULL, 16 },
         {NULL, no_argument, NULL, 0 }};
     int long_index;
     
@@ -752,6 +755,7 @@ static int process_cmdline(int argc, char *argv[])
             frame_height = atoi(optarg);
             break;
         case 'n':
+        case 16:
             frame_count = atoi(optarg);
             break;
         case 'f':
@@ -843,9 +847,14 @@ static int process_cmdline(int argc, char *argv[])
         if (srcyuv_fp == NULL)
             printf("Open source YUV file %s failed, use auto-generated YUV data\n", srcyuv_fn);
         else {
-            fseek(srcyuv_fp, 0L, SEEK_END);
-            srcyuv_frames = ftell(srcyuv_fp) / (frame_width * frame_height * 1.5);
+            struct stat tmp;
+
+            fstat(fileno(srcyuv_fp), &tmp);
+            srcyuv_frames = tmp.st_size / (frame_width * frame_height * 1.5);
             printf("Source YUV file %s with %llu frames\n", srcyuv_fn, srcyuv_frames);
+
+            if (frame_count == 0)
+                frame_count = srcyuv_frames;
         }
     }
 
