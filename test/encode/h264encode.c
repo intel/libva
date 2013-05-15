@@ -75,7 +75,7 @@
 #define SURFACE_NUM 16 /* 16 surfaces for source YUV */
 #define SURFACE_NUM 16 /* 16 surfaces for reference */
 static  VADisplay va_dpy;
-static  VAProfile h264_profile;
+static  VAProfile h264_profile = ~0;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
 static  VAConfigAttrib config_attrib[VAConfigAttribTypeMax];
 static  int config_attrib_num = 0;
@@ -100,6 +100,8 @@ static  unsigned int numShortTerm = 0;
 static  int constraint_set_flag = 0;
 static  int h264_packedheader = 0; /* support pack header? */
 static  int h264_maxref = (1<<16|1);
+static  int h264_entropy_mode = 1; /* cabac */
+
 static  char *coded_fn = NULL, *srcyuv_fn = NULL, *recyuv_fn = NULL;
 static  FILE *coded_fp = NULL, *srcyuv_fp = NULL, *recyuv_fp = NULL;
 static  unsigned long long srcyuv_frames = 0;
@@ -116,7 +118,7 @@ static  unsigned int frame_coded = 0;
 static  unsigned int frame_bitrate = 0;
 static  unsigned int frame_slices = 1;
 static  double frame_size = 0;
-static  int initial_qp = 28;
+static  int initial_qp = 26;
 static  int minimal_qp = 0;
 static  int intra_period = 30;
 static  int intra_idr_period = 60;
@@ -719,7 +721,8 @@ static int print_help(void)
     printf("   --fourcc <NV12|IYUV|YV12> source YUV fourcc\n");
     printf("   --recyuv <filename> save reconstructed YUV into a file\n");
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
-
+    printf("   --entropy <0|1>, 1 means cabac, 0 cavlc\n");
+    printf("   --profile <BP|MP|HP>\n");
     return 0;
 }
 
@@ -743,6 +746,8 @@ static int process_cmdline(int argc, char *argv[])
         {"prit", required_argument, NULL, 14 },
         {"priv", required_argument, NULL, 15 },
         {"framecount", required_argument, NULL, 16 },
+        {"entropy", required_argument, NULL, 17 },
+        {"profile", required_argument, NULL, 18 },
         {NULL, no_argument, NULL, 0 }};
     int long_index;
     
@@ -816,6 +821,19 @@ static int process_cmdline(int argc, char *argv[])
             break;
         case 15:
             misc_priv_value = strtol(optarg, NULL, 0);
+            break;
+        case 17:
+            h264_entropy_mode = atoi(optarg) ? 1: 0;
+            break;
+        case 18:
+            if (strncmp(optarg, "BP", 2) == 0)
+                h264_profile = VAProfileH264Baseline;
+            else if (strncmp(optarg, "MP", 2) == 0)
+                h264_profile = VAProfileH264Main;
+            else if (strncmp(optarg, "HP", 2) == 0)
+                h264_profile = VAProfileH264High;
+            else
+                h264_profile = 0;
             break;
         case ':':
         case '?':
@@ -912,6 +930,9 @@ static int init_va(void)
 
     /* use the highest profile */
     for (i = 0; i < sizeof(profile_list)/sizeof(profile_list[0]); i++) {
+        if ((h264_profile != ~0) && h264_profile != profile_list[i])
+            continue;
+        
         h264_profile = profile_list[i];
         vaQueryConfigEntrypoints(va_dpy, h264_profile, entrypoints, &num_entrypoints);
         for (slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
@@ -933,6 +954,7 @@ static int init_va(void)
                 printf("Use profile VAProfileH264Baseline\n");
                 ip_period = 1;
                 constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
+                h264_entropy_mode = 0;
                 break;
             case VAProfileH264ConstrainedBaseline:
                 printf("Use profile VAProfileH264ConstrainedBaseline\n");
@@ -1273,6 +1295,8 @@ static int render_sequence(void)
     seq_param.seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;;
     seq_param.seq_fields.bits.frame_mbs_only_flag = 1;
     seq_param.seq_fields.bits.chroma_format_idc = 1;
+    seq_param.seq_fields.bits.direct_8x8_inference_flag = 1;
+    
     if (frame_width != frame_width_mbaligned ||
         frame_height != frame_height_mbaligned) {
         seq_param.frame_cropping_flag = 1;
@@ -1390,7 +1414,7 @@ static int render_picture(void)
     
     pic_param.pic_fields.bits.idr_pic_flag = (current_frame_type == FRAME_IDR);
     pic_param.pic_fields.bits.reference_pic_flag = (current_frame_type != FRAME_B);
-    pic_param.pic_fields.bits.entropy_coding_mode_flag = 1;
+    pic_param.pic_fields.bits.entropy_coding_mode_flag = h264_entropy_mode;
     pic_param.pic_fields.bits.deblocking_filter_control_present_flag = 1;
     pic_param.frame_num = current_frame_num;
     pic_param.coded_buf = coded_buf[current_slot];
@@ -1595,7 +1619,8 @@ static int render_slice(void)
     slice_param.num_macroblocks = frame_width_mbaligned * frame_height_mbaligned/(16*16); /* Measured by MB */
     slice_param.slice_type = (current_frame_type == FRAME_IDR)?2:current_frame_type;
     if (current_frame_type == FRAME_IDR) {
-        ++slice_param.idr_pic_id;
+        if (current_frame_encoding != 0)
+            ++slice_param.idr_pic_id;
     } else if (current_frame_type == FRAME_P) {
         int refpiclist0_max = h264_maxref & 0xffff;
         memcpy(slice_param.RefPicList0, RefPicList0_P, refpiclist0_max*sizeof(VAPictureH264));
@@ -1621,8 +1646,9 @@ static int render_slice(void)
         }
     }
 
-    slice_param.slice_alpha_c0_offset_div2 = 2;
-    slice_param.slice_beta_offset_div2 = 2;
+    slice_param.slice_alpha_c0_offset_div2 = 0;
+    slice_param.slice_beta_offset_div2 = 0;
+    slice_param.direct_spatial_mv_pred_flag = 1;
     slice_param.pic_order_cnt_lsb = (current_frame_display - current_IDR_display) % MaxPicOrderCntLsb;
     
     va_status = vaCreateBuffer(va_dpy,context_id,VAEncSliceParameterBufferType,
@@ -1631,7 +1657,7 @@ static int render_slice(void)
 
     va_status = vaRenderPicture(va_dpy,context_id, &slice_param_buf, 1);
     CHECK_VASTATUS(va_status,"vaRenderPicture");
-
+    
     return 0;
 }
 
