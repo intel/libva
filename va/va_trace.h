@@ -96,6 +96,20 @@ void va_TraceCreateContext(
     VAContextID *context		/* out */
 );
 
+void va_TraceCreateBuffer (
+    VADisplay dpy,
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
+);
+    
+void va_TraceDestroyBuffer (
+    VADisplay dpy,
+    VABufferID buf_id    /* in */
+);
 
 void va_TraceMapBuffer (
     VADisplay dpy,

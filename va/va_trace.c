@@ -619,6 +619,61 @@ static char * buffer_type_to_string(int type)
     }
 }
 
+void va_TraceCreateBuffer (
+    VADisplay dpy,
+    VAContextID context,	/* in */
+    VABufferType type,		/* in */
+    unsigned int size,		/* in */
+    unsigned int num_elements,	/* in */
+    void *data,			/* in */
+    VABufferID *buf_id		/* out */
+)
+{
+    DPY2INDEX(dpy);
+
+    /* only trace CodedBuffer */
+    if (type != VAEncCodedBufferType)
+        return;
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    va_TraceMsg(idx, "\tbuf_id=0x%x\n", *buf_id);
+    va_TraceMsg(idx, "\tsize=%d\n", size);
+    va_TraceMsg(idx, "\tnum_elements=%d\n", num_elements);
+    
+    va_TraceMsg(idx, NULL);
+}
+
+void va_TraceDestroyBuffer (
+    VADisplay dpy,
+    VABufferID buf_id    /* in */
+)
+{
+    VABufferType type;
+    unsigned int size;
+    unsigned int num_elements;
+    
+    VACodedBufferSegment *buf_list;
+    int i = 0;
+    
+    DPY2INDEX(dpy);
+
+    vaBufferInfo(dpy, trace_context[idx].trace_context, buf_id, &type, &size, &num_elements);    
+    
+    /* only trace CodedBuffer */
+    if (type != VAEncCodedBufferType)
+        return;
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    va_TraceMsg(idx, "\tbuf_id=0x%x\n", buf_id);
+    va_TraceMsg(idx, "\tsize=%d\n", size);
+    va_TraceMsg(idx, "\tnum_elements=%d\n", num_elements);
+    
+    va_TraceMsg(idx, NULL);
+}
+
+
 void va_TraceMapBuffer (
     VADisplay dpy,
     VABufferID buf_id,    /* in */
