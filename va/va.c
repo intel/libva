@@ -800,15 +800,22 @@ VAStatus vaCreateBuffer (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus;
+  int ret = 0;
+  
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-  int ret = 0;
 
   VA_FOOL_FUNC(va_FoolCreateBuffer, dpy, context, type, size, num_elements, data, buf_id);
   if (ret)
       return VA_STATUS_SUCCESS;
 
-  return ctx->vtable->vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
+  vaStatus = ctx->vtable->vaCreateBuffer( ctx, context, type, size, num_elements, data, buf_id);
+
+  VA_TRACE_LOG(va_TraceCreateBuffer,
+               dpy, context, type, size, num_elements, data, buf_id);
+  
+  return vaStatus;
 }
 
 VAStatus vaBufferSetNumElements (
@@ -878,6 +885,9 @@ VAStatus vaDestroyBuffer (
   ctx = CTX(dpy);
 
   VA_FOOL_RETURN();
+
+  VA_TRACE_LOG(va_TraceDestroyBuffer,
+               dpy, buffer_id);
   
   return ctx->vtable->vaDestroyBuffer( ctx, buffer_id );
 }
