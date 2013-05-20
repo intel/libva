@@ -1692,6 +1692,7 @@ static void va_TraceVAEncMiscParameterBuffer(
 
         va_TraceMsg(idx, "VAEncMiscParameterRateControl\n");
         va_TraceMsg(idx, "\tbits_per_second = %d\n", p->bits_per_second);
+        va_TraceMsg(idx, "\ttarget_percentage = %d\n", p->target_percentage);
         va_TraceMsg(idx, "\twindow_size = %d\n", p->window_size);
         va_TraceMsg(idx, "\tinitial_qp = %d\n", p->initial_qp);
         va_TraceMsg(idx, "\tmin_qp = %d\n", p->min_qp);
