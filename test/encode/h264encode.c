@@ -1322,6 +1322,8 @@ static int render_sequence(void)
     misc_rate_ctrl = (VAEncMiscParameterRateControl *)misc_param->data;
     memset(misc_rate_ctrl, 0, sizeof(*misc_rate_ctrl));
     misc_rate_ctrl->bits_per_second = frame_bitrate;
+    misc_rate_ctrl->target_percentage = 66;
+    misc_rate_ctrl->window_size = 1000;
     misc_rate_ctrl->initial_qp = initial_qp;
     misc_rate_ctrl->min_qp = minimal_qp;
     misc_rate_ctrl->basic_unit_size = 0;
@@ -1680,55 +1682,44 @@ static int upload_source_YUV_once_for_all()
     return 0;
 }
 
-#define check_ret(ret)                                  \
-if (ret != 1) {                                         \
-    printf("fread doesn't return enough data\n");       \
-    exit(1);                                            \
-}
 static int load_surface(VASurfaceID surface_id, unsigned long long display_order)
 {
-    unsigned char *src_Y = NULL, *src_U = NULL, *src_V = NULL;
-    int ret = 0;
+    unsigned char *srcyuv_ptr = NULL, *src_Y = NULL, *src_U = NULL, *src_V = NULL;
+    unsigned long long frame_start, mmap_start;
+    char *mmap_ptr = NULL;
+    int frame_size, mmap_size;
     
     if (srcyuv_fp == NULL)
         return 0;
     
-    /* rewind the file pointer if encoding more than srcyuv_frames */
+    /* allow encoding more than srcyuv_frames */    
     display_order = display_order % srcyuv_frames;
-    fseek(srcyuv_fp, display_order * frame_width * frame_height * 1.5, SEEK_SET);
+    frame_size = frame_width * frame_height * 3 / 2; /* for YUV420 */
+    frame_start = display_order * frame_size;
     
-
+    mmap_start = frame_start & (~0xfff);
+    mmap_size = (frame_size + (frame_start & 0xfff) + 0xfff) & (~0xfff);
+    mmap_ptr = mmap(0, mmap_size, PROT_READ, MAP_SHARED,
+                    fileno(srcyuv_fp), mmap_start);
+    if (mmap_ptr == MAP_FAILED) {
+        printf("Failed to mmap YUV file (%s)\n", strerror(errno));
+        return 1;
+    }
+    srcyuv_ptr = (unsigned char *)mmap_ptr +  (frame_start & 0xfff);
     if (srcyuv_fourcc == VA_FOURCC_NV12) {
-        int uv_size = 2 * (frame_width/2) * (frame_height/2);
-
-        src_Y = malloc(2 * uv_size);
-        src_U = malloc(uv_size);
-        
-        ret = fread(src_Y, frame_width * frame_height, 1, srcyuv_fp);
-        check_ret(ret);
-        ret = fread(src_U, uv_size, 1, srcyuv_fp);
-        check_ret(ret);
+        src_Y = srcyuv_ptr;
+        src_U = src_Y + frame_width * frame_height;
+        src_V = NULL;
     } else if (srcyuv_fourcc == VA_FOURCC_IYUV ||
         srcyuv_fourcc == VA_FOURCC_YV12) {
-        int uv_size = (frame_width/2) * (frame_height/2);
-
-        src_Y = malloc(4 * uv_size);
-        src_U = malloc(uv_size);
-        src_V = malloc(uv_size);
-
-        ret = fread(src_Y, frame_width * frame_height, 1, srcyuv_fp);
-        check_ret(ret);
+        src_Y = srcyuv_ptr;
         if (srcyuv_fourcc == VA_FOURCC_IYUV) {
-            ret = fread(src_U, uv_size, 1, srcyuv_fp);
-            check_ret(ret);
-            ret = fread(src_V, uv_size, 1, srcyuv_fp);
-            check_ret(ret);
+            src_U = src_Y + frame_width * frame_height;
+            src_V = src_U + (frame_width/2) * (frame_height/2);
         } else { /* YV12 */
-            ret = fread(src_V, uv_size, 1, srcyuv_fp);
-            check_ret(ret);
-            ret = fread(src_U, uv_size, 1, srcyuv_fp);
-            check_ret(ret);
-        }
+            src_V = src_Y + frame_width * frame_height;
+            src_U = src_V + (frame_width/2) * (frame_height/2);
+        } 
     } else {
         printf("Unsupported source YUV format\n");
         exit(1);
@@ -1737,12 +1728,8 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     upload_surface_yuv(va_dpy, surface_id,
                        srcyuv_fourcc, frame_width, frame_height,
                        src_Y, src_U, src_V);
-    if (src_Y)
-        free(src_Y);
-    if (src_U)
-        free(src_U);
-    if (src_V)
-        free(src_V);
+    if (mmap_ptr)
+        munmap(mmap_ptr, mmap_size);
 
     return 0;
 }
@@ -1805,6 +1792,8 @@ static int save_recyuv(VASurfaceID surface_id,
     if (dst_V)
         free(dst_V);
 
+    fflush(recyuv_fp);
+
     return 0;
 }
 
@@ -1841,16 +1830,10 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
             break;
     }
     printf("%08lld", encode_order);
-    /*
-    if (current_frame_encoding % intra_count == 0)
-        printf("(I)");
-    else
-        printf("(P)");
-    */
     printf("(%06d bytes coded)",coded_size);
-    /* skipped frame ? */
-    printf("                                    ");
 
+    fflush(coded_fp);
+    
     return 0;
 }
 
@@ -2026,12 +2009,7 @@ static int encode_frames(void)
             storage_task(current_frame_display, current_frame_encoding);
         else /* queue the storage task queue */
             storage_task_queue(current_frame_display, current_frame_encoding);
-
-        /* how to process skipped frames
-           surface_status = (VASurfaceStatus) 0;
-           va_status = vaQuerySurfaceStatus(va_dpy, src_surface[i%SURFACE_NUM],&surface_status);
-           frame_skipped = (surface_status & VASurfaceSkipped);
-        */
+        
         update_ReferenceFrames();        
     }
 
@@ -2103,36 +2081,39 @@ static int print_input()
 
 static int calc_PSNR(double *psnr)
 {
-    unsigned long srcyuv_size, recyuv_size, min_size;
-    char *srcyuv_ptr, *recyuv_ptr;
-    unsigned long i, sse=0;
+    char *srcyuv_ptr = NULL, *recyuv_ptr = NULL, tmp;
+    unsigned long long min_size;
+    unsigned long long i, sse=0;
     double ssemean;
-    
-    fseek(srcyuv_fp, 0L, SEEK_END);
-    srcyuv_size = ftell(srcyuv_fp);
-    fseek(recyuv_fp, 0L, SEEK_END);
-    recyuv_size = ftell(recyuv_fp);
-    
-    fseek(srcyuv_fp, 0L, SEEK_SET);
-    fseek(recyuv_fp, 0L, SEEK_SET);
+    int fourM = 0x400000; /* 4M */
 
-    min_size = MIN(srcyuv_size,recyuv_size);
-    srcyuv_ptr = mmap (0, min_size, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), 0);
-    recyuv_ptr = mmap (0, min_size, PROT_READ, MAP_SHARED, fileno(recyuv_fp), 0);
-    if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
-        printf("Failed to mmap YUV files\n");
-        return 1;
-    }
-    
+    min_size = MIN(srcyuv_frames, frame_count) * frame_width * frame_height * 1.5;
     for (i=0; i<min_size; i++) {
-        char tmp = srcyuv_ptr[i] - recyuv_ptr[i];
+        unsigned long long j = i % fourM;
+        
+        if ((i % fourM) == 0) {
+            if (srcyuv_ptr)
+                munmap(srcyuv_ptr, fourM);
+            if (recyuv_ptr)
+                munmap(recyuv_ptr, fourM);
+            
+            srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
+            recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
+            if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
+                printf("Failed to mmap YUV files\n");
+                return 1;
+            }
+        }
+        tmp = srcyuv_ptr[j] - recyuv_ptr[j];
         sse += tmp * tmp;
     }
     ssemean = (double)sse/(double)min_size;
     *psnr = 20.0*log10(255) - 10.0*log10(ssemean);
-           
-    munmap(srcyuv_ptr, min_size);
-    munmap(recyuv_ptr, min_size);
+
+    if (srcyuv_ptr)
+        munmap(srcyuv_ptr, fourM);
+    if (recyuv_ptr)
+        munmap(recyuv_ptr, fourM);
     
     return 0;
 }
