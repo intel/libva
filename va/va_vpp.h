@@ -312,6 +312,14 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardSMPTE240M,
     /** \brief Generic film. */
     VAProcColorStandardGenericFilm,
+    /** \brief sRGB. */
+    VAProcColorStandardSRGB,
+    /** \brief stRGB. */
+    VAProcColorStandardSTRGB,
+    /** \brief xvYCC601. */
+    VAProcColorStandardXVYCC601,
+    /** \brief xvYCC709. */
+    VAProcColorStandardXVYCC709,
     /** \brief Number of color standards. */
     VAProcColorStandardCount
 } VAProcColorStandardType;
