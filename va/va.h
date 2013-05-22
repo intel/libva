@@ -2174,7 +2174,7 @@ typedef struct _VAImage
     unsigned short	width; 
     unsigned short	height;
     unsigned int	data_size;
-    unsigned int	num_planes;	/* can not be greater than 3 */
+    unsigned int	num_planes;	/* can not be greater than 4 */
     /* 
      * An array indicating the scanline pitch in bytes for each plane.
      * Each plane may have a different pitch. Maximum 3 planes for planar formats
@@ -2198,6 +2198,12 @@ typedef struct _VAImage
      * Only entry_bytes characters of the string are used.
      */
     char component_order[4];
+    /*
+     * Pitch and byte offset for the fourth plane if the image format requires 4 planes
+     * Particular use case is JPEG with CMYK profile
+     */
+    unsigned int extra_pitch;
+    unsigned int extra_offset;
 } VAImage;
 
 /* Get maximum number of image formats supported by the implementation */
