@@ -253,6 +253,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterSkinToneEnhancement,
     /** \brief Total Color Correction. */
     VAProcFilterTotalColorCorrection,
+    /** \brief Non-Linear Anamorphic Scaling. */
+    VAProcFilterNonLinearAnamorphicScaling,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -796,6 +798,18 @@ typedef struct _VAProcFilterParamterBufferTotalColorCorrection {
     float                       yellow;
 } VAProcFilterParameterBufferTotalColorCorrection;
 
+/** \brief Non-Linear Anamorphic Scaling filter parametrization. */
+typedef struct _VAProcFilterParameterBufferNonLinearAnamorphicScaling {
+    /** \brief filter type. Shall be set to #VAProcFilterNonLinearAnamorphicScaling. */
+    VAProcFilterType    type;
+    /** \brief Vertical crop. */
+    float               vertical_crop;
+    /** \brief HLinear region. */
+    float               horizontal_linear_region;
+    /** \brief Non-linear crop. */
+    float               nonlinear_crop;
+} VAProcFilterParameterBufferNonLinearAnamorphicScaling;
+
 /**
  * \brief Default filter cap specification (single range value).
  *
@@ -836,6 +850,16 @@ typedef struct _VAProcFilterCapTotalColorCorrection {
     /** \brief Range of supported values for yellow saturation. */
     VAProcFilterValueRange      yellow_range;
 } VAProcFilterCapTotalColorCorrection;
+
+/** \brief Capabilities specification for the Non-Linear Anamorphic Scaling filter. */
+typedef struct _VAProcFilterCapNonLinearAnamorphicScaling {
+    /** \brief Range of supported values for the vertical crop. */
+    VAProcFilterValueRange      vertical_crop_range;
+    /** \brief Range of supported values for the horizontal linear region. */
+    VAProcFilterValueRange      horizontal_linear_region_range;
+    /** \brief Range of supported values for the non-linear crop. */
+    VAProcFilterValueRange      nonlinear_crop_range;
+} VAProcFilterCapNonLinearAnamorphicScaling;
 
 /**
  * \brief Queries video processing filters.
