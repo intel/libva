@@ -70,6 +70,7 @@ LOCAL_COPY_HEADERS := \
 	va_backend.h \
 	va_dec_jpeg.h \
 	va_drmcommon.h \
+	va_enc_jpeg.h \
 	va_enc_vp8.h \
 	va_version.h
 
