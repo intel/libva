@@ -30,6 +30,7 @@
 #include "va_backend.h"
 #include "va_trace.h"
 #include "va_enc_h264.h"
+#include "va_enc_jpeg.h"
 #include "va_dec_jpeg.h"
 #include "va_dec_vp8.h"
 #include "va_vpp.h"
