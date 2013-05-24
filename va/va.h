@@ -402,6 +402,28 @@ typedef enum
      * through VAEncSliceParameterBufferH264::macroblock_info.
      */
     VAConfigAttribEncMacroblockInfo     = 16,
+    /**
+     * \brief Maximum picture width. Read-only.
+     *
+     * This attribute determines the maximum picture width the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureWidth     = 18,
+    /**
+     * \brief Maximum picture height. Read-only.
+     *
+     * This attribute determines the maximum picture height the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureHeight    = 19,
+    /**
+     * \brief JPEG encoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * JPEG implementation. The attribute value is partitioned into fields as defined in the 
+     * VAConfigAttribValEncJPEG union.
+     */
+    VAConfigAttribEncJPEG             = 20,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -492,6 +514,25 @@ typedef struct _VAConfigAttrib {
 /** \brief Driver supports an arbitrary number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
 /**@}*/
+
+/** \brief Attribute value for VAConfigAttribEncJPEG */
+typedef union _VAConfigAttribValEncJPEG {
+    struct {
+        /** \brief set to 1 for arithmatic coding. */
+        unsigned int arithmatic_coding_mode : 1;
+        /** \brief set to 1 for progressive dct. */
+        unsigned int progressive_dct_mode : 1;
+        /** \brief set to 1 for non-interleaved. */
+        unsigned int non_interleaved_mode : 1;
+        /** \brief set to 1 for differential. */
+        unsigned int differential_mode : 1;
+        unsigned int max_num_components : 3;
+        unsigned int max_num_scans : 4;
+        unsigned int max_num_huffman_tables : 3;
+        unsigned int max_num_quantization_tables : 3;
+    } bits;
+    unsigned int value;
+} VAConfigAttribValEncJPEG;
 
 /*
  * if an attribute is not applicable for a given
@@ -1096,28 +1137,6 @@ typedef struct _VASliceParameterBufferBase
     unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
     unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
 } VASliceParameterBufferBase;
-
-
-/****************************
- * JEPG data structure
- ***************************/
-typedef struct _VAQMatrixBufferJPEG
-{
-    int load_lum_quantiser_matrix;
-    int load_chroma_quantiser_matrix;
-    unsigned char lum_quantiser_matrix[64];
-    unsigned char chroma_quantiser_matrix[64];
-} VAQMatrixBufferJPEG;
-
-typedef struct _VAEncPictureParameterBufferJPEG
-{
-    VASurfaceID reconstructed_picture;
-    unsigned short picture_width;
-    unsigned short picture_height;
-    VABufferID coded_buf;
-} VAEncPictureParameterBufferJPEG;
-
-#include <va/va_dec_jpeg.h>
 
 /****************************
  * MPEG-2 data structures
