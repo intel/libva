@@ -655,6 +655,142 @@ VAStatus vaQueryConfigAttributes (
   return ctx->vtable->vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
+/* XXX: this is a slow implementation that will be removed */
+static VAStatus
+va_impl_query_surface_attributes(
+    VADriverContextP    ctx,
+    VAConfigID          config,
+    VASurfaceAttrib    *out_attribs,
+    unsigned int       *out_num_attribs_ptr
+)
+{
+    VASurfaceAttrib *attribs = NULL;
+    unsigned int num_attribs, n;
+    VASurfaceAttrib *out_attrib;
+    unsigned int out_num_attribs;
+    VAImageFormat *image_formats = NULL;
+    int num_image_formats, i;
+    VAStatus va_status;
+
+    /* List of surface attributes to query */
+    struct va_surface_attrib_map {
+        VASurfaceAttribType type;
+        VAGenericValueType  value_type;
+    };
+    static const struct va_surface_attrib_map attribs_map[] = {
+        { VASurfaceAttribMinWidth,      VAGenericValueTypeInteger },
+        { VASurfaceAttribMaxWidth,      VAGenericValueTypeInteger },
+        { VASurfaceAttribMinHeight,     VAGenericValueTypeInteger },
+        { VASurfaceAttribMaxHeight,     VAGenericValueTypeInteger },
+        { VASurfaceAttribMemoryType,    VAGenericValueTypeInteger },
+        { VASurfaceAttribNone, }
+    };
+
+    if (!out_attribs || !out_num_attribs_ptr)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+    if (!ctx->vtable->vaGetSurfaceAttributes)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+
+    num_image_formats = ctx->max_image_formats;
+    image_formats = malloc(num_image_formats * sizeof(*image_formats));
+    if (!image_formats) {
+        va_status = VA_STATUS_ERROR_ALLOCATION_FAILED;
+        goto end;
+    }
+
+    va_status = ctx->vtable->vaQueryImageFormats(
+        ctx, image_formats, &num_image_formats);
+    if (va_status != VA_STATUS_SUCCESS)
+        goto end;
+
+    num_attribs = VASurfaceAttribCount + num_image_formats;
+    attribs = malloc(num_attribs * sizeof(*attribs));
+    if (!attribs) {
+        va_status = VA_STATUS_ERROR_ALLOCATION_FAILED;
+        goto end;
+    }
+
+    /* Initialize with base surface attributes, except pixel-formats */
+    for (n = 0; attribs_map[n].type != VASurfaceAttribNone; n++) {
+        VASurfaceAttrib * const attrib = &attribs[n];
+        attrib->type = attribs_map[n].type;
+        attrib->flags = VA_SURFACE_ATTRIB_GETTABLE;
+        attrib->value.type = attribs_map[n].value_type;
+    }
+
+    /* Append image formats */
+    for (i = 0; i < num_image_formats; i++) {
+        VASurfaceAttrib * const attrib = &attribs[n];
+        attrib->type = VASurfaceAttribPixelFormat;
+        attrib->flags = VA_SURFACE_ATTRIB_GETTABLE|VA_SURFACE_ATTRIB_SETTABLE;
+        attrib->value.type = VAGenericValueTypeInteger;
+        attrib->value.value.i = image_formats[i].fourcc;
+        if (++n == num_attribs) {
+            va_status = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            goto end;
+        }
+    }
+    num_attribs = n;
+
+    va_status = ctx->vtable->vaGetSurfaceAttributes(
+        ctx, config, attribs, num_attribs);
+    if (va_status != VA_STATUS_SUCCESS)
+        goto end;
+
+    /* Remove invalid entries */
+    out_num_attribs = 0;
+    for (n = 0; n < num_attribs; n++) {
+        VASurfaceAttrib * const attrib = &attribs[n];
+
+        if (attrib->flags == VA_SURFACE_ATTRIB_NOT_SUPPORTED)
+            continue;
+
+        // Accept all surface attributes that are not pixel-formats
+        if (attrib->type != VASurfaceAttribPixelFormat) {
+            out_num_attribs++;
+            continue;
+        }
+
+        // Drop invalid pixel-format attribute
+        if (!attrib->value.value.i) {
+            attrib->flags = VA_SURFACE_ATTRIB_NOT_SUPPORTED;
+            continue;
+        }
+
+        // Check for duplicates
+        int is_duplicate = 0;
+        for (i = n - 1; i >= 0 && !is_duplicate; i--) {
+            const VASurfaceAttrib * const prev_attrib = &attribs[i];
+            if (prev_attrib->type != VASurfaceAttribPixelFormat)
+                break;
+            is_duplicate = prev_attrib->value.value.i == attrib->value.value.i;
+        }
+        if (is_duplicate)
+            attrib->flags = VA_SURFACE_ATTRIB_NOT_SUPPORTED;
+        else
+            out_num_attribs++;
+    }
+
+    if (*out_num_attribs_ptr < out_num_attribs) {
+        *out_num_attribs_ptr = out_num_attribs;
+        va_status = VA_STATUS_ERROR_MAX_NUM_EXCEEDED;
+        goto end;
+    }
+
+    out_attrib = out_attribs;
+    for (n = 0; n < num_attribs; n++) {
+        const VASurfaceAttrib * const attrib = &attribs[n];
+        if (attrib->flags == VA_SURFACE_ATTRIB_NOT_SUPPORTED)
+            continue;
+        *out_attrib++ = *attrib;
+    }
+
+end:
+    free(attribs);
+    free(image_formats);
+    return va_status;
+}
+
 VAStatus
 vaQuerySurfaceAttributes(
     VADisplay           dpy,
@@ -672,7 +808,8 @@ vaQuerySurfaceAttributes(
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
     if (!ctx->vtable->vaQuerySurfaceAttributes)
-        return VA_STATUS_ERROR_UNIMPLEMENTED;
+        return va_impl_query_surface_attributes(ctx, config,
+            attrib_list, num_attribs);
 
     vaStatus = ctx->vtable->vaQuerySurfaceAttributes(ctx, config,
         attrib_list, num_attribs);
