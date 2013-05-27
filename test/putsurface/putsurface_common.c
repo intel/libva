@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <getopt.h>
 
 #include <sys/time.h>
@@ -59,7 +60,11 @@ if (va_status != VA_STATUS_SUCCESS) {                                   \
 
 static  void *win_display;
 static  VADisplay va_dpy;
-static  VAConfigID config_id;
+static  VAImageFormat *va_image_formats;
+static  int va_num_image_formats = -1;
+static  VAConfigID vpp_config_id = VA_INVALID_ID;
+static  VASurfaceAttrib *va_surface_attribs;
+static  int va_num_surface_attribs = -1;
 static  VASurfaceID surface_id[SURFACE_NUM];
 static  pthread_mutex_t surface_mutex[SURFACE_NUM];
 
@@ -123,46 +128,151 @@ char* map_vafourcc_to_str (unsigned int format)
 
 }
 
+static int
+va_value_equals(const VAGenericValue *v1, const VAGenericValue *v2)
+{
+    if (v1->type != v2->type)
+        return 0;
+
+    switch (v1->type) {
+    case VAGenericValueTypeInteger:
+        return v1->value.i == v2->value.i;
+    case VAGenericValueTypeFloat:
+        return v1->value.f == v2->value.f;
+    case VAGenericValueTypePointer:
+        return v1->value.p == v2->value.p;
+    case VAGenericValueTypeFunc:
+        return v1->value.fn == v2->value.fn;
+    }
+    return 0;
+}
+
+static int
+ensure_image_formats(void)
+{
+    VAStatus va_status;
+    VAImageFormat *image_formats;
+    int num_image_formats;
+
+    if (va_num_image_formats >= 0)
+        return va_num_image_formats;
+
+    num_image_formats = vaMaxNumImageFormats(va_dpy);
+    if (num_image_formats == 0)
+        return 0;
+
+    image_formats = malloc(num_image_formats * sizeof(*image_formats));
+    if (!image_formats)
+        return 0;
+
+    va_status = vaQueryImageFormats(va_dpy, image_formats, &num_image_formats);
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes()");
+
+    va_image_formats = image_formats;
+    va_num_image_formats = num_image_formats;
+    return num_image_formats;
+}
+
+static const VAImageFormat *
+lookup_image_format(uint32_t fourcc)
+{
+    int i;
+
+    if (!ensure_image_formats())
+        return NULL;
+
+    for (i = 0; i < va_num_image_formats; i++) {
+        const VAImageFormat * const image_format = &va_image_formats[i];
+        if (image_format->fourcc == fourcc)
+            return image_format;
+    }
+    return NULL;
+}
+
+static int
+ensure_surface_attribs(void)
+{
+    VAStatus va_status;
+    VASurfaceAttrib *surface_attribs;
+    unsigned int num_image_formats, num_surface_attribs;
+
+    if (va_num_surface_attribs >= 0)
+        return va_num_surface_attribs;
+
+    num_image_formats = vaMaxNumImageFormats(va_dpy);
+    if (num_image_formats == 0)
+        return 0;
+
+    va_status = vaCreateConfig(va_dpy, VAProfileNone, VAEntrypointVideoProc,
+        NULL, 0, &vpp_config_id);
+    CHECK_VASTATUS(va_status, "vaCreateConfig()");
+
+    /* Guess the number of surface attributes, thus including any
+       pixel-format supported by the VA driver */
+    num_surface_attribs = VASurfaceAttribCount + num_image_formats;
+    surface_attribs = malloc(num_surface_attribs * sizeof(*surface_attribs));
+    if (!surface_attribs)
+        return 0;
+
+    va_status = vaQuerySurfaceAttributes(va_dpy, vpp_config_id,
+        surface_attribs, &num_surface_attribs);
+    if (va_status == VA_STATUS_SUCCESS)
+        va_surface_attribs =  surface_attribs;
+    else if (va_status == VA_STATUS_ERROR_MAX_NUM_EXCEEDED) {
+        va_surface_attribs = realloc(surface_attribs,
+            num_surface_attribs * sizeof(*va_surface_attribs));
+        if (!va_surface_attribs) {
+            free(surface_attribs);
+            return 0;
+        }
+        va_status = vaQuerySurfaceAttributes(va_dpy, vpp_config_id,
+            va_surface_attribs, &num_surface_attribs);
+    }
+    CHECK_VASTATUS(va_status, "vaQuerySurfaceAttributes()");
+    va_num_surface_attribs = num_surface_attribs;
+    return num_surface_attribs;
+}
+
+static const VASurfaceAttrib *
+lookup_surface_attrib(VASurfaceAttribType type, const VAGenericValue *value)
+{
+    int i;
+
+    if (!ensure_surface_attribs())
+        return NULL;
+
+    for (i = 0; i < va_num_surface_attribs; i++) {
+        const VASurfaceAttrib * const surface_attrib = &va_surface_attribs[i];
+        if (surface_attrib->type != type)
+            continue;
+        if (!(surface_attrib->flags & VA_SURFACE_ATTRIB_SETTABLE))
+            continue;
+        if (va_value_equals(&surface_attrib->value, value))
+            return surface_attrib;
+    }
+    return NULL;
+}
+
 int csc_preparation ()
 {
     VAStatus va_status;
-    int i;
     
     // 1. make sure dst fourcc is supported for vaImage
-    #define MAX_IMAGE_FORMAT_COUNT      10
-    VAImageFormat format_list[MAX_IMAGE_FORMAT_COUNT];
-    int num_formats = 0, find_dst_fourcc = 0;
-    
-    va_status = vaQueryImageFormats(va_dpy, format_list,&num_formats);
-    printf("num_formats: %d\n", num_formats);
-    assert(num_formats<MAX_IMAGE_FORMAT_COUNT);
-    for (i=0; i<num_formats; i++) {
-        if (format_list[i].fourcc == csc_dst_fourcc) {
-            find_dst_fourcc = 1;
-        }
-    }
-    if (!find_dst_fourcc) {
+    if (!lookup_image_format(csc_dst_fourcc)) {
         test_color_conversion = 0;
-        printf("vaImage doesn't support %s, skip additional color conversion\n",  map_vafourcc_to_str(csc_dst_fourcc));
+        printf("VA driver doesn't support %s image, skip additional color conversion\n",  map_vafourcc_to_str(csc_dst_fourcc));
         goto cleanup;
     }
 
     // 2. make sure src_fourcc is supported for vaSurface
-    VASurfaceAttrib s_attrib[1];
-    va_status = vaCreateConfig(va_dpy, VAProfileNone, VAEntrypointVideoProc,
-                                          NULL, 0,&config_id);
-    CHECK_VASTATUS(va_status, "vaCreateConfig");
+    VASurfaceAttrib surface_attribs[1], * const s_attrib = &surface_attribs[0];
+    s_attrib->type = VASurfaceAttribPixelFormat;
+    s_attrib->flags = VA_SURFACE_ATTRIB_SETTABLE;
+    s_attrib->value.type = VAGenericValueTypeInteger;
+    s_attrib->value.value.i = csc_src_fourcc;
 
-    s_attrib[0].flags = VA_SURFACE_ATTRIB_SETTABLE;
-    s_attrib[0].type = VASurfaceAttribPixelFormat;
-    s_attrib[0].value.type = VAGenericValueTypeInteger;
-    s_attrib[0].value.value.i = csc_src_fourcc;
-
-    va_status = vaGetSurfaceAttributes(va_dpy, config_id, s_attrib, 1);
-    CHECK_VASTATUS(va_status,"vaGetSurfaceAttributes");
-    if (! (s_attrib[0].flags & VA_SURFACE_ATTRIB_SETTABLE)) {
-        printf("vaSurface doesn't support %s, skip additional color conversion\n",  map_vafourcc_to_str(csc_src_fourcc));
-        vaDestroyConfig (va_dpy, config_id);
+    if (!lookup_surface_attrib(VASurfaceAttribPixelFormat, &s_attrib->value)) {
+        printf("VA driver doesn't support %s surface, skip additional color conversion\n",  map_vafourcc_to_str(csc_src_fourcc));
         test_color_conversion = 0;
         goto cleanup;
     }
@@ -173,7 +283,7 @@ int csc_preparation ()
         va_dpy,
         VA_RT_FORMAT_YUV420, surface_width, surface_height,
         &surface_id[0], SURFACE_NUM,
-        s_attrib, 1
+        surface_attribs, 1
     );
     CHECK_VASTATUS(va_status,"vaCreateSurfaces");
 
@@ -190,11 +300,11 @@ int csc_preparation ()
     
 
     // 3.3 create a temp VASurface for final rendering(vaPutSurface)
-    s_attrib[0].value.value.i = VA_FOURCC_NV12;
+    s_attrib->value.value.i = VA_FOURCC_NV12;
     va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420, 
                                  surface_width, surface_height,
                                  &csc_render_surface, 1, 
-                                 s_attrib, 1);
+                                 surface_attribs, 1);
     CHECK_VASTATUS(va_status,"vaCreateSurfaces");
 
 
@@ -559,12 +669,18 @@ int main(int argc,char **argv)
         
         va_status = vaDestroyImage(va_dpy, csc_dst_fourcc_image.image_id);
         CHECK_VASTATUS(va_status,"vaDestroyImage");
-        vaDestroyConfig (va_dpy, config_id);
     }
-    
+
+    if (vpp_config_id != VA_INVALID_ID) {
+        vaDestroyConfig (va_dpy, vpp_config_id);
+        vpp_config_id = VA_INVALID_ID;
+    }
+
     vaDestroySurfaces(va_dpy,&surface_id[0],SURFACE_NUM);    
     vaTerminate(va_dpy);
 
+    free(va_image_formats);
+    free(va_surface_attribs);
     close_display(win_display);
     
     return 0;
