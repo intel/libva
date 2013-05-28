@@ -48,6 +48,7 @@ struct jdec_private;
 #define COMPONENTS	   4
 #define JPEG_MAX_WIDTH	   2048
 #define JPEG_MAX_HEIGHT	   2048
+#define JPEG_SCAN_MAX	   4
 
 enum std_markers {
    DQT  = 0xDB, /* Define Quantization Table */
@@ -95,10 +96,10 @@ struct jpeg_sos
 struct jdec_private
 {
   /* Public variables */
-  unsigned int width, height;	/* Size of the image */
+  unsigned int width[JPEG_SCAN_MAX], height[JPEG_SCAN_MAX];	/* Size of the image */
 
   /* Private variables */
-  const unsigned char *stream_begin, *stream_end;
+  const unsigned char *stream_begin, *stream_end,*stream_scan;
   unsigned int stream_length;
 
   const unsigned char *stream;	/* Pointer to the current stream */
