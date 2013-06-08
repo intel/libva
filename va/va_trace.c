@@ -475,9 +475,11 @@ void va_TraceCreateConfig(
     va_TraceMsg(idx, "\tprofile = %d\n", profile);
     va_TraceMsg(idx, "\tentrypoint = %d\n", entrypoint);
     va_TraceMsg(idx, "\tnum_attribs = %d\n", num_attribs);
-    for (i = 0; i < num_attribs; i++) {
-        va_TraceMsg(idx, "\t\tattrib_list[%d].type = 0x%08x\n", i, attrib_list[i].type);
-        va_TraceMsg(idx, "\t\tattrib_list[%d].value = 0x%08x\n", i, attrib_list[i].value);
+    if (attrib_list) {
+        for (i = 0; i < num_attribs; i++) {
+            va_TraceMsg(idx, "\t\tattrib_list[%d].type = 0x%08x\n", i, attrib_list[i].type);
+            va_TraceMsg(idx, "\t\tattrib_list[%d].value = 0x%08x\n", i, attrib_list[i].value);
+        }
     }
     va_TraceMsg(idx, NULL);
 
@@ -519,6 +521,41 @@ void va_TraceCreateConfig(
     }
 }
 
+static void va_TraceSurfaceAttributes(
+    int idx,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int       *num_attribs
+)
+{
+    int i, num;
+    VASurfaceAttrib *p;
+    
+    if (!attrib_list || !num_attribs)
+        return;
+    
+    p = attrib_list;
+    num = *num_attribs;
+    if (num > VASurfaceAttribCount)
+        num = VASurfaceAttribCount;
+
+    for (i=0; i<num; i++) {
+        va_TraceMsg(idx, "\tattrib_list[%i] =\n", i);
+        
+        va_TraceMsg(idx, "\t\ttype = %d\n", p->type);
+        va_TraceMsg(idx, "\t\tflags = %d\n", p->flags);
+        va_TraceMsg(idx, "\t\tvalue.type = %d\n", p->value.type);
+        if (p->value.type == VAGenericValueTypeInteger)
+            va_TraceMsg(idx, "\t\tvalue.value.i = 0x%08x\n", p->value.value.i);
+        else if (p->value.type == VAGenericValueTypeFloat)
+        va_TraceMsg(idx, "\t\tvalue.value.f = %f\n", p->value.value.f);
+        else if (p->value.type == VAGenericValueTypePointer)
+            va_TraceMsg(idx, "\t\tvalue.value.p = %p\n", p->value.value.p);
+        else if (p->value.type == VAGenericValueTypeFunc)
+            va_TraceMsg(idx, "\t\tvalue.value.fn = %p\n", p->value.value.fn);
+
+        p++;
+    }
+}
 
 void va_TraceCreateSurfaces(
     VADisplay dpy,
@@ -541,9 +578,33 @@ void va_TraceCreateSurfaces(
     va_TraceMsg(idx, "\tformat = %d\n", format);
     va_TraceMsg(idx, "\tnum_surfaces = %d\n", num_surfaces);
 
-    for (i = 0; i < num_surfaces; i++)
-        va_TraceMsg(idx, "\t\tsurfaces[%d] = 0x%08x\n", i, surfaces[i]);
+    if (surfaces) {
+        for (i = 0; i < num_surfaces; i++)
+            va_TraceMsg(idx, "\t\tsurfaces[%d] = 0x%08x\n", i, surfaces[i]);
+    }
+    
+    va_TraceSurfaceAttributes(idx, attrib_list, &num_attribs);
 
+    va_TraceMsg(idx, NULL);
+}
+
+
+void va_TraceDestroySurfaces(
+    VADisplay dpy,
+    VASurfaceID *surface_list,
+    int num_surfaces
+)
+{
+    int i;
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    if (surface_list) {
+        for (i = 0; i < num_surfaces; i++)
+            va_TraceMsg(idx, "\t\tsurfaces[%d] = 0x%08x\n", i, surface_list[i]);
+    }
+    
     va_TraceMsg(idx, NULL);
 }
 
@@ -563,18 +624,22 @@ void va_TraceCreateContext(
     DPY2INDEX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
+    va_TraceMsg(idx, "\tconfig = 0x%08x\n", config_id);
     va_TraceMsg(idx, "\twidth = %d\n", picture_width);
     va_TraceMsg(idx, "\theight = %d\n", picture_height);
     va_TraceMsg(idx, "\tflag = 0x%08x\n", flag);
     va_TraceMsg(idx, "\tnum_render_targets = %d\n", num_render_targets);
-    for (i=0; i<num_render_targets; i++)
-        va_TraceMsg(idx, "\t\trender_targets[%d] = 0x%08x\n", i, render_targets[i]);
-    va_TraceMsg(idx, "\tcontext = 0x%08x\n", *context);
-    va_TraceMsg(idx, NULL);
-
-    trace_context[idx].trace_context = *context;
-
+    if (render_targets) {
+        for (i=0; i<num_render_targets; i++)
+            va_TraceMsg(idx, "\t\trender_targets[%d] = 0x%08x\n", i, render_targets[i]);
+    }
+    if (context) {
+        va_TraceMsg(idx, "\tcontext = 0x%08x\n", *context);
+        trace_context[idx].trace_context = *context;
+    } else
+        trace_context[idx].trace_context = VA_INVALID_ID;
+    
     trace_context[idx].trace_frame_no = 0;
     trace_context[idx].trace_slice_no = 0;
 
@@ -637,7 +702,8 @@ void va_TraceCreateBuffer (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
-    va_TraceMsg(idx, "\tbuf_id=0x%x\n", *buf_id);
+    if (buf_id)
+        va_TraceMsg(idx, "\tbuf_id=0x%x\n", *buf_id);
     va_TraceMsg(idx, "\tsize=%d\n", size);
     va_TraceMsg(idx, "\tnum_elements=%d\n", num_elements);
     
@@ -698,6 +764,9 @@ void va_TraceMapBuffer (
     TRACE_FUNCNAME(idx);
     va_TraceMsg(idx, "\tbuf_id=0x%x\n", buf_id);
     va_TraceMsg(idx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    if ((pbuf == NULL) || (*pbuf == NULL))
+        return;
+    
     buf_list = (VACodedBufferSegment *)(*pbuf);
     while (buf_list != NULL) {
         va_TraceMsg(idx, "\tCodedbuf[%d] =\n", i++);
@@ -2011,6 +2080,8 @@ static void va_TraceVAEncPictureParameterBufferJPEG(
     void *data)
 {
     VAEncPictureParameterBufferJPEG *p = (VAEncPictureParameterBufferJPEG *)data;
+    int i;
+    
     DPY2INDEX(dpy);
     
     va_TraceMsg(idx, "VAEncPictureParameterBufferJPEG\n");
@@ -2063,6 +2134,7 @@ static void va_TraceVAEncQMatrixBufferJPEG(
     
     return;
 }
+
 
 static void va_TraceH263Buf(
     VADisplay dpy,
@@ -2148,8 +2220,10 @@ static void va_TraceJPEGBuf(
     case VAProtectedSliceDataBufferType:
     case VAEncCodedBufferType:
     case VAEncSequenceParameterBufferType:
-    case VAEncSliceParameterBufferType:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncSliceParameterBufferType:
+        va_TraceVAEncPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAPictureParameterBufferType:
         va_TraceVAPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -2386,8 +2460,11 @@ void va_TraceRenderPicture(
     
     va_TraceMsg(idx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(idx, "\tnum_buffers = %d\n", num_buffers);
+    if (buffers == NULL)
+        return;
+    
     for (i = 0; i < num_buffers; i++) {
-        unsigned char *pbuf;
+        unsigned char *pbuf = NULL;
         unsigned int j;
         
         /* get buffer type information */
@@ -2400,7 +2477,9 @@ void va_TraceRenderPicture(
         va_TraceMsg(idx, "\t  num_elements = %d\n", num_elements);
 
         vaMapBuffer(dpy, buffers[i], (void **)&pbuf);
-
+        if (pbuf == NULL)
+            continue;
+        
         switch (trace_context[idx].trace_profile) {
         case VAProfileMPEG2Simple:
         case VAProfileMPEG2Main:
@@ -2513,6 +2592,23 @@ void va_TraceSyncSurface(
     va_TraceMsg(idx, NULL);
 }
 
+void va_TraceQuerySurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int       *num_attribs
+)
+{
+    DPY2INDEX(dpy);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(idx, "\tconfig = 0x%08x\n", config);
+    va_TraceSurfaceAttributes(idx, attrib_list, num_attribs);
+    
+    va_TraceMsg(idx, NULL);
+
+}
+
 
 void va_TraceQuerySurfaceStatus(
     VADisplay dpy,
@@ -2525,7 +2621,8 @@ void va_TraceQuerySurfaceStatus(
     TRACE_FUNCNAME(idx);
 
     va_TraceMsg(idx, "\trender_target = 0x%08x\n", render_target);
-    va_TraceMsg(idx, "\tstatus = 0x%08x\n", *status);
+    if (status)
+        va_TraceMsg(idx, "\tstatus = 0x%08x\n", *status);
     va_TraceMsg(idx, NULL);
 }
 
@@ -2542,9 +2639,9 @@ void va_TraceQuerySurfaceError(
     TRACE_FUNCNAME(idx);
     va_TraceMsg(idx, "\tsurface = 0x%08x\n", surface);
     va_TraceMsg(idx, "\terror_status = 0x%08x\n", error_status);
-    if (error_status == VA_STATUS_ERROR_DECODING_ERROR) {
+    if (error_info && (error_status == VA_STATUS_ERROR_DECODING_ERROR)) {
         VASurfaceDecodeMBErrors *p = *error_info;
-        while (p->status != -1) {
+        while (p && (p->status != -1)) {
             va_TraceMsg(idx, "\t\tstatus = %d\n", p->status);
             va_TraceMsg(idx, "\t\tstart_mb = %d\n", p->start_mb);
             va_TraceMsg(idx, "\t\tend_mb = %d\n", p->end_mb);
@@ -2578,7 +2675,9 @@ void va_TraceQueryDisplayAttributes (
     DPY2INDEX(dpy);
     
     va_TraceMsg(idx, "\tnum_attributes = %d\n", *num_attributes);
-
+    if (attr_list == NULL || num_attributes == NULL)
+        return;
+    
     for (i=0; i<*num_attributes; i++) {
         va_TraceMsg(idx, "\tattr_list[%d] =\n");
         va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
@@ -2602,6 +2701,9 @@ static void va_TraceDisplayAttributes (
     DPY2INDEX(dpy);
     
     va_TraceMsg(idx, "\tnum_attributes = %d\n", num_attributes);
+    if (attr_list == NULL)
+        return;
+    
     for (i=0; i<num_attributes; i++) {
         va_TraceMsg(idx, "\tattr_list[%d] =\n");
         va_TraceMsg(idx, "\t  typ = 0x%08x\n", attr_list[i].type);
