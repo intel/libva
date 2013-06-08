@@ -144,6 +144,13 @@ void va_TraceSyncSurface(
     VASurfaceID render_target
 );
 
+void va_TraceQuerySurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib    *attrib_list,
+    unsigned int       *num_attribs
+);
+
 void va_TraceQuerySurfaceStatus(
     VADisplay dpy,
     VASurfaceID render_target,

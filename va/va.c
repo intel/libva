@@ -828,11 +828,14 @@ vaQuerySurfaceAttributes(
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
     if (!ctx->vtable->vaQuerySurfaceAttributes)
-        return va_impl_query_surface_attributes(ctx, config,
-            attrib_list, num_attribs);
+        vaStatus = va_impl_query_surface_attributes(ctx, config,
+                                                    attrib_list, num_attribs);
+    else
+        vaStatus = ctx->vtable->vaQuerySurfaceAttributes(ctx, config,
+                                                         attrib_list, num_attribs);
 
-    vaStatus = ctx->vtable->vaQuerySurfaceAttributes(ctx, config,
-        attrib_list, num_attribs);
+    VA_TRACE_LOG(va_TraceQuerySurfaceAttributes, dpy, config, attrib_list, num_attribs);
+
     return vaStatus;
 }
 
@@ -857,16 +860,14 @@ vaCreateSurfaces(
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
     if (ctx->vtable->vaCreateSurfaces2)
-        return ctx->vtable->vaCreateSurfaces2(ctx, format, width, height,
+        vaStatus = ctx->vtable->vaCreateSurfaces2(ctx, format, width, height,
                                               surfaces, num_surfaces,
                                               attrib_list, num_attribs);
-
-    if (attrib_list && num_attribs > 0)
-        return VA_STATUS_ERROR_ATTR_NOT_SUPPORTED;
-
-    vaStatus = ctx->vtable->vaCreateSurfaces(ctx, width, height, format,
-                                             num_surfaces, surfaces);
-
+    else if (attrib_list && num_attribs > 0)
+        vaStatus = VA_STATUS_ERROR_ATTR_NOT_SUPPORTED;
+    else
+        vaStatus = ctx->vtable->vaCreateSurfaces(ctx, width, height, format,
+                                                 num_surfaces, surfaces);
     VA_TRACE_LOG(va_TraceCreateSurfaces,
                  dpy, width, height, format, num_surfaces, surfaces,
                  attrib_list, num_attribs);
@@ -882,10 +883,17 @@ VAStatus vaDestroySurfaces (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus;
+  
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaDestroySurfaces( ctx, surface_list, num_surfaces );
+  VA_TRACE_LOG(va_TraceDestroySurfaces,
+               dpy, surface_list, num_surfaces);
+  
+  vaStatus = ctx->vtable->vaDestroySurfaces( ctx, surface_list, num_surfaces );
+  
+  return vaStatus;
 }
 
 VAStatus vaCreateContext (
