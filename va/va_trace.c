@@ -2220,6 +2220,25 @@ static void va_TraceVAEncPictureParameterBufferJPEG(
     va_TraceMsg(trace_ctx, "\tcoded_buf = %08x\n", p->coded_buf);
     va_TraceMsg(trace_ctx, "\tpicture_width = %d\n", p->picture_width);
     va_TraceMsg(trace_ctx, "\tpicture_height = %d\n", p->picture_height);
+    va_TraceMsg(trace_ctx, "\tpic_flags.bits.profile = %d\n", p->pic_flags.bits.profile);
+    va_TraceMsg(trace_ctx, "\tpic_flags.bits.progressive = %d\n", p->pic_flags.bits.profile);
+    va_TraceMsg(trace_ctx, "\tpic_flags.bits.huffman = %d\n", p->pic_flags.bits.huffman);
+    va_TraceMsg(trace_ctx, "\tpic_flags.bits.interleaved = %d\n", p->pic_flags.bits.interleaved);
+    va_TraceMsg(trace_ctx, "\tpic_flags.bits.differential = %d\n", p->pic_flags.bits.differential);
+    va_TraceMsg(trace_ctx, "\tsample_bit_depth = %d\n", p->sample_bit_depth);
+    va_TraceMsg(trace_ctx, "\tnum_scan = %d\n", p->num_scan);
+    va_TraceMsg(trace_ctx, "\tnum_components = %d\n", p->num_components);
+    for (i=0; i<p->num_components; i++)
+        va_TraceMsg(trace_ctx, "\tcomponent_id[%d] = %d\n", i, p->component_id[i]);
+
+    if (p->quality > 0)
+        va_TraceMsg(trace_ctx, "\tquality = %d\n", p->quality);
+    else
+        va_TraceMsg(trace_ctx, "\tquantiser_table_selector[] = %d %d %d %d\n",
+                    p->quantiser_table_selector[0],
+                    p->quantiser_table_selector[1],
+                    p->quantiser_table_selector[2],
+                    p->quantiser_table_selector[3]);
 
     va_TraceMsg(trace_ctx, NULL);
 
@@ -2264,6 +2283,37 @@ static void va_TraceVAEncQMatrixBufferJPEG(
     
     return;
 }
+
+
+static void va_TraceVAEncSliceParameterBufferJPEG(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncSliceParameterBufferJPEG *p = (VAEncSliceParameterBufferJPEG *)data;
+    int i;
+    
+    DPY2TRACECTX(dpy);
+    
+    va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferJPEG\n");
+    va_TraceMsg(trace_ctx, "\trestart_interval = 0x%04x\n", p->restart_interval);
+    va_TraceMsg(trace_ctx, "\tnum_components = 0x%08x\n", p->num_components);
+    for (i=0; i<4; i++) {
+        va_TraceMsg(trace_ctx, "\tcomponents[%i] =\n ");
+        va_TraceMsg(trace_ctx, "\t\tcomponent_selector = %d\n", p->components[i].component_selector);
+        va_TraceMsg(trace_ctx, "\t\tdc_table_selector = %d\n", p->components[i].dc_table_selector);
+        va_TraceMsg(trace_ctx, "\t\tac_table_selector = %d\n", p->components[i].ac_table_selector);
+    }
+    
+    va_TraceMsg(trace_ctx, NULL);
+    
+    return;
+}
+
 
 static void va_TraceH263Buf(
     VADisplay dpy,
@@ -2352,7 +2402,7 @@ static void va_TraceJPEGBuf(
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncSliceParameterBufferType:
-        va_TraceVAEncPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
+        va_TraceVAEncSliceParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAPictureParameterBufferType:
         va_TraceVAPictureParameterBufferJPEG(dpy, context, buffer, type, size, num_elements, pbuf);
