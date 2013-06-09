@@ -239,14 +239,14 @@ typedef enum _VAProcFilterType {
     VAProcFilterNone = 0,
     /** \brief Noise reduction filter. */
     VAProcFilterNoiseReduction,
-    /** \brief Deblocking filter. */
-    VAProcFilterDeblocking,
     /** \brief Deinterlacing filter. */
     VAProcFilterDeinterlacing,
     /** \brief Sharpening filter. */
     VAProcFilterSharpening,
     /** \brief Color balance parameters. */
     VAProcFilterColorBalance,
+    /** \brief Deblocking filter. */
+    VAProcFilterDeblocking,
     /** \brief Frame rate conversion. */
     VAProcFilterFrameRateConversion,
     /** \brief Skin Tone Enhancement. */
