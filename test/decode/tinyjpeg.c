@@ -698,7 +698,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
            type = "Format_400P";
        }
 
-       va_status = vaCreateSurfaces(va_dpy,VA_RT_FORMAT_YUV420,
+       va_status = vaCreateSurfaces(va_dpy,surface_type,
                                     priv->width[scan_num],priv->height[scan_num], //alignment?
                                     &surface_id, 1, &forcc, 1);
        CHECK_VASTATUS(va_status, "vaCreateSurfaces");
