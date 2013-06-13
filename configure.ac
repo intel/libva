@@ -291,6 +291,11 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
+# Define __vaDriverInit*() function name for dummy backend
+VA_DRIVER_INIT_FUNC="__vaDriverInit_${VA_API_MAJOR_VERSION}_${VA_API_MINOR_VERSION}"
+AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC], [$VA_DRIVER_INIT_FUNC],
+    [Defined to the versioned __vaDriverInit function name])
+
 AC_OUTPUT([
     Makefile
     debian.upstream/Makefile
