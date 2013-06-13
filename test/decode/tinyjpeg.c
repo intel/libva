@@ -693,7 +693,7 @@ int tinyjpeg_decode(struct jdec_private *priv)
        else
        {
            surface_type = VA_RT_FORMAT_YUV400;
-           forcc.value.value.i = VA_FOURCC('4','0','0','P');
+           forcc.value.value.i = VA_FOURCC('Y','8','0','0');
            ChromaTypeIndex = 0;
            type = "Format_400P";
        }
