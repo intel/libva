@@ -438,6 +438,15 @@ typedef enum
      * VAConfigAttribValEncJPEG union.
      */
     VAConfigAttribEncJPEG             = 20,
+    /**
+     * \brief Encoding quality range attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports different quality level settings
+     * for encoding. A value less than or equal to 1 means that the encoder only has a single
+     * quality setting, and a value greater than 1 represents the number of quality levels 
+     * that can be configured. e.g. a value of 2 means there are two distinct quality levels. 
+     */
+    VAConfigAttribEncQualityRange     = 21,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1000,6 +1009,7 @@ typedef enum
     VAEncMiscParameterTypeMaxFrameSize  = 4,
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
+    VAEncMiscParameterTypeQualityLevel  = 6,
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -1130,6 +1140,22 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     /** \brief Maximum size of a frame (in bits). */
     unsigned int                max_frame_size;
 } VAEncMiscParameterBufferMaxFrameSize;
+
+/**
+ * \brief Encoding quality level.
+ *
+ * The encoding quality could be set through this structure, if the implementation  
+ * supports multiple quality levels. The quality level set through this structure is 
+ * persistent over the entire coded sequence, or until a new structure is being sent.
+ * The quality level range can be queried through the VAConfigAttribEncQualityRange 
+ * attribute. A lower value means higher quality, and a value of 1 represents the highest 
+ * quality. The quality level setting is used as a trade-off between quality and speed/power 
+ * consumption, with higher quality corresponds to lower speed and higher power consumption. 
+ */
+typedef struct _VAEncMiscParameterBufferQualityLevel {
+    /** \brief Encoding quality level setting. */
+    unsigned int                quality_level;
+} VAEncMiscParameterBufferQualityLevel;
 
 /* 
  * There will be cases where the bitstream buffer will not have enough room to hold
