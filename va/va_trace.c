@@ -2674,9 +2674,10 @@ void va_TraceQueryDisplayAttributes (
     
     DPY2INDEX(dpy);
     
-    va_TraceMsg(idx, "\tnum_attributes = %d\n", *num_attributes);
     if (attr_list == NULL || num_attributes == NULL)
         return;
+
+    va_TraceMsg(idx, "\tnum_attributes = %d\n", *num_attributes);
     
     for (i=0; i<*num_attributes; i++) {
         va_TraceMsg(idx, "\tattr_list[%d] =\n");
