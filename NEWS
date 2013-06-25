@@ -1,5 +1,18 @@
-libva NEWS -- summary of user visible changes.  2013-03-19
-Copyright (C) 2009-2011 Intel Corporation
+libva NEWS -- summary of user visible changes.  2013-06-26
+Copyright (C) 2009-2013 Intel Corporation
+
+Version 1.2.0 - 26.Jun.2013
+* API: new H.264 encoding API for Main and High profiles
+* API: add support for MPEG-2 encoding
+* API: add video processing interfaces
+* API: add vaQuerySurfaceAttributes() to query surface attributes supported by the underlying drivers.
+* API: new version of vaCreateSurfaces()
+* API: add new surface attributes to enable VA surface creation from external buffer
+* API: add new RT formats and fourcc codes
+* Refine VA trace utility
+* Refine H.264 encoding test cases {avcenc, h264enc}
+* A new test case for MPEG-2 encoding
+* A lot of bug fixes
 
 Version 1.1.1 - 19.Mar.2013
 * Support wayland 1.0 protocol (Rob Bradford)
