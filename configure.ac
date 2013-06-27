@@ -329,9 +329,6 @@ debian.upstream/libva-x11.install.in
     test/decode/Makefile
     test/encode/Makefile
     test/putsurface/Makefile
-    test/v4l_h264/Makefile
-    test/v4l_h264/decode/Makefile
-    test/v4l_h264/encode/Makefile
     test/vainfo/Makefile
     va/Makefile
     va/drm/Makefile
