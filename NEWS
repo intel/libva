@@ -1,5 +1,9 @@
-libva NEWS -- summary of user visible changes.  2013-06-25
+libva NEWS -- summary of user visible changes.  2013-06-27
 Copyright (C) 2009-2013 Intel Corporation
+
+Version 1.2.1 - 27.Jun.2013
+* Fix https://bugs.freedesktop.org/show_bug.cgi?id=66221 
+* Add back VA_DRIVER_INIT_FUNC definition for testing
 
 Version 1.2.0 - 25.Jun.2013
 * API: new H.264 encoding API for Main and High profiles
