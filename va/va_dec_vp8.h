@@ -51,11 +51,11 @@ extern "C" {
 typedef struct _VABoolCoderContextVPX
 {
     /* partition 0 "range" */
-    unsigned short range;
+    unsigned char range;
     /* partition 0 "value" */
-    unsigned int value;
+    unsigned char value;
     /* partition 0 number of shifts before an output byte is available */
-    unsigned short count;
+    unsigned char count;
 } VABoolCoderContextVPX;
 
 /**
