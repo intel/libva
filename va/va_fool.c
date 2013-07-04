@@ -62,14 +62,10 @@
 int fool_codec = 0;
 int fool_postp  = 0;
 
-#define FOOL_CONTEXT_MAX 4
-
 #define FOOL_BUFID_MAGIC   0x12345600
 #define FOOL_BUFID_MASK    0xffffff00
-/* per context settings */
-static struct _fool_context {
-    VADisplay dpy; /* should use context as the key */
 
+struct fool_context {
     char *fn_enc;/* file pattern with codedbuf content for encode */
     char *segbuf_enc; /* the segment buffer of coded buffer, load frome fn_enc */
     int file_count;
@@ -89,17 +85,14 @@ static struct _fool_context {
     unsigned int fool_buf_element[VABufferTypeMax]; /* element count of created buffers */
     unsigned int fool_buf_count[VABufferTypeMax]; /* count of created buffers */
     VAContextID context;
-} fool_context[FOOL_CONTEXT_MAX]; /* trace five context at the same time */
+};
 
-#define DPY2INDEX(dpy)                                  \
-    int idx;                                            \
-                                                        \
-    for (idx = 0; idx < FOOL_CONTEXT_MAX; idx++)        \
-        if (fool_context[idx].dpy == dpy)               \
-            break;                                      \
-                                                        \
-    if (idx == FOOL_CONTEXT_MAX)                        \
-        return 0;  /* let driver go */
+#define FOOL_CTX(dpy) ((struct fool_context *)((VADisplayContextP)dpy)->vafool)
+#define DPY2FOOLCTX(dpy)                                 \
+    struct fool_context *fool_ctx = FOOL_CTX(dpy);       \
+                                                         \
+    if (fool_ctx == NULL)                                \
+        return 0; /* let driver go */                    \
 
 /* Prototype declarations (functions defined in va.c) */
 
@@ -113,14 +106,11 @@ void va_FoolInit(VADisplay dpy)
     char env_value[1024];
     int fool_index = 0;
 
-    for (fool_index = 0; fool_index < FOOL_CONTEXT_MAX; fool_index++)
-        if (fool_context[fool_index].dpy == 0)
-            break;
-
-    if (fool_index == FOOL_CONTEXT_MAX)
+    struct fool_context *fool_ctx = calloc(sizeof(struct fool_context), 1);
+    
+    if (fool_ctx == NULL)
         return;
-
-    memset(&fool_context[fool_index], 0, sizeof(struct _fool_context));
+    
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
         fool_postp = 1;
         va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
@@ -132,41 +122,41 @@ void va_FoolInit(VADisplay dpy)
     }
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
         fool_codec  |= VA_FOOL_FLAG_ENCODE;
-        fool_context[fool_index].fn_enc = strdup(env_value);
+        fool_ctx->fn_enc = strdup(env_value);
         va_infoMessage("LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
-                       fool_context[fool_index].fn_enc);
+                       fool_ctx->fn_enc);
     }
     if (va_parseConfig("LIBVA_FOOL_JPEG", &env_value[0]) == 0) {
         fool_codec  |= VA_FOOL_FLAG_JPEG;
-        fool_context[fool_index].fn_jpg = strdup(env_value);
+        fool_ctx->fn_jpg = strdup(env_value);
         va_infoMessage("LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
-                       fool_context[fool_index].fn_jpg);
+                       fool_ctx->fn_jpg);
     }
     
-    if (fool_codec)
-        fool_context[fool_index].dpy = dpy;
+    ((VADisplayContextP)dpy)->vafool = fool_ctx;
 }
 
 
 int va_FoolEnd(VADisplay dpy)
 {
     int i;
-    DPY2INDEX(dpy);
+    DPY2FOOLCTX(dpy);
 
     for (i = 0; i < VABufferTypeMax; i++) {/* free memory */
-        if (fool_context[idx].fool_buf[i])
-            free(fool_context[idx].fool_buf[i]);
+        if (fool_ctx->fool_buf[i])
+            free(fool_ctx->fool_buf[i]);
     }
-    if (fool_context[idx].segbuf_enc)
-        free(fool_context[idx].segbuf_enc);
-    if (fool_context[idx].segbuf_jpg)
-        free(fool_context[idx].segbuf_jpg);
-    if (fool_context[idx].fn_enc)
-        free(fool_context[idx].fn_enc);
-    if (fool_context[idx].fn_jpg)
-        free(fool_context[idx].fn_jpg);
-    
-    memset(&fool_context[idx], 0, sizeof(struct _fool_context));
+    if (fool_ctx->segbuf_enc)
+        free(fool_ctx->segbuf_enc);
+    if (fool_ctx->segbuf_jpg)
+        free(fool_ctx->segbuf_jpg);
+    if (fool_ctx->fn_enc)
+        free(fool_ctx->fn_enc);
+    if (fool_ctx->fn_jpg)
+        free(fool_ctx->fn_jpg);
+
+    free(fool_ctx);
+    ((VADisplayContextP)dpy)->vafool = NULL;
     
     return 0;
 }
@@ -181,9 +171,9 @@ int va_FoolCreateConfig(
         VAConfigID *config_id /* out */
 )
 {
-    DPY2INDEX(dpy);
+    DPY2FOOLCTX(dpy);
 
-    fool_context[idx].entrypoint = entrypoint;
+    fool_ctx->entrypoint = entrypoint;
     
     /*
      * check fool_codec to align with current context
@@ -214,16 +204,16 @@ VAStatus va_FoolCreateBuffer(
 {
     unsigned int new_size = size * num_elements;
     unsigned int old_size;
-    DPY2INDEX(dpy);
+    DPY2FOOLCTX(dpy);
 
-    old_size = fool_context[idx].fool_buf_size[type] * fool_context[idx].fool_buf_element[type];
+    old_size = fool_ctx->fool_buf_size[type] * fool_ctx->fool_buf_element[type];
 
     if (old_size < new_size)
-        fool_context[idx].fool_buf[type] = realloc(fool_context[idx].fool_buf[type], new_size);
+        fool_ctx->fool_buf[type] = realloc(fool_ctx->fool_buf[type], new_size);
     
-    fool_context[idx].fool_buf_size[type] = size;
-    fool_context[idx].fool_buf_element[type] = num_elements;
-    fool_context[idx].fool_buf_count[type]++;
+    fool_ctx->fool_buf_size[type] = size;
+    fool_ctx->fool_buf_element[type] = num_elements;
+    fool_ctx->fool_buf_count[type]++;
     /* because we ignore the vaRenderPicture, 
      * all buffers with same type share same real memory
      * bufferID = (magic number) | type
@@ -242,19 +232,19 @@ VAStatus va_FoolBufferInfo(
 )
 {
     unsigned int magic = buf_id & FOOL_BUFID_MASK;
-    DPY2INDEX(dpy);
+    DPY2FOOLCTX(dpy);
 
     if (magic != FOOL_BUFID_MAGIC)
         return 0;
 
     *type = buf_id & 0xff;
-    *size = fool_context[idx].fool_buf_size[*type];
-    *num_elements = fool_context[idx].fool_buf_element[*type];;
+    *size = fool_ctx->fool_buf_size[*type];
+    *num_elements = fool_ctx->fool_buf_element[*type];;
     
     return 1; /* don't call into driver */
 }
 
-static int va_FoolFillCodedBufEnc(int idx)
+static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
 {
     char file_name[1024];
     struct stat file_stat = {0};
@@ -264,67 +254,67 @@ static int va_FoolFillCodedBufEnc(int idx)
     /* try file_name.file_count, if fail, try file_name.file_count-- */
     for (i=0; i<=1; i++) {
         snprintf(file_name, 1024, "%s.%d",
-                 fool_context[idx].fn_enc,
-                 fool_context[idx].file_count);
+                 fool_ctx->fn_enc,
+                 fool_ctx->file_count);
 
         if ((fd = open(file_name, O_RDONLY)) != -1) {
             fstat(fd, &file_stat);
-            fool_context[idx].file_count++; /* open next file */
+            fool_ctx->file_count++; /* open next file */
             break;
         } else /* fall back to the first file file */
-            fool_context[idx].file_count = 0;
+            fool_ctx->file_count = 0;
     }
     if (fd != -1) {
-        fool_context[idx].segbuf_enc = realloc(fool_context[idx].segbuf_enc, file_stat.st_size);
-        read(fd, fool_context[idx].segbuf_enc, file_stat.st_size);
+        fool_ctx->segbuf_enc = realloc(fool_ctx->segbuf_enc, file_stat.st_size);
+        read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
         close(fd);
     } else
         va_errorMessage("Open file %s failed:%s\n", file_name, strerror(errno));
 
-    codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
+    codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
     codedbuf->bit_offset = 0;
     codedbuf->status = 0;
     codedbuf->reserved = 0;
-    codedbuf->buf = fool_context[idx].segbuf_enc;
+    codedbuf->buf = fool_ctx->segbuf_enc;
     codedbuf->next = NULL;
 
     return 0;
 }
 
 
-static int va_FoolFillCodedBufJPG(int idx)
+static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
 {
     struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
 
-    if ((fd = open(fool_context[idx].fn_jpg, O_RDONLY)) != -1) {
+    if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
         fstat(fd, &file_stat);
-        fool_context[idx].segbuf_jpg = realloc(fool_context[idx].segbuf_jpg, file_stat.st_size);
-        read(fd, fool_context[idx].segbuf_jpg, file_stat.st_size);
+        fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
+        read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
         close(fd);
     } else
-        va_errorMessage("Open file %s failed:%s\n", fool_context[idx].fn_jpg, strerror(errno));
+        va_errorMessage("Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
 
-    codedbuf = (VACodedBufferSegment *)fool_context[idx].fool_buf[VAEncCodedBufferType];
+    codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
     codedbuf->bit_offset = 0;
     codedbuf->status = 0;
     codedbuf->reserved = 0;
-    codedbuf->buf = fool_context[idx].segbuf_jpg;
+    codedbuf->buf = fool_ctx->segbuf_jpg;
     codedbuf->next = NULL;
 
     return 0;
 }
 
 
-static int va_FoolFillCodedBuf(int idx)
+static int va_FoolFillCodedBuf(struct fool_context *fool_ctx)
 {
-    if (fool_context[idx].entrypoint == VAEntrypointEncSlice)
-        va_FoolFillCodedBufEnc(idx);
-    else if (fool_context[idx].entrypoint == VAEntrypointEncPicture)
-        va_FoolFillCodedBufJPG(idx);
+    if (fool_ctx->entrypoint == VAEntrypointEncSlice)
+        va_FoolFillCodedBufEnc(fool_ctx);
+    else if (fool_ctx->entrypoint == VAEntrypointEncPicture)
+        va_FoolFillCodedBufJPG(fool_ctx);
         
     return 0;
 }
@@ -338,17 +328,17 @@ VAStatus va_FoolMapBuffer(
 {
     unsigned int buftype = buf_id & 0xff;
     unsigned int magic = buf_id & FOOL_BUFID_MASK;
-    DPY2INDEX(dpy);
+    DPY2FOOLCTX(dpy);
 
     if (magic != FOOL_BUFID_MAGIC || buftype >= VABufferTypeMax || !pbuf)
         return 0;
 
     /* buf_id is the buffer type */
-    *pbuf = fool_context[idx].fool_buf[buftype];
+    *pbuf = fool_ctx->fool_buf[buftype];
 
     /* it is coded buffer, fill the fake segment buf from file */
     if (*pbuf && (buftype == VAEncCodedBufferType))
-        va_FoolFillCodedBuf(idx);
+        va_FoolFillCodedBuf(fool_ctx);
     
     return 1; /* don't call into driver */
 }
