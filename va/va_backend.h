@@ -534,6 +534,8 @@ struct VADisplayContext
     );
 
     void *opaque; /* opaque for display extensions (e.g. GLX) */
+    void *vatrace; /* opaque for VA trace context */
+    void *vafool; /* opaque for VA fool context */
 };
 
 typedef VAStatus (*VADriverInit) (
