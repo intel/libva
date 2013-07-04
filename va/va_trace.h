@@ -55,8 +55,6 @@ extern int trace_flag;
 void va_TraceInit(VADisplay dpy);
 void va_TraceEnd(VADisplay dpy);
 
-void va_TraceMsg(int idx, const char *msg, ...);
-
 void va_TraceInitialize (
     VADisplay dpy,
     int *major_version,	 /* out */
