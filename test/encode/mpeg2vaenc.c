@@ -1013,6 +1013,7 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
                                   int display_order)
 {
     VAEncPictureParameterBufferMPEG2 *pic_param = &ctx->pic_param;
+    uint8_t f_code_x, f_code_y;
 
     pic_param->picture_type = picture_type;
     pic_param->temporal_reference = (display_order - ctx->gop_header_in_display_order) & 0x3FF;
@@ -1020,6 +1021,21 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
     pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
     pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
 
+    f_code_x = 0xf;
+    f_code_y = 0xf;
+    if (pic_param->picture_type != VAEncPictureTypeIntra) {
+	if (ctx->level == MPEG2_LEVEL_LOW) {
+		f_code_x = 7;
+		f_code_y = 4;
+	} else if (ctx->level == MPEG2_LEVEL_MAIN) {
+		f_code_x = 8;
+		f_code_y = 5;
+	} else {
+		f_code_x = 9;
+		f_code_y = 5;
+	}
+    }
+    
     if (pic_param->picture_type == VAEncPictureTypeIntra) {
         pic_param->f_code[0][0] = 0xf;
         pic_param->f_code[0][1] = 0xf;
@@ -1029,17 +1045,17 @@ mpeg2enc_update_picture_parameter(struct mpeg2enc_context *ctx,
         pic_param->backward_reference_picture = VA_INVALID_SURFACE;
 
     } else if (pic_param->picture_type == VAEncPictureTypePredictive) {
-        pic_param->f_code[0][0] = 0x1;
-        pic_param->f_code[0][1] = 0x1;
+        pic_param->f_code[0][0] = f_code_x;
+        pic_param->f_code[0][1] = f_code_y;
         pic_param->f_code[1][0] = 0xf;
         pic_param->f_code[1][1] = 0xf;
         pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
         pic_param->backward_reference_picture = VA_INVALID_SURFACE;
     } else if (pic_param->picture_type == VAEncPictureTypeBidirectional) {
-        pic_param->f_code[0][0] = 0x1;
-        pic_param->f_code[0][1] = 0x1;
-        pic_param->f_code[1][0] = 0x1;
-        pic_param->f_code[1][1] = 0x1;
+        pic_param->f_code[0][0] = f_code_x;
+        pic_param->f_code[0][1] = f_code_y;
+        pic_param->f_code[1][0] = f_code_x;
+        pic_param->f_code[1][1] = f_code_y;
         pic_param->forward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L0];
         pic_param->backward_reference_picture = surface_ids[SID_REFERENCE_PICTURE_L1];
     } else {
