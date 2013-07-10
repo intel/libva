@@ -1324,6 +1324,8 @@ typedef struct _VAPictureParameterBufferMPEG4
     /* for direct mode prediction */
     short TRB;
     short TRD;
+    unsigned int Tframe;
+    unsigned char vop_quant;
 } VAPictureParameterBufferMPEG4;
 
 /* MPEG-4 Inverse Quantization Matrix Buffer */
