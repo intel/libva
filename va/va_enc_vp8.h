@@ -54,8 +54,11 @@ typedef struct  _VAEncSequenceParameterBufferVP8
     unsigned int frame_width;
     /* frame height in pixels */
     unsigned int frame_height;
-    /* frame rate */
-    unsigned int frame_rate;
+    /* horizontal scale */
+    unsigned int frame_width_scale;
+    /* vertical scale */
+    unsigned int frame_height_scale;
+
     /* whether to enable error resilience features */
     unsigned int error_resilient;
     /* auto keyframe placement, non-zero means enable auto keyframe placement */
@@ -69,34 +72,25 @@ typedef struct  _VAEncSequenceParameterBufferVP8
     /* RC related fields. RC modes are set with VAConfigAttribRateControl */
     /* For VP8, CBR implies HRD conformance and VBR implies no HRD conformance */
 
-    /* target bit-rate */
-    unsigned int bits_per_second;
-    /* min QP */
-    unsigned int min_qp;
-    /* max QP */
-    unsigned int max_qp;
-    /* RC undershoot percentage */
-    unsigned int rc_undershoot;
-    /* RC overshoot percentage */
-    unsigned int rc_overshoot;
-    /* HRD buffer size */
-    unsigned int hrd_buf_size;
-    /* HRD buffer initial fullness */
-    unsigned int hrd_buf_initial_fullness;
-    /* HRD buffer optimal fullness */
-    unsigned int hrd_buf_optimal_fullness;
-
-    /* up to 3 modes are honored, quality (1), normal (2) and performance (3) */
-    unsigned char target_usage;
-    /* only valid for avbr mode */
-    unsigned int user_max_frame_size;
     /**
-     * min number of frames for bit rate to converge. 
-     * value should be >= 100. used for avbr mode 
+     * Initial bitrate set for this sequence in CBR or VBR modes.
+     *
+     * This field represents the initial bitrate value for this
+     * sequence if CBR or VBR mode is used, i.e. if the encoder
+     * pipeline was created with a #VAConfigAttribRateControl
+     * attribute set to either \ref VA_RC_CBR or \ref VA_RC_VBR.
+     *
+     * The bitrate can be modified later on through
+     * #VAEncMiscParameterRateControl buffers.
      */
-    unsigned int avbr_convergence;
+    unsigned int bits_per_second;
+    /* Period between I frames. */
+    unsigned int intra_period;
 
-    /* reference and reconstructed frame buffers*/
+    /* reference and reconstructed frame buffers
+     * Used for driver auto reference management when configured through 
+     * VAConfigAttribEncAutoReference. 
+     */
     VASurfaceID reference_frames[4];
 
 } VAEncSequenceParameterBufferVP8;
@@ -112,6 +106,14 @@ typedef struct  _VAEncPictureParameterBufferVP8
 {
     /* surface to store reconstructed frame  */
     VASurfaceID reconstructed_frame;
+
+    /* 
+     * surfaces to store reference frames in non auto reference mode
+     * VA_INVALID_SURFACE can be used to denote an invalid reference frame. 
+     */
+    VASurfaceID ref_last_frame;
+    VASurfaceID ref_gf_frame;
+    VASurfaceID ref_arf_frame;
 
     /* buffer to store coded data */
     VABufferID coded_buf;
@@ -219,9 +221,6 @@ typedef struct  _VAEncPictureParameterBufferVP8
         unsigned int value;
     } pic_flags;
 
-    /* quality setting, equivalent to VP8E_SET_CPUUSED */
-    unsigned int quality_setting;
-
     /**
      * Contains a list of 4 loop filter level values (updated value if applicable)
      * controlling the deblocking filter strength. Each entry represents a segment.
@@ -295,16 +294,18 @@ typedef struct _VAEncMBMapBufferVP8
 /**
  * \brief VP8 Quantization Matrix Buffer Structure
  *
- * Contains quantization indices for yac(0),ydc(1),y2dc(2),y2ac(3),uvdc(4),
- * uvac(5) for each segment (0-3). When segmentation is disabled, only  
- * quantization_index[0][] will be used. This structure is sent once per frame.
+ * Contains quantization index for yac(0-3) for each segment and quantization 
+ * index deltas, ydc(0), y2dc(1), y2ac(2), uvdc(3), uvac(4) that are applied 
+ * to all segments.  When segmentation is disabled, only quantization_index[0] 
+ * will be used. This structure is sent once per frame.
  */
 typedef struct _VAQMatrixBufferVP8
 {
     /* 
      * array first dimensional is segment and 2nd dimensional is Q index
      */
-    unsigned short quantization_index[4][6];
+    unsigned short quantization_index[4];
+    short quantization_index_delta[5];
 } VAQMatrixBufferVP8;
 
 
