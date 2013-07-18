@@ -515,14 +515,14 @@ VAStatus vaTerminate (
   free(old_ctx->vtable_vpp);
   old_ctx->vtable_vpp = NULL;
 
-  if (VA_STATUS_SUCCESS == vaStatus)
-      pDisplayContext->vaDestroy(pDisplayContext);
-
   VA_TRACE_LOG(va_TraceTerminate, dpy);
 
   va_TraceEnd(dpy);
 
   va_FoolEnd(dpy);
+
+  if (VA_STATUS_SUCCESS == vaStatus)
+      pDisplayContext->vaDestroy(pDisplayContext);
 
   return vaStatus;
 }
