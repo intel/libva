@@ -1300,6 +1300,9 @@ static void va_TraceVAPictureParameterBufferH264(
     va_TraceFlagIfNotZero(trace_ctx, "\t\tredundant_pic_cnt_present_flag", p->pic_fields.bits.redundant_pic_cnt_present_flag);
     va_TraceFlagIfNotZero(trace_ctx, "\t\treference_pic_flag", p->pic_fields.bits.reference_pic_flag);
     va_TraceMsg(trace_ctx, "\tframe_num = %d\n", p->frame_num);
+    va_TraceMsg(trace_ctx, "\tnum_ref_idx_l0_default_active_minus1 = %d\n", p->num_ref_idx_l0_default_active_minus1);
+    va_TraceMsg(trace_ctx, "\tnum_ref_idx_l1_default_active_minus1 = %d\n", p->num_ref_idx_l1_default_active_minus1);
+    
     va_TraceMsg(trace_ctx, NULL);
 
     return;
