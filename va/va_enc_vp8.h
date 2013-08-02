@@ -122,12 +122,25 @@ typedef struct  _VAEncPictureParameterBufferVP8
         struct {
             /* force this frame to be a keyframe */
             unsigned int force_kf                       : 1;
-	    /* don't reference the last frame */
+            /* don't reference the last frame */
             unsigned int no_ref_last                    : 1;
-	    /* don't reference the golden frame */
+            /* don't reference the golden frame */
             unsigned int no_ref_gf                      : 1;
-	    /* don't reference the alternate reference frame */
+            /* don't reference the alternate reference frame */
             unsigned int no_ref_arf                     : 1;
+            unsigned int reserved                       : 28;
+        } bits;
+        unsigned int value;
+    } ref_flags;
+
+    union {
+        struct {
+            /* version */
+            unsigned int version                        : 3;
+            /* show_frame */
+            unsigned int show_frame                     : 1;
+            /* color_space */						   
+            unsigned int color_space                    : 1;
             /*  0: bicubic, 1: bilinear, other: none */
             unsigned int recon_filter_type              : 2;
             /*  0: no loop fitler, 1: simple loop filter */
@@ -216,7 +229,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
 	     * Encoder application is advised to set this flag to 1 at key frames.
 	     */
             unsigned int forced_lf_adjustment           : 1;
-	    unsigned int reserved                       : 4;
+	    unsigned int reserved                       : 3;
         } bits;
         unsigned int value;
     } pic_flags;
@@ -301,9 +314,6 @@ typedef struct _VAEncMBMapBufferVP8
  */
 typedef struct _VAQMatrixBufferVP8
 {
-    /* 
-     * array first dimensional is segment and 2nd dimensional is Q index
-     */
     unsigned short quantization_index[4];
     short quantization_index_delta[5];
 } VAQMatrixBufferVP8;
