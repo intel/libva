@@ -1081,9 +1081,13 @@ typedef struct _VAEncMiscParameterRateControl
      * then the rate control will guarantee the target bit-rate over a 500 ms window
      */
     unsigned int window_size;
-    /* initial QP at I frames */
+    /* initial_qp: initial QP for the first I frames
+     * min_qp/max_qp: minimal and maximum QP frames
+     * If set them to 0, encoder chooses the best QP according to rate control
+     */
     unsigned int initial_qp;
     unsigned int min_qp;
+    unsigned int max_qp;
     unsigned int basic_unit_size;
     union
     {
@@ -1121,7 +1125,20 @@ typedef struct _VAEncMiscParameterAIR
 
 typedef struct _VAEncMiscParameterHRD
 {
+   /**
+    * \brief This value indicates the amount of data that will
+    * be buffered by the decoding application prior to beginning playback
+    */
     unsigned int initial_buffer_fullness;       /* in bits */
+   /**
+    * \brief This value indicates the amount of data that the
+    * encoder should try to maintain in the decoder's buffer
+    */
+    unsigned int optimal_buffer_fullness;       /* in bits */
+    /**
+     * \brief This value indicates the amount of data that
+     * may be buffered by the decoding application
+     */
     unsigned int buffer_size;                   /* in bits */
 } VAEncMiscParameterHRD;
 
