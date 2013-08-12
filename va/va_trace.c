@@ -359,6 +359,9 @@ void va_TraceSurface(VADisplay dpy)
     unsigned char check_sum = 0;
     DPY2TRACECTX(dpy);
 
+    if (!trace_ctx->trace_fp_surface)
+        return;
+
     va_TraceMsg(trace_ctx, "==========dump surface data in file %s\n", trace_ctx->trace_surface_fn);
 
     if ((file_size(trace_ctx->trace_fp_surface) >= trace_logsize)) {
@@ -405,20 +408,18 @@ void va_TraceSurface(VADisplay dpy)
 
     tmp = Y_data + luma_stride * trace_ctx->trace_surface_yoff;
     for (i=0; i<trace_ctx->trace_surface_height; i++) {
-        if (trace_ctx->trace_fp_surface)
-            fwrite(tmp + trace_ctx->trace_surface_xoff,
-                   trace_ctx->trace_surface_width,
-                   1, trace_ctx->trace_fp_surface);
+        fwrite(tmp + trace_ctx->trace_surface_xoff,
+               trace_ctx->trace_surface_width,
+               1, trace_ctx->trace_fp_surface);
         
         tmp += luma_stride;
     }
     tmp = UV_data + chroma_u_stride * trace_ctx->trace_surface_yoff;
     if (fourcc == VA_FOURCC_NV12) {
         for (i=0; i<trace_ctx->trace_surface_height/2; i++) {
-            if (trace_ctx->trace_fp_surface)
-                fwrite(tmp + trace_ctx->trace_surface_xoff,
-                       trace_ctx->trace_surface_width,
-                       1, trace_ctx->trace_fp_surface);
+            fwrite(tmp + trace_ctx->trace_surface_xoff,
+                   trace_ctx->trace_surface_width,
+                   1, trace_ctx->trace_fp_surface);
             
             tmp += chroma_u_stride;
         }
