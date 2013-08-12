@@ -310,7 +310,7 @@ void va_TraceCodedBuf(VADisplay dpy)
 {
     VACodedBufferSegment *buf_list = NULL;
     VAStatus va_status;
-    int i;
+    int i = 0;
     
     DPY2TRACECTX(dpy);
     
