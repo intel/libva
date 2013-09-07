@@ -136,6 +136,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
     union {
         struct {
             /* version */
+            unsigned int frame_type                     : 1;
             unsigned int version                        : 3;
             /* show_frame */
             unsigned int show_frame                     : 1;
@@ -229,7 +230,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
 	     * Encoder application is advised to set this flag to 1 at key frames.
 	     */
             unsigned int forced_lf_adjustment           : 1;
-	    unsigned int reserved                       : 3;
+            unsigned int reserved                       : 2;
         } bits;
         unsigned int value;
     } pic_flags;
