@@ -490,6 +490,7 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CQP                       0x00000010
 /** \brief Variable bitrate with peak rate higher than average bitrate. */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
+#define VA_RC_CRF			0x00000040
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribDecSliceMode */
@@ -1100,6 +1101,7 @@ typedef struct _VAEncMiscParameterRateControl
         } bits;
         unsigned int value;
     } rc_flags;
+    unsigned int CRF_quality_factor;
 } VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
