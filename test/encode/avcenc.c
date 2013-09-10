@@ -1328,7 +1328,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
             index = SID_INPUT_PICTURE_0;
         if ( next_display_num >= frame_number )
             next_display_num = frame_number - 1;
-        fseek(yuv_fp, frame_size * next_display_num, SEEK_SET);
+        fseeko(yuv_fp, (off_t)frame_size * next_display_num, SEEK_SET);
 
         avcenc_context.upload_thread_param.yuv_fp = yuv_fp;
         avcenc_context.upload_thread_param.surface_id = surface_ids[index];
@@ -1552,7 +1552,7 @@ int main(int argc, char *argv[])
     int f;
     FILE *yuv_fp;
     FILE *avc_fp;
-    long file_size;
+    off_t file_size;
     int i_frame_only=0,i_p_frame_only=1;
     int mode_value;
     struct timeval tpstart,tpend; 
@@ -1615,8 +1615,8 @@ int main(int argc, char *argv[])
         printf("Can't open input YUV file\n");
         return -1;
     }
-    fseek(yuv_fp,0l, SEEK_END);
-    file_size = ftell(yuv_fp);
+    fseeko(yuv_fp, (off_t)0, SEEK_END);
+    file_size = ftello(yuv_fp);
     frame_size = picture_width * picture_height +  ((picture_width * picture_height) >> 1) ;
 
     if ( (file_size < frame_size) || (file_size % frame_size) ) {
@@ -1625,7 +1625,7 @@ int main(int argc, char *argv[])
         return -1;
     }
     frame_number = file_size / frame_size;
-    fseek(yuv_fp, 0l, SEEK_SET);
+    fseeko(yuv_fp, (off_t)0, SEEK_SET);
 
     avc_fp = fopen(argv[4], "wb");	
     if ( avc_fp == NULL) {
