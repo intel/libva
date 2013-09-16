@@ -32,6 +32,7 @@
 #include "va_enc_jpeg.h"
 #include "va_enc_vp8.h"
 #include "va_dec_jpeg.h"
+#include "va_vpp.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -2672,6 +2673,226 @@ static void va_TraceVC1Buf(
     }
 }
 
+static void
+va_TraceProcFilterParameterBufferDeinterlacing(
+    VADisplay dpy,
+    VAContextID context,
+    VAProcFilterParameterBufferBase *base
+)
+{
+    VAProcFilterParameterBufferDeinterlacing *deint = (VAProcFilterParameterBufferDeinterlacing *)base;
+
+    DPY2TRACECTX(dpy);
+
+    va_TraceMsg(trace_ctx, "\t    type = %d\n", deint->type);
+    va_TraceMsg(trace_ctx, "\t    algorithm = %d\n", deint->algorithm);
+    va_TraceMsg(trace_ctx, "\t    flags = %d\n", deint->flags);
+}
+
+static void
+va_TraceProcFilterParameterBufferColorBalance(
+    VADisplay dpy,
+    VAContextID context,
+    VAProcFilterParameterBufferBase *base
+)
+{
+    VAProcFilterParameterBufferColorBalance *color_balance = (VAProcFilterParameterBufferColorBalance *)base;
+
+    DPY2TRACECTX(dpy);
+
+    va_TraceMsg(trace_ctx, "\t    type = %d\n", color_balance->type);
+    va_TraceMsg(trace_ctx, "\t    attrib = %d\n", color_balance->attrib);
+    va_TraceMsg(trace_ctx, "\t    value = %f\n", color_balance->value);
+}
+
+static void
+va_TraceProcFilterParameterBufferBase(
+    VADisplay dpy,
+    VAContextID context,
+    VAProcFilterParameterBufferBase *base
+)
+{
+    DPY2TRACECTX(dpy);
+
+    va_TraceMsg(trace_ctx, "\t    type = %d\n", base->type);
+}
+
+static void
+va_TraceProcFilterParameterBuffer(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID *filters,
+    unsigned int num_filters
+)
+{
+    VABufferType type;
+    unsigned int size;
+    unsigned int num_elements;
+    VAProcFilterParameterBufferBase *base_filter = NULL;
+    int i;
+
+    DPY2TRACECTX(dpy);
+
+    if (num_filters == 0 || filters == NULL) {
+        va_TraceMsg(trace_ctx, "\t  num_filters = %d\n", num_filters);
+        va_TraceMsg(trace_ctx, "\t  filters = %p\n", filters);
+        return;
+    }
+
+    va_TraceMsg(trace_ctx, "\t  num_filters = %d\n", num_filters);
+
+    /* get buffer type information */
+    for (i = 0; i < num_filters; i++) {
+        vaBufferInfo(dpy, context, filters[i], &type, &size, &num_elements);
+
+        if (type != VAProcFilterParameterBufferType) {
+            va_TraceMsg(trace_ctx, "\t  filters[%d] = 0x%08x (INVALID)\n", i, filters[i]);
+            return;
+        } else {
+            va_TraceMsg(trace_ctx, "\t  filters[%d] = 0x%08x\n", i, filters[i]);
+        }
+
+        base_filter = NULL;
+        vaMapBuffer(dpy, filters[i], (void **)&base_filter);
+
+        if (base_filter == NULL) {
+            vaUnmapBuffer(dpy, filters[i]);
+            return;
+        }
+
+        switch (base_filter->type) {
+        case VAProcFilterDeinterlacing:
+            va_TraceProcFilterParameterBufferDeinterlacing(dpy,
+                                                           context,
+                                                           base_filter);
+            break;
+        case VAProcFilterColorBalance:
+            va_TraceProcFilterParameterBufferColorBalance(dpy,
+                                                          context,
+                                                          base_filter);
+            break;
+        default:
+            va_TraceProcFilterParameterBufferBase(dpy,
+                                                  context,
+                                                  base_filter);
+            break;
+        }
+
+        vaUnmapBuffer(dpy, filters[i]);
+    }
+}
+
+static void
+va_TraceVAProcPipelineParameterBuffer(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data
+)
+{
+    VAProcPipelineParameterBuffer *p = (VAProcPipelineParameterBuffer *)data;
+    int i;
+
+    DPY2TRACECTX(dpy);
+
+    va_TraceMsg(trace_ctx, "\t--VAProcPipelineParameterBuffer\n");
+
+    va_TraceMsg(trace_ctx, "\t  surface = 0x%08x\n", p->surface);
+
+    if (p->surface_region) {
+        va_TraceMsg(trace_ctx, "\t  surface_region\n");
+        va_TraceMsg(trace_ctx, "\t    x = %d\n", p->surface_region->x);
+        va_TraceMsg(trace_ctx, "\t    y = %d\n", p->surface_region->y);
+        va_TraceMsg(trace_ctx, "\t    width = %d\n", p->surface_region->width);
+        va_TraceMsg(trace_ctx, "\t    height = %d\n", p->surface_region->height);
+    } else {
+        va_TraceMsg(trace_ctx, "\t  surface_region = (NULL)\n");
+    }
+
+    va_TraceMsg(trace_ctx, "\t  surface_color_standard = %d\n", p->surface_color_standard);
+
+    if (p->output_region) {
+        va_TraceMsg(trace_ctx, "\t  output_region\n");
+        va_TraceMsg(trace_ctx, "\t    x = %d\n", p->output_region->x);
+        va_TraceMsg(trace_ctx, "\t    y = %d\n", p->output_region->y);
+        va_TraceMsg(trace_ctx, "\t    width = %d\n", p->output_region->width);
+        va_TraceMsg(trace_ctx, "\t    height = %d\n", p->output_region->height);
+    } else {
+        va_TraceMsg(trace_ctx, "\t  output_region = (NULL)\n");
+    }
+
+    va_TraceMsg(trace_ctx, "\t  output_background_color = 0x%08x\n", p->output_background_color);
+    va_TraceMsg(trace_ctx, "\t  output_color_standard = %d\n", p->output_color_standard);
+    va_TraceMsg(trace_ctx, "\t  pipeline_flags = 0x%08x\n", p->pipeline_flags);
+    va_TraceMsg(trace_ctx, "\t  filter_flags = 0x%08x\n", p->filter_flags);
+
+    va_TraceProcFilterParameterBuffer(dpy, context, p->filters, p->num_filters);
+
+    va_TraceMsg(trace_ctx, "\t  num_forward_references = 0x%08x\n", p->num_forward_references);
+
+    if (p->num_forward_references) {
+        va_TraceMsg(trace_ctx, "\t  forward_references\n");
+
+        if (p->forward_references) {
+            /* only dump the first 5 forward references */
+            for (i = 0; i < p->num_forward_references && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    forward_references[%d] = 0x%08x\n", i, p->forward_references[i]);
+            }
+        } else {
+            for (i = 0; i < p->num_forward_references && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    forward_references[%d] = (NULL)\n", i);
+            }
+        }
+    }
+
+    va_TraceMsg(trace_ctx, "\t  num_backward_references = 0x%08x\n", p->num_backward_references);
+
+    if (p->num_backward_references) {
+        va_TraceMsg(trace_ctx, "\t  backward_references\n");
+
+        if (p->backward_references) {
+            /* only dump the first 5 backward references */
+            for (i = 0; i < p->num_backward_references && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    backward_references[%d] = 0x%08x\n", i, p->backward_references[i]);
+            }
+        } else {
+            for (i = 0; i < p->num_backward_references && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    backward_references[%d] = (NULL)\n", i);
+            }
+        }
+    }
+
+    /* FIXME: add other info later */
+
+    va_TraceMsg(trace_ctx, NULL);
+}
+
+static void
+va_TraceNoneBuf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    DPY2TRACECTX(dpy);
+
+    switch (type) {
+    case VAProcPipelineParameterBufferType:
+        va_TraceVAProcPipelineParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    }
+}
+
 void va_TraceRenderPicture(
     VADisplay dpy,
     VAContextID context,
@@ -2763,6 +2984,13 @@ void va_TraceRenderPicture(
                 va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
 
                 va_TraceVP8Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
+            }
+            break;
+        case VAProfileNone:
+            for (j=0; j<num_elements; j++) {
+                va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
+
+                va_TraceNoneBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         default:
