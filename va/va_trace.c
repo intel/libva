@@ -2983,7 +2983,7 @@ void va_TraceEndPicture(
 
     /* trace encode source surface, can do it before HW completes rendering */
     if ((encode && (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE))||
-	    (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
+        (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
         va_TraceSurface(dpy);
     
     /* trace decoded surface, do it after HW completes rendering */
