@@ -1270,8 +1270,6 @@ static void va_TraceVAPictureParameterBufferH264(
         } else
             break;
     }
-    va_TraceMsg(trace_ctx, "\n");
-    
     va_TraceMsg(trace_ctx, "\tpicture_width_in_mbs_minus1 = %d\n", p->picture_width_in_mbs_minus1);
     va_TraceMsg(trace_ctx, "\tpicture_height_in_mbs_minus1 = %d\n", p->picture_height_in_mbs_minus1);
     va_TraceMsg(trace_ctx, "\tbit_depth_luma_minus8 = %d\n", p->bit_depth_luma_minus8);
@@ -1343,7 +1341,7 @@ static void va_TraceVASliceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tslice_alpha_c0_offset_div2 = %d\n", p->slice_alpha_c0_offset_div2);
     va_TraceMsg(trace_ctx, "\tslice_beta_offset_div2 = %d\n", p->slice_beta_offset_div2);
 
-    va_TraceMsg(trace_ctx, "\tRefPicList0 =");
+    va_TraceMsg(trace_ctx, "\tRefPicList0 =\n");
     for (i = 0; i < 32; i++) {
         if ((p->RefPicList0[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->RefPicList0[i].flags & VA_PICTURE_H264_INVALID) == 0))
@@ -1351,7 +1349,7 @@ static void va_TraceVASliceParameterBufferH264(
         else
             break;
     }
-    va_TraceMsg(trace_ctx, "\tRefPicList1 =");
+    va_TraceMsg(trace_ctx, "\tRefPicList1 =\n");
     for (i = 0; i < 32; i++) {
         if ((p->RefPicList0[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->RefPicList0[i].flags & VA_PICTURE_H264_INVALID) == 0))
@@ -1365,45 +1363,41 @@ static void va_TraceVASliceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tluma_weight_l0_flag = %d\n", p->luma_weight_l0_flag);
     if (p->luma_weight_l0_flag) {
         for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_weight_l0[i]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_offset_l0[i]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
+                        p->luma_weight_l0[i],
+                        p->luma_offset_l0[i]);
         }
-        if (p->num_ref_idx_l0_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tchroma_weight_l0_flag = %d\n", p->chroma_weight_l0_flag);
     if (p->chroma_weight_l0_flag) {
         for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l0[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l0[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l0[i][1]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l0[i][1]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+                        p->chroma_weight_l0[i][0],
+                        p->chroma_offset_l0[i][0],
+                        p->chroma_weight_l0[i][1],
+                        p->chroma_offset_l0[i][1]);
         }
-        if (p->num_ref_idx_l0_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
     
     va_TraceMsg(trace_ctx, "\tluma_weight_l1_flag = %d\n", p->luma_weight_l1_flag);
     if (p->luma_weight_l1_flag) {
         for (i = 0; (i <=  p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_weight_l1[i]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_offset_l1[i]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
+                        p->luma_weight_l1[i],
+                        p->luma_offset_l1[i]);
         }
-        if (p->num_ref_idx_l1_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
     
     va_TraceMsg(trace_ctx, "\tchroma_weight_l1_flag = %d\n", p->chroma_weight_l1_flag);
     if (p->chroma_weight_l1_flag) {
         for (i = 0; (i <= p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l1[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l1[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l1[i][1]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l1[i][1]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+                        p->chroma_weight_l1[i][0],
+                        p->chroma_offset_l1[i][0],
+                        p->chroma_weight_l1[i][1],
+                        p->chroma_offset_l1[i][1]);
         }
-        if (p->num_ref_idx_l1_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -1428,18 +1422,22 @@ static void va_TraceVAIQMatrixBufferH264(
     va_TraceMsg(trace_ctx, "\tScalingList4x4[6][16]=\n");
     for (i = 0; i < 6; i++) {
         for (j = 0; j < 16; j++) {
-            va_TraceMsg(trace_ctx, "\t%d\t", p->ScalingList4x4[i][j]);
-            if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+            if (trace_ctx->trace_fp_log) {
+                fprintf(trace_ctx->trace_fp_log, "\t%d", p->ScalingList4x4[i][j]);
+                if ((j + 1) % 8 == 0)
+                    fprintf(trace_ctx->trace_fp_log, "\n");
+            }
         }
     }
 
     va_TraceMsg(trace_ctx, "\tScalingList8x8[2][64]=\n");
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 64; j++) {
-            va_TraceMsg(trace_ctx, "\t%d", p->ScalingList8x8[i][j]);
-            if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+            if (trace_ctx->trace_fp_log) {
+                fprintf(trace_ctx->trace_fp_log,"\t%d", p->ScalingList8x8[i][j]);
+                if ((j + 1) % 8 == 0)
+                    fprintf(trace_ctx->trace_fp_log, "\n");
+            }
         }
     }
 
@@ -1459,7 +1457,7 @@ static void va_TraceVAEncSequenceParameterBufferH264(
 {
     VAEncSequenceParameterBufferH264 *p = (VAEncSequenceParameterBufferH264 *)data;
     DPY2TRACECTX(dpy);
-    int i;
+    unsigned int i;
 
     va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferH264\n");
 
@@ -1486,7 +1484,7 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tnum_ref_frames_in_pic_order_cnt_cycle = %d\n", p->num_ref_frames_in_pic_order_cnt_cycle);
     va_TraceMsg(trace_ctx, "\toffset_for_non_ref_pic = %d\n", p->offset_for_non_ref_pic);
     va_TraceMsg(trace_ctx, "\toffset_for_top_to_bottom_field = %d\n", p->offset_for_top_to_bottom_field);
-    for(i = 0; i< p->max_num_ref_frames; ++i)
+    for(i = 0; (i < p->max_num_ref_frames) && (i < 32); ++i)
         va_TraceMsg(trace_ctx, "\toffset_for_ref_frame[%d] = %d\n", i, p->offset_for_ref_frame[i]);
     va_TraceMsg(trace_ctx, "\tframe_cropping_flag = %d\n", p->frame_cropping_flag);
     va_TraceMsg(trace_ctx, "\tframe_crop_left_offset = %d\n", p->frame_crop_left_offset);
@@ -1673,45 +1671,41 @@ static void va_TraceVAEncSliceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tluma_weight_l0_flag = %d\n", p->luma_weight_l0_flag);
     if (p->luma_weight_l0_flag) {
         for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_weight_l0[i]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->luma_offset_l0[i]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
+                        p->luma_weight_l0[i],
+                        p->luma_offset_l0[i]);
         }
-        if (p->num_ref_idx_l0_active_minus1 >=0)
-            va_TraceMsg(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tchroma_weight_l0_flag = %d\n", p->chroma_weight_l0_flag);
     if (p->chroma_weight_l0_flag) {
         for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l0[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l0[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l0[i][1]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l0[i][1]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+                        p->chroma_weight_l0[i][0],
+                        p->chroma_offset_l0[i][0],
+                        p->chroma_weight_l0[i][1],
+                        p->chroma_offset_l0[i][1]);
         }
-        if (p->num_ref_idx_l0_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tluma_weight_l1_flag = %d\n", p->luma_weight_l1_flag);
     if (p->luma_weight_l1_flag) {
         for (i = 0; (i <= p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t\t%d ", p->luma_weight_l1[i]);
-            va_TraceMsg(trace_ctx, "\t\t%d ", p->luma_offset_l1[i]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t\t%d\n",
+                        p->luma_weight_l1[i],
+                        p->luma_offset_l1[i]);
         }
-        if (p->num_ref_idx_l1_active_minus1 >= 0)
-            va_TraceMsg(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tchroma_weight_l1_flag = %d\n", p->chroma_weight_l1_flag);
     if (p->chroma_weight_l1_flag && p->num_ref_idx_l1_active_minus1 < 32) {
         for (i = 0; (i <= p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l1[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l1[i][0]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_weight_l1[i][1]);
-            va_TraceMsg(trace_ctx, "\t%d ", p->chroma_offset_l1[i][1]);
+            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+                        p->chroma_weight_l1[i][0],
+                        p->chroma_offset_l1[i][0],
+                        p->chroma_weight_l1[i][1],
+                        p->chroma_offset_l1[i][1]);
         }
-        if ( p->num_ref_idx_l1_active_minus1 >=0)
-            va_TraceMsg(trace_ctx, "\n");
     }
     va_TraceMsg(trace_ctx, NULL);
 
