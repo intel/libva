@@ -415,7 +415,7 @@ void va_TraceSurface(VADisplay dpy)
         
         tmp += luma_stride;
     }
-    tmp = UV_data + chroma_u_stride * trace_ctx->trace_surface_yoff;
+    tmp = UV_data + chroma_u_stride * trace_ctx->trace_surface_yoff / 2;
     if (fourcc == VA_FOURCC_NV12) {
         for (i=0; i<trace_ctx->trace_surface_height/2; i++) {
             fwrite(tmp + trace_ctx->trace_surface_xoff,
