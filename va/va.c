@@ -641,7 +641,7 @@ VAStatus vaCreateConfig (
   vaStatus = ctx->vtable->vaCreateConfig ( ctx, profile, entrypoint, attrib_list, num_attribs, config_id );
 
   /* record the current entrypoint for further trace/fool determination */
-  VA_TRACE_LOG(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
+  VA_TRACE_ALL(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
   VA_FOOL_FUNC(va_FoolCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
   
   return vaStatus;
@@ -917,7 +917,7 @@ VAStatus vaCreateContext (
                                       flag, render_targets, num_render_targets, context );
 
   /* keep current encode/decode resoluton */
-  VA_TRACE_LOG(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
+  VA_TRACE_ALL(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
 
   return vaStatus;
 }
@@ -1071,7 +1071,7 @@ VAStatus vaBeginPicture (
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  VA_TRACE_LOG(va_TraceBeginPicture, dpy, context, render_target);
+  VA_TRACE_ALL(va_TraceBeginPicture, dpy, context, render_target);
   VA_FOOL_RETURN();
   
   va_status = ctx->vtable->vaBeginPicture( ctx, context, render_target );
@@ -1112,7 +1112,7 @@ VAStatus vaEndPicture (
       va_status = ctx->vtable->vaEndPicture( ctx, context );
 
   /* dump surface content */
-  VA_TRACE_SURFACE(va_TraceEndPicture, dpy, context, 1);
+  VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 1);
 
   return va_status;
 }

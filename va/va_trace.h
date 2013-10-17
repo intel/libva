@@ -47,9 +47,9 @@ extern int trace_flag;
     if (trace_flag & VA_TRACE_FLAG_LOG) {       \
         trace_func(__VA_ARGS__);                \
     }
-#define VA_TRACE_SURFACE(trace_func,...)                                \
-    if (trace_flag & (VA_TRACE_FLAG_SURFACE | VA_TRACE_FLAG_CODEDBUF)) { \
-        trace_func(__VA_ARGS__);                                        \
+#define VA_TRACE_ALL(trace_func,...)            \
+    if (trace_flag) {                           \
+        trace_func(__VA_ARGS__);                \
     }
 
 void va_TraceInit(VADisplay dpy);
@@ -85,6 +85,12 @@ void va_TraceCreateSurfaces(
     unsigned int        num_attribs
 );
 
+void va_TraceDestroySurfaces(
+    VADisplay dpy,
+    VASurfaceID *surface_list,
+    int num_surfaces
+);
+    
 void va_TraceCreateContext(
     VADisplay dpy,
     VAConfigID config_id,
