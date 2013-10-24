@@ -30,6 +30,7 @@
 #include "va_trace.h"
 #include "va_enc_h264.h"
 #include "va_dec_jpeg.h"
+#include "va_dec_vp8.h"
 #include "va_vpp.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -1943,6 +1944,169 @@ static void va_TraceVASliceParameterBufferVC1(
     va_TraceMsg(trace_ctx, NULL);
 }
 
+static void va_TraceVAPictureParameterBufferVP8(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    char tmp[1024];
+    VAPictureParameterBufferVP8 *p = (VAPictureParameterBufferVP8 *)data;
+    DPY2TRACECTX(dpy);
+    int i,j;
+
+    va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferVP8\n");
+
+    va_TraceMsg(trace_ctx, "\tframe_width = %d\n", p->frame_width);
+    va_TraceMsg(trace_ctx, "\tframe_height = %d\n", p->frame_height);
+    va_TraceMsg(trace_ctx, "\tlast_ref_frame = %x\n", p->last_ref_frame);
+    va_TraceMsg(trace_ctx, "\tgolden_ref_frame = %x\n", p->golden_ref_frame);
+    va_TraceMsg(trace_ctx, "\talt_ref_frame = %x\n", p->alt_ref_frame);
+    va_TraceMsg(trace_ctx, "\tout_of_loop_frame = %x\n", p->out_of_loop_frame);
+
+    va_TraceMsg(trace_ctx, "\tkey_frame = %d\n", p->pic_fields.bits.key_frame);
+    va_TraceMsg(trace_ctx, "\tversion = %d\n", p->pic_fields.bits.version);
+    va_TraceMsg(trace_ctx, "\tsegmentation_enabled = %d\n", p->pic_fields.bits.segmentation_enabled);
+    va_TraceMsg(trace_ctx, "\tupdate_mb_segmentation_map = %d\n", p->pic_fields.bits.update_mb_segmentation_map);
+    va_TraceMsg(trace_ctx, "\tupdate_segment_feature_data = %d\n", p->pic_fields.bits.update_segment_feature_data);
+    va_TraceMsg(trace_ctx, "\tfilter_type = %d\n", p->pic_fields.bits.filter_type);
+    va_TraceMsg(trace_ctx, "\tsharpness_level = %d\n", p->pic_fields.bits.sharpness_level);
+    va_TraceMsg(trace_ctx, "\tloop_filter_adj_enable = %d\n", p->pic_fields.bits.loop_filter_adj_enable);
+    va_TraceMsg(trace_ctx, "\tmode_ref_lf_delta_update = %d\n", p->pic_fields.bits.mode_ref_lf_delta_update);
+    va_TraceMsg(trace_ctx, "\tsign_bias_golden = %d\n", p->pic_fields.bits.sign_bias_golden);
+    va_TraceMsg(trace_ctx, "\tsign_bias_alternate = %d\n", p->pic_fields.bits.sign_bias_alternate);
+    va_TraceMsg(trace_ctx, "\tmb_no_coeff_skip = %d\n", p->pic_fields.bits.mb_no_coeff_skip);
+    va_TraceMsg(trace_ctx, "\tloop_filter_disable = %d\n", p->pic_fields.bits.loop_filter_disable);
+
+    va_TraceMsg(trace_ctx, "\tmb_segment_tree_probs: 0x%2x, 0x%2x, 0x%2x\n",
+        p->mb_segment_tree_probs[0], p->mb_segment_tree_probs[1], p->mb_segment_tree_probs[2]);
+
+    va_TraceMsg(trace_ctx, "\tloop_filter_level: %d, %d, %d, %d\n",
+        p->loop_filter_level[0], p->loop_filter_level[1], p->loop_filter_level[2], p->loop_filter_level[3]);
+
+    va_TraceMsg(trace_ctx, "\tloop_filter_deltas_ref_frame: %d, %d, %d, %d\n",
+        p->loop_filter_deltas_ref_frame[0], p->loop_filter_deltas_ref_frame[1], p->loop_filter_deltas_ref_frame[2], p->loop_filter_deltas_ref_frame[3]);
+
+    va_TraceMsg(trace_ctx, "\tloop_filter_deltas_mode: %d, %d, %d, %d\n",
+        p->loop_filter_deltas_mode[0], p->loop_filter_deltas_mode[1], p->loop_filter_deltas_mode[2], p->loop_filter_deltas_mode[3]);
+
+    va_TraceMsg(trace_ctx, "\tprob_skip_false = %2x\n", p->prob_skip_false);
+    va_TraceMsg(trace_ctx, "\tprob_intra = %2x\n", p->prob_intra);
+    va_TraceMsg(trace_ctx, "\tprob_last = %2x\n", p->prob_last);
+    va_TraceMsg(trace_ctx, "\tprob_gf = %2x\n", p->prob_gf);
+
+    va_TraceMsg(trace_ctx, "\ty_mode_probs: 0x%2x, 0x%2x, 0x%2x, 0x%2x\n",
+        p->y_mode_probs[0], p->y_mode_probs[1], p->y_mode_probs[2], p->y_mode_probs[3]);
+
+    va_TraceMsg(trace_ctx, "\tuv_mode_probs: 0x%2x, 0x%2x, 0x%2x\n",
+        p->uv_mode_probs[0], p->uv_mode_probs[1], p->uv_mode_probs[2]);
+
+    va_TraceMsg(trace_ctx, "\tmv_probs[2][19]:\n");
+    for(i = 0; i<2; ++i) {
+        memset(tmp, 0, sizeof tmp);
+        for (j=0; j<19; j++)
+            sprintf(tmp + strlen(tmp), "%2x ", p->mv_probs[i][j]);
+        va_TraceMsg(trace_ctx,"\t\t[%d] = %s\n", i, tmp);
+    }
+
+    va_TraceMsg(trace_ctx, "\tbool_coder_ctx: range = %02x, value = %02x, count = %d\n",
+        p->bool_coder_ctx.range, p->bool_coder_ctx.value, p->bool_coder_ctx.count);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
+static void va_TraceVASliceParameterBufferVP8(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VASliceParameterBufferVP8 *p = (VASliceParameterBufferVP8 *)data;
+    DPY2TRACECTX(dpy);
+    int i;
+
+    va_TraceMsg(trace_ctx, "\t--VASliceParameterBufferVP8\n");
+
+    va_TraceMsg(trace_ctx, "\tslice_data_size = %d\n", p->slice_data_size);
+    va_TraceMsg(trace_ctx, "\tslice_data_offset = %d\n", p->slice_data_offset);
+    va_TraceMsg(trace_ctx, "\tslice_data_flag = %d\n", p->slice_data_flag);
+    va_TraceMsg(trace_ctx, "\tmacroblock_offset = %d\n", p->macroblock_offset);
+    va_TraceMsg(trace_ctx, "\tnum_of_partitions = %d\n", p->num_of_partitions);
+
+    for(i = 0; i<9; ++i)
+        va_TraceMsg(trace_ctx, "\tpartition_size[%d] = %d\n", i, p->partition_size[i]);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
+static void va_TraceVAIQMatrixBufferVP8(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    char tmp[1024];
+    VAIQMatrixBufferVP8 *p = (VAIQMatrixBufferVP8 *)data;
+    DPY2TRACECTX(dpy);
+    int i,j;
+
+    va_TraceMsg(trace_ctx, "\t--VAIQMatrixBufferVP8\n");
+
+    va_TraceMsg(trace_ctx, "\tquantization_index[4][6]=\n");
+    for (i = 0; i < 4; i++) {
+        memset(tmp, 0, sizeof tmp);
+        for (j = 0; j < 6; j++)
+            sprintf(tmp + strlen(tmp), "%4x, ", p->quantization_index[i][j]);
+        va_TraceMsg(trace_ctx,"\t\t[%d] = %s\n", i, tmp);
+    }
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+static void va_TraceVAProbabilityBufferVP8(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    char tmp[1024];
+    VAProbabilityDataBufferVP8 *p = (VAProbabilityDataBufferVP8 *)data;
+    DPY2TRACECTX(dpy);
+    int i,j,k,l;
+
+    va_TraceMsg(trace_ctx, "\t--VAProbabilityDataBufferVP8\n");
+
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 8; j++) {
+            memset(tmp, 0, sizeof tmp);
+            for (k=0; k<3; k++)
+                for (l=0; l<11; l++)
+                    sprintf(tmp + strlen(tmp), "%2x, ", p->dct_coeff_probs[i][j][k][l]);
+            va_TraceMsg(trace_ctx,"\t\t[%d, %d] = %s\n", i, j, tmp);
+        }
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
 void va_TraceBeginPicture(
     VADisplay dpy,
     VAContextID context,
@@ -2385,6 +2549,64 @@ static void va_TraceH264Buf(
     }
 }
 
+static void va_TraceVP8Buf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    DPY2TRACECTX(dpy);
+
+    switch (type) {
+    case VAPictureParameterBufferType:
+        va_TraceVAPictureParameterBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAIQMatrixBufferType:
+        va_TraceVAIQMatrixBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VABitPlaneBufferType:
+        break;
+    case VASliceGroupMapBufferType:
+        break;
+    case VASliceParameterBufferType:
+        va_TraceVASliceParameterBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VASliceDataBufferType:
+        break;
+    case VAProbabilityBufferType:
+        va_TraceVAProbabilityBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAMacroblockParameterBufferType:
+        break;
+    case VAResidualDataBufferType:
+        break;
+    case VADeblockingParameterBufferType:
+        break;
+    case VAImageBufferType:
+        break;
+    case VAProtectedSliceDataBufferType:
+        break;
+    case VAEncCodedBufferType:
+        break;
+    case VAEncSequenceParameterBufferType:
+        break;
+    case VAEncPictureParameterBufferType:
+        break;
+    case VAEncSliceParameterBufferType:
+        break;
+    case VAEncPackedHeaderParameterBufferType:
+        break;
+    case VAEncMiscParameterBufferType:
+        break;
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    }
+}
 
 static void va_TraceVC1Buf(
     VADisplay dpy,
@@ -2759,6 +2981,14 @@ void va_TraceRenderPicture(
                 va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
 
                 va_TraceNoneBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
+            }
+            break;
+
+        case VAProfileVP8Version0_3:
+            for (j=0; j<num_elements; j++) {
+                va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
+
+                va_TraceVP8Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
 
