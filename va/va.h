@@ -306,6 +306,15 @@ typedef enum
     VAEntrypointDeblocking	= 5,
     VAEntrypointEncSlice	= 6,	/* slice level encode */
     VAEntrypointEncPicture 	= 7,	/* pictuer encode, JPEG, etc */
+    /*
+     * For an implementation that supports a low power/high performance variant
+     * for slice level encode, it can choose to expose the 
+     * VAEntrypointEncSliceLP entrypoint. Certain encoding tools may not be 
+     * available with this entrypoint (e.g. interlace, MBAFF) and the 
+     * application can query the encoding configuration attributes to find 
+     * out more details if this entrypoint is supported.
+     */
+    VAEntrypointEncSliceLP 	= 8,
     VAEntrypointVideoProc       = 10,   /**< Video pre/post-processing. */
     VAEntrypointMax
 } VAEntrypoint;
