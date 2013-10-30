@@ -515,6 +515,10 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CQP                       0x00000010
 /** \brief Variable bitrate with peak rate higher than average bitrate. */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
+/** \brief Macroblock based rate control.  Per MB control is decided
+ *  internally in the encoder. It may be combined with other RC modes, except CQP. */
+#define VA_RC_MB                        0x00000080
+
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribDecSliceMode */
@@ -1157,6 +1161,7 @@ typedef struct _VAEncMiscParameterRateControl
             unsigned int reset : 1;
             unsigned int disable_frame_skip : 1; /* Disable frame skip in rate control mode */
             unsigned int disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
+            unsigned int mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
         } bits;
         unsigned int value;
     } rc_flags;
