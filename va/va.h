@@ -663,6 +663,9 @@ typedef enum {
     VASurfaceAttribMemoryType,
     /** \brief External buffer descriptor (pointer, write). */
     VASurfaceAttribExternalBufferDescriptor,
+    /** \brief Surface usage hint, gives the driver a hint of intended usage 
+     *  to optimize allocation (e.g. tiling) (int, read/write). */
+    VASurfaceAttribUsageHint,
     /** \brief Number of surface attributes. */
     VASurfaceAttribCount
 } VASurfaceAttribType;
@@ -733,6 +736,21 @@ typedef struct _VASurfaceAttribExternalBuffers {
 #define VA_SURFACE_EXTBUF_DESC_WC		0x00000008
 /** \brief Memory is protected */
 #define VA_SURFACE_EXTBUF_DESC_PROTECTED        0x80000000
+
+/** @name VASurfaceAttribUsageHint attribute usage hint flags */
+/**@{*/
+/** \brief Surface usage not indicated. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_GENERIC 	0x00000000
+/** \brief Surface used by video decoder. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_DECODER 	0x00000001
+/** \brief Surface used by video encoder. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_ENCODER 	0x00000002
+/** \brief Surface read by video post-processing. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_VPP_READ 	0x00000004
+/** \brief Surface written by video post-processing. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_VPP_WRITE 	0x00000008
+/** \brief Surface used for display. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_DISPLAY 	0x00000010
 
 /**@}*/
 
