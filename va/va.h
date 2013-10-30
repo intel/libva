@@ -472,6 +472,14 @@ typedef enum
      * for encoding (e.g. adaptive intra refresh or rolling intra refresh). 
      */
     VAConfigAttribEncIntraRefresh     = 23,
+    /**
+     * \brief Encoding skip frame attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports sending skip frame parameters 
+     * (VAEncMiscParameterTypeSkipFrame) to the encoder's rate control, when the user has 
+     * externally skipped frames. 
+     */
+    VAConfigAttribEncSkipFrame        = 24,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1075,6 +1083,9 @@ typedef enum
     VAEncMiscParameterTypeQualityLevel  = 6,
     VAEncMiscParameterTypeRIR           = 7,
     VAEncMiscParameterTypeQuantization  = 8,
+    /** \brief Buffer type used for sending skip frame parameters to the encoder's
+      * rate control, when the user has externally skipped frames. */
+    VAEncMiscParameterTypeSkipFrame     = 9
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -1311,6 +1322,30 @@ typedef struct _VAEncMiscParameterQuantization
         unsigned int value;
     } quantization_flags;
 } VAEncMiscParameterQuantization;
+
+/**
+ * \brief Encoding skip frame.
+ *
+ * The application may choose to skip frames externally to the encoder (e.g. drop completely or 
+ * code as all skip's). For rate control purposes the encoder will need to know the size and number 
+ * of skipped frames.  Skip frame(s) indicated through this structure is applicable only to the 
+ * current frame.  It is allowed for the application to still send in packed headers for the driver to 
+ * pack, although no frame will be encoded (e.g. for HW to encrypt the frame).  
+ */
+typedef struct _VAEncMiscParameterSkipFrame {
+    /** \brief Indicates skip frames as below.
+      * 0: Encode as normal, no skip.
+      * 1: One or more frames were skipped prior to the current frame, encode the current frame as normal.  
+      * 2: The current frame is to be skipped, do not encode it but pack/encrypt the packed header contents
+      *    (all except VAEncPackedHeaderSlice) which could contain actual frame contents (e.g. pack the frame 
+      *    in VAEncPackedHeaderPicture).  */
+    unsigned char               skip_frame_flag;
+    /** \brief The number of frames skipped prior to the current frame.  Valid when skip_frame_flag = 1. */
+    unsigned char               num_skip_frames;
+    /** \brief When skip_frame_flag = 1, the size of the skipped frames in bits.   When skip_frame_flag = 2, 
+      * the size of the current skipped frame that is to be packed/encrypted in bits. */
+    unsigned int                size_skip_frames;
+} VAEncMiscParameterSkipFrame;
 
 /* 
  * There will be cases where the bitstream buffer will not have enough room to hold
