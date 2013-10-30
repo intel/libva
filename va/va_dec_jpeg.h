@@ -70,6 +70,8 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
     }                   components[255];
     /** \brief Number of components in frame (Nf). */
     unsigned char       num_components;
+    /** \brief Input color space 0: YUV, 1: RGB, others: reserved */
+    unsigned char       color_space;
 } VAPictureParameterBufferJPEGBaseline;
 
 /**
