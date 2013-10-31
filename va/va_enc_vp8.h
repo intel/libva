@@ -281,30 +281,6 @@ typedef struct  _VAEncPictureParameterBufferVP8
 	
 } VAEncPictureParameterBufferVP8;
 
-
-/**
- * \brief VP8 MB Segmentation ID Buffer
- *
- * application provides buffer containing the initial segmentation id for each 
- * MB, in raster scan order. Rate control may reassign it.
- * For an 640x480 video, the buffer has 1200 entries. 
- * the value of each entry should be in the range [0..3], inclusive.
- * If segmentation is not enabled, application does not need to provide it. 
- */
-typedef struct _VAEncMBMapBufferVP8
-{
-    /** 
-     * number of MBs in the frame.
-     * It is also the number of entries of mb_segment_id[];
-     */
-    unsigned int num_mbs;
-    /**
-     * per MB Segmentation ID Buffer
-     */
-    unsigned char *mb_segment_id;
-} VAEncMBMapBufferVP8;
-
-
 /**
  * \brief VP8 Quantization Matrix Buffer Structure
  *
@@ -319,6 +295,15 @@ typedef struct _VAQMatrixBufferVP8
     short quantization_index_delta[5];
 } VAQMatrixBufferVP8;
 
+/**
+ * \brief VP8 MB Segmentation ID Buffer
+ *
+ * The application provides a buffer of VAEncMacroblockMapBufferType containing 
+ * the initial segmentation id for each MB, one byte each, in raster scan order. 
+ * Rate control may reassign it.  For example, a 640x480 video, the buffer has 1200 entries. 
+ * The value of each entry should be in the range [0..3], inclusive.
+ * If segmentation is not enabled, the application does not need to provide it. 
+ */
 
 
 /**@}*/
