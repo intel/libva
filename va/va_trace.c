@@ -790,13 +790,20 @@ static void va_TraceVABuffers(
 {
     unsigned int i;
     unsigned char *p = pbuf;
+    unsigned int dump_size = 64;
 
     DPY2TRACECTX(dpy);
     
     va_TraceMsg(trace_ctx, "--%s\n",  buffer_type_to_string(type));
 
-    if ((trace_flag & VA_TRACE_FLAG_BUFDATA) && trace_ctx->trace_fp_log) {
-        for (i=0; i<size; i++) {
+    if (dump_size>size)
+        dump_size = size;
+
+    if (trace_flag & VA_TRACE_FLAG_BUFDATA)
+        dump_size = size;
+
+    if (trace_ctx->trace_fp_log) {
+        for (i=0; i<dump_size; i++) {
             unsigned char value =  p[i];
 
             if (i==0)
