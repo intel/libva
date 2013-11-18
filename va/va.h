@@ -485,7 +485,7 @@ typedef enum
      *
      * This attribute conveys whether the driver supports sending skip frame parameters 
      * (VAEncMiscParameterTypeSkipFrame) to the encoder's rate control, when the user has 
-     * externally skipped frames. 
+     * externally skipped frames.  It is a boolean value 0 - unsupported, 1 - supported.
      */
     VAConfigAttribEncSkipFrame        = 24,
     /**
@@ -540,8 +540,9 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CQP                       0x00000010
 /** \brief Variable bitrate with peak rate higher than average bitrate. */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
-/** \brief Constant rate factor. */
-#define VA_RC_CRF			0x00000040
+/** \brief Intelligent Constant Quality. Provided an initial ICQ_quality_factor, 
+ *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
+#define VA_RC_ICQ			0x00000040
 /** \brief Macroblock based rate control.  Per MB control is decided 
  *  internally in the encoder. It may be combined with other RC modes, except CQP. */
 #define VA_RC_MB                        0x00000080
@@ -1209,7 +1210,7 @@ typedef struct _VAEncMiscParameterRateControl
         } bits;
         unsigned int value;
     } rc_flags;
-    unsigned int CRF_quality_factor;
+    unsigned int ICQ_quality_factor; /* Initial ICQ quality factor: 1-51. */
 } VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
