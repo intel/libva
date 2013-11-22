@@ -1102,12 +1102,14 @@ typedef enum
     VAEncMiscParameterTypeFrameRate 	= 0,
     VAEncMiscParameterTypeRateControl  	= 1,
     VAEncMiscParameterTypeMaxSliceSize	= 2,
+    /** \brief Buffer type used for Adaptive intra refresh */
     VAEncMiscParameterTypeAIR    	= 3,
     /** \brief Buffer type used to express a maximum frame size (in bits). */
     VAEncMiscParameterTypeMaxFrameSize  = 4,
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
     VAEncMiscParameterTypeQualityLevel  = 6,
+    /** \brief Buffer type used for Rolling intra refresh */
     VAEncMiscParameterTypeRIR           = 7,
     VAEncMiscParameterTypeQuantization  = 8,
     /** \brief Buffer type used for sending skip frame parameters to the encoder's
@@ -1234,11 +1236,24 @@ typedef struct _VAEncMiscParameterCIR
     unsigned int cir_num_mbs;
 } VAEncMiscParameterCIR;
 
+/*
+ * \brief Adaptive intra refresh data structure for encoding.
+ */
 typedef struct _VAEncMiscParameterAIR
 {
+    /** \brief the minimum number of macroblocks to refresh in a frame */
     unsigned int air_num_mbs;
+    /**
+     * \brief threshhold of blockmatching criterion (typically SAD)
+     *
+     * Macroblocks above that threshold are marked as candidates and
+     * on subsequent frames a number of these candidates are coded as Intra
+     * Generally the threshhold need to be set and tuned to an appropriate level
+     * according to the feedback of coded frame.
+     */
     unsigned int air_threshold;
-    unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
+    /** \brief if set to 1 then hardware auto-tune the AIR threshold */
+    unsigned int air_auto;
 } VAEncMiscParameterAIR;
 
 /*
