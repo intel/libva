@@ -633,6 +633,9 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_ENC_INTRA_REFRESH_ROLLING_ROW                0x00000002
 /** \brief Driver supports adaptive intra refresh */
 #define VA_ENC_INTRA_REFRESH_ADAPTIVE                   0x00000010
+/** \brief Driver supports cyclic intra refresh */
+#define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
+
 /**@}*/
 
 /*
@@ -1111,7 +1114,9 @@ typedef enum
       * rate control, when the user has externally skipped frames. */
     VAEncMiscParameterTypeSkipFrame     = 9,
     /** \brief Buffer type used for region-of-interest (ROI) parameters. */
-    VAEncMiscParameterTypeROI           = 10
+    VAEncMiscParameterTypeROI           = 10,
+    /** \brief Buffer type used for Cyclic intra refresh */
+    VAEncMiscParameterTypeCIR           = 11
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -1219,6 +1224,15 @@ typedef struct _VAEncMiscParameterMaxSliceSize
 {
     unsigned int max_slice_size;
 } VAEncMiscParameterMaxSliceSize;
+
+/*
+ * \brief Cyclic intra refresh data structure for encoding.
+ */
+typedef struct _VAEncMiscParameterCIR
+{
+    /** \brief  the number of consecutive macroblocks to be coded as intra */
+    unsigned int cir_num_mbs;
+} VAEncMiscParameterCIR;
 
 typedef struct _VAEncMiscParameterAIR
 {
