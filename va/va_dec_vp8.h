@@ -54,7 +54,11 @@ typedef struct _VABoolCoderContextVPX
     unsigned char range;
     /* partition 0 "value" */
     unsigned char value;
-    /* partition 0 number of shifts before an output byte is available */
+    /*
+     * 'partition 0 number of shifts before an output byte is available'
+     * it is the number of remaining bits in 'value' for decoding, range [0, 7].
+     */
+
     unsigned char count;
 } VABoolCoderContextVPX;
 
@@ -83,7 +87,7 @@ typedef struct  _VAPictureParameterBufferVP8
 
     union {
         struct {
-	    /* same as key_frame in bitstream syntax */
+	    /* same as key_frame in bitstream syntax, 0 means a key frame */
             unsigned int key_frame			: 1; 
 	    /* same as version in bitstream syntax */
             unsigned int version			: 3;
@@ -107,8 +111,6 @@ typedef struct  _VAPictureParameterBufferVP8
             unsigned int sign_bias_alternate		: 1; 
 	    /* same as mb_no_coeff_skip in bitstream syntax */
             unsigned int mb_no_coeff_skip		: 1; 
-	    /* see section 11.1 for mb_skip_coeff */
-            unsigned int mb_skip_coeff			: 1; 
 	    /* flag to indicate that loop filter should be disabled */
             unsigned int loop_filter_disable		: 1; 
         } bits;
@@ -172,7 +174,7 @@ typedef struct  _VASliceParameterBufferVP8
      */
     unsigned int slice_data_size;
     /*
-     * offset to the first byte of partition data
+     * offset to the first byte of partition data (control partition)
      */
     unsigned int slice_data_offset;
     /*
@@ -180,12 +182,20 @@ typedef struct  _VASliceParameterBufferVP8
      */
     unsigned int slice_data_flag; 
     /*
-     * offset to the first bit of MB from the first byte of partition data
+     * offset to the first bit of MB from the first byte of partition data(slice_data_offset)
      */
     unsigned int macroblock_offset;
 
-    /* Partitions */
+    /*
+     * Partitions
+     * (1<<log2_nbr_of_dct_partitions)+1, count both control partition (frame header) and toke partition
+     */
     unsigned char num_of_partitions;
+    /*
+     * partition_size[0] is remaining bytes of control partition after parsed by application.
+     * exclude current byte for the remaining bits in bool_coder_ctx.
+     * exclude the uncompress data chunk since first_part_size 'excluding the uncompressed data chunk'
+     */
     unsigned int partition_size[9];
 } VASliceParameterBufferVP8;
 
