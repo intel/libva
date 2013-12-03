@@ -1060,6 +1060,34 @@ VAStatus vaBufferInfo (
   return ctx->vtable->vaBufferInfo( ctx, buf_id, type, size, num_elements );
 }
 
+/* Locks buffer for external API usage */
+VAStatus
+vaAcquireBufferHandle(VADisplay dpy, VABufferID buf_id, VABufferInfo *buf_info)
+{
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaAcquireBufferHandle)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaAcquireBufferHandle(ctx, buf_id, buf_info);
+}
+
+/* Unlocks buffer after usage from external API */
+VAStatus
+vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id)
+{
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaReleaseBufferHandle)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaReleaseBufferHandle(ctx, buf_id);
+}
+
 VAStatus vaBeginPicture (
     VADisplay dpy,
     VAContextID context,
