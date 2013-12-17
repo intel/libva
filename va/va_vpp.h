@@ -833,8 +833,8 @@ typedef struct _VAProcFilterParamterBufferFrameRateConversion {
      * \brief Array to store output frames in addition to the first one. 
      * \brief The first output frame is stored in the render target from vaBeginPicture(). */
     VASurfaceID*                        output_frames;   
-    /** \brief Boolean if frame repeat or not. */
-    bool                                repeat_frame;  
+    /** \brief if frame repeat or not. 1: repeat 0: do not repeat */
+    unsigned int                        repeat_frame;  
     /** \brief Counter within one complete FRC Cycle.
         \brief The counter would run from 0 to 4 for 24to60p in each cycle.
         \brief The counter would run from 0 to 1 for 30to60p in each cycle. */
@@ -940,9 +940,9 @@ typedef struct _VAProcFilterCapNonLinearAnamorphicScaling {
 
 /** \brief Capabilities specification for the Frame Rate Conversion filter. */
 typedef struct _VAProcFilterCapFrameRateConversion { 
-    /** \brief Bool Should be set if only supported rates are requested.
-        \brief Set to false to get the rest of the caps for the particular custom rate */
-    bool                                bget_custom_rates;
+    /** \brief Should be set to 1 if only supported rates are requested.
+        \brief Set to 0 to get the rest of the caps for the particular custom rate */
+    unsigned int                        bget_custom_rates;
     /** \brief FRC custom rates supported by the pipeline in the first query
         \brief App request caps for a custom rate in the second query */
     unsigned int                        frc_custom_rates;
@@ -954,8 +954,8 @@ typedef struct _VAProcFilterCapFrameRateConversion {
     unsigned int                        input_frames;
     /** \brief Number of output frames. */
     unsigned int                        output_frames;
-   /** \brief Boolean if interlaced input supoorted. */
-    bool                                input_interlaced;
+   /** \brief Set to 1 if interlaced input is supoorted. */
+    unsigned int                        input_interlaced;
 } VAProcFilterCapFrameRateConversion;
 
 /**
