@@ -544,8 +544,7 @@ VAStatus vaInitialize (
         va_infoMessage("User requested driver '%s'\n", driver_name);
     }
 
-    if ((VA_STATUS_SUCCESS == vaStatus) &&
-        driver_name_env && (geteuid() == getuid())) {
+    if (driver_name_env && (geteuid() == getuid())) {
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
         if (driver_name) /* memory is allocated in va_getDriverName */
             free(driver_name);
