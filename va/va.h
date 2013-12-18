@@ -498,6 +498,14 @@ typedef enum
      * VAEncMiscParameterTypeRoi.
      */
     VAConfigAttribEncRoi              = 25,
+    /**
+     * \brief Encoding extended rate control attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports any extended rate control features
+     * The attribute value is partitioned into fields as defined in the 
+     * VAConfigAttribRateControlExt union.
+     */
+    VAConfigAttribEncRateControlExt   = 26,
 
     /**@}*/
     VAConfigAttribTypeMax
@@ -638,6 +646,23 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
 
 /**@}*/
+
+/** \brief Attribute value for VAConfigAttribEncRateControlExt */
+typedef union _VAConfigAttribValEncRateControlExt {
+    struct {
+        /** \brief The number of temporal layers with layer specific bit-rate targets
+         * that are supported. The application will send multiple
+         * VAEncMiscParameterRateControl and VAEncMiscParameterFrameRate structures
+         * for each layer, using the temporal_id field as the layer identifier.
+         * If per temporal layer rate control is not supported, 
+         * num_temporal_layers_minus1 will be 0 and the temporal_id field in
+         * VAEncMiscParameterRateControl and VAEncMiscParameterFrameRate will be ignored.
+         */
+     unsigned int num_temporal_layers_minus1 : 8;
+     unsigned int reserved                   : 24;
+     } bits;
+     unsigned int value;
+} VAConfigAttribValEncRateControlExt;
 
 /*
  * if an attribute is not applicable for a given
@@ -1207,6 +1232,11 @@ typedef struct _VAEncMiscParameterRateControl
             unsigned int disable_frame_skip : 1; /* Disable frame skip in rate control mode */
             unsigned int disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
             unsigned int mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
+            /*
+             * The temporal layer that the rate control parameters are specified for.
+             */ 
+            unsigned int temporal_id : 8; 
+            unsigned int reserved : 17;
         } bits;
         unsigned int value;
     } rc_flags;
@@ -1216,6 +1246,18 @@ typedef struct _VAEncMiscParameterRateControl
 typedef struct _VAEncMiscParameterFrameRate
 {
     unsigned int framerate;
+    union 
+    {
+        struct
+        {
+            /*
+             * The temporal id the framerate parameters are specified for.
+             */
+            unsigned int temporal_id : 8; 
+            unsigned int reserved : 24;
+         } bits;
+         unsigned int value;
+     } framerate_flags;
 } VAEncMiscParameterFrameRate;
 
 /*
