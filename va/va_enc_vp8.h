@@ -128,7 +128,9 @@ typedef struct  _VAEncPictureParameterBufferVP8
             unsigned int no_ref_gf                      : 1;
             /* don't reference the alternate reference frame */
             unsigned int no_ref_arf                     : 1;
-            unsigned int reserved                       : 28;
+            /* The temporal id the frame belongs to. */
+            unsigned int temporal_id                    : 8;
+            unsigned int reserved                       : 20;
         } bits;
         unsigned int value;
     } ref_flags;
