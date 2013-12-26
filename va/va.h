@@ -2511,10 +2511,11 @@ typedef enum
 */
 typedef struct _VASurfaceDecodeMBErrors
 {
-    int status; /* 1 if hardware has returned detailed info below, -1 means this record is invalid */
+    int status; /* 1 if start_mb/end_mb with errors is returned, 2 if num_mb with errors is returned, -1 means this record is invalid */
     unsigned int start_mb; /* start mb address with errors */
-    unsigned int end_mb;  /* end mb address with errors */
+    unsigned int end_mb;   /* end mb address with errors */
     VADecodeErrorType decode_error_type;
+    unsigned int num_mb;   /* number of mbs with errors */
 } VASurfaceDecodeMBErrors;
 
 /*
