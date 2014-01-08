@@ -585,6 +585,15 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
     } info;
 } VAEncMacroblockParameterBufferH264;
 
+typedef struct _VAEncQpBufferH264 {
+    /*
+     * \brief This structure holds luma Qp per 16x16 macroblock. Buffer size shall be 
+     * sufficient to fit the slice or frame to be encoded depending on if it is a slice level
+     * or frame level encoding.
+     */
+    unsigned char qp_y;
+} VAEncQpBufferH264;
+
 /** \brief Bitstream writer attribute types specific to H.264 encoding. */
 typedef enum {
     /**
