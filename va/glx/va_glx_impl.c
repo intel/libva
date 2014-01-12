@@ -504,7 +504,6 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     };
     for (attrib = fbconfig_attrs; *attrib != GL_NONE; attrib += 2)
         ;
-    *attrib++ = GLX_DEPTH_SIZE;                 *attrib++ = wattr.depth;
     if (wattr.depth == 32) {
     *attrib++ = GLX_ALPHA_SIZE;                 *attrib++ = 8;
     *attrib++ = GLX_BIND_TO_TEXTURE_RGBA_EXT;   *attrib++ = GL_TRUE;
