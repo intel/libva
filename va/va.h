@@ -1268,7 +1268,7 @@ typedef enum
     /** \brief Buffer type used for Cyclic intra refresh */
     VAEncMiscParameterTypeCIR           = 11,
 
-    /* Intel specific types start at 1001
+    /* Intel specific types start at 1001 */
     /* VAEntrypointEncFEIIntel */
     VAEncMiscParameterTypeFEIFrameControlIntel = 1001 
 } VAEncMiscParameterType;
