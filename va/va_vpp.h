@@ -426,6 +426,21 @@ typedef struct _VABlendState {
 #define VA_PIPELINE_FLAG_END		0x00000004
 /**@}*/
 
+/** @name Chroma Siting flag */
+/**@{*/
+#define VA_CHROMA_SITING_UNKNOWN              0x00000000
+/** \brief Chroma samples are co-sited vertically on the top with the luma samples. */
+#define VA_CHROMA_SITING_VERTICAL_TOP         0x00000001
+/** \brief Chroma samples are not co-sited vertically with the luma samples. */
+#define VA_CHROMA_SITING_VERTICAL_CENTER      0x00000002
+/** \brief Chroma samples are co-sited vertically on the bottom with the luma samples. */
+#define VA_CHROMA_SITING_VERTICAL_BOTTOM      0x00000003
+/** \brief Chroma samples are co-sited horizontally on the left with the luma samples. */
+#define VA_CHROMA_SITING_HORIZONTAL_LEFT      0x00000004
+/** \brief Chroma samples are not co-sited horizontally with the luma samples. */
+#define VA_CHROMA_SITING_HORIZONTAL_CENTER    0x00000008
+/**@}*/
+
 /** \brief Video processing pipeline capabilities. */
 typedef struct _VAProcPipelineCaps {
     /** \brief Pipeline flags. See VAProcPipelineParameterBuffer::pipeline_flags. */
@@ -692,6 +707,8 @@ typedef struct _VAProcPipelineParameterBuffer {
     VASurfaceID        *additional_outputs;
     /** \brief Number of additional output surfaces. */
     unsigned int        num_additional_outputs;
+    /** \brief Flag to indicate the chroma siting information. */
+    unsigned int        chroma_siting_flag;
 } VAProcPipelineParameterBuffer;
 
 /**
