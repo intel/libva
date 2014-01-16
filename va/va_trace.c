@@ -1359,53 +1359,53 @@ static void va_TraceVASliceParameterBufferH264(
     }
     va_TraceMsg(trace_ctx, "\tRefPicList1 =\n");
     for (i = 0; i < 32; i++) {
-        if ((p->RefPicList0[i].picture_id != VA_INVALID_SURFACE) &&
-            ((p->RefPicList0[i].flags & VA_PICTURE_H264_INVALID) == 0))
+        if ((p->RefPicList1[i].picture_id != VA_INVALID_SURFACE) &&
+            ((p->RefPicList1[i].flags & VA_PICTURE_H264_INVALID) == 0))
             va_TraceMsg(trace_ctx, "%08d-%08d-0x%08x-%08d-0x%08x\n", p->RefPicList1[i].TopFieldOrderCnt, p->RefPicList1[i].BottomFieldOrderCnt, p->RefPicList1[i].picture_id, p->RefPicList1[i].frame_idx, p->RefPicList1[i].flags);
         else
             break;
     }
-    
+
     va_TraceMsg(trace_ctx, "\tluma_log2_weight_denom = %d\n", p->luma_log2_weight_denom);
     va_TraceMsg(trace_ctx, "\tchroma_log2_weight_denom = %d\n", p->chroma_log2_weight_denom);
     va_TraceMsg(trace_ctx, "\tluma_weight_l0_flag = %d\n", p->luma_weight_l0_flag);
-    if (p->luma_weight_l0_flag) {
-        for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
-                        p->luma_weight_l0[i],
-                        p->luma_offset_l0[i]);
-        }
+
+    for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
+        va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
+            p->luma_weight_l0[i],
+            p->luma_offset_l0[i]);
     }
 
+
     va_TraceMsg(trace_ctx, "\tchroma_weight_l0_flag = %d\n", p->chroma_weight_l0_flag);
-    if (p->chroma_weight_l0_flag) {
-        for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
-                        p->chroma_weight_l0[i][0],
-                        p->chroma_offset_l0[i][0],
-                        p->chroma_weight_l0[i][1],
-                        p->chroma_offset_l0[i][1]);
-        }
+
+    for (i = 0; (i <= p->num_ref_idx_l0_active_minus1) && (i<32); i++) {
+        va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+            p->chroma_weight_l0[i][0],
+            p->chroma_offset_l0[i][0],
+            p->chroma_weight_l0[i][1],
+            p->chroma_offset_l0[i][1]);
     }
-    
+
+
     va_TraceMsg(trace_ctx, "\tluma_weight_l1_flag = %d\n", p->luma_weight_l1_flag);
-    if (p->luma_weight_l1_flag) {
-        for (i = 0; (i <=  p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
-                        p->luma_weight_l1[i],
-                        p->luma_offset_l1[i]);
-        }
+
+    for (i = 0; (i <=  p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
+        va_TraceMsg(trace_ctx, "\t\t%d\t%d\n",
+            p->luma_weight_l1[i],
+            p->luma_offset_l1[i]);
     }
-    
+
+
     va_TraceMsg(trace_ctx, "\tchroma_weight_l1_flag = %d\n", p->chroma_weight_l1_flag);
-    if (p->chroma_weight_l1_flag) {
-        for (i = 0; (i <= p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
-            va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
-                        p->chroma_weight_l1[i][0],
-                        p->chroma_offset_l1[i][0],
-                        p->chroma_weight_l1[i][1],
-                        p->chroma_offset_l1[i][1]);
-        }
+
+    for (i = 0; (i <= p->num_ref_idx_l1_active_minus1) && (i<32); i++) {
+        va_TraceMsg(trace_ctx, "\t\t%d\t%d\t%d\t%d\n",
+            p->chroma_weight_l1[i][0],
+            p->chroma_offset_l1[i][0],
+            p->chroma_weight_l1[i][1],
+            p->chroma_offset_l1[i][1]);
+
     }
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -1420,7 +1420,7 @@ static void va_TraceVAIQMatrixBufferH264(
     void *data
 )
 {
-    int i, j;    
+    int i, j;
     VAIQMatrixBufferH264* p = (VAIQMatrixBufferH264* )data;
 
     DPY2TRACECTX(dpy);
