@@ -229,6 +229,7 @@ typedef struct _VAIQMatrixBufferVP8
 {
     /* 
      * array first dimensional is segment and 2nd dimensional is Q index
+     * all Q indexs should be clipped to be range [0, 127]
      */
     unsigned short quantization_index[4][6];
 } VAIQMatrixBufferVP8;
