@@ -36,6 +36,7 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include <va/va_enc.h>
 
 /**
@@ -584,6 +585,115 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
         /**@}*/
     } info;
 } VAEncMacroblockParameterBufferH264;
+
+/**
+ * \brief H.264 Mutiview Coding(MVC) Sequence Parameter Buffer
+ *
+ */
+typedef struct _VAEncSequenceParameterBufferH264_MVC {
+    /** brief Basic common sequence parameter */
+    VAEncSequenceParameterBufferH264 base;
+
+    /** brief Plus 1 specify the max number of views
+     * coded in the video sequence
+     */
+    uint16_t num_views_minus1;
+
+    /** brief Specify the view information in all layers */
+    struct H264SPSExtMVCViewInfo{
+        /** \brief The current view identifier. */
+        uint16_t view_id;
+        /** \brief Specifies the number of view components for inter-view
+         * prediction in the initialized RefPicList0 in decoding
+         * anchor views.
+         */
+        uint8_t  num_anchor_refs_l0;
+        /** \brief Specifies the view_id for inter-view prediction in
+         * the initialized RefPicList0 in decoding anchor views.
+         */
+        uint16_t anchor_ref_l0[15];
+        /** \brief Specifies the number of view components for inter-view
+         * prediction in the initialized RefPicList1 in decoding
+         * anchor views
+         */
+        uint8_t  num_anchor_refs_l1;
+        /** \brief Specifies the view_id for inter-view prediction in
+         * the initialized RefPicList1 in decoding anchor views.
+         */
+        uint16_t anchor_ref_l1[15];
+        /** \brief Specifies the number of view components for inter-view
+         * prediction in the initialized RefPicList0 in decoding
+         * non-anchor views.
+         */
+        uint8_t  num_non_anchor_refs_l0;
+        /** \brief Specifies the view_id for inter-view prediction in
+         * the initialized RefPicList0 in decoding non-anchor views.
+         */
+        uint16_t non_anchor_ref_l0[15];
+        /** \brief Specifies the number of view components for inter-view
+         * prediction in the initialized RefPicList1 in decoding
+         * non-anchor view.
+         */
+        uint8_t  num_non_anchor_refs_l1;
+        /** \brief Specifies the view_id for inter-view prediction in
+         * the initialized RefPicList1 in decoding non-anchor views.
+         */
+        uint16_t non_anchor_ref_l1[15];
+    }* view_list;
+
+    /** brief Plus 1 specifies the number of level values
+     * signalled for the coded video sequence
+     */
+    uint8_t num_level_values_signalled_minus1;
+
+    /** brief Level values operation for a set of the operation
+     * points in the current sequence
+     */
+    struct H264SPSExtMVCLevelValue {
+        /** \brief Specifies the level value signalled for the coded video sequence */
+        uint8_t level_idc;
+
+        /** \brief Plus 1 specifies the number of operation points to
+         *  which the level indicated by level_idc applies
+         */
+        uint16_t num_applicable_ops_minus1;
+
+        /** \brief Represent the specific operation to the view in the video sequence */
+        struct H264SPSExtMVCLevelValueOps {
+            /** \brief Specify a temporal identifier for the NAL unit */
+            uint8_t   temporal_id;
+            /** \brief Specify the number of the views whose level value will be modified */
+            uint16_t  num_target_views_minus1;
+            /** \brief Specify the views whose level value will be modified */
+            uint16_t* target_view_id_list;
+            /** \brief Specify the number of views whose level value can be modified */
+            uint16_t  num_views_minus1;
+        }* level_value_ops_list;
+
+    }* level_value_list;
+
+} VAEncSequenceParameterBufferH264_MVC;
+
+/**
+ * \brief H.264 Multiview Coding(MVC) Picture Parameter Buffer
+ *
+ */
+typedef struct _VAEncPictureParameterBufferH264_MVC
+{
+    /** brief Basic common picture parameter */
+    VAEncPictureParameterBufferH264 base;
+
+    /** brief Specifes the view id for current picture */
+    uint16_t view_id;
+
+    /** brief Specifes whether the picture is one anchor picture */
+    uint8_t  anchor_pic_flag;
+
+    /** brief Specifes whether inter view reference frame
+     * is used to encode current picture.
+     */
+    uint8_t  inter_view_flag;
+} VAEncPictureParameterBufferH264_MVC;
 
 typedef struct _VAEncQpBufferH264 {
     /*
