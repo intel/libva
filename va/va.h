@@ -234,6 +234,16 @@ typedef struct _VARectangle
     unsigned short height;
 } VARectangle;
 
+/** \brief Generic motion vector data structure. */
+typedef struct _VAMotionVector {
+    /** \mv0[0]: horizontal motion vector for past reference */
+    /** \mv0[1]: vertical motion vector for past reference */
+    /** \mv1[0]: horizontal motion vector for future reference */
+    /** \mv1[1]: vertical motion vector for future reference */
+    unsigned short  mv0[2];  /* past reference */
+    unsigned short  mv1[2];  /* future reference */
+} VAMotionVector;
+
 /*
  * Initialization:
  * A display must be obtained by calling vaGetDisplay() before calling

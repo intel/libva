@@ -111,7 +111,7 @@ typedef struct _VAStatsStatisticsParameter16x16Intel
 
 /** \brief VAStatsMotionVectorBufferTypeIntel. Motion vector buffer layout.
  * Motion vector output is per 4x4 block. For each 4x4 block there is a pair of past and future 
- * reference MVs as defined in VAMotionVectorIntel. Depending on Subblock partition, 
+ * reference MVs as defined in VAMotionVector. Depending on Subblock partition, 
  * for the shape that is not 4x4, the MV is replicated so each 4x4 block has a pair of MVs. 
  * If only past reference is used, future MV should be ignored, and vice versa. 
  * The 16x16 block is in raster scan order, within the 16x16 block, each 4x4 block MV is ordered as below in memory. 
@@ -129,17 +129,6 @@ typedef struct _VAStatsStatisticsParameter16x16Intel
  *        -----------------------------------------
  *
  **/
-
-/** \brief Motion vector data structure. */
-typedef struct _VAMotionVectorIntel {
-    /** \mv0[0]: horizontal motion vector for past reference */
-    /** \mv0[1]: vertical motion vector for past reference */
-    /** \mv1[0]: horizontal motion vector for future reference */
-    /** \mv1[1]: vertical motion vector for future reference */
-    unsigned short  mv0[2];  /* past reference */
-    unsigned short  mv1[2];  /* future reference */
-} VAMotionVectorIntel;
-
 
 /** \brief VAStatsStatisticsBufferTypeIntel. Statistics buffer layout.
  * Statistics output is per 16x16 block. Data structure per 16x16 block is defined below. 
