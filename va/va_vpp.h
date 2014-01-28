@@ -322,6 +322,8 @@ typedef enum _VAProcColorStandardType {
     VAProcColorStandardXVYCC601,
     /** \brief xvYCC709. */
     VAProcColorStandardXVYCC709,
+    /** \brief ITU-R BT.2020. */
+    VAProcColorStandardBT2020,
     /** \brief Number of color standards. */
     VAProcColorStandardCount
 } VAProcColorStandardType;

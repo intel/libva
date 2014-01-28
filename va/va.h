@@ -208,6 +208,7 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
 #define VA_SRC_SMPTE_240        0x00000040
+#define VA_SRC_BT2020           0x00000080
 
 /* Scaling flags for vaPutSurface() */
 #define VA_FILTER_SCALING_DEFAULT       0x00000000
