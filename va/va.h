@@ -217,6 +217,9 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
+#define VA_SOURCE_RANGE_MASK            0x00010000
+#define VA_SOURCE_RANGE_FULL            0x00010000
+#define VA_SOURCE_RANGE_REDUCED         0x00000000
 /*
  * The upper 16 bits are reserved for VPP filter fast path usage.
  * Flag to enable auto noise reduction.

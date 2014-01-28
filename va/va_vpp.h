@@ -710,8 +710,14 @@ typedef struct _VAProcPipelineParameterBuffer {
     VASurfaceID        *additional_outputs;
     /** \brief Number of additional output surfaces. */
     unsigned int        num_additional_outputs;
-    /** \brief Flag to indicate the chroma siting information. */
-    unsigned int        chroma_siting_flag;
+    /**
+     * \brief Flag to indicate the input surface flag such as chroma-siting,
+     * range flag and so on.
+     *
+     * The lower 4 bits are still used as chroma-siting flag
+     * The bit 16 is used to indicate the range flag of color-space conversion
+     */
+    unsigned int        input_surface_flag;
 } VAProcPipelineParameterBuffer;
 
 /**
