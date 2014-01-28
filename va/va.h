@@ -205,6 +205,7 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_CLEAR_DRAWABLE       0x00000008
 
 /** Color space conversion flags for vaPutSurface() */
+#define VA_SRC_COLOR_MASK       0x000000f0
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
 #define VA_SRC_SMPTE_240        0x00000040
