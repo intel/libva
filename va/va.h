@@ -216,6 +216,12 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
 /*
+ * The upper 16 bits are reserved for VPP filter fast path usage.
+ * Flag to enable auto noise reduction.
+ */
+#define VA_FILTER_NOISEREDUCTION_AUTO   0x00010000
+
+/*
  * Returns a short english description of error_status
  */
 const char *vaErrorStr(VAStatus error_status);

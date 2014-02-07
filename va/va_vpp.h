@@ -622,6 +622,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   \c VA_SRC_SMPTE_240. 
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
+     * - Enable auto noise reduction: \c VA_FILTER_NOISEREDUCTION_AUTO.
      */
     unsigned int        filter_flags;
     /**
