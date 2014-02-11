@@ -225,6 +225,17 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_FILTER_NOISEREDUCTION_AUTO   0x00010000
 
 /*
+ * This is to indicate that the color-space conversion uses full range or reduced range.
+ * VA_SOURCE_RANGE_FULL(Full range): Y/Cb/Cr is in [0, 255]. It is mainly used
+ *      for JPEG/JFIF formats. The combination with the BT601 flag means that
+ *      JPEG/JFIF color-space conversion matrix is used.
+ * VA_SOURCE_RANGE_REDUCED(Reduced range): Y is in [16, 235] and Cb/Cr is in [16, 240].
+ *      It is mainly used for the YUV->RGB color-space conversion in SDTV/HDTV/UHDTV.
+ */
+#define VA_SOURCE_RANGE_MASK            0x00020000
+#define VA_SOURCE_RANGE_FULL            0x00020000
+#define VA_SOURCE_RANGE_REDUCED         0x00000000
+/*
  * Returns a short english description of error_status
  */
 const char *vaErrorStr(VAStatus error_status);
