@@ -33,7 +33,8 @@
 #define CHECK_VASTATUS(va_status,func, ret)                             \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
     fprintf(stderr,"%s failed with error code %d (%s),exit\n",func, va_status, vaErrorStr(va_status)); \
-    exit(ret);                                                          \
+    ret_val = ret;                                                      \
+    goto error;                                                         \
 }
 
 static char * profile_string(VAProfile profile)
@@ -90,6 +91,7 @@ int main(int argc, const char* argv[])
   VAProfile profile;
   VAEntrypoint entrypoint, entrypoints[10];
   int num_entrypoint;
+  int ret_val = 0;
   
   if (name)
       name++;
@@ -128,8 +130,9 @@ int main(int argc, const char* argv[])
           printf("      %-32s:	%s\n", profile_str, entrypoint_string(entrypoints[entrypoint]));
   }
   
+error:
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
   
-  return 0;
+  return ret_val;
 }
