@@ -89,7 +89,8 @@ int main(int argc, const char* argv[])
   int major_version, minor_version;
   const char *driver;
   const char *name = strrchr(argv[0], '/'); 
-  VAProfile profile;
+  VAProfile profile, *profile_list = NULL;
+  int num_profiles, max_num_profiles, i;
   VAEntrypoint entrypoint, entrypoints[10];
   int num_entrypoint;
   int ret_val = 0;
@@ -116,9 +117,22 @@ int main(int argc, const char* argv[])
   printf("%s: Driver version: %s\n", name, driver ? driver : "<unknown>");
 
   printf("%s: Supported profile and entrypoints\n", name);
-  for	(profile = VAProfileNone; profile <= VAProfileVP8Version0_3; profile++) {
+  max_num_profiles = vaMaxNumProfiles(va_dpy);
+  profile_list = malloc(max_num_profiles * sizeof(VAProfile));
+
+  if (!profile_list) {
+      printf("Failed to allocate memory for profile list\n");
+      ret_val = 5;
+      goto error;
+  }
+
+  va_status = vaQueryConfigProfiles(va_dpy, profile_list, &num_profiles);
+  CHECK_VASTATUS(va_status, "vaQueryConfigProfiles", 6);
+
+  for (i = 0; i < num_profiles; i++) {
       char *profile_str;
 
+      profile = profile_list[i];
       va_status = vaQueryConfigEntrypoints(va_dpy, profile, entrypoints, 
                                            &num_entrypoint);
       if (va_status == VA_STATUS_ERROR_UNSUPPORTED_PROFILE)
@@ -132,6 +146,7 @@ int main(int argc, const char* argv[])
   }
   
 error:
+  free(profile_list);
   vaTerminate(va_dpy);
   va_close_display(va_dpy);
   
