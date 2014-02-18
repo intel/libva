@@ -299,7 +299,7 @@ void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
         struct timeval tv;
 
         if (gettimeofday(&tv, NULL) == 0)
-            fprintf(trace_ctx->trace_fp_log, "[%04d:%06d] ",
+            fprintf(trace_ctx->trace_fp_log, "[%04d.%06d] ",
                     (unsigned int)tv.tv_sec & 0xffff, (unsigned int)tv.tv_usec);
         va_start(args, msg);
         vfprintf(trace_ctx->trace_fp_log, msg, args);
@@ -532,19 +532,50 @@ static void va_TraceSurfaceAttributes(
         num = VASurfaceAttribCount;
 
     for (i=0; i<num; i++) {
+        int type = p->value.type;
+        
         va_TraceMsg(trace_ctx, "\tattrib_list[%i] =\n", i);
         
         va_TraceMsg(trace_ctx, "\t\ttype = %d\n", p->type);
         va_TraceMsg(trace_ctx, "\t\tflags = %d\n", p->flags);
-        va_TraceMsg(trace_ctx, "\t\tvalue.type = %d\n", p->value.type);
-        if (p->value.type == VAGenericValueTypeInteger)
+        va_TraceMsg(trace_ctx, "\t\tvalue.type = %d\n", type);
+        switch (type) {
+        case VAGenericValueTypeInteger:
             va_TraceMsg(trace_ctx, "\t\tvalue.value.i = 0x%08x\n", p->value.value.i);
-        else if (p->value.type == VAGenericValueTypeFloat)
-        va_TraceMsg(trace_ctx, "\t\tvalue.value.f = %f\n", p->value.value.f);
-        else if (p->value.type == VAGenericValueTypePointer)
+            break;
+        case VAGenericValueTypeFloat:
+            va_TraceMsg(trace_ctx, "\t\tvalue.value.f = %f\n", p->value.value.f);
+            break;
+        case VAGenericValueTypePointer:
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
-        else if (p->value.type == VAGenericValueTypeFunc)
+            if (type == VASurfaceAttribExternalBufferDescriptor) {
+                VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
+                int j;
+                
+                va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
+                va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
+                va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
+                va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
+                va_TraceMsg(trace_ctx, "\t\t  data_size=%d\n", tmp->data_size);
+                va_TraceMsg(trace_ctx, "\t\t  num_planes=%d\n", tmp->num_planes);
+                va_TraceMsg(trace_ctx, "\t\t  pitches[4]=%d %d %d %d\n",
+                            tmp->pitches[0], tmp->pitches[1], tmp->pitches[2], tmp->pitches[3]);
+                va_TraceMsg(trace_ctx, "\t\t  offsets[4]=%d %d %d %d\n",
+                            tmp->offsets[0], tmp->offsets[1], tmp->offsets[2], tmp->offsets[3]);
+                va_TraceMsg(trace_ctx, "\t\t  flags=0x%08x\n", tmp->flags);
+                va_TraceMsg(trace_ctx, "\t\t  num_buffers=0x%08x\n", tmp->num_buffers);
+                va_TraceMsg(trace_ctx, "\t\t  buffers=\n", tmp->buffers);
+                for (j = 0; j < tmp->num_buffers; j++) {
+                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%j]=0x%08x\n", tmp->buffers[j]);
+                }
+            }
+            break;
+        case VAGenericValueTypeFunc:
             va_TraceMsg(trace_ctx, "\t\tvalue.value.fn = %p\n", p->value.value.fn);
+            break;
+        default:
+            break;
+        }
 
         p++;
     }
