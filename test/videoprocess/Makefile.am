@@ -1,4 +1,4 @@
-# Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+# Copyright (c) 2014 Intel Corporation. All Rights Reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -7,11 +7,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -20,9 +20,18 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = common decode encode vainfo videoprocess
-if USE_X11
-SUBDIRS += basic putsurface transcode
-endif
+noinst_PROGRAMS = videoprocess
 
-EXTRA_DIST = loadsurface.h loadsurface_yuv.h
+INCLUDES = -I$(top_srcdir) \
+           -I$(top_srcdir)/test/common \
+           $(NULL)
+
+videoprocess_SOURCES = videoprocess.cpp
+videoprocess_LDADD   = $(top_builddir)/va/libva.la \
+                       $(top_builddir)/test/common/libva-display.la \
+                       $(NULL)
+
+valgrind:(noinst_PROGRAMS)
+	for a in(noinst_PROGRAMS); do \
+		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
+	done

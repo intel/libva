@@ -315,6 +315,7 @@ AC_OUTPUT([
     test/putsurface/Makefile
     test/transcode/Makefile
     test/vainfo/Makefile
+    test/videoprocess/Makefile
     va/Makefile
     va/drm/Makefile
     va/egl/Makefile
