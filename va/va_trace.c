@@ -54,17 +54,12 @@
  *                                decode/encode or jpeg surfaces
  * .LIBVA_TRACE_SURFACE_GEOMETRY=WIDTHxHEIGHT+XOFF+YOFF: only save part of surface context into file
  *                                due to storage bandwidth limitation
- * .LIBVA_TRACE_LOGSIZE=numeric number: truncate the log_file or coded_clip_file, or decoded_yuv_file
- *                                      when the size is bigger than the number
  */
 
 /* global settings */
 
 /* LIBVA_TRACE */
 int trace_flag = 0;
-
-/* LIBVA_TRACE_LOGSIZE */
-static unsigned int trace_logsize = 0xffffffff; /* truncate the log when the size is bigger than it */
 
 /* per context settings */
 struct trace_context {
@@ -98,7 +93,6 @@ struct trace_context {
 
     unsigned int trace_frame_width; /* current frame width */
     unsigned int trace_frame_height; /* current frame height */
-    unsigned int trace_sequence_start; /* get a new sequence for encoding or not */
 };
 
 #define TRACE_CTX(dpy) ((struct trace_context *)((VADisplayContextP)dpy)->vatrace)
@@ -181,11 +175,6 @@ void va_TraceInit(VADisplay dpy)
     }
 
     /* may re-get the global settings for multiple context */
-    if (va_parseConfig("LIBVA_TRACE_LOGSIZE", &env_value[0]) == 0) {
-        trace_logsize = atoi(env_value);
-        va_infoMessage("LIBVA_TRACE_LOGSIZE is on, size is %d\n", trace_logsize);
-    }
-
     if ((trace_flag & VA_TRACE_FLAG_LOG) && (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)) {
         trace_flag |= VA_TRACE_FLAG_BUFDATA;
         va_infoMessage("LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
@@ -270,22 +259,6 @@ void va_TraceEnd(VADisplay dpy)
 }
 
 
-static unsigned int file_size(FILE *fp)
-{
-    struct stat buf;
-
-    fstat(fileno(fp), &buf);
-
-    return buf.st_size;
-}
-
-
-static void truncate_file(FILE *fp)
-{
-    ftruncate(fileno(fp), 0);
-    rewind(fp);
-}
-
 void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
 {
     va_list args;
@@ -293,8 +266,6 @@ void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
     if (!(trace_flag & VA_TRACE_FLAG_LOG))
         return;
 
-    if (file_size(trace_ctx->trace_fp_log) >= trace_logsize)
-        truncate_file(trace_ctx->trace_fp_log);
     if (msg)  {
         struct timeval tv;
 
@@ -315,15 +286,6 @@ void va_TraceCodedBuf(VADisplay dpy)
     int i = 0;
     
     DPY2TRACECTX(dpy);
-    
-    /* can only truncate at a sequence boudary */
-    if (((file_size(trace_ctx->trace_fp_log) >= trace_logsize))
-        && trace_ctx->trace_sequence_start) {
-        va_TraceMsg(trace_ctx, "==========truncate file %s\n", trace_ctx->trace_codedbuf_fn);
-        truncate_file(trace_ctx->trace_fp_log);
-    }
-
-    trace_ctx->trace_sequence_start = 0; /* only truncate coded file when meet next new sequence */
     
     va_status = vaMapBuffer(dpy, trace_ctx->trace_codedbuf, (void **)(&buf_list));
     if (va_status != VA_STATUS_SUCCESS)
@@ -364,10 +326,6 @@ void va_TraceSurface(VADisplay dpy)
 
     va_TraceMsg(trace_ctx, "==========dump surface data in file %s\n", trace_ctx->trace_surface_fn);
 
-    if ((file_size(trace_ctx->trace_fp_surface) >= trace_logsize)) {
-        va_TraceMsg(trace_ctx, "==========truncate file %s\n", trace_ctx->trace_surface_fn);
-        truncate_file(trace_ctx->trace_fp_surface);
-    }
     va_TraceMsg(trace_ctx, NULL);
 
     va_status = vaLockSurface(
@@ -1185,9 +1143,6 @@ static void va_TraceVAEncSequenceParameterBufferMPEG4(
     va_TraceMsg(trace_ctx, "\tmin_qp = %d\n", p->min_qp);
     va_TraceMsg(trace_ctx, NULL);
 
-    /* start a new sequce, coded log file can be truncated */
-    trace_ctx->trace_sequence_start = 1;
-
     return;
 }
 
@@ -1530,9 +1485,6 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\ttime_scale = %d\n", p->time_scale);
 
     va_TraceMsg(trace_ctx, NULL);
-
-    /* start a new sequce, coded log file can be truncated */
-    trace_ctx->trace_sequence_start = 1;
 
     return;
 }
@@ -2243,9 +2195,6 @@ static void va_TraceVAEncSequenceParameterBufferH263(
     va_TraceMsg(trace_ctx, "\tinitial_qp = %d\n", p->initial_qp);
     va_TraceMsg(trace_ctx, "\tmin_qp = %d\n", p->min_qp);
     va_TraceMsg(trace_ctx, NULL);
-
-    /* start a new sequce, coded log file can be truncated */
-    trace_ctx->trace_sequence_start = 1;
 
     return;
 }
