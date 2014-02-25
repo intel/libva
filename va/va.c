@@ -998,7 +998,7 @@ VAStatus vaMapBuffer (
   
   va_status = ctx->vtable->vaMapBuffer( ctx, buf_id, pbuf );
 
-  VA_TRACE_LOG(va_TraceMapBuffer, dpy, buf_id, pbuf);
+  VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf);
   
   return va_status;
 }
