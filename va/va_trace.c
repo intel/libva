@@ -499,9 +499,9 @@ static void va_TraceSurfaceAttributes(
                             tmp->offsets[0], tmp->offsets[1], tmp->offsets[2], tmp->offsets[3]);
                 va_TraceMsg(trace_ctx, "\t\t  flags=0x%08x\n", tmp->flags);
                 va_TraceMsg(trace_ctx, "\t\t  num_buffers=0x%08x\n", tmp->num_buffers);
-                va_TraceMsg(trace_ctx, "\t\t  buffers=\n", tmp->buffers);
+                va_TraceMsg(trace_ctx, "\t\t  buffers=%p\n", tmp->buffers);
                 for (j = 0; j < tmp->num_buffers; j++) {
-                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%j]=0x%08x\n", tmp->buffers[j]);
+                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%j]=%p\n", tmp->buffers[j]);
                 }
             }
             break;
