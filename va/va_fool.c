@@ -52,6 +52,7 @@
  * LIBVA_FOOL_ENCODE=<framename>:
  * . if set, encode does nothing, but fill in the coded buffer from the content of files with
  *   name framename.0,framename.1,..., framename.N, framename.0,..., framename.N,...repeatly
+ *   Use file name to determine h264 or vp8
  * LIBVA_FOOL_JPEG=<framename>:fill the content of filename to codedbuf for jpeg encoding
  * LIBVA_FOOL_POSTP:
  * . if set, do nothing for vaPutSurface
@@ -66,6 +67,7 @@ int fool_postp  = 0;
 #define FOOL_BUFID_MASK    0xffffff00
 
 struct fool_context {
+    int enabled; /* fool_codec is global, and it is for concurent encode/decode */
     char *fn_enc;/* file pattern with codedbuf content for encode */
     char *segbuf_enc; /* the segment buffer of coded buffer, load frome fn_enc */
     int file_count;
@@ -88,11 +90,16 @@ struct fool_context {
 };
 
 #define FOOL_CTX(dpy) ((struct fool_context *)((VADisplayContextP)dpy)->vafool)
+
 #define DPY2FOOLCTX(dpy)                                 \
     struct fool_context *fool_ctx = FOOL_CTX(dpy);       \
-                                                         \
     if (fool_ctx == NULL)                                \
-        return 0; /* let driver go */                    \
+        return 0; /* no fool for the context */          \
+
+#define DPY2FOOLCTX_CHK(dpy)                             \
+    struct fool_context *fool_ctx = FOOL_CTX(dpy);       \
+    if ((fool_ctx == NULL) || (fool_ctx->enabled == 0))  \
+        return 0; /* no fool for the context */          \
 
 /* Prototype declarations (functions defined in va.c) */
 
@@ -104,7 +111,6 @@ int  va_parseConfig(char *env, char *env_value);
 void va_FoolInit(VADisplay dpy)
 {
     char env_value[1024];
-    int fool_index = 0;
 
     struct fool_context *fool_ctx = calloc(sizeof(struct fool_context), 1);
     
@@ -161,7 +167,6 @@ int va_FoolEnd(VADisplay dpy)
     return 0;
 }
 
-
 int va_FoolCreateConfig(
         VADisplay dpy,
         VAProfile profile, 
@@ -182,13 +187,29 @@ int va_FoolCreateConfig(
      * which is not desired
      */
     if (((fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
-        ((fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) ||
         ((fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
-        ; /* the fool_codec is meaningful */
-    else
-        fool_codec = 0;
+        fool_ctx->enabled = 1;
+    else if ((fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
+        /* H264 is desired */
+        if (((profile == VAProfileH264Baseline ||
+              profile == VAProfileH264Main ||
+              profile == VAProfileH264High ||
+              profile == VAProfileH264ConstrainedBaseline)) &&
+            strstr(fool_ctx->fn_enc, "h264"))
+            fool_ctx->enabled = 1;
 
-    return 0; /* driver continue */
+        /* vp8 is desired */
+        if ((profile == VAProfileVP8Version0_3) &&
+            strstr(fool_ctx->fn_enc, "vp8"))
+            fool_ctx->enabled = 1;
+    }
+    if (fool_ctx->enabled)
+        va_infoMessage("FOOL is enabled for this context\n");
+    else
+        va_infoMessage("FOOL is not enabled for this context\n");
+
+    
+    return 0; /* continue */
 }
 
 
@@ -204,7 +225,7 @@ VAStatus va_FoolCreateBuffer(
 {
     unsigned int new_size = size * num_elements;
     unsigned int old_size;
-    DPY2FOOLCTX(dpy);
+    DPY2FOOLCTX_CHK(dpy);
 
     old_size = fool_ctx->fool_buf_size[type] * fool_ctx->fool_buf_element[type];
 
@@ -231,17 +252,13 @@ VAStatus va_FoolBufferInfo(
     unsigned int *num_elements /* out */
 )
 {
-    unsigned int magic = buf_id & FOOL_BUFID_MASK;
-    DPY2FOOLCTX(dpy);
-
-    if (magic != FOOL_BUFID_MAGIC)
-        return 0;
+    DPY2FOOLCTX_CHK(dpy);
 
     *type = buf_id & 0xff;
     *size = fool_ctx->fool_buf_size[*type];
     *num_elements = fool_ctx->fool_buf_element[*type];;
     
-    return 1; /* don't call into driver */
+    return 1; /* fool is valid */
 }
 
 static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
@@ -282,12 +299,11 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
     return 0;
 }
 
-
 static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
 {
     struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
-    int i, fd = -1;
+    int fd = -1;
 
     if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
         fstat(fd, &file_stat);
@@ -326,32 +342,23 @@ VAStatus va_FoolMapBuffer(
     void **pbuf 	/* out */
 )
 {
-    unsigned int buftype = buf_id & 0xff;
-    unsigned int magic = buf_id & FOOL_BUFID_MASK;
-    DPY2FOOLCTX(dpy);
+    unsigned int buftype;
+    DPY2FOOLCTX_CHK(dpy);
 
-    if (magic != FOOL_BUFID_MAGIC || buftype >= VABufferTypeMax || !pbuf)
-        return 0;
-
-    /* buf_id is the buffer type */
+    buftype = buf_id & 0xff;
     *pbuf = fool_ctx->fool_buf[buftype];
 
-    /* it is coded buffer, fill the fake segment buf from file */
+    /* it is coded buffer, fill coded segment from file */
     if (*pbuf && (buftype == VAEncCodedBufferType))
         va_FoolFillCodedBuf(fool_ctx);
     
-    return 1; /* don't call into driver */
+    return 1; /* fool is valid */
 }
 
-VAStatus va_FoolUnmapBuffer(
-        VADisplay dpy,
-        VABufferID buf_id	/* in */
-)
+VAStatus va_FoolCheckContinuity(VADisplay dpy)
 {
-    unsigned int magic = buf_id & FOOL_BUFID_MASK;
+    DPY2FOOLCTX_CHK(dpy);
 
-    if (magic != FOOL_BUFID_MAGIC)
-        return 0;
-
-    return 1;
+    return 1; /* fool is valid */
 }
+

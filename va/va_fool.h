@@ -41,13 +41,10 @@ extern int fool_postp;
 
 #define VA_FOOL_FUNC(fool_func,...)            \
     if (fool_codec) {                          \
-        ret = fool_func(__VA_ARGS__);          \
+        if (fool_func(__VA_ARGS__))            \
+            return VA_STATUS_SUCCESS;          \
     }
-#define VA_FOOL_RETURN()                       \
-    if (fool_codec) {                          \
-        return VA_STATUS_SUCCESS;              \
-    }
-
+    
 void va_FoolInit(VADisplay dpy);
 int va_FoolEnd(VADisplay dpy);
 
@@ -77,11 +74,6 @@ VAStatus va_FoolMapBuffer (
     void **pbuf 	/* out */
 );
 
-VAStatus va_FoolUnmapBuffer(
-        VADisplay dpy,
-        VABufferID buf_id	/* in */
-);
-
 VAStatus va_FoolBufferInfo (
     VADisplay dpy,
     VABufferID buf_id,  /* in */
@@ -90,7 +82,8 @@ VAStatus va_FoolBufferInfo (
     unsigned int *num_elements /* out */
 );
     
-    
+VAStatus va_FoolCheckContinuity(VADisplay dpy);
+
 #ifdef __cplusplus
 }
 #endif
