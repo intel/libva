@@ -3107,14 +3107,14 @@ void va_TraceRenderPicture(
             break;
         case VAProfileVP8Version0_3:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
+                va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
 
                 va_TraceVP8Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         case VAProfileNone:
             for (j=0; j<num_elements; j++) {
-                va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
+                va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
 
                 va_TraceNoneBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }

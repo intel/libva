@@ -252,8 +252,14 @@ VAStatus va_FoolBufferInfo(
     unsigned int *num_elements /* out */
 )
 {
+    unsigned int magic;
+    
     DPY2FOOLCTX_CHK(dpy);
 
+    magic = buf_id & FOOL_BUFID_MASK;
+    if (magic != FOOL_BUFID_MAGIC)
+        return 0; /* could be VAImageBufferType from vaDeriveImage */
+    
     *type = buf_id & 0xff;
     *size = fool_ctx->fool_buf_size[*type];
     *num_elements = fool_ctx->fool_buf_element[*type];;
@@ -342,9 +348,13 @@ VAStatus va_FoolMapBuffer(
     void **pbuf 	/* out */
 )
 {
-    unsigned int buftype;
+    unsigned int magic, buftype;
     DPY2FOOLCTX_CHK(dpy);
 
+    magic = buf_id & FOOL_BUFID_MASK;
+    if (magic != FOOL_BUFID_MAGIC)
+        return 0; /* could be VAImageBufferType from vaDeriveImage */
+    
     buftype = buf_id & 0xff;
     *pbuf = fool_ctx->fool_buf[buftype];
 
