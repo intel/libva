@@ -78,6 +78,7 @@
 #ifndef _VA_H_
 #define _VA_H_
 
+#include <stdint.h>
 #include <va/va_version.h>
 
 #ifdef __cplusplus
