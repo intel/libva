@@ -106,6 +106,7 @@ const char *profile2string(VAProfile profile)
         PROFILE(VC1Main)
         PROFILE(VC1Advanced)
         PROFILE(JPEGBaseline)
+        PROFILE(VP8Version0_3)
     }
     ASSERT(0);
     return "Unknown";
