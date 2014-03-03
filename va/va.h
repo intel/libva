@@ -389,7 +389,6 @@ typedef enum
      *
      **/
     VAEntrypointStatisticsIntel,
-    VAEntrypointMax
 } VAEntrypoint;
 
 /* Currently defined configuration attribute types */

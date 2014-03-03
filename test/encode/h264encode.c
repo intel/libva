@@ -917,8 +917,8 @@ static int process_cmdline(int argc, char *argv[])
 static int init_va(void)
 {
     VAProfile profile_list[]={VAProfileH264High,VAProfileH264Main,VAProfileH264Baseline,VAProfileH264ConstrainedBaseline};
-    VAEntrypoint entrypoints[VAEntrypointMax]={0};
-    int num_entrypoints,slice_entrypoint;
+    VAEntrypoint *entrypoints;
+    int num_entrypoints, slice_entrypoint;
     int support_encode = 0;    
     int major_ver, minor_ver;
     VAStatus va_status;
@@ -927,6 +927,13 @@ static int init_va(void)
     va_dpy = va_open_display();
     va_status = vaInitialize(va_dpy, &major_ver, &minor_ver);
     CHECK_VASTATUS(va_status, "vaInitialize");
+
+    num_entrypoints = vaMaxNumEntrypoints(va_dpy);
+    entrypoints = malloc(num_entrypoints * sizeof(*entrypoints));
+    if (!entrypoints) {
+        fprintf(stderr, "error: failed to initialize VA entrypoints array\n");
+        exit(1);
+    }
 
     /* use the highest profile */
     for (i = 0; i < sizeof(profile_list)/sizeof(profile_list[0]); i++) {
@@ -1101,6 +1108,7 @@ static int init_va(void)
         printf("Support VAConfigAttribEncMacroblockInfo\n");
     }
 
+    free(entrypoints);
     return 0;
 }
 
