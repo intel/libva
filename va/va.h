@@ -98,7 +98,6 @@ extern "C" {
  *
  * VA-API is split into several modules:
  * - \ref api_core
- * - \ref api_enc_core
  * - \ref api_enc_h264
  * - \ref api_vpp
  */
@@ -109,7 +108,7 @@ extern "C" {
  * @{
  */
 
-/* 
+/**
 Overview 
 
 The VA API is intended to provide an interface between a video decode/encode/display
@@ -139,8 +138,8 @@ Initialization & Configuration Management
 
 typedef void* VADisplay;	/* window system dependent */
 
-typedef int VAStatus;	/* Return status type from functions */
-/* Values for the return status */
+typedef int VAStatus;	/** Return status type from functions */
+/** Values for the return status */
 #define VA_STATUS_SUCCESS			0x00000000
 #define VA_STATUS_ERROR_OPERATION_FAILED	0x00000001
 #define VA_STATUS_ERROR_ALLOCATION_FAILED	0x00000002
@@ -182,12 +181,12 @@ typedef int VAStatus;	/* Return status type from functions */
 #define VA_STATUS_ERROR_HW_BUSY                 0x00000022
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
-/* De-interlacing flags for vaPutSurface() */
+/** De-interlacing flags for vaPutSurface() */
 #define VA_FRAME_PICTURE        0x00000000 
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
 
-/*
+/**
  * Enabled the positioning/cropping/blending feature:
  * 1, specify the video playback position in the isurface
  * 2, specify the cropping info for video playback
@@ -195,31 +194,31 @@ typedef int VAStatus;	/* Return status type from functions */
  */
 #define VA_ENABLE_BLEND         0x00000004 /* video area blend with the constant color */ 
     
-/*
+/**
  * Clears the drawable with background color.
  * for hardware overlay based implementation this flag
  * can be used to turn off the overlay
  */
 #define VA_CLEAR_DRAWABLE       0x00000008
 
-/* Color space conversion flags for vaPutSurface() */
+/** Color space conversion flags for vaPutSurface() */
 #define VA_SRC_BT601            0x00000010
 #define VA_SRC_BT709            0x00000020
 #define VA_SRC_SMPTE_240        0x00000040
 
-/* Scaling flags for vaPutSurface() */
+/** Scaling flags for vaPutSurface() */
 #define VA_FILTER_SCALING_DEFAULT       0x00000000
 #define VA_FILTER_SCALING_FAST          0x00000100
 #define VA_FILTER_SCALING_HQ            0x00000200
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
-/*
+/**
  * Returns a short english description of error_status
  */
 const char *vaErrorStr(VAStatus error_status);
 
-/*
+/**
  * Initialization:
  * A display must be obtained by calling vaGetDisplay() before calling
  * vaInitialize() and other functions. This connects the API to the 
@@ -230,7 +229,7 @@ typedef void* VANativeDisplay;	/* window system dependent */
 
 int vaDisplayIsValid(VADisplay dpy);
     
-/*
+/**
  * Initialize the library 
  */
 VAStatus vaInitialize (
@@ -239,14 +238,14 @@ VAStatus vaInitialize (
     int *minor_version 	 /* out */
 );
 
-/*
+/**
  * After this call, all library internal resources will be cleaned up
  */ 
 VAStatus vaTerminate (
     VADisplay dpy
 );
 
-/*
+/**
  * vaQueryVendorString returns a pointer to a zero-terminated string
  * describing some aspects of the VA implemenation on a specific    
  * hardware accelerator. The format of the returned string is vendor
@@ -260,7 +259,7 @@ const char *vaQueryVendorString (
 
 typedef int (*VAPrivFunc)();
 
-/*
+/**
  * Return a function pointer given a function name in the library.
  * This allows private interfaces into the library
  */ 
@@ -269,7 +268,7 @@ VAPrivFunc vaGetLibFunc (
     const char *func
 );
 
-/* Currently defined profiles */
+/** Currently defined profiles */
 typedef enum
 {
     /** \brief Profile ID used for video processing. */
@@ -291,7 +290,7 @@ typedef enum
     VAProfileVP8Version0_3              = 14
 } VAProfile;
 
-/* 
+/**
  *  Currently defined entrypoints 
  */
 typedef enum
@@ -306,7 +305,7 @@ typedef enum
     VAEntrypointVideoProc       = 10,   /**< Video pre/post-processing. */
 } VAEntrypoint;
 
-/* Currently defined configuration attribute types */
+/** Currently defined configuration attribute types */
 typedef enum
 {
     VAConfigAttribRTFormat		= 0,
@@ -389,7 +388,7 @@ typedef enum
     VAConfigAttribTypeMax
 } VAConfigAttribType;
 
-/*
+/**
  * Configuration attributes
  * If there is more than one value for an attribute, a default
  * value will be assigned to the attribute if the client does not
@@ -400,7 +399,7 @@ typedef struct _VAConfigAttrib {
     unsigned int value; /* OR'd flags (bits) for this attribute */
 } VAConfigAttrib;
 
-/* attribute value for VAConfigAttribRTFormat */
+/** attribute value for VAConfigAttribRTFormat */
 #define VA_RT_FORMAT_YUV420	0x00000001	
 #define VA_RT_FORMAT_YUV422	0x00000002
 #define VA_RT_FORMAT_YUV444	0x00000004
@@ -468,28 +467,28 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
 /**@}*/
 
-/*
+/**
  * if an attribute is not applicable for a given
  * profile/entrypoint pair, then set the value to the following 
  */
 #define VA_ATTRIB_NOT_SUPPORTED 0x80000000
 
-/* Get maximum number of profiles supported by the implementation */
+/** Get maximum number of profiles supported by the implementation */
 int vaMaxNumProfiles (
     VADisplay dpy
 );
 
-/* Get maximum number of entrypoints supported by the implementation */
+/** Get maximum number of entrypoints supported by the implementation */
 int vaMaxNumEntrypoints (
     VADisplay dpy
 );
 
-/* Get maximum number of attributs supported by the implementation */
+/** Get maximum number of attributs supported by the implementation */
 int vaMaxNumConfigAttributes (
     VADisplay dpy
 );
 
-/* 
+/**
  * Query supported profiles 
  * The caller must provide a "profile_list" array that can hold at
  * least vaMaxNumProfile() entries. The actual number of profiles
@@ -501,7 +500,7 @@ VAStatus vaQueryConfigProfiles (
     int *num_profiles		/* out */
 );
 
-/* 
+/**
  * Query supported entrypoints for a given profile 
  * The caller must provide an "entrypoint_list" array that can hold at
  * least vaMaxNumEntrypoints() entries. The actual number of entrypoints 
@@ -514,7 +513,7 @@ VAStatus vaQueryConfigEntrypoints (
     int *num_entrypoints		/* out */
 );
 
-/* 
+/**
  * Get attributes for a given profile/entrypoint pair 
  * The caller must provide an "attrib_list" with all attributes to be 
  * retrieved.  Upon return, the attributes in "attrib_list" have been 
@@ -530,12 +529,12 @@ VAStatus vaGetConfigAttributes (
     int num_attribs
 );
 
-/* Generic ID type, can be re-typed for specific implementation */
+/** Generic ID type, can be re-typed for specific implementation */
 typedef unsigned int VAGenericID;
 
 typedef VAGenericID VAConfigID;
 
-/* 
+/**
  * Create a configuration for the decode pipeline 
  * it passes in the attribute list that specifies the attributes it cares 
  * about, with the rest taking default values.  
@@ -549,7 +548,7 @@ VAStatus vaCreateConfig (
     VAConfigID *config_id /* out */
 );
 
-/* 
+/**
  * Free resources associdated with a given config 
  */
 VAStatus vaDestroyConfig (
@@ -557,7 +556,7 @@ VAStatus vaDestroyConfig (
     VAConfigID config_id
 );
 
-/* 
+/**
  * Query all attributes for a given configuration 
  * The profile of the configuration is returned in "profile"
  * The entrypoint of the configuration is returned in "entrypoint"
@@ -575,7 +574,7 @@ VAStatus vaQueryConfigAttributes (
 );
 
 
-/*
+/**
  * Contexts and Surfaces
  *
  * Context represents a "virtual" video decode pipeline. Surfaces are render 
@@ -801,7 +800,7 @@ vaCreateSurfaces(
     unsigned int        num_attribs
 );
     
-/*
+/**
  * vaDestroySurfaces - Destroy resources associated with surfaces. 
  *  Surfaces can only be destroyed after the context associated has been 
  *  destroyed.  
@@ -816,7 +815,7 @@ VAStatus vaDestroySurfaces (
 );
 
 #define VA_PROGRESSIVE 0x1
-/*
+/**
  * vaCreateContext - Create a context
  *  dpy: display
  *  config_id: configuration for the context
@@ -839,7 +838,7 @@ VAStatus vaCreateContext (
     VAContextID *context		/* out */
 );
 
-/*
+/**
  * vaDestroyContext - Destroy a context 
  *  dpy: display
  *  context: context to be destroyed
@@ -849,7 +848,7 @@ VAStatus vaDestroyContext (
     VAContextID context
 );
 
-/*
+/**
  * Buffers 
  * Buffers are used to pass various types of data from the
  * client to the server. The server maintains a data store
@@ -952,7 +951,7 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
     unsigned char               has_emulation_bytes;
 } VAEncPackedHeaderParameterBuffer;
 
-/*
+/**
  *  For application, e.g. set a new bitrate
  *    VABufferID buf_id;
  *    VAEncMiscParameterBuffer *misc_param;
@@ -1011,7 +1010,7 @@ typedef struct _VAEncMiscParameterFrameRate
     unsigned int framerate;
 } VAEncMiscParameterFrameRate;
 
-/*
+/**
  * Allow a maximum slice size to be specified (in bits).
  * The encoder will attempt to make sure that individual slices do not exceed this size
  * Or to signal applicate if the slice size exceed this size, see "status" of VACodedBufferSegment
@@ -1050,7 +1049,7 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     unsigned int                max_frame_size;
 } VAEncMiscParameterBufferMaxFrameSize;
 
-/* 
+/**
  * There will be cases where the bitstream buffer will not have enough room to hold
  * the data for the entire slice, and the following flags will be used in the slice
  * parameter to signal to the server for the possible cases.
@@ -1131,7 +1130,7 @@ typedef struct _VAPictureParameterBufferMPEG2
     } picture_coding_extension;
 } VAPictureParameterBufferMPEG2;
 
-/* MPEG-2 Inverse Quantization Matrix Buffer */
+/** MPEG-2 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferMPEG2
 {
     int load_intra_quantiser_matrix;
@@ -1144,7 +1143,7 @@ typedef struct _VAIQMatrixBufferMPEG2
     unsigned char chroma_non_intra_quantiser_matrix[64];
 } VAIQMatrixBufferMPEG2;
 
-/* MPEG-2 Slice Parameter Buffer */
+/** MPEG-2 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferMPEG2
 {
     unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
@@ -1157,7 +1156,7 @@ typedef struct _VASliceParameterBufferMPEG2
     int intra_slice_flag;
 } VASliceParameterBufferMPEG2;
 
-/* MPEG-2 Macroblock Parameter Buffer */
+/** MPEG-2 Macroblock Parameter Buffer */
 typedef struct _VAMacroblockParameterBufferMPEG2
 {
     unsigned short macroblock_address;
@@ -1204,7 +1203,7 @@ typedef struct _VAMacroblockParameterBufferMPEG2
 #define VA_MB_TYPE_MOTION_PATTERN	0x08
 #define VA_MB_TYPE_MOTION_INTRA		0x10
 
-/* 
+/**
  * MPEG-2 Residual Data Buffer 
  * For each macroblock, there wil be 64 shorts (16-bit) in the 
  * residual data buffer
@@ -1267,7 +1266,7 @@ typedef struct _VAPictureParameterBufferMPEG4
     short TRD;
 } VAPictureParameterBufferMPEG4;
 
-/* MPEG-4 Inverse Quantization Matrix Buffer */
+/** MPEG-4 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferMPEG4
 {
     int load_intra_quant_mat;
@@ -1276,7 +1275,7 @@ typedef struct _VAIQMatrixBufferMPEG4
     unsigned char non_intra_quant_mat[64];
 } VAIQMatrixBufferMPEG4;
 
-/* MPEG-4 Slice Parameter Buffer */
+/** MPEG-4 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferMPEG4
 {
     unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
@@ -1287,7 +1286,7 @@ typedef struct _VASliceParameterBufferMPEG4
     int quant_scale;
 } VASliceParameterBufferMPEG4;
 
-/*
+/**
  VC-1 data structures
 */
 
@@ -1300,7 +1299,7 @@ typedef enum   /* see 7.1.1.32 */
     VAMvModeIntensityCompensation      = 4 
 } VAMvModeVC1;
 
-/* VC-1 Picture Parameter Buffer */
+/** VC-1 Picture Parameter Buffer */
 /* 
  * For each picture, and before any slice data, a picture parameter
  * buffer must be send. Multiple picture parameter buffers may be
@@ -1459,7 +1458,7 @@ typedef struct _VAPictureParameterBufferVC1
     } transform_fields;
 } VAPictureParameterBufferVC1;
 
-/* VC-1 Bitplane Buffer 
+/** VC-1 Bitplane Buffer
 There will be at most three bitplanes coded in any picture header. To send 
 the bitplane data more efficiently, each byte is divided in two nibbles, with
 each nibble carrying three bitplanes for one macroblock.  The following table
@@ -1511,7 +1510,7 @@ typedef struct _VAPictureH264
 #define VA_PICTURE_H264_SHORT_TERM_REFERENCE	0x00000008
 #define VA_PICTURE_H264_LONG_TERM_REFERENCE	0x00000010
 
-/* H.264 Picture Parameter Buffer */
+/** H.264 Picture Parameter Buffer */
 /* 
  * For each picture, and before any slice data, a single
  * picture parameter buffer must be send.
@@ -1566,14 +1565,14 @@ typedef struct _VAPictureParameterBufferH264
     unsigned short frame_num;
 } VAPictureParameterBufferH264;
 
-/* H.264 Inverse Quantization Matrix Buffer */
+/** H.264 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferH264
 {
     unsigned char ScalingList4x4[6][16];
     unsigned char ScalingList8x8[2][64];
 } VAIQMatrixBufferH264;
 
-/* 
+/**
  * H.264 Slice Group Map Buffer 
  * When VAPictureParameterBufferH264::num_slice_group_minus1 is not equal to 0,
  * A slice group map buffer should be sent for each picture if required. The buffer
@@ -1583,7 +1582,7 @@ typedef struct _VAIQMatrixBufferH264
  * in raster scan order
  */ 
 
-/* H.264 Slice Parameter Buffer */
+/** H.264 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferH264
 {
     unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
@@ -1712,9 +1711,9 @@ typedef struct _VAEncPictureParameterBufferMPEG4
 
 
 
-/* Buffer functions */
+/** Buffer functions */
 
-/*
+/**
  * Creates a buffer for "num_elements" elements of "size" bytes and 
  * initalize with "data".
  * if "data" is null, then the contents of the buffer data store
@@ -1738,7 +1737,7 @@ VAStatus vaCreateBuffer (
     VABufferID *buf_id	/* out */
 );
 
-/*
+/**
  * Convey to the server how many valid elements are in the buffer. 
  * e.g. if multiple slice parameters are being held in a single buffer,
  * this will communicate to the server the number of slice parameters
@@ -1751,7 +1750,7 @@ VAStatus vaBufferSetNumElements (
 );
 
 
-/*
+/**
  * device independent data structure for codedbuffer
  */
 
@@ -1819,7 +1818,7 @@ typedef  struct _VACodedBufferSegment  {
     void               *next;
 } VACodedBufferSegment;
      
-/*
+/**
  * Map data store of the buffer into the client's address space
  * vaCreateBuffer() needs to be called with "data" set to NULL before
  * calling vaMapBuffer()
@@ -1833,7 +1832,7 @@ VAStatus vaMapBuffer (
     void **pbuf 	/* out */
 );
 
-/*
+/**
  * After client making changes to a mapped data store, it needs to
  * "Unmap" it to let the server know that the data is ready to be
  * consumed by the server
@@ -1843,7 +1842,7 @@ VAStatus vaUnmapBuffer (
     VABufferID buf_id	/* in */
 );
 
-/*
+/**
  * After this call, the buffer is deleted and this buffer_id is no longer valid
  * Only call this if the buffer is not going to be passed to vaRenderBuffer
  */
@@ -1860,7 +1859,7 @@ A picture represents either a frame or a field.
 The Begin/Render/End sequence sends the decode buffers to the server
 */
 
-/*
+/**
  * Get ready to decode a picture to a target surface
  */
 VAStatus vaBeginPicture (
@@ -1869,7 +1868,7 @@ VAStatus vaBeginPicture (
     VASurfaceID render_target
 );
 
-/* 
+/**
  * Send decode buffers to the server.
  * Buffers are automatically destroyed afterwards
  */
@@ -1880,7 +1879,7 @@ VAStatus vaRenderPicture (
     int num_buffers
 );
 
-/* 
+/**
  * Make the end of rendering for a picture. 
  * The server should start processing all pending operations for this 
  * surface. This call is non-blocking. The client can start another 
@@ -1897,7 +1896,7 @@ Synchronization
 
 */
 
-/* 
+/**
  * This function blocks until all pending operations on the render target
  * have been completed.  Upon return it is safe to use the render target for a 
  * different picture. 
@@ -1917,7 +1916,7 @@ typedef enum
     VASurfaceSkipped	= 8  /* Indicate a skipped frame during encode */
 } VASurfaceStatus;
 
-/*
+/**
  * Find out any pending ops on the render target 
  */
 VAStatus vaQuerySurfaceStatus (
@@ -1932,7 +1931,7 @@ typedef enum
     VADecodeMBError                 = 1,
 } VADecodeErrorType;
 
-/*
+/**
  * Client calls vaQuerySurfaceError with VA_STATUS_ERROR_DECODING_ERROR, server side returns
  * an array of structure VASurfaceDecodeMBErrors, and the array is terminated by setting status=-1
 */
@@ -1944,7 +1943,7 @@ typedef struct _VASurfaceDecodeMBErrors
     VADecodeErrorType decode_error_type;
 } VASurfaceDecodeMBErrors;
 
-/*
+/**
  * After the application gets VA_STATUS_ERROR_DECODING_ERROR after calling vaSyncSurface(),
  * it can call vaQuerySurfaceError to find out further details on the particular error.
  * VA_STATUS_ERROR_DECODING_ERROR should be passed in as "error_status",
@@ -1959,7 +1958,7 @@ VAStatus vaQuerySurfaceError(
     void **error_info
 );
 
-/*
+/**
  * Images and Subpictures
  * VAImage is used to either get the surface data to client memory, or 
  * to copy image data in client memory to a surface. 
@@ -2062,12 +2061,12 @@ typedef struct _VAImage
     char component_order[4];
 } VAImage;
 
-/* Get maximum number of image formats supported by the implementation */
+/** Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy
 );
 
-/* 
+/**
  * Query supported image formats 
  * The caller must provide a "format_list" array that can hold at
  * least vaMaxNumImageFormats() entries. The actual number of formats
@@ -2079,7 +2078,7 @@ VAStatus vaQueryImageFormats (
     int *num_formats		/* out */
 );
 
-/* 
+/**
  * Create a VAImage structure
  * The width and height fields returned in the VAImage structure may get 
  * enlarged for some YUV formats. Upon return from this function, 
@@ -2094,7 +2093,7 @@ VAStatus vaCreateImage (
     VAImage *image	/* out */
 );
 
-/*
+/**
  * Should call DestroyImage before destroying the surface it is bound to
  */
 VAStatus vaDestroyImage (
@@ -2113,7 +2112,7 @@ VAStatus vaSetImagePalette (
     unsigned char *palette 
 );
 
-/*
+/**
  * Retrive surface data into a VAImage
  * Image must be in a format supported by the implementation
  */
@@ -2127,7 +2126,7 @@ VAStatus vaGetImage (
     VAImageID image
 );
 
-/*
+/**
  * Copy data from a VAImage to a surface
  * Image must be in a format supported by the implementation
  * Returns a VA_STATUS_ERROR_SURFACE_BUSY if the surface
@@ -2147,7 +2146,7 @@ VAStatus vaPutImage (
     unsigned int dest_height
 );
 
-/*
+/**
  * Derive an VAImage from an existing surface.
  * This interface will derive a VAImage and corresponding image buffer from
  * an existing VA Surface. The image buffer can then be mapped/unmapped for
@@ -2184,7 +2183,7 @@ VAStatus vaDeriveImage (
     VAImage *image	/* out */
 );
 
-/*
+/**
  * Subpictures 
  * Subpicture is a special type of image that can be blended 
  * with a surface during vaPutSurface(). Subpicture can be used to render
@@ -2193,16 +2192,16 @@ VAStatus vaDeriveImage (
 
 typedef VAGenericID VASubpictureID;
 
-/* Get maximum number of subpicture formats supported by the implementation */
+/** Get maximum number of subpicture formats supported by the implementation */
 int vaMaxNumSubpictureFormats (
     VADisplay dpy
 );
 
-/* flags for subpictures */
+/** flags for subpictures */
 #define VA_SUBPICTURE_CHROMA_KEYING			0x0001
 #define VA_SUBPICTURE_GLOBAL_ALPHA			0x0002
 #define VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD	0x0004
-/* 
+/**
  * Query supported subpicture formats 
  * The caller must provide a "format_list" array that can hold at
  * least vaMaxNumSubpictureFormats() entries. The flags arrary holds the flag 
@@ -2221,7 +2220,7 @@ VAStatus vaQuerySubpictureFormats (
     unsigned int *num_formats	/* out */
 );
 
-/* 
+/**
  * Subpictures are created with an image associated. 
  */
 VAStatus vaCreateSubpicture (
@@ -2230,7 +2229,7 @@ VAStatus vaCreateSubpicture (
     VASubpictureID *subpicture	/* out */
 );
 
-/*
+/**
  * Destroy the subpicture before destroying the image it is assocated to
  */
 VAStatus vaDestroySubpicture (
@@ -2238,7 +2237,7 @@ VAStatus vaDestroySubpicture (
     VASubpictureID subpicture
 );
 
-/* 
+/**
  * Bind an image to the subpicture. This image will now be associated with 
  * the subpicture instead of the one at creation.
  */
@@ -2248,7 +2247,7 @@ VAStatus vaSetSubpictureImage (
     VAImageID image
 );
 
-/*
+/**
  * If chromakey is enabled, then the area where the source value falls within
  * the chromakey [min, max] range is transparent
  * The chromakey component format is the following:
@@ -2265,7 +2264,7 @@ VAStatus vaSetSubpictureChromakey (
     unsigned int chromakey_mask
 );
 
-/*
+/**
  * Global alpha value is between 0 and 1. A value of 1 means fully opaque and 
  * a value of 0 means fully transparent. If per-pixel alpha is also specified then
  * the overall alpha is per-pixel alpha multiplied by the global alpha
@@ -2276,7 +2275,7 @@ VAStatus vaSetSubpictureGlobalAlpha (
     float global_alpha 
 );
 
-/*
+/**
  * vaAssociateSubpicture associates the subpicture with target_surfaces.
  * It defines the region mapping between the subpicture and the target  
  * surfaces through source and destination rectangles (with the same width and height).
@@ -2303,7 +2302,7 @@ VAStatus vaAssociateSubpicture (
     unsigned int flags
 );
 
-/*
+/**
  * vaDeassociateSubpicture removes the association of the subpicture with target_surfaces.
  */
 VAStatus vaDeassociateSubpicture (
@@ -2321,7 +2320,7 @@ typedef struct _VARectangle
     unsigned short height;
 } VARectangle;
 
-/*
+/**
  * Display attributes
  * Display attributes are used to control things such as contrast, hue, saturation,
  * brightness etc. in the rendering process.  The application can query what
@@ -2338,29 +2337,29 @@ typedef enum
     VADISPLAYATTRIB_BLE_NONE,
 } VADisplayAttribBLEMode;
 
-/* attribute value for VADisplayAttribRotation   */
+/** attribute value for VADisplayAttribRotation   */
 #define VA_ROTATION_NONE        0x00000000
 #define VA_ROTATION_90          0x00000001
 #define VA_ROTATION_180         0x00000002
 #define VA_ROTATION_270         0x00000003
 
-/* attribute value for VADisplayAttribOutOfLoopDeblock */
+/** attribute value for VADisplayAttribOutOfLoopDeblock */
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000
 #define VA_OOL_DEBLOCKING_TRUE  0x00000001
 
-/* Render mode */
+/** Render mode */
 #define VA_RENDER_MODE_UNDEFINED           0
 #define VA_RENDER_MODE_LOCAL_OVERLAY       1
 #define VA_RENDER_MODE_LOCAL_GPU           2
 #define VA_RENDER_MODE_EXTERNAL_OVERLAY    4
 #define VA_RENDER_MODE_EXTERNAL_GPU        8
 
-/* Render device */
+/** Render device */
 #define VA_RENDER_DEVICE_UNDEFINED  0
 #define VA_RENDER_DEVICE_LOCAL      1
 #define VA_RENDER_DEVICE_EXTERNAL   2
 
-/* Currently defined display attribute types */
+/** Currently defined display attribute types */
 typedef enum
 {
     VADisplayAttribBrightness		= 0,
@@ -2449,12 +2448,12 @@ typedef struct _VADisplayAttribute
     unsigned int flags;
 } VADisplayAttribute;
 
-/* Get maximum number of display attributs supported by the implementation */
+/** Get maximum number of display attributs supported by the implementation */
 int vaMaxNumDisplayAttributes (
     VADisplay dpy
 );
 
-/* 
+/**
  * Query display attributes 
  * The caller must provide a "attr_list" array that can hold at
  * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
@@ -2466,7 +2465,7 @@ VAStatus vaQueryDisplayAttributes (
     int *num_attributes			/* out */
 );
 
-/* 
+/**
  * Get display attributes 
  * This function returns the current attribute values in "attr_list".
  * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
@@ -2478,7 +2477,7 @@ VAStatus vaGetDisplayAttributes (
     int num_attributes
 );
 
-/* 
+/**
  * Set display attributes 
  * Only attributes returned with VA_DISPLAY_ATTRIB_SETTABLE set in the "flags" field
  * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or 
