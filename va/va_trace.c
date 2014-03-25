@@ -483,7 +483,7 @@ static void va_TraceSurfaceAttributes(
             break;
         case VAGenericValueTypePointer:
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
-            if (type == VASurfaceAttribExternalBufferDescriptor) {
+            if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
                 int j;
                 
@@ -501,7 +501,7 @@ static void va_TraceSurfaceAttributes(
                 va_TraceMsg(trace_ctx, "\t\t  num_buffers=0x%08x\n", tmp->num_buffers);
                 va_TraceMsg(trace_ctx, "\t\t  buffers=%p\n", tmp->buffers);
                 for (j = 0; j < tmp->num_buffers; j++) {
-                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%j]=%p\n", tmp->buffers[j]);
+                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%d]=%p\n", j, tmp->buffers[j]);
                 }
             }
             break;
