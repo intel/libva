@@ -44,7 +44,7 @@
 #include "va/va_dec_vp8.h"
 #include "va_display.h"
 
-#define OLD_VP8_INTERFACE_WORKAROUND	0
+#define OLD_VP8_INTERFACE_WORKAROUND	1
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -1317,12 +1317,11 @@ int main(int argc,char **argv)
         pic_param.uv_mode_probs[1] = 0x72;
         pic_param.uv_mode_probs[2] = 0xb7;
         slice_param.slice_data_offset = 10;
-        slice_param.macroblock_offset -= 11 * 8;
     }
     else {
         slice_param.slice_data_offset = 3;
-        slice_param.macroblock_offset -= 4 * 8;
     }
+    slice_param.macroblock_offset -= (slice_param.slice_data_offset+1) * 8;
     slice_param.partition_size[0] -= (slice_param.macroblock_offset+7)/8;
 #endif
 
