@@ -62,6 +62,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_COPY_HEADERS := \
 	va.h \
 	va_version.h \
+	va_dec_hevc.h \
 	va_dec_jpeg.h \
 	va_dec_vp8.h \
 	va_enc.h \
