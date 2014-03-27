@@ -65,6 +65,7 @@ static char g_config_file_name[MAX_LEN];
 static char g_src_file_name[MAX_LEN];
 static char g_dst_file_name[MAX_LEN];
 static char g_filter_type_name[MAX_LEN];
+static char g_src_file_format[10];
 
 static uint32_t g_in_pic_width = 352;
 static uint32_t g_in_pic_height = 288;
@@ -251,9 +252,9 @@ construct_nv12_mask_surface(VASurfaceID surface_id,
     return VA_STATUS_SUCCESS;
 }
 
-/* Load yv12 frame to NV12/YV12/I420 surface*/
+/* Load yuv frame to NV12/YV12/I420 surface*/
 static VAStatus
-upload_yv12_frame_to_yuv_surface(FILE *fp,
+upload_yuv_frame_to_yuv_surface(FILE *fp,
                                  VASurfaceID surface_id)
 {
     VAStatus va_status;
@@ -282,8 +283,13 @@ upload_yv12_frame_to_yuv_surface(FILE *fp,
         } while (n_items != 1);
 
         y_src = newImageBuffer;
-        v_src = newImageBuffer + surface_image.width * surface_image.height;
-        u_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
+        if (!strcmp(g_src_file_format, "I420")) {
+            u_src = newImageBuffer + surface_image.width * surface_image.height;
+            v_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
+        } else {
+            v_src = newImageBuffer + surface_image.width * surface_image.height;
+            u_src = newImageBuffer + surface_image.width * surface_image.height * 5 / 4;
+        }
 
         y_dst = (unsigned char *)((unsigned char*)surface_p + surface_image.offsets[0]);
 
@@ -493,6 +499,30 @@ denoise_filter_init(VABufferID *filter_param_buf_id)
     *filter_param_buf_id = denoise_param_buf_id;
 
     return va_status;
+}
+
+/*
+ * This is a method to initialize STDE filter.
+ * If this filter is called, it is enabled by default.
+ */
+static VAStatus
+skintone_filter_init(VABufferID *filter_param_buf_id)
+{
+     VAStatus va_status = VA_STATUS_SUCCESS;
+     VAProcFilterParameterBuffer stde_param;
+     VABufferID stde_param_buf_id;
+
+     stde_param.type  = VAProcFilterSkinToneEnhancement;
+     stde_param.value = 0;
+
+     va_status = vaCreateBuffer(va_dpy, context_id,
+                                VAProcFilterParameterBufferType, sizeof(stde_param), 1,
+                                &stde_param, &stde_param_buf_id);
+     CHECK_VASTATUS(va_status,"vaCreateBuffer");
+
+     *filter_param_buf_id = stde_param_buf_id;
+
+     return va_status;
 }
 
 static VAStatus
@@ -745,6 +775,9 @@ video_frame_process(VAProcFilterType filter_type,
       case VAProcFilterColorBalance:
            color_balance_filter_init(&filter_param_buf_id);
            break;
+      case VAProcFilterSkinToneEnhancement:
+            skintone_filter_init(&filter_param_buf_id);
+            break;
       default :
            filter_count = 0;
          break;
@@ -993,6 +1026,7 @@ parse_basic_parameters()
     read_value_uint32(g_config_file_fd, "DST_FRAME_WIDTH", &g_out_pic_width);
     read_value_uint32(g_config_file_fd, "DST_FRAME_HEIGHT",&g_out_pic_height);
     read_value_string(g_config_file_fd, "DST_FRAME_FORMAT", str);
+    read_value_string(g_config_file_fd, "SRC_FILE_FORMAT", g_src_file_format);
     parse_fourcc_and_format(str, &g_out_fourcc, &g_out_format);
 
     read_value_uint32(g_config_file_fd, "FRAME_SUM", &g_frame_count);
@@ -1011,6 +1045,8 @@ parse_basic_parameters()
         g_filter_type = VAProcFilterSharpening;
     else if (!strcmp(g_filter_type_name, "VAProcFilterColorBalance"))
         g_filter_type = VAProcFilterColorBalance;
+    else if (!strcmp(g_filter_type_name, "VAProcFilterSkinToneEnhancement"))
+         g_filter_type = VAProcFilterSkinToneEnhancement;
     else if (!strcmp(g_filter_type_name, "VAProcFilterNone"))
         g_filter_type = VAProcFilterNone;
     else {
@@ -1087,9 +1123,9 @@ int32_t main(int32_t argc, char *argv[])
     for (i = 0; i < g_frame_count; i ++){
         if (g_blending_enabled) {
             construct_nv12_mask_surface(g_in_surface_id, g_blending_min_luma, g_blending_max_luma);
-            upload_yv12_frame_to_yuv_surface(g_src_file_fd, g_out_surface_id);
+            upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_out_surface_id);
         } else {
-            upload_yv12_frame_to_yuv_surface(g_src_file_fd, g_in_surface_id);
+            upload_yuv_frame_to_yuv_surface(g_src_file_fd, g_in_surface_id);
         }
 
         video_frame_process(g_filter_type, i, g_in_surface_id, g_out_surface_id);
