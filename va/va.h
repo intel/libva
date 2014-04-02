@@ -295,7 +295,8 @@ typedef enum
     VAProfileH264MultiviewHigh          = 15,
     VAProfileH264StereoHigh             = 16,
     VAProfileHEVCMain                   = 17,
-    VAProfileHEVCMain10                 = 18
+    VAProfileHEVCMain10                 = 18,
+    VAProfileVP9Profile0                = 19
 } VAProfile;
 
 /**
@@ -2796,6 +2797,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_hevc.h>
 #include <va/va_dec_jpeg.h>
 #include <va/va_dec_vp8.h>
+#include <va/va_dec_vp9.h>
 #include <va/va_enc_hevc.h>
 #include <va/va_enc_h264.h>
 #include <va/va_enc_jpeg.h>
