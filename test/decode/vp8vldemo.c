@@ -44,7 +44,11 @@
 #include "va/va_dec_vp8.h"
 #include "va_display.h"
 
-#define OLD_VP8_INTERFACE_WORKAROUND	1
+#define VP8_INTERFACE_PSB_OLD           1
+#define VP8_INTERFACE_PSB_NEW           2
+#define VP8_INTERFACE_UPSTREAM          3
+#define VP8_INTERFACE_MODE              VP8_INTERFACE_PSB_NEW
+
 
 #define CHECK_VASTATUS(va_status,func)                                  \
 if (va_status != VA_STATUS_SUCCESS) {                                   \
@@ -1041,7 +1045,7 @@ static VASliceParameterBufferVP8 slice_param = {
     slice_data_flag:0,//no used now. 0 means whole slice is in the buffer.
     macroblock_offset:3371,//means mb_offsett_bits,must less than 8(reg bits:[2:0] in Bspec,)
     num_of_partitions:1,
-    partition_size:{1141, 6488169, 5046373, 7209057, 6750305, 7471205, 0, 12, 7667789}//partition size in bytes
+    partition_size:{1141, 14052, 5046373, 7209057, 6750305, 7471205, 0, 12, 7667789}//partition size in bytes
 };
 
 static VAProbabilityDataBufferVP8 probability_param = {
@@ -1306,8 +1310,9 @@ int main(int argc,char **argv)
     if (argc > 1)
         putsurface = 1;
 
-#if OLD_VP8_INTERFACE_WORKAROUND
+#if (VP8_INTERFACE_MODE == VP8_INTERFACE_PSB_NEW || VP8_INTERFACE_MODE == VP8_INTERFACE_UPSTREAM)
     slice_param.num_of_partitions += 1;
+
     if (pic_param.pic_fields.bits.key_frame == 0) {
         pic_param.y_mode_probs[0] = 0x91;
         pic_param.y_mode_probs[1] = 0x9c;
@@ -1316,15 +1321,31 @@ int main(int argc,char **argv)
         pic_param.uv_mode_probs[0] = 0x8e;
         pic_param.uv_mode_probs[1] = 0x72;
         pic_param.uv_mode_probs[2] = 0xb7;
+
         slice_param.slice_data_offset = 10;
-    }
-    else {
+        slice_param.macroblock_offset -= 11 * 8;
+    } else {
         slice_param.slice_data_offset = 3;
+        slice_param.macroblock_offset -= 4 * 8;
     }
-    slice_param.macroblock_offset -= (slice_param.slice_data_offset+1) * 8;
+
     slice_param.partition_size[0] -= (slice_param.macroblock_offset+7)/8;
+    pic_param.pic_fields.bits.loop_filter_disable =
+                pic_param.loop_filter_level[0] == 0;
 #endif
 
+    int _slice_data_offset = 0;
+#if (VP8_INTERFACE_MODE == VP8_INTERFACE_PSB_NEW)
+    // it is an bug in psb_video, uncomment it before the bug fix
+    // slice_param.partition_size[0] -= 3;
+
+    // normalize slice_data_offset to 0, macroblock_offset to [0,7]
+    _slice_data_offset = (slice_param.macroblock_offset+7)/8 + slice_param.slice_data_offset;
+    printf ("_slice_data_offset: %d\n", _slice_data_offset);
+    slice_param.slice_data_size -= _slice_data_offset;
+    slice_param.slice_data_offset = 0;
+    slice_param.macroblock_offset = slice_param.macroblock_offset % 8;
+#endif
 
 
     va_dpy = va_open_display();
@@ -1406,9 +1427,9 @@ int main(int argc,char **argv)
 
     va_status = vaCreateBuffer(va_dpy, context_id,
                               VASliceDataBufferType,
-                              15203,
+                              15203-_slice_data_offset,
                               1,
-                              vp8_clip,
+                              &vp8_clip[_slice_data_offset],
                               &slice_data_buf);
     CHECK_VASTATUS(va_status, "vaCreateBuffer");
 
