@@ -500,6 +500,15 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
         GLX_RED_SIZE,           8,
         GLX_GREEN_SIZE,         8,
         GLX_BLUE_SIZE,          8,
+        /*
+         * depth test isn't enabled in the implementaion of VA GLX,
+         * so depth buffer is unnecessary. However to workaround a
+         * bug in older verson of xorg-server, always require a depth
+         * buffer.
+         *
+         * See https://bugs.freedesktop.org/show_bug.cgi?id=76755
+         */
+        GLX_DEPTH_SIZE,         1,
         GL_NONE,
     };
     for (attrib = fbconfig_attrs; *attrib != GL_NONE; attrib += 2)
