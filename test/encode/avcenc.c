@@ -1285,20 +1285,6 @@ store_coded_buffer(FILE *avc_fp, int slice_type)
         w_items = fwrite(coded_mem, slice_data_length, 1, avc_fp);
     } while (w_items != 1);
 
-    if (slice_type == SLICE_TYPE_I) {
-        if (avcenc_context.codedbuf_i_size > slice_data_length * 3 / 2) {
-            avcenc_context.codedbuf_i_size = slice_data_length * 3 / 2;
-        }
-        
-        if (avcenc_context.codedbuf_pb_size < slice_data_length) {
-            avcenc_context.codedbuf_pb_size = slice_data_length;
-        }
-    } else {
-        if (avcenc_context.codedbuf_pb_size > slice_data_length * 3 / 2) {
-            avcenc_context.codedbuf_pb_size = slice_data_length * 3 / 2;
-        }
-    }
-
     vaUnmapBuffer(va_dpy, avcenc_context.codedbuf_buf_id);
 
     return 0;
@@ -1523,7 +1509,7 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.codedbuf_buf_id = VA_INVALID_ID;
     avcenc_context.misc_parameter_hrd_buf_id = VA_INVALID_ID;
     avcenc_context.codedbuf_i_size = width * height;
-    avcenc_context.codedbuf_pb_size = 0;
+    avcenc_context.codedbuf_pb_size = width * height;
     avcenc_context.current_input_surface = SID_INPUT_PICTURE_0;
     avcenc_context.upload_thread_value = -1;
     avcenc_context.packed_sei_header_param_buf_id = VA_INVALID_ID;
