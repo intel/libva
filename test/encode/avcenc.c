@@ -88,6 +88,8 @@ static int qp_value = 26;
 static int intra_period = 30;
 static int pb_period = 5;
 static int frame_bit_rate = -1;
+static int frame_rate = 30;
+static int ip_period = 1;
 
 #define MAX_SLICES      32
 
@@ -597,8 +599,8 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
     misc_hrd_param = (VAEncMiscParameterHRD *)misc_param->data;
 
     if (frame_bit_rate > 0) {
-        misc_hrd_param->initial_buffer_fullness = frame_bit_rate * 1024 * 4;
-        misc_hrd_param->buffer_size = frame_bit_rate * 1024 * 8;
+        misc_hrd_param->initial_buffer_fullness = frame_bit_rate * 1000 * 4;
+        misc_hrd_param->buffer_size = frame_bit_rate * 1000 * 8;
     } else {
         misc_hrd_param->initial_buffer_fullness = 0;
         misc_hrd_param->buffer_size = 0;
@@ -944,19 +946,20 @@ static void sps_rbsp(bitstream *bs)
         bitstream_put_ui(bs, 0, 1); /* chroma_loc_info_present_flag */
         bitstream_put_ui(bs, 1, 1); /* timing_info_present_flag */
         {
-            bitstream_put_ui(bs, 15, 32);
-            bitstream_put_ui(bs, 900, 32);
+            bitstream_put_ui(bs, 1, 32);
+            bitstream_put_ui(bs, frame_rate * 2, 32);
             bitstream_put_ui(bs, 1, 1);
         }
         bitstream_put_ui(bs, 1, 1); /* nal_hrd_parameters_present_flag */
         {
             // hrd_parameters 
             bitstream_put_ue(bs, 0);    /* cpb_cnt_minus1 */
-            bitstream_put_ui(bs, 4, 4); /* bit_rate_scale */
-            bitstream_put_ui(bs, 6, 4); /* cpb_size_scale */
+            bitstream_put_ui(bs, 0, 4); /* bit_rate_scale */
+            bitstream_put_ui(bs, 2, 4); /* cpb_size_scale */
            
-            bitstream_put_ue(bs, frame_bit_rate - 1); /* bit_rate_value_minus1[0] */
-            bitstream_put_ue(bs, frame_bit_rate*8 - 1); /* cpb_size_value_minus1[0] */
+	    /* the frame_bit_rate is in kbps */
+            bitstream_put_ue(bs, (((frame_bit_rate * 1000)>> 6) - 1)); /* bit_rate_value_minus1[0] */
+            bitstream_put_ue(bs, ((frame_bit_rate * 8000) >> 6) - 1); /* cpb_size_value_minus1[0] */
             bitstream_put_ui(bs, 1, 1);  /* cbr_flag[0] */
 
             bitstream_put_ui(bs, 23, 5);   /* initial_cpb_removal_delay_length_minus1 */
@@ -1396,19 +1399,19 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->seq_parameter_set_id = 0;
     seq_param->level_idc = 41;
     seq_param->intra_period = intra_period;
-    seq_param->ip_period = 0;   /* FIXME: ??? */
+    seq_param->ip_period = ip_period;
     seq_param->max_num_ref_frames = 4;
     seq_param->picture_width_in_mbs = width_in_mbs;
     seq_param->picture_height_in_mbs = height_in_mbs;
     seq_param->seq_fields.bits.frame_mbs_only_flag = 1;
     
     if (frame_bit_rate > 0)
-        seq_param->bits_per_second = 1024 * frame_bit_rate; /* use kbps as input */
+        seq_param->bits_per_second = 1000 * frame_bit_rate; /* use kbps as input */
     else
         seq_param->bits_per_second = 0;
     
-    seq_param->time_scale = 900;
-    seq_param->num_units_in_tick = 15;			/* Tc = num_units_in_tick / time_sacle */
+    seq_param->time_scale = frame_rate * 2;
+    seq_param->num_units_in_tick = 1;			/* Tc = num_units_in_tick / time_sacle */
 
     if (height_in_mbs * 16 - height) {
         frame_cropping_flag = 1;
@@ -1580,14 +1583,18 @@ int main(int argc, char *argv[])
         if ( mode_value == 0 ) {
                 i_frame_only = 1;
 		i_p_frame_only = 0;
+		ip_period = 0;
         }
         else if ( mode_value == 1) {
 		i_frame_only = 0;
                 i_p_frame_only = 1;
+		ip_period = 1;
         }
         else if ( mode_value == 2 ) {
 		i_frame_only = 0;
                 i_p_frame_only = 0;
+		/* Hack mechanism before adding the parameter of B-frame number */
+		ip_period = 3;
         }
         else {
                 printf("mode_value=%d\n",mode_value);
