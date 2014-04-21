@@ -3145,6 +3145,12 @@ typedef enum
      * specify vaPutSurface render area if there is no drawable on the monitor
      */
     VADisplayAttribRenderRect          = 18,
+    /*
+     * The flag is used to indicate that the range flag of color-space conversion.
+     * "value" field should be assigned as VA_SOURCE_RANGE_FULL or VA_SOURCE_RANGE_REDUCED
+     * to indicate full range or reduced range
+     */
+    VADisplayAttribColorRange          = 19,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
