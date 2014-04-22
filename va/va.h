@@ -590,6 +590,16 @@ typedef enum
      */
     VAConfigAttribEncRateControlExt   = 26,
     /**
+     * \brief Processing rate reporting attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports reporting of 
+     * encode/decode processing rate based on certain set of parameters 
+     * (i.e. levels, I frame internvals) for a given configuration.  
+     * If this is supported, vaQueryProcessingRate() can be used to get
+     * encode or decode processing rate.
+     */
+    VAConfigAttribProcessingRate    = 27,
+    /**
      * \brief Intel specific attributes start at 1001 
      */
     /**
@@ -788,6 +798,16 @@ typedef union _VAConfigAttribValEncRateControlExt {
      unsigned int value;
 } VAConfigAttribValEncRateControlExt;
 
+/** @name Attribute values for VAConfigAttribProcessingRate. */
+/**@{*/
+/** \brief Driver does not support processing rate report */
+#define VA_PROCESSING_RATE_NONE                       0x00000000
+/** \brief Driver supports encode processing rate report  */
+#define VA_PROCESSING_RATE_ENCODE                     0x00000001
+/** \brief Driver supports decode processing rate report  */
+#define VA_PROCESSING_RATE_DECODE                     0x00000002
+/**@}*/
+
 /**
  * \brief Intel specific attribute definitions
  */
@@ -935,7 +955,6 @@ VAStatus vaQueryConfigAttributes (
     VAConfigAttrib *attrib_list,/* out */
     int *num_attribs 		/* out */
 );
-
 
 /**
  * Contexts and Surfaces
@@ -1288,6 +1307,9 @@ typedef enum
      */
     VAProcFilterParameterBufferType     = 42,
 
+/* Following are all other buffer types */
+    VAProcessingBufferType              = 101,
+
     /**
      * \brief Intel specific buffer types start at 1001
      */
@@ -1300,6 +1322,61 @@ typedef enum
 
     VABufferTypeMax
 } VABufferType;
+
+/** 
+ * Processing rate parameter for encode. 
+ */
+typedef struct _VAProcessingRateBufferEnc {
+    /** \brief Profile level */
+    unsigned char       level_idc;
+    unsigned char       reserved[3];
+    /** \brief quality level. When set to 0 or 0xffffffff, default quality 
+     * level is used. 
+     */
+    unsigned int       quality_level;
+    /** \brief Period between I frames. */
+    unsigned int        intra_period;
+    /** \brief Period between I/P frames. */
+    unsigned int        ip_period;
+} VAProcessingRateBufferEnc;
+
+/** 
+ * Processing rate parameter for decode. 
+ */
+typedef struct _VAProcessingRateBufferDec {
+    /** \brief Profile level */
+    unsigned char       level_idc;
+    unsigned char       reserved0[3];
+    unsigned int        reserved;
+} VAProcessingRateBufferDec;
+
+/**
+ * \brief Queries processing rate for the supplied config.
+ *
+ * This function queries the processing rate based on parameters in
+ * \c proc_buf for the given \c config. Upon successful return, the processing
+ * rate value will be stored in \c processing_rate. Processing rate is
+ * specified as the number of macroblocks per second.
+ *
+ * If NULL is passed to the \c proc_buf, the default processing rate for the 
+ * given configuration will be returned.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] config            the config identifying a codec or a video
+ *     processing pipeline
+ * @param[in] proc_buf       the buffer that contains the parameters for
+        either the encode or decode processing rate 
+ * @param[out] processing_rate  processing rate in number of macroblocks per 
+        second constrained by parameters specified in proc_buf
+ *      
+ */
+VAStatus
+vaQueryProcessingRate(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VABufferID          proc_buf,
+    unsigned int       *processing_rate
+);
 
 typedef enum
 {
