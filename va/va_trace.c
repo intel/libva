@@ -1003,17 +1003,17 @@ static void va_TraceVAHuffmanTableBufferJPEG(
         for (j = 0; j < 16; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].num_ac_codes[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tnum_ac_codes =%s\n", tmp);
         memset(tmp, 0, sizeof tmp);
         for (j = 0; j < 162; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].ac_values[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tac_values =%s\n", tmp);
         memset(tmp, 0, sizeof tmp);
         for (j = 0; j < 2; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].pad[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tpad =%s\n", tmp);
     }
 }
 
@@ -2344,16 +2344,25 @@ static void va_TraceVAEncPictureParameterBufferJPEG(
     va_TraceMsg(trace_ctx, "\tsample_bit_depth = %d\n", p->sample_bit_depth);
     va_TraceMsg(trace_ctx, "\tnum_scan = %d\n", p->num_scan);
     va_TraceMsg(trace_ctx, "\tnum_components = %d\n", p->num_components);
-    va_TraceMsg(trace_ctx, "\tcomponent_id[] = ");
-    for (i=0; i<4; i++)
-        va_TraceMsg(trace_ctx, "%d\t", p->component_id[i]);
-    va_TraceMsg(trace_ctx, "\n");
-    va_TraceMsg(trace_ctx, "\tquantiser_table_selector[] = ");
-    for (i=0; i<4; i++)
-        va_TraceMsg(trace_ctx, "%d\t", p->quantiser_table_selector[i]);
-    va_TraceMsg(trace_ctx, "\n");
-    va_TraceMsg(trace_ctx, "\tquality = %d\n", p->picture_height);
-    
+    for (i=0; i<p->num_components; i++)
+        va_TraceMsg(trace_ctx, "\tcomponent_id[%d] = %d\n", i, p->component_id[i]);
+
+    if (p->quality > 0) {
+        va_TraceMsg(trace_ctx, "\tquality = %d\n", p->quality);
+    } else {
+        va_TraceMsg(trace_ctx, "\tquantiser_table_selector[] =\n");
+        for (i=0; i<8; i++)
+            va_TraceMsg(trace_ctx, "\t\t%d %d %d %d %d %d %d %d\n",
+                        p->quantiser_table_selector[8*i + 0],
+                        p->quantiser_table_selector[8*i + 1],
+                        p->quantiser_table_selector[8*i + 2],
+                        p->quantiser_table_selector[8*i + 3],
+                        p->quantiser_table_selector[8*i + 4],
+                        p->quantiser_table_selector[8*i + 5],
+                        p->quantiser_table_selector[8*i + 6],
+                        p->quantiser_table_selector[8*i + 7]);
+    }
+
     va_TraceMsg(trace_ctx, NULL);
 
     return;
@@ -2372,25 +2381,38 @@ static void va_TraceVAEncQMatrixBufferJPEG(
     DPY2TRACECTX(dpy);
     
     va_TraceMsg(trace_ctx, "\t--VAQMatrixBufferJPEG\n");
-    va_TraceMsg(trace_ctx, "\tload_lum_quantiser_matrix = %d", p->load_lum_quantiser_matrix);
+    va_TraceMsg(trace_ctx, "\tload_lum_quantiser_matrix = %d\n", p->load_lum_quantiser_matrix);
     if (p->load_lum_quantiser_matrix) {
         int i;
-        for (i = 0; i < 64; i++) {
-            if ((i % 8) == 0)
-                va_TraceMsg(trace_ctx, "\n\t");
-            va_TraceMsg(trace_ctx, "\t0x%02x", p->lum_quantiser_matrix[i]);
+        for (i = 0; i < 8; i++) {
+            va_TraceMsg(trace_ctx,
+                        "\t\t0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
+                        p->lum_quantiser_matrix[i*8],
+                        p->lum_quantiser_matrix[i*8 + 1],
+                        p->lum_quantiser_matrix[i*8 + 2],
+                        p->lum_quantiser_matrix[i*8 + 3],
+                        p->lum_quantiser_matrix[i*8 + 4],
+                        p->lum_quantiser_matrix[i*8 + 5],
+                        p->lum_quantiser_matrix[i*8 + 6],
+                        p->lum_quantiser_matrix[i*8 + 7]);
         }
-        va_TraceMsg(trace_ctx, "\n");
     }
-    va_TraceMsg(trace_ctx, "\tload_chroma_quantiser_matrix = %08x\n", p->load_chroma_quantiser_matrix);
+
+    va_TraceMsg(trace_ctx, "\tload_chroma_quantiser_matrix = %d\n", p->load_chroma_quantiser_matrix);
     if (p->load_chroma_quantiser_matrix) {
         int i;
-        for (i = 0; i < 64; i++) {
-            if ((i % 8) == 0)
-                va_TraceMsg(trace_ctx, "\n\t");
-            va_TraceMsg(trace_ctx, "\t0x%02x", p->chroma_quantiser_matrix[i]);
+        for (i = 0; i < 8; i++) {
+            va_TraceMsg(trace_ctx,
+                        "\t\t0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
+                        p->chroma_quantiser_matrix[i*8],
+                        p->chroma_quantiser_matrix[i*8 + 1],
+                        p->chroma_quantiser_matrix[i*8 + 2],
+                        p->chroma_quantiser_matrix[i*8 + 3],
+                        p->chroma_quantiser_matrix[i*8 + 4],
+                        p->chroma_quantiser_matrix[i*8 + 5],
+                        p->chroma_quantiser_matrix[i*8 + 6],
+                        p->chroma_quantiser_matrix[i*8 + 7]);
         }
-        va_TraceMsg(trace_ctx, "\n");
     }
     
     va_TraceMsg(trace_ctx, NULL);
