@@ -2347,21 +2347,14 @@ static void va_TraceVAEncPictureParameterBufferJPEG(
     for (i=0; i<p->num_components; i++)
         va_TraceMsg(trace_ctx, "\tcomponent_id[%d] = %d\n", i, p->component_id[i]);
 
-    if (p->quality > 0) {
+    if (p->quality > 0)
         va_TraceMsg(trace_ctx, "\tquality = %d\n", p->quality);
-    } else {
-        va_TraceMsg(trace_ctx, "\tquantiser_table_selector[] =\n");
-        for (i=0; i<8; i++)
-            va_TraceMsg(trace_ctx, "\t\t%d %d %d %d %d %d %d %d\n",
-                        p->quantiser_table_selector[8*i + 0],
-                        p->quantiser_table_selector[8*i + 1],
-                        p->quantiser_table_selector[8*i + 2],
-                        p->quantiser_table_selector[8*i + 3],
-                        p->quantiser_table_selector[8*i + 4],
-                        p->quantiser_table_selector[8*i + 5],
-                        p->quantiser_table_selector[8*i + 6],
-                        p->quantiser_table_selector[8*i + 7]);
-    }
+    else
+        va_TraceMsg(trace_ctx, "\tquantiser_table_selector[] = %d %d %d %d\n",
+                    p->quantiser_table_selector[0],
+                    p->quantiser_table_selector[1],
+                    p->quantiser_table_selector[2],
+                    p->quantiser_table_selector[3]);
 
     va_TraceMsg(trace_ctx, NULL);
 
