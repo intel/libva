@@ -93,6 +93,12 @@ static int ip_period = 1;
 
 #define MAX_SLICES      32
 
+
+static  unsigned int MaxFrameNum = (1<<12);
+static  unsigned int MaxPicOrderCntLsb = (1<<8);
+static  unsigned int Log2MaxFrameNum = 12;
+static  unsigned int Log2MaxPicOrderCntLsb = 8;
+
 static int
 build_packed_pic_buffer(unsigned char **header_buffer);
 
@@ -1398,6 +1404,7 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->seq_parameter_set_id = 0;
     seq_param->level_idc = 41;
     seq_param->intra_period = intra_period;
+    seq_param->intra_idr_period = seq_param->intra_period;
     seq_param->ip_period = ip_period;
     seq_param->max_num_ref_frames = 4;
     seq_param->picture_width_in_mbs = width_in_mbs;
@@ -1429,8 +1436,8 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->seq_fields.bits.pic_order_cnt_type = 0;
     seq_param->seq_fields.bits.direct_8x8_inference_flag = 0;
     
-    seq_param->seq_fields.bits.log2_max_frame_num_minus4 = 0;
-    seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = 2;
+    seq_param->seq_fields.bits.log2_max_frame_num_minus4 = Log2MaxFrameNum - 4;
+    seq_param->seq_fields.bits.log2_max_pic_order_cnt_lsb_minus4 = Log2MaxPicOrderCntLsb - 4;
 	
     if (frame_bit_rate > 0)
         seq_param->vui_parameters_present_flag = 1;	//HRD info located in vui
