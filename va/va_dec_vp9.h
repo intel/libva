@@ -32,8 +32,6 @@
 #ifndef VA_DEC_VP9_H
 #define VA_DEC_VP9_H
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -62,17 +60,14 @@ typedef struct  _VADecPictureParameterBufferVP9
     /**@{*/
 
     /** \brief picture width
-     *  The value must be multiple of 8.
+     *  Picture original resolution. The value may not be multiple of 8.
      */
     uint16_t                frame_width;
     /** \brief picture height
-     *  The value must be multiple of 8.
+     *  Picture original resolution. The value may not be multiple of 8.
      */
     uint16_t                frame_height;
 
-    /** \brief Surface index of decoded current picture
-     */
-    VASurfaceID             curr_pic;
     /** \brief Surface indices of reference frames in DPB.
      *
      *  Each entry of the list specifies the surface index of the picture
@@ -169,6 +164,8 @@ typedef struct  _VADecPictureParameterBufferVP9
      *  read_uncompressed_header() in VP9 code.
      *  Specifically, it is the byte count from bit stream buffer start to
      *  the last byte of uncompressed frame header.
+     *  If there are other meta data in the buffer before uncompressed header,
+     *  its size should be also included here.
      */
     uint8_t                 frame_header_length_in_bytes;
 
@@ -176,11 +173,6 @@ typedef struct  _VADecPictureParameterBufferVP9
      *  which corresponds to syntax first_partition_size in code.
      */
     uint16_t                first_partition_size;
-
-    /** \brief The byte count of current frame in the bitstream buffer,
-     *  starting from first byte of the buffer.
-     */
-    uint32_t                frame_data_size;
 
     /** These values are segment probabilities with same names in VP9
      *  function setup_segmentation(). They should be parsed directly from
@@ -289,6 +281,13 @@ typedef struct  _VASegmentParameterVP9
 typedef struct _VASliceParameterBufferVP9
 {
     /**@{*/
+    /** \brief The byte count of current frame in the bitstream buffer,
+     *  starting from first byte of the buffer.
+     *  It uses the name slice_data_size to be consitent with other codec,
+     *  but actually means frame_data_size.
+     */
+    uint32_t                slice_data_size;
+
     /**
      * \brief per segment information
      */
