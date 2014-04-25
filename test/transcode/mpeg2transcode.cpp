@@ -2181,9 +2181,9 @@ static void upload_yuv_to_surface(FILE *yuv_fp, VASurfaceID surface_id)
     u_src = newImageBuffer + y_size; /* UV offset for NV12 */
     v_src = newImageBuffer + y_size + u_size;
 
-    y_dst = (unsigned char *)(surface_p + surface_image.offsets[0]);
-    u_dst = (unsigned char *)(surface_p + surface_image.offsets[1]); /* UV offset for NV12 */
-    v_dst = (unsigned char *)(surface_p + surface_image.offsets[2]);
+    y_dst = (unsigned char *)surface_p + surface_image.offsets[0];
+    u_dst = (unsigned char *)surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
+    v_dst = (unsigned char *)surface_p + surface_image.offsets[2];
 
     /* Y plane */
     for (row = 0; row < surface_image.height; row++) {
