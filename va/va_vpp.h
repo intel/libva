@@ -245,12 +245,12 @@ typedef enum _VAProcFilterType {
     VAProcFilterSharpening,
     /** \brief Color balance parameters. */
     VAProcFilterColorBalance,
+    /** \brief Skin Tone Enhancement. */
+    VAProcFilterSkinToneEnhancement,
     /** \brief Deblocking filter. */
     VAProcFilterDeblocking,
     /** \brief Frame rate conversion. */
     VAProcFilterFrameRateConversion,
-    /** \brief Skin Tone Enhancement. */
-    VAProcFilterSkinToneEnhancement,
     /** \brief Total Color Correction. */
     VAProcFilterTotalColorCorrection,
     /** \brief Non-Linear Anamorphic Scaling. */
