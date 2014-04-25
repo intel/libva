@@ -440,7 +440,7 @@ typedef struct _VAConfigAttrib {
 /** \brief Driver supports misc packed headers. e.g. SEI for H.264. */
 #define VA_ENC_PACKED_HEADER_MISC       0x00000008
 /** \brief Driver supports raw packed header, see VAEncPackedHeaderRawData */
-#define VA_ENC_PACKED_HEADER_RAW_DATA   0x0000000C
+#define VA_ENC_PACKED_HEADER_RAW_DATA   0x00000010
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncInterlaced */
