@@ -286,7 +286,15 @@ typedef struct _VASliceParameterBufferVP9
      *  It uses the name slice_data_size to be consitent with other codec,
      *  but actually means frame_data_size.
      */
-    uint32_t                slice_data_size;
+    uint32_t slice_data_size;
+    /**
+     * offset to the first byte of partition data (control partition)
+     */
+    uint32_t slice_data_offset;
+    /**
+     * see VA_SLICE_DATA_FLAG_XXX definitions
+     */
+    uint32_t slice_data_flag;
 
     /**
      * \brief per segment information
