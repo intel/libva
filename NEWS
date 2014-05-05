@@ -1,5 +1,12 @@
-libva NEWS -- summary of user visible changes.  2014-03-24
+libva NEWS -- summary of user visible changes.  2014-05-xx
 Copyright (C) 2009-2014 Intel Corporation
+
+Version 1.3.1 - xx.May.2014
+* API: fix VA_ENC_PACKED_HEADER_RAW_DATA value
+* API: add STE filter to the VPP pipeline
+* Update doxygen tags in libva
+* Fix doc/Makefile.am
+* A workaround for https://bugs.freedesktop.org/show_bug.cgi?id=76755
 
 Version 1.3.0 - 24.Mar.2014
 * API: add support for VP8 decoding
