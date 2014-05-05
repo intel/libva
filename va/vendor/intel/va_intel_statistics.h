@@ -56,29 +56,29 @@ typedef struct _VAStatsStatisticsParameter16x16Intel
     VASurfaceID     *future_references;
     unsigned int    num_future_references;
 
-    /** \brief ID of the output surface. 
+    /** \brief ID of the output buffer. 
      * The number of outputs is determined by below DisableMVOutput and DisableStatisticsOutput. 
      * The output layout is defined by VAStatsStatisticsBufferType and VAStatsMotionVectorBufferType. 
      **/
-    VASurfaceID     *outputs;
+    VABufferID      *outputs;
 
     /** \brief MV predictor. It is valid only when mv_predictor_ctrl is not 0. 
      * Each 16x16 block has a pair of MVs, one for past and one for future reference 
      * as defined by VAMotionVector. The 16x16 block is in raster scan order. 
      * Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAMotionVector). 
      **/
-    VASurfaceID     mv_predictor;
+    VABufferID      mv_predictor;
 
-    /** \brief Qp input surface. It is valid only when mb_qp is set to 1. 
+    /** \brief Qp input buffer. It is valid only when mb_qp is set to 1. 
      * The data in this buffer correspond to the input source. 
      * One Qp per 16x16 block in raster scan order, each Qp is a signed char (8-bit) value. 
      **/
-    VASurfaceID     qp;
+    VABufferID      qp;
 
     unsigned int    frame_qp                    : 8;     
     unsigned int    len_sp                      : 8;     
     unsigned int    max_len_sp                  : 8;     
-    unsigned int    reserved0                   : 8;     
+    unsigned int    reserved0                   : 8;
 
     unsigned int    sub_mb_part_mask            : 7;     
     unsigned int    sub_pel_mode                : 2;     
@@ -105,30 +105,16 @@ typedef struct _VAStatsStatisticsParameter16x16Intel
     unsigned int	disable_mv_output           : 1;    
     /** \brief StatisticsOutput. When set to 1, Statistics output is NOT provided. */
     unsigned int    disable_statistics_output   : 1;    
-    unsigned int    reserved3                   : 30;    
+    /** \brief interlaced.
+     * 0  : progressive
+     * 1  : top field
+     * 2  : bottom field
+     * 3-7: reserved
+     **/
+    unsigned int    interlaced                  : 3;
+    unsigned int    reserved3                   : 27;    
 
 } VAStatsStatisticsParameter16x16Intel;
-
-/** \brief VAStatsMotionVectorBufferTypeIntel. Motion vector buffer layout.
- * Motion vector output is per 4x4 block. For each 4x4 block there is a pair of past and future 
- * reference MVs as defined in VAMotionVector. Depending on Subblock partition, 
- * for the shape that is not 4x4, the MV is replicated so each 4x4 block has a pair of MVs. 
- * If only past reference is used, future MV should be ignored, and vice versa. 
- * The 16x16 block is in raster scan order, within the 16x16 block, each 4x4 block MV is ordered as below in memory. 
- * The buffer size shall be greater than or equal to the number of 16x16 blocks multiplied by (sizeof(VAMotionVector) * 16).
- *
- *                      16x16 Block        
- *        -----------------------------------------
- *        |    1    |    2    |    5    |    6    |
- *        -----------------------------------------
- *        |    3    |    4    |    7    |    8    |
- *        -----------------------------------------
- *        |    9    |    10   |    13   |    14   |
- *        -----------------------------------------
- *        |    11   |    12   |    15   |    16   |
- *        -----------------------------------------
- *
- **/
 
 /** \brief VAStatsStatisticsBufferTypeIntel. Statistics buffer layout.
  * Statistics output is per 16x16 block. Data structure per 16x16 block is defined below. 

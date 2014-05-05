@@ -58,6 +58,8 @@ libva_source_h = \
 	va_tpi.h		\
 	va_version.h		\
 	va_vpp.h		\
+        vendor/intel/va_intel_fei.h  \
+        vendor/intel/va_intel_statistics.h \
 	$(NULL)
 
 libva_source_h_priv = \

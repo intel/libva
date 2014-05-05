@@ -46,21 +46,44 @@ extern "C" {
 
 /** \brief FEI frame level control buffer for H.264 */
 typedef struct _VAEncMiscParameterFEIFrameControlH264Intel {
-    unsigned int function; /* one of the VAConfigAttribEncFunctionType values */   
-    /** \brief MB (16x16) control input surface. It is valid only when (mb_input | mb_size_ctrl) 
+    unsigned int      function; /* one of the VAConfigAttribEncFunctionType values */   
+    /** \brief MB (16x16) control input buffer. It is valid only when (mb_input | mb_size_ctrl) 
      * is set to 1. The data in this buffer correspond to the input source. 16x16 MB is in raster scan order, 
      * each MB control data structure is defined by VAEncFEIMBControlBufferH264. 
      * Buffer size shall not be less than the number of 16x16 blocks multiplied by 
      * sizeof(VAEncFEIMBControlBufferH264Intel). 
      * Note: if mb_qp is set, VAEncQpBufferH264 is expected.
      */
-    VASurfaceID       mb_ctrl;
+    VABufferID        mb_ctrl;
+    /** \brief distortion output of MB ENC or ENC_PAK.
+     * Each 16x16 block has one distortion data with VAEncFEIDistortionBufferH264Intel layout
+     * Buffer size shall not be less than the number of 16x16 blocks multiplied by 
+     * sizeof(VAEncFEIDistortionBufferH264Intel). 
+     */
+    VABufferID        distortion;
+    /** \brief MVs data output of MB ENC.
+     * Each 16x16 block has one MVs data with layout VAMotionVectorIntel 
+     * Buffer size shall not be less than the number of 16x16 blocks multiplied by 
+     * sizeof(VAMotionVectorIntel). 
+     */
+    VABufferID        mv_data;
+    /** \brief MBCode data output of MB ENC.
+     * Each 16x16 block has one MB Code data with layout VAEncFEIModeBufferH264Intel
+     * Buffer size shall not be less than the number of 16x16 blocks multiplied by 
+     * sizeof(VAEncFEIModeBufferH264Intel). 
+     */
+    VABufferID        mb_code_data;
+    /** \brief Qp input buffer. It is valid only when mb_qp is set to 1. 
+     * The data in this buffer correspond to the input source. 
+     * One Qp per 16x16 block in raster scan order, each Qp is a signed char (8-bit) value. 
+     **/
+    VABufferID        qp;
     /** \brief MV predictor. It is valid only when mv_predictor_enable is set to 1. 
      * Each 16x16 block has one or more pair of motion vectors and the corresponding 
      * reference indexes as defined by VAEncMVPredictorBufferH264. 16x16 block is in raster scan order. 
      * Buffer size shall not be less than the number of 16x16 blocks multiplied by 
      * sizeof(VAEncMVPredictorBufferH264). */
-    VASurfaceID       mv_predictor;
+    VABufferID        mv_predictor;
 
     /** \brief number of MV predictors. It must not be greater than maximum supported MV predictor. */
     unsigned int      num_mv_predictors;
@@ -95,18 +118,20 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264Intel {
 
 /** \brief FEI MB level control data structure */
 typedef struct _VAEncFEIMBControlH264Intel {
-    /** \brief when set, correposndent MB is coded as skip */
-    unsigned int force_to_skip       : 1;     
     /** \brief when set, correposndent MB is coded as intra */
     unsigned int force_to_intra      : 1;     
-    unsigned int reserved1           : 30;    
+    /** \brief when set, correposndent MB is coded as skip */
+    unsigned int force_to_skip       : 1;     
+    unsigned int reserved0           : 30;    
+
+    unsigned int reserved1;    
+
+    unsigned int reserved2;    
 
     /** \brief when mb_size_ctrl is set, size here is used to budget accumulatively. Set to 0xFF if don't care. */
-    unsigned int max_size_in_word    : 8;     
+    unsigned int reserved3           : 16;    
     unsigned int target_size_in_word : 8;     
-    unsigned int reserved2           : 16;    
-
-    unsigned int reserved3;    
+    unsigned int max_size_in_word    : 8;     
 } VAEncFEIMBControlH264Intel;
 
 

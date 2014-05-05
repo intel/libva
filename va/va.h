@@ -1318,9 +1318,12 @@ typedef enum
     VAEncFEIMVBufferTypeIntel                 = 1001,
     VAEncFEIModeBufferTypeIntel,
     VAEncFEIDistortionBufferTypeIntel,
+    VAEncFEIMBControlBufferTypeIntel,
+    VAEncFEIMVPredictorBufferTypeIntel,
     VAStatsStatisticsParameterBufferTypeIntel,
     VAStatsStatisticsBufferTypeIntel,
     VAStatsMotionVectorBufferTypeIntel,
+    VAStatsMVPredictorBufferTypeIntel,
 
     VABufferTypeMax
 } VABufferType;
@@ -1775,6 +1778,37 @@ typedef struct _VASliceParameterBufferBase
     unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
     unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
 } VASliceParameterBufferBase;
+
+/** \brief VAEncFEIMVBufferTypeIntel and VAStatsMotionVectorBufferTypeIntel. Motion vector buffer layout.
+ * Motion vector output is per 4x4 block. For each 4x4 block there is a pair of past and future 
+ * reference MVs as defined in VAMotionVectorIntel. Depending on Subblock partition, 
+ * for the shape that is not 4x4, the MV is replicated so each 4x4 block has a pair of MVs. 
+ * If only past reference is used, future MV should be ignored, and vice versa. 
+ * The 16x16 block is in raster scan order, within the 16x16 block, each 4x4 block MV is ordered as below in memory. 
+ * The buffer size shall be greater than or equal to the number of 16x16 blocks multiplied by (sizeof(VAMotionVector) * 16).
+ *
+ *                      16x16 Block        
+ *        -----------------------------------------
+ *        |    1    |    2    |    5    |    6    |
+ *        -----------------------------------------
+ *        |    3    |    4    |    7    |    8    |
+ *        -----------------------------------------
+ *        |    9    |    10   |    13   |    14   |
+ *        -----------------------------------------
+ *        |    11   |    12   |    15   |    16   |
+ *        -----------------------------------------
+ *
+ **/
+
+/** \brief Motion vector data structure. */
+typedef struct _VAMotionVectorIntel {
+    /** \mv0[0]: horizontal motion vector for past reference */
+    /** \mv0[1]: vertical motion vector for past reference */
+    /** \mv1[0]: horizontal motion vector for future reference */
+    /** \mv1[1]: vertical motion vector for future reference */
+    short  mv0[2];  /* past reference */
+    short  mv1[2];  /* future reference */
+} VAMotionVectorIntel;
 
 #include <va/va_dec_jpeg.h>
 
