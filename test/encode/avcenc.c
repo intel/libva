@@ -107,13 +107,14 @@ static int
 build_packed_seq_buffer(unsigned char **header_buffer);
 
 static int 
-build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
-				unsigned int init_cpb_removal_delay,
-				unsigned int init_cpb_removal_delay_offset,
-				unsigned int cpb_removal_length,
-				unsigned int cpb_removal_delay,
+build_packed_sei_pic_timing(unsigned int cpb_removal_length,
 				unsigned int dpb_output_length,
-				unsigned int dpb_output_delay,
+				unsigned char **sei_buffer);
+
+static int
+build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
+				unsigned int cpb_removal_length,
+				unsigned int dpb_output_length,
 				unsigned char **sei_buffer);
 
 struct upload_thread_param
@@ -154,10 +155,19 @@ static struct {
     pthread_t upload_thread_id;
     int upload_thread_value;
     int i_initial_cpb_removal_delay;
+    int i_initial_cpb_removal_delay_offset;
     int i_initial_cpb_removal_delay_length;
     int i_cpb_removal_delay;
     int i_cpb_removal_delay_length;
     int i_dpb_output_delay_length;
+    int time_offset_length;
+
+    unsigned long long idr_frame_num;
+    unsigned long long prev_idr_cpb_removal;
+    unsigned long long current_idr_cpb_removal;
+    unsigned long long current_cpb_removal;
+    /* This is relative to the current_cpb_removal */
+    unsigned int current_dpb_removal_delta;
 } avcenc_context;
 
 static  VAPictureH264 ReferenceFrames[16], RefPicList0[32], RefPicList1[32];
@@ -320,21 +330,23 @@ static void release_encode_resource()
     vaDestroySurfaces(va_dpy, ref_surface, SURFACE_NUM);
 }
 
-static void avcenc_update_sei_param(int frame_num)
+static void avcenc_update_sei_param(int is_idr)
 {
 	VAEncPackedHeaderParameterBuffer packed_header_param_buffer;
 	unsigned int length_in_bits;
 	unsigned char *packed_sei_buffer = NULL;
 	VAStatus va_status;
 
-	length_in_bits = build_packed_sei_buffer_timing(
+        if (is_idr)
+	    length_in_bits = build_packed_idr_sei_buffer_timing(
 				avcenc_context.i_initial_cpb_removal_delay_length,
-				avcenc_context.i_initial_cpb_removal_delay,
-				0,
 				avcenc_context.i_cpb_removal_delay_length,
-				avcenc_context.i_cpb_removal_delay * frame_num,
 				avcenc_context.i_dpb_output_delay_length,
-				0,
+				&packed_sei_buffer);
+       else
+	    length_in_bits = build_packed_sei_pic_timing(
+				avcenc_context.i_cpb_removal_delay_length,
+				avcenc_context.i_dpb_output_delay_length,
 				&packed_sei_buffer);
 
 	packed_header_param_buffer.type = VAEncPackedHeaderH264_SEI;
@@ -1120,10 +1132,18 @@ static void sps_rbsp(bitstream *bs)
             bitstream_put_ue(bs, ((frame_bit_rate * 8000) >> 6) - 1); /* cpb_size_value_minus1[0] */
             bitstream_put_ui(bs, 1, 1);  /* cbr_flag[0] */
 
-            bitstream_put_ui(bs, 23, 5);   /* initial_cpb_removal_delay_length_minus1 */
-            bitstream_put_ui(bs, 23, 5);   /* cpb_removal_delay_length_minus1 */
-            bitstream_put_ui(bs, 23, 5);   /* dpb_output_delay_length_minus1 */
-            bitstream_put_ui(bs, 23, 5);   /* time_offset_length  */
+            /* initial_cpb_removal_delay_length_minus1 */
+            bitstream_put_ui(bs,
+                (avcenc_context.i_initial_cpb_removal_delay_length - 1), 5);
+            /* cpb_removal_delay_length_minus1 */
+            bitstream_put_ui(bs,
+                (avcenc_context.i_cpb_removal_delay_length - 1), 5);
+            /* dpb_output_delay_length_minus1 */
+            bitstream_put_ui(bs,
+                (avcenc_context.i_dpb_output_delay_length - 1), 5);
+            /* time_offset_length  */
+            bitstream_put_ui(bs,
+                (avcenc_context.time_offset_length - 1), 5);
         }
         bitstream_put_ui(bs, 0, 1);   /* vcl_hrd_parameters_present_flag */
         bitstream_put_ui(bs, 0, 1);   /* low_delay_hrd_flag */ 
@@ -1234,37 +1254,50 @@ build_packed_seq_buffer(unsigned char **header_buffer)
 }
 
 static int 
-build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
-				unsigned int init_cpb_removal_delay,
-				unsigned int init_cpb_removal_delay_offset,
+build_packed_idr_sei_buffer_timing(unsigned int init_cpb_removal_delay_length,
 				unsigned int cpb_removal_length,
-				unsigned int cpb_removal_delay,
 				unsigned int dpb_output_length,
-				unsigned int dpb_output_delay,
 				unsigned char **sei_buffer)
 {
     unsigned char *byte_buf;
     int bp_byte_size, i, pic_byte_size;
+    unsigned int cpb_removal_delay;
 
     bitstream nal_bs;
     bitstream sei_bp_bs, sei_pic_bs;
 
     bitstream_start(&sei_bp_bs);
     bitstream_put_ue(&sei_bp_bs, 0);       /*seq_parameter_set_id*/
-    bitstream_put_ui(&sei_bp_bs, init_cpb_removal_delay, cpb_removal_length); 
-    bitstream_put_ui(&sei_bp_bs, init_cpb_removal_delay_offset, cpb_removal_length); 
+    /* SEI buffer period info */
+    /* NALHrdBpPresentFlag == 1 */
+    bitstream_put_ui(&sei_bp_bs, avcenc_context.i_initial_cpb_removal_delay,
+                     init_cpb_removal_delay_length);
+    bitstream_put_ui(&sei_bp_bs, avcenc_context.i_initial_cpb_removal_delay_offset,
+                     init_cpb_removal_delay_length);
     if ( sei_bp_bs.bit_offset & 0x7) {
         bitstream_put_ui(&sei_bp_bs, 1, 1);
     }
     bitstream_end(&sei_bp_bs);
     bp_byte_size = (sei_bp_bs.bit_offset + 7) / 8;
     
+    /* SEI pic timing info */
     bitstream_start(&sei_pic_bs);
+    /* The info of CPB and DPB delay is controlled by CpbDpbDelaysPresentFlag,
+     * which is derived as 1 if one of the following conditions is true:
+     * nal_hrd_parameters_present_flag is present in the bitstream and is equal to 1,
+     * vcl_hrd_parameters_present_flag is present in the bitstream and is equal to 1,
+     */
+    cpb_removal_delay = (avcenc_context.current_cpb_removal - avcenc_context.prev_idr_cpb_removal);
     bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length); 
-    bitstream_put_ui(&sei_pic_bs, dpb_output_delay, dpb_output_length); 
+    bitstream_put_ui(&sei_pic_bs, avcenc_context.current_dpb_removal_delta,
+                     dpb_output_length);
     if ( sei_pic_bs.bit_offset & 0x7) {
         bitstream_put_ui(&sei_pic_bs, 1, 1);
     }
+    /* The pic_structure_present_flag determines whether the pic_structure
+     * info is written into the SEI pic timing info.
+     * Currently it is set to zero.
+     */
     bitstream_end(&sei_pic_bs);
     pic_byte_size = (sei_pic_bs.bit_offset + 7) / 8;
     
@@ -1281,7 +1314,7 @@ build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
         bitstream_put_ui(&nal_bs, byte_buf[i], 8);
     }
     free(byte_buf);
-	/* write the SEI timing data */
+	/* write the SEI pic timing data */
     bitstream_put_ui(&nal_bs, 0x01, 8);
     bitstream_put_ui(&nal_bs, pic_byte_size, 8);
     
@@ -1296,6 +1329,61 @@ build_packed_sei_buffer_timing(unsigned int init_cpb_removal_length,
 
     *sei_buffer = (unsigned char *)nal_bs.buffer; 
    
+    return nal_bs.bit_offset;
+}
+
+static int
+build_packed_sei_pic_timing(unsigned int cpb_removal_length,
+				unsigned int dpb_output_length,
+				unsigned char **sei_buffer)
+{
+    unsigned char *byte_buf;
+    int i, pic_byte_size;
+    unsigned int cpb_removal_delay;
+
+    bitstream nal_bs;
+    bitstream sei_pic_bs;
+
+    bitstream_start(&sei_pic_bs);
+    /* The info of CPB and DPB delay is controlled by CpbDpbDelaysPresentFlag,
+     * which is derived as 1 if one of the following conditions is true:
+     * nal_hrd_parameters_present_flag is present in the bitstream and is equal to 1,
+     * vcl_hrd_parameters_present_flag is present in the bitstream and is equal to 1,
+     */
+    cpb_removal_delay = (avcenc_context.current_cpb_removal - avcenc_context.current_idr_cpb_removal);
+    bitstream_put_ui(&sei_pic_bs, cpb_removal_delay, cpb_removal_length);
+    bitstream_put_ui(&sei_pic_bs, avcenc_context.current_dpb_removal_delta,
+                     dpb_output_length);
+    if ( sei_pic_bs.bit_offset & 0x7) {
+        bitstream_put_ui(&sei_pic_bs, 1, 1);
+    }
+
+    /* The pic_structure_present_flag determines whether the pic_structure
+     * info is written into the SEI pic timing info.
+     * Currently it is set to zero.
+     */
+    bitstream_end(&sei_pic_bs);
+    pic_byte_size = (sei_pic_bs.bit_offset + 7) / 8;
+
+    bitstream_start(&nal_bs);
+    nal_start_code_prefix(&nal_bs);
+    nal_header(&nal_bs, NAL_REF_IDC_NONE, NAL_SEI);
+
+	/* write the SEI Pic timing data */
+    bitstream_put_ui(&nal_bs, 0x01, 8);
+    bitstream_put_ui(&nal_bs, pic_byte_size, 8);
+
+    byte_buf = (unsigned char *)sei_pic_bs.buffer;
+    for(i = 0; i < pic_byte_size; i++) {
+        bitstream_put_ui(&nal_bs, byte_buf[i], 8);
+    }
+    free(byte_buf);
+
+    rbsp_trailing_bits(&nal_bs);
+    bitstream_end(&nal_bs);
+
+    *sei_buffer = (unsigned char *)nal_bs.buffer;
+
     return nal_bs.bit_offset;
 }
 
@@ -1577,7 +1665,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
         avcenc_update_slice_parameter(slice_type);
 
 	if (avcenc_context.rate_control_method == VA_RC_CBR)
-		avcenc_update_sei_param(frame_num);
+		avcenc_update_sei_param(is_idr);
 
         avcenc_render_picture();
 
@@ -1679,12 +1767,19 @@ static void avcenc_context_sei_init()
 	/* it comes for the bps defined in SPS */
 	target_bit_rate = avcenc_context.seq_param.bits_per_second;
 	init_cpb_size = (target_bit_rate * 8) >> 10;
-	avcenc_context.i_initial_cpb_removal_delay = init_cpb_size * 0.5 * 1024 / target_bit_rate * 90000;
+	avcenc_context.i_initial_cpb_removal_delay = 2 * 90000;
+	avcenc_context.i_initial_cpb_removal_delay_offset = 2 * 90000;
 
 	avcenc_context.i_cpb_removal_delay = 2;
 	avcenc_context.i_initial_cpb_removal_delay_length = 24;
 	avcenc_context.i_cpb_removal_delay_length = 24;
 	avcenc_context.i_dpb_output_delay_length = 24;
+	avcenc_context.time_offset_length = 24;
+
+        avcenc_context.prev_idr_cpb_removal = avcenc_context.i_initial_cpb_removal_delay / 90000;
+        avcenc_context.current_idr_cpb_removal = avcenc_context.prev_idr_cpb_removal;
+        avcenc_context.current_cpb_removal = 0;
+        avcenc_context.idr_frame_num = 0;
 }
 
 static void avcenc_context_init(int width, int height)
@@ -1849,6 +1944,45 @@ int main(int argc, char *argv[])
             numShortTerm = 0;
             current_frame_num = 0;
             current_IDR_display = current_frame_display;
+            if (avcenc_context.rate_control_method == VA_RC_CBR) {
+                unsigned long long frame_interval;
+
+                frame_interval = enc_frame_number - avcenc_context.idr_frame_num;
+
+                /* Based on the H264 spec the removal time of the IDR access
+                 * unit is derived as the following:
+                 * the removal time of previous IDR unit + Tc * cpb_removal_delay(n)
+                 */
+                avcenc_context.current_cpb_removal = avcenc_context.prev_idr_cpb_removal +
+				frame_interval * 2;
+                avcenc_context.idr_frame_num = enc_frame_number;
+                avcenc_context.current_idr_cpb_removal = avcenc_context.current_cpb_removal;
+                if (ip_period)
+                    avcenc_context.current_dpb_removal_delta = (ip_period + 1) * 2;
+                else
+                    avcenc_context.current_dpb_removal_delta = 2;
+            }
+        } else {
+            if (avcenc_context.rate_control_method == VA_RC_CBR) {
+                unsigned long long frame_interval;
+
+                frame_interval = enc_frame_number - avcenc_context.idr_frame_num;
+
+                /* Based on the H264 spec the removal time of the non-IDR access
+                 * unit is derived as the following:
+                 * the removal time of current IDR unit + Tc * cpb_removal_delay(n)
+                 */
+                avcenc_context.current_cpb_removal = avcenc_context.current_idr_cpb_removal +
+				frame_interval * 2;
+                if (current_frame_type == SLICE_TYPE_I ||
+                    current_frame_type == SLICE_TYPE_P) {
+                    if (ip_period)
+                        avcenc_context.current_dpb_removal_delta = (ip_period + 1) * 2;
+                    else
+                        avcenc_context.current_dpb_removal_delta = 2;
+                } else
+                   avcenc_context.current_dpb_removal_delta = 2;
+            }
         }
 
         /* use the simple mechanism to calc the POC */
@@ -1859,7 +1993,13 @@ int main(int argc, char *argv[])
                       (current_frame_type == FRAME_IDR) ? SLICE_TYPE_I : current_frame_type,
                       (next_frame_type == SLICE_TYPE_B) ? 1 : 0,
                 next_frame_display);
-
+        if ((current_frame_type == FRAME_IDR) &&
+            (avcenc_context.rate_control_method == VA_RC_CBR)) {
+           /* after one IDR frame is written, it needs to update the
+            * prev_idr_cpb_removal for next IDR
+            */
+           avcenc_context.prev_idr_cpb_removal = avcenc_context.current_idr_cpb_removal;
+        }
         printf("\r %d/%d ...", f, frame_number);
         fflush(stdout);
     }
