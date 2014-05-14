@@ -724,6 +724,20 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   conversion in SDTV/HDTV/UHDTV.
      */
     unsigned int        input_surface_flag;
+    /**
+     * \brief Flag to indicate the output surface flag such as chroma-siting,
+     * range flag and so on. This flag should be consistent for all streams.
+     *
+     * The lower 4 bits are still used as chroma-siting flag
+     * The range_flag bit is used to indicate that the range flag of color-space conversion.
+     * -\ref VA_SOURCE_RANGE_FULL(Full range): Y/Cb/Cr is in [0, 255].It is
+     *   mainly used for JPEG/JFIF formats. The combination with the BT601 flag
+     *   means that JPEG/JFIF color-space conversion matrix is used.
+     * -\ref VA_SOURCE_RANGE_REDUCED(Reduced range): Y is in [16, 235] and Cb/Cr
+     *   is in [16, 240]. It is mainly used for the YUV<->RGB color-space
+     *   conversion in SDTV/HDTV/UHDTV.
+     */
+    unsigned int        output_surface_flag;
 } VAProcPipelineParameterBuffer;
 
 /**
