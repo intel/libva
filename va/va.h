@@ -672,6 +672,8 @@ typedef struct _VAConfigAttrib {
 /** \brief Macroblock based rate control.  Per MB control is decided 
  *  internally in the encoder. It may be combined with other RC modes, except CQP. */
 #define VA_RC_MB                        0x00000080
+/** \brief Constant Frame Size */
+#define VA_RC_CFS                       0x00000100
 
 /**@}*/
 
@@ -1508,7 +1510,8 @@ typedef struct _VAEncMiscParameterRateControl
              * The temporal layer that the rate control parameters are specified for.
              */ 
             unsigned int temporal_id : 8; 
-            unsigned int reserved : 17;
+            unsigned int cfs_I_frames : 1; /* I frame also follows CFS */
+            unsigned int reserved : 16;
         } bits;
         unsigned int value;
     } rc_flags;
