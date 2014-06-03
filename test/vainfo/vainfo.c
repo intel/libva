@@ -56,6 +56,8 @@ static char * profile_string(VAProfile profile)
             case VAProfileH264ConstrainedBaseline: return "VAProfileH264ConstrainedBaseline";
             case VAProfileJPEGBaseline: return "VAProfileJPEGBaseline";
             case VAProfileVP8Version0_3: return "VAProfileVP8Version0_3";
+            case VAProfileH264MultiviewHigh: return "VAProfileH264MultiviewHigh";
+            case VAProfileH264StereoHigh: return "VAProfileH264StereoHigh";
 
             default:
                 break;
