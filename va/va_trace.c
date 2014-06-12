@@ -1216,11 +1216,11 @@ static void va_TraceVAPictureParameterBufferHEVC(
     void *data)
 {
     int i;
-    VADecPictureParameterBufferHEVC *p = (VADecPictureParameterBufferHEVC*)data;
+    VAPictureParameterBufferHEVC *p = (VAPictureParameterBufferHEVC*)data;
 
     DPY2TRACECTX(dpy);
 
-    va_TraceMsg(trace_ctx, "VADecPictureParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "VAPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
     va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.PicOrderCnt);

@@ -127,7 +127,7 @@ typedef struct _VAPictureHEVC
  * per frame.
  *
  */
-typedef struct  _VADecPictureParameterBufferHEVC
+typedef struct  _VAPictureParameterBufferHEVC
 {
     /** \brief buffer description of decoded current picture
      * only VA_PICTURE_HEVC_FIELD_PIC and VA_PICTURE_HEVC_BOTTOM_FIELD
@@ -263,7 +263,7 @@ typedef struct  _VADecPictureParameterBufferHEVC
      */
     uint32_t                st_rps_bits;
 
-} VADecPictureParameterBufferHEVC;
+} VAPictureParameterBufferHEVC;
 
 
 
