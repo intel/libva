@@ -500,6 +500,34 @@ typedef struct _VAProcPipelineCaps {
     unsigned int        mirror_flags;
     /** \brief Number of additional output surfaces supported by the pipeline  */
     unsigned int        num_additional_outputs;
+
+    /** \brief Number of elements in \ref input_pixel_format array. */
+    unsigned int        num_input_pixel_formats;
+    /** \brief List of input pixel formats in fourcc. */
+    unsigned int        *input_pixel_format;
+    /** \brief Number of elements in \ref output_pixel_format array. */
+    unsigned int        num_output_pixel_formats;
+    /** \brief List of output pixel formats in fourcc. */
+    unsigned int        *output_pixel_format;
+  
+    /** \brief Max supported input width in pixels. */
+    unsigned int        max_input_width;
+    /** \brief Max supported input height in pixels. */
+    unsigned int        max_input_height;
+    /** \brief Min supported input width in pixels. */
+    unsigned int        min_input_width;
+    /** \brief Min supported input height in pixels. */
+    unsigned int        min_input_height;
+
+    /** \brief Max supported output width in pixels. */
+    unsigned int        max_output_width;
+    /** \brief Max supported output height in pixels. */
+    unsigned int        max_output_height;
+    /** \brief Min supported output width in pixels. */
+    unsigned int        min_output_width;
+    /** \brief Min supported output height in pixels. */
+    unsigned int        min_output_height;
+
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
