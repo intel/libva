@@ -677,7 +677,7 @@ VAStatus vaQueryConfigAttributes (
 VAStatus vaQueryProcessingRate (
     VADisplay dpy,
     VAConfigID config_id, 
-    VABufferID proc_buf,
+    VAProcessingRateParams *proc_buf,
     unsigned int *processing_rate	/* out */
 )
 {

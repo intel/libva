@@ -436,7 +436,7 @@ struct VADriverVTable
        VAStatus (*vaQueryProcessingRate) (
                VADriverContextP ctx,
                VAConfigID config_id,
-               VABufferID buf_id,
+               VAProcessingRateParams *proc_buf,
                unsigned int *processing_rate	/* out */
        );
 };
