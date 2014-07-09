@@ -578,12 +578,13 @@ typedef enum
      * \brief Encoding region-of-interest (ROI) attribute. Read-only.
      *
      * This attribute conveys whether the driver supports region-of-interest (ROI) encoding,
-     * based on user provided ROI rectangles.  The attribute value returned indicates the number
-     * of regions that are supported.  e.g. A value of 0 means ROI encoding is not supported.
+     * based on user provided ROI rectangles.  The attribute value is partitioned into fields
+     * as defined in the VAConfigAttribValEncROI union.     
+     *
      * If ROI encoding is supported, the ROI information is passed to the driver using
-     * VAEncMiscParameterTypeRoi.
+     * VAEncMiscParameterTypeROI.
      */
-    VAConfigAttribEncRoi              = 25,
+    VAConfigAttribEncROI              = 25,
     /**
      * \brief Encoding extended rate control attribute. Read-only.
      *
@@ -783,6 +784,23 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_ENC_INTRA_REFRESH_ADAPTIVE                   0x00000010
 /** \brief Driver supports cyclic intra refresh */
 #define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
+
+/**@}*/
+
+/** \brief Attribute value for VAConfigAttribEncROI */
+typedef union _VAConfigAttribValEncROI {
+    struct {
+     	/** \brief The number of ROI regions supported, 0 if ROI is not supported. */
+     	unsigned int num_roi_regions 		: 8;
+	/** \brief Indicates if ROI priority indication is supported when
+         * VAConfigAttribRateControl != VA_RC_CQP, else only ROI delta QP added on top of
+         * the frame level QP is supported when VAConfigAttribRateControl == VA_RC_CQP.
+         */
+	unsigned int roi_rc_priority_support	: 1;
+	unsigned int reserved                   : 23;
+     } bits;
+     unsigned int value;
+} VAConfigAttribValEncROI;
 
 /**@}*/
 
@@ -1734,35 +1752,43 @@ typedef struct _VAEncMiscParameterSkipFrame {
 /**
  * \brief Encoding region-of-interest (ROI).
  *
- * The encoding ROI can be set through this structure, if the implementation
+ * The encoding ROI can be set through VAEncMiscParameterBufferROI, if the implementation
  * supports ROI input. The ROI set through this structure is applicable only to the
- * current frame.  The number of supported ROIs can be queried through the
- * VAConfigAttribEncRoi.  The encoder will use the ROI information to adjust the QP
- * values of the MB's that fall within the ROIs.
+ * current frame or field, so must be sent every frame or field to be applied.  The number of
+ * supported ROIs can be queried through the VAConfigAttribEncROI.  The encoder will use the
+ * ROI information to adjust the QP values of the MB's that fall within the ROIs.
  */
-typedef struct _VAEncMiscParameterBufferRoi {
-    /** \brief Number of ROIs being sent.*/
-    unsigned int                num_roi;
-    /** \brief Valid when VAConfigAttribRateControl != VA_RC_CQP, then the encoder's
-     *  rate control will determine actual delta QPs.  Specifies the max/min allowed delta QPs.*/
-    char                        max_delta_qp;
-    char                        min_delta_qp;
-
-    /** \brief Pointer to a VAEncROI array with num_ROI elements.*/
-    struct VAEncROI
-    {
+typedef struct _VAEncROI
+{
         /** \brief Defines the ROI boundary in pixels, the driver will map it to appropriate
-         *  codec coding units.  It is relative to the frame coordinates for both frame and field cases. */
-        VARectangle             roi_rectangle;
-        /** \brief When VAConfigAttribRateControl == VA_RC_CQP then roi_value specifes the delta QP that
-         *  will be added on top of the frame level QP.  For other rate control modes, roi_value specifies the
-         *  priority of the ROI region relative to the non-ROI region.  It can positive (more important) or
-         *  negative (less important) values and is compared with non-ROI region (taken as value 0).
-         *  E.g. ROI region with roi_value -3 is less important than the non-ROI region (roi_value implied to be 0)
-         *  which is less important than ROI region with roi_value +2.  For overlapping regions, the roi_value
-         *  that is first in the ROI array will have priority.   */
-        char                    roi_value;
-    } *ROI;
+         *  codec coding units.  It is relative to frame coordinates for the frame case and 
+    	 *  to field coordinates for the field case. */
+        VARectangle     roi_rectangle;
+        /** \brief When VAConfigAttribRateControl == VA_RC_CQP then roi_value specifes the
+	 *  delta QP that will be added on top of the frame level QP.  For other rate control
+	 *  modes, roi_value specifies the priority of the ROI region relative to the non-ROI
+	 *  region.  It can be positive (more important) or negative (less important) values
+         *  and is compared with non-ROI region (taken as value 0).
+         *  E.g. ROI region with roi_value -3 is less important than the non-ROI region
+	 *  (roi_value implied to be 0) which is less important than ROI region with 
+	 *  roi_value +2.  For overlapping regions, the roi_value that is first in the ROI 
+	 *  array will have priority.   */
+        char            roi_value;
+} VAEncROI;
+
+typedef struct _VAEncMiscParameterBufferROI {
+    /** \brief Number of ROIs being sent.*/
+    unsigned int        num_roi;
+
+    /** \brief Valid when VAConfigAttribRateControl != VA_RC_CQP, then the encoder's
+     *  rate control will determine actual delta QPs.  Specifies the max/min allowed delta
+     *  QPs. */
+    char                max_delta_qp;
+    char                min_delta_qp;
+
+   /** \brief Pointer to a VAEncRoi array with num_roi elements.  It is relative to frame
+     *  coordinates for the frame case and to field coordinates for the field case.*/
+    VAEncROI            *roi;
 } VAEncMiscParameterBufferROI;
 
 /**
