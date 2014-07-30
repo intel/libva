@@ -1368,7 +1368,7 @@ typedef struct _VAProcessingRateParamsEnc {
     /** \brief Profile level */
     unsigned char       level_idc;
     unsigned char       reserved[3];
-    /** \brief quality level. When set to 0 or 0xffffffff, default quality 
+    /** \brief quality level. When set to 0, default quality
      * level is used. 
      */
     unsigned int       quality_level;
@@ -1711,7 +1711,9 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
  * consumption, with higher quality corresponds to lower speed and higher power consumption. 
  */
 typedef struct _VAEncMiscParameterBufferQualityLevel {
-    /** \brief Encoding quality level setting. */
+    /** \brief Encoding quality level setting. When set to 0, default quality
+     * level is used.
+     */
     unsigned int                quality_level;
 } VAEncMiscParameterBufferQualityLevel;
 
