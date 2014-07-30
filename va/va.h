@@ -1092,7 +1092,9 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
  * consumption, with higher quality corresponds to lower speed and higher power consumption. 
  */
 typedef struct _VAEncMiscParameterBufferQualityLevel {
-    /** \brief Encoding quality level setting. */
+    /** \brief Encoding quality level setting. When set to 0, default quality
+     * level is used.
+     */
     unsigned int                quality_level;
 } VAEncMiscParameterBufferQualityLevel;
 
