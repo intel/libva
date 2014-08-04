@@ -127,7 +127,15 @@ static  int minimal_qp = 0;
 static  int intra_period = 30;
 static  int intra_idr_period = 60;
 static  int ip_period = 1;
-static  int rc_mode = VA_RC_VBR;
+static  int rc_mode = -1;
+static  int rc_default_modes[] = {
+    VA_RC_VBR,
+    VA_RC_CQP,
+    VA_RC_VBR_CONSTRAINED,
+    VA_RC_CBR,
+    VA_RC_VCM,
+    VA_RC_NONE,
+};
 static  unsigned long long current_frame_encoding = 0;
 static  unsigned long long current_frame_display = 0;
 static  unsigned long long current_IDR_display = 0;
@@ -1146,7 +1154,21 @@ static int init_va(void)
 
         printf("\n");
 
-        /* need to check if support rc_mode */
+        if (rc_mode == -1 || !(rc_mode & tmp))  {
+            if (rc_mode != -1) {
+                printf("Warning: Don't support the specified RateControl mode: %s!!!, switch to ", rc_to_string(rc_mode));
+            }
+
+            for (i = 0; i < sizeof(rc_default_modes) / sizeof(rc_default_modes[0]); i++) {
+                if (rc_default_modes[i] & tmp) {
+                    rc_mode = rc_default_modes[i];
+                    break;
+                }
+            }
+
+            printf("RateControl mode: %s\n", rc_to_string(rc_mode));
+        }
+
         config_attrib[config_attrib_num].type = VAConfigAttribRateControl;
         config_attrib[config_attrib_num].value = rc_mode;
         config_attrib_num++;
@@ -2222,7 +2244,8 @@ static int deinit_va()
 static int print_input()
 {
     printf("\n\nINPUT:Try to encode H264...\n");
-    printf("INPUT: RateControl  : %s\n", rc_to_string(rc_mode));
+    if (rc_mode != -1)
+        printf("INPUT: RateControl  : %s\n", rc_to_string(rc_mode));
     printf("INPUT: Resolution   : %dx%d, %d frames\n",
            frame_width, frame_height, frame_count);
     printf("INPUT: FrameRate    : %d\n", frame_rate);
