@@ -1414,6 +1414,8 @@ static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_
     seq_param->picture_width_in_mbs = width_in_mbs;
     seq_param->picture_height_in_mbs = height_in_mbs;
     seq_param->seq_fields.bits.frame_mbs_only_flag = 1;
+    seq_param->seq_fields.bits.chroma_format_idc = 1;
+
     
     if (frame_bit_rate > 0)
         seq_param->bits_per_second = 1024 * frame_bit_rate; /* use kbps as input */
