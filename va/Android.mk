@@ -25,7 +25,8 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-LIBVA_DRIVERS_PATH = /system/lib
+LIBVA_DRIVERS_PATH_32 = /system/lib
+LIBVA_DRIVERS_PATH_64 = /system/lib64
 
 # Version set to Android Jelly Bean
 ALOG_VERSION_REQ := 4.1
@@ -42,9 +43,14 @@ LOCAL_SRC_FILES := \
 	va_trace.c \
 	va_fool.c
 
-LOCAL_CFLAGS += \
+LOCAL_CFLAGS_32 += \
 	-DANDROID \
-	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\"" \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH_32)\"" \
+	-DLOG_TAG=\"libva\"
+
+LOCAL_CFLAGS_64 += \
+	-DANDROID \
+	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH_64)\"" \
 	-DLOG_TAG=\"libva\"
 
 # Android Jelly Bean defined ALOGx, older versions use LOGx
