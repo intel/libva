@@ -31,7 +31,7 @@
  * @param[in]  ctx        the VA driver context
  * @return VA_STATUS_SUCCESS if successful
  */
+DLL_HIDDEN
 VAStatus va_glx_init_context(VADriverContextP ctx);
-    /* ATTRIBUTE_HIDDEN; */
 
 #endif /* VA_GLX_IMPL_H */

@@ -22,6 +22,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "sysdeps.h"
 #include <stdlib.h>
 #include "va_glx_private.h"
 #include "va_glx_impl.h"

@@ -23,6 +23,7 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va_glx_private.h"
 #include "va_glx_impl.h"
 #include <stdio.h>
