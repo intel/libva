@@ -278,7 +278,7 @@ fi
 AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
 
 m4_ifdef([WAYLAND_SCANNER_RULES],
-    [WAYLAND_SCANNER_RULES(['$(top_srcdir)/va/wayland/protocol'])],
+    [WAYLAND_SCANNER_RULES(['$(top_builddir)/va/wayland/protocol'])],
     [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
 
 # We only need the headers, we don't link against the DRM libraries
