@@ -53,6 +53,7 @@ stamp-h1
 /test/egl/va_egl
 /test/encode/avcenc
 /test/encode/h264encode
+/test/encode/mpeg2vaenc
 /test/putsurface/putsurface
 /test/putsurface/putsurface_wayland
 /test/transcode/mpeg2transcode
