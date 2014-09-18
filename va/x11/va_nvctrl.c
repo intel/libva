@@ -22,6 +22,7 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include <string.h>
 
 #define NEED_REPLIES
