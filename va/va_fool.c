@@ -23,6 +23,7 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
 #include "va_trace.h"

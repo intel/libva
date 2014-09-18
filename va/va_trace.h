@@ -50,19 +50,24 @@ extern int trace_flag;
         trace_func(__VA_ARGS__);                \
     }
 
+DLL_HIDDEN
 void va_TraceInit(VADisplay dpy);
+DLL_HIDDEN
 void va_TraceEnd(VADisplay dpy);
 
+DLL_HIDDEN
 void va_TraceInitialize (
     VADisplay dpy,
     int *major_version,	 /* out */
     int *minor_version 	 /* out */
 );
 
+DLL_HIDDEN
 void va_TraceTerminate (
     VADisplay dpy
 );
 
+DLL_HIDDEN
 void va_TraceCreateConfig(
     VADisplay dpy,
     VAProfile profile, 
@@ -72,6 +77,7 @@ void va_TraceCreateConfig(
     VAConfigID *config_id /* out */
 );
 
+DLL_HIDDEN
 void va_TraceCreateSurfaces(
     VADisplay dpy,
     int width,
@@ -83,12 +89,14 @@ void va_TraceCreateSurfaces(
     unsigned int        num_attribs
 );
 
+DLL_HIDDEN
 void va_TraceDestroySurfaces(
     VADisplay dpy,
     VASurfaceID *surface_list,
     int num_surfaces
 );
-    
+
+DLL_HIDDEN
 void va_TraceCreateContext(
     VADisplay dpy,
     VAConfigID config_id,
@@ -100,6 +108,7 @@ void va_TraceCreateContext(
     VAContextID *context		/* out */
 );
 
+DLL_HIDDEN
 void va_TraceCreateBuffer (
     VADisplay dpy,
     VAContextID context,	/* in */
@@ -109,12 +118,14 @@ void va_TraceCreateBuffer (
     void *data,			/* in */
     VABufferID *buf_id		/* out */
 );
-    
+
+DLL_HIDDEN
 void va_TraceDestroyBuffer (
     VADisplay dpy,
     VABufferID buf_id    /* in */
 );
 
+DLL_HIDDEN
 void va_TraceMapBuffer (
     VADisplay dpy,
     VABufferID buf_id,	/* in */
@@ -122,12 +133,14 @@ void va_TraceMapBuffer (
 );
 
 
+DLL_HIDDEN
 void va_TraceBeginPicture(
     VADisplay dpy,
     VAContextID context,
     VASurfaceID render_target
 );
 
+DLL_HIDDEN
 void va_TraceRenderPicture(
     VADisplay dpy,
     VAContextID context,
@@ -135,17 +148,20 @@ void va_TraceRenderPicture(
     int num_buffers
 );
 
+DLL_HIDDEN
 void va_TraceEndPicture(
     VADisplay dpy,
     VAContextID context,
     int endpic_done
 );
 
+DLL_HIDDEN
 void va_TraceSyncSurface(
     VADisplay dpy,
     VASurfaceID render_target
 );
 
+DLL_HIDDEN
 void va_TraceQuerySurfaceAttributes(
     VADisplay           dpy,
     VAConfigID          config,
@@ -153,12 +169,14 @@ void va_TraceQuerySurfaceAttributes(
     unsigned int       *num_attribs
 );
 
+DLL_HIDDEN
 void va_TraceQuerySurfaceStatus(
     VADisplay dpy,
     VASurfaceID render_target,
     VASurfaceStatus *status	/* out */
 );
 
+DLL_HIDDEN
 void va_TraceQuerySurfaceError(
 	VADisplay dpy,
 	VASurfaceID surface,
@@ -167,23 +185,27 @@ void va_TraceQuerySurfaceError(
 );
 
 
+DLL_HIDDEN
 void va_TraceMaxNumDisplayAttributes (
     VADisplay dpy,
     int number
 );
 
+DLL_HIDDEN
 void va_TraceQueryDisplayAttributes (
     VADisplay dpy,
     VADisplayAttribute *attr_list,	/* out */
     int *num_attributes			/* out */
 );
 
+DLL_HIDDEN
 void va_TraceGetDisplayAttributes (
     VADisplay dpy,
     VADisplayAttribute *attr_list,
     int num_attributes
 );
 
+DLL_HIDDEN
 void va_TraceSetDisplayAttributes (
     VADisplay dpy,
     VADisplayAttribute *attr_list,

@@ -24,6 +24,7 @@
  */
 
 #define _GNU_SOURCE 1
+#include "sysdeps.h"
 #include "va.h"
 #include "va_enc_h264.h"
 #include "va_backend.h"
@@ -257,8 +258,7 @@ void va_TraceEnd(VADisplay dpy)
     ((VADisplayContextP)dpy)->vatrace = NULL;
 }
 
-
-void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
+static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
 {
     va_list args;
 
@@ -279,7 +279,7 @@ void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
 }
 
 
-void va_TraceSurface(VADisplay dpy)
+static void va_TraceSurface(VADisplay dpy)
 {
     unsigned int i, j;
     unsigned int fourcc; /* following are output argument */
