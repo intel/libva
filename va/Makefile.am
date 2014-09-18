@@ -61,7 +61,7 @@ libva_source_h_priv = \
 
 libva_ldflags = \
 	$(LDADD) -no-undefined	\
-	-Wl,-version-script,libva.syms \
+	-Wl,-version-script,${srcdir}/libva.syms \
 	$(NULL)
 
 lib_LTLIBRARIES			= libva.la
