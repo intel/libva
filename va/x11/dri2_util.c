@@ -161,7 +161,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     return &dri2_drawable->buffers[dri2_drawable->front_index];
 }
 
-void
+static void
 dri2Close(VADriverContextP ctx)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
