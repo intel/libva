@@ -26,6 +26,7 @@
 
 #include "sysdeps.h"
 #include <xf86drm.h>
+#include <sys/stat.h>
 #include "va_drm_utils.h"
 #include "va_drmcommon.h"
 
@@ -77,4 +78,24 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr)
 
     *driver_name_ptr = driver_name;
     return VA_STATUS_SUCCESS;
+}
+
+/* Checks whether the file descriptor is a DRM Render-Nodes one */
+int
+VA_DRM_IsRenderNodeFd(int fd)
+{
+    struct stat st;
+    const char *name;
+
+    /* Check by device node */
+    if (fstat(fd, &st) == 0)
+        return S_ISCHR(st.st_mode) && (st.st_rdev & 0x80);
+
+    /* Check by device name */
+    name = drmGetDeviceNameFromFd(fd);
+    if (name)
+        return strncmp(name, "/dev/dri/renderD", 16) == 0;
+
+    /* Unrecoverable error */
+    return -1;
 }
