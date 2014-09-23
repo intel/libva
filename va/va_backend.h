@@ -48,6 +48,8 @@ enum {
     VA_DISPLAY_ANDROID  = 0x20,
     /** \brief VA/DRM API is used, through vaGetDisplayDRM() entry-point. */
     VA_DISPLAY_DRM      = 0x30,
+    /** \brief VA/DRM API is used, with a render-node device path */
+    VA_DISPLAY_DRM_RENDERNODES = (VA_DISPLAY_DRM | (1 << 0)),
     /** \brief VA/Wayland API is used, through vaGetDisplayWl() entry-point. */
     VA_DISPLAY_WAYLAND  = 0x40,
 };

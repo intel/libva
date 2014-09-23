@@ -36,7 +36,8 @@ va_DisplayContextIsValid(VADisplayContextP pDisplayContext)
     VADriverContextP const pDriverContext = pDisplayContext->pDriverContext;
 
     return (pDriverContext &&
-            pDriverContext->display_type == VA_DISPLAY_DRM);
+            ((pDriverContext->display_type & VA_DISPLAY_MAJOR_MASK) ==
+             VA_DISPLAY_DRM));
 }
 
 static void
@@ -67,15 +68,18 @@ va_DisplayContextGetDriverName(
     if (status != VA_STATUS_SUCCESS)
         return status;
 
-    ret = drmGetMagic(drm_state->fd, &magic);
-    if (ret < 0)
-        return VA_STATUS_ERROR_OPERATION_FAILED;
+    /* Authentication is only needed for a legacy DRM device */
+    if (ctx->display_type != VA_DISPLAY_DRM_RENDERNODES) {
+        ret = drmGetMagic(drm_state->fd, &magic);
+        if (ret < 0)
+            return VA_STATUS_ERROR_OPERATION_FAILED;
 
-    if (!va_drm_is_authenticated(drm_state->fd)) {
-        if (!va_drm_authenticate(drm_state->fd, magic))
-            return VA_STATUS_ERROR_OPERATION_FAILED;
-        if (!va_drm_is_authenticated(drm_state->fd))
-            return VA_STATUS_ERROR_OPERATION_FAILED;
+        if (!va_drm_is_authenticated(drm_state->fd)) {
+            if (!va_drm_authenticate(drm_state->fd, magic))
+                return VA_STATUS_ERROR_OPERATION_FAILED;
+            if (!va_drm_is_authenticated(drm_state->fd))
+                return VA_STATUS_ERROR_OPERATION_FAILED;
+        }
     }
 
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
@@ -89,8 +93,9 @@ vaGetDisplayDRM(int fd)
     VADisplayContextP pDisplayContext = NULL;
     VADriverContextP  pDriverContext  = NULL;
     struct drm_state *drm_state       = NULL;
+    int is_render_nodes;
 
-    if (fd < 0)
+    if (fd < 0 || (is_render_nodes = VA_DRM_IsRenderNodeFd(fd)) < 0)
         return NULL;
 
     /* Create new entry */
@@ -104,7 +109,8 @@ vaGetDisplayDRM(int fd)
     if (!pDriverContext)
         goto error;
     pDriverContext->native_dpy   = NULL;
-    pDriverContext->display_type = VA_DISPLAY_DRM;
+    pDriverContext->display_type = is_render_nodes ?
+        VA_DISPLAY_DRM_RENDERNODES : VA_DISPLAY_DRM;
     pDriverContext->drm_state    = drm_state;
 
     pDisplayContext = calloc(1, sizeof(*pDisplayContext));
