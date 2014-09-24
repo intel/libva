@@ -677,6 +677,15 @@ typedef enum
      VAConfigAttribEncDynamicScaling        = 30,
 
     /**
+     * \brief Tile Support Attribute. Read-only.
+     * This attribute conveys whether encoder is capable to support tiles.
+     * If not supported, the tile related parameters sent to encoder, such as
+     * tiling structure, should be ignored.
+     * It is a boolean value 0 - unsupported, 1 - supported.
+     */
+     VAConfigAttribEncTileSupport        = 31,
+
+    /**
      * \brief Intel specific attributes start at 1001 
      */
     /**
