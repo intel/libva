@@ -2711,6 +2711,17 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW         0x1000
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
+
+/**
+ * \brief Codec specific information will be sent out. 
+ *
+ * This flag indicates that the coded buffer segment
+ * VACodedBufferSegment.buf points to a predefined data structure
+ * associated with each codec. And encoder may use this
+ * data structure to convey information back to application.
+ */
+#define VA_CODED_BUF_STATUS_CODEC_SPECIFIC              0x2000	
+
 /**
  * \brief The coded buffer segment contains a single NAL unit. 
  *
