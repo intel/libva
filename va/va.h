@@ -652,6 +652,20 @@ typedef enum
      VAConfigAttribEncDirtyROI       = 28,
 
     /**
+     * \brief Parallel Rate Control (hierachical B) attribute. Read-only.
+     * This attribute conveys whether the encoder supports parallel rate control.
+     * It is a boolean value 0 - unsupported, 1 - supported.
+     * This is the way when hireachical B frames are encoded, multiple independent B frames 
+     * on the same layer may be processed at same time.
+     * If supported, app may enable it by setting enable_parallel_brc in
+     * VAEncMiscParameterRateControl,
+     * and the number of B frames per layer per GOP will be passed to driver
+     * through VAEncMiscParameterParallelRateControl structure.
+     * Currently three layers are defined. 
+     */
+     VAConfigAttribEncParallelRateControl   = 29,
+
+    /**
      * \brief Intel specific attributes start at 1001 
      */
     /**
@@ -726,6 +740,17 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_MB                        0x00000080
 /** \brief Constant Frame Size */
 #define VA_RC_CFS                       0x00000100
+/** \brief Parallel BRC, for hierachical B.  
+ *  For hierachical B, B frames can be refered by other B frames.
+ *  Currently three layers of hierachy are defined:
+ *  B0 - regular B, no reference to other B frames.
+ *  B1 - reference to only I, P and regular B0 frames.
+ *  B2 - reference to any other frames, including B1.
+ *  In Hierachical B structure, B frames on the same layer can be processed 
+ *  simultaneously. And BRC would adjust accordingly. This is so called
+ *  Parallel BRC.
+ */
+#define VA_RC_PARALLEL                  0x00000200
 
 /**@}*/
 
@@ -1490,6 +1515,8 @@ typedef enum
     VAEncMiscParameterTypeTemporalLayerStructure   = 12,
     /** \brief Buffer type used for dirty region-of-interest (ROI) parameters. */
     VAEncMiscParameterTypeDirtyROI      = 13,
+    /** \brief Buffer type used for parallel BRC parameters. */
+    VAEncMiscParameterTypeParallelBRC   = 14,
 
     /* Intel specific types start at 1001 */
     /* VAEntrypointEncFEIIntel */
@@ -1597,7 +1624,8 @@ typedef struct _VAEncMiscParameterRateControl
              */ 
             unsigned int temporal_id : 8; 
             unsigned int cfs_I_frames : 1; /* I frame also follows CFS */
-            unsigned int reserved : 16;
+            unsigned int enable_parallel_brc    : 1;
+            unsigned int reserved               : 15;
         } bits;
         unsigned int value;
     } rc_flags;
@@ -1870,6 +1898,15 @@ typedef struct _VAEncMiscParameterBufferDirtyROI
     /** \brief Pointer to a VARectangle array with num_roi_rectangle elements.*/
      VARectangle    *roi_rectangle;
 } VAEncMiscParameterBufferDirtyROI;
+
+/** \brief Attribute value for VAConfigAttribEncParallelRateControl */
+typedef struct _VAEncMiscParameterParallelRateControl {
+    /** brief Number of B frames per layer per GOP.
+     *  num_b_in_gop[0] is the number of regular B which refers to only I or P frames.
+     */
+    unsigned int num_b_in_gop[3];
+} VAEncMiscParameterParallelRateControl;
+
 
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
