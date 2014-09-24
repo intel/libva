@@ -666,6 +666,17 @@ typedef enum
      VAConfigAttribEncParallelRateControl   = 29,
 
     /**
+     * \brief Dynamic Scaling Attribute. Read-only.
+     * This attribute conveys whether encoder is capable to determine dynamic frame
+     * resolutions adaptive to bandwidth utilization and processing power, etc., as well
+     * as capable to scale raw source and reference frames.
+     * It is a boolean value 0 - unsupported, 1 - supported.
+     * If it is supported, app may enable it by setting enable_dynamic_scaling in 
+     * VAEncMiscParameterRateControl.
+     */
+     VAConfigAttribEncDynamicScaling        = 30,
+
+    /**
      * \brief Intel specific attributes start at 1001 
      */
     /**
@@ -1625,7 +1636,8 @@ typedef struct _VAEncMiscParameterRateControl
             unsigned int temporal_id : 8; 
             unsigned int cfs_I_frames : 1; /* I frame also follows CFS */
             unsigned int enable_parallel_brc    : 1;
-            unsigned int reserved               : 15;
+            unsigned int enable_dynamic_scaling : 1;
+            unsigned int reserved               : 14;
         } bits;
         unsigned int value;
     } rc_flags;
