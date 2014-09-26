@@ -83,6 +83,8 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
  * The #load_quantization_table array can be used as a hint to notify
  * the VA driver implementation about which table(s) actually changed
  * since the last submission of this buffer.
+ *
+ * The #quantiser_table values are specified in zig-zag scan order.
  */
 typedef struct _VAIQMatrixBufferJPEGBaseline {
     /** \brief Specifies which #quantiser_table is valid. */
