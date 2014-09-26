@@ -1223,7 +1223,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "VAPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
-    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.PicOrderCnt);
+    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.pic_order_cnt);
     va_TraceMsg(trace_ctx, "\tCurrPic.flags = %d\n", p->CurrPic.flags);
 
     va_TraceMsg(trace_ctx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags:\n");
@@ -1233,7 +1233,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
             ((p->ReferenceFrames[i].flags & VA_PICTURE_HEVC_INVALID) == 0)) {
             va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x\n",
                         p->ReferenceFrames[i].picture_id,
-                        p->ReferenceFrames[i].PicOrderCnt,
+                        p->ReferenceFrames[i].pic_order_cnt,
                         p->ReferenceFrames[i].flags);
         } else
             va_TraceMsg(trace_ctx, "\t\tinv-inv-inv-inv-inv\n");
