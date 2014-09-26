@@ -1,5 +1,13 @@
-libva NEWS -- summary of user visible changes.  2014-05-09
+libva NEWS -- summary of user visible changes.  2014-09-DD
 Copyright (C) 2009-2014 Intel Corporation
+
+Version 1.4.0 - DD.Sep.2014
+* API: add support for VP8 encoding
+* API: add H.264 MVC profiles for decoding and encoding
+* API: add buffer export interfaces for interop with 3rdparty APIs (EGL, OCL)
+* Add support for DRM Render-Nodes (Andrey Larionov)
+* Fix build on 64-bit versions of Android (Qiming Shi)
+* Assorted fixes to the VA fool and trace modules (Austin Yuan)
 
 Version 1.3.1 - 09.May.2014
 * API: fix VA_ENC_PACKED_HEADER_RAW_DATA value
