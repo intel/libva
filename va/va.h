@@ -1185,13 +1185,21 @@ typedef struct _VAPictureParameterBufferMPEG2
 /** MPEG-2 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferMPEG2
 {
+    /** \brief Same as the MPEG-2 bitstream syntax element. */
     int load_intra_quantiser_matrix;
+    /** \brief Same as the MPEG-2 bitstream syntax element. */
     int load_non_intra_quantiser_matrix;
+    /** \brief Same as the MPEG-2 bitstream syntax element. */
     int load_chroma_intra_quantiser_matrix;
+    /** \brief Same as the MPEG-2 bitstream syntax element. */
     int load_chroma_non_intra_quantiser_matrix;
+    /** \brief Luminance intra matrix, in zig-zag scan order. */
     unsigned char intra_quantiser_matrix[64];
+    /** \brief Luminance non-intra matrix, in zig-zag scan order. */
     unsigned char non_intra_quantiser_matrix[64];
+    /** \brief Chroma intra matrix, in zig-zag scan order. */
     unsigned char chroma_intra_quantiser_matrix[64];
+    /** \brief Chroma non-intra matrix, in zig-zag scan order. */
     unsigned char chroma_non_intra_quantiser_matrix[64];
 } VAIQMatrixBufferMPEG2;
 
@@ -1321,9 +1329,13 @@ typedef struct _VAPictureParameterBufferMPEG4
 /** MPEG-4 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferMPEG4
 {
+    /** Same as the MPEG-4:2 bitstream syntax element. */
     int load_intra_quant_mat;
+    /** Same as the MPEG-4:2 bitstream syntax element. */
     int load_non_intra_quant_mat;
+    /** The matrix for intra blocks, in zig-zag scan order. */
     unsigned char intra_quant_mat[64];
+    /** The matrix for non-intra blocks, in zig-zag scan order. */
     unsigned char non_intra_quant_mat[64];
 } VAIQMatrixBufferMPEG4;
 
@@ -1620,7 +1632,9 @@ typedef struct _VAPictureParameterBufferH264
 /** H.264 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferH264
 {
+    /** \brief 4x4 scaling list, in raster scan order. */
     unsigned char ScalingList4x4[6][16];
+    /** \brief 8x8 scaling list, in raster scan order. */
     unsigned char ScalingList8x8[2][64];
 } VAIQMatrixBufferH264;
 
