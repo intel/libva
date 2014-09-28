@@ -733,6 +733,9 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV444	0x00000004
 #define VA_RT_FORMAT_YUV411	0x00000008
 #define VA_RT_FORMAT_YUV400	0x00000010
+/** YUV formats with more than 8 bpp */
+#define VA_RT_FORMAT_YUV420_10BPP	0x00000100
+/** RGB formats */
 #define VA_RT_FORMAT_RGB16	0x00010000
 #define VA_RT_FORMAT_RGB32	0x00020000
 /* RGBP covers RGBP and BGRP fourcc */ 
@@ -3063,6 +3066,11 @@ VAStatus vaQuerySurfaceError(
  * 8-bit Y plane, followed by 8-bit 2x1 subsampled V and U planes
  */
 #define VA_FOURCC_YV16          0x36315659
+/**
+ * 10-bit and 16-bit Planar YUV 4:2:0. 
+ */
+#define VA_FOURCC_P010          0x30313050
+#define VA_FOURCC_P016          0x36313050
 
 /* byte order */
 #define VA_LSB_FIRST		1
