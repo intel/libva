@@ -736,6 +736,12 @@ typedef struct _VAProcFilterParameterBuffer {
  * if this is not set then assumes the frame contains two interleaved fields.
  */
 #define VA_DEINTERLACING_ONE_FIELD		0x0004
+/** 
+ * \brief Film Mode Detection is enabled. If enabled, driver performs inverse
+ * of various pulldowns, such as 3:2 pulldown.
+ * if this is not set then assumes FMD is disabled.
+ */
+#define VA_DEINTERLACING_FMD_ENABLE		0x0008
 /**@}*/
 
 /** \brief Deinterlacing filter parametrization. */
