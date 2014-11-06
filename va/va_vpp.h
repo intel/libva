@@ -255,6 +255,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterTotalColorCorrection,
     /** \brief Non-Linear Anamorphic Scaling. */
     VAProcFilterNonLinearAnamorphicScaling,
+    /** \brief Image Stabilization. */
+    VAProcFilterImageStabilization,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -342,6 +344,19 @@ typedef enum _VAProcTotalColorCorrectionType {
     /** \brief Number of color correction attributes. */
     VAProcTotalColorCorrectionCount
 } VAProcTotalColorCorrectionType;
+
+/** \brief ImageStabilization Types. */
+typedef enum _VAProcImageStabilizationType {
+    VAProcImageStabilizationTypeNone = 0,
+    /** \brief Mode Crop - crops the frame by the app provided percentage. */
+    VAProcImageStabilizationTypeCrop,
+    /** \brief Mode Crop Min Zoom - crops and then upscales the frame to half the black boundary. */
+    VAProcImageStabilizationTypeMinZoom,
+    /** \brief Mode Crop Full Zoom - crops and upscales the frame to original size. */
+    VAProcImageStabilizationTypeFullZoom,
+    /** \brief Number of Image Stabilization Type. */
+    VAProcImageStabilizationTypeCount
+} VAProcImageStabilizationType;
 
 /** @name Video blending flags */
 /**@{*/
@@ -821,6 +836,26 @@ typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
     float                             value;
 } VAProcFilterParameterBufferTotalColorCorrection;
 
+/** @name ImageStabilization Perf Types. */
+/**@{*/
+/** \brief Fast Mode. */
+#define VA_IMAGE_STABILIZATION_PERF_TYPE_FAST       0x0001
+ /** \brief Quality Mode. */
+#define VA_IMAGE_STABILIZATION_PERF_TYPE_QUALITY    0x0002
+/**@}*/
+
+/** \brief Image Stabilization filter parametrization. */
+typedef struct _VAProcFilterParameterBufferImageStabilization {
+    /** \brief Filter type. Shall be set to #VAProcFilterImageStabilization. */
+    VAProcFilterType                  type;
+    /** \brief Image Stabilization Mode. */
+    VAProcImageStabilizationType      mode;
+    /** \brief Image Stabilization Crop percentage. */
+    float                             crop;
+    /** \brief Image Stabilization Perf type. */
+    unsigned int                      perf_type;
+} VAProcFilterParameterBufferImageStabilization;
+
 /** \brief Non-Linear Anamorphic Scaling filter parametrization. */
 typedef struct _VAProcFilterParameterBufferNonLinearAnamorphicScaling {
     /** \brief filter type. Shall be set to #VAProcFilterNonLinearAnamorphicScaling. */
@@ -865,6 +900,18 @@ typedef struct _VAProcFilterCapTotalColorCorrection {
     /** \brief Range of supported values for the specified color. */
     VAProcFilterValueRange            range;
 } VAProcFilterCapTotalColorCorrection;
+
+/** \brief Capabilities specification for the Image Stabilization filter. */
+typedef struct _VAProcFilterCapImageStabilization {
+    /** \brief IS modes supported. */
+    VAProcImageStabilizationType       type[VAProcImageStabilizationTypeCount];
+    /** \brief Range of supported values for crop ratio. */
+    VAProcFilterValueRange             crop_range;
+    /** \brief Maximum number of forward reference frames supported. */
+    unsigned int                       max_forward_reference;
+    /** \brief Maximum number of IS perf modes supported. */
+    unsigned int                       perf_type;
+} VAProcFilterCapImageStabilization;
 
 /** \brief Capabilities specification for the Non-Linear Anamorphic Scaling filter. */
 typedef struct _VAProcFilterCapNonLinearAnamorphicScaling {
