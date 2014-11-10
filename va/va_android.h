@@ -48,7 +48,8 @@ VADisplay vaGetDisplay (
 
 #ifdef __cplusplus
 #ifdef ANDROID
-#include <gui/Surface.h>
+#include <system/window.h>
+#include <utils/StrongPointer.h>
 using namespace android;
 
 /*
