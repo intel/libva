@@ -20,7 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-bin_PROGRAMS = avcenc mpeg2vaenc h264encode
+bin_PROGRAMS = avcenc mpeg2vaenc h264encode jpegenc
 
 INCLUDES = \
        -Wall                           \
@@ -49,6 +49,13 @@ mpeg2vaenc_LDADD	= \
 	$(top_builddir)/test/common/libva-display.la \
 	-lpthread
 
+jpegenc_SOURCES		= jpegenc.c
+jpegenc_CFLAGS		= -I$(top_srcdir)/test/common -g
+jpegenc_LDADD		= \
+	$(top_builddir)/va/libva.la \
+	$(top_builddir)/test/common/libva-display.la \
+	-lpthread	
+	
 valgrind:	$(bin_PROGRAMS)
 	for a in $(bin_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
