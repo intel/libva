@@ -94,42 +94,6 @@ typedef struct _VAIQMatrixBufferJPEGBaseline {
 } VAIQMatrixBufferJPEGBaseline;
 
 /**
- * \brief Huffman table for JPEG decoding.
- *
- * This structure holds the complete Huffman tables. This is an
- * aggregation of all Huffman table (DHT) segments maintained by the
- * application. i.e. up to 2 Huffman tables are stored in there for
- * baseline profile.
- *
- * The #load_huffman_table array can be used as a hint to notify the
- * VA driver implementation about which table(s) actually changed
- * since the last submission of this buffer.
- */
-typedef struct _VAHuffmanTableBufferJPEGBaseline {
-    /** \brief Specifies which #huffman_table is valid. */
-    unsigned char       load_huffman_table[2];
-    /** \brief Huffman tables indexed by table identifier (Th). */
-    struct {
-        /** @name DC table (up to 12 categories) */
-        /**@{*/
-        /** \brief Number of Huffman codes of length i + 1 (Li). */
-        unsigned char   num_dc_codes[16];
-        /** \brief Value associated with each Huffman code (Vij). */
-        unsigned char   dc_values[12];
-        /**@}*/
-        /** @name AC table (2 special codes + up to 16 * 10 codes) */
-        /**@{*/
-        /** \brief Number of Huffman codes of length i + 1 (Li). */
-        unsigned char   num_ac_codes[16];
-        /** \brief Value associated with each Huffman code (Vij). */
-        unsigned char   ac_values[162];
-        /** \brief Padding to 4-byte boundaries. Must be set to zero. */
-        unsigned char   pad[2];
-        /**@}*/
-    }                   huffman_table[2];
-} VAHuffmanTableBufferJPEGBaseline;
-
-/**
  * \brief Slice parameter for JPEG decoding.
  *
  * This structure holds information from the scan header, along with
