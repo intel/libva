@@ -149,8 +149,6 @@ typedef struct _VAQMatrixBufferJPEG
 
 /**@}*/
 
-#include <va/va_dec_jpeg.h>
-
 #ifdef __cplusplus
 }
 #endif
