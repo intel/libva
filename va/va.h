@@ -2024,8 +2024,6 @@ typedef struct _VAHuffmanTableBufferJPEGBaseline {
     }                   huffman_table[2];
 } VAHuffmanTableBufferJPEGBaseline;
 
-#include <va/va_dec_jpeg.h>
-
 /****************************
  * MPEG-2 data structures
  ****************************/
@@ -3670,6 +3668,16 @@ typedef struct _VAPictureHEVC
  * NumPocLtCurr.
  */
 #define VA_PICTURE_HEVC_RPS_LT_CURR             0x00000040
+
+#include <va/va_dec_hevc.h>
+#include <va/va_dec_jpeg.h>
+#include <va/va_dec_vp8.h>
+#include <va/va_dec_vp9.h>
+#include <va/va_enc_h264.h>
+#include <va/va_enc_jpeg.h>
+#include <va/va_enc_mpeg2.h>
+#include <va/va_enc_vp8.h>
+#include <va/va_vpp.h>
 
 /**@}*/
 
