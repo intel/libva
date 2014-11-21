@@ -254,6 +254,7 @@ static void destory_encode_pipe()
 
 static  VASurfaceID surface_ids[SID_NUMBER];
 static  VASurfaceID ref_surface[SURFACE_NUM];
+static  int use_slot[SURFACE_NUM];
 
 static  unsigned long long current_frame_display = 0;
 static  unsigned long long current_IDR_display = 0;
@@ -271,6 +272,23 @@ static unsigned int current_poc;
 static  unsigned int num_ref_frames = 2;
 static  unsigned int numShortTerm = 0;
 /***************************************************/
+
+static int get_free_slot()
+{
+    int i, index = -1;
+
+    for (i = 0; i < SURFACE_NUM; i++) {
+        if (use_slot[i] == 0) {
+            index = i;
+            break;
+        }
+    }
+    if (index < 0) {
+        printf("WARNING: No free slot to store the reconstructed frame \n");
+        index = SURFACE_NUM - 1;
+    }
+    return index;
+}
 
 static void *
 upload_thread_function(void *data)
@@ -488,11 +506,13 @@ static void avcenc_update_picture_parameter(int slice_type, int is_idr)
 {
     VAEncPictureParameterBufferH264 *pic_param;
     VAStatus va_status;
+    int recon_index;
 
+    recon_index = get_free_slot();
     // Picture level
     pic_param = &avcenc_context.pic_param;
 
-    pic_param->CurrPic.picture_id = ref_surface[current_slot];
+    pic_param->CurrPic.picture_id = ref_surface[recon_index];
     pic_param->CurrPic.frame_idx = current_frame_num;
     pic_param->CurrPic.flags = 0;
 
@@ -674,7 +694,6 @@ static void avcenc_update_slice_parameter(int slice_type)
 static int update_ReferenceFrames(void)
 {
     int i;
-
     /* B-frame is not used for reference */
     if (current_frame_type == SLICE_TYPE_B)
         return 0;
@@ -691,6 +710,26 @@ static int update_ReferenceFrames(void)
         current_frame_num++;
     if (current_frame_num > MaxFrameNum)
         current_frame_num = 0;
+
+    /* Update the use_slot. Only when the surface is used in reference
+     * frame list, the use_slot[index] is set
+     */
+    for (i = 0; i < SURFACE_NUM; i++) {
+        int j;
+        bool found;
+
+        found = false;
+        for (j = 0; j < numShortTerm; j++) {
+            if (ref_surface[i] == ReferenceFrames[j].picture_id) {
+                found = true;
+                break;
+            }
+        }
+        if (found)
+            use_slot[i] = 1;
+        else
+            use_slot[i] = 0;
+    }
 
     return 0;
 }
@@ -1790,6 +1829,7 @@ static void avcenc_context_init(int width, int height)
     memset(&avcenc_context, 0, sizeof(avcenc_context));
     avcenc_context.profile = VAProfileH264Main;
 
+    memset(&use_slot, 0, sizeof(use_slot));
     switch (avcenc_context.profile) {
     case VAProfileH264Baseline:
         avcenc_context.constraint_set_flag |= (1 << 0); /* Annex A.2.1 */
@@ -1945,6 +1985,7 @@ int main(int argc, char *argv[])
         if (current_frame_type == FRAME_IDR) {
             numShortTerm = 0;
             current_frame_num = 0;
+            memset(&use_slot, 0, sizeof(use_slot));
             current_IDR_display = current_frame_display;
             if (avcenc_context.rate_control_method == VA_RC_CBR) {
                 unsigned long long frame_interval;
