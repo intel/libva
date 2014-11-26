@@ -86,11 +86,12 @@ free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int i = 0;
 
-    while (i++ < DRAWABLE_HASH_SZ) {
+    while (i < DRAWABLE_HASH_SZ) {
 	if (dri_drawable == dri_state->drawable_hash[i]) {
 	    dri_state->destroyDrawable(ctx, dri_drawable);
 	    dri_state->drawable_hash[i] = NULL;
 	}
+	i++;
     }
 }
 
