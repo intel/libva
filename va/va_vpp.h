@@ -809,21 +809,36 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
     float                       value;
 } VAProcFilterParameterBufferColorBalance;
 
+/** @name FRC Custom Rate types. */
+/**@{*/
+/** \brief 24p to 60p. */
+#define VA_FRAME_RATE_CONVERSION_24p_60p    0x0001
+/** \brief 30p to 60p. */
+#define VA_FRAME_RATE_CONVERSION_30p_60p    0x0002
+/**@}*/
+
 /** \brief Frame rate conversion filter parametrization. */
 typedef struct _VAProcFilterParamterBufferFrameRateConversion {
     /** \brief filter type. Shall be set to #VAProcFilterFrameRateConversion. */
-    VAProcFilterType            type;
+    VAProcFilterType                    type;
     /** \brief FPS of input sequence. */
-    unsigned int                input_fps;
+    unsigned int                        input_fps;
     /** \brief FPS of output sequence. */
-    unsigned int                output_fps;
-    /** \brief Number of output frames in addition to the first output frame. */
-    unsigned int num_output_frames;
+    unsigned int                        output_fps;
+    /** \brief Number of output frames in addition to the first output frame.
+        \brief If num_output_frames returned from pipeline query is 0,
+        \brief vaRenderPicture() will only produce one output frame with each call*/ 
+    unsigned int                        num_output_frames;
     /** 
      * \brief Array to store output frames in addition to the first one. 
-     * The first output frame is stored in the render target from vaBeginPicture(). 
-     */
-    VASurfaceID* output_frames;
+     * \brief The first output frame is stored in the render target from vaBeginPicture(). */
+    VASurfaceID*                        output_frames;   
+    /** \brief Boolean if frame repeat or not. */
+    bool                                repeat_frame;  
+    /** \brief Counter within one complete FRC Cycle.
+        \brief The counter would run from 0 to 4 for 24to60p in each cycle.
+        \brief The counter would run from 0 to 1 for 30to60p in each cycle. */
+    unsigned int                        cyclic_counter;
 } VAProcFilterParameterBufferFrameRateConversion;
 
 /** \brief Total color correction filter parametrization. */
@@ -922,6 +937,26 @@ typedef struct _VAProcFilterCapNonLinearAnamorphicScaling {
     /** \brief Range of supported values for the non-linear crop. */
     VAProcFilterValueRange      nonlinear_crop_range;
 } VAProcFilterCapNonLinearAnamorphicScaling;
+
+/** \brief Capabilities specification for the Frame Rate Conversion filter. */
+typedef struct _VAProcFilterCapFrameRateConversion { 
+    /** \brief Bool Should be set if only supported rates are requested.
+        \brief Set to false to get the rest of the caps for the particular custom rate */
+    bool                                bget_custom_rates;
+    /** \brief FRC custom rates supported by the pipeline in the first query
+        \brief App request caps for a custom rate in the second query */
+    unsigned int                        frc_custom_rates;
+    /** \brief FPS of input sequence. */
+    unsigned int                        input_fps;
+    /** \brief FPS of output sequence. */
+    unsigned int                        output_fps;
+    /** \brief Number of input frames. */   
+    unsigned int                        input_frames;
+    /** \brief Number of output frames. */
+    unsigned int                        output_frames;
+   /** \brief Boolean if interlaced input supoorted. */
+    bool                                input_interlaced;
+} VAProcFilterCapFrameRateConversion;
 
 /**
  * \brief Queries video processing filters.
