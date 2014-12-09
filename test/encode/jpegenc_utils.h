@@ -330,11 +330,11 @@ uint8_t jpeg_hufftable_chroma_ac[] = {
 };
 
 typedef struct _YUVComponentSpecs {
-    //One of 0(NV12)/1(UYVY)/2(YUY2)/3(Y8)/4(RGB)>
+    //One of 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)>
     unsigned int yuv_type;
-    // One of VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422, VA_RT_FORMAT_YUV400, VA_RT_FORMAT_YUV444
+    // One of VA_RT_FORMAT_YUV420, VA_RT_FORMAT_YUV422, VA_RT_FORMAT_YUV400, VA_RT_FORMAT_YUV444, VA_RT_FORMAT_RGB32
     unsigned int va_surface_format;
-    //One of VA_FOURCC_I420, VA_FOURCC_NV12, VA_FOURCC_UYVY, VA_FOURCC_YUY2, VA_FOURCC_Y800, VA_FOURCC_444P
+    //One of VA_FOURCC_I420, VA_FOURCC_NV12, VA_FOURCC_UYVY, VA_FOURCC_YUY2, VA_FOURCC_Y800, VA_FOURCC_444P, VA_FOURCC_RGBA
     unsigned int fourcc_val; //Using this field to evaluate the input file type.
     //no.of. components
     unsigned int num_components;
