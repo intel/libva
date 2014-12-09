@@ -25,8 +25,8 @@
  * Simple JPEG encoder based on libVA.
  *
  * Usage:
- * ./jpegenc <width> <height> <input file> <output file> <input filetype 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGB)> q <quality>
- * Currently supporting only I420 and NV12 input file formats.
+ * ./jpegenc <width> <height> <input file> <output file> <input filetype 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)> q <quality>
+ * Currently supporting only I420/NV12/UYVY/YUY2/Y8 input file formats.
  */  
 
 #include "sysdeps.h"
@@ -63,9 +63,9 @@
 
 void show_help()
 {
-    printf("Usage: ./jpegenc <width> <height> <input file> <output file> <fourcc value 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGB)> q <quality>\n");
-    printf("Currently supporting only I420 and NV12 input file formats.\n"); 
-    printf("Example: ./jpegenc 1024 768 input_file.yuv output.jpeg 0 50\n\n"); 
+    printf("Usage: ./jpegenc <width> <height> <input file> <output file> <fourcc value 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)> q <quality>\n");
+    printf("Currently supporting only I420/NV12/UYVY/YUY2/Y8 input file formats.\n");
+    printf("Example: ./jpegenc 1024 768 input_file.yuv output.jpeg 0 50\n\n");
     return;
 }
 
@@ -94,8 +94,7 @@ void jpegenc_pic_param_init(VAEncPictureParameterBufferJPEG *pic_param,int width
     } else {
         pic_param->component_id[0] = pic_param->quantiser_table_selector[0] = 0;
         pic_param->component_id[1] = pic_param->quantiser_table_selector[1] = 1;
-        pic_param->component_id[2] = 2;
-        pic_param->quantiser_table_selector[2] = 1;
+        pic_param->component_id[2] = 2; pic_param->quantiser_table_selector[2] = 1;
     }
     
     pic_param->quality = quality;
@@ -228,8 +227,8 @@ void populate_frame_header(JPEGFrameHeader *frameHdr, YUVComponentSpecs yuvComp,
         } else {
             //Analyzing the sampling factors for U/V, they are 1 for all formats except for Y8. 
             //So, it is okay to have the code below like this. For Y8, we wont reach this code.
-            frameHdr->JPEGComponent[i].Hi = 1;  
-            frameHdr->JPEGComponent[i].Vi = 1;
+            frameHdr->JPEGComponent[i].Hi = yuvComp.u_h_subsample;
+            frameHdr->JPEGComponent[i].Vi = yuvComp.u_v_subsample;
             frameHdr->JPEGComponent[i].Tqi = 1;
         }
     }
@@ -416,6 +415,8 @@ int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentS
             bitstream_put_ui(&bs, acHuffSectionHdr.Vij[j], 8);
         }
 
+        if((yuvComp.fourcc_val == VA_FOURCC_Y800) )
+            break;
     }
     
     //Add Restart Interval if restart_interval is not 0
@@ -464,12 +465,15 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
     void *surface_p = NULL;
     unsigned char newImageBuffer[frame_size];
     unsigned char *y_src, *u_src, *v_src;
-    unsigned char *y_dst, *u_dst, *v_dst;
+    unsigned char *y_dst, *u_dst;
     int y_size = picture_width * picture_height;
-    int u_size = (picture_width >> 1) * (picture_height >> 1);
+    int u_size = 0;
     int row, col;
     size_t n_items;
-    
+
+    //u_size is used for I420, NV12 formats only
+    u_size = ((picture_width >> 1) * (picture_height >> 1));
+
     memset(newImageBuffer,0,frame_size);
     do {
         n_items = fread(newImageBuffer, frame_size, 1, yuv_fp);
@@ -487,89 +491,60 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
 
     y_dst = surface_p + surface_image.offsets[0];
     u_dst = surface_p + surface_image.offsets[1]; /* UV offset for NV12 */
-    v_dst = surface_p + surface_image.offsets[2];
 
-    /* Y plane */
-    for (row = 0; row < surface_image.height; row++) {
-        memcpy(y_dst, y_src, surface_image.width);
-        y_dst += surface_image.pitches[0];
-        y_src += picture_width;
-    }
+    if((yuvComp.fourcc_val == VA_FOURCC_NV12) || (yuvComp.fourcc_val == VA_FOURCC_I420) ||
+       (yuvComp.fourcc_val == VA_FOURCC_Y800) ) {
 
-    if(yuvComp.num_components > 1 ) {
+        /* Y plane */
+        for (row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width);
+            y_dst += surface_image.pitches[0];
+            y_src += picture_width;
+        }
         
-        switch(yuvComp.fourcc_val) {
-            
-            case VA_FOURCC_NV12: {
-                for (row = 0; row < surface_image.height/2; row++) {
-                    memcpy(u_dst, u_src, surface_image.width);
-                    u_dst += surface_image.pitches[1];
-                    u_src += (picture_width);
-                }
-                break;
-            }
+        if(yuvComp.num_components > 1) {
 
-            case VA_FOURCC_I420: {
-                for (row = 0; row < surface_image.height / 2; row++) {
-                    for (col = 0; col < surface_image.width / 2; col++) {
-                    u_dst[col * 2] = u_src[col];
-                    u_dst[col * 2 + 1] = v_src[col];
-                    }  
-
-                    u_dst += surface_image.pitches[1];
-                    u_src += (picture_width / 2);
-                    v_src += (picture_width / 2);
+            switch(yuvComp.fourcc_val) {
+                case VA_FOURCC_NV12: {
+                    for (row = 0; row < surface_image.height/2; row++) {
+                        memcpy(u_dst, u_src, surface_image.width);
+                        u_dst += surface_image.pitches[1];
+                        u_src += (picture_width);
+                    }
+                    break;
                 }
 
-                break;
-            }
-    
-            //TO DO: Code for below formats needs to be fixed.
-            //This will come as enhancement to the feature.        
-            case VA_FOURCC_UYVY:
-            case VA_FOURCC_YUY2: {
-                const int U = 1;
-                const int V = 2;
+                case VA_FOURCC_I420: {
+                    for (row = 0; row < surface_image.height / 2; row++) {
+                        for (col = 0; col < surface_image.width / 2; col++) {
+                             u_dst[col * 2] = u_src[col];
+                             u_dst[col * 2 + 1] = v_src[col];
+                         }
 
-                u_dst = surface_p + surface_image.offsets[U];
-                v_dst = surface_p + surface_image.offsets[V];
-
-                for (row = 0; row < surface_image.height / 2; row++) {
-                    memcpy(u_dst, u_src, surface_image.width / 2);
-                    memcpy(v_dst, v_src, surface_image.width / 2);
-                    u_dst += surface_image.pitches[U];
-                    v_dst += surface_image.pitches[V];
-                    u_src += (picture_width / 2);
-                    v_src += (picture_width / 2);
+                         u_dst += surface_image.pitches[1];
+                         u_src += (picture_width / 2);
+                         v_src += (picture_width / 2);
+                    }
+                    break;
                 }
+            }//end of switch
+       }//end of if check
+    } else if((yuvComp.fourcc_val == VA_FOURCC_UYVY) || (yuvComp.fourcc_val == VA_FOURCC_YUY2)) {
+
+        for(row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width*2);
+            y_dst += surface_image.pitches[0];
+            y_src += picture_width*2;
+        }
              
-                break;
-            }
-            
-            case VA_FOURCC_444P: {
-                const int U = 1;
-                const int V = 2;
+    } else if(yuvComp.fourcc_val == VA_FOURCC_RGBA) {
 
-                u_dst = surface_p + surface_image.offsets[U];
-                v_dst = surface_p + surface_image.offsets[V];
-
-                for (row = 0; row < surface_image.height; row++) {
-                    memcpy(u_dst, u_src, surface_image.width);
-                    memcpy(v_dst, v_src, surface_image.width);
-                    u_dst += surface_image.pitches[U];
-                    v_dst += surface_image.pitches[V];
-                    u_src += (picture_width);
-                    v_src += (picture_width);
-                }
-                break;
-            }
-            
-            default: {
-                //processing like Y8   
-                break;
-            }
-        } //end of switch
-    } //end of if
+        for (row = 0; row < surface_image.height; row++) {
+            memcpy(y_dst, y_src, surface_image.width*4);
+            y_dst += surface_image.pitches[0];
+            y_src += picture_width*4;
+        }
+    }
     
     vaUnmapBuffer(va_dpy, surface_image.buf);
     vaDestroyImage(va_dpy, surface_image.image_id);
@@ -581,7 +556,7 @@ void upload_yuv_to_surface(VADisplay va_dpy, FILE *yuv_fp, VASurfaceID surface_i
 void init_yuv_component(YUVComponentSpecs *yuvComponent, int yuv_type, int *surface_type, VASurfaceAttrib *fourcc)
 {
     
-    //<fourcc value 0(NV12)/1(UYVY)/2(YUY2)/3(Y8)/4(RGB)>     
+    //<fourcc value 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)>
     switch(yuv_type)
     {
         case 0 :   //I420
@@ -634,7 +609,7 @@ void init_yuv_component(YUVComponentSpecs *yuvComponent, int yuv_type, int *surf
             yuvComponent->fourcc_val = fourcc->value.value.i = VA_FOURCC_Y800;
             yuvComponent->num_components = 1;
             yuvComponent->y_h_subsample = 1;
-            yuvComponent->y_v_subsample = 0;
+            yuvComponent->y_v_subsample = 1;
             yuvComponent->u_h_subsample = 0;
             yuvComponent->u_v_subsample = 0;
             yuvComponent->v_h_subsample = 0;
@@ -642,9 +617,9 @@ void init_yuv_component(YUVComponentSpecs *yuvComponent, int yuv_type, int *surf
             break;
         }
         
-        case 5: { //RGB or YUV444
-            yuvComponent->va_surface_format = (*surface_type) = VA_RT_FORMAT_YUV444;
-            yuvComponent->fourcc_val = fourcc->value.value.i = VA_FOURCC_444P;
+        case 5: { //RGBA
+            yuvComponent->va_surface_format = (*surface_type) = VA_RT_FORMAT_RGB32;
+            yuvComponent->fourcc_val = fourcc->value.value.i = VA_FOURCC_RGBA;
             yuvComponent->num_components = 3;
             yuvComponent->y_h_subsample = 1;
             yuvComponent->y_v_subsample = 1;
@@ -723,7 +698,7 @@ int encode_input_image(FILE *yuv_fp, FILE *jpeg_fp, int picture_width, int pictu
     vaGetConfigAttributes(va_dpy, VAProfileJPEGBaseline, VAEntrypointEncPicture, &attrib[0], 2);
 
     // RT should be one of below.
-    if(!((attrib[0].value & VA_RT_FORMAT_YUV420) || (attrib[0].value & VA_RT_FORMAT_YUV422) 
+    if(!((attrib[0].value & VA_RT_FORMAT_YUV420) || (attrib[0].value & VA_RT_FORMAT_YUV422) || (attrib[0].value & VA_RT_FORMAT_RGB32)
         ||(attrib[0].value & VA_RT_FORMAT_YUV444) || (attrib[0].value & VA_RT_FORMAT_YUV400))) 
     {
         /* Did not find the supported RT format */
@@ -935,7 +910,7 @@ int main(int argc, char *argv[])
     fseeko(yuv_fp, (off_t)0, SEEK_END);
     file_size = ftello(yuv_fp);
     
-    //<input file type: 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGB)>     
+    //<input file type: 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)>
     switch(yuv_type)
     {
         case 0 :   //I420 
@@ -955,8 +930,8 @@ int main(int argc, char *argv[])
             break;
         }
         
-        case 5: { //RGB or YUV444
-            frame_size = 3 * (picture_width * picture_height) ;
+        case 5: { //RGBA
+            frame_size = 4 * (picture_width * picture_height) ;
             break;
         }
         
@@ -970,7 +945,7 @@ int main(int argc, char *argv[])
     
     if ( (file_size < frame_size) || (file_size % frame_size) ) {
         fclose(yuv_fp);
-        printf("The YUV file's size is not correct\n");
+        printf("The YUV file's size is not correct: file_size=%zd, frame_size=%d\n", file_size, frame_size);
         return -1;
     }
     
