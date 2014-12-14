@@ -1,7 +1,15 @@
-libva NEWS -- summary of user visible changes.  2014-10-xx
+libva NEWS -- summary of user visible changes.  2014-12-xx
 Copyright (C) 2009-2014 Intel Corporation
 
-Version 1.4.1 - xx.Oct.2014
+Version 1.5.0 - xx.Dec.2014
+* API: add support for HEVC decoding
+* API: extend JPEG encoding data structures and add configuration attribute for JPEG encoding
+* Add a unit test for JPEG encoding (Sirisha Muppavarapu)
+* Add support for HEVC decoding and JPEG encoding in VA trace utility
+* Fix out of tree builds (Emil Velikov)
+* VA/X11: fix BadDrawable issue when calling vaTerminate() after the pixmaps have been destroyed (Lionel Landwerlin)
+
+Version 1.4.1 - 24.Oct.2014
 * Add support for DRM Render-Nodes (Andrey Larionov)
 
 Version 1.4.0 - 30.Sep.2014
