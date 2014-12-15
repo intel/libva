@@ -511,9 +511,17 @@ skintone_filter_init(VABufferID *filter_param_buf_id)
      VAStatus va_status = VA_STATUS_SUCCESS;
      VAProcFilterParameterBuffer stde_param;
      VABufferID stde_param_buf_id;
+     uint8_t stde_factor = 0;
+
+     if (read_value_uint8(g_config_file_fd, "STDE_FACTOR", &stde_factor)) {
+        printf("Read STDE Factor failed, use default value");
+        stde_factor = 0;
+    }
+
+    printf("Applying STDE factor: %d\n", stde_factor);
 
      stde_param.type  = VAProcFilterSkinToneEnhancement;
-     stde_param.value = 0;
+     stde_param.value = stde_factor;
 
      va_status = vaCreateBuffer(va_dpy, context_id,
                                 VAProcFilterParameterBufferType, sizeof(stde_param), 1,
