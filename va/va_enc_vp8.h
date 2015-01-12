@@ -148,7 +148,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
             unsigned int loop_filter_type               : 2;
             /* 0: disabled, 1: normal, 2: simple */
             unsigned int auto_partitions                : 1;
-            /* number of token partitions */
+            /* same as log2_nbr_of_dct_partitions in frame header syntax */
             unsigned int num_token_partitions           : 2;
 
             /** 
