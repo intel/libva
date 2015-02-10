@@ -335,8 +335,10 @@ typedef enum
     VAProfileH264StereoHigh             = 16,
     VAProfileHEVCMain                   = 17,
     VAProfileHEVCMain10                 = 18,
-    VAProfileVP9Version0                = 19,
-    VAProfileVP9Version0Still           = 20
+    VAProfileVP9Profile0                = 19,
+    VAProfileVP9Profile1                = 20,
+    VAProfileVP9Profile2                = 21,
+    VAProfileVP9Profile3                = 22
 } VAProfile;
 
 /**
