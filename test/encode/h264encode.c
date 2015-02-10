@@ -1707,8 +1707,8 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     
     mmap_start = frame_start & (~0xfff);
     mmap_size = (frame_size + (frame_start & 0xfff) + 0xfff) & (~0xfff);
-    mmap_ptr = mmap(0, mmap_size, PROT_READ, MAP_SHARED,
-                    fileno(srcyuv_fp), mmap_start);
+    mmap_ptr = mmap64(0, mmap_size, PROT_READ, MAP_SHARED,
+                      fileno(srcyuv_fp), (off64_t)mmap_start);
     if (mmap_ptr == MAP_FAILED) {
         printf("Failed to mmap YUV file (%s)\n", strerror(errno));
         return 1;
@@ -2105,8 +2105,8 @@ static int calc_PSNR(double *psnr)
             if (recyuv_ptr)
                 munmap(recyuv_ptr, fourM);
             
-            srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
-            recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
+            srcyuv_ptr = mmap64(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), (off64_t)i);
+            recyuv_ptr = mmap64(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), (off64_t)i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
                 printf("Failed to mmap YUV files\n");
                 return 1;
