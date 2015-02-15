@@ -396,7 +396,7 @@ struct VADriverVTable
         /* DEPRECATED */
         VAStatus
         (*vaGetSurfaceAttributes)(
-            VADriverContextP    dpy,
+            VADriverContextP    ctx,
             VAConfigID          config,
             VASurfaceAttrib    *attrib_list,
             unsigned int        num_attribs
