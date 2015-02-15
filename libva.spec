@@ -87,8 +87,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/mpeg2vldemo
 %{_bindir}/putsurface
 
-%{_libdir}/dri/dummy_drv_video.so
-
 %files devel
 %defattr(-,root,root,-)
 %dir %{_includedir}/va

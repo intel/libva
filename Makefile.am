@@ -22,7 +22,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = va dummy_drv_video pkgconfig test debian.upstream doc
+SUBDIRS = va pkgconfig test debian.upstream doc
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \

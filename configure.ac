@@ -144,13 +144,6 @@ AC_ARG_ENABLE([wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
     [], [enable_wayland="yes"])
 
-AC_ARG_ENABLE(dummy-driver,
-    [AC_HELP_STRING([--enable-dummy-driver],
-                    [build dummy video driver @<:@default=yes@:>@])],
-    [], [enable_dummy_driver="yes"])
-AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
-
-
 AC_ARG_WITH(drivers-path,
     [AC_HELP_STRING([--with-drivers-path=[[path]]],
                     [drivers path])],
@@ -298,7 +291,6 @@ AC_OUTPUT([
     Makefile
     debian.upstream/Makefile
     doc/Makefile
-    dummy_drv_video/Makefile
     pkgconfig/Makefile
     pkgconfig/libva-drm.pc
     pkgconfig/libva-egl.pc
@@ -339,6 +331,5 @@ echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
-echo Build dummy driver ............... : $enable_dummy_driver
 echo Build documentation .............. : $enable_docs
 echo
