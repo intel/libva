@@ -108,11 +108,11 @@ static  unsigned long long srcyuv_frames = 0;
 static  int srcyuv_fourcc = VA_FOURCC_NV12;
 static  int calc_psnr = 0;
 
-static  int frame_width = 176;
-static  int frame_height = 144;
-static  int frame_width_mbaligned;
-static  int frame_height_mbaligned;
-static  int frame_rate = 30;
+static  unsigned int frame_width = 176;
+static  unsigned int frame_height = 144;
+static  unsigned int frame_width_mbaligned;
+static  unsigned int frame_height_mbaligned;
+static  unsigned int frame_rate = 30;
 static  unsigned int frame_count = 60;
 static  unsigned int frame_coded = 0;
 static  unsigned int frame_bitrate = 0;
@@ -1116,7 +1116,7 @@ static int setup_encode()
 {
     VAStatus va_status;
     VASurfaceID *tmp_surfaceid;
-    int codedbuf_size, i;
+    unsigned int codedbuf_size, i;
     
     va_status = vaCreateConfig(va_dpy, h264_profile, VAEntrypointEncSlice,
             &config_attrib[0], config_attrib_num, &config_id);
