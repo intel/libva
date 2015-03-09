@@ -308,8 +308,6 @@ VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
 	p[i] = attachments[i];
 
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	UnlockDisplay(dpy);
-	SyncHandle();
 	return NULL;
     }
 
@@ -323,8 +321,6 @@ VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
     buffers = Xmalloc(rep.count * sizeof buffers[0]);
     if (buffers == NULL) {
 	_XEatData(dpy, rep.count * sizeof repBuffer);
-	UnlockDisplay(dpy);
-	SyncHandle();
 	return NULL;
     }
 
