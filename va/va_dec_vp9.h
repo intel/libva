@@ -181,10 +181,16 @@ typedef struct  _VADecPictureParameterBufferVP9
     uint8_t                 mb_segment_tree_probs[7];
     uint8_t                 segment_pred_probs[3];
 
-    /** \brief VP9 version number
-     *  value can be 0 or 1.
+    /** \brief VP9 Profile definition
+     *  value range [0..3].
      */
-    uint8_t                 version;
+    uint8_t                 profile;
+
+    /** \brief VP9 bit depth per sample
+     *  same for both luma and chroma samples.
+     */
+    uint8_t                 bit_depth;
+
     /**@}*/
 
 } VADecPictureParameterBufferVP9;
