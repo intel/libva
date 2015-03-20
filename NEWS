@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2015-03-xx
-Copyright (C) 2009-2014 Intel Corporation
+libva NEWS -- summary of user visible changes.  2015-03-20
+Copyright (C) 2009-2015 Intel Corporation
 
-Version 1.5.1 - DD.Mar.2015
+Version 1.5.1 - 20.Mar.2015
 * API: correct the comment for num_token_partitions in struct  _VAEncPictureParameterBufferVP8
 * VA/x11: fix double Unlocks/SyncHandle to avoid segmentation fault
 
