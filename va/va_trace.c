@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2009-2011 Intel Corporation. All Rights Reserved.
  *
@@ -1876,6 +1875,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tdelta_pic_order_cnt[1] = %d\n", p->delta_pic_order_cnt[1]);
     va_TraceMsg(trace_ctx, "\tdirect_spatial_mv_pred_flag = %d\n", p->direct_spatial_mv_pred_flag);
     va_TraceMsg(trace_ctx, "\tnum_ref_idx_active_override_flag = %d\n", p->num_ref_idx_active_override_flag);
+    va_TraceMsg(trace_ctx, "\tnum_ref_idx_l0_active_minus1 = %d\n", p->num_ref_idx_l0_active_minus1);
     va_TraceMsg(trace_ctx, "\tnum_ref_idx_l1_active_minus1 = %d\n", p->num_ref_idx_l1_active_minus1);
     va_TraceMsg(trace_ctx, "\tslice_beta_offset_div2 = %d\n", p->slice_beta_offset_div2);
 
@@ -1998,6 +1998,7 @@ static void va_TraceVAEncMiscParameterBuffer(
     unsigned int num_elements,
     void *data)
 {
+    int i;
     VAEncMiscParameterBuffer* tmp = (VAEncMiscParameterBuffer*)data;
     DPY2TRACECTX(dpy);
     
@@ -2007,6 +2008,9 @@ static void va_TraceVAEncMiscParameterBuffer(
         VAEncMiscParameterFrameRate *p = (VAEncMiscParameterFrameRate *)tmp->data;
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterFrameRate\n");
         va_TraceMsg(trace_ctx, "\tframerate = %d\n", p->framerate);
+        va_TraceMsg(trace_ctx, "\tframerate_flags.temporal_id = %d", p->framerate_flags.bits.temporal_id);
+        va_TraceMsg(trace_ctx, "\tframerate_flags.reserved = %d", p->framerate_flags.bits.reserved);
+        va_TraceMsg(trace_ctx, "\tframerate_flags.value = %d", p->framerate_flags.value);
         
         break;
     }
@@ -2020,10 +2024,18 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\twindow_size = %d\n", p->window_size);
         va_TraceMsg(trace_ctx, "\tinitial_qp = %d\n", p->initial_qp);
         va_TraceMsg(trace_ctx, "\tmin_qp = %d\n", p->min_qp);
+        va_TraceMsg(trace_ctx, "\tmax_qp = %d\n", p->max_qp);
         va_TraceMsg(trace_ctx, "\tbasic_unit_size = %d\n", p->basic_unit_size);
         va_TraceMsg(trace_ctx, "\trc_flags.reset = %d \n", p->rc_flags.bits.reset);
         va_TraceMsg(trace_ctx, "\trc_flags.disable_frame_skip = %d\n", p->rc_flags.bits.disable_frame_skip);
         va_TraceMsg(trace_ctx, "\trc_flags.disable_bit_stuffing = %d\n", p->rc_flags.bits.disable_bit_stuffing);
+        va_TraceMsg(trace_ctx, "\trc_flags.mb_rate_control = %d\n", p->rc_flags.bits.mb_rate_control);
+        va_TraceMsg(trace_ctx, "\trc_flags.temporal_id = %d\n", p->rc_flags.bits.temporal_id);
+        va_TraceMsg(trace_ctx, "\trc_flags.cfs_I_frames = %d\n", p->rc_flags.bits.cfs_I_frames);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_parallel_brc = %d\n", p->rc_flags.bits.enable_parallel_brc);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_dynamic_scaling = %d\n", p->rc_flags.bits.enable_dynamic_scaling);
+        va_TraceMsg(trace_ctx, "\trc_flags.reserved = %d\n", p->rc_flags.bits.reserved);
+        va_TraceMsg(trace_ctx, "\tICQ_quality_factor = %d\n", p->ICQ_quality_factor);
         break;
     }
     case VAEncMiscParameterTypeMaxSliceSize:
@@ -2050,6 +2062,7 @@ static void va_TraceVAEncMiscParameterBuffer(
 
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterHRD\n");
         va_TraceMsg(trace_ctx, "\tinitial_buffer_fullness = %d\n", p->initial_buffer_fullness);
+        va_TraceMsg(trace_ctx, "\toptimal_buffer_fullness = %d\n", p->optimal_buffer_fullness);
         va_TraceMsg(trace_ctx, "\tbuffer_size = %d\n", p->buffer_size);
         break;
     }
@@ -2057,8 +2070,104 @@ static void va_TraceVAEncMiscParameterBuffer(
     {
         VAEncMiscParameterBufferMaxFrameSize *p = (VAEncMiscParameterBufferMaxFrameSize *)tmp->data;
 
-        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMaxFrameSize\n");
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferMaxFrameSize\n");
         va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
+        break;
+    }
+    case VAEncMiscParameterTypeQualityLevel:
+    {
+        VAEncMiscParameterBufferQualityLevel *p = (VAEncMiscParameterBufferQualityLevel *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferQualityLevel\n");
+        va_TraceMsg(trace_ctx, "\tquality_level = %d\n", p->quality_level);
+        break;
+    }
+    case VAEncMiscParameterTypeRIR:
+    {
+        VAEncMiscParameterRIR *p = (VAEncMiscParameterRIR *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterRIR\n");
+        va_TraceMsg(trace_ctx, "\trir_flags.enable_rir_column = %d\n", p->rir_flags.bits.enable_rir_column);
+        va_TraceMsg(trace_ctx, "\trir_flags.enable_rir_row = %d\n", p->rir_flags.bits.enable_rir_row);
+        va_TraceMsg(trace_ctx, "\trir_flags.reserved = %d\n", p->rir_flags.bits.reserved);
+        va_TraceMsg(trace_ctx, "\trir_flags.value = %d\n", p->rir_flags.value);
+        va_TraceMsg(trace_ctx, "\tintra_insertion_location = %d\n", p->intra_insertion_location);
+        va_TraceMsg(trace_ctx, "\tintra_insert_size = %d\n", p->intra_insert_size);
+        va_TraceMsg(trace_ctx, "\tqp_delta_for_inserted_intra = %d\n", p->qp_delta_for_inserted_intra);
+        break;
+    }
+    case VAEncMiscParameterTypeQuantization:
+    {
+        VAEncMiscParameterQuantization *p = (VAEncMiscParameterQuantization *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterQuantization\n");
+        va_TraceMsg(trace_ctx, "\tquantization_flags.disable_trellis = %d\n", p->quantization_flags.bits.disable_trellis);
+        va_TraceMsg(trace_ctx, "\tquantization_flags.enable_trellis_I = %d\n", p->quantization_flags.bits.enable_trellis_I);
+        va_TraceMsg(trace_ctx, "\tquantization_flags.enable_trellis_P = %d\n", p->quantization_flags.bits.enable_trellis_P);
+        va_TraceMsg(trace_ctx, "\tquantization_flags.enable_trellis_B = %d\n", p->quantization_flags.bits.enable_trellis_B);
+        va_TraceMsg(trace_ctx, "\tquantization_flags.reserved = %d\n", p->quantization_flags.bits.reserved);        
+        break;
+    }
+    case VAEncMiscParameterTypeSkipFrame:
+    {
+        VAEncMiscParameterSkipFrame *p = (VAEncMiscParameterSkipFrame *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterSkipFrame\n");
+        va_TraceMsg(trace_ctx, "\tskip_frame_flag = %d\n", p->skip_frame_flag);
+        va_TraceMsg(trace_ctx, "\tnum_skip_frames = %d\n", p->num_skip_frames);
+        va_TraceMsg(trace_ctx, "\tsize_skip_frames = %d\n", p->size_skip_frames);
+        break;
+    }
+    case VAEncMiscParameterTypeROI:
+    {
+        VAEncMiscParameterBufferROI *p = (VAEncMiscParameterBufferROI *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferROI\n");
+        va_TraceMsg(trace_ctx, "\tnum_roi = %d\n", p->num_roi);
+        va_TraceMsg(trace_ctx, "\tmax_delta_qp = %d\n", p->max_delta_qp);
+        va_TraceMsg(trace_ctx, "\tmin_delta_qp = %d\n", p->min_delta_qp);
+
+        for( i = 0; i < p->num_roi; i++)
+        {
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_value = %d\n", i, p->roi[i].roi_value);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.x position = %d\n", i, p->roi[i].roi_rectangle.x);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.y position = %d\n", i, p->roi[i].roi_rectangle.y);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.width = %d\n", i, p->roi[i].roi_rectangle.width);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.height = %d\n", i, p->roi[i].roi_rectangle.height);
+        }
+        break;
+    }
+    case VAEncMiscParameterTypeCIR:
+    {
+        VAEncMiscParameterCIR *p = (VAEncMiscParameterCIR *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterCIR\n");
+        va_TraceMsg(trace_ctx, "\tcir_num_mbs = %d\n", p->cir_num_mbs);
+        break;
+    }
+    case VAEncMiscParameterTypeTemporalLayerStructure:
+    {
+        VAEncMiscParameterTemporalLayerStructure *p = (VAEncMiscParameterTemporalLayerStructure *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTemporalLayerStructure\n");
+        va_TraceMsg(trace_ctx, "\tnumber_of_layers = %d\n", p->number_of_layers);
+        va_TraceMsg(trace_ctx, "\tperiodicity = %d\n", p->periodicity);
+        for (i = 0; i < p->periodicity; i++)
+        {
+            va_TraceMsg(trace_ctx, "\tlayer_id[%d] = %d\n", i, p->layer_id[i]);
+        }
+        break;
+    }
+    case VAEncMiscParameterTypeDirtyROI:
+    {
+        VAEncMiscParameterBufferDirtyROI *p = (VAEncMiscParameterBufferDirtyROI *)tmp -> data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferDirtyROI\n");
+        va_TraceMsg(trace_ctx, "\tnum_roi_rectangle = %d\n", p->num_roi_rectangle);
+        va_TraceMsg(trace_ctx, "\troi_rectangle.x position = %d\n", p->roi_rectangle->x);
+        va_TraceMsg(trace_ctx, "\troi_rectangle.y position = %d\n", p->roi_rectangle->y);
+        va_TraceMsg(trace_ctx, "\troi_rectangle.width = %d\n", p->roi_rectangle->width);
+        va_TraceMsg(trace_ctx, "\troi_rectangle.height = %d\n", p->roi_rectangle->height);
         break;
     }
     default:
