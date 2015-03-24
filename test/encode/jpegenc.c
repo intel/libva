@@ -27,7 +27,10 @@
  * Usage:
  * ./jpegenc <width> <height> <input file> <output file> <input filetype 0(I420)/1(NV12)/2(UYVY)/3(YUY2)/4(Y8)/5(RGBA)> q <quality>
  * Currently supporting only I420/NV12/UYVY/YUY2/Y8 input file formats.
- */  
+ * 
+ * NOTE: The intel-driver expects a packed header sent to it. So, the app is responsible to pack the header
+ * and send to the driver through LibVA. This unit test also showcases how to send the header to the driver.
+ */
 
 #include "sysdeps.h"
 #include <stdio.h>
@@ -310,11 +313,15 @@ void populate_scan_header(JPEGScanHeader *scanHdr, YUVComponentSpecs yuvComp)
     
 }
 
-
-int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentSpecs yuvComp, int picture_width, int picture_height, uint16_t restart_interval)
+// This method packs the header information which is to be sent to the driver through LibVA.
+// All the information that needs to be inserted in the encoded buffer should be built and sent.
+// It is the responsibility of the app talking to LibVA to build this header and send it.
+// This includes Markers, Quantization tables (normalized with quality factor), Huffman tables,etc.
+int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentSpecs yuvComp, int picture_width, int picture_height, uint16_t restart_interval, int quality)
 {
     bitstream bs;
     int i=0, j=0;
+    uint32_t temp=0;
     
     bitstream_start(&bs);
     
@@ -336,6 +343,14 @@ int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentS
     bitstream_put_ui(&bs, 72, 16);    //Y density
     bitstream_put_ui(&bs, 0, 8);      //Thumbnail width
     bitstream_put_ui(&bs, 0, 8);      //Thumbnail height
+
+    // Regarding Quantization matrices: As per JPEG Spec ISO/IEC 10918-1:1993(E), Pg-19:
+    // "applications may specify values which customize picture quality for their particular
+    // image characteristics, display devices, and viewing conditions"
+
+
+    //Normalization of quality factor
+    quality = (quality < 50) ? (5000/quality) : (200 - (quality*2));
     
     //Add QTable - Y
     JPEGQuantSection quantLuma;
@@ -346,6 +361,12 @@ int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentS
     bitstream_put_ui(&bs, quantLuma.Pq, 4);
     bitstream_put_ui(&bs, quantLuma.Tq, 4);
     for(i=0; i<NUM_QUANT_ELEMENTS; i++) {
+        //scale the quantization table with quality factor
+        temp = (quantLuma.Qk[i] * quality)/100;
+        //clamp to range [1,255]
+        temp = (temp > 255) ? 255 : temp;
+        temp = (temp < 1) ? 1 : temp;
+        quantLuma.Qk[i] = (unsigned char)temp;
         bitstream_put_ui(&bs, quantLuma.Qk[i], 8);
     }
 
@@ -359,6 +380,12 @@ int build_packed_jpeg_header_buffer(unsigned char **header_buffer, YUVComponentS
         bitstream_put_ui(&bs, quantChroma.Pq, 4);
         bitstream_put_ui(&bs, quantChroma.Tq, 4);
         for(i=0; i<NUM_QUANT_ELEMENTS; i++) {
+            //scale the quantization table with quality factor
+            temp = (quantChroma.Qk[i] * quality)/100;
+            //clamp to range [1,255]
+            temp = (temp > 255) ? 255 : temp;
+            temp = (temp < 1) ? 1 : temp;
+            quantChroma.Qk[i] = (unsigned char)temp;
             bitstream_put_ui(&bs, quantChroma.Qk[i], 8);
         }
     }
@@ -667,6 +694,9 @@ int encode_input_image(FILE *yuv_fp, FILE *jpeg_fp, int picture_width, int pictu
     YUVComponentSpecs yuvComponent;
     int writeToFile = 1;
     
+    //Clamp the quality factor value to [1,100]
+    if(quality >= 100) quality=100;
+    if(quality <= 0) quality=1;
     
     fourcc.type =VASurfaceAttribPixelFormat;
     fourcc.flags=VA_SURFACE_ATTRIB_SETTABLE;
@@ -778,7 +808,7 @@ int encode_input_image(FILE *yuv_fp, FILE *jpeg_fp, int picture_width, int pictu
     unsigned int length_in_bits;
     unsigned char *packed_header_buffer = NULL;
 
-    length_in_bits = build_packed_jpeg_header_buffer(&packed_header_buffer, yuvComponent, picture_width, picture_height, slice_param.restart_interval);
+    length_in_bits = build_packed_jpeg_header_buffer(&packed_header_buffer, yuvComponent, picture_width, picture_height, slice_param.restart_interval, quality);
     packed_header_param_buffer.type = VAEncPackedHeaderRawData;
     packed_header_param_buffer.bit_length = length_in_bits;
     packed_header_param_buffer.has_emulation_bytes = 0;
