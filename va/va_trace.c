@@ -664,8 +664,8 @@ void va_TraceCreateBuffer (
     va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
     if (buf_id)
         va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", *buf_id);
-    va_TraceMsg(trace_ctx, "\tsize=%d\n", size);
-    va_TraceMsg(trace_ctx, "\tnum_elements=%d\n", num_elements);
+    va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
+    va_TraceMsg(trace_ctx, "\tnum_elements=%u\n", num_elements);
     
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -693,8 +693,8 @@ void va_TraceDestroyBuffer (
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
     va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", buf_id);
-    va_TraceMsg(trace_ctx, "\tsize=%d\n", size);
-    va_TraceMsg(trace_ctx, "\tnum_elements=%d\n", num_elements);
+    va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
+    va_TraceMsg(trace_ctx, "\tnum_elements=%u\n", num_elements);
     
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -731,8 +731,8 @@ void va_TraceMapBuffer (
     while (buf_list != NULL) {
         va_TraceMsg(trace_ctx, "\tCodedbuf[%d] =\n", i++);
         
-        va_TraceMsg(trace_ctx, "\t   size = %d\n", buf_list->size);
-        va_TraceMsg(trace_ctx, "\t   bit_offset = %d\n", buf_list->bit_offset);
+        va_TraceMsg(trace_ctx, "\t   size = %u\n", buf_list->size);
+        va_TraceMsg(trace_ctx, "\t   bit_offset = %u\n", buf_list->bit_offset);
         va_TraceMsg(trace_ctx, "\t   status = 0x%08x\n", buf_list->status);
         va_TraceMsg(trace_ctx, "\t   reserved = 0x%08x\n", buf_list->reserved);
         va_TraceMsg(trace_ctx, "\t   buf = 0x%08x\n", buf_list->buf);
@@ -1734,8 +1734,8 @@ static void va_TraceVAPictureParameterBufferH264(
     va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferH264\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
-    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.frame_idx);
-    va_TraceMsg(trace_ctx, "\tCurrPic.flags = %d\n", p->CurrPic.flags);
+    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %u\n", p->CurrPic.frame_idx);
+    va_TraceMsg(trace_ctx, "\tCurrPic.flags = 0x%08x\n", p->CurrPic.flags);
     va_TraceMsg(trace_ctx, "\tCurrPic.TopFieldOrderCnt = %d\n", p->CurrPic.TopFieldOrderCnt);
     va_TraceMsg(trace_ctx, "\tCurrPic.BottomFieldOrderCnt = %d\n", p->CurrPic.BottomFieldOrderCnt);
 
@@ -1744,7 +1744,7 @@ static void va_TraceVAPictureParameterBufferH264(
     {
         if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->ReferenceFrames[i].flags & VA_PICTURE_H264_INVALID) == 0)) {
-            va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
+            va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x-%08u-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
                         p->ReferenceFrames[i].picture_id,
@@ -1806,9 +1806,9 @@ static void va_TraceVASliceParameterBufferH264(
     trace_ctx->trace_slice_size = p->slice_data_size;
 
     va_TraceMsg(trace_ctx, "\t--VASliceParameterBufferH264\n");
-    va_TraceMsg(trace_ctx, "\tslice_data_size = %d\n", p->slice_data_size);
-    va_TraceMsg(trace_ctx, "\tslice_data_offset = %d\n", p->slice_data_offset);
-    va_TraceMsg(trace_ctx, "\tslice_data_flag = %d\n", p->slice_data_flag);
+    va_TraceMsg(trace_ctx, "\tslice_data_size = %u\n", p->slice_data_size);
+    va_TraceMsg(trace_ctx, "\tslice_data_offset = %u\n", p->slice_data_offset);
+    va_TraceMsg(trace_ctx, "\tslice_data_flag = 0x%08x\n", p->slice_data_flag);
     va_TraceMsg(trace_ctx, "\tslice_data_bit_offset = %d\n", p->slice_data_bit_offset);
     va_TraceMsg(trace_ctx, "\tfirst_mb_in_slice = %d\n", p->first_mb_in_slice);
     va_TraceMsg(trace_ctx, "\tslice_type = %d\n", p->slice_type);
@@ -1943,11 +1943,11 @@ static void va_TraceVAEncSequenceParameterBufferH264(
 
     va_TraceMsg(trace_ctx, "\tseq_parameter_set_id = %d\n", p->seq_parameter_set_id);
     va_TraceMsg(trace_ctx, "\tlevel_idc = %d\n", p->level_idc);
-    va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
-    va_TraceMsg(trace_ctx, "\tintra_idr_period = %d\n", p->intra_idr_period);
-    va_TraceMsg(trace_ctx, "\tip_period = %d\n", p->ip_period);
-    va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
-    va_TraceMsg(trace_ctx, "\tmax_num_ref_frames = %d\n", p->max_num_ref_frames);
+    va_TraceMsg(trace_ctx, "\tintra_period = %u\n", p->intra_period);
+    va_TraceMsg(trace_ctx, "\tintra_idr_period = %u\n", p->intra_idr_period);
+    va_TraceMsg(trace_ctx, "\tip_period = %u\n", p->ip_period);
+    va_TraceMsg(trace_ctx, "\tbits_per_second = %u\n", p->bits_per_second);
+    va_TraceMsg(trace_ctx, "\tmax_num_ref_frames = %u\n", p->max_num_ref_frames);
     va_TraceMsg(trace_ctx, "\tpicture_width_in_mbs = %d\n", p->picture_width_in_mbs);
     va_TraceMsg(trace_ctx, "\tpicture_height_in_mbs = %d\n", p->picture_height_in_mbs);
     va_TraceMsg(trace_ctx, "\tchroma_format_idc = %d\n", p->seq_fields.bits.chroma_format_idc);
@@ -1967,10 +1967,10 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     for(i = 0; (i < p->max_num_ref_frames) && (i < 32); ++i)
         va_TraceMsg(trace_ctx, "\toffset_for_ref_frame[%d] = %d\n", i, p->offset_for_ref_frame[i]);
     va_TraceMsg(trace_ctx, "\tframe_cropping_flag = %d\n", p->frame_cropping_flag);
-    va_TraceMsg(trace_ctx, "\tframe_crop_left_offset = %d\n", p->frame_crop_left_offset);
-    va_TraceMsg(trace_ctx, "\tframe_crop_right_offset = %d\n", p->frame_crop_right_offset);
-    va_TraceMsg(trace_ctx, "\tframe_crop_top_offset = %d\n", p->frame_crop_top_offset);
-    va_TraceMsg(trace_ctx, "\tframe_crop_bottom_offset = %d\n", p->frame_crop_bottom_offset);
+    va_TraceMsg(trace_ctx, "\tframe_crop_left_offset = %u\n", p->frame_crop_left_offset);
+    va_TraceMsg(trace_ctx, "\tframe_crop_right_offset = %u\n", p->frame_crop_right_offset);
+    va_TraceMsg(trace_ctx, "\tframe_crop_top_offset = %u\n", p->frame_crop_top_offset);
+    va_TraceMsg(trace_ctx, "\tframe_crop_bottom_offset = %u\n", p->frame_crop_bottom_offset);
     va_TraceMsg(trace_ctx, "\tvui_parameters_present_flag = %d\n", p->vui_parameters_present_flag);
     va_TraceMsg(trace_ctx, "\taspect_ratio_info_present_flag = %d\n", p->vui_fields.bits.aspect_ratio_info_present_flag);
     va_TraceMsg(trace_ctx, "\ttiming_info_present_flag = %d\n", p->vui_fields.bits.timing_info_present_flag);
@@ -1978,10 +1978,10 @@ static void va_TraceVAEncSequenceParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tlog2_max_mv_length_horizontal = %d\n", p->vui_fields.bits.log2_max_mv_length_horizontal);
     va_TraceMsg(trace_ctx, "\tlog2_max_mv_length_vertical = %d\n", p->vui_fields.bits.log2_max_mv_length_vertical);
     va_TraceMsg(trace_ctx, "\taspect_ratio_idc = %d\n", p->aspect_ratio_idc);
-    va_TraceMsg(trace_ctx, "\tsar_width = %d\n", p->sar_width);
-    va_TraceMsg(trace_ctx, "\tsar_height = %d\n", p->sar_height);
-    va_TraceMsg(trace_ctx, "\tnum_units_in_tick = %d\n", p->num_units_in_tick);
-    va_TraceMsg(trace_ctx, "\ttime_scale = %d\n", p->time_scale);
+    va_TraceMsg(trace_ctx, "\tsar_width = %u\n", p->sar_width);
+    va_TraceMsg(trace_ctx, "\tsar_height = %u\n", p->sar_height);
+    va_TraceMsg(trace_ctx, "\tnum_units_in_tick = %u\n", p->num_units_in_tick);
+    va_TraceMsg(trace_ctx, "\ttime_scale = %u\n", p->time_scale);
 
     va_TraceMsg(trace_ctx, NULL);
 
@@ -2005,8 +2005,8 @@ static void va_TraceVAEncPictureParameterBufferH264(
     va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferH264\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
-    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.frame_idx);
-    va_TraceMsg(trace_ctx, "\tCurrPic.flags = %d\n", p->CurrPic.flags);
+    va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %u\n", p->CurrPic.frame_idx);
+    va_TraceMsg(trace_ctx, "\tCurrPic.flags = 0x%08x\n", p->CurrPic.flags);
     va_TraceMsg(trace_ctx, "\tCurrPic.TopFieldOrderCnt = %d\n", p->CurrPic.TopFieldOrderCnt);
     va_TraceMsg(trace_ctx, "\tCurrPic.BottomFieldOrderCnt = %d\n", p->CurrPic.BottomFieldOrderCnt);
     va_TraceMsg(trace_ctx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
@@ -2014,7 +2014,7 @@ static void va_TraceVAEncPictureParameterBufferH264(
     {
         if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->ReferenceFrames[i].flags & VA_PICTURE_H264_INVALID) == 0)) {
-            va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x-%08d-0x%08x\n",
+            va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x-%08u-0x%08x\n",
                         p->ReferenceFrames[i].TopFieldOrderCnt,
                         p->ReferenceFrames[i].BottomFieldOrderCnt,
                         p->ReferenceFrames[i].picture_id,
@@ -2094,8 +2094,8 @@ static void va_TraceVAEncSliceParameterBufferH264(
         return;
     
     va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferH264\n");
-    va_TraceMsg(trace_ctx, "\tmacroblock_address = %d\n", p->macroblock_address);
-    va_TraceMsg(trace_ctx, "\tnum_macroblocks = %d\n", p->num_macroblocks);
+    va_TraceMsg(trace_ctx, "\tmacroblock_address = %u\n", p->macroblock_address);
+    va_TraceMsg(trace_ctx, "\tnum_macroblocks = %u\n", p->num_macroblocks);
     va_TraceMsg(trace_ctx, "\tmacroblock_info = %08x\n", p->macroblock_info);
     va_TraceMsg(trace_ctx, "\tslice_type = %d\n", p->slice_type);
     va_TraceMsg(trace_ctx, "\tpic_parameter_set_id = %d\n", p->pic_parameter_set_id);
