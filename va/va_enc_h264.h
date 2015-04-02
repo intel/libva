@@ -244,6 +244,12 @@ typedef struct _VAEncSequenceParameterBufferH264 {
             unsigned int log2_max_mv_length_horizontal          : 5;
             /** \brief Range: 0 to 16, inclusive. */
             unsigned int log2_max_mv_length_vertical            : 5;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            unsigned int fixed_frame_rate_flag                  : 1;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            unsigned int low_delay_hrd_flag                     : 1;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            unsigned int motion_vectors_over_pic_boundaries_flag : 1;
         } bits;
         unsigned int value;
     } vui_fields;
