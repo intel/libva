@@ -337,7 +337,7 @@ typedef struct  _VASliceParameterBufferHEVC
     /** HEVC syntax element. */
     uint8_t                 luma_log2_weight_denom;
     /** HEVC syntax element. */
-    uint8_t                 delta_chroma_log2_weight_denom;
+    int8_t                  delta_chroma_log2_weight_denom;
     /** HEVC syntax element. */
     int8_t                  delta_luma_weight_l0[15];
     /** HEVC syntax element. */

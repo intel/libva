@@ -563,7 +563,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
     /** \brief Same as the HEVC bitstream syntax element. */
     uint8_t         luma_log2_weight_denom;
     /** \brief Same as the HEVC bitstream syntax element. */
-    uint8_t         delta_chroma_log2_weight_denom;
+    int8_t          delta_chroma_log2_weight_denom;
     /** \brief Same as the HEVC bitstream syntax element. */
     int8_t          delta_luma_weight_l0[15];
     /** \brief Same as the HEVC bitstream syntax element. */
