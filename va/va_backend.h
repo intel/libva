@@ -524,7 +524,9 @@ struct VADriverContext
      */
     struct VADriverVTableVPP *vtable_vpp;
 
-    unsigned long reserved[42];         /* reserve for future add-ins, decrease the subscript accordingly */
+    char *override_driver_name;
+
+    unsigned long reserved[41];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */

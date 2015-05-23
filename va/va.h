@@ -232,7 +232,14 @@ const char *vaErrorStr(VAStatus error_status);
 typedef void* VANativeDisplay;	/* window system dependent */
 
 int vaDisplayIsValid(VADisplay dpy);
-    
+
+/**
+ *  Set the override driver name instead of queried driver driver.
+ */
+VAStatus vaSetDriverName(VADisplay dpy,
+                         char *driver_name
+);
+
 /**
  * Initialize the library 
  */
