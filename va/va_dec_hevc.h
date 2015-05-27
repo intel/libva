@@ -264,7 +264,6 @@ typedef struct  _VASliceParameterBufferHEVC
      * there. However, the slice data buffer passed to the hardware is
      * the original bitstream, thus including any emulation prevention
      * bytes.
-     * The slice bit stream may or may not include the start code prefix.
      */
     uint32_t                slice_data_byte_offset;
     /** HEVC syntax element. */
