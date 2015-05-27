@@ -533,7 +533,7 @@ typedef struct _VAEncPictureParameterBufferHEVC {
  *
  */
 typedef struct _VAEncSliceParameterBufferHEVC {
-    /** \brief Starting MB address for this slice. */
+    /** \brief Starting CTU address for this slice. */
     uint32_t        slice_segment_address;
     /** \brief Number of CTUs in this slice. */
     uint32_t        num_ctu_in_slice;
