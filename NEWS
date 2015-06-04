@@ -1,5 +1,15 @@
-libva NEWS -- summary of user visible changes.  2015-03-xx
-Copyright (C) 2009-2014 Intel Corporation
+libva NEWS -- summary of user visible changes.  2015-06-xx
+Copyright (C) 2009-2015 Intel Corporation
+
+Version 1.6.0 - DD.Jun.2015
+* Bump VA API version to 0.38
+* Add support for HEVC encode API
+* Add support for VP9 decode API
+* Add API (vaSetDriverName()) to allow the user to specify the loaded backend driver
+* Add VAConfigAttribEncSkipFrame and corresponding structures to support
+  sending skip frame parameters to the backend driver.
+* Add support for querying slice decoding mode supported by the backend driver
+* Fix quality issue in the JPEG encode demo
 
 Version 1.5.1 - DD.Mar.2015
 * API: correct the comment for num_token_partitions in struct  _VAEncPictureParameterBufferVP8
