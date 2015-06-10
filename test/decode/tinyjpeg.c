@@ -387,7 +387,7 @@ static int parse_DRI(struct jdec_private *priv, const unsigned char *stream)
 
 static int findEOI(struct jdec_private *priv,const unsigned char *stream)
 {
-   while (!(*stream == 0xff  && *(stream+1) == 0xd9 )&& stream<=priv->stream_end) //searching for the end of image marker
+   while (stream<=priv->stream_end&& !(*stream == 0xff  && *(stream+1) == 0xd9 )) //searching for the end of image marker
    {
       stream++;
       continue;
