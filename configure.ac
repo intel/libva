@@ -43,7 +43,7 @@ m4_define([va_api_version],
 m4_define([libva_major_version], [m4_eval(va_api_major_version + 1)])
 m4_define([libva_minor_version], [m4_eval(va_api_minor_version - 32)])
 m4_define([libva_micro_version], [0])
-m4_define([libva_pre_version],   [1])
+m4_define([libva_pre_version],   [2])
 
 m4_define([libva_version],
           [libva_major_version.libva_minor_version.libva_micro_version])
