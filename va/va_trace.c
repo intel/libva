@@ -34,6 +34,7 @@
 #include "va_enc_vp8.h"
 #include "va_dec_jpeg.h"
 #include "va_dec_vp8.h"
+#include "va_dec_vp9.h"
 #include "va_dec_hevc.h"
 #include "va_vpp.h"
 #include <assert.h>
@@ -2629,6 +2630,72 @@ static void va_TraceVAEncSequenceParameterBufferVP8(
     return;
 }
 
+static void va_TraceVAPictureParameterBufferVP9(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VADecPictureParameterBufferVP9 *p = (VADecPictureParameterBufferVP9 *)data;
+    DPY2TRACECTX(dpy);
+    int i,j;
+
+    va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferVP9\n");
+
+    va_TraceMsg(trace_ctx, "\tframe_width = %d\n", p->frame_width);
+    va_TraceMsg(trace_ctx, "\tframe_height = %d\n", p->frame_height);
+    va_TraceMsg(trace_ctx, "\treference_frames[8] =\n");
+    for (i = 0; i < 8; i++) {
+        va_TraceMsg(trace_ctx, "\t\t0x%x\n", p->reference_frames[i]);
+    }
+    va_TraceMsg(trace_ctx, "\tsubsampling_x = %d\n", p->pic_fields.bits.subsampling_x);
+    va_TraceMsg(trace_ctx, "\tsubsampling_y = %d\n", p->pic_fields.bits.subsampling_y);
+    va_TraceMsg(trace_ctx, "\tframe_type = %d\n",    p->pic_fields.bits.frame_type);
+    va_TraceMsg(trace_ctx, "\tshow_frame = %d\n",    p->pic_fields.bits.show_frame);
+    va_TraceMsg(trace_ctx, "\terror_resilient_mode = %d\n", p->pic_fields.bits.error_resilient_mode);
+    va_TraceMsg(trace_ctx, "\tintra_only = %d\n", p->pic_fields.bits.intra_only);
+    va_TraceMsg(trace_ctx, "\tallow_high_precision_mv = %d\n", p->pic_fields.bits.allow_high_precision_mv);
+    va_TraceMsg(trace_ctx, "\tmcomp_filter_type = %d\n", p->pic_fields.bits.mcomp_filter_type);
+    va_TraceMsg(trace_ctx, "\tframe_parallel_decoding_mode = %d\n", p->pic_fields.bits.frame_parallel_decoding_mode);
+    va_TraceMsg(trace_ctx, "\treset_frame_context = %d\n", p->pic_fields.bits.reset_frame_context);
+    va_TraceMsg(trace_ctx, "\trefresh_frame_context = %d\n", p->pic_fields.bits.refresh_frame_context);
+    va_TraceMsg(trace_ctx, "\tframe_context_idx = %d\n", p->pic_fields.bits.frame_context_idx);
+    va_TraceMsg(trace_ctx, "\tsegmentation_enabled = %d\n", p->pic_fields.bits.segmentation_enabled);
+    va_TraceMsg(trace_ctx, "\tsegmentation_temporal_update = %d\n", p->pic_fields.bits.segmentation_temporal_update);
+    va_TraceMsg(trace_ctx, "\tsegmentation_update_map = %d\n", p->pic_fields.bits.segmentation_update_map);
+    va_TraceMsg(trace_ctx, "\tlast_ref_frame = %d\n", p->pic_fields.bits.last_ref_frame);
+    va_TraceMsg(trace_ctx, "\tlast_ref_frame_sign_bias = %d\n",    p->pic_fields.bits.last_ref_frame_sign_bias);
+    va_TraceMsg(trace_ctx, "\tgolden_ref_frame = %d\n",    p->pic_fields.bits.golden_ref_frame);
+    va_TraceMsg(trace_ctx, "\tgolden_ref_frame_sign_bias = %d\n", p->pic_fields.bits.golden_ref_frame_sign_bias);
+    va_TraceMsg(trace_ctx, "\talt_ref_frame = %d\n", p->pic_fields.bits.alt_ref_frame);
+    va_TraceMsg(trace_ctx, "\talt_ref_frame_sign_bias = %d\n", p->pic_fields.bits.alt_ref_frame_sign_bias);
+    va_TraceMsg(trace_ctx, "\tlossless_flag = %d\n", p->pic_fields.bits.lossless_flag);
+
+    va_TraceMsg(trace_ctx, "\tfilter_level = %d\n", p->filter_level);
+    va_TraceMsg(trace_ctx, "\tsharpness_level = %d\n", p->sharpness_level);
+    va_TraceMsg(trace_ctx, "\tlog2_tile_rows = %d\n", p->log2_tile_rows);
+    va_TraceMsg(trace_ctx, "\tlog2_tile_columns = %d\n", p->log2_tile_columns);
+    va_TraceMsg(trace_ctx, "\tframe_header_length_in_bytes = %d\n", p->frame_header_length_in_bytes);
+    va_TraceMsg(trace_ctx, "\tfirst_partition_size = %d\n", p->first_partition_size);
+
+    va_TraceMsg(trace_ctx, "\tmb_segment_tree_probs[7]: [0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x]\n",
+                p->mb_segment_tree_probs[0], p->mb_segment_tree_probs[1],
+                p->mb_segment_tree_probs[2], p->mb_segment_tree_probs[3],
+                p->mb_segment_tree_probs[4], p->mb_segment_tree_probs[5],
+                p->mb_segment_tree_probs[6]);
+
+    va_TraceMsg(trace_ctx, "\tsegment_pred_probs[3]: [0x%02x, 0x%02x, 0x%02x]\n", p->segment_pred_probs[0], p->segment_pred_probs[1], p->segment_pred_probs[2]);
+
+    va_TraceMsg(trace_ctx, "\tprofile = %d\n", p->profile);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
 static void va_TraceVAEncPictureParameterBufferVP8(
     VADisplay dpy,
     VAContextID context,
@@ -2691,6 +2758,47 @@ static void va_TraceVAEncPictureParameterBufferVP8(
     va_TraceMsg(trace_ctx, "\tsharpness_level = %d\n", p->sharpness_level);
     va_TraceMsg(trace_ctx, "\tclamp_qindex_high = %d\n", p->clamp_qindex_high);
     va_TraceMsg(trace_ctx, "\tclamp_qindex_low = %d\n", p->clamp_qindex_low);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
+static void va_TraceVASliceParameterBufferVP9(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+
+    VASliceParameterBufferVP9 *p = (VASliceParameterBufferVP9 *)data;
+    DPY2TRACECTX(dpy);
+    int i, j;
+
+    va_TraceMsg(trace_ctx, "\t--VASliceParameterBufferVP9\n");
+
+    va_TraceMsg(trace_ctx, "\tslice_data_size = %d\n", p->slice_data_size);
+    va_TraceMsg(trace_ctx, "\tslice_data_offset = %d\n", p->slice_data_offset);
+    va_TraceMsg(trace_ctx, "\tslice_data_flag = %d\n", p->slice_data_flag);
+
+    for (i = 0; i < 8; i++) {
+        VASegmentParameterVP9* seg = p->seg_param + i;
+        va_TraceMsg(trace_ctx, "\tseg_param[%d] = \n",  i);
+        va_TraceMsg(trace_ctx, "\t\tsegment_reference_enabled = %d\n", seg->segment_flags.fields.segment_reference_enabled);
+        va_TraceMsg(trace_ctx, "\t\tsegment_reference = %d\n", seg->segment_flags.fields.segment_reference);
+        va_TraceMsg(trace_ctx, "\t\tsegment_reference_skipped = %d\n", seg->segment_flags.fields.segment_reference_skipped);
+        va_TraceMsg(trace_ctx, "\t\tfilter_level[4][2] = \n");
+        for (j  = 0; j < 4; j++) {
+            va_TraceMsg(trace_ctx, "\t\t\t[%3d, %3d]\n", seg->filter_level[j][0], seg->filter_level[j][1]);
+        }
+        va_TraceMsg(trace_ctx, "\t\tluma_ac_quant_scale = %d\n", seg->luma_ac_quant_scale);
+        va_TraceMsg(trace_ctx, "\t\tluma_dc_quant_scale = %d\n", seg->luma_dc_quant_scale);
+        va_TraceMsg(trace_ctx, "\t\tchroma_ac_quant_scale = %d\n", seg->chroma_ac_quant_scale);
+        va_TraceMsg(trace_ctx, "\t\tchroma_dc_quant_scale = %d\n", seg->chroma_dc_quant_scale);
+    }
 
     va_TraceMsg(trace_ctx, NULL);
 
@@ -3285,6 +3393,31 @@ static void va_TraceVP8Buf(
     }
 }
 
+static void va_TraceVP9Buf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    DPY2TRACECTX(dpy);
+
+    switch (type) {
+    case VAPictureParameterBufferType:
+        va_TraceVAPictureParameterBufferVP9(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VASliceParameterBufferType:
+        va_TraceVASliceParameterBufferVP9(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    }
+}
+
 static void va_TraceVC1Buf(
     VADisplay dpy,
     VAContextID context,
@@ -3675,6 +3808,13 @@ void va_TraceRenderPicture(
                 va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
 
                 va_TraceHEVCBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
+            }
+            break;
+        case VAProfileVP9Profile0:
+            for (j=0; j<num_elements; j++) {
+                va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
+
+                va_TraceVP9Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         default:
