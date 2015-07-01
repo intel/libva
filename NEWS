@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2015-06-xx
+libva NEWS -- summary of user visible changes.  2015-07-01
 Copyright (C) 2009-2015 Intel Corporation
 
-Version 1.6.0 - DD.Jun.2015
+Version 1.6.0 - 01.Jul.2015
 * Bump VA API version to 0.38
 * Add support for HEVC encode API
 * Add support for VP9 decode API
