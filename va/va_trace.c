@@ -997,17 +997,17 @@ static void va_TraceVAHuffmanTableBufferJPEG(
         for (j = 0; j < 16; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].num_ac_codes[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tnum_ac_codes =%s\n", tmp);
         memset(tmp, 0, sizeof tmp);
         for (j = 0; j < 162; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].ac_values[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tac_values =%s\n", tmp);
         memset(tmp, 0, sizeof tmp);
         for (j = 0; j < 2; ++j) {
             sprintf(tmp + strlen(tmp), "%u ", p->huffman_table[i].pad[j]);
         }
-        va_TraceMsg(trace_ctx,"\t\tnum_dc_codes =%s\n", tmp);
+        va_TraceMsg(trace_ctx,"\t\tpad =%s\n", tmp);
     }
 }
 
