@@ -60,6 +60,7 @@ static char * profile_string(VAProfile profile)
             case VAProfileH264StereoHigh: return "VAProfileH264StereoHigh";
             case VAProfileHEVCMain: return "VAProfileHEVCMain";
             case VAProfileHEVCMain10: return "VAProfileHEVCMain10";
+            case VAProfileVP9Profile0: return "VAProfileVP9Profile0";
 
             default:
                 break;
