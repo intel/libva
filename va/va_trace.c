@@ -3237,7 +3237,7 @@ static void va_TraceHEVCBuf(
             va_TraceVASliceParameterBufferHEVC(dpy, context, buffer, type, size, num_elements, pbuf);
             break;
         case VAIQMatrixBufferType:
-            va_TraceVAIQMatrixBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
+            va_TraceVAIQMatrixBufferHEVC(dpy, context, buffer, type, size, num_elements, pbuf);
             break;
         case VAEncSequenceParameterBufferType:
             va_TraceVAEncSequenceParameterBufferHEVC(dpy, context, buffer, type, size, num_elements, pbuf);
