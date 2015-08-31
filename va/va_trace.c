@@ -97,6 +97,8 @@ struct trace_context {
 
     unsigned int trace_frame_width; /* current frame width */
     unsigned int trace_frame_height; /* current frame height */
+
+    unsigned int pts; /* IVF header information */
 };
 
 #define TRACE_CTX(dpy) ((struct trace_context *)((VADisplayContextP)dpy)->vatrace)
@@ -701,6 +703,58 @@ void va_TraceDestroyBuffer (
 }
 
 
+static void mem_put_le16(char *mem, unsigned int val)
+{
+    mem[0] = val;
+    mem[1] = val>>8;
+}
+
+static void mem_put_le32(char *mem, unsigned int val)
+{
+    mem[0] = val;
+    mem[1] = val>>8;
+    mem[2] = val>>16;
+    mem[3] = val>>24;
+}
+
+static void va_TraceCodedBufferIVFHeader(struct trace_context *trace_ctx, void **pbuf)
+{
+    VACodedBufferSegment *buf_list;
+    unsigned int frame_length = 0;
+    char header[32];
+
+    buf_list = (VACodedBufferSegment *)(*pbuf);
+
+    if (ftell(trace_ctx->trace_fp_codedbuf) == 0) { /* write ivf header */
+        header[0] = 'D';
+        header[1] = 'K';
+        header[2] = 'I';
+        header[3] = 'F';
+        mem_put_le16(header+4,  0);                     /* version */
+        mem_put_le16(header+6,  32);                    /* headersize */
+        mem_put_le32(header+8,  0x30385056);            /* headersize */
+        /* write width and height of the first rc_param to IVF file header */
+        mem_put_le16(header+12, trace_ctx->trace_frame_width);  /* width */
+        mem_put_le16(header+14, trace_ctx->trace_frame_height); /* height */
+        mem_put_le32(header+16, 30);            /* rate */
+        mem_put_le32(header+20, 1);                     /* scale */
+        mem_put_le32(header+24, 0xffffffff);            /* length */
+        mem_put_le32(header+28, 0);                     /* unused */
+        fwrite(header, 1, 32, trace_ctx->trace_fp_codedbuf);
+    }
+
+    /* write frame header */
+    while (buf_list != NULL) {
+        frame_length += buf_list->size;
+        buf_list = (VACodedBufferSegment *) buf_list->next;
+    }
+    mem_put_le32(header, frame_length);
+    mem_put_le32(header+4, trace_ctx->pts&0xFFFFFFFF);
+    mem_put_le32(header+8, 0);
+    fwrite(header, 1, 12, trace_ctx->trace_fp_codedbuf);
+    trace_ctx->pts++;
+}
+
 void va_TraceMapBuffer (
     VADisplay dpy,
     VABufferID buf_id,    /* in */
@@ -727,7 +781,12 @@ void va_TraceMapBuffer (
     va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
     if ((pbuf == NULL) || (*pbuf == NULL))
         return;
-    
+
+    if (trace_ctx->trace_profile == VAProfileVP8Version0_3) {
+        va_TraceMsg(trace_ctx, "\tAdd IVF header information\n");
+        va_TraceCodedBufferIVFHeader(trace_ctx, pbuf);
+    }
+
     buf_list = (VACodedBufferSegment *)(*pbuf);
     while (buf_list != NULL) {
         va_TraceMsg(trace_ctx, "\tCodedbuf[%d] =\n", i++);
