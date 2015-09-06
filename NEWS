@@ -1,5 +1,10 @@
-libva NEWS -- summary of user visible changes.  2015-07-01
+libva NEWS -- summary of user visible changes.  2015-09-xx
 Copyright (C) 2009-2015 Intel Corporation
+
+Version 1.6.1 - DD.Sep.2015
+* Add support for VP9 decode and HEVC encode in VA trace module
+* Add VP9 profile to vainfo
+* Enhance VA trace to dump VP8 encode parameters
 
 Version 1.6.0 - 01.Jul.2015
 * Bump VA API version to 0.38
