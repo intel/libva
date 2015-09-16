@@ -330,7 +330,6 @@ pps_rbsp(const VAEncSequenceParameterBufferMPEG2 *seq_param,
          const VAEncPictureParameterBufferMPEG2 *pic_param,
          bitstream *bs)
 {
-    int i;
     int chroma_420_type;
 
     if (seq_param->sequence_extension.bits.chroma_format == CHROMA_FORMAT_420)

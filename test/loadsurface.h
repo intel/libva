@@ -297,8 +297,8 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
                               unsigned char *src_Y, unsigned char *src_U, unsigned char *src_V)
 {
     VAImage surface_image;
-    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL, *V_start=NULL;
-    int Y_pitch=0, U_pitch=0, V_pitch=0, row;
+    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL;
+    int Y_pitch=0, U_pitch=0, row;
     VAStatus va_status;
     
     va_status = vaDeriveImage(va_dpy,surface_id, &surface_image);
@@ -312,27 +312,19 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
     switch (surface_image.format.fourcc) {
     case VA_FOURCC_NV12:
         U_start = (unsigned char *)surface_p + surface_image.offsets[1];
-        V_start = U_start + 1;
         U_pitch = surface_image.pitches[1];
-        V_pitch = surface_image.pitches[1];
         break;
     case VA_FOURCC_IYUV:
         U_start = (unsigned char *)surface_p + surface_image.offsets[1];
-        V_start = (unsigned char *)surface_p + surface_image.offsets[2];
         U_pitch = surface_image.pitches[1];
-        V_pitch = surface_image.pitches[2];
         break;
     case VA_FOURCC_YV12:
         U_start = (unsigned char *)surface_p + surface_image.offsets[2];
-        V_start = (unsigned char *)surface_p + surface_image.offsets[1];
         U_pitch = surface_image.pitches[2];
-        V_pitch = surface_image.pitches[1];
         break;
     case VA_FOURCC_YUY2:
         U_start = surface_p + 1;
-        V_start = surface_p + 3;
         U_pitch = surface_image.pitches[0];
-        V_pitch = surface_image.pitches[0];
         break;
     default:
         assert(0);
@@ -395,8 +387,8 @@ static int download_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
                                 unsigned char *dst_Y, unsigned char *dst_U, unsigned char *dst_V)
 {
     VAImage surface_image;
-    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL,*V_start=NULL;
-    int Y_pitch=0, U_pitch=0, V_pitch=0, row;
+    unsigned char *surface_p=NULL, *Y_start=NULL, *U_start=NULL;
+    int Y_pitch=0, U_pitch=0, row;
     VAStatus va_status;
     
     va_status = vaDeriveImage(va_dpy,surface_id, &surface_image);
@@ -410,27 +402,19 @@ static int download_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
     switch (surface_image.format.fourcc) {
     case VA_FOURCC_NV12:
         U_start = (unsigned char *)surface_p + surface_image.offsets[1];
-        V_start = U_start + 1;
         U_pitch = surface_image.pitches[1];
-        V_pitch = surface_image.pitches[1];
         break;
     case VA_FOURCC_IYUV:
         U_start = (unsigned char *)surface_p + surface_image.offsets[1];
-        V_start = (unsigned char *)surface_p + surface_image.offsets[2];
         U_pitch = surface_image.pitches[1];
-        V_pitch = surface_image.pitches[2];
         break;
     case VA_FOURCC_YV12:
         U_start = (unsigned char *)surface_p + surface_image.offsets[2];
-        V_start = (unsigned char *)surface_p + surface_image.offsets[1];
         U_pitch = surface_image.pitches[2];
-        V_pitch = surface_image.pitches[1];
         break;
     case VA_FOURCC_YUY2:
         U_start = surface_p + 1;
-        V_start = surface_p + 3;
         U_pitch = surface_image.pitches[0];
-        V_pitch = surface_image.pitches[0];
         break;
     default:
         assert(0);
