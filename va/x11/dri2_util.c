@@ -196,7 +196,6 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
         goto err_out;
 
     dri_state->base.fd = open(device_name, O_RDWR);
-    assert(dri_state->base.fd >= 0);
 
     if (dri_state->base.fd < 0)
         goto err_out;
