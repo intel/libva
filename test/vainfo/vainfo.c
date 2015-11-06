@@ -104,6 +104,8 @@ int main(int argc, const char* argv[])
   else
       name = argv[0];
 
+  va_init_display_args(&argc, (char **)argv);
+
   va_dpy = va_open_display();
   if (NULL == va_dpy)
   {
