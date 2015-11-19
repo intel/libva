@@ -72,8 +72,7 @@
    
 #define BITSTREAM_ALLOCATE_STEPPING     4096
 
-#define SURFACE_NUM 16 /* 16 surfaces for source YUV */
-#define SURFACE_NUM 16 /* 16 surfaces for reference */
+#define SURFACE_NUM 16 /* 16 surfaces for source YUV/reference frame */
 static  VADisplay va_dpy;
 static  VAProfile h264_profile = ~0;
 static  VAConfigAttrib attrib[VAConfigAttribTypeMax];
@@ -89,7 +88,7 @@ static  VAEncPictureParameterBufferH264 pic_param;
 static  VAEncSliceParameterBufferH264 slice_param;
 static  VAPictureH264 CurrentCurrPic;
 static  VAPictureH264 ReferenceFrames[16], RefPicList0_P[32], RefPicList0_B[32], RefPicList1_B[32];
-
+static  unsigned int surface_num = SURFACE_NUM;
 static  unsigned int MaxFrameNum = (2<<16);
 static  unsigned int MaxPicOrderCntLsb = (2<<8);
 static  unsigned int Log2MaxFrameNum = 16;
@@ -108,11 +107,11 @@ static  unsigned long long srcyuv_frames = 0;
 static  int srcyuv_fourcc = VA_FOURCC_NV12;
 static  int calc_psnr = 0;
 
-static  int frame_width = 176;
-static  int frame_height = 144;
-static  int frame_width_mbaligned;
-static  int frame_height_mbaligned;
-static  int frame_rate = 30;
+static  unsigned int frame_width = 176;
+static  unsigned int frame_height = 144;
+static  unsigned int frame_width_mbaligned;
+static  unsigned int frame_height_mbaligned;
+static  unsigned int frame_rate = 30;
 static  unsigned int frame_count = 60;
 static  unsigned int frame_coded = 0;
 static  unsigned int frame_bitrate = 0;
@@ -129,7 +128,7 @@ static  unsigned long long current_frame_display = 0;
 static  unsigned long long current_IDR_display = 0;
 static  unsigned int current_frame_num = 0;
 static  int current_frame_type;
-#define current_slot (current_frame_display % SURFACE_NUM)
+#define current_slot (current_frame_display % surface_num)
 
 static  int misc_priv_type = 0;
 static  int misc_priv_value = 0;
@@ -723,6 +722,7 @@ static int print_help(void)
     printf("   --enablePSNR calculate PSNR of recyuv vs. srcyuv\n");
     printf("   --entropy <0|1>, 1 means cabac, 0 cavlc\n");
     printf("   --profile <BP|MP|HP>\n");
+    printf("   --surface_num: set the surface number for encoding, default is 16\n");
     return 0;
 }
 
@@ -748,6 +748,7 @@ static int process_cmdline(int argc, char *argv[])
         {"framecount", required_argument, NULL, 16 },
         {"entropy", required_argument, NULL, 17 },
         {"profile", required_argument, NULL, 18 },
+        {"surface_num", required_argument, NULL, 19 },
         {NULL, no_argument, NULL, 0 }};
     int long_index;
     
@@ -834,6 +835,10 @@ static int process_cmdline(int argc, char *argv[])
                 h264_profile = VAProfileH264High;
             else
                 h264_profile = 0;
+            break;
+        case 19:
+            surface_num = atoi(optarg);
+            surface_num = MAX(4, MIN(surface_num,16)); /* clamp to [4, 16] */
             break;
         case ':':
         case '?':
@@ -1116,7 +1121,7 @@ static int setup_encode()
 {
     VAStatus va_status;
     VASurfaceID *tmp_surfaceid;
-    int codedbuf_size, i;
+    unsigned int codedbuf_size, i;
     
     va_status = vaCreateConfig(va_dpy, h264_profile, VAEntrypointEncSlice,
             &config_attrib[0], config_attrib_num, &config_id);
@@ -1125,7 +1130,7 @@ static int setup_encode()
     /* create source surfaces */
     va_status = vaCreateSurfaces(va_dpy,
                                  VA_RT_FORMAT_YUV420, frame_width_mbaligned, frame_height_mbaligned,
-                                 &src_surface[0], SURFACE_NUM,
+                                 &src_surface[0], surface_num,
                                  NULL, 0);
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
@@ -1133,27 +1138,27 @@ static int setup_encode()
     va_status = vaCreateSurfaces(
             va_dpy,
             VA_RT_FORMAT_YUV420, frame_width_mbaligned, frame_height_mbaligned,
-            &ref_surface[0], SURFACE_NUM,
+            &ref_surface[0], surface_num,
             NULL, 0
             );
     CHECK_VASTATUS(va_status, "vaCreateSurfaces");
 
-    tmp_surfaceid = calloc(2 * SURFACE_NUM, sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid, src_surface, SURFACE_NUM * sizeof(VASurfaceID));
-    memcpy(tmp_surfaceid + SURFACE_NUM, ref_surface, SURFACE_NUM * sizeof(VASurfaceID));
+    tmp_surfaceid = calloc(2 * surface_num, sizeof(VASurfaceID));
+    memcpy(tmp_surfaceid, src_surface, surface_num * sizeof(VASurfaceID));
+    memcpy(tmp_surfaceid + surface_num, ref_surface, surface_num * sizeof(VASurfaceID));
     
     /* Create a context for this encode pipe */
     va_status = vaCreateContext(va_dpy, config_id,
                                 frame_width_mbaligned, frame_height_mbaligned,
                                 VA_PROGRESSIVE,
-                                tmp_surfaceid, 2 * SURFACE_NUM,
+                                tmp_surfaceid, 2 * surface_num,
                                 &context_id);
     CHECK_VASTATUS(va_status, "vaCreateContext");
     free(tmp_surfaceid);
 
     codedbuf_size = (frame_width_mbaligned * frame_height_mbaligned * 400) / (16*16);
 
-    for (i = 0; i < SURFACE_NUM; i++) {
+    for (i = 0; i < surface_num; i++) {
         /* create coded buffer once for all
          * other VA buffers which won't be used again after vaRenderPicture.
          * so APP can always vaCreateBuffer for every frame
@@ -1416,7 +1421,7 @@ static int render_picture(void)
         }
     } else {
         memcpy(pic_param.ReferenceFrames, ReferenceFrames, numShortTerm*sizeof(VAPictureH264));
-        for (i = numShortTerm; i < SURFACE_NUM; i++) {
+        for (i = numShortTerm; i < surface_num; i++) {
             pic_param.ReferenceFrames[i].picture_id = VA_INVALID_SURFACE;
             pic_param.ReferenceFrames[i].flags = VA_PICTURE_H264_INVALID;
         }
@@ -1678,7 +1683,7 @@ static int upload_source_YUV_once_for_all()
     int row_shift=0;
     int i;
 
-    for (i = 0; i < SURFACE_NUM; i++) {
+    for (i = 0; i < surface_num; i++) {
         printf("\rLoading data into surface %d.....", i);
         upload_surface(va_dpy, src_surface[i], box_width, row_shift, 0);
 
@@ -1707,8 +1712,8 @@ static int load_surface(VASurfaceID surface_id, unsigned long long display_order
     
     mmap_start = frame_start & (~0xfff);
     mmap_size = (frame_size + (frame_start & 0xfff) + 0xfff) & (~0xfff);
-    mmap_ptr = mmap(0, mmap_size, PROT_READ, MAP_SHARED,
-                    fileno(srcyuv_fp), mmap_start);
+    mmap_ptr = mmap64(0, mmap_size, PROT_READ, MAP_SHARED,
+                      fileno(srcyuv_fp), (off64_t)mmap_start);
     if (mmap_ptr == MAP_FAILED) {
         printf("Failed to mmap YUV file (%s)\n", strerror(errno));
         return 1;
@@ -1812,7 +1817,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
     VAStatus va_status;
     unsigned int coded_size = 0;
 
-    va_status = vaMapBuffer(va_dpy,coded_buf[display_order % SURFACE_NUM],(void **)(&buf_list));
+    va_status = vaMapBuffer(va_dpy,coded_buf[display_order % surface_num],(void **)(&buf_list));
     CHECK_VASTATUS(va_status,"vaMapBuffer");
     while (buf_list != NULL) {
         coded_size += fwrite(buf_list->buf, 1, buf_list->size, coded_fp);
@@ -1820,7 +1825,7 @@ static int save_codeddata(unsigned long long display_order, unsigned long long e
 
         frame_size += coded_size;
     }
-    vaUnmapBuffer(va_dpy,coded_buf[display_order % SURFACE_NUM]);
+    vaUnmapBuffer(va_dpy,coded_buf[display_order % surface_num]);
 
     printf("\r      "); /* return back to startpoint */
     switch (encode_order % 4) {
@@ -1882,7 +1887,7 @@ static int storage_task_queue(unsigned long long display_order, unsigned long lo
         storage_task_tail = tmp;
     }
 
-    srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_STORAGE;
+    srcsurface_status[display_order % surface_num] = SRC_SURFACE_IN_STORAGE;
     pthread_cond_signal(&encode_cond);
     
     pthread_mutex_unlock(&encode_mutex);
@@ -1896,23 +1901,23 @@ static void storage_task(unsigned long long display_order, unsigned long long en
     VAStatus va_status;
     
     tmp = GetTickCount();
-    va_status = vaSyncSurface(va_dpy, src_surface[display_order % SURFACE_NUM]);
+    va_status = vaSyncSurface(va_dpy, src_surface[display_order % surface_num]);
     CHECK_VASTATUS(va_status,"vaSyncSurface");
     SyncPictureTicks += GetTickCount() - tmp;
     tmp = GetTickCount();
     save_codeddata(display_order, encode_order);
     SavePictureTicks += GetTickCount() - tmp;
 
-    save_recyuv(ref_surface[display_order % SURFACE_NUM], display_order, encode_order);
+    save_recyuv(ref_surface[display_order % surface_num], display_order, encode_order);
 
     /* reload a new frame data */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL)
-        load_surface(src_surface[display_order % SURFACE_NUM], display_order + SURFACE_NUM);
+        load_surface(src_surface[display_order % surface_num], display_order + surface_num);
     UploadPictureTicks += GetTickCount() - tmp;
 
     pthread_mutex_lock(&encode_mutex);
-    srcsurface_status[display_order % SURFACE_NUM] = SRC_SURFACE_IN_ENCODING;
+    srcsurface_status[display_order % surface_num] = SRC_SURFACE_IN_ENCODING;
     pthread_mutex_unlock(&encode_mutex);
 }
 
@@ -1952,7 +1957,7 @@ static int encode_frames(void)
     /* upload RAW YUV data into all surfaces */
     tmp = GetTickCount();
     if (srcyuv_fp != NULL) {
-        for (i = 0; i < SURFACE_NUM; i++)
+        for (i = 0; i < surface_num; i++)
             load_surface(src_surface[i], i);
     } else
         upload_source_YUV_once_for_all();
@@ -2034,10 +2039,10 @@ static int release_encode()
 {
     int i;
     
-    vaDestroySurfaces(va_dpy,&src_surface[0],SURFACE_NUM);
-    vaDestroySurfaces(va_dpy,&ref_surface[0],SURFACE_NUM);
+    vaDestroySurfaces(va_dpy,&src_surface[0],surface_num);
+    vaDestroySurfaces(va_dpy,&ref_surface[0],surface_num);
 
-    for (i = 0; i < SURFACE_NUM; i++)
+    for (i = 0; i < surface_num; i++)
         vaDestroyBuffer(va_dpy,coded_buf[i]);
     
     vaDestroyContext(va_dpy,context_id);
@@ -2104,9 +2109,9 @@ static int calc_PSNR(double *psnr)
                 munmap(srcyuv_ptr, fourM);
             if (recyuv_ptr)
                 munmap(recyuv_ptr, fourM);
-            
-            srcyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), i);
-            recyuv_ptr = mmap(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), i);
+
+            srcyuv_ptr = mmap64(0, fourM, PROT_READ, MAP_SHARED, fileno(srcyuv_fp), (off64_t)i);
+            recyuv_ptr = mmap64(0, fourM, PROT_READ, MAP_SHARED, fileno(recyuv_fp), (off64_t)i);
             if ((srcyuv_ptr == MAP_FAILED) || (recyuv_ptr == MAP_FAILED)) {
                 printf("Failed to mmap YUV files\n");
                 return 1;

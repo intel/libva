@@ -115,7 +115,12 @@ typedef struct  _VAEncPictureParameterBufferVP8
     VASurfaceID ref_gf_frame;
     VASurfaceID ref_arf_frame;
 
-    /* buffer to store coded data */
+    /**
+     * \brief Output encoded bitstream.
+     *
+     * \ref coded_buf has type #VAEncCodedBufferType. It should be
+     * large enough to hold the compressed bit stream.
+     */
     VABufferID coded_buf;
 
     union {
@@ -130,8 +135,19 @@ typedef struct  _VAEncPictureParameterBufferVP8
             unsigned int no_ref_arf                     : 1;
             /* The temporal id the frame belongs to. */
             unsigned int temporal_id                    : 8;
-            unsigned int reserved                       : 20;
-        } bits;
+            /**
+             *  following two flags indicate the reference order
+             *  LastRef is specified by 01b;
+             *  GoldRef is specified by 10b;
+             *  AltRef  is specified by 11b;
+             *  first_ref specifies the reference frame which is searched first.
+             *  second_ref specifies the reference frame which is searched second
+             *  if there is.
+             */
+            unsigned int first_ref                      : 2;
+            unsigned int second_ref                     : 2;
+            unsigned int reserved                       : 16;
+    } bits;
         unsigned int value;
     } ref_flags;
 
@@ -150,7 +166,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
             unsigned int loop_filter_type               : 2;
             /* 0: disabled, 1: normal, 2: simple */
             unsigned int auto_partitions                : 1;
-            /* number of token partitions */
+            /* same as log2_nbr_of_dct_partitions in frame header syntax */
             unsigned int num_token_partitions           : 2;
 
             /** 
@@ -307,6 +323,40 @@ typedef struct _VAQMatrixBufferVP8
  * If segmentation is not enabled, the application does not need to provide it. 
  */
 
+/**
+ * \brief VP8 Encoding Information Buffer Structure
+ *
+ * This structure is used to convey status data from encoder to application.
+ * Driver allocates VACodedBufferVP8Status as a private data buffer.
+ * Driver encapsulates the status buffer with a VACodedBufferSegment,
+ * and sets VACodedBufferSegment.status to be VA_CODED_BUF_STATUS_CODEC_SPECIFIC.
+ * And driver associates status data segment to the bit stream buffer segment
+ * by setting VACodedBufferSegment.next of coded_buf (bit stream) to the private
+ * buffer segment of status data.
+ * Application accesses it by calling VAMapBuffer() with VAEncCodedBufferType.
+ *
+ */
+typedef struct _VACodedBufferVP8Status
+{
+    /** Final quantization index used (yac), determined by BRC.
+     *  Application is providing quantization index deltas
+     *  ydc(0), y2dc(1), y2ac(2), uvdc(3), uvac(4) that are applied to all segments
+     *  and segmentation qi deltas, they will not be changed by BRC.
+     */
+    unsigned short quantization_index;
+
+    /** Final loopfilter levels for the frame, if segmentation is disabled
+     *  only index 0 is used.
+     * If loop_filter_level[] is 0, it indicates loop filter is disabled.
+     */
+    char loop_filter_level[4];
+
+    /** Long term reference frame indication from BRC.  BRC recommends the
+     *  current frame that is being queried is a good candidate for a long
+     *  term reference.
+     */
+    unsigned char long_term_indication;
+} VACodedBufferVP8Status;
 
 /**@}*/
 

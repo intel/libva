@@ -247,6 +247,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 int minor;
             } compatible_versions[] = {
                 { VA_MAJOR_VERSION, VA_MINOR_VERSION },
+                { 0, 34 },
                 { 0, 33 },
                 { 0, 32 },
                 { -1, }
@@ -438,7 +439,68 @@ const char *vaErrorStr(VAStatus error_status)
     }
     return "unknown libva error / description missing";
 }
-      
+
+const static char *prefer_driver_list[4] = {
+    "i965",
+    "hybrid",
+    "pvr",
+    "iHD",
+};
+
+VAStatus vaSetDriverName(
+    VADisplay dpy,
+    char *driver_name
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+    char *override_driver_name = NULL;
+    int i, found;
+    ctx = CTX(dpy);
+
+    if (geteuid() != getuid()) {
+        vaStatus = VA_STATUS_ERROR_OPERATION_FAILED;
+        va_errorMessage("no permission to vaSetDriverName\n");
+        return vaStatus;
+    }
+
+    if (strlen(driver_name) == 0 || strlen(driver_name) >=256) {
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        va_errorMessage("vaSetDriverName returns %s\n",
+                         vaErrorStr(vaStatus));
+        return vaStatus;
+    }
+
+    found = 0;
+    for (i = 0; i < sizeof(prefer_driver_list) / sizeof(char *); i++) {
+        if (strlen(prefer_driver_list[i]) != strlen(driver_name))
+            continue;
+        if (!strncmp(prefer_driver_list[i], driver_name, strlen(driver_name))) {
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        va_errorMessage("vaSetDriverName returns %s. Incorrect parameter\n",
+                         vaErrorStr(vaStatus));
+        return vaStatus;
+    }
+
+    override_driver_name = strdup(driver_name);
+
+    if (!override_driver_name) {
+        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+        va_errorMessage("vaSetDriverName returns %s. Out of Memory\n",
+                         vaErrorStr(vaStatus));
+        return vaStatus;
+    }
+
+    ctx->override_driver_name = override_driver_name;
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus vaInitialize (
     VADisplay dpy,
     int *major_version,	 /* out */
@@ -448,8 +510,11 @@ VAStatus vaInitialize (
     const char *driver_name_env = NULL;
     char *driver_name = NULL;
     VAStatus vaStatus;
+    VADriverContextP ctx;
 
     CHECK_DISPLAY(dpy);
+
+    ctx = CTX(dpy);
 
     va_TraceInit(dpy);
 
@@ -458,9 +523,25 @@ VAStatus vaInitialize (
     va_infoMessage("VA-API version %s\n", VA_VERSION_S);
 
     vaStatus = va_getDriverName(dpy, &driver_name);
-    va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
 
-    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+    if (!ctx->override_driver_name) {
+        va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
+
+        driver_name_env = getenv("LIBVA_DRIVER_NAME");
+    } else if (vaStatus == VA_STATUS_SUCCESS) {
+        if (driver_name)
+            free(driver_name);
+
+        driver_name = strdup(ctx->override_driver_name);
+        if (!driver_name) {
+            vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            va_errorMessage("vaInitialize() failed with %s, out of memory\n",
+                        vaErrorStr(vaStatus));
+            return vaStatus;
+        }
+        va_infoMessage("User requested driver '%s'\n", driver_name);
+    }
+
     if ((VA_STATUS_SUCCESS == vaStatus) &&
         driver_name_env && (geteuid() == getuid())) {
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
@@ -514,6 +595,11 @@ VAStatus vaTerminate (
   old_ctx->vtable = NULL;
   free(old_ctx->vtable_vpp);
   old_ctx->vtable_vpp = NULL;
+
+  if (old_ctx->override_driver_name) {
+      free(old_ctx->override_driver_name);
+      old_ctx->override_driver_name = NULL;
+  }
 
   VA_TRACE_LOG(va_TraceTerminate, dpy);
 

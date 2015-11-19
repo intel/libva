@@ -36,7 +36,7 @@
 struct VADriverVTableTPI
 {
     VAStatus (*vaCreateSurfacesWithAttribute) (
-        VADisplay dpy,
+        VADriverContextP ctx,
         int width,
         int height,
         int format,

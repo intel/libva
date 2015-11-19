@@ -10,7 +10,7 @@ LOCAL_SRC_FILES := \
   #putsurface_x11.c
 
 LOCAL_CFLAGS += \
-    -DANDROID
+    -DANDROID -Wno-unused-parameter
 
 LOCAL_C_INCLUDES += \
   $(TARGET_OUT_HEADERS)/libva

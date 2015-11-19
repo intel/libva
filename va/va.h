@@ -271,7 +271,14 @@ typedef struct _VAMotionVector {
 typedef void* VANativeDisplay;	/* window system dependent */
 
 int vaDisplayIsValid(VADisplay dpy);
-    
+
+/**
+ *  Set the override driver name instead of queried driver driver.
+ */
+VAStatus vaSetDriverName(VADisplay dpy,
+                         char *driver_name
+);
+
 /**
  * Initialize the library 
  */
@@ -742,6 +749,12 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_RGB32	0x00020000
 /* RGBP covers RGBP and BGRP fourcc */ 
 #define VA_RT_FORMAT_RGBP	0x00100000
+/** 
+ * RGB 10-bit packed format with upper 2 bits as alpha channel. 
+ * The existing pre-defined fourcc codes can be used to signal 
+ * the position of each component for this RT format.  
+ */
+#define VA_RT_FORMAT_RGB32_10BPP 0x00200000
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
 /** @name Attribute values for VAConfigAttribRateControl */
@@ -3675,6 +3688,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_jpeg.h>
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
+#include <va/va_enc_hevc.h>
 #include <va/va_enc_h264.h>
 #include <va/va_enc_jpeg.h>
 #include <va/va_enc_mpeg2.h>

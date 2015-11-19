@@ -29,7 +29,7 @@ INCLUDES = \
        $(NULL)
 
 h264encode_SOURCES	= h264encode.c
-h264encode_CFLAGS	= -I$(top_srcdir)/test/common -g
+h264encode_CFLAGS	= -I$(top_srcdir)/test/common -g -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
 h264encode_LDADD	= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
