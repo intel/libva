@@ -92,6 +92,8 @@ static int frame_bit_rate = -1;
 static int frame_rate = 30;
 static int ip_period = 1;
 
+static VAEntrypoint select_entrypoint = VAEntrypointEncSlice;
+
 #define MAX_SLICES      32
 
 
@@ -103,6 +105,7 @@ static const struct option longopts[] = {
     {"qp", required_argument, 0, 1},
     {"fb", required_argument, 0, 2},
     {"mode", required_argument, 0, 3},
+    {"low-power", no_argument, 0, 4},
     { NULL, 0, NULL, 0}
 };
 
@@ -194,7 +197,7 @@ static void create_encode_pipe()
                              &num_entrypoints);
 
     for	(slice_entrypoint = 0; slice_entrypoint < num_entrypoints; slice_entrypoint++) {
-        if (entrypoints[slice_entrypoint] == VAEntrypointEncSlice)
+        if (entrypoints[slice_entrypoint] == select_entrypoint)
             break;
     }
 
@@ -206,7 +209,7 @@ static void create_encode_pipe()
     /* find out the format for the render target, and rate control mode */
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
-    vaGetConfigAttributes(va_dpy, avcenc_context.profile, VAEntrypointEncSlice,
+    vaGetConfigAttributes(va_dpy, avcenc_context.profile, select_entrypoint,
                           &attrib[0], 2);
 
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
@@ -223,7 +226,7 @@ static void create_encode_pipe()
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = avcenc_context.rate_control_method; /* set to desired RC mode */
 
-    va_status = vaCreateConfig(va_dpy, avcenc_context.profile, VAEntrypointEncSlice,
+    va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
                                &attrib[0], 2,&avcenc_context.config_id);
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
@@ -1688,7 +1691,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
 
 static void show_help()
 {
-    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)\n");
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)] [--low-power]\n");
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_param,
@@ -1917,6 +1920,10 @@ int main(int argc, char *argv[])
                     return -1;
                 }
 
+                break;
+
+            case 4:     // low-power mode
+                select_entrypoint = VAEntrypointEncSliceLP;
                 break;
 
             default:
