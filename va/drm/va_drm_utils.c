@@ -41,6 +41,8 @@ static const struct driver_name_map g_driver_name_map[] = {
     { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
     { "emgd",       4, "emgd"   }, // Intel ECG PVR driver
     { "hybrid",     6, "hybrid" }, // Intel OTC Hybrid driver
+    { "nouveau",    7, "gallium" }, // Mesa Gallium driver
+    { "radeon",     6, "gallium" }, // Mesa Gallium driver
     { NULL, }
 };
 
