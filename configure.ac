@@ -273,15 +273,16 @@ if test "$enable_wayland" = "yes"; then
     PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version],
         [USE_WAYLAND="yes"], [:])
     if test "$USE_WAYLAND" = "yes"; then
+        m4_ifdef([WAYLAND_SCANNER_RULES],
+            [WAYLAND_SCANNER_RULES(['$(top_builddir)/va/wayland/protocol'])],
+            [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
+
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is built])
     fi
 fi
-AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
 
-m4_ifdef([WAYLAND_SCANNER_RULES],
-    [WAYLAND_SCANNER_RULES(['$(top_builddir)/va/wayland/protocol'])],
-    [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
+AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
 
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
@@ -309,8 +310,6 @@ debian.upstream/libva-drm.install.in
 debian.upstream/libva-egl.install.in
     debian.upstream/libva-glx$LIBVA_MAJOR_VERSION.install:\
 debian.upstream/libva-glx.install.in
-    debian.upstream/libva-wayland$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-wayland.install.in
     debian.upstream/libva-x11-$LIBVA_MAJOR_VERSION.install:\
 debian.upstream/libva-x11.install.in
     doc/Makefile
@@ -320,7 +319,6 @@ debian.upstream/libva-x11.install.in
     pkgconfig/libva-egl.pc
     pkgconfig/libva-glx.pc
     pkgconfig/libva-tpi.pc
-    pkgconfig/libva-wayland.pc
     pkgconfig/libva-x11.pc
     pkgconfig/libva.pc
     test/Makefile
@@ -335,10 +333,18 @@ debian.upstream/libva-x11.install.in
     va/egl/Makefile
     va/glx/Makefile
     va/va_version.h
-    va/wayland/Makefile
-    va/wayland/protocol/Makefile
     va/x11/Makefile
 ])
+
+if test "$USE_WAYLAND" = "yes"; then
+AC_OUTPUT([
+    debian.upstream/libva-wayland$LIBVA_MAJOR_VERSION.install:\
+debian.upstream/libva-wayland.install.in
+    pkgconfig/libva-wayland.pc
+    va/wayland/Makefile
+    va/wayland/protocol/Makefile
+])
+fi
 
 # Print a small summary
 BACKENDS=""
