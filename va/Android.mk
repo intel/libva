@@ -25,8 +25,9 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-LIBVA_DRIVERS_PATH_32 = /system/vendor/lib
-LIBVA_DRIVERS_PATH_64 = /system/vendor/lib64
+# colon-separated search list for *_drv_video.so library.
+LIBVA_DRIVERS_PATH_32 = /vendor/lib:/system/lib
+LIBVA_DRIVERS_PATH_64 = /vendor/lib64:/system/lib64
 
 # Version set to Android Jelly Bean
 ALOG_VERSION_REQ := 4.1
