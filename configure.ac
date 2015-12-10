@@ -310,6 +310,8 @@ debian.upstream/libva-drm.install.in
 debian.upstream/libva-egl.install.in
     debian.upstream/libva-glx$LIBVA_MAJOR_VERSION.install:\
 debian.upstream/libva-glx.install.in
+    debian.upstream/libva-wayland$LIBVA_MAJOR_VERSION.install:\
+debian.upstream/libva-wayland.install.in
     debian.upstream/libva-x11-$LIBVA_MAJOR_VERSION.install:\
 debian.upstream/libva-x11.install.in
     doc/Makefile
@@ -319,6 +321,7 @@ debian.upstream/libva-x11.install.in
     pkgconfig/libva-egl.pc
     pkgconfig/libva-glx.pc
     pkgconfig/libva-tpi.pc
+    pkgconfig/libva-wayland.pc
     pkgconfig/libva-x11.pc
     pkgconfig/libva.pc
     test/Makefile
@@ -333,18 +336,10 @@ debian.upstream/libva-x11.install.in
     va/egl/Makefile
     va/glx/Makefile
     va/va_version.h
-    va/x11/Makefile
-])
-
-if test "$USE_WAYLAND" = "yes"; then
-AC_OUTPUT([
-    debian.upstream/libva-wayland$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-wayland.install.in
-    pkgconfig/libva-wayland.pc
     va/wayland/Makefile
     va/wayland/protocol/Makefile
+    va/x11/Makefile
 ])
-fi
 
 # Print a small summary
 BACKENDS=""
