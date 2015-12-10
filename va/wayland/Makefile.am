@@ -20,8 +20,6 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = protocol
-
 AM_CPPFLAGS = \
 	-DLINUX			\
 	-I$(top_srcdir)		\
@@ -60,7 +58,12 @@ noinst_HEADERS			= $(source_h_priv)
 
 # Wayland protocol
 va_wayland_drm.c: $(protocol_source_h)
-@wayland_scanner_rules@
+%-client-protocol.h : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
+
+EXTRA_DIST = \
+	wayland-drm.xml         \
+	$(NULL)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in

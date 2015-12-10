@@ -273,9 +273,10 @@ if test "$enable_wayland" = "yes"; then
     PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version],
         [USE_WAYLAND="yes"], [:])
     if test "$USE_WAYLAND" = "yes"; then
-        m4_ifdef([WAYLAND_SCANNER_RULES],
-            [WAYLAND_SCANNER_RULES(['$(top_builddir)/va/wayland/protocol'])],
-            [wayland_scanner_rules=""; AC_SUBST(wayland_scanner_rules)])
+
+        WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
+        AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
+                     [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
 
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is built])
@@ -337,7 +338,6 @@ debian.upstream/libva-x11.install.in
     va/glx/Makefile
     va/va_version.h
     va/wayland/Makefile
-    va/wayland/protocol/Makefile
     va/x11/Makefile
 ])
 
