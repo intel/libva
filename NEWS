@@ -1,10 +1,10 @@
-libva NEWS -- summary of user visible changes.  2015-12-xx
+libva NEWS -- summary of user visible changes.  2015-12-15
 Copyright (C) 2009-2015 Intel Corporation
 
-Version 1.6.2 - DD.Dec.2015
+Version 1.6.2 - 15.Dec.2015
 * Bump VA API version to 0.38.1
-* Add 10-bit YUV RT format
-* Add new fourcc codes
+* Add new RT format for 16 bits per channel memory layout(P010,P016): VA_RT_FORMAT_YUV420_10BPP
+* Add new fourcc codes: VA_FOURCC_P010, VA_FOURCC_P016, VA_FOURCC_YV16
 * Fix crash if user doesn't have right to access the DRI device
 * Fix uninitialized x11_screen driver context member for X11 output
   https://bugs.freedesktop.org/show_bug.cgi?id=61603
