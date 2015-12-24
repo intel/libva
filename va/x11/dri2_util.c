@@ -95,8 +95,9 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     if (dri2_drawable->has_backbuffer) {
         if (gsDRI2SwapAvailable) {
             CARD64 ret;
-            VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable, 0, 0,
-                               0, &ret);
+            VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable,
+			       0, 1, 0,
+			       &ret);
         } else {
             xrect.x = 0;
             xrect.y = 0;
