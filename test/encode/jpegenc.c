@@ -968,7 +968,7 @@ int main(int argc, char *argv[])
         default: {
             printf("Unsupported format:\n");
             show_help();
-            break;
+            return -1;
         }
         
     }
