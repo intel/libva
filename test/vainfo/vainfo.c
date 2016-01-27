@@ -61,6 +61,9 @@ static char * profile_string(VAProfile profile)
             case VAProfileHEVCMain: return "VAProfileHEVCMain";
             case VAProfileHEVCMain10: return "VAProfileHEVCMain10";
             case VAProfileVP9Profile0: return "VAProfileVP9Profile0";
+            case VAProfileVP9Profile1: return "VAProfileVP9Profile1";
+            case VAProfileVP9Profile2: return "VAProfileVP9Profile2";
+            case VAProfileVP9Profile3: return "VAProfileVP9Profile3";
 
             default:
                 break;
