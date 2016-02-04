@@ -91,6 +91,7 @@ static int intra_period = 30;
 static int frame_bit_rate = -1;
 static int frame_rate = 30;
 static int ip_period = 1;
+static int roi_test_enable = 0;
 
 static VAEntrypoint select_entrypoint = VAEntrypointEncSlice;
 
@@ -106,6 +107,7 @@ static const struct option longopts[] = {
     {"fb", required_argument, 0, 2},
     {"mode", required_argument, 0, 3},
     {"low-power", no_argument, 0, 4},
+    {"roi-test", no_argument, 0, 5},
     { NULL, 0, NULL, 0}
 };
 
@@ -154,6 +156,7 @@ static struct {
     VABufferID packed_sei_header_param_buf_id;   /* the SEI buffer */
     VABufferID packed_sei_buf_id;
     VABufferID misc_parameter_hrd_buf_id;
+    VABufferID misc_parameter_roi_buf_id;
 
     int num_slices;
     int codedbuf_i_size;
@@ -185,7 +188,7 @@ static void create_encode_pipe()
 {
     VAEntrypoint entrypoints[5];
     int num_entrypoints,slice_entrypoint;
-    VAConfigAttrib attrib[2];
+    VAConfigAttrib attrib[3];
     int major_ver, minor_ver;
     VAStatus va_status;
 
@@ -209,8 +212,11 @@ static void create_encode_pipe()
     /* find out the format for the render target, and rate control mode */
     attrib[0].type = VAConfigAttribRTFormat;
     attrib[1].type = VAConfigAttribRateControl;
+
+    /* This is to query whether the ROI is supported */
+    attrib[2].type = VAConfigAttribEncROI;
     vaGetConfigAttributes(va_dpy, avcenc_context.profile, select_entrypoint,
-                          &attrib[0], 2);
+                          &attrib[0], 3);
 
     if ((attrib[0].value & VA_RT_FORMAT_YUV420) == 0) {
         /* not find desired YUV420 RT format */
@@ -223,11 +229,30 @@ static void create_encode_pipe()
         assert(0);
     }
 
+    if (roi_test_enable){
+        if (attrib[2].value != VA_ATTRIB_NOT_SUPPORTED) {
+            VAConfigAttribValEncROI *roi_config = (VAConfigAttribValEncROI *)&(attrib[2].value);
+            if(roi_config->bits.num_roi_regions == 0 ||
+               roi_config->bits.roi_rc_qp_delat_support == 0) {
+                roi_test_enable = 0;
+                printf("WARNING: do not support ROI or ROI delta QP ! \n");
+            }
+        } else {
+            roi_test_enable = 0;
+            printf("WARNING: do not support VAConfigAttribValEncROI! \n");
+        }
+    }
+
     attrib[0].value = VA_RT_FORMAT_YUV420; /* set to desired RT format */
     attrib[1].value = avcenc_context.rate_control_method; /* set to desired RC mode */
 
-    va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
-                               &attrib[0], 2,&avcenc_context.config_id);
+    if (roi_test_enable){
+        va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
+                                   &attrib[0], 3,&avcenc_context.config_id);
+    }else {
+        va_status = vaCreateConfig(va_dpy, avcenc_context.profile, select_entrypoint,
+                                   &attrib[0], 2,&avcenc_context.config_id);
+    }
     CHECK_VASTATUS(va_status, "vaCreateConfig");
 
     /* Create a context for this decode pipe */
@@ -814,13 +839,65 @@ static int begin_picture(FILE *yuv_fp, int frame_num, int display_num, int slice
 
     vaUnmapBuffer(va_dpy, avcenc_context.misc_parameter_hrd_buf_id);
 
+    /* ROI parameter: hard code for test on only one region (0,0,120,120) with qp_delta=4 */
+    if(roi_test_enable)
+    {
+        VAEncMiscParameterBufferROI *misc_roi_param;
+
+        int roi_num = 1;
+        vaCreateBuffer(va_dpy,
+            avcenc_context.context_id,
+            VAEncMiscParameterBufferType,
+            sizeof(VAEncMiscParameterBuffer) + sizeof(VAEncMiscParameterBufferROI) + roi_num * sizeof(VAEncROI),
+            1,
+            NULL,
+            &avcenc_context.misc_parameter_roi_buf_id);
+        vaMapBuffer(va_dpy,
+            avcenc_context.misc_parameter_roi_buf_id,
+            (void **)&misc_param);
+        misc_param->type = VAEncMiscParameterTypeROI;
+        misc_roi_param = (VAEncMiscParameterBufferROI *)misc_param->data;
+        {
+            misc_roi_param->roi_flags.bits.roi_value_is_qp_delta = 1;
+            /*
+            * Max/Min delta_qp is only used in CBR mode. It is ingored under CQP mode.
+            * max_delta_qp means the allowed upper bound of qp delta. (qp + X)
+            * min_delta_qp means the allowed lower bound of qp delta. (qp -X)
+            * So it will be better that it is positive. Otherwise the driver will
+            * use the default bound setting.
+            */
+            misc_roi_param->max_delta_qp = 3;
+            misc_roi_param->min_delta_qp = 3;
+            /* one example of ROI region conf.
+            * please change it on the fly.
+            */
+            VAEncROI *region_roi =(VAEncROI *)((char *)misc_param + sizeof(VAEncMiscParameterBuffer) +
+                sizeof(VAEncMiscParameterBufferROI));
+
+            /*
+            * Under CQP mode roi_value specifies the qp_delta that is added to frame qp
+            * Under CBR mode roi_value specifies the important level (positive means that
+            * it is important. negative means that it is less important).
+            */
+            region_roi->roi_value = 4;
+            region_roi->roi_rectangle.x = 0;
+            region_roi->roi_rectangle.y = 0;
+            region_roi->roi_rectangle.width = (120 < picture_width/4)? 120:picture_width/4;
+            region_roi->roi_rectangle.height = (120 < picture_height/4)? 120:picture_height/4;
+
+            misc_roi_param->roi = region_roi;
+            misc_roi_param->num_roi = 1;
+        }
+
+        vaUnmapBuffer(va_dpy, avcenc_context.misc_parameter_roi_buf_id);
+    }
     return 0;
 }
 
 int avcenc_render_picture()
 {
     VAStatus va_status;
-    VABufferID va_buffers[10];
+    VABufferID va_buffers[20];
     unsigned int num_va_buffers = 0;
     int i;
 
@@ -847,6 +924,9 @@ int avcenc_render_picture()
 
     if (avcenc_context.misc_parameter_hrd_buf_id != VA_INVALID_ID)
         va_buffers[num_va_buffers++] =  avcenc_context.misc_parameter_hrd_buf_id;
+
+    if (avcenc_context.misc_parameter_roi_buf_id != VA_INVALID_ID)
+        va_buffers[num_va_buffers++] =  avcenc_context.misc_parameter_roi_buf_id;
 
     va_status = vaBeginPicture(va_dpy,
                                avcenc_context.context_id,
@@ -904,6 +984,7 @@ static void end_picture()
     avcenc_destroy_buffers(&avcenc_context.slice_param_buf_id[0], avcenc_context.num_slices);
     avcenc_destroy_buffers(&avcenc_context.codedbuf_buf_id, 1);
     avcenc_destroy_buffers(&avcenc_context.misc_parameter_hrd_buf_id, 1);
+    avcenc_destroy_buffers(&avcenc_context.misc_parameter_roi_buf_id, 1);
 
     memset(avcenc_context.slice_param, 0, sizeof(avcenc_context.slice_param));
     avcenc_context.num_slices = 0;
@@ -1693,7 +1774,7 @@ encode_picture(FILE *yuv_fp, FILE *avc_fp,
 
 static void show_help()
 {
-    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)] [--low-power]\n");
+    printf("Usage: avnenc <width> <height> <input_yuvfile> <output_avcfile> [--qp=qpvalue|--fb=framebitrate] [--mode=0(I frames only)/1(I and P frames)/2(I, P and B frames)] [--low-power] [--roi-test]\n");
 }
 
 static void avcenc_context_seq_param_init(VAEncSequenceParameterBufferH264 *seq_param,
@@ -1833,6 +1914,7 @@ static void avcenc_context_init(int width, int height)
     avcenc_context.upload_thread_value = -1;
     avcenc_context.packed_sei_header_param_buf_id = VA_INVALID_ID;
     avcenc_context.packed_sei_buf_id = VA_INVALID_ID;
+    avcenc_context.misc_parameter_roi_buf_id = VA_INVALID_ID;
 
     if (qp_value == -1)
         avcenc_context.rate_control_method = VA_RC_CBR;
@@ -1926,6 +2008,10 @@ int main(int argc, char *argv[])
 
             case 4:     // low-power mode
                 select_entrypoint = VAEntrypointEncSliceLP;
+                break;
+
+            case 5:     // roi-test enable/disable
+                roi_test_enable = 1;
                 break;
 
             default:
