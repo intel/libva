@@ -191,18 +191,40 @@ static int check_extension(const char *name, const char *ext)
     return 0;
 }
 
+static int check_extension3(const char *name)
+{
+    int nbExtensions, i;
+    PFNGLGETSTRINGIPROC glGetStringi = 0;
+
+    glGetStringi = (PFNGLGETSTRINGIPROC) get_proc_address("glGetStringi");
+    if(!glGetStringi)
+        return 0;
+
+
+    glGetIntegerv(GL_NUM_EXTENSIONS, &nbExtensions);
+    for(i = 0; i < nbExtensions; i++)
+    {
+        const GLubyte *strExtension = glGetStringi(GL_EXTENSIONS, i);
+        if(strcmp(strExtension, (const GLubyte *)name) == 0)
+            return 1;
+    }
+
+    return 0;
+}
+
 static int check_tfp_extensions(VADriverContextP ctx)
 {
     const char *gl_extensions;
     const char *glx_extensions;
 
     gl_extensions = (const char *)glGetString(GL_EXTENSIONS);
-    if (!check_extension("GL_ARB_texture_non_power_of_two", gl_extensions))
+    if (!check_extension("GL_ARB_texture_non_power_of_two", gl_extensions) && !check_extension3("GL_ARB_texture_non_power_of_two"))
         return 0;
 
     glx_extensions = glXQueryExtensionsString(ctx->native_dpy, ctx->x11_screen);
     if (!check_extension("GLX_EXT_texture_from_pixmap", glx_extensions))
         return 0;
+
     return 1;
 }
 
@@ -211,10 +233,11 @@ static int check_fbo_extensions(VADriverContextP ctx)
     const char *gl_extensions;
 
     gl_extensions = (const char *)glGetString(GL_EXTENSIONS);
-    if (check_extension("GL_ARB_framebuffer_object", gl_extensions))
+    if (check_extension("GL_ARB_framebuffer_object", gl_extensions) || check_extension3("GL_ARB_framebuffer_object"))
         return 1;
-    if (check_extension("GL_EXT_framebuffer_object", gl_extensions))
+    if (check_extension("GL_EXT_framebuffer_object", gl_extensions) || check_extension3("GL_EXT_framebuffer_object"))
         return 1;
+
     return 0;
 }
 
