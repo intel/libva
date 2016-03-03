@@ -1,5 +1,18 @@
-libva NEWS -- summary of user visible changes.  2015-09-09
+libva NEWS -- summary of user visible changes.  2015-12-15
 Copyright (C) 2009-2015 Intel Corporation
+
+Version 1.6.2 - 15.Dec.2015
+* Bump VA API version to 0.38.1
+* Add new RT format for 16 bits per channel memory layout(P010,P016): VA_RT_FORMAT_YUV420_10BPP
+* Add new fourcc codes: VA_FOURCC_P010, VA_FOURCC_P016, VA_FOURCC_YV16
+* Fix crash if user doesn't have right to access the DRI device
+* Fix uninitialized x11_screen driver context member for X11 output
+  https://bugs.freedesktop.org/show_bug.cgi?id=61603
+* Fix the issue of not to use LIBVA_DRIVER_NAME
+  https://bugs.freedesktop.org/show_bug.cgi?id=72822
+* Fix build issue with wayland
+  https://bugs.freedesktop.org/show_bug.cgi?id=79478
+* vainfo: Add option '--display'
 
 Version 1.6.1 - 09.Sep.2015
 * Add support for VP9 decode and HEVC encode in VA trace module
