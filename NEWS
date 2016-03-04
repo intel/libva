@@ -1,5 +1,11 @@
-libva NEWS -- summary of user visible changes.  2015-12-15
+libva NEWS -- summary of user visible changes.  2016-03-xx
 Copyright (C) 2009-2015 Intel Corporation
+
+Version 1.7.0 - DD.Mar.2016
+* Bump VA API version to 0.39
+* Add support for VP9 10bit decode API
+* Allow libva to load the vaapi driver provided by Mesa Gallium for nouveau and radeon
+* Fix libva-glx against OpenGL 3.1 or above
 
 Version 1.6.2 - 15.Dec.2015
 * Bump VA API version to 0.38.1
