@@ -47,7 +47,7 @@ static void close_display(void *win_display);
 static int create_window(void *win_display, int x, int y, int width, int height);
 static int check_window_event(void *x11_display, void *win, int *width, int *height, int *quit);
 
-#define CAST_DRAWABLE(a)  static_cast<ANativeWindow *>((void *)(*(unsigned int *)a))
+#define CAST_DRAWABLE(a)  static_cast<ANativeWindow *>((void *)(*(unsigned long *)a))
 #include "putsurface_common.c"
 
 static void *open_display()
