@@ -585,6 +585,7 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
         /**@{*/
         struct {
             union {
+                char dummy;
             } bits;
             unsigned int value;
         } inter_fields;
