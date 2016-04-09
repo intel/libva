@@ -168,7 +168,7 @@ dri2Close(VADriverContextP ctx)
 
     free_drawable_hashtable(ctx);
 
-    if (dri_state->base.fd >= 0);
+    if (dri_state->base.fd >= 0)
 	close(dri_state->base.fd);
 }
 
