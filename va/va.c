@@ -740,10 +740,16 @@ VAStatus vaDestroyConfig (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus = VA_STATUS_SUCCESS;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaDestroyConfig ( ctx, config_id );
+  vaStatus = ctx->vtable->vaDestroyConfig ( ctx, config_id );
+
+  VA_TRACE_ALL(va_TraceDestroyConfig, dpy, config_id);
+
+  return vaStatus;
 }
 
 VAStatus vaQueryConfigAttributes (
@@ -1015,10 +1021,16 @@ VAStatus vaDestroyContext (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaDestroyContext( ctx, context );
+  vaStatus = ctx->vtable->vaDestroyContext( ctx, context );
+
+  VA_TRACE_ALL(va_TraceDestroyContext, dpy, context);
+
+  return vaStatus;
 }
 
 VAStatus vaCreateBuffer (
