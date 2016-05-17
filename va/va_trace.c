@@ -228,6 +228,11 @@ struct va_trace {
 
 #define TRACE_FUNCNAME(idx)    va_TraceMsg(trace_ctx, "==========%s\n", __func__); 
 
+#define TRACE_NEWLINE() do { \
+    va_TracePrint(trace_ctx, "\n"); \
+    va_TraceMsg(trace_ctx, "") ; \
+} while (0)
+
 /* Prototype declarations (functions defined in va.c) */
 
 void va_errorMessage(const char *msg, ...);
@@ -1643,7 +1648,7 @@ static void va_TraceVABuffers(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
     
-    va_TraceMsg(trace_ctx, "--%s\n", buffer_type_to_string(type));
+    va_TracePrint(trace_ctx, "--%s\n", buffer_type_to_string(type));
 
     if(trace_ctx->plog_file)
         fp = trace_ctx->plog_file->fp_log;
@@ -2097,7 +2102,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
-    va_TraceMsg(trace_ctx, "VAPictureParameterBufferHEVC\n");
+    va_TracePrint(trace_ctx, "VAPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
     va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.pic_order_cnt);
@@ -2165,19 +2170,21 @@ static void va_TraceVAPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tnum_tile_rows_minus1 = %d\n", p->num_tile_rows_minus1);
 
     va_TraceMsg(trace_ctx, "\tcolumn_width_minus1[19]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 19; i++) {
-        va_TraceMsg(trace_ctx, "\t%d", p->column_width_minus1[i]);
+        va_TracePrint(trace_ctx, "\t%d", p->column_width_minus1[i]);
         if ((i + 1) % 8 == 0)
-            va_TraceMsg(trace_ctx, "\n");
+            TRACE_NEWLINE();
     }
-    va_TraceMsg(trace_ctx, "\n");
+    va_TracePrint(trace_ctx, "\n");
     va_TraceMsg(trace_ctx, "\trow_height_minus1[21]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 21; i++) {
-        va_TraceMsg(trace_ctx, "\t%d", p->row_height_minus1[i]);
+        va_TracePrint(trace_ctx, "\t%d", p->row_height_minus1[i]);
         if ((i + 1) % 8 == 0)
-            va_TraceMsg(trace_ctx, "\n");
+            TRACE_NEWLINE();
     }
-    va_TraceMsg(trace_ctx, "\n");
+    va_TracePrint(trace_ctx, "\n");
 
     va_TraceMsg(trace_ctx, "\tslice_parsing_fields = %d\n", p->slice_parsing_fields.value);
     va_TraceMsg(trace_ctx, "\tlists_modification_present_flag = %d\n", p->slice_parsing_fields.bits.lists_modification_present_flag);
@@ -2226,7 +2233,7 @@ static void va_TraceVASliceParameterBufferHEVC(
     trace_ctx->trace_slice_no++;
     trace_ctx->trace_slice_size = p->slice_data_size;
 
-    va_TraceMsg(trace_ctx, "VASliceParameterBufferHEVC\n");
+    va_TracePrint(trace_ctx, "VASliceParameterBufferHEVC\n");
     va_TraceMsg(trace_ctx, "\tslice_data_size = %d\n", p->slice_data_size);
     va_TraceMsg(trace_ctx, "\tslice_data_offset = %d\n", p->slice_data_offset);
     va_TraceMsg(trace_ctx, "\tslice_data_flag = %d\n", p->slice_data_flag);
@@ -2234,16 +2241,17 @@ static void va_TraceVASliceParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tslice_segment_address = %d\n", p->slice_segment_address);
 
     va_TraceMsg(trace_ctx, "\tRefPicList[2][15]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 15; j++) {
-            va_TraceMsg(trace_ctx, "\t%d", p->RefPicList[i][j]);
-            if ((i*8 + j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+            va_TracePrint(trace_ctx, "\t%d", p->RefPicList[i][j]);
+            if ((j + 1) % 8 == 0)
+                TRACE_NEWLINE();
         }
+        TRACE_NEWLINE();
     }
-    va_TraceMsg(trace_ctx, "\n");
 
-    va_TraceMsg(trace_ctx, "\tLongSliceFlags.value = %d\n", p->LongSliceFlags.value);
+    va_TracePrint(trace_ctx, "\tLongSliceFlags.value = %d\n", p->LongSliceFlags.value);
     va_TraceMsg(trace_ctx, "\tLongSliceFlags.fields.LastSliceOfPic = %d\n", p->LongSliceFlags.fields.LastSliceOfPic);
     va_TraceMsg(trace_ctx, "\tLongSliceFlags.fields.dependent_slice_segment_flag = %d\n", p->LongSliceFlags.fields.dependent_slice_segment_flag);
     va_TraceMsg(trace_ctx, "\tLongSliceFlags.fields.slice_type = %d\n", p->LongSliceFlags.fields.slice_type);
@@ -2270,24 +2278,24 @@ static void va_TraceVASliceParameterBufferHEVC(
 
     va_TraceMsg(trace_ctx, "\tnum_ref_idx_l0_active_minus1 = %d\n", p->num_ref_idx_l0_active_minus1);
     for (i = 0; i <=  p->num_ref_idx_l0_active_minus1; i++) {
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_luma_weight_l0[i]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->luma_offset_l0[i]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_chroma_weight_l0[i][0]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_chroma_weight_l0[i][1]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->ChromaOffsetL0[i][0]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->ChromaOffsetL0[i][1]);
-        va_TraceMsg(trace_ctx, "\n");
+        va_TraceMsg(trace_ctx, "\t% d ", p->delta_luma_weight_l0[i]);
+        va_TracePrint(trace_ctx, "\t% d ", p->luma_offset_l0[i]);
+        va_TracePrint(trace_ctx, "\t% d ", p->delta_chroma_weight_l0[i][0]);
+        va_TracePrint(trace_ctx, "\t% d ", p->delta_chroma_weight_l0[i][1]);
+        va_TracePrint(trace_ctx, "\t% d ", p->ChromaOffsetL0[i][0]);
+        va_TracePrint(trace_ctx, "\t% d ", p->ChromaOffsetL0[i][1]);
+        va_TracePrint(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tnum_ref_idx_l1_active_minus1 = %d\n", p->num_ref_idx_l1_active_minus1);
     for (i = 0; i <=  p->num_ref_idx_l1_active_minus1; i++) {
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_luma_weight_l1[i]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->luma_offset_l1[i]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_chroma_weight_l1[i][0]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->delta_chroma_weight_l1[i][1]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->ChromaOffsetL1[i][0]);
-        va_TraceMsg(trace_ctx, "\t%d ", p->ChromaOffsetL1[i][1]);
-        va_TraceMsg(trace_ctx, "\n");
+        va_TraceMsg(trace_ctx, "\t% d ", p->delta_luma_weight_l1[i]);
+        va_TracePrint(trace_ctx, "\t% d ", p->luma_offset_l1[i]);
+        va_TracePrint(trace_ctx, "\t% d ", p->delta_chroma_weight_l1[i][0]);
+        va_TracePrint(trace_ctx, "\t% d ", p->delta_chroma_weight_l1[i][1]);
+        va_TracePrint(trace_ctx, "\t% d ", p->ChromaOffsetL1[i][0]);
+        va_TracePrint(trace_ctx, "\t% d ", p->ChromaOffsetL1[i][1]);
+        va_TracePrint(trace_ctx, "\n");
     }
 
     va_TraceMsg(trace_ctx, "\tfive_minus_max_num_merge_cand = %d\n", p->five_minus_max_num_merge_cand);
@@ -2310,52 +2318,60 @@ static void va_TraceVAIQMatrixBufferHEVC(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
-    va_TraceMsg(trace_ctx, "VAIQMatrixBufferHEVC\n");
+    va_TracePrint(trace_ctx, "VAIQMatrixBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tScalingList4x4[6][16]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 6; i++) {
         for (j = 0; j < 16; j++) {
-            va_TraceMsg(trace_ctx, "\t%d\t", p->ScalingList4x4[i][j]);
+            va_TracePrint(trace_ctx, "\t%d\t", p->ScalingList4x4[i][j]);
             if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+                TRACE_NEWLINE();
         }
     }
 
-    va_TraceMsg(trace_ctx, "\tScalingList8x8[6][64]=\n");
+    va_TracePrint(trace_ctx, "\tScalingList8x8[6][64]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 6; i++) {
         for (j = 0; j < 64; j++) {
-            va_TraceMsg(trace_ctx, "\t%d", p->ScalingList8x8[i][j]);
+            va_TracePrint(trace_ctx, "\t%d", p->ScalingList8x8[i][j]);
             if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+                TRACE_NEWLINE();
         }
     }
 
-    va_TraceMsg(trace_ctx, "\tScalingList16x16[6][64]=\n");
+    va_TracePrint(trace_ctx, "\tScalingList16x16[6][64]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 6; i++) {
         for (j = 0; j < 64; j++) {
-            va_TraceMsg(trace_ctx, "\t%d", p->ScalingList16x16[i][j]);
+            va_TracePrint(trace_ctx, "\t%d", p->ScalingList16x16[i][j]);
             if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+                TRACE_NEWLINE();
         }
     }
 
-    va_TraceMsg(trace_ctx, "\tScalingList32x32[2][64]=\n");
+    va_TracePrint(trace_ctx, "\tScalingList32x32[2][64]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 64; j++) {
-            va_TraceMsg(trace_ctx, "\t%d", p->ScalingList32x32[i][j]);
+            va_TracePrint(trace_ctx, "\t%d", p->ScalingList32x32[i][j]);
             if ((j + 1) % 8 == 0)
-                va_TraceMsg(trace_ctx, "\n");
+                TRACE_NEWLINE();
         }
     }
 
-    va_TraceMsg(trace_ctx, "\tScalingListDC16x16[6]=\n");
+    va_TracePrint(trace_ctx, "\tScalingListDC16x16[6]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (j = 0; j < 6; j++) {
-        va_TraceMsg(trace_ctx, "\t%d", p->ScalingListDC16x16[j]);
+        va_TracePrint(trace_ctx, "\t%d", p->ScalingListDC16x16[j]);
     }
+    va_TracePrint(trace_ctx, "\n");
     va_TraceMsg(trace_ctx, "\tScalingListDC32x32[2]=\n");
+    va_TraceMsg(trace_ctx, "");
     for (j = 0; j < 2; j++) {
-        va_TraceMsg(trace_ctx, "\t%d", p->ScalingListDC32x32[j]);
+        va_TracePrint(trace_ctx, "\t%d", p->ScalingListDC32x32[j]);
     }
+    va_TracePrint(trace_ctx, "\n");
 
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -2376,7 +2392,7 @@ static void va_TraceVAEncSequenceParameterBufferHEVC(
     if(!p)
         return;
 
-    va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferHEVC\n");
+    va_TracePrint(trace_ctx, "\t--VAEncSequenceParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tgeneral_profile_idc = %d\n", p->general_profile_idc);
     va_TraceMsg(trace_ctx, "\tgeneral_level_idc = %d\n", p->general_level_idc);
@@ -2449,7 +2465,7 @@ static void va_TraceVAEncPictureParameterBufferHEVC(
     if(!p)
         return;
 
-    va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferHEVC\n");
+    va_TracePrint(trace_ctx, "\t--VAEncPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.picture_id = %d\n", p->decoded_curr_pic.picture_id);
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.pic_order_cnt = %d\n", p->decoded_curr_pic.pic_order_cnt);
@@ -2529,7 +2545,7 @@ static void va_TraceVAEncSliceParameterBufferHEVC(
     if(!p)
         return;
 
-    va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferHEVC\n");
+    va_TracePrint(trace_ctx, "\t--VAEncSliceParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tslice_segment_address = %d\n", p->slice_segment_address);
     va_TraceMsg(trace_ctx, "\tnum_ctu_in_slice = %d\n", p->num_ctu_in_slice);
