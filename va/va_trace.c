@@ -877,10 +877,9 @@ void va_TraceEnd(VADisplay dpy)
     ((VADisplayContextP)dpy)->vatrace = NULL;
 }
 
-static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
+static void va_TraceVPrint(struct trace_context *trace_ctx, const char *msg, va_list args)
 {
     FILE *fp = NULL;
-    va_list args;
 
     if (!(trace_flag & VA_TRACE_FLAG_LOG)
         || !trace_ctx->plog_file)
@@ -888,23 +887,42 @@ static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
 
     fp = trace_ctx->plog_file->fp_log;
     if (msg)  {
-        struct timeval tv;
-
-        if (gettimeofday(&tv, NULL) == 0)
-            fprintf(fp, "[%04d.%06d]",
-                (unsigned int)tv.tv_sec & 0xffff, (unsigned int)tv.tv_usec);
-
-        if(trace_ctx->trace_context != VA_INVALID_ID)
-            fprintf(fp,
-                "[ctx 0x%08x]", trace_ctx->trace_context);
-        else
-            fprintf(fp, "[ctx       none]");
-
-        va_start(args, msg);
         vfprintf(fp, msg, args);
-        va_end(args);
     } else
         fflush(fp);
+}
+
+static void va_TracePrint(struct trace_context *trace_ctx, const char *msg, ...)
+{
+    va_list args;
+    va_start(args, msg);
+    va_TraceVPrint(trace_ctx, msg, args);
+    va_end(args);
+}
+
+static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
+{
+    va_list args;
+    struct timeval tv;
+
+    if (!msg) {
+        va_TracePrint(trace_ctx, msg);
+        return;
+    }
+
+    if (gettimeofday(&tv, NULL) == 0)
+        va_TracePrint(trace_ctx, "[%04d.%06d]",
+            (unsigned int)tv.tv_sec & 0xffff, (unsigned int)tv.tv_usec);
+
+    if(trace_ctx->trace_context != VA_INVALID_ID)
+        va_TracePrint(trace_ctx,
+            "[ctx 0x%08x]", trace_ctx->trace_context);
+    else
+        va_TracePrint(trace_ctx, "[ctx       none]");
+
+    va_start(args, msg);
+    va_TraceVPrint(trace_ctx, msg, args);
+    va_end(args);
 }
 
 static void va_TraceSurface(VADisplay dpy, VAContextID context)
