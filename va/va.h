@@ -2945,6 +2945,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_enc_jpeg.h>
 #include <va/va_enc_mpeg2.h>
 #include <va/va_enc_vp8.h>
+#include <va/va_enc_vp9.h>
 #include <va/va_vpp.h>
 
 /**@}*/

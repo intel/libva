@@ -74,6 +74,7 @@ LOCAL_COPY_HEADERS := \
 	va_enc_hevc.h \
 	va_enc_jpeg.h \
 	va_enc_vp8.h \
+	va_enc_vp9.h \
 	va_dec_vp9.h \
 	va_version.h
 
