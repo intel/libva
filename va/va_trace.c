@@ -501,7 +501,10 @@ static void FILE_NAME_SUFFIX(
     int tmp = strnlen(env_value, max_size);
     int left = max_size - tmp;
     struct timeval tv;
-    int size = strlen(suffix_str);
+    int size = 0;
+
+    if (suffix_str)
+        strlen(suffix_str);
 
     if(left < (size + 8 + 10))
         return;
@@ -735,8 +738,12 @@ void va_TraceInit(VADisplay dpy)
     struct va_trace *pva_trace = calloc(sizeof(struct va_trace), 1);
     struct trace_context *trace_ctx = calloc(sizeof(struct trace_context), 1);
 
-    if (pva_trace == NULL || trace_ctx == NULL)
+    if (pva_trace == NULL || trace_ctx == NULL) {
+        free(pva_trace);
+        free(trace_ctx);
+
         return;
+    }
 
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         pva_trace->fn_log_env = strdup(env_value);
@@ -1474,6 +1481,9 @@ void va_TraceCreateBuffer (
     VABufferID *buf_id		/* out */
 )
 {
+    if (!buf_id || *buf_id == VA_INVALID_ID)
+        return;
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     add_trace_buf_info(pva_trace, context, *buf_id);
@@ -1503,7 +1513,10 @@ void va_TraceDestroyBuffer (
     
     VACodedBufferSegment *buf_list;
     int i = 0;
-    
+
+    if (buf_id == VA_INVALID_ID)
+        return;
+
     DPY2TRACECTX(dpy, VA_INVALID_ID, buf_id);
 
     vaBufferInfo(dpy, trace_ctx->trace_context, buf_id, &type, &size, &num_elements);    
