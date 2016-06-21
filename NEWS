@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2016-06-xx
+libva NEWS -- summary of user visible changes.  2016-06-21
 Copyright (C) 2009-2016 Intel Corporation
 
-Version 1.7.1 - DD.Jun.2016
+Version 1.7.1 - 21.Jun.2016
 * Bump VA API version to 0.39.2
 * API: add support for VP9 8bit encode
 * API: add support for low power/high performance encode
