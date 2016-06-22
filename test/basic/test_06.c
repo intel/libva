@@ -36,7 +36,7 @@ int config_count = 0;
 
 void pre()
 {
-    int i, j, k;
+    int i, j;
 
     test_init();
     test_profiles();
