@@ -3553,7 +3553,7 @@ static void va_TraceVAPictureParameterBufferVP9(
 {
     VADecPictureParameterBufferVP9 *p = (VADecPictureParameterBufferVP9 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    int i,j;
+    int i;
 
     va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferVP9\n");
 
