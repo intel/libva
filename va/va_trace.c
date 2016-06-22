@@ -3118,7 +3118,6 @@ static void va_TraceVAEncPackedHeaderParameterBufferType(
 {
     VAEncPackedHeaderParameterBuffer* p = (VAEncPackedHeaderParameterBuffer*)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    int i;
 
     if (!p)
         return;
