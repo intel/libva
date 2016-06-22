@@ -1510,9 +1510,6 @@ void va_TraceDestroyBuffer (
     VABufferType type;
     unsigned int size;
     unsigned int num_elements;
-    
-    VACodedBufferSegment *buf_list;
-    int i = 0;
 
     if (buf_id == VA_INVALID_ID)
         return;
