@@ -171,7 +171,6 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct va_wayland_drm_context *wl_drm_ctx;
     struct drm_state *drm_state;
-    uint32_t id;
 
     wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
     if (!wl_drm_ctx)
