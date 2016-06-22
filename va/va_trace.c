@@ -939,7 +939,7 @@ static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
 
 static void va_TraceSurface(VADisplay dpy, VAContextID context)
 {
-    unsigned int i, j;
+    unsigned int i;
     unsigned int fourcc; /* following are output argument */
     unsigned int luma_stride;
     unsigned int chroma_u_stride;
@@ -951,7 +951,6 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     void *buffer = NULL;
     unsigned char *Y_data, *UV_data, *tmp;
     VAStatus va_status;
-    unsigned char check_sum = 0;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     if (!trace_ctx->trace_fp_surface)
