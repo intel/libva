@@ -733,7 +733,6 @@ void va_TraceInit(VADisplay dpy)
 {
     char env_value[1024];
     unsigned short suffix = 0xffff & ((unsigned int)time(NULL));
-    int trace_index = 0;
     FILE *tmp;
     struct va_trace *pva_trace = calloc(sizeof(struct va_trace), 1);
     struct trace_context *trace_ctx = calloc(sizeof(struct trace_context), 1);
