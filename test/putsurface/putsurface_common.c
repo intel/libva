@@ -350,9 +350,6 @@ static VASurfaceID get_next_free_surface(int *index)
 
 static int upload_source_YUV_once_for_all()
 {
-    VAImage surface_image;
-    void *surface_p=NULL, *U_start,*V_start;
-    VAStatus va_status;
     int box_width_loc=8;
     int row_shift_loc=0;
     int i;
