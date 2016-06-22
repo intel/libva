@@ -36,7 +36,7 @@ void test()
 {
     int max_entrypoints;
     int num_entrypoints;
-    int i, j, k;
+    int i, j;
     int config_count = 0;
     max_entrypoints = vaMaxNumEntrypoints(va_dpy);
     ASSERT(max_entrypoints > 0);
