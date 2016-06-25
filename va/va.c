@@ -74,8 +74,10 @@ int va_parseConfig(char *env, char *env_value)
 	    continue;
 
         if (strcmp(token, env) == 0) {
-            if (env_value)
+            if (env_value) {
                 strncpy(env_value,value, 1024);
+                env_value[1023] = '\0';
+            }
 
             fclose(fp);
 
@@ -88,8 +90,10 @@ int va_parseConfig(char *env, char *env_value)
     /* no setting in config file, use env setting */
     value = getenv(env);
     if (value) {
-        if (env_value)
+        if (env_value) {
             strncpy(env_value, value, 1024);
+            env_value[1023] = '\0';
+        }
         return 0;
     }
     
