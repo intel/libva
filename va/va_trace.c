@@ -546,6 +546,7 @@ static int open_tracing_specil_file(
     FILE *fp = NULL;
 
     strncpy(env_value, fn_env, 1024);
+    env_value[1023] = '\0';
     FILE_NAME_SUFFIX(env_value, 1024,
         "ctx-", (unsigned int)ptra_ctx->trace_context);
 
@@ -594,6 +595,7 @@ static int open_tracing_log_file(
         char env_value[1024];
 
         strncpy(env_value, pva_trace->fn_log_env, 1024);
+        env_value[1023] = '\0';
         FILE_NAME_SUFFIX(env_value, 1024,
             "thd-", (unsigned int)thd_id);
 
