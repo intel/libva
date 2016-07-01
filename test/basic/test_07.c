@@ -84,7 +84,7 @@ void test()
     test_unique_surfaces(surfaces_4, 4, surfaces_16, 4);
     test_unique_surfaces(surfaces_4, 4, surfaces_16, 16);
     test_unique_surfaces(surfaces_4, 1, surfaces_16, 16);
-    test_unique_surfaces(surfaces_1, 16, surfaces_16, 16);
+    test_unique_surfaces(surfaces_1, 1, surfaces_16, 16);
 
     status("vaDestroySurface 4 surfaces\n");
     va_status = vaDestroySurfaces(va_dpy, surfaces_4, 4);
@@ -98,7 +98,7 @@ void test()
 
     test_unique_surfaces(surfaces_1, 1, surfaces_6, 6);
     test_unique_surfaces(surfaces_6, 6, surfaces_16, 16);
-    test_unique_surfaces(surfaces_1, 6, surfaces_16, 6);
+    test_unique_surfaces(surfaces_1, 1, surfaces_16, 6);
 
     status("vaDestroySurface 16 surfaces\n");
     va_status = vaDestroySurfaces(va_dpy, surfaces_16, 16);
