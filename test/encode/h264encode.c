@@ -2009,9 +2009,6 @@ static int save_recyuv(VASurfaceID surface_id,
             fwrite(dst_V, uv_size, 1, recyuv_fp);
             fwrite(dst_U, uv_size, 1, recyuv_fp);
         }
-    } else {
-        printf("Unsupported YUV format\n");
-        exit(1);
     }
     
     if (dst_Y)
