@@ -1877,7 +1877,7 @@ static void va_TraceVAHuffmanTableBufferJPEG(
     va_TraceMsg(trace_ctx,"*VAHuffmanTableBufferJPEG\n");
 
     for (i = 0; i < 2; ++i) {
-        va_TraceMsg(trace_ctx,"\tload_huffman_table[%d] =%u\n", i, p->load_huffman_table[0]);
+        va_TraceMsg(trace_ctx,"\tload_huffman_table[%d] =%u\n", i, p->load_huffman_table[i]);
         va_TraceMsg(trace_ctx,"\thuffman_table[%d] =\n", i);
         memset(tmp, 0, sizeof tmp);
         for (j = 0; j < 16; ++j) {
