@@ -1940,13 +1940,47 @@ static int save_recyuv(VASurfaceID surface_id,
     if (srcyuv_fourcc == VA_FOURCC_NV12) {
         int uv_size = 2 * (frame_width/2) * (frame_height/2);
         dst_Y = malloc(2*uv_size);
+        if(dst_Y == NULL) {
+           printf("Failed to allocate memory for dst_Y\n");
+           exit(1);
+        }
+
         dst_U = malloc(uv_size);
+        if(dst_U == NULL) {
+           printf("Failed to allocate memory for dst_U\n");
+           free(dst_Y);
+           exit(1);
+        }
+
+        memset(dst_Y, 0, 2*uv_size);
+        memset(dst_U, 0, uv_size);
     } else if (srcyuv_fourcc == VA_FOURCC_IYUV ||
                srcyuv_fourcc == VA_FOURCC_YV12) {
         int uv_size = (frame_width/2) * (frame_height/2);
         dst_Y = malloc(4*uv_size);
+        if(dst_Y == NULL) {
+           printf("Failed to allocate memory for dst_Y\n");
+           exit(1);
+        }
+
         dst_U = malloc(uv_size);
+        if(dst_U == NULL) {
+           printf("Failed to allocate memory for dst_U\n");
+           free(dst_Y);
+           exit(1);
+        }
+
         dst_V = malloc(uv_size);
+        if(dst_V == NULL) {
+           printf("Failed to allocate memory for dst_V\n");
+           free(dst_Y);
+           free(dst_U);
+           exit(1);
+        }
+
+        memset(dst_Y, 0, 4*uv_size);
+        memset(dst_U, 0, uv_size);
+        memset(dst_V, 0, uv_size);
     } else {
         printf("Unsupported source YUV format\n");
         exit(1);
