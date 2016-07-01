@@ -45,6 +45,7 @@ void pre()
     total_surfaces = surface_count;
     
     surfaces = malloc(total_surfaces * sizeof(VASurfaceID));
+    assert(surfaces);
 
     // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
     va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420, width, height, surfaces, total_surfaces, NULL, 0);

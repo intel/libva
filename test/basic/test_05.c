@@ -44,6 +44,7 @@ void test()
     ASSERT(entrypoints);
 
     VAConfigID *configs = malloc(max_entrypoints * num_profiles * sizeof(VAConfigID));
+    ASSERT(configs);
 
     for(i = 0; i < num_profiles; i++)
     {
