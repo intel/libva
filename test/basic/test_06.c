@@ -74,6 +74,7 @@ void test()
     ASSERT(max_attribs > 0);
 
     VAConfigAttrib *attrib_list = malloc(max_attribs * sizeof(VAConfigAttrib));
+    ASSERT(attrib_list);
 
     config_count = 0;
     for(i = 0; i < num_profiles; i++)

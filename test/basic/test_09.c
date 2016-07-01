@@ -44,7 +44,9 @@ void test()
     ASSERT(entrypoints);
 
     VAConfigID *configs = malloc(max_entrypoints * num_profiles * sizeof(VAConfigID));
+    ASSERT(configs);
     VAContextID *contexts = malloc(max_entrypoints * num_profiles * sizeof(VAContextID));
+    ASSERT(contexts);
 
     for(i = 0; i < num_profiles; i++)
     {
@@ -67,6 +69,7 @@ void test()
     int total_surfaces = config_count * surface_count;
     
     VASurfaceID *surfaces = malloc(total_surfaces * sizeof(VASurfaceID));
+    ASSERT(surfaces);
 
     // TODO: Don't assume VA_RT_FORMAT_YUV420 is supported / needed for each config
     va_status = vaCreateSurfaces(va_dpy, VA_RT_FORMAT_YUV420, width, height, surfaces, total_surfaces, NULL, 0);
