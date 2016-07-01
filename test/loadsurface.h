@@ -371,9 +371,12 @@ static int upload_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
                 v_ptr = src_U + row * (src_width/2);
                 u_ptr = src_V + row * (src_width/2);
             }
-            for(j = 0; j < src_width/2; j++) {
-                U_row[2*j] = u_ptr[j];
-                U_row[2*j+1] = v_ptr[j];
+            if ((src_fourcc == VA_FOURCC_IYUV) ||
+                (src_fourcc == VA_FOURCC_YV12)) {
+                for(j = 0; j < src_width/2; j++) {
+                    U_row[2*j] = u_ptr[j];
+                    U_row[2*j+1] = v_ptr[j];
+                }
             }
             break;
         case VA_FOURCC_IYUV:
@@ -461,9 +464,12 @@ static int download_surface_yuv(VADisplay va_dpy, VASurfaceID surface_id,
                 v_ptr = dst_U + row * (dst_width/2);
                 u_ptr = dst_V + row * (dst_width/2);
             }
-            for(j = 0; j < dst_width/2; j++) {
-                u_ptr[j] = U_row[2*j];
-                v_ptr[j] = U_row[2*j+1];
+            if ((dst_fourcc == VA_FOURCC_IYUV) ||
+                (dst_fourcc == VA_FOURCC_YV12)) {
+                for(j = 0; j < dst_width/2; j++) {
+                    u_ptr[j] = U_row[2*j];
+                    v_ptr[j] = U_row[2*j+1];
+                }
             }
             break;
         case VA_FOURCC_IYUV:
