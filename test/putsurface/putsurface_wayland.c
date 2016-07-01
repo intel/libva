@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <errno.h>
 #include <sys/select.h>
+#include <assert.h>
 #ifdef IN_LIBVA
 # include "va/wayland/va_wayland.h"
 #else
@@ -257,6 +258,7 @@ create_window(void *win_display, int x, int y, int width, int height)
     wl_shell_surface_set_toplevel(shell_surface);
 
     drawable1 = malloc(sizeof(*drawable1));
+    assert(drawable1);
     drawable1->display          = display;
     drawable1->surface          = surface1;
     drawable1->redraw_pending   = 0;
@@ -272,6 +274,7 @@ create_window(void *win_display, int x, int y, int width, int height)
     wl_shell_surface_set_toplevel(shell_surface_2);
 
     drawable2 = malloc(sizeof(*drawable2));
+    assert(drawable2);
     drawable2->display          = display;
     drawable1->surface          = surface2;
     drawable2->redraw_pending   = 0;
