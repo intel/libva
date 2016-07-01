@@ -831,6 +831,7 @@ mpeg2enc_alloc_va_resources(struct mpeg2enc_context *ctx)
 
     max_entrypoints = vaMaxNumEntrypoints(ctx->va_dpy);
     entrypoint_list = malloc(max_entrypoints * sizeof(VAEntrypoint));
+    assert(entrypoint_list);
     vaQueryConfigEntrypoints(ctx->va_dpy,
                              ctx->profile,
                              entrypoint_list,
