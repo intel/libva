@@ -142,6 +142,7 @@ va_put_surface(
     struct wl_callback *callback;
     VAStatus va_status;
     struct wl_buffer *buffer;
+    int ret = 0;
 
     if (!wl_drawable)
         return VA_STATUS_ERROR_INVALID_SURFACE;
@@ -153,8 +154,8 @@ va_put_surface(
     /* Wait for the previous frame to complete redraw */
     if (wl_drawable->redraw_pending) {
         wl_display_flush(d->display);
-        while (wl_drawable->redraw_pending)
-            wl_display_dispatch(wl_drawable->display);
+        while (wl_drawable->redraw_pending && ret >=0)
+            ret = wl_display_dispatch(wl_drawable->display);
     }
 
     va_status = vaGetSurfaceBufferWl(va_dpy, va_surface, VA_FRAME_PICTURE, &buffer);
