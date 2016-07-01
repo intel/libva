@@ -207,8 +207,10 @@ open_display(void)
         return NULL;
 
     d->display = wl_display_connect(NULL);
-    if (!d->display)
+    if (!d->display){
+        free(d);
         return NULL;
+    }
 
     wl_display_set_user_data(d->display, d);
     d->registry = wl_display_get_registry(d->display);
