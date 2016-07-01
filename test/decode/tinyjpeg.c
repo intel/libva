@@ -154,19 +154,23 @@ static VAHuffmanTableBufferJPEGBaseline default_huffman_table_param={
 static int build_default_huffman_tables(struct jdec_private *priv)
 {
     int i = 0;
-	if (priv->default_huffman_table_initialized)
-		return 0;
+    if (priv->default_huffman_table_initialized)
+        return 0;
 
     for (i = 0; i < 4; i++) {
         priv->HTDC_valid[i] = 1;
-        memcpy(priv->HTDC[i].bits, default_huffman_table_param.huffman_table[i].num_dc_codes, 16);
-        memcpy(priv->HTDC[i].values, default_huffman_table_param.huffman_table[i].dc_values, 16);
+        memcpy(priv->HTDC[i].bits, default_huffman_table_param.huffman_table[i].num_dc_codes,
+               sizeof(default_huffman_table_param.huffman_table[i].num_dc_codes));
+        memcpy(priv->HTDC[i].values, default_huffman_table_param.huffman_table[i].dc_values,
+               sizeof(default_huffman_table_param.huffman_table[i].dc_values));
         priv->HTAC_valid[i] = 1;
-        memcpy(priv->HTAC[i].bits, default_huffman_table_param.huffman_table[i].num_ac_codes, 16);
-        memcpy(priv->HTAC[i].values, default_huffman_table_param.huffman_table[i].ac_values, 256);
+        memcpy(priv->HTAC[i].bits, default_huffman_table_param.huffman_table[i].num_ac_codes,
+               sizeof(default_huffman_table_param.huffman_table[i].num_ac_codes));
+        memcpy(priv->HTAC[i].values, default_huffman_table_param.huffman_table[i].ac_values,
+               sizeof(default_huffman_table_param.huffman_table[i].ac_values));
     }
-	priv->default_huffman_table_initialized = 1;
-	return 0;
+    priv->default_huffman_table_initialized = 1;
+    return 0;
 }
 
 
