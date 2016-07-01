@@ -72,10 +72,30 @@ static int YUV_blend_with_pic(int width, int height,
     
     if (width != 640 || height != 480) { /* need to scale the pic */
         pic_y = (unsigned char *)malloc(width * height);
-        pic_u = (unsigned char *)malloc(width * height/4);
-        pic_v = (unsigned char *)malloc(width * height/4);
+        if(pic_y == NULL) {
+           printf("Failed to allocate memory for pic_y\n");
+           return -1;
+        }
 
+        pic_u = (unsigned char *)malloc(width * height/4);
+        if(pic_u == NULL) {
+           printf("Failed to allocate memory for pic_u\n");
+           free(pic_y);
+           return -1;
+        }
+
+        pic_v = (unsigned char *)malloc(width * height/4);
+        if(pic_v == NULL) {
+           printf("Failed to allocate memory for pic_v\n");
+           free(pic_y);
+           free(pic_u);
+           return -1;
+        }
         allocated = 1;
+
+        memset(pic_y, 0, width * height);
+        memset(pic_u, 0, width * height /4);
+        memset(pic_v, 0, width * height /4);
         
         scale_2dimage(pic_y_old, 640, 480,
                       pic_y, width, height);
@@ -133,7 +153,6 @@ static int YUV_blend_with_pic(int width, int height,
         }
     }
         
-    
     if (allocated) {
         free(pic_y);
         free(pic_u);
