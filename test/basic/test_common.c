@@ -109,6 +109,12 @@ const char *profile2string(VAProfile profile)
         PROFILE(VC1Advanced)
         PROFILE(JPEGBaseline)
         PROFILE(VP8Version0_3)
+        PROFILE(HEVCMain)
+        PROFILE(HEVCMain10)
+        PROFILE(VP9Profile0)
+        PROFILE(VP9Profile1)
+        PROFILE(VP9Profile2)
+        PROFILE(VP9Profile3)
     }
     ASSERT(0);
     return "Unknown";
@@ -127,6 +133,7 @@ const char *entrypoint2string(VAEntrypoint entrypoint)
         ENTRYPOINT(Deblocking)
         ENTRYPOINT(EncSlice)
         ENTRYPOINT(EncPicture)
+        ENTRYPOINT(EncSliceLP)
         ENTRYPOINT(VideoProc)
     }
     ASSERT(0);
