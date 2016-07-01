@@ -197,6 +197,7 @@ bitstream_start(bitstream *bs)
 {
     bs->max_size_in_dword = BITSTREAM_ALLOCATE_STEPPING;
     bs->buffer = calloc(bs->max_size_in_dword * sizeof(int), 1);
+    assert(bs->buffer);
     bs->bit_offset = 0;
 }
 
@@ -234,6 +235,7 @@ bitstream_put_ui(bitstream *bs, unsigned int val, int size_in_bits)
         if (pos + 1 == bs->max_size_in_dword) {
             bs->max_size_in_dword += BITSTREAM_ALLOCATE_STEPPING;
             bs->buffer = realloc(bs->buffer, bs->max_size_in_dword * sizeof(unsigned int));
+            assert(bs->buffer);
         }
 
         bs->buffer[pos + 1] = val;
