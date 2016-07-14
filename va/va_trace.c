@@ -157,7 +157,7 @@ do {                                                    \
 
 void va_TraceInit(VADisplay dpy)
 {
-    char env_value[1024];
+    char env_value[1024] = {'\0'};
     unsigned short suffix = 0xffff & ((unsigned int)time(NULL));
     int trace_index = 0;
     FILE *tmp;    
