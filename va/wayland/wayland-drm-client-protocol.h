@@ -14,7 +14,7 @@ extern "C" {
 /**
  * @page page_drm The drm protocol
  * @section page_ifaces_drm Interfaces
- * - @subpage page_iface_wl_drm -
+ * - @subpage page_iface_wl_drm - 
  * @section page_copyright_drm Copyright
  * <pre>
  *
@@ -129,6 +129,22 @@ enum wl_drm_format {
 };
 #endif /* WL_DRM_FORMAT_ENUM */
 
+#ifndef WL_DRM_CAPABILITY_ENUM
+#define WL_DRM_CAPABILITY_ENUM
+/**
+ * @ingroup iface_wl_drm
+ * wl_drm capability bitmask
+ *
+ * Bitmask of capabilities.
+ */
+enum wl_drm_capability {
+	/**
+	 * wl_drm prime available
+	 */
+	WL_DRM_CAPABILITY_PRIME = 1,
+};
+#endif /* WL_DRM_CAPABILITY_ENUM */
+
 /**
  * @ingroup iface_wl_drm
  * @struct wl_drm_listener
@@ -148,6 +164,11 @@ struct wl_drm_listener {
 	 */
 	void (*authenticated)(void *data,
 			      struct wl_drm *wl_drm);
+	/**
+	 */
+	void (*capabilities)(void *data,
+			     struct wl_drm *wl_drm,
+			     uint32_t value);
 };
 
 /**
@@ -164,6 +185,7 @@ wl_drm_add_listener(struct wl_drm *wl_drm,
 #define WL_DRM_AUTHENTICATE 0
 #define WL_DRM_CREATE_BUFFER 1
 #define WL_DRM_CREATE_PLANAR_BUFFER 2
+#define WL_DRM_CREATE_PRIME_BUFFER 3
 
 /**
  * @ingroup iface_wl_drm
@@ -177,6 +199,10 @@ wl_drm_add_listener(struct wl_drm *wl_drm,
  * @ingroup iface_wl_drm
  */
 #define WL_DRM_CREATE_PLANAR_BUFFER_SINCE_VERSION 1
+/**
+ * @ingroup iface_wl_drm
+ */
+#define WL_DRM_CREATE_PRIME_BUFFER_SINCE_VERSION 2
 
 /** @ingroup iface_wl_drm */
 static inline void
@@ -239,6 +265,20 @@ wl_drm_create_planar_buffer(struct wl_drm *wl_drm, uint32_t name, int32_t width,
 
 	id = wl_proxy_marshal_constructor((struct wl_proxy *) wl_drm,
 			 WL_DRM_CREATE_PLANAR_BUFFER, &wl_buffer_interface, NULL, name, width, height, format, offset0, stride0, offset1, stride1, offset2, stride2);
+
+	return (struct wl_buffer *) id;
+}
+
+/**
+ * @ingroup iface_wl_drm
+ */
+static inline struct wl_buffer *
+wl_drm_create_prime_buffer(struct wl_drm *wl_drm, int32_t name, int32_t width, int32_t height, uint32_t format, int32_t offset0, int32_t stride0, int32_t offset1, int32_t stride1, int32_t offset2, int32_t stride2)
+{
+	struct wl_proxy *id;
+
+	id = wl_proxy_marshal_constructor((struct wl_proxy *) wl_drm,
+			 WL_DRM_CREATE_PRIME_BUFFER, &wl_buffer_interface, NULL, name, width, height, format, offset0, stride0, offset1, stride1, offset2, stride2);
 
 	return (struct wl_buffer *) id;
 }
