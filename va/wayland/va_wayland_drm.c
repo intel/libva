@@ -98,10 +98,21 @@ drm_handle_authenticated(void *data, struct wl_drm *drm)
     drm_state->auth_type         = VA_DRM_AUTH_CUSTOM;
 }
 
+static void
+drm_handle_capabilities(void *data, struct wl_drm *wl_drm, uint32_t value)
+{
+    VADisplayContextP const pDisplayContext = data;
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
+
+    vtable->has_prime_sharing = !!(value & WL_DRM_CAPABILITY_PRIME);
+}
+
 static const struct wl_drm_listener drm_listener = {
     drm_handle_device,
     drm_handle_format,
-    drm_handle_authenticated
+    drm_handle_authenticated,
+    drm_handle_capabilities,
 };
 
 static VAStatus
@@ -121,6 +132,9 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct va_wayland_drm_context * const wl_drm_ctx = pDisplayContext->opaque;
     struct drm_state * const drm_state = ctx->drm_state;
+    struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
+
+    vtable->has_prime_sharing = 0;
 
     if (wl_drm_ctx->drm) {
         wl_drm_destroy(wl_drm_ctx->drm);
@@ -156,7 +170,7 @@ registry_handle_global(
 
     if (strcmp(interface, "wl_drm") == 0) {
         wl_drm_ctx->drm =
-            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface, 1);
+            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface, 2);
     }
 }
 
@@ -171,6 +185,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct va_wayland_drm_context *wl_drm_ctx;
     struct drm_state *drm_state;
+    struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
 
     wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
     if (!wl_drm_ctx)
@@ -189,6 +204,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     drm_state->fd        = -1;
     drm_state->auth_type = 0;
     ctx->drm_state       = drm_state;
+    vtable->has_prime_sharing = 0;
 
     wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
     if (!wl_drm_ctx->handle)

@@ -60,6 +60,9 @@ struct VADriverVTableWayland {
         unsigned int            flags,
         struct wl_buffer      **out_buffer
     );
+
+    /** \brief Indicate whether buffer sharing with prime fd is supported. */
+    unsigned int has_prime_sharing;
 };
 
 #endif /* VA_BACKEND_WAYLAND_H */
