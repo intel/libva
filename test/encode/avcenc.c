@@ -1876,7 +1876,7 @@ int main(int argc, char *argv[])
     picture_height_in_mbs = (picture_height + 15) / 16;
 
     if (argc > 5) {
-        char o;
+        int o;
 
         optind = 5;
 
