@@ -860,7 +860,7 @@ static int print_help(void)
 
 static int process_cmdline(int argc, char *argv[])
 {
-    char c;
+    int c;
     const struct option long_opts[] = {
         {"help", no_argument, NULL, 0 },
         {"bitrate", required_argument, NULL, 1 },

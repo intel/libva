@@ -514,7 +514,7 @@ int main(int argc,char **argv)
     VAStatus va_status;
     pthread_t thread1;
     int ret;
-    char c;
+    int c;
     int i;
     char str_src_fmt[5], str_dst_fmt[5];
 
