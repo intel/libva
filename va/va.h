@@ -593,12 +593,31 @@ typedef union _VAConfigAttribValEncROI {
     struct {
         /** \brief The number of ROI regions supported, 0 if ROI is not supported. */
         unsigned int num_roi_regions 		: 8;
-        /** \brief Indicates if ROI priority indication is supported when
-         * VAConfigAttribRateControl != VA_RC_CQP, else only ROI delta QP added on top of
-         * the frame level QP is supported when VAConfigAttribRateControl == VA_RC_CQP.
+        /**
+         * \brief A flag indicates whether ROI priority is supported
+         *
+         * \ref roi_rc_priority_support equal to 1 specifies the underlying driver supports
+         * ROI priority when VAConfigAttribRateControl != VA_RC_CQP, user can use \c roi_value
+         * in #VAEncROI to set ROI priority. \ref roi_rc_priority_support equal to 0 specifies
+         * the underlying driver doesn't support ROI priority.
+         *
+         * User should ignore \ref roi_rc_priority_support when VAConfigAttribRateControl == VA_RC_CQP
+         * because ROI delta QP is always required when VAConfigAttribRateControl == VA_RC_CQP.
          */
-	unsigned int roi_rc_priority_support	: 1;
-	unsigned int reserved                   : 23;
+        unsigned int roi_rc_priority_support	: 1;
+        /**
+         * \brief A flag indicates whether ROI delta QP is supported
+         *
+         * \ref roi_rc_qp_delat_support equal to 1 specifies the underlying driver supports
+         * ROI delta QP when VAConfigAttribRateControl != VA_RC_CQP, user can use \c roi_value
+         * in #VAEncROI to set ROI delta QP. \ref roi_rc_qp_delat_support equal to 0 specifies
+         * the underlying driver doesn't support ROI delta QP.
+         *
+         * User should ignore \ref roi_rc_qp_delat_support when VAConfigAttribRateControl == VA_RC_CQP
+         * because ROI delta QP is always required when VAConfigAttribRateControl == VA_RC_CQP.
+         */
+        unsigned int roi_rc_qp_delat_support    : 1;
+        unsigned int reserved                   : 22;
      } bits;
      unsigned int value;
 } VAConfigAttribValEncROI;
@@ -1268,15 +1287,24 @@ typedef struct _VAEncROI
          *  codec coding units.  It is relative to frame coordinates for the frame case and
          *  to field coordinates for the field case. */
         VARectangle     roi_rectangle;
-        /** \brief When VAConfigAttribRateControl == VA_RC_CQP then roi_value specifes the
-	 *  delta QP that will be added on top of the frame level QP.  For other rate control
-	 *  modes, roi_value specifies the priority of the ROI region relative to the non-ROI
-	 *  region.  It can be positive (more important) or negative (less important) values
-         *  and is compared with non-ROI region (taken as value 0).
-         *  E.g. ROI region with roi_value -3 is less important than the non-ROI region
-	 *  (roi_value implied to be 0) which is less important than ROI region with
-	 *  roi_value +2.  For overlapping regions, the roi_value that is first in the ROI
-	 *  array will have priority.   */
+        /**
+         * \brief ROI value
+         *
+         * \ref roi_value specifies ROI delta QP or ROI priority.
+         * --  ROI delta QP is the value that will be added on top of the frame level QP.
+         * --  ROI priority specifies the priority of a region, it can be positive (more important)
+         * or negative (less important) values and is compared with non-ROI region (taken as value 0),
+         * E.g. ROI region with \ref roi_value -3 is less important than the non-ROI region (\ref roi_value
+         * implied to be 0) which is less important than ROI region with roi_value +2. For overlapping
+         * regions, the roi_value that is first in the ROI array will have priority.
+         *
+         * \ref roi_value always specifes ROI delta QP when VAConfigAttribRateControl == VA_RC_CQP, no matter
+         * the value of \c roi_value_is_qp_delta in #VAEncMiscParameterBufferROI.
+         *
+         * \ref roi_value depends on \c roi_value_is_qp_delta in #VAEncMiscParameterBufferROI when
+         * VAConfigAttribRateControl != VA_RC_CQP. \ref roi_value specifies ROI_delta QP if \c roi_value_is_qp_delta
+         * in VAEncMiscParameterBufferROI is 1, otherwise \ref roi_value specifies ROI priority.
+         */
         char            roi_value;
 } VAEncROI;
 
@@ -1293,6 +1321,25 @@ typedef struct _VAEncMiscParameterBufferROI {
    /** \brief Pointer to a VAEncROI array with num_roi elements.  It is relative to frame
      *  coordinates for the frame case and to field coordinates for the field case.*/
     VAEncROI            *roi;
+    union {
+        struct {
+            /**
+             * \brief An indication for roi value.
+             *
+             * \ref roi_value_is_qp_delta equal to 1 indicates \c roi_value in #VAEncROI should
+             * be used as ROI delta QP. \ref roi_value_is_qp_delta equal to 0 indicates \c roi_value
+             * in #VAEncROI should be used as ROI priority.
+             *
+             * \ref roi_value_is_qp_delta is only available when VAConfigAttribRateControl != VA_RC_CQP,
+             * the setting must comply with \c roi_rc_priority_support and \c roi_rc_qp_delat_support in
+             * #VAConfigAttribValEncROI. The underlying driver should ignore this field
+             * when VAConfigAttribRateControl == VA_RC_CQP.
+             */
+            uint32_t  roi_value_is_qp_delta    : 1;
+            uint32_t  reserved                 : 31;
+        } bits;
+        uint32_t value;
+    } roi_flags;
 } VAEncMiscParameterBufferROI;
 
 /**
