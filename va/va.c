@@ -547,13 +547,19 @@ VAStatus vaInitialize (
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
         if (driver_name) /* memory is allocated in va_getDriverName */
             free(driver_name);
-        
+
         driver_name = strdup(driver_name_env);
         vaStatus = VA_STATUS_SUCCESS;
         va_infoMessage("User requested driver '%s'\n", driver_name);
     }
 
     if ((VA_STATUS_SUCCESS == vaStatus) && (driver_name != NULL)) {
+        if (!strncmp(driver_name, "/", sizeof(driver_name))
+            || !strncmp(driver_name, "/etc/", 5)
+            || !strncmp(driver_name, "../", 3)) {
+            va_errorMessage("Illegal path may expose to path traversal attack, driver_name=%s\n",driver_name);
+            return VA_STATUS_ERROR_INVALID_CONFIG;
+        }
         vaStatus = va_openDriver(dpy, driver_name);
         va_infoMessage("va_openDriver() returns %d\n", vaStatus);
 
@@ -565,7 +571,7 @@ VAStatus vaInitialize (
 
     if (driver_name)
         free(driver_name);
-    
+
     VA_TRACE_LOG(va_TraceInitialize, dpy, major_version, minor_version);
 
     return vaStatus;
@@ -574,7 +580,7 @@ VAStatus vaInitialize (
 
 /*
  * After this call, all library internal resources will be cleaned up
- */ 
+ */
 VAStatus vaTerminate (
     VADisplay dpy
 )

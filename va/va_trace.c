@@ -160,16 +160,22 @@ void va_TraceInit(VADisplay dpy)
     char env_value[1024] = {'\0'};
     unsigned short suffix = 0xffff & ((unsigned int)time(NULL));
     int trace_index = 0;
-    FILE *tmp;    
+    FILE *tmp;
     struct trace_context *trace_ctx = calloc(sizeof(struct trace_context), 1);
 
     if (trace_ctx == NULL)
         return;
-    
+
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         FILE_NAME_SUFFIX(env_value);
         trace_ctx->trace_log_fn = strdup(env_value);
-        
+        if (!strncmp(env_value, "/", sizeof(env_value))
+            || !strncmp(env_value, "/etc/", 5)
+            || !strncmp(env_value, "../", 3)) {
+            va_errorMessage("Illegal path may expose to path traversal attack, env_value=%s\n",env_value);
+            return;
+        }
+
         tmp = fopen(env_value, "w");
         if (tmp) {
             trace_ctx->trace_fp_log = tmp;
