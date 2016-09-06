@@ -1261,6 +1261,14 @@ typedef struct _VAEncMiscParameterRateControl
 
 typedef struct _VAEncMiscParameterFrameRate
 {
+    /*
+     * fps = numerator / denominator
+     * The high 2 bytes (bits 16 to 31) of framerate specifies the numerator, and
+     * the low 2 bytes (bits 0 to 15) of framerate specifies the denominator. For
+     * example, ((100 < 16 ) | 750) is 7.5 fps
+     *
+     * If the high 2 btyes is 0, the frame rate is specified by the low 2 bytes.
+     */
     unsigned int framerate;
     union
     {
