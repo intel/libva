@@ -21,6 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 bin_PROGRAMS = avcenc mpeg2vaenc h264encode jpegenc
+noinst_PROGRAMS = svctenc
 
 AM_CPPFLAGS = \
 	-Wall				\
@@ -54,10 +55,17 @@ jpegenc_CFLAGS		= -I$(top_srcdir)/test/common -g
 jpegenc_LDADD		= \
 	$(top_builddir)/va/libva.la \
 	$(top_builddir)/test/common/libva-display.la \
-	-lpthread	
-	
-valgrind:	$(bin_PROGRAMS)
-	for a in $(bin_PROGRAMS); do \
+	-lpthread
+
+svctenc_SOURCES		= svctenc.c
+svctenc_CFLAGS		= -I$(top_srcdir)/test/common -g
+svctenc_LDADD		= \
+	$(top_builddir)/va/libva.la \
+	$(top_builddir)/test/common/libva-display.la \
+	-lpthread -lm
+
+valgrind:	$(bin_PROGRAMS) $(noinst_PROGRAMS)
+	for a in $(bin_PROGRAMS) $(noinst_PROGRAMS); do \
 		valgrind --leak-check=full --show-reachable=yes .libs/$$a; \
 	done
 
