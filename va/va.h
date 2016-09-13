@@ -471,6 +471,15 @@ typedef enum
      * VAEncMiscParameterTypeROI.
      */
     VAConfigAttribEncROI              = 25,
+    /**
+     * \brief Encoding extended rate control attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports any extended rate control features
+     * The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncRateControlExt union.
+     */
+    VAConfigAttribEncRateControlExt   = 26,
+
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -621,6 +630,47 @@ typedef union _VAConfigAttribValEncROI {
      } bits;
      unsigned int value;
 } VAConfigAttribValEncROI;
+
+/** \brief Attribute value for VAConfigAttribEncRateControlExt */
+typedef union _VAConfigAttribValEncRateControlExt {
+    struct {
+        /**
+         * \brief The maximum number of temporal layers minus 1
+         *
+         * \ref max_num_temporal_layers_minus1 plus 1 specifies the maximum number of temporal
+         * layers that supported by the underlying driver. \ref max_num_temporal_layers_minus1
+         * equal to 0 implies the underlying driver doesn't support encoding with temporal layer.
+         */
+        unsigned int max_num_temporal_layers_minus1      : 8;
+
+        /**
+         * /brief support temporal layer bit-rate control flag
+         *
+         * \ref temporal_layer_bitrate_control_flag equal to 1 specifies the underlying driver
+         * can support bit-rate control per temporal layer when (#VAConfigAttribRateControl == #VA_RC_CBR ||
+         * #VAConfigAttribRateControl == #VA_RC_VBR).
+         *
+         * The underlying driver must set \ref temporal_layer_bitrate_control_flag to 0 when
+         * \c max_num_temporal_layers_minus1 is equal to 0
+         *
+         * To use bit-rate control per temporal layer, an application must send the right layer
+         * structure via #VAEncMiscParameterTemporalLayerStructure at the beginning of a coded sequence
+         * and then followed by #VAEncMiscParameterRateControl and #VAEncMiscParameterFrameRate structures
+         * for each layer, using the \c temporal_id field as the layer identifier. Otherwise
+         * the driver doesn't use bitrate control per temporal layer if an application doesn't send the
+         * layer structure via #VAEncMiscParameterTemporalLayerStructure to the driver. The driver returns
+         * VA_STATUS_ERROR_INVALID_PARAMETER if an application sends a wrong layer structure or doesn't send
+         * #VAEncMiscParameterRateControl and #VAEncMiscParameterFrameRate for each layer.
+         *
+         * The driver will ignore #VAEncMiscParameterTemporalLayerStructure and the \c temporal_id field
+         * in #VAEncMiscParameterRateControl and #VAEncMiscParameterFrameRate if
+         * \ref temporal_layer_bitrate_control_flag is equal to 0 or #VAConfigAttribRateControl == #VA_RC_CQP
+         */
+        unsigned int temporal_layer_bitrate_control_flag : 1;
+        unsigned int reserved                            : 23;
+    } bits;
+    unsigned int value;
+} VAConfigAttribValEncRateControlExt;
 
 /**
  * if an attribute is not applicable for a given
@@ -1097,7 +1147,9 @@ typedef enum
       * rate control, when the user has externally skipped frames. */
     VAEncMiscParameterTypeSkipFrame     = 9,
     /** \brief Buffer type used for region-of-interest (ROI) parameters. */
-    VAEncMiscParameterTypeROI           = 10
+    VAEncMiscParameterTypeROI           = 10,
+    /** \brief Buffer type used for temporal layer structure */
+    VAEncMiscParameterTypeTemporalLayerStructure   = 12,
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -1154,6 +1206,22 @@ typedef struct _VAEncMiscParameterBuffer
     unsigned int data[0];
 } VAEncMiscParameterBuffer;
 
+/** \brief Temporal layer Structure*/
+typedef struct _VAEncMiscParameterTemporalLayerStructure
+{
+    /** \brief The number of temporal layers */
+    unsigned int number_of_layers;
+    /** \brief The length of the array defining frame layer membership. Should be 1-32 */
+    unsigned int periodicity;
+    /**
+     * \brief The array indicating the layer id for each frame
+     *
+     * The layer id for the first frame in a coded sequence is always 0, so layer_id[] specifies the layer
+     * ids for frames starting from the 2nd frame.
+     */
+    unsigned int layer_id[32];
+} VAEncMiscParameterTemporalLayerStructure;
+
 
 /** \brief Rate control parameters */
 typedef struct _VAEncMiscParameterRateControl
@@ -1181,6 +1249,11 @@ typedef struct _VAEncMiscParameterRateControl
             unsigned int disable_frame_skip : 1; /* Disable frame skip in rate control mode */
             unsigned int disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
             unsigned int mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
+            /*
+             * The temporal layer that the rate control parameters are specified for.
+             */
+            unsigned int temporal_id : 8;
+            unsigned int reserved : 17;
         } bits;
         unsigned int value;
     } rc_flags;
@@ -1189,6 +1262,18 @@ typedef struct _VAEncMiscParameterRateControl
 typedef struct _VAEncMiscParameterFrameRate
 {
     unsigned int framerate;
+    union
+    {
+        struct
+        {
+            /*
+             * The temporal id the framerate parameters are specified for.
+             */
+            unsigned int temporal_id : 8;
+            unsigned int reserved : 24;
+         } bits;
+         unsigned int value;
+     } framerate_flags;
 } VAEncMiscParameterFrameRate;
 
 /**
