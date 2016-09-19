@@ -1,5 +1,21 @@
-libva NEWS -- summary of user visible changes.  2016-03-15
-Copyright (C) 2009-2015 Intel Corporation
+libva NEWS -- summary of user visible changes.  2016-09-05
+Copyright (C) 2009-2016 Intel Corporation
+
+Version 1.7.2 - 05.Sep.2016
+* Bump VA API version to 0.39.3
+* API: add support for ROI
+* Add support for VP9 encoder in VA tracer
+* Refine test cases
+* Fix the issue of not properly terminating the parsed environment values with '\0'
+  https://bugs.freedesktop.org/show_bug.cgi?id=96677
+
+Version 1.7.1 - 21.Jun.2016
+* Bump VA API version to 0.39.2
+* API: add support for VP9 8bit encode
+* API: add support for low power/high performance encode
+* API: add support for encoding ROI attribute
+* API: add support for macroblock based rate control
+* Fix VA tracer to support multiple contexts in one instance
 
 Version 1.7.0 - 15.Mar.2016
 * Bump VA API version to 0.39
