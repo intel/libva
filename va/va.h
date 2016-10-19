@@ -230,6 +230,21 @@ typedef struct _VARectangle
     unsigned short height;
 } VARectangle;
 
+/** Type of a message callback, used for both error and info log. */
+typedef void (*vaMessageCallback)(const char *message);
+
+/**
+ * Set the callback for error messages, or NULL for no logging.
+ * Returns the previous one, or NULL if it was disabled.
+ */
+vaMessageCallback vaSetErrorCallback(vaMessageCallback);
+
+/**
+ * Set the callback for info messages, or NULL for no logging.
+ * Returns the previous one, or NULL if it was disabled.
+ */
+vaMessageCallback vaSetInfoCallback(vaMessageCallback);
+
 /**
  * Initialization:
  * A display must be obtained by calling vaGetDisplay() before calling
