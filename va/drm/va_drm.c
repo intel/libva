@@ -74,12 +74,8 @@ va_DisplayContextGetDriverName(
         if (ret < 0)
             return VA_STATUS_ERROR_OPERATION_FAILED;
 
-        if (!va_drm_is_authenticated(drm_state->fd)) {
-            if (!va_drm_authenticate(drm_state->fd, magic))
-                return VA_STATUS_ERROR_OPERATION_FAILED;
-            if (!va_drm_is_authenticated(drm_state->fd))
-                return VA_STATUS_ERROR_OPERATION_FAILED;
-        }
+        if (!va_drm_authenticate(drm_state->fd, magic))
+            return VA_STATUS_ERROR_OPERATION_FAILED;
     }
 
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;

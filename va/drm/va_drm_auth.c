@@ -28,41 +28,6 @@
 #include "va_drm_auth.h"
 #include "va_drm_auth_x11.h"
 
-#if defined __linux__
-# include <sys/syscall.h>
-#endif
-
-/* Checks whether the thread id is the current thread */
-static bool
-is_local_tid(pid_t tid)
-{
-#if defined __linux__
-    /* On Linux systems, drmGetClient() would return the thread ID
-       instead of the actual process ID */
-    return syscall(SYS_gettid) == tid;
-#else
-    return false;
-#endif
-}
-
-/* Checks whether DRM connection is authenticated */
-bool
-va_drm_is_authenticated(int fd)
-{
-    pid_t client_pid;
-    int i, auth, pid, uid;
-    unsigned long magic, iocs;
-    bool is_authenticated = false;
-
-    client_pid = getpid();
-    for (i = 0; !is_authenticated; i++) {
-        if (drmGetClient(fd, i, &auth, &pid, &uid, &magic, &iocs) != 0)
-            break;
-        is_authenticated = auth && (pid == client_pid || is_local_tid(pid));
-    }
-    return is_authenticated;
-}
-
 /* Try to authenticate the DRM connection with the supplied magic id */
 bool
 va_drm_authenticate(int fd, uint32_t magic)
