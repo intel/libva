@@ -2545,6 +2545,11 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_P010          0x30313050
 #define VA_FOURCC_P016          0x36313050
 
+/**
+ * 10-bit Planar YUV 420 and occupy the lower 10-bit.
+ */
+#define VA_FOURCC_I010          0x30313049
+
 /* byte order */
 #define VA_LSB_FIRST		1
 #define VA_MSB_FIRST		2
