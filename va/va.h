@@ -291,7 +291,7 @@ const char *vaQueryVendorString (
     VADisplay dpy
 );
 
-typedef int (*VAPrivFunc)();
+typedef int (*VAPrivFunc)(void);
 
 /**
  * Return a function pointer given a function name in the library.
