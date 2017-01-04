@@ -2166,6 +2166,7 @@ typedef struct _VAEncPictureParameterBufferMPEG4
  * eliminates this copy is to pass null as "data" when calling vaCreateBuffer(),
  * and then use vaMapBuffer() to map the data store from the server side to the
  * client address space for access.
+ * The user must call vaDestroyBuffer() to destroy a buffer.
  *  Note: image buffers are created by the library, not the client. Please see 
  *        vaCreateImage on how image buffers are managed.
  */
@@ -2286,7 +2287,12 @@ VAStatus vaUnmapBuffer (
 
 /**
  * After this call, the buffer is deleted and this buffer_id is no longer valid
- * Only call this if the buffer is not going to be passed to vaRenderBuffer
+ *
+ * A buffer can be re-used and sent to the server by another Begin/Render/End
+ * sequence if vaDestroyBuffer() is not called with this buffer.
+ *
+ * Note re-using a shared buffer (e.g. a slice data buffer) between the host and the
+ * hardware accelerator can result in performance dropping.
  */
 VAStatus vaDestroyBuffer (
     VADisplay dpy,
@@ -2414,7 +2420,6 @@ VAStatus vaBeginPicture (
 
 /**
  * Send decode buffers to the server.
- * Buffers are automatically destroyed afterwards
  */
 VAStatus vaRenderPicture (
     VADisplay dpy,

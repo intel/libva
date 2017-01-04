@@ -371,11 +371,9 @@ typedef struct _VAProcFilterValueRange {
 /**
  * \brief Video processing pipeline configuration.
  *
- * This buffer defines a video processing pipeline. As for any buffer
- * passed to \c vaRenderPicture(), this is a one-time usage model.
- * However, the actual filters to be applied are provided in the
- * \c filters field, so they can be re-used in other processing
- * pipelines.
+ * This buffer defines a video processing pipeline. The actual filters to
+ * be applied are provided in the \c filters field, they can be re-used
+ * in other processing pipelines.
  *
  * The target surface is specified by the \c render_target argument of
  * \c vaBeginPicture(). The general usage model is described as follows:
@@ -491,10 +489,6 @@ typedef struct _VAProcPipelineParameterBuffer {
      * #VA_STATUS_ERROR_UNSUPPORTED_FILTER is returned if the list
      * contains an unsupported filter.
      *
-     * Note: no filter buffer is destroyed after a call to vaRenderPicture(),
-     * only this pipeline buffer will be destroyed as per the core API
-     * specification. This allows for flexibility in re-using the filter for
-     * other surfaces to be processed.
      */
     VABufferID         *filters;
     /** \brief Actual number of filters. */
