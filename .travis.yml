@@ -9,23 +9,24 @@ env:
   global:
     - NUM_THREADS=4
 
-addons:
-	apt:
-                packages:
-                        - autoconf
-                        - automake
-                        - libtool
-                        - m4
-                        - perl
-                        - pkg-config
-                        - libdrm-dev
-                        - libegl1-mesa-dev
-                        - libgl1-mesa-dev
-                        - libwayland-dev
-                        - libx11-dev
-                        - libxext-dev
-                        - libxfixes-dev
-
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y build-essential
+  - sudo apt-get install -y autoconf
+  - sudo apt-get install -y automake
+  - sudo apt-get install -y libtool
+  - sudo apt-get install -y m4 
+  - sudo apt-get install -y perl
+  - sudo apt-get install -y pkg-config
+  - sudo apt-get install -y libdrm-dev
+  - sudo apt-get install -y autoconf
+  - sudo apt-get install -y libegl1-mesa-dev
+  - sudo apt-get install -y libgl1-mesa-dev
+  - sudo apt-get install -y libwayland-dev
+  - sudo apt-get install -y libx11-dev
+  - sudo apt-get install -y libxext-dev
+  - sudo apt-get install -y libxfixes-dev
+  
 script:
         - ./autogen.sh
         - ./configure --prefix=/usr
