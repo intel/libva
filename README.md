@@ -1,3 +1,5 @@
+[![Stories in Ready](https://badge.waffle.io/01org/libva.png?label=ready&title=Ready)](http://waffle.io/01org/libva)
+
 #Libva Project
 
 Libva is an implementation for VA-API (Video Acceleration API)
