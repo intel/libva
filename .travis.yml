@@ -10,12 +10,14 @@ env:
     - NUM_THREADS=4
 
 before_install:
+  - pip install --user cpp-coveralls
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential
   - sudo apt-get install -y autoconf
   - sudo apt-get install -y automake
   - sudo apt-get install -y libtool
   - sudo apt-get install -y m4 
+  - sudo apt-get install -y lcov
   - sudo apt-get install -y perl
   - sudo apt-get install -y pkg-config
   - sudo apt-get install -y libdrm-dev
@@ -32,6 +34,9 @@ script:
         - ./configure --prefix=/usr
         - make -j4 ; sudo make install
         - make check
+
+after_success:
+        - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
 
 notifications:
 # Emails are sent to the committer's git-configured email address by default,
