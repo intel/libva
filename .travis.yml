@@ -1,0 +1,51 @@
+dist: xenial
+sudo: required
+
+language: c
+compiler: gcc
+os: linux
+
+env:
+  global:
+    - NUM_THREADS=4
+
+addons:
+	apt:
+                packages:
+                        - autoconf
+                        - automake
+                        - libtool
+                        - m4
+                        - perl
+                        - pkg-config
+                        - libdrm-dev
+                        - libegl1-mesa-dev
+                        - libgl1-mesa-dev
+                        - libwayland-dev
+                        - libx11-dev
+                        - libxext-dev
+                        - libxfixes-dev
+
+script:
+        - ./autogen.sh
+        - ./configure --prefix=/usr
+        - make -j4 ; sudo make install
+        - make check
+
+notifications:
+# Emails are sent to the committer's git-configured email address by default,
+# but only if they have access to the repository.  To enable Travis on your
+# public fork of Caffe, just go to travis-ci.org and flip the switch on for
+# your Caffe fork.  To configure your git email address, use:
+#     git config --global user.email me@example.com
+  email:
+    on_success: always
+    on_failure: always
+
+# IRC notifications disabled by default.
+# Uncomment next 5 lines to send notifications to chat.freenode.net#caffe
+#   irc:
+#     channels:
+#       - "chat.freenode.net#intel-media"
+#     template:
+#       - "%{repository}/%{branch} (%{commit} - %{author}): %{message}"
