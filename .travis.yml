@@ -48,6 +48,10 @@ notifications:
     on_success: always
     on_failure: always
 
+# Slack notifications
+#
+  slack: intel-media:p0wZO3fWJ1ouSsF0RNKbOl5G
+
 # IRC notifications disabled by default.
 # Uncomment next 5 lines to send notifications to chat.freenode.net#caffe
 #   irc:
