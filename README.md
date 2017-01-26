@@ -22,6 +22,6 @@ extensive knowledge of libva.
 
 We would love to help you start contributing!
 
-The libva development team can be reached via our [mailing
-list](http://lists.freedesktop.org/mailman/listinfo/libva) and on IRC
-in channel #intel-media on [Freenode](https://freenode.net/kb/answer/chat).
+The libva-vaapi-media development team can be reached via our [mailing
+list](https://lists.01.org/mailman/listinfo/intel-vaapi-media) and on IRC
+in channel ##intel-media on [Freenode](https://freenode.net/kb/answer/chat).
