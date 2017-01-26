@@ -58,7 +58,7 @@ int va_parseConfig(char *env, char *env_value)
 {
     char *token, *value, *saveptr;
     char oneline[1024];
-    FILE *fp=NULL;
+    FILE *fp=NULL
 
     if (env == NULL)
         return 1;
