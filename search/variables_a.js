@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['next',['next',['../structVACodedBufferSegment.html#a50a74f34a8003c1d254cf5876757a847',1,'VACodedBufferSegment']]],
+  ['non_5finterleaved_5fmode',['non_interleaved_mode',['../unionVAConfigAttribValEncJPEG.html#a8eff638bf07eacb05c9028bdedf5f576',1,'VAConfigAttribValEncJPEG']]],
+  ['non_5fintra_5fquant_5fmat',['non_intra_quant_mat',['../structVAIQMatrixBufferMPEG4.html#a78ab0d51f069d6b315419d777f568133',1,'VAIQMatrixBufferMPEG4']]],
+  ['non_5fintra_5fquantiser_5fmatrix',['non_intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#ab5875dd197942398e8ab9240268f784a',1,'VAIQMatrixBufferMPEG2']]],
+  ['num_5fac_5fcodes',['num_ac_codes',['../structVAHuffmanTableBufferJPEGBaseline.html#a15c54f01f9142d98ea8c32a44e6ee3e0',1,'VAHuffmanTableBufferJPEGBaseline']]],
+  ['num_5fbackward_5freferences',['num_backward_references',['../structVAProcPipelineCaps.html#a3f8586ed699ffdfe7faa9d79ad3a306a',1,'VAProcPipelineCaps::num_backward_references()'],['../structVAProcPipelineParameterBuffer.html#ad72ca505d9b38a34a874dcab2b855a20',1,'VAProcPipelineParameterBuffer::num_backward_references()']]],
+  ['num_5fbuffers',['num_buffers',['../structVASurfaceAttribExternalBuffers.html#a07c33085a9cf452bf09ee28a472526ab',1,'VASurfaceAttribExternalBuffers']]],
+  ['num_5fdc_5fcodes',['num_dc_codes',['../structVAHuffmanTableBufferJPEGBaseline.html#aa17087c8eb9d343b1850d6ce3a493ca6',1,'VAHuffmanTableBufferJPEGBaseline']]],
+  ['num_5ffilters',['num_filters',['../structVAProcPipelineParameterBuffer.html#a9b47b3a0b0165f208777668a83141d7e',1,'VAProcPipelineParameterBuffer']]],
+  ['num_5fforward_5freferences',['num_forward_references',['../structVAProcPipelineCaps.html#aafe619b30596f18ef210d446adcecab5',1,'VAProcPipelineCaps::num_forward_references()'],['../structVAProcPipelineParameterBuffer.html#ab18f574a7f6df70ce3d705e80254a1c6',1,'VAProcPipelineParameterBuffer::num_forward_references()']]],
+  ['num_5finput_5fcolor_5fstandards',['num_input_color_standards',['../structVAProcPipelineCaps.html#ad2d73c0d355b291db49e7fa3a889d7f6',1,'VAProcPipelineCaps']]],
+  ['num_5fmacroblocks',['num_macroblocks',['../structVAEncSliceParameterBufferH264.html#ae3f4bd530f3c65eff3264f0349d95ed6',1,'VAEncSliceParameterBufferH264']]],
+  ['num_5foutput_5fcolor_5fstandards',['num_output_color_standards',['../structVAProcPipelineCaps.html#a066d56430d7f74e2907bc2372c0185f3',1,'VAProcPipelineCaps']]],
+  ['num_5fplanes',['num_planes',['../structVASurfaceAttribExternalBuffers.html#a94cc65cc59d299ef146d4787c2578a04',1,'VASurfaceAttribExternalBuffers']]],
+  ['num_5fref_5fframes_5fin_5fpic_5forder_5fcnt_5fcycle',['num_ref_frames_in_pic_order_cnt_cycle',['../structVAEncSequenceParameterBufferH264.html#a0fbf832b0fada357b446ed071616c381',1,'VAEncSequenceParameterBufferH264']]],
+  ['num_5fref_5fidx_5factive_5foverride_5fflag',['num_ref_idx_active_override_flag',['../structVAEncSliceParameterBufferH264.html#a1716411aa7078f2e792a0df7fce00888',1,'VAEncSliceParameterBufferH264']]],
+  ['num_5fref_5fidx_5fl0_5factive_5fminus1',['num_ref_idx_l0_active_minus1',['../structVAEncPictureParameterBufferH264.html#aab602696f8cd6351eb25f2ee86fc8bba',1,'VAEncPictureParameterBufferH264::num_ref_idx_l0_active_minus1()'],['../structVAEncSliceParameterBufferH264.html#a39af26d1513933275a18a4397f8aff4e',1,'VAEncSliceParameterBufferH264::num_ref_idx_l0_active_minus1()']]],
+  ['num_5fref_5fidx_5fl1_5factive_5fminus1',['num_ref_idx_l1_active_minus1',['../structVAEncPictureParameterBufferH264.html#a879cd6d9102cf55be673cd2fd536c1c5',1,'VAEncPictureParameterBufferH264::num_ref_idx_l1_active_minus1()'],['../structVAEncSliceParameterBufferH264.html#a0782fd89745bdb38507d869f6fb778c6',1,'VAEncSliceParameterBufferH264::num_ref_idx_l1_active_minus1()']]],
+  ['num_5froi_5fregions',['num_roi_regions',['../unionVAConfigAttribValEncROI.html#a4623bde0eebc4e7819604da9cbccb4df',1,'VAConfigAttribValEncROI']]],
+  ['num_5fskip_5fframes',['num_skip_frames',['../structVAEncMiscParameterSkipFrame.html#a7aaad5bc24919701729920162caf1f8a',1,'VAEncMiscParameterSkipFrame']]],
+  ['num_5funits_5fin_5ftick',['num_units_in_tick',['../structVAEncSequenceParameterBufferH264.html#a4c487e82e2c7d5aae9606598fafddb26',1,'VAEncSequenceParameterBufferH264']]],
+  ['number_5fof_5flayers',['number_of_layers',['../structVAEncMiscParameterTemporalLayerStructure.html#a9989282ccf81b56362f10d2d7035aeea',1,'VAEncMiscParameterTemporalLayerStructure']]]
+];

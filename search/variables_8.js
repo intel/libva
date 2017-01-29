@@ -1,0 +1,24 @@
+var searchData=
+[
+  ['last_5fpicture',['last_picture',['../structVAEncPictureParameterBufferH264.html#aa6775f772ee997ec86e89c46afef83c3',1,'VAEncPictureParameterBufferH264']]],
+  ['layer_5fid',['layer_id',['../structVAEncMiscParameterTemporalLayerStructure.html#a9a085ad32ddec67c8300e937637fa39a',1,'VAEncMiscParameterTemporalLayerStructure']]],
+  ['level_5fidc',['level_idc',['../structVAEncSequenceParameterBufferH264.html#a1c479c8f01b04236e1b338952d0fe863',1,'VAEncSequenceParameterBufferH264']]],
+  ['load_5fchroma_5fintra_5fquantiser_5fmatrix',['load_chroma_intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#a4cc63aeb1da2523958e10d179bbbb0c8',1,'VAIQMatrixBufferMPEG2']]],
+  ['load_5fchroma_5fnon_5fintra_5fquantiser_5fmatrix',['load_chroma_non_intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#a958a2fe34910d6bc4b39934f7b91e17e',1,'VAIQMatrixBufferMPEG2']]],
+  ['load_5fhuffman_5ftable',['load_huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#acee13c6d432f1475e7acf64b870ebb0c',1,'VAHuffmanTableBufferJPEGBaseline']]],
+  ['load_5fintra_5fquant_5fmat',['load_intra_quant_mat',['../structVAIQMatrixBufferMPEG4.html#a50e482fd9939cca21ee9b381f5205d0d',1,'VAIQMatrixBufferMPEG4']]],
+  ['load_5fintra_5fquantiser_5fmatrix',['load_intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#a985f24927629641359ef0d7407fb50ee',1,'VAIQMatrixBufferMPEG2']]],
+  ['load_5fnon_5fintra_5fquant_5fmat',['load_non_intra_quant_mat',['../structVAIQMatrixBufferMPEG4.html#a20da39cac130886deb84f279485d4b40',1,'VAIQMatrixBufferMPEG4']]],
+  ['load_5fnon_5fintra_5fquantiser_5fmatrix',['load_non_intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#ad03aad6e59496453f15ab7463d3a58b4',1,'VAIQMatrixBufferMPEG2']]],
+  ['log2_5fmax_5fframe_5fnum_5fminus4',['log2_max_frame_num_minus4',['../structVAEncSequenceParameterBufferH264.html#afe524a4e6baf385c4388134fb97a294d',1,'VAEncSequenceParameterBufferH264']]],
+  ['log2_5fmax_5fmv_5flength_5fhorizontal',['log2_max_mv_length_horizontal',['../structVAEncSequenceParameterBufferH264.html#aca71022727fa403e616d6853a4b418a7',1,'VAEncSequenceParameterBufferH264']]],
+  ['log2_5fmax_5fmv_5flength_5fvertical',['log2_max_mv_length_vertical',['../structVAEncSequenceParameterBufferH264.html#add3e7b73a46abf610f62f13096019b9e',1,'VAEncSequenceParameterBufferH264']]],
+  ['log2_5fmax_5fpic_5forder_5fcnt_5flsb_5fminus4',['log2_max_pic_order_cnt_lsb_minus4',['../structVAEncSequenceParameterBufferH264.html#ab5f0d03e36a88b5adb3e82123736efc3',1,'VAEncSequenceParameterBufferH264']]],
+  ['luma_5flog2_5fweight_5fdenom',['luma_log2_weight_denom',['../structVAEncSliceParameterBufferH264.html#ab1df3382b36d578cf3c60352f943998c',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5foffset_5fl0',['luma_offset_l0',['../structVAEncSliceParameterBufferH264.html#ad2c863183711218f55ebd29593cc0a26',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5foffset_5fl1',['luma_offset_l1',['../structVAEncSliceParameterBufferH264.html#adfc784320e736c710de645de2fabc819',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5fweight_5fl0',['luma_weight_l0',['../structVAEncSliceParameterBufferH264.html#a640f08379ff703e28d913b37b3cc421e',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5fweight_5fl0_5fflag',['luma_weight_l0_flag',['../structVAEncSliceParameterBufferH264.html#a9fa73b135b6f26e7e60d205d100a2980',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5fweight_5fl1',['luma_weight_l1',['../structVAEncSliceParameterBufferH264.html#ae5b08008ef0b9dbc6889b0670338d83c',1,'VAEncSliceParameterBufferH264']]],
+  ['luma_5fweight_5fl1_5fflag',['luma_weight_l1_flag',['../structVAEncSliceParameterBufferH264.html#aaf7efb5a361f6653497590e94ee846d0',1,'VAEncSliceParameterBufferH264']]]
+];
