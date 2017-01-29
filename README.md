@@ -22,6 +22,10 @@ extensive knowledge of libva.
 
 We would love to help you start contributing!
 
+Doxygen files are regularly updated through Github Pages and can
+be accessed directly through [github pages
+libva](http://01org.github.io/libva/)
+
 The libva development team can be reached via our [mailing
 list](https://lists.01.org/mailman/listinfo/intel-vaapi-media) and on IRC
 in channel ##intel-media on [Freenode](https://freenode.net/kb/answer/chat).
