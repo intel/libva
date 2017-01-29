@@ -325,13 +325,6 @@ debian.upstream/libva-x11.install.in
     pkgconfig/libva-wayland.pc
     pkgconfig/libva-x11.pc
     pkgconfig/libva.pc
-    test/Makefile
-    test/basic/Makefile
-    test/common/Makefile
-    test/decode/Makefile
-    test/encode/Makefile
-    test/putsurface/Makefile
-    test/vainfo/Makefile
     va/Makefile
     va/drm/Makefile
     va/egl/Makefile
