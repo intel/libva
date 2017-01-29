@@ -14,6 +14,7 @@ env:
 
 
 before_install:
+  - test "${TRAVIS_BRANCH}" != 'coverity_scan' -o "${TRAVIS_JOB_NUMBER##*.}" = '1' || exit 0
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - pip install --user cpp-coveralls
   - sudo apt-get -qq update
@@ -39,16 +40,20 @@ addons:
     project:
       name: "01org/libva"
       description: "Build submitted via Travis CI"
-    notification_email: sean.v.kelley@intel.com
     build_command_prepend: "./autogen.sh; ./configure --prefix=/usr"
     build_command:  "make -j4"
-    branch_pattern: master
+    branch_pattern: coverity_scan
 
 script:
-        - ./autogen.sh
-        - ./configure --prefix=/usr
-        - make -j4 ; sudo make install
-        - make check
+  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
+      then
+        echo "Don't build on coverty_scan branch.";
+        exit 0;
+    fi
+  - ./autogen.sh
+  - ./configure --prefix=/usr
+  - make -j4 ; sudo make install
+  - make check
 
 after_success:
         - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
@@ -56,8 +61,8 @@ after_success:
 notifications:
 # Emails are sent to the committer's git-configured email address by default,
 # but only if they have access to the repository.  To enable Travis on your
-# public fork of Caffe, just go to travis-ci.org and flip the switch on for
-# your Caffe fork.  To configure your git email address, use:
+# public project, just go to travis-ci.org and flip the switch on for
+# your project.  To configure your git email address, use:
 #     git config --global user.email me@example.com
   email:
     on_success: always
