@@ -8,8 +8,13 @@ os: linux
 env:
   global:
     - NUM_THREADS=4
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "Eu+ys+LW614J1wU1+i2qpfbSq9gFPvPq09XBgkK2hkDIEuouOX+G4ydpqc7Wg7+pv/P38KiUdbyoJtPxryvlwFYmuL/MEHPzjqVmxHuS0TpqwYE7Fh/44d/N9slGjD9Iv//pbabVrcrTptuJIRwH76GVsmec564uXd+yZGlR0c0="
+
 
 before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
   - pip install --user cpp-coveralls
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential
@@ -28,7 +33,17 @@ before_install:
   - sudo apt-get install -y libx11-dev
   - sudo apt-get install -y libxext-dev
   - sudo apt-get install -y libxfixes-dev
-  
+
+addons:
+  coverity_scan:
+    project:
+      name: "01org/libva"
+      description: "Build submitted via Travis CI"
+    notification_email: sean.v.kelley@intel.com
+    build_command_prepend: "./autogen.sh; ./configure --prefix=/usr"
+    build_command:  "make -j4"
+    branch_pattern: master
+
 script:
         - ./autogen.sh
         - ./configure --prefix=/usr
