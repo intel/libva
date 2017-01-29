@@ -100,7 +100,6 @@ if [ -d "html-out" ] && [ -f "html-out/index.html" ]; then
     git reset --soft $CURRENTCOMMIT # Move HEAD back to where it was
 
     # Move doxy files into local gh-pages branch folder
-    mv ../../doxygen.log .
     mv ../../html-out/* .
 
     # Need to create a .nojekyll file to allow filenames starting with an underscore
