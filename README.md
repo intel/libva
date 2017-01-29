@@ -1,7 +1,7 @@
 [![Stories in Ready](https://badge.waffle.io/01org/libva.png?label=ready&title=Ready)](http://waffle.io/01org/libva)
-[![Build Status](https://travis-ci.org/01org/ciao.svg?branch=master)](https://travis-ci.org/01org/libva)
+[![Build Status](https://travis-ci.org/01org/libva.svg?branch=master)](https://travis-ci.org/01org/libva)
 [![Coverage Status](https://coveralls.io/repos/github/01org/libva/badge.svg?branch=master)](https://coveralls.io/github/01org/libva?branch=master)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/1105/badge.svg)](https://scan.coverity.com/projects/01org-libva)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/11605/badge.svg)](https://scan.coverity.com/projects/01org-libva)
 
 #Libva Project
 
