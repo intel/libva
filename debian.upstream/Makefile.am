@@ -12,7 +12,6 @@ DEBIANFILES = \
 	libva-x11.install.in				\
 	libva.install.in	 			\
 	rules						\
-	vainfo.install					\
 	$(NULL)
 
 DEBIANGENFILES = \
