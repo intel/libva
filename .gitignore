@@ -22,14 +22,6 @@ config.log
 config.status
 config.sub
 configure
-debian.upstream/changelog
-debian.upstream/control
-debian.upstream/libva-drm*.install
-debian.upstream/libva-egl*.install
-debian.upstream/libva-glx*.install
-debian.upstream/libva-wayland*.install
-debian.upstream/libva-x11*.install
-debian.upstream/libva[0-9]*.install
 depcomp
 install-sh
 libtool

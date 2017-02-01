@@ -305,21 +305,6 @@ AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC], [$VA_DRIVER_INIT_FUNC],
 
 AC_OUTPUT([
     Makefile
-    debian.upstream/Makefile
-    debian.upstream/changelog
-    debian.upstream/control
-    debian.upstream/libva$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva.install.in
-    debian.upstream/libva-drm$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-drm.install.in
-    debian.upstream/libva-egl$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-egl.install.in
-    debian.upstream/libva-glx$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-glx.install.in
-    debian.upstream/libva-wayland$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-wayland.install.in
-    debian.upstream/libva-x11-$LIBVA_MAJOR_VERSION.install:\
-debian.upstream/libva-x11.install.in
     doc/Makefile
     dummy_drv_video/Makefile
     pkgconfig/Makefile
