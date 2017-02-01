@@ -81,7 +81,12 @@ m4_define([libdrm_version], [2.4])
 m4_define([wayland_api_version], [1.0.0])
 
 AC_PREREQ(2.57)
-AC_INIT([libva], [libva_version], [waldo.bastian@intel.com], libva)
+AC_INIT([libva],
+        [libva_version],
+        [https://github.com/01org/libva/issues/new],
+        [libva],
+        [https://github.com/01org/libva])
+
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([dist-bzip2])
