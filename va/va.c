@@ -155,6 +155,7 @@ vaMessageCallback vaSetInfoCallback(vaMessageCallback callback)
 
 void va_errorMessage(const char *msg, ...)
 {
+#if ENABLE_VA_MESSAGING
     char buf[512], *dynbuf;
     va_list args;
     int n, len;
@@ -179,10 +180,12 @@ void va_errorMessage(const char *msg, ...)
     }
     else if (len > 0)
         va_log_error(buf);
+#endif
 }
 
 void va_infoMessage(const char *msg, ...)
 {
+#if ENABLE_VA_MESSAGING
     char buf[512], *dynbuf;
     va_list args;
     int n, len;
@@ -207,6 +210,7 @@ void va_infoMessage(const char *msg, ...)
     }
     else if (len > 0)
         va_log_info(buf);
+#endif
 }
 
 static bool va_checkVtable(void *ptr, char *function)

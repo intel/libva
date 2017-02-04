@@ -153,6 +153,11 @@ AC_ARG_ENABLE([wayland],
                     [build with VA/Wayland API support @<:@default=yes@:>@])],
     [], [enable_wayland="yes"])
 
+AC_ARG_ENABLE([va-messaging],
+    [AC_HELP_STRING([--enable-va-messaging],
+                    [build with va info and error messaging @<:@default=yes@:>@])],
+    [], [enable_va_messaging="yes"])
+
 AC_ARG_ENABLE(dummy-driver,
     [AC_HELP_STRING([--enable-dummy-driver],
                     [build dummy video driver @<:@default=yes@:>@])],
@@ -185,6 +190,11 @@ if test "$enable_docs" = "yes"; then
     fi
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
+
+# Check for va messaging
+if test "$enable_va_messaging" = "yes"; then
+    AC_DEFINE([ENABLE_VA_MESSAGING], [1], [Defined to 1 if va messaging is needed])
+fi
 
 # Check for __attribute__((visibility()))
 AC_CACHE_CHECK([whether __attribute__((visibility())) is supported],
@@ -340,4 +350,5 @@ echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
 echo Build dummy driver ............... : $enable_dummy_driver
 echo Build documentation .............. : $enable_docs
+echo Build with messaging ............. : $enable_va_messaging
 echo
