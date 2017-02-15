@@ -38,7 +38,10 @@
 #include "wayland-drm-client-protocol.h"
 
 /* XXX: Wayland/DRM support currently lives in Mesa libEGL.so.* library */
-#define LIBWAYLAND_DRM_NAME "libEGL.so.1"
+/* First try the soname of a glvnd enabled mesa build */
+#define LIBWAYLAND_DRM_NAME "libEGL_mesa.so.0"
+/* Then fallback to plain libEGL.so.1 (which might not be mesa) */
+#define LIBWAYLAND_DRM_NAME_FALLBACK "libEGL.so.1"
 
 typedef struct va_wayland_drm_context {
     struct va_wayland_context   base;
@@ -207,8 +210,11 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     vtable->has_prime_sharing = 0;
 
     wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
-    if (!wl_drm_ctx->handle)
-        return false;
+    if (!wl_drm_ctx->handle) {
+        wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME_FALLBACK, RTLD_LAZY|RTLD_LOCAL);
+        if (!wl_drm_ctx->handle)
+            return false;
+    }
 
     wl_drm_ctx->drm_interface =
         dlsym(wl_drm_ctx->handle, "wl_drm_interface");
