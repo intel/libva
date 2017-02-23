@@ -53,7 +53,7 @@ protocol_source_h = \
 noinst_LTLIBRARIES		= libva_wayland.la
 libva_waylandincludedir		= ${includedir}/va
 libva_waylandinclude_HEADERS	= $(source_h)
-libva_wayland_la_SOURCES	= $(source_c) $(protocol_source_h)
+libva_wayland_la_SOURCES	= $(source_c)
 noinst_HEADERS			= $(source_h_priv)
 
 # Wayland protocol
@@ -64,6 +64,9 @@ va_wayland_drm.c: $(protocol_source_h)
 EXTRA_DIST = \
 	wayland-drm.xml         \
 	$(NULL)
+
+BUILT_SOURCES = $(protocol_source_h)
+CLEANFILES = $(BUILT_SOURCES)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in
