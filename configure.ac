@@ -292,6 +292,9 @@ if test "$enable_wayland" = "yes"; then
         WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
         AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
                      [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
+        if test "x$WAYLAND_SCANNER" = "x"; then
+            AC_MSG_ERROR([wayland-scanner not found: Install it or use --disable-wayland])
+        fi
 
         AC_DEFINE([HAVE_VA_WAYLAND], [1],
                   [Defined to 1 if VA/Wayland API is built])
