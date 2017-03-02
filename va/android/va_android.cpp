@@ -194,7 +194,7 @@ extern "C"  {
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,
-    sp<ISurface> draw, /* Android Surface/Window */
+    sp<ANativeWindow> draw, /* Android Native Window */
     short srcx,
     short srcy,
     unsigned short srcw,
