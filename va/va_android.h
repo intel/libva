@@ -48,7 +48,8 @@ VADisplay vaGetDisplay (
 
 #ifdef __cplusplus
 #ifdef ANDROID
-#include <surfaceflinger/ISurface.h>
+#include <system/window.h>
+#include <utils/StrongPointer.h>
 using namespace android;
 
 /*
@@ -62,7 +63,7 @@ using namespace android;
 VAStatus vaPutSurface (
     VADisplay dpy,
     VASurfaceID surface,	
-    sp<ISurface> draw, /* Android Window/Surface */
+    sp<ANativeWindow> draw, /* Android Native Window */
     short srcx,
     short srcy,
     unsigned short srcw,
