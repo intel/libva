@@ -82,18 +82,20 @@ LOCAL_COPY_HEADERS_TO := libva/va
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 
 LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils liblog
 
-include $(BUILD_SHARED_LIBRARY)
+intermediates := $(call local-generated-sources-dir)
 
-GEN := $(LOCAL_PATH)/va_version.h
+GEN := $(intermediates)/va/va_version.h
 $(GEN): SCRIPT := $(LOCAL_PATH)/../build/gen_version.sh
-$(GEN): PRIVATE_PATH := $(LOCAL_PATH)
-$(GEN): PRIVATE_CUSTOM_TOOL = sh $(SCRIPT) $(PRIVATE_PATH)/.. $(PRIVATE_PATH)/va_version.h.in > $@
-$(GEN): $(LOCAL_PATH)/%.h : $(LOCAL_PATH)/%.h.in $(SCRIPT) $(LOCAL_PATH)/../configure.ac
+$(GEN): PRIVATE_CUSTOM_TOOL = sh $(SCRIPT) $(<D)/.. $< > $@
+$(GEN): $(intermediates)/va/%.h : $(LOCAL_PATH)/%.h.in $(LOCAL_PATH)/../configure.ac
 	$(transform-generated-source)
 LOCAL_GENERATED_SOURCES += $(GEN) 
+
+include $(BUILD_SHARED_LIBRARY)
 
 # For libva-android
 # =====================================================
