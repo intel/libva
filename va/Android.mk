@@ -60,25 +60,7 @@ else
 LOCAL_CFLAGS += -DANDROID_LOG
 endif
 
-LOCAL_C_INCLUDES += \
-	$(TARGET_OUT_HEADERS)/libva \
-	$(LOCAL_PATH)/x11 \
-	$(LOCAL_PATH)/..
-
-LOCAL_COPY_HEADERS := \
-	va.h \
-	va_backend.h \
-	va_dec_hevc.h \
-	va_dec_jpeg.h \
-	va_drmcommon.h \
-	va_enc_hevc.h \
-	va_enc_jpeg.h \
-	va_enc_vp8.h \
-	va_enc_vp9.h \
-	va_dec_vp9.h \
-	va_version.h
-
-LOCAL_COPY_HEADERS_TO := libva/va
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva
@@ -87,6 +69,10 @@ LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils liblog
 
 intermediates := $(call local-generated-sources-dir)
+
+LOCAL_EXPORT_C_INCLUDE_DIRS := \
+	$(intermediates) \
+	$(LOCAL_C_INCLUDES)
 
 GEN := $(intermediates)/va/va_version.h
 $(GEN): SCRIPT := $(LOCAL_PATH)/../build/gen_version.sh
@@ -110,13 +96,7 @@ LOCAL_CFLAGS += \
 	-DANDROID -DLOG_TAG=\"libva-android\"
 
 LOCAL_C_INCLUDES += \
-	$(TARGET_OUT_HEADERS)/libva \
-	$(TARGET_OUT_HEADERS)/libdrm \
 	$(LOCAL_PATH)/drm
-
-LOCAL_COPY_HEADERS_TO := libva/va
-
-LOCAL_COPY_HEADERS := va_android.h		
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
@@ -137,14 +117,6 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS += \
 	-DANDROID -DLOG_TAG=\"libva-egl\"
 
-LOCAL_C_INCLUDES += \
-	$(TARGET_OUT_HEADERS)/libva \
-	$(LOCAL_PATH)/x11
-
-LOCAL_COPY_HEADERS_TO := libva/va
-
-LOCAL_COPY_HEADERS := egl/va_egl.h egl/va_backend_egl.h
-
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-egl
 
@@ -161,16 +133,6 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := va_tpi.c
 
 LOCAL_CFLAGS += -DANDROID -DLOG_TAG=\"libva-tpi\"
-
-LOCAL_C_INCLUDES += \
-	$(TARGET_OUT_HEADERS)/libva \
-	$(LOCAL_PATH)/..
-
-LOCAL_COPY_HEADERS_TO := libva/va
-
-LOCAL_COPY_HEADERS := \
-	va_tpi.h \
-	va_backend_tpi.h
 
 LOCAL_SHARED_LIBRARIES := libva
 
