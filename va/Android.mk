@@ -44,12 +44,10 @@ LOCAL_SRC_FILES := \
 	va_fool.c
 
 LOCAL_CFLAGS_32 += \
-	-DANDROID \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH_32)\"" \
 	-DLOG_TAG=\"libva\"
 
 LOCAL_CFLAGS_64 += \
-	-DANDROID \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH_64)\"" \
 	-DLOG_TAG=\"libva\"
 
@@ -93,7 +91,7 @@ LOCAL_SRC_FILES := \
 	drm/va_drm_utils.c
 
 LOCAL_CFLAGS += \
-	-DANDROID -DLOG_TAG=\"libva-android\"
+	-DLOG_TAG=\"libva-android\"
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/drm
@@ -115,7 +113,7 @@ LOCAL_SRC_FILES := \
 	egl/va_egl.c
 
 LOCAL_CFLAGS += \
-	-DANDROID -DLOG_TAG=\"libva-egl\"
+	-DLOG_TAG=\"libva-egl\"
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-egl
@@ -132,7 +130,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := va_tpi.c
 
-LOCAL_CFLAGS += -DANDROID -DLOG_TAG=\"libva-tpi\"
+LOCAL_CFLAGS += -DLOG_TAG=\"libva-tpi\"
 
 LOCAL_SHARED_LIBRARIES := libva
 
