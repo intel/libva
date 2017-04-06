@@ -37,6 +37,16 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#ifdef ANDROID
+#include <cutils/log.h>
+/* support versions < JellyBean */
+#ifndef ALOGE
+#define ALOGE LOGE
+#endif
+#ifndef ALOGI
+#define ALOGI LOGI
+#endif
+#endif
 
 #define DRIVER_EXTENSION	"_drv_video.so"
 
@@ -108,10 +118,8 @@ int vaDisplayIsValid(VADisplay dpy)
 
 static void default_log_error(const char *buffer)
 {
-# ifdef ANDROID_ALOG
+# ifdef ANDROID
     ALOGE("%s", buffer);
-# elif ANDROID_LOG
-    LOGE("%s", buffer);
 # else
     fprintf(stderr, "libva error: %s", buffer);
 # endif
@@ -119,10 +127,8 @@ static void default_log_error(const char *buffer)
 
 static void default_log_info(const char *buffer)
 {
-# ifdef ANDROID_ALOG
+# ifdef ANDROID
     ALOGI("%s", buffer);
-# elif ANDROID_LOG
-    LOGI("%s", buffer);
 # else
     fprintf(stderr, "libva info: %s", buffer);
 # endif
