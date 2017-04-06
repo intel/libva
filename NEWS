@@ -1,5 +1,8 @@
-libva NEWS -- summary of user visible changes.  2017-03-31
+libva NEWS -- summary of user visible changes.  2017-04-xx
 Copyright (C) 2009-2017 Intel Corporation
+
+Version 1.8.1 - DD.Apr.2017
+* Bump libva to 1.8.1
 
 Version 1.8.0 - 31.March.2017
 * Bump VA API version to 0.40
