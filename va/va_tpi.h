@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -44,7 +44,8 @@ typedef enum {
     VAExternalMemoryAndroidGrallocBuffer, /* the memory is from Android Gralloc memory, and buffers points
                                            * the gralloc native_handle_t list
                                            */
-} VASurfaceMemoryType;
+}
+VASurfaceMemoryType;
 
 typedef struct _VASurfaceAttributeTPI {
     VASurfaceMemoryType type;
@@ -67,7 +68,7 @@ typedef struct _VASurfaceAttributeTPI {
 } VASurfaceAttributeTPI;
 
 
-VAStatus vaPutSurfaceBuf (
+VAStatus vaPutSurfaceBuf(
     VADisplay dpy,
     VASurfaceID surface,
     unsigned char* data,
@@ -86,7 +87,7 @@ VAStatus vaPutSurfaceBuf (
 );
 
 
-VAStatus vaCreateSurfacesWithAttribute (
+VAStatus vaCreateSurfacesWithAttribute(
     VADisplay dpy,
     int width,
     int height,
@@ -100,4 +101,4 @@ VAStatus vaCreateSurfacesWithAttribute (
 }
 #endif
 
-#endif 
+#endif

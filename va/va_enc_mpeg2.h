@@ -94,8 +94,8 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
     unsigned int ip_period;
     /** \brief Picture width.
      *
-     * A 14bits unsigned inter, the lower 12bits 
-     * is horizontal_size_value, and the upper 
+     * A 14bits unsigned inter, the lower 12bits
+     * is horizontal_size_value, and the upper
      * 2bits is \c horizontal_size_extension
      *
      */
@@ -103,7 +103,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
     /** \brief Picture height.
      *
      * A 14bits unsigned inter, the lower 12bits
-     * is vertical_size_value, and the upper 2bits is 
+     * is vertical_size_value, and the upper 2bits is
      * vertical_size_size_extension
      *
      */
@@ -122,8 +122,8 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
     unsigned int bits_per_second;
     /**
      * \brief Frame rate
-     * 
-     * Derived from frame_rate_value, frame_rate_extension_n and 
+     *
+     * Derived from frame_rate_value, frame_rate_extension_n and
      * frame_rate_extension_d
      *
      */
@@ -170,7 +170,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
 /**
  * \brief Picture parameter for MPEG-2 encoding
  *
- * This structure holds information for picture_header() and 
+ * This structure holds information for picture_header() and
  * picture_coding_extension()
  *
  * If packed picture headers mode is used, i.e. if the encoding
@@ -201,8 +201,8 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
     /**
      * \brief Flag to indicate the picture is the last one or not.
      *
-     * This fields holds 0 if the picture to be encoded is not 
-     * the last one in the stream. Otherwise, it 
+     * This fields holds 0 if the picture to be encoded is not
+     * the last one in the stream. Otherwise, it
      * is \ref MPEG2_LAST_PICTURE_EOSTREAM.
      */
     unsigned char last_picture;
@@ -217,13 +217,13 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
     union {
         struct {
             /** \brief Same as the element in Picture coding extension */
-            unsigned int intra_dc_precision             : 2; 
+            unsigned int intra_dc_precision             : 2;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int picture_structure              : 2; 
+            unsigned int picture_structure              : 2;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int top_field_first                : 1; 
+            unsigned int top_field_first                : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int frame_pred_frame_dct           : 1; 
+            unsigned int frame_pred_frame_dct           : 1;
             /** \brief Same as the element in Picture coding extension */
             unsigned int concealment_motion_vectors     : 1;
             /** \brief Same as the element in Picture coding extension */
@@ -248,7 +248,7 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
      */
     union {
         struct {
-            /** \brief Same as the element in Picture coding extension */            
+            /** \brief Same as the element in Picture coding extension */
             unsigned int v_axis                         : 1;
             /** \brief Same as the element in Picture coding extension */
             unsigned int field_sequence                 : 3;

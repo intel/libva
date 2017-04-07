@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -49,7 +49,7 @@
  *
  * EGLClientBuffer is gfx/video driver implementation specific (?). It means we need to pass up
  * the low-level buffer ID (or handle) of the decoded surface to gst-gltexture, and gst-gltexture
- * then pass down it to gfx driver.  
+ * then pass down it to gfx driver.
  *
  * Bellow API vaGetEGLClientBufferFromSurface is for this purpose
  */
@@ -61,22 +61,22 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-VAStatus vaGetEGLClientBufferFromSurface (
+VAStatus vaGetEGLClientBufferFromSurface(
     VADisplay dpy,
     VASurfaceID surface,
     EGLClientBuffer *buffer /* out*/
 )
 {
-  VADriverContextP ctx;
-  struct VADriverVTableEGL *va_egl;
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
+    VADriverContextP ctx;
+    struct VADriverVTableEGL *va_egl;
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
 
-  va_egl = (struct VADriverVTableEGL *)ctx->vtable_egl;
-  if (va_egl && va_egl->vaGetEGLClientBufferFromSurface) {
-      return va_egl->vaGetEGLClientBufferFromSurface(ctx, surface, buffer);
-  } else
-      return VA_STATUS_ERROR_UNIMPLEMENTED;
+    va_egl = (struct VADriverVTableEGL *)ctx->vtable_egl;
+    if (va_egl && va_egl->vaGetEGLClientBufferFromSurface) {
+        return va_egl->vaGetEGLClientBufferFromSurface(ctx, surface, buffer);
+    } else
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
-  
-  
+
+

@@ -130,7 +130,8 @@ typedef enum {
      * Note: packed \c nal_unit_type shall be equal to 39 or 40.
      */
     VAEncPackedHeaderHEVC_SEI   = (VAEncPackedHeaderMiscMask | 1),
-} VAEncPackedHeaderTypeHEVC;
+}
+VAEncPackedHeaderTypeHEVC;
 
 /**
  * \brief Sequence parameter for HEVC encoding in main & main 10
@@ -463,7 +464,7 @@ typedef struct _VAEncPictureParameterBufferHEVC {
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    transform_skip_enabled_flag                    : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
-            uint32_t    cu_qp_delta_enabled_flag	               : 1;
+            uint32_t    cu_qp_delta_enabled_flag                   : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    weighted_pred_flag                             : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
@@ -625,7 +626,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    mvd_l1_zero_flag                               : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
-            uint32_t    cabac_init_flag        	                    : 1;
+            uint32_t    cabac_init_flag                             : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    slice_deblocking_filter_disabled_flag          : 2;
             /** \brief Corresponds to HEVC syntax element of the same name. */
@@ -650,8 +651,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
  *
  * Matrix entries are in raster scan order which follows HEVC spec.
  */
-typedef struct _VAQMatrixBufferHEVC
-{
+typedef struct _VAQMatrixBufferHEVC {
     /**
      * \brief scaling lists,
      * corresponds to same HEVC spec syntax element

@@ -27,28 +27,28 @@
 static int x11_error_code = 0;
 static int (*old_error_handler)(Display *, XErrorEvent *);
 
-static int 
+static int
 error_handler(Display *dpy, XErrorEvent *error)
 {
     x11_error_code = error->error_code;
     return 0;
 }
 
-static void 
+static void
 x11_trap_errors(void)
 {
     x11_error_code    = 0;
     old_error_handler = XSetErrorHandler(error_handler);
 }
 
-static int 
+static int
 x11_untrap_errors(void)
 {
     XSetErrorHandler(old_error_handler);
     return x11_error_code;
 }
 
-static int 
+static int
 is_window(Display *dpy, Drawable drawable)
 {
     XWindowAttributes wattr;
@@ -87,11 +87,11 @@ free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
     int i = 0;
 
     while (i < DRAWABLE_HASH_SZ) {
-	if (dri_drawable == dri_state->drawable_hash[i]) {
-	    dri_state->destroyDrawable(ctx, dri_drawable);
-	    dri_state->drawable_hash[i] = NULL;
-	}
-	i++;
+        if (dri_drawable == dri_state->drawable_hash[i]) {
+            dri_state->destroyDrawable(ctx, dri_drawable);
+            dri_state->drawable_hash[i] = NULL;
+        }
+        i++;
     }
 }
 
@@ -111,7 +111,7 @@ free_drawable_hashtable(VADriverContextP ctx)
             dri_state->destroyDrawable(ctx, prev);
         }
 
-	dri_state->drawable_hash[i] = NULL;
+        dri_state->drawable_hash[i] = NULL;
     }
 }
 
@@ -121,7 +121,7 @@ dri_get_drawable(VADriverContextP ctx, XID drawable)
     return do_drawable_hash(ctx, drawable);
 }
 
-void 
+void
 dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
@@ -130,9 +130,9 @@ dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 }
 
 union dri_buffer *
-dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
+        dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
-    
+
     return dri_state->getRenderingBuffer(ctx, dri_drawable);
 }

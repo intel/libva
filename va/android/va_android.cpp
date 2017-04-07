@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -43,45 +43,42 @@
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/dri/renderD128"
 
-static int open_device (char *dev_name)
+static int open_device(char *dev_name)
 {
     struct stat st;
     int fd;
 
-    if (-1 == stat (dev_name, &st))
-    {
-        printf ("Cannot identify '%s': %d, %s\n",
-                dev_name, errno, strerror (errno));
+    if (-1 == stat(dev_name, &st)) {
+        printf("Cannot identify '%s': %d, %s\n",
+               dev_name, errno, strerror(errno));
         return -1;
     }
 
-    if (!S_ISCHR (st.st_mode))
-    {
-        printf ("%s is no device\n", dev_name);
+    if (!S_ISCHR(st.st_mode)) {
+        printf("%s is no device\n", dev_name);
         return -1;
     }
 
-    fd = open (dev_name, O_RDWR);
+    fd = open(dev_name, O_RDWR);
 
-    if (-1 == fd)
-    {
-        fprintf (stderr, "Cannot open '%s': %d, %s\n",
-                 dev_name, errno, strerror (errno));
+    if (-1 == fd) {
+        fprintf(stderr, "Cannot open '%s': %d, %s\n",
+                dev_name, errno, strerror(errno));
         return -1;
     }
 
     return fd;
 }
 
-static int va_DisplayContextIsValid (
+static int va_DisplayContextIsValid(
     VADisplayContextP pDisplayContext
-                                  )
+)
 {
     return (pDisplayContext != NULL &&
             pDisplayContext->pDriverContext != NULL);
 }
 
-static void va_DisplayContextDestroy (
+static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
 {
@@ -99,7 +96,7 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-static VAStatus va_DisplayContextGetDriverName (
+static VAStatus va_DisplayContextGetDriverName(
     VADisplayContextP pDisplayContext,
     char **driver_name
 )
@@ -111,7 +108,7 @@ static VAStatus va_DisplayContextGetDriverName (
     drm_state->fd = open_device((char *)DEVICE_NAME);
 
     if (drm_state->fd < 0) {
-        fprintf(stderr,"can't open DRM devices\n");
+        fprintf(stderr, "can't open DRM devices\n");
         return VA_STATUS_ERROR_UNKNOWN;
     }
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
@@ -120,7 +117,7 @@ static VAStatus va_DisplayContextGetDriverName (
 }
 
 
-VADisplay vaGetDisplay (
+VADisplay vaGetDisplay(
     void *native_dpy /* implementation specific */
 )
 {
@@ -130,17 +127,15 @@ VADisplay vaGetDisplay (
     if (!native_dpy)
         return NULL;
 
-    if (!dpy)
-    {
+    if (!dpy) {
         /* create new entry */
         VADriverContextP pDriverContext = 0;
         struct drm_state *drm_state = 0;
         pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
         pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
         drm_state       = (struct drm_state*)calloc(1, sizeof(*drm_state));
-        if (pDisplayContext && pDriverContext && drm_state)
-        {
-            pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
+        if (pDisplayContext && pDriverContext && drm_state) {
+            pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;
 
             pDriverContext->native_dpy       = (void *)native_dpy;
             pDriverContext->display_type     = VA_DISPLAY_ANDROID;
@@ -148,11 +143,9 @@ VADisplay vaGetDisplay (
             pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
             pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
             pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-            pDriverContext->drm_state 	     = drm_state;
+            pDriverContext->drm_state        = drm_state;
             dpy                              = (VADisplay)pDisplayContext;
-        }
-        else
-        {
+        } else {
             if (pDisplayContext)
                 free(pDisplayContext);
             if (pDriverContext)
@@ -161,7 +154,7 @@ VADisplay vaGetDisplay (
                 free(drm_state);
         }
     }
-  
+
     return dpy;
 }
 
@@ -173,7 +166,7 @@ extern "C"  {
     extern int fool_postp; /* do nothing for vaPutSurface if set */
     extern int trace_flag; /* trace vaPutSurface parameters */
 
-    void va_TracePutSurface (
+    void va_TracePutSurface(
         VADisplay dpy,
         VASurfaceID surface,
         void *draw, /* the target Drawable */
@@ -188,10 +181,10 @@ extern "C"  {
         VARectangle *cliprects, /* client supplied clip list */
         unsigned int number_cliprects, /* number of clip rects in the clip list */
         unsigned int flags /* de-interlacing flags */
-        );
+    );
 }
 
-VAStatus vaPutSurface (
+VAStatus vaPutSurface(
     VADisplay dpy,
     VASurfaceID surface,
     sp<ANativeWindow> draw, /* Android Native Window */
@@ -221,9 +214,9 @@ VAStatus vaPutSurface (
 
     VA_TRACE_LOG(va_TracePutSurface, dpy, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
                  destx, desty, destw, desth,
-                 cliprects, number_cliprects, flags );
-    
-    return ctx->vtable->vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
+                 cliprects, number_cliprects, flags);
+
+    return ctx->vtable->vaPutSurface(ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
                                      destx, desty, destw, desth,
-                                     cliprects, number_cliprects, flags );
+                                     cliprects, number_cliprects, flags);
 }

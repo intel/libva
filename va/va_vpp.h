@@ -248,7 +248,8 @@ typedef enum _VAProcFilterType {
     /** \brief Skin Tone Enhancement. */
     VAProcFilterSkinToneEnhancement,
     VAProcFilterCount
-} VAProcFilterType;
+}
+VAProcFilterType;
 
 /** \brief Deinterlacing types. */
 typedef enum _VAProcDeinterlacingType {
@@ -333,7 +334,7 @@ typedef enum _VAProcColorStandardType {
 /** @name Pipeline end flags */
 /**@{*/
 /** \brief Specifies the pipeline is the last. */
-#define VA_PIPELINE_FLAG_END		0x00000004
+#define VA_PIPELINE_FLAG_END        0x00000004
 /**@}*/
 
 /** \brief Video processing pipeline capabilities. */
@@ -427,7 +428,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      *
      * Pointer to a #VARectangle defining the region within the output
      * surface that receives the processed pixels. If NULL, \c output_region
-     * implies the whole surface. 
+     * implies the whole surface.
      *
      * Note that any pixels residing outside the specified region will
      * be filled in with the \ref output_background_color.
@@ -473,7 +474,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   \c VA_BOTTOM_FIELD. Note that any deinterlacing filter
      *   (#VAProcFilterDeinterlacing) will override those flags.
      * - Color space conversion: \c VA_SRC_BT601, \c VA_SRC_BT709,
-     *   \c VA_SRC_SMPTE_240. 
+     *   \c VA_SRC_SMPTE_240.
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
      */
@@ -530,21 +531,21 @@ typedef struct _VAProcFilterParameterBuffer {
 
 /** @name De-interlacing flags */
 /**@{*/
-/** 
- * \brief Bottom field first in the input frame. 
+/**
+ * \brief Bottom field first in the input frame.
  * if this is not set then assumes top field first.
  */
-#define VA_DEINTERLACING_BOTTOM_FIELD_FIRST	0x0001
-/** 
- * \brief Bottom field used in deinterlacing. 
+#define VA_DEINTERLACING_BOTTOM_FIELD_FIRST 0x0001
+/**
+ * \brief Bottom field used in deinterlacing.
  * if this is not set then assumes top field is used.
  */
-#define VA_DEINTERLACING_BOTTOM_FIELD		0x0002
-/** 
- * \brief A single field is stored in the input frame. 
+#define VA_DEINTERLACING_BOTTOM_FIELD       0x0002
+/**
+ * \brief A single field is stored in the input frame.
  * if this is not set then assumes the frame contains two interleaved fields.
  */
-#define VA_DEINTERLACING_ONE_FIELD		0x0004
+#define VA_DEINTERLACING_ONE_FIELD      0x0004
 /**@}*/
 
 /** \brief Deinterlacing filter parametrization. */
@@ -554,7 +555,7 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
     /** \brief Deinterlacing flags. */
-    unsigned int     		flags;
+    unsigned int            flags;
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**
@@ -605,7 +606,7 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
     /**
      * \brief Color balance value.
      *
-     * Special case for automatically adjusted attributes. e.g. 
+     * Special case for automatically adjusted attributes. e.g.
      * #VAProcColorBalanceAutoSaturation,
      * #VAProcColorBalanceAutoBrightness,
      * #VAProcColorBalanceAutoContrast.

@@ -10,11 +10,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -209,9 +209,9 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     ctx->drm_state       = drm_state;
     vtable->has_prime_sharing = 0;
 
-    wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
+    wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY | RTLD_LOCAL);
     if (!wl_drm_ctx->handle) {
-        wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME_FALLBACK, RTLD_LAZY|RTLD_LOCAL);
+        wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME_FALLBACK, RTLD_LAZY | RTLD_LOCAL);
         if (!wl_drm_ctx->handle)
             return false;
     }

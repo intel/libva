@@ -33,16 +33,16 @@
 #ifndef _DRI2_TOKENS_H_
 #define _DRI2_TOKENS_H_
 
-#define DRI2BufferFrontLeft		0
-#define DRI2BufferBackLeft		1
-#define DRI2BufferFrontRight		2
-#define DRI2BufferBackRight		3
-#define DRI2BufferDepth			4
-#define DRI2BufferStencil		5
-#define DRI2BufferAccum			6
-#define DRI2BufferFakeFrontLeft		7
-#define DRI2BufferFakeFrontRight	8
+#define DRI2BufferFrontLeft     0
+#define DRI2BufferBackLeft      1
+#define DRI2BufferFrontRight        2
+#define DRI2BufferBackRight     3
+#define DRI2BufferDepth         4
+#define DRI2BufferStencil       5
+#define DRI2BufferAccum         6
+#define DRI2BufferFakeFrontLeft     7
+#define DRI2BufferFakeFrontRight    8
 
-#define DRI2DriverDRI			0
+#define DRI2DriverDRI           0
 
 #endif

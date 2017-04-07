@@ -118,10 +118,11 @@ typedef enum {
      * Note: packed \c nal_unit_type shall be equal to 6.
      */
     VAEncPackedHeaderH264_SEI   = (VAEncPackedHeaderMiscMask | 1),
-} VAEncPackedHeaderTypeH264;
+}
+VAEncPackedHeaderTypeH264;
 
 /**
- * \brief Sequence parameter for H.264 encoding in baseline, main & high 
+ * \brief Sequence parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds information for \c seq_parameter_set_data() as
@@ -258,7 +259,7 @@ typedef struct _VAEncSequenceParameterBufferH264 {
 } VAEncSequenceParameterBufferH264;
 
 /**
- * \brief Picture parameter for H.264 encoding in baseline, main & high 
+ * \brief Picture parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds information for \c pic_parameter_set_rbsp() as
@@ -523,7 +524,7 @@ typedef struct _VAEncSliceParameterBufferH264 {
 /**@}*/
 
 /**
- * \brief Macroblock parameter for H.264 encoding in baseline, main & high 
+ * \brief Macroblock parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds per-macroblock information. The buffer must be

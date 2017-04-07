@@ -33,19 +33,19 @@
 #include <string.h>
 #include <stdarg.h>
 
-#define ASSERT	assert
+#define ASSERT  assert
 
-#define INIT_DRIVER_DATA	struct dummy_driver_data * const driver_data = (struct dummy_driver_data *) ctx->pDriverData;
+#define INIT_DRIVER_DATA    struct dummy_driver_data * const driver_data = (struct dummy_driver_data *) ctx->pDriverData;
 
 #define CONFIG(id)  ((object_config_p) object_heap_lookup( &driver_data->config_heap, id ))
 #define CONTEXT(id) ((object_context_p) object_heap_lookup( &driver_data->context_heap, id ))
-#define SURFACE(id)	((object_surface_p) object_heap_lookup( &driver_data->surface_heap, id ))
+#define SURFACE(id) ((object_surface_p) object_heap_lookup( &driver_data->surface_heap, id ))
 #define BUFFER(id)  ((object_buffer_p) object_heap_lookup( &driver_data->buffer_heap, id ))
 
-#define CONFIG_ID_OFFSET		0x01000000
-#define CONTEXT_ID_OFFSET		0x02000000
-#define SURFACE_ID_OFFSET		0x04000000
-#define BUFFER_ID_OFFSET		0x08000000
+#define CONFIG_ID_OFFSET        0x01000000
+#define CONTEXT_ID_OFFSET       0x02000000
+#define SURFACE_ID_OFFSET       0x04000000
+#define BUFFER_ID_OFFSET        0x08000000
 
 static void dummy__error_message(const char *msg, ...)
 {
@@ -68,10 +68,10 @@ static void dummy__information_message(const char *msg, ...)
 }
 
 VAStatus dummy_QueryConfigProfiles(
-		VADriverContextP ctx,
-		VAProfile *profile_list,	/* out */
-		int *num_profiles			/* out */
-	)
+    VADriverContextP ctx,
+    VAProfile *profile_list,    /* out */
+    int *num_profiles           /* out */
+)
 {
     int i = 0;
 
@@ -95,44 +95,44 @@ VAStatus dummy_QueryConfigProfiles(
 }
 
 VAStatus dummy_QueryConfigEntrypoints(
-		VADriverContextP ctx,
-		VAProfile profile,
-		VAEntrypoint  *entrypoint_list,	/* out */
-		int *num_entrypoints		/* out */
-	)
+    VADriverContextP ctx,
+    VAProfile profile,
+    VAEntrypoint  *entrypoint_list, /* out */
+    int *num_entrypoints        /* out */
+)
 {
     switch (profile) {
-        case VAProfileMPEG2Simple:
-        case VAProfileMPEG2Main:
-                *num_entrypoints = 2;
-                entrypoint_list[0] = VAEntrypointVLD;
-                entrypoint_list[1] = VAEntrypointMoComp;
-                break;
+    case VAProfileMPEG2Simple:
+    case VAProfileMPEG2Main:
+        *num_entrypoints = 2;
+        entrypoint_list[0] = VAEntrypointVLD;
+        entrypoint_list[1] = VAEntrypointMoComp;
+        break;
 
-        case VAProfileMPEG4Simple:
-        case VAProfileMPEG4AdvancedSimple:
-        case VAProfileMPEG4Main:
-                *num_entrypoints = 1;
-                entrypoint_list[0] = VAEntrypointVLD;
-                break;
+    case VAProfileMPEG4Simple:
+    case VAProfileMPEG4AdvancedSimple:
+    case VAProfileMPEG4Main:
+        *num_entrypoints = 1;
+        entrypoint_list[0] = VAEntrypointVLD;
+        break;
 
-        case VAProfileH264Baseline:
-        case VAProfileH264Main:
-        case VAProfileH264High:
-                *num_entrypoints = 1;
-                entrypoint_list[0] = VAEntrypointVLD;
-                break;
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        *num_entrypoints = 1;
+        entrypoint_list[0] = VAEntrypointVLD;
+        break;
 
-        case VAProfileVC1Simple:
-        case VAProfileVC1Main:
-        case VAProfileVC1Advanced:
-                *num_entrypoints = 1;
-                entrypoint_list[0] = VAEntrypointVLD;
-                break;
+    case VAProfileVC1Simple:
+    case VAProfileVC1Main:
+    case VAProfileVC1Advanced:
+        *num_entrypoints = 1;
+        entrypoint_list[0] = VAEntrypointVLD;
+        break;
 
-        default:
-                *num_entrypoints = 0;
-                break;
+    default:
+        *num_entrypoints = 0;
+        break;
     }
 
     /* If the assert fails then DUMMY_MAX_ENTRYPOINTS needs to be bigger */
@@ -141,29 +141,27 @@ VAStatus dummy_QueryConfigEntrypoints(
 }
 
 VAStatus dummy_GetConfigAttributes(
-		VADriverContextP ctx,
-		VAProfile profile,
-		VAEntrypoint entrypoint,
-		VAConfigAttrib *attrib_list,	/* in/out */
-		int num_attribs
-	)
+    VADriverContextP ctx,
+    VAProfile profile,
+    VAEntrypoint entrypoint,
+    VAConfigAttrib *attrib_list,    /* in/out */
+    int num_attribs
+)
 {
     int i;
 
     /* Other attributes don't seem to be defined */
     /* What to do if we don't know the attribute? */
-    for (i = 0; i < num_attribs; i++)
-    {
-        switch (attrib_list[i].type)
-        {
-          case VAConfigAttribRTFormat:
-              attrib_list[i].value = VA_RT_FORMAT_YUV420;
-              break;
+    for (i = 0; i < num_attribs; i++) {
+        switch (attrib_list[i].type) {
+        case VAConfigAttribRTFormat:
+            attrib_list[i].value = VA_RT_FORMAT_YUV420;
+            break;
 
-          default:
-              /* Do nothing */
-              attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
-              break;
+        default:
+            /* Do nothing */
+            attrib_list[i].value = VA_ATTRIB_NOT_SUPPORTED;
+            break;
         }
     }
 
@@ -174,17 +172,14 @@ static VAStatus dummy__update_attribute(object_config_p obj_config, VAConfigAttr
 {
     int i;
     /* Check existing attrbiutes */
-    for(i = 0; obj_config->attrib_count < i; i++)
-    {
-        if (obj_config->attrib_list[i].type == attrib->type)
-        {
+    for (i = 0; obj_config->attrib_count < i; i++) {
+        if (obj_config->attrib_list[i].type == attrib->type) {
             /* Update existing attribute */
             obj_config->attrib_list[i].value = attrib->value;
             return VA_STATUS_SUCCESS;
         }
     }
-    if (obj_config->attrib_count < DUMMY_MAX_CONFIG_ATTRIBUTES)
-    {
+    if (obj_config->attrib_count < DUMMY_MAX_CONFIG_ATTRIBUTES) {
         i = obj_config->attrib_count;
         obj_config->attrib_list[i].type = attrib->type;
         obj_config->attrib_list[i].value = attrib->value;
@@ -195,13 +190,13 @@ static VAStatus dummy__update_attribute(object_config_p obj_config, VAConfigAttr
 }
 
 VAStatus dummy_CreateConfig(
-		VADriverContextP ctx,
-		VAProfile profile,
-		VAEntrypoint entrypoint,
-		VAConfigAttrib *attrib_list,
-		int num_attribs,
-		VAConfigID *config_id		/* out */
-	)
+    VADriverContextP ctx,
+    VAProfile profile,
+    VAEntrypoint entrypoint,
+    VAConfigAttrib *attrib_list,
+    int num_attribs,
+    VAConfigID *config_id       /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus;
@@ -211,72 +206,58 @@ VAStatus dummy_CreateConfig(
 
     /* Validate profile & entrypoint */
     switch (profile) {
-        case VAProfileMPEG2Simple:
-        case VAProfileMPEG2Main:
-                if ((VAEntrypointVLD == entrypoint) ||
-                    (VAEntrypointMoComp == entrypoint))
-                {
-                    vaStatus = VA_STATUS_SUCCESS;
-                }
-                else
-                {
-                    vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-                }
-                break;
+    case VAProfileMPEG2Simple:
+    case VAProfileMPEG2Main:
+        if ((VAEntrypointVLD == entrypoint) ||
+            (VAEntrypointMoComp == entrypoint)) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+        break;
 
-        case VAProfileMPEG4Simple:
-        case VAProfileMPEG4AdvancedSimple:
-        case VAProfileMPEG4Main:
-                if (VAEntrypointVLD == entrypoint)
-                {
-                    vaStatus = VA_STATUS_SUCCESS;
-                }
-                else
-                {
-                    vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-                }
-                break;
+    case VAProfileMPEG4Simple:
+    case VAProfileMPEG4AdvancedSimple:
+    case VAProfileMPEG4Main:
+        if (VAEntrypointVLD == entrypoint) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+        break;
 
-        case VAProfileH264Baseline:
-        case VAProfileH264Main:
-        case VAProfileH264High:
-                if (VAEntrypointVLD == entrypoint)
-                {
-                    vaStatus = VA_STATUS_SUCCESS;
-                }
-                else
-                {
-                    vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-                }
-                break;
+    case VAProfileH264Baseline:
+    case VAProfileH264Main:
+    case VAProfileH264High:
+        if (VAEntrypointVLD == entrypoint) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+        break;
 
-        case VAProfileVC1Simple:
-        case VAProfileVC1Main:
-        case VAProfileVC1Advanced:
-                if (VAEntrypointVLD == entrypoint)
-                {
-                    vaStatus = VA_STATUS_SUCCESS;
-                }
-                else
-                {
-                    vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
-                }
-                break;
+    case VAProfileVC1Simple:
+    case VAProfileVC1Main:
+    case VAProfileVC1Advanced:
+        if (VAEntrypointVLD == entrypoint) {
+            vaStatus = VA_STATUS_SUCCESS;
+        } else {
+            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT;
+        }
+        break;
 
-        default:
-                vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
-                break;
+    default:
+        vaStatus = VA_STATUS_ERROR_UNSUPPORTED_PROFILE;
+        break;
     }
 
-    if (VA_STATUS_SUCCESS != vaStatus)
-    {
+    if (VA_STATUS_SUCCESS != vaStatus) {
         return vaStatus;
     }
 
-    configID = object_heap_allocate( &driver_data->config_heap );
+    configID = object_heap_allocate(&driver_data->config_heap);
     obj_config = CONFIG(configID);
-    if (NULL == obj_config)
-    {
+    if (NULL == obj_config) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         return vaStatus;
     }
@@ -287,22 +268,17 @@ VAStatus dummy_CreateConfig(
     obj_config->attrib_list[0].value = VA_RT_FORMAT_YUV420;
     obj_config->attrib_count = 1;
 
-    for(i = 0; i < num_attribs; i++)
-    {
+    for (i = 0; i < num_attribs; i++) {
         vaStatus = dummy__update_attribute(obj_config, &(attrib_list[i]));
-        if (VA_STATUS_SUCCESS != vaStatus)
-        {
+        if (VA_STATUS_SUCCESS != vaStatus) {
             break;
         }
     }
 
     /* Error recovery */
-    if (VA_STATUS_SUCCESS != vaStatus)
-    {
-        object_heap_free( &driver_data->config_heap, (object_base_p) obj_config);
-    }
-    else
-    {
+    if (VA_STATUS_SUCCESS != vaStatus) {
+        object_heap_free(&driver_data->config_heap, (object_base_p) obj_config);
+    } else {
         *config_id = configID;
     }
 
@@ -310,33 +286,32 @@ VAStatus dummy_CreateConfig(
 }
 
 VAStatus dummy_DestroyConfig(
-		VADriverContextP ctx,
-		VAConfigID config_id
-	)
+    VADriverContextP ctx,
+    VAConfigID config_id
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus;
     object_config_p obj_config;
 
     obj_config = CONFIG(config_id);
-    if (NULL == obj_config)
-    {
+    if (NULL == obj_config) {
         vaStatus = VA_STATUS_ERROR_INVALID_CONFIG;
         return vaStatus;
     }
 
-    object_heap_free( &driver_data->config_heap, (object_base_p) obj_config);
+    object_heap_free(&driver_data->config_heap, (object_base_p) obj_config);
     return VA_STATUS_SUCCESS;
 }
 
 VAStatus dummy_QueryConfigAttributes(
-		VADriverContextP ctx,
-		VAConfigID config_id,
-		VAProfile *profile,		/* out */
-		VAEntrypoint *entrypoint, 	/* out */
-		VAConfigAttrib *attrib_list,	/* out */
-		int *num_attribs		/* out */
-	)
+    VADriverContextP ctx,
+    VAConfigID config_id,
+    VAProfile *profile,     /* out */
+    VAEntrypoint *entrypoint,   /* out */
+    VAConfigAttrib *attrib_list,    /* out */
+    int *num_attribs        /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -349,8 +324,7 @@ VAStatus dummy_QueryConfigAttributes(
     *profile = obj_config->profile;
     *entrypoint = obj_config->entrypoint;
     *num_attribs =  obj_config->attrib_count;
-    for(i = 0; i < obj_config->attrib_count; i++)
-    {
+    for (i = 0; i < obj_config->attrib_count; i++) {
         attrib_list[i] = obj_config->attrib_list[i];
     }
 
@@ -358,30 +332,27 @@ VAStatus dummy_QueryConfigAttributes(
 }
 
 VAStatus dummy_CreateSurfaces(
-		VADriverContextP ctx,
-		int width,
-		int height,
-		int format,
-		int num_surfaces,
-		VASurfaceID *surfaces		/* out */
-	)
+    VADriverContextP ctx,
+    int width,
+    int height,
+    int format,
+    int num_surfaces,
+    VASurfaceID *surfaces       /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     int i;
 
     /* We only support one format */
-    if (VA_RT_FORMAT_YUV420 != format)
-    {
+    if (VA_RT_FORMAT_YUV420 != format) {
         return VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT;
     }
 
-    for (i = 0; i < num_surfaces; i++)
-    {
-        int surfaceID = object_heap_allocate( &driver_data->surface_heap );
+    for (i = 0; i < num_surfaces; i++) {
+        int surfaceID = object_heap_allocate(&driver_data->surface_heap);
         object_surface_p obj_surface = SURFACE(surfaceID);
-        if (NULL == obj_surface)
-        {
+        if (NULL == obj_surface) {
             vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
             break;
         }
@@ -390,15 +361,13 @@ VAStatus dummy_CreateSurfaces(
     }
 
     /* Error recovery */
-    if (VA_STATUS_SUCCESS != vaStatus)
-    {
+    if (VA_STATUS_SUCCESS != vaStatus) {
         /* surfaces[i-1] was the last successful allocation */
-        for(; i--; )
-        {
+        for (; i--;) {
             object_surface_p obj_surface = SURFACE(surfaces[i]);
             surfaces[i] = VA_INVALID_SURFACE;
             ASSERT(obj_surface);
-            object_heap_free( &driver_data->surface_heap, (object_base_p) obj_surface);
+            object_heap_free(&driver_data->surface_heap, (object_base_p) obj_surface);
         }
     }
 
@@ -406,26 +375,25 @@ VAStatus dummy_CreateSurfaces(
 }
 
 VAStatus dummy_DestroySurfaces(
-		VADriverContextP ctx,
-		VASurfaceID *surface_list,
-		int num_surfaces
-	)
+    VADriverContextP ctx,
+    VASurfaceID *surface_list,
+    int num_surfaces
+)
 {
     INIT_DRIVER_DATA
     int i;
-    for(i = num_surfaces; i--; )
-    {
+    for (i = num_surfaces; i--;) {
         object_surface_p obj_surface = SURFACE(surface_list[i]);
         ASSERT(obj_surface);
-        object_heap_free( &driver_data->surface_heap, (object_base_p) obj_surface);
+        object_heap_free(&driver_data->surface_heap, (object_base_p) obj_surface);
     }
     return VA_STATUS_SUCCESS;
 }
 
 VAStatus dummy_QueryImageFormats(
-	VADriverContextP ctx,
-	VAImageFormat *format_list,        /* out */
-	int *num_formats           /* out */
+    VADriverContextP ctx,
+    VAImageFormat *format_list,        /* out */
+    int *num_formats           /* out */
 )
 {
     /* TODO */
@@ -433,11 +401,11 @@ VAStatus dummy_QueryImageFormats(
 }
 
 VAStatus dummy_CreateImage(
-	VADriverContextP ctx,
-	VAImageFormat *format,
-	int width,
-	int height,
-	VAImage *image     /* out */
+    VADriverContextP ctx,
+    VAImageFormat *format,
+    int width,
+    int height,
+    VAImage *image     /* out */
 )
 {
     /* TODO */
@@ -445,9 +413,9 @@ VAStatus dummy_CreateImage(
 }
 
 VAStatus dummy_DeriveImage(
-	VADriverContextP ctx,
-	VASurfaceID surface,
-	VAImage *image     /* out */
+    VADriverContextP ctx,
+    VASurfaceID surface,
+    VAImage *image     /* out */
 )
 {
     /* TODO */
@@ -455,8 +423,8 @@ VAStatus dummy_DeriveImage(
 }
 
 VAStatus dummy_DestroyImage(
-	VADriverContextP ctx,
-	VAImageID image
+    VADriverContextP ctx,
+    VAImageID image
 )
 {
     /* TODO */
@@ -464,9 +432,9 @@ VAStatus dummy_DestroyImage(
 }
 
 VAStatus dummy_SetImagePalette(
-	VADriverContextP ctx,
-	VAImageID image,
-	unsigned char *palette
+    VADriverContextP ctx,
+    VAImageID image,
+    unsigned char *palette
 )
 {
     /* TODO */
@@ -474,13 +442,13 @@ VAStatus dummy_SetImagePalette(
 }
 
 VAStatus dummy_GetImage(
-	VADriverContextP ctx,
-	VASurfaceID surface,
-	int x,     /* coordinates of the upper left source pixel */
-	int y,
-	unsigned int width, /* width and height of the region */
-	unsigned int height,
-	VAImageID image
+    VADriverContextP ctx,
+    VASurfaceID surface,
+    int x,     /* coordinates of the upper left source pixel */
+    int y,
+    unsigned int width, /* width and height of the region */
+    unsigned int height,
+    VAImageID image
 )
 {
     /* TODO */
@@ -489,17 +457,17 @@ VAStatus dummy_GetImage(
 
 
 VAStatus dummy_PutImage(
-	VADriverContextP ctx,
-	VASurfaceID surface,
-	VAImageID image,
-	int src_x,
-	int src_y,
-	unsigned int src_width,
-	unsigned int src_height,
-	int dest_x,
-	int dest_y,
-	unsigned int dest_width,
-	unsigned int dest_height
+    VADriverContextP ctx,
+    VASurfaceID surface,
+    VAImageID image,
+    int src_x,
+    int src_y,
+    unsigned int src_width,
+    unsigned int src_height,
+    int dest_x,
+    int dest_y,
+    unsigned int dest_width,
+    unsigned int dest_height
 )
 {
     /* TODO */
@@ -507,10 +475,10 @@ VAStatus dummy_PutImage(
 }
 
 VAStatus dummy_QuerySubpictureFormats(
-	VADriverContextP ctx,
-	VAImageFormat *format_list,        /* out */
-	unsigned int *flags,       /* out */
-	unsigned int *num_formats  /* out */
+    VADriverContextP ctx,
+    VAImageFormat *format_list,        /* out */
+    unsigned int *flags,       /* out */
+    unsigned int *num_formats  /* out */
 )
 {
     /* TODO */
@@ -518,9 +486,9 @@ VAStatus dummy_QuerySubpictureFormats(
 }
 
 VAStatus dummy_CreateSubpicture(
-	VADriverContextP ctx,
-	VAImageID image,
-	VASubpictureID *subpicture   /* out */
+    VADriverContextP ctx,
+    VAImageID image,
+    VASubpictureID *subpicture   /* out */
 )
 {
     /* TODO */
@@ -528,8 +496,8 @@ VAStatus dummy_CreateSubpicture(
 }
 
 VAStatus dummy_DestroySubpicture(
-	VADriverContextP ctx,
-	VASubpictureID subpicture
+    VADriverContextP ctx,
+    VASubpictureID subpicture
 )
 {
     /* TODO */
@@ -537,9 +505,9 @@ VAStatus dummy_DestroySubpicture(
 }
 
 VAStatus dummy_SetSubpictureImage(
-        VADriverContextP ctx,
-        VASubpictureID subpicture,
-        VAImageID image
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    VAImageID image
 )
 {
     /* TODO */
@@ -547,14 +515,14 @@ VAStatus dummy_SetSubpictureImage(
 }
 
 VAStatus dummy_SetSubpicturePalette(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	/*
-	 * pointer to an array holding the palette data.  The size of the array is
-	 * num_palette_entries * entry_bytes in size.  The order of the components
-	 * in the palette is described by the component_order in VASubpicture struct
-	 */
-	unsigned char *palette
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    /*
+     * pointer to an array holding the palette data.  The size of the array is
+     * num_palette_entries * entry_bytes in size.  The order of the components
+     * in the palette is described by the component_order in VASubpicture struct
+     */
+    unsigned char *palette
 )
 {
     /* TODO */
@@ -562,11 +530,11 @@ VAStatus dummy_SetSubpicturePalette(
 }
 
 VAStatus dummy_SetSubpictureChromakey(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	unsigned int chromakey_min,
-	unsigned int chromakey_max,
-	unsigned int chromakey_mask
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    unsigned int chromakey_min,
+    unsigned int chromakey_max,
+    unsigned int chromakey_mask
 )
 {
     /* TODO */
@@ -574,9 +542,9 @@ VAStatus dummy_SetSubpictureChromakey(
 }
 
 VAStatus dummy_SetSubpictureGlobalAlpha(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	float global_alpha 
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    float global_alpha
 )
 {
     /* TODO */
@@ -585,23 +553,23 @@ VAStatus dummy_SetSubpictureGlobalAlpha(
 
 
 VAStatus dummy_AssociateSubpicture(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	VASurfaceID *target_surfaces,
-	int num_surfaces,
-	short src_x, /* upper left offset in subpicture */
-	short src_y,
-	unsigned short src_width,
-	unsigned short src_height,
-	short dest_x, /* upper left offset in surface */
-	short dest_y,
-	unsigned short dest_width,
-	unsigned short dest_height,
-	/*
-	 * whether to enable chroma-keying or global-alpha
-	 * see VA_SUBPICTURE_XXX values
-	 */
-	unsigned int flags
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces,
+    short src_x, /* upper left offset in subpicture */
+    short src_y,
+    unsigned short src_width,
+    unsigned short src_height,
+    short dest_x, /* upper left offset in surface */
+    short dest_y,
+    unsigned short dest_width,
+    unsigned short dest_height,
+    /*
+     * whether to enable chroma-keying or global-alpha
+     * see VA_SUBPICTURE_XXX values
+     */
+    unsigned int flags
 )
 {
     /* TODO */
@@ -609,10 +577,10 @@ VAStatus dummy_AssociateSubpicture(
 }
 
 VAStatus dummy_DeassociateSubpicture(
-	VADriverContextP ctx,
-	VASubpictureID subpicture,
-	VASurfaceID *target_surfaces,
-	int num_surfaces
+    VADriverContextP ctx,
+    VASubpictureID subpicture,
+    VASurfaceID *target_surfaces,
+    int num_surfaces
 )
 {
     /* TODO */
@@ -620,15 +588,15 @@ VAStatus dummy_DeassociateSubpicture(
 }
 
 VAStatus dummy_CreateContext(
-		VADriverContextP ctx,
-		VAConfigID config_id,
-		int picture_width,
-		int picture_height,
-		int flag,
-		VASurfaceID *render_targets,
-		int num_render_targets,
-		VAContextID *context		/* out */
-	)
+    VADriverContextP ctx,
+    VAConfigID config_id,
+    int picture_width,
+    int picture_height,
+    int flag,
+    VASurfaceID *render_targets,
+    int num_render_targets,
+    VAContextID *context        /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -636,8 +604,7 @@ VAStatus dummy_CreateContext(
     int i;
 
     obj_config = CONFIG(config_id);
-    if (NULL == obj_config)
-    {
+    if (NULL == obj_config) {
         vaStatus = VA_STATUS_ERROR_INVALID_CONFIG;
         return vaStatus;
     }
@@ -645,10 +612,9 @@ VAStatus dummy_CreateContext(
     /* Validate flag */
     /* Validate picture dimensions */
 
-    int contextID = object_heap_allocate( &driver_data->context_heap );
+    int contextID = object_heap_allocate(&driver_data->context_heap);
     object_context_p obj_context = CONTEXT(contextID);
-    if (NULL == obj_context)
-    {
+    if (NULL == obj_context) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         return vaStatus;
     }
@@ -661,16 +627,13 @@ VAStatus dummy_CreateContext(
     obj_context->picture_height = picture_height;
     obj_context->num_render_targets = num_render_targets;
     obj_context->render_targets = (VASurfaceID *) malloc(num_render_targets * sizeof(VASurfaceID));
-    if (obj_context->render_targets == NULL)
-    {
+    if (obj_context->render_targets == NULL) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         return vaStatus;
     }
-    
-    for(i = 0; i < num_render_targets; i++)
-    {
-        if (NULL == SURFACE(render_targets[i]))
-        {
+
+    for (i = 0; i < num_render_targets; i++) {
+        if (NULL == SURFACE(render_targets[i])) {
             vaStatus = VA_STATUS_ERROR_INVALID_SURFACE;
             break;
         }
@@ -679,15 +642,14 @@ VAStatus dummy_CreateContext(
     obj_context->flags = flag;
 
     /* Error recovery */
-    if (VA_STATUS_SUCCESS != vaStatus)
-    {
+    if (VA_STATUS_SUCCESS != vaStatus) {
         obj_context->context_id = -1;
         obj_context->config_id = -1;
         free(obj_context->render_targets);
         obj_context->render_targets = NULL;
         obj_context->num_render_targets = 0;
         obj_context->flags = 0;
-        object_heap_free( &driver_data->context_heap, (object_base_p) obj_context);
+        object_heap_free(&driver_data->context_heap, (object_base_p) obj_context);
     }
 
     return vaStatus;
@@ -695,9 +657,9 @@ VAStatus dummy_CreateContext(
 
 
 VAStatus dummy_DestroyContext(
-		VADriverContextP ctx,
-		VAContextID context
-	)
+    VADriverContextP ctx,
+    VAContextID context
+)
 {
     INIT_DRIVER_DATA
     object_context_p obj_context = CONTEXT(context);
@@ -707,8 +669,7 @@ VAStatus dummy_DestroyContext(
     obj_context->config_id = -1;
     obj_context->picture_width = 0;
     obj_context->picture_height = 0;
-    if (obj_context->render_targets)
-    {
+    if (obj_context->render_targets) {
         free(obj_context->render_targets);
     }
     obj_context->render_targets = NULL;
@@ -717,7 +678,7 @@ VAStatus dummy_DestroyContext(
 
     obj_context->current_render_target = -1;
 
-    object_heap_free( &driver_data->context_heap, (object_base_p) obj_context);
+    object_heap_free(&driver_data->context_heap, (object_base_p) obj_context);
 
     return VA_STATUS_SUCCESS;
 }
@@ -729,21 +690,20 @@ static VAStatus dummy__allocate_buffer(object_buffer_p obj_buffer, int size)
     VAStatus vaStatus = VA_STATUS_SUCCESS;
 
     obj_buffer->buffer_data = realloc(obj_buffer->buffer_data, size);
-    if (NULL == obj_buffer->buffer_data)
-    {
+    if (NULL == obj_buffer->buffer_data) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
     }
     return vaStatus;
 }
 
 VAStatus dummy_CreateBuffer(
-		VADriverContextP ctx,
-                VAContextID context,	/* in */
-                VABufferType type,	/* in */
-                unsigned int size,		/* in */
-                unsigned int num_elements,	/* in */
-                void *data,			/* in */
-                VABufferID *buf_id		/* out */
+    VADriverContextP ctx,
+    VAContextID context,    /* in */
+    VABufferType type,  /* in */
+    unsigned int size,      /* in */
+    unsigned int num_elements,  /* in */
+    void *data,         /* in */
+    VABufferID *buf_id      /* out */
 )
 {
     INIT_DRIVER_DATA
@@ -752,29 +712,27 @@ VAStatus dummy_CreateBuffer(
     object_buffer_p obj_buffer;
 
     /* Validate type */
-    switch (type)
-    {
-        case VAPictureParameterBufferType:
-        case VAIQMatrixBufferType:
-        case VABitPlaneBufferType:
-        case VASliceGroupMapBufferType:
-        case VASliceParameterBufferType:
-        case VASliceDataBufferType:
-        case VAMacroblockParameterBufferType:
-        case VAResidualDataBufferType:
-        case VADeblockingParameterBufferType:
-        case VAImageBufferType:
-            /* Ok */
-            break;
-        default:
-            vaStatus = VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE;
-            return vaStatus;
+    switch (type) {
+    case VAPictureParameterBufferType:
+    case VAIQMatrixBufferType:
+    case VABitPlaneBufferType:
+    case VASliceGroupMapBufferType:
+    case VASliceParameterBufferType:
+    case VASliceDataBufferType:
+    case VAMacroblockParameterBufferType:
+    case VAResidualDataBufferType:
+    case VADeblockingParameterBufferType:
+    case VAImageBufferType:
+        /* Ok */
+        break;
+    default:
+        vaStatus = VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE;
+        return vaStatus;
     }
 
-    bufferID = object_heap_allocate( &driver_data->buffer_heap );
+    bufferID = object_heap_allocate(&driver_data->buffer_heap);
     obj_buffer = BUFFER(bufferID);
-    if (NULL == obj_buffer)
-    {
+    if (NULL == obj_buffer) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         return vaStatus;
     }
@@ -782,18 +740,15 @@ VAStatus dummy_CreateBuffer(
     obj_buffer->buffer_data = NULL;
 
     vaStatus = dummy__allocate_buffer(obj_buffer, size * num_elements);
-    if (VA_STATUS_SUCCESS == vaStatus)
-    {
+    if (VA_STATUS_SUCCESS == vaStatus) {
         obj_buffer->max_num_elements = num_elements;
         obj_buffer->num_elements = num_elements;
-        if (data)
-        {
+        if (data) {
             memcpy(obj_buffer->buffer_data, data, size * num_elements);
         }
     }
 
-    if (VA_STATUS_SUCCESS == vaStatus)
-    {
+    if (VA_STATUS_SUCCESS == vaStatus) {
         *buf_id = bufferID;
     }
 
@@ -802,22 +757,20 @@ VAStatus dummy_CreateBuffer(
 
 
 VAStatus dummy_BufferSetNumElements(
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-        unsigned int num_elements	/* in */
-	)
+    VADriverContextP ctx,
+    VABufferID buf_id,  /* in */
+    unsigned int num_elements   /* in */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     object_buffer_p obj_buffer = BUFFER(buf_id);
     ASSERT(obj_buffer);
 
-    if ((num_elements < 0) || (num_elements > obj_buffer->max_num_elements))
-    {
+    if ((num_elements < 0) || (num_elements > obj_buffer->max_num_elements)) {
         vaStatus = VA_STATUS_ERROR_UNKNOWN;
     }
-    if (VA_STATUS_SUCCESS == vaStatus)
-    {
+    if (VA_STATUS_SUCCESS == vaStatus) {
         obj_buffer->num_elements = num_elements;
     }
 
@@ -825,23 +778,21 @@ VAStatus dummy_BufferSetNumElements(
 }
 
 VAStatus dummy_MapBuffer(
-		VADriverContextP ctx,
-		VABufferID buf_id,	/* in */
-		void **pbuf         /* out */
-	)
+    VADriverContextP ctx,
+    VABufferID buf_id,  /* in */
+    void **pbuf         /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
     object_buffer_p obj_buffer = BUFFER(buf_id);
     ASSERT(obj_buffer);
-    if (NULL == obj_buffer)
-    {
+    if (NULL == obj_buffer) {
         vaStatus = VA_STATUS_ERROR_INVALID_BUFFER;
         return vaStatus;
     }
 
-    if (NULL != obj_buffer->buffer_data)
-    {
+    if (NULL != obj_buffer->buffer_data) {
         *pbuf = obj_buffer->buffer_data;
         vaStatus = VA_STATUS_SUCCESS;
     }
@@ -849,9 +800,9 @@ VAStatus dummy_MapBuffer(
 }
 
 VAStatus dummy_UnmapBuffer(
-		VADriverContextP ctx,
-		VABufferID buf_id	/* in */
-	)
+    VADriverContextP ctx,
+    VABufferID buf_id   /* in */
+)
 {
     /* Do nothing */
     return VA_STATUS_SUCCESS;
@@ -859,19 +810,18 @@ VAStatus dummy_UnmapBuffer(
 
 static void dummy__destroy_buffer(struct dummy_driver_data *driver_data, object_buffer_p obj_buffer)
 {
-    if (NULL != obj_buffer->buffer_data)
-    {
+    if (NULL != obj_buffer->buffer_data) {
         free(obj_buffer->buffer_data);
         obj_buffer->buffer_data = NULL;
     }
 
-    object_heap_free( &driver_data->buffer_heap, (object_base_p) obj_buffer);
+    object_heap_free(&driver_data->buffer_heap, (object_base_p) obj_buffer);
 }
 
 VAStatus dummy_DestroyBuffer(
-		VADriverContextP ctx,
-		VABufferID buffer_id
-	)
+    VADriverContextP ctx,
+    VABufferID buffer_id
+)
 {
     INIT_DRIVER_DATA
     object_buffer_p obj_buffer = BUFFER(buffer_id);
@@ -882,10 +832,10 @@ VAStatus dummy_DestroyBuffer(
 }
 
 VAStatus dummy_BeginPicture(
-		VADriverContextP ctx,
-		VAContextID context,
-		VASurfaceID render_target
-	)
+    VADriverContextP ctx,
+    VAContextID context,
+    VASurfaceID render_target
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -904,11 +854,11 @@ VAStatus dummy_BeginPicture(
 }
 
 VAStatus dummy_RenderPicture(
-		VADriverContextP ctx,
-		VAContextID context,
-		VABufferID *buffers,
-		int num_buffers
-	)
+    VADriverContextP ctx,
+    VAContextID context,
+    VABufferID *buffers,
+    int num_buffers
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -923,20 +873,17 @@ VAStatus dummy_RenderPicture(
     ASSERT(obj_surface);
 
     /* verify that we got valid buffer references */
-    for(i = 0; i < num_buffers; i++)
-    {
+    for (i = 0; i < num_buffers; i++) {
         object_buffer_p obj_buffer = BUFFER(buffers[i]);
         ASSERT(obj_buffer);
-        if (NULL == obj_buffer)
-        {
+        if (NULL == obj_buffer) {
             vaStatus = VA_STATUS_ERROR_INVALID_BUFFER;
             break;
         }
     }
-    
+
     /* Release buffers */
-    for(i = 0; i < num_buffers; i++)
-    {
+    for (i = 0; i < num_buffers; i++) {
         object_buffer_p obj_buffer = BUFFER(buffers[i]);
         ASSERT(obj_buffer);
         dummy__destroy_buffer(driver_data, obj_buffer);
@@ -946,9 +893,9 @@ VAStatus dummy_RenderPicture(
 }
 
 VAStatus dummy_EndPicture(
-		VADriverContextP ctx,
-		VAContextID context
-	)
+    VADriverContextP ctx,
+    VAContextID context
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -969,9 +916,9 @@ VAStatus dummy_EndPicture(
 
 
 VAStatus dummy_SyncSurface(
-		VADriverContextP ctx,
-		VASurfaceID render_target
-	)
+    VADriverContextP ctx,
+    VASurfaceID render_target
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -984,10 +931,10 @@ VAStatus dummy_SyncSurface(
 }
 
 VAStatus dummy_QuerySurfaceStatus(
-		VADriverContextP ctx,
-		VASurfaceID render_target,
-		VASurfaceStatus *status	/* out */
-	)
+    VADriverContextP ctx,
+    VASurfaceID render_target,
+    VASurfaceStatus *status /* out */
+)
 {
     INIT_DRIVER_DATA
     VAStatus vaStatus = VA_STATUS_SUCCESS;
@@ -1002,69 +949,69 @@ VAStatus dummy_QuerySurfaceStatus(
 }
 
 VAStatus dummy_PutSurface(
-   		VADriverContextP ctx,
-		VASurfaceID surface,
-		void *draw, /* X Drawable */
-		short srcx,
-		short srcy,
-		unsigned short srcw,
-		unsigned short srch,
-		short destx,
-		short desty,
-		unsigned short destw,
-		unsigned short desth,
-		VARectangle *cliprects, /* client supplied clip list */
-		unsigned int number_cliprects, /* number of clip rects in the clip list */
-		unsigned int flags /* de-interlacing flags */
-	)
+    VADriverContextP ctx,
+    VASurfaceID surface,
+    void *draw, /* X Drawable */
+    short srcx,
+    short srcy,
+    unsigned short srcw,
+    unsigned short srch,
+    short destx,
+    short desty,
+    unsigned short destw,
+    unsigned short desth,
+    VARectangle *cliprects, /* client supplied clip list */
+    unsigned int number_cliprects, /* number of clip rects in the clip list */
+    unsigned int flags /* de-interlacing flags */
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
-/* 
- * Query display attributes 
+/*
+ * Query display attributes
  * The caller must provide a "attr_list" array that can hold at
  * least vaMaxNumDisplayAttributes() entries. The actual number of attributes
  * returned in "attr_list" is returned in "num_attributes".
  */
-VAStatus dummy_QueryDisplayAttributes (
-		VADriverContextP ctx,
-		VADisplayAttribute *attr_list,	/* out */
-		int *num_attributes		/* out */
-	)
+VAStatus dummy_QueryDisplayAttributes(
+    VADriverContextP ctx,
+    VADisplayAttribute *attr_list,  /* out */
+    int *num_attributes     /* out */
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
-/* 
- * Get display attributes 
+/*
+ * Get display attributes
  * This function returns the current attribute values in "attr_list".
  * Only attributes returned with VA_DISPLAY_ATTRIB_GETTABLE set in the "flags" field
- * from vaQueryDisplayAttributes() can have their values retrieved.  
+ * from vaQueryDisplayAttributes() can have their values retrieved.
  */
-VAStatus dummy_GetDisplayAttributes (
-		VADriverContextP ctx,
-		VADisplayAttribute *attr_list,	/* in/out */
-		int num_attributes
-	)
+VAStatus dummy_GetDisplayAttributes(
+    VADriverContextP ctx,
+    VADisplayAttribute *attr_list,  /* in/out */
+    int num_attributes
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
 }
 
-/* 
- * Set display attributes 
+/*
+ * Set display attributes
  * Only attributes returned with VA_DISPLAY_ATTRIB_SETTABLE set in the "flags" field
- * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or 
+ * from vaQueryDisplayAttributes() can be set.  If the attribute is not settable or
  * the value is out of range, the function returns VA_STATUS_ERROR_ATTR_NOT_SUPPORTED
  */
-VAStatus dummy_SetDisplayAttributes (
-		VADriverContextP ctx,
-		VADisplayAttribute *attr_list,
-		int num_attributes
-	)
+VAStatus dummy_SetDisplayAttributes(
+    VADriverContextP ctx,
+    VADisplayAttribute *attr_list,
+    int num_attributes
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNKNOWN;
@@ -1072,47 +1019,47 @@ VAStatus dummy_SetDisplayAttributes (
 
 
 VAStatus dummy_BufferInfo(
-        VADriverContextP ctx,
-        VABufferID buf_id,	/* in */
-        VABufferType *type,	/* out */
-        unsigned int *size,    	/* out */
-        unsigned int *num_elements /* out */
-    )
+    VADriverContextP ctx,
+    VABufferID buf_id,  /* in */
+    VABufferType *type, /* out */
+    unsigned int *size,     /* out */
+    unsigned int *num_elements /* out */
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
-    
+
 
 VAStatus dummy_LockSurface(
-		VADriverContextP ctx,
-		VASurfaceID surface,
-                unsigned int *fourcc, /* following are output argument */
-                unsigned int *luma_stride,
-                unsigned int *chroma_u_stride,
-                unsigned int *chroma_v_stride,
-                unsigned int *luma_offset,
-                unsigned int *chroma_u_offset,
-                unsigned int *chroma_v_offset,
-                unsigned int *buffer_name,
-		void **buffer
-	)
+    VADriverContextP ctx,
+    VASurfaceID surface,
+    unsigned int *fourcc, /* following are output argument */
+    unsigned int *luma_stride,
+    unsigned int *chroma_u_stride,
+    unsigned int *chroma_v_stride,
+    unsigned int *luma_offset,
+    unsigned int *chroma_u_offset,
+    unsigned int *chroma_v_offset,
+    unsigned int *buffer_name,
+    void **buffer
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
 VAStatus dummy_UnlockSurface(
-		VADriverContextP ctx,
-		VASurfaceID surface
-	)
+    VADriverContextP ctx,
+    VASurfaceID surface
+)
 {
     /* TODO */
     return VA_STATUS_ERROR_UNIMPLEMENTED;
 }
 
-VAStatus dummy_Terminate( VADriverContextP ctx )
+VAStatus dummy_Terminate(VADriverContextP ctx)
 {
     INIT_DRIVER_DATA
     object_buffer_p obj_buffer;
@@ -1120,29 +1067,27 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     object_heap_iterator iter;
 
     /* Clean up left over buffers */
-    obj_buffer = (object_buffer_p) object_heap_first( &driver_data->buffer_heap, &iter);
-    while (obj_buffer)
-    {
+    obj_buffer = (object_buffer_p) object_heap_first(&driver_data->buffer_heap, &iter);
+    while (obj_buffer) {
         dummy__information_message("vaTerminate: bufferID %08x still allocated, destroying\n", obj_buffer->base.id);
         dummy__destroy_buffer(driver_data, obj_buffer);
-        obj_buffer = (object_buffer_p) object_heap_next( &driver_data->buffer_heap, &iter);
+        obj_buffer = (object_buffer_p) object_heap_next(&driver_data->buffer_heap, &iter);
     }
-    object_heap_destroy( &driver_data->buffer_heap );
+    object_heap_destroy(&driver_data->buffer_heap);
 
     /* TODO cleanup */
-    object_heap_destroy( &driver_data->surface_heap );
+    object_heap_destroy(&driver_data->surface_heap);
 
     /* TODO cleanup */
-    object_heap_destroy( &driver_data->context_heap );
+    object_heap_destroy(&driver_data->context_heap);
 
     /* Clean up configIDs */
-    obj_config = (object_config_p) object_heap_first( &driver_data->config_heap, &iter);
-    while (obj_config)
-    {
-        object_heap_free( &driver_data->config_heap, (object_base_p) obj_config);
-        obj_config = (object_config_p) object_heap_next( &driver_data->config_heap, &iter);
+    obj_config = (object_config_p) object_heap_first(&driver_data->config_heap, &iter);
+    while (obj_config) {
+        object_heap_free(&driver_data->config_heap, (object_base_p) obj_config);
+        obj_config = (object_config_p) object_heap_next(&driver_data->config_heap, &iter);
     }
-    object_heap_destroy( &driver_data->config_heap );
+    object_heap_destroy(&driver_data->config_heap);
 
     free(ctx->pDriverData);
     ctx->pDriverData = NULL;
@@ -1150,7 +1095,7 @@ VAStatus dummy_Terminate( VADriverContextP ctx )
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
+VAStatus VA_DRIVER_INIT_FUNC(VADriverContextP ctx)
 {
     struct VADriverVTable * const vtable = ctx->vtable;
     int result;
@@ -1211,20 +1156,20 @@ VAStatus VA_DRIVER_INIT_FUNC(  VADriverContextP ctx )
     vtable->vaUnlockSurface = dummy_UnlockSurface;
     vtable->vaBufferInfo = dummy_BufferInfo;
 
-    driver_data = (struct dummy_driver_data *) malloc( sizeof(*driver_data) );
+    driver_data = (struct dummy_driver_data *) malloc(sizeof(*driver_data));
     ctx->pDriverData = (void *) driver_data;
 
-    result = object_heap_init( &driver_data->config_heap, sizeof(struct object_config), CONFIG_ID_OFFSET );
-    ASSERT( result == 0 );
+    result = object_heap_init(&driver_data->config_heap, sizeof(struct object_config), CONFIG_ID_OFFSET);
+    ASSERT(result == 0);
 
-    result = object_heap_init( &driver_data->context_heap, sizeof(struct object_context), CONTEXT_ID_OFFSET );
-    ASSERT( result == 0 );
+    result = object_heap_init(&driver_data->context_heap, sizeof(struct object_context), CONTEXT_ID_OFFSET);
+    ASSERT(result == 0);
 
-    result = object_heap_init( &driver_data->surface_heap, sizeof(struct object_surface), SURFACE_ID_OFFSET );
-    ASSERT( result == 0 );
+    result = object_heap_init(&driver_data->surface_heap, sizeof(struct object_surface), SURFACE_ID_OFFSET);
+    ASSERT(result == 0);
 
-    result = object_heap_init( &driver_data->buffer_heap, sizeof(struct object_buffer), BUFFER_ID_OFFSET );
-    ASSERT( result == 0 );
+    result = object_heap_init(&driver_data->buffer_heap, sizeof(struct object_buffer), BUFFER_ID_OFFSET);
+    ASSERT(result == 0);
 
 
     return VA_STATUS_SUCCESS;

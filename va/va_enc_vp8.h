@@ -48,8 +48,7 @@ extern "C" {
  * This structure conveys sequence level parameters.
  *
  */
-typedef struct  _VAEncSequenceParameterBufferVP8
-{
+typedef struct  _VAEncSequenceParameterBufferVP8 {
     /* frame width in pixels */
     unsigned int frame_width;
     /* frame height in pixels */
@@ -88,8 +87,8 @@ typedef struct  _VAEncSequenceParameterBufferVP8
     unsigned int intra_period;
 
     /* reference and reconstructed frame buffers
-     * Used for driver auto reference management when configured through 
-     * VAConfigAttribEncAutoReference. 
+     * Used for driver auto reference management when configured through
+     * VAConfigAttribEncAutoReference.
      */
     VASurfaceID reference_frames[4];
 
@@ -102,14 +101,13 @@ typedef struct  _VAEncSequenceParameterBufferVP8
  * This structure conveys picture level parameters.
  *
  */
-typedef struct  _VAEncPictureParameterBufferVP8
-{
+typedef struct  _VAEncPictureParameterBufferVP8 {
     /* surface to store reconstructed frame  */
     VASurfaceID reconstructed_frame;
 
-    /* 
+    /*
      * surfaces to store reference frames in non auto reference mode
-     * VA_INVALID_SURFACE can be used to denote an invalid reference frame. 
+     * VA_INVALID_SURFACE can be used to denote an invalid reference frame.
      */
     VASurfaceID ref_last_frame;
     VASurfaceID ref_gf_frame;
@@ -140,7 +138,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
             unsigned int version                        : 3;
             /* show_frame */
             unsigned int show_frame                     : 1;
-            /* color_space */						   
+            /* color_space */
             unsigned int color_space                    : 1;
             /*  0: bicubic, 1: bilinear, other: none */
             unsigned int recon_filter_type              : 2;
@@ -151,36 +149,36 @@ typedef struct  _VAEncPictureParameterBufferVP8
             /* same as log2_nbr_of_dct_partitions in frame header syntax */
             unsigned int num_token_partitions           : 2;
 
-            /** 
-             * The following fields correspond to the same VP8 syntax elements 
+            /**
+             * The following fields correspond to the same VP8 syntax elements
              * in the frame header.
              */
-	    /**
-             * 0: clamping of reconstruction pixels is disabled,
-             * 1: clamping enabled.
-             */
+            /**
+                 * 0: clamping of reconstruction pixels is disabled,
+                 * 1: clamping enabled.
+                 */
             unsigned int clamping_type                  : 1;
             /* indicate segmentation is enabled for the current frame. */
             unsigned int segmentation_enabled           : 1;
             /**
-             * Determines if the MB segmentation map is updated in the current 
+             * Determines if the MB segmentation map is updated in the current
              * frame.
              */
             unsigned int update_mb_segmentation_map     : 1;
             /**
-             * Indicates if the segment feature data is updated in the current 
+             * Indicates if the segment feature data is updated in the current
              * frame.
              */
             unsigned int update_segment_feature_data    : 1;
             /**
-             * indicates if the MB level loop filter adjustment is enabled for 
-             * the current frame (0 off, 1 on).  
+             * indicates if the MB level loop filter adjustment is enabled for
+             * the current frame (0 off, 1 on).
              */
-	    unsigned int loop_filter_adj_enable         : 1;
+            unsigned int loop_filter_adj_enable         : 1;
             /**
-             * Determines whether updated token probabilities are used only for 
-             * this frame or until further update. 
-             * It may be used by application to enable error resilient mode. 
+             * Determines whether updated token probabilities are used only for
+             * this frame or until further update.
+             * It may be used by application to enable error resilient mode.
              * In this mode probability updates are allowed only at Key Frames.
              */
             unsigned int refresh_entropy_probs          : 1;
@@ -188,13 +186,13 @@ typedef struct  _VAEncPictureParameterBufferVP8
              * Determines if the current decoded frame refreshes the golden frame.
              */
             unsigned int refresh_golden_frame           : 1;
-            /** 
-             * Determines if the current decoded frame refreshes the alternate 
+            /**
+             * Determines if the current decoded frame refreshes the alternate
              * reference frame.
              */
             unsigned int refresh_alternate_frame        : 1;
             /**
-             * Determines if the current decoded frame refreshes the last frame 
+             * Determines if the current decoded frame refreshes the last frame
              * reference buffer.
              */
             unsigned int refresh_last                   : 1;
@@ -206,29 +204,29 @@ typedef struct  _VAEncPictureParameterBufferVP8
              * Determines if the alternate reference is replaced by another reference.
              */
             unsigned int copy_buffer_to_alternate       : 2;
-            /** 
-             * Controls the sign of motion vectors when the golden frame is referenced.  
+            /**
+             * Controls the sign of motion vectors when the golden frame is referenced.
              */
             unsigned int sign_bias_golden               : 1;
             /**
-             * Controls the sign of motion vectors when the alternate frame is 
-             * referenced. 
+             * Controls the sign of motion vectors when the alternate frame is
+             * referenced.
              */
-	    unsigned int sign_bias_alternate            : 1;
+            unsigned int sign_bias_alternate            : 1;
             /**
-             * Enables or disables the skipping of macroblocks containing no 
-             * non-zero coefficients. 
+             * Enables or disables the skipping of macroblocks containing no
+             * non-zero coefficients.
              */
-	    unsigned int mb_no_coeff_skip               : 1;
-            /** 
-             * Enforces unconditional per-MB loop filter delta update setting frame 
-             * header flags mode_ref_lf_delta_update, all mb_mode_delta_update_flag[4], 
-             * and all ref_frame_delta_update_flag[4] to 1. 
-	     * Since loop filter deltas are not automatically refreshed to default 
-             * values at key frames, dropped frame with delta update may prevent 
-             * correct decoding from the next key frame. 
-	     * Encoder application is advised to set this flag to 1 at key frames.
-	     */
+            unsigned int mb_no_coeff_skip               : 1;
+            /**
+             * Enforces unconditional per-MB loop filter delta update setting frame
+             * header flags mode_ref_lf_delta_update, all mb_mode_delta_update_flag[4],
+             * and all ref_frame_delta_update_flag[4] to 1.
+            * Since loop filter deltas are not automatically refreshed to default
+             * values at key frames, dropped frame with delta update may prevent
+             * correct decoding from the next key frame.
+            * Encoder application is advised to set this flag to 1 at key frames.
+            */
             unsigned int forced_lf_adjustment           : 1;
             unsigned int reserved                       : 2;
         } bits;
@@ -238,62 +236,61 @@ typedef struct  _VAEncPictureParameterBufferVP8
     /**
      * Contains a list of 4 loop filter level values (updated value if applicable)
      * controlling the deblocking filter strength. Each entry represents a segment.
-     * When segmentation is disabled, use entry 0. 
-     * When loop_filter_level is 0, loop filter shall be disabled. 
+     * When segmentation is disabled, use entry 0.
+     * When loop_filter_level is 0, loop filter shall be disabled.
      */
     char loop_filter_level[4];
 
-    /** 
-     * Contains a list of 4 delta values for reference frame based MB-level 
-     * loop filter adjustment.  
+    /**
+     * Contains a list of 4 delta values for reference frame based MB-level
+     * loop filter adjustment.
      * If no update, then set to 0.
      */
     char ref_lf_delta[4];
 
     /**
      * Contains a list of 4 delta values for coding mode based MB-level loop
-     * filter adjustment.  
-     * If no update, then set to 0. 
+     * filter adjustment.
+     * If no update, then set to 0.
      */
     char mode_lf_delta[4];
-	
+
     /**
-     * Controls the deblocking filter sensitivity. 
+     * Controls the deblocking filter sensitivity.
      * Corresponds to the same VP8 syntax element in frame header.
      */
     unsigned char sharpness_level;
-	
-    /** 
-     * Application supplied maximum clamp value for Qindex used in quantization.  
-     * Qindex will not be allowed to exceed this value.  
-     * It has a valid range [0..127] inclusive.  
+
+    /**
+     * Application supplied maximum clamp value for Qindex used in quantization.
+     * Qindex will not be allowed to exceed this value.
+     * It has a valid range [0..127] inclusive.
      */
     unsigned char clamp_qindex_high;
-	
+
     /**
-     * Application supplied minimum clamp value for Qindex used in quantization.  
-     * Qindex will not be allowed to be lower than this value.  
-     * It has a valid range [0..127] inclusive.  
-     * Condition clamp_qindex_low <= clamp_qindex_high must be guaranteed, 
-     * otherwise they are ignored. 
+     * Application supplied minimum clamp value for Qindex used in quantization.
+     * Qindex will not be allowed to be lower than this value.
+     * It has a valid range [0..127] inclusive.
+     * Condition clamp_qindex_low <= clamp_qindex_high must be guaranteed,
+     * otherwise they are ignored.
      */
     unsigned char clamp_qindex_low;
-	
+
 } VAEncPictureParameterBufferVP8;
 
 
 /**
  * \brief VP8 MB Segmentation ID Buffer
  *
- * application provides buffer containing the initial segmentation id for each 
+ * application provides buffer containing the initial segmentation id for each
  * MB, in raster scan order. Rate control may reassign it.
- * For an 640x480 video, the buffer has 1200 entries. 
+ * For an 640x480 video, the buffer has 1200 entries.
  * the value of each entry should be in the range [0..3], inclusive.
- * If segmentation is not enabled, application does not need to provide it. 
+ * If segmentation is not enabled, application does not need to provide it.
  */
-typedef struct _VAEncMBMapBufferVP8
-{
-    /** 
+typedef struct _VAEncMBMapBufferVP8 {
+    /**
      * number of MBs in the frame.
      * It is also the number of entries of mb_segment_id[];
      */
@@ -308,13 +305,12 @@ typedef struct _VAEncMBMapBufferVP8
 /**
  * \brief VP8 Quantization Matrix Buffer Structure
  *
- * Contains quantization index for yac(0-3) for each segment and quantization 
- * index deltas, ydc(0), y2dc(1), y2ac(2), uvdc(3), uvac(4) that are applied 
- * to all segments.  When segmentation is disabled, only quantization_index[0] 
+ * Contains quantization index for yac(0-3) for each segment and quantization
+ * index deltas, ydc(0), y2dc(1), y2ac(2), uvdc(3), uvac(4) that are applied
+ * to all segments.  When segmentation is disabled, only quantization_index[0]
  * will be used. This structure is sent once per frame.
  */
-typedef struct _VAQMatrixBufferVP8
-{
+typedef struct _VAQMatrixBufferVP8 {
     unsigned short quantization_index[4];
     short quantization_index_delta[5];
 } VAQMatrixBufferVP8;
