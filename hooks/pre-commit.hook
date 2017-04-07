@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Use astyle to check the coding style
+#
+
+ASTYLE=astyle
+ASTYLE_PARAMS="--style=linux -cnpUH -s4 -M120"
+
+if [ -z "`which $ASTYLE 2> /dev/null`" ]; then
+    echo "git pre-commit hook:"
+    echo "Don't find $ASTYLE, please install $ASTYLE before committing the changes"
+    exit 1
+fi
+
+echo "Checking coding style..."
+echo ""
+for file in `git diff-index --cached --name-only --diff-filter=ACMR HEAD . | grep "\.[ch]$\|\.cpp$" 2> /dev/null`; do
+    tmp0file=`git checkout-index --temp ${file} | cut -f 1`
+    tmp1file=`mktemp /tmp/${tmp0file}.XXX` || exit 1
+    $ASTYLE $ASTYLE_PARAMS < ${tmp0file} > ${tmp1file} 2> /dev/null
+    diff -up "${tmp0file}" "${tmp1file}"
+    ret=$?
+    rm -f "${tmp0file}" "${tmp1file}"
+    if [ $ret != 0 ]; then
+echo ""
+echo "**************************************************************************"
+echo " Coding style error in $file"
+echo ""
+echo " Please fix the coding style before committing. You may run the command"
+echo " below to fix the coding style from the top-level directory"
+echo ""
+echo " $ASTYLE $ASTYLE_PARAMS $file"
+echo "**************************************************************************"
+        exit 1
+    fi
+done
+echo "PASS!!!"

@@ -4,7 +4,39 @@ Libva is an open source project licensed under the [MIT License](https://opensou
 
 ## Coding Style
 
-Libva does not have a defined coding style at this time, but that will be updated.
+We follow the Linux coding style with a few changes in libva. You may run 'astyle --style=linux -cnpUH -s4 -M120 <file>'
+to format/indent a single file or run './style_unify' in the top-level directory to handle all .c/.h/.cpp files in libva.
+
+You will fail to commit your patch if your patch doesn't follow the coding style and the pre-commit hook will prompt you to fix
+the coding style.
+
+For example:
+
+```
+Checking coding style...
+
+--- .merge_file_2VbdKc  2017-04-07 20:04:51.969577559 +0800
++++ /tmp/.merge_file_2VbdKc.B57 2017-04-07 20:04:52.054578126 +0800
+@@ -64,8 +64,7 @@ int va_parseConfig(char *env, char *env_
+         return 1;
+
+     fp = fopen("/etc/libva.conf", "r");
+-    while (fp && (fgets(oneline, 1024, fp) != NULL))
+-    {
++    while (fp && (fgets(oneline, 1024, fp) != NULL)) {
+         if (strlen(oneline) == 1)
+             continue;
+         token = strtok_r(oneline, "=\n", &saveptr);
+
+**************************************************************************
+ Coding style error in va/va.c
+
+ Please fix the coding style before committing. You may run the command
+ below to fix the coding style from the top-level directory
+
+ astyle --style=linux -cnpUH -s4 -M120 va/va.c
+**************************************************************************
+```
 
 ## Certificate of Origin
 
