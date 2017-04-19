@@ -1,6 +1,6 @@
 # Contributing to libva
 
-Libva is an open source project licensed under the [MIT License] (https://opensource.org/licenses/MIT)
+Libva is an open source project licensed under the [MIT License](https://opensource.org/licenses/MIT)
 
 ## Coding Style
 
@@ -8,7 +8,7 @@ Libva does not have a defined coding style at this time, but that will be update
 
 ## Certificate of Origin
 
-In order to get a clear contribution chain of trust we use the [signed-off-by language] (https://01.org/community/signed-process)
+In order to get a clear contribution chain of trust we use the [signed-off-by language](https://01.org/community/signed-process)
 used by the Linux kernel project.  
 ## Patch format
 
@@ -19,7 +19,7 @@ Beside the signed-off-by footer, we expect each patch to comply with the followi
 
 More detailed explanation of your changes: Why and how.
 Wrap it to 72 characters.
-See [here] (http://chris.beams.io/posts/git-commit/)
+See [here](http://chris.beams.io/posts/git-commit/)
 for some more good advices.
 
 Signed-off-by: <contributor@foo.com>

@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/01org/libva.svg?branch=master)](https://travis-ci.org/01org/libva)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/11605/badge.svg)](https://scan.coverity.com/projects/01org-libva)
 
-#Libva Project
+# Libva Project
 
 Libva is an implementation for VA-API (Video Acceleration API)
 
