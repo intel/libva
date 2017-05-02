@@ -504,7 +504,7 @@ static void FILE_NAME_SUFFIX(
     int size = 0;
 
     if (suffix_str)
-        strlen(suffix_str);
+        size = strlen(suffix_str);
 
     if(left < (size + 8 + 10))
         return;
