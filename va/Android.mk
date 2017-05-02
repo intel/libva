@@ -89,6 +89,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
+LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libva libdrm
 
