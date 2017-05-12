@@ -93,39 +93,3 @@ LOCAL_MODULE := libva-android
 LOCAL_SHARED_LIBRARIES := libva libdrm
 
 include $(BUILD_SHARED_LIBRARY)
-
-
-# For libva-egl
-# =====================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := \
-	egl/va_egl.c
-
-LOCAL_CFLAGS += \
-	-DLOG_TAG=\"libva-egl\"
-
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := libva-egl
-
-LOCAL_SHARED_LIBRARIES := libva
-
-include $(BUILD_SHARED_LIBRARY)
-
-
-# For libva-tpi
-# =====================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := va_tpi.c
-
-LOCAL_CFLAGS += -DLOG_TAG=\"libva-tpi\"
-
-LOCAL_SHARED_LIBRARIES := libva
-
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE := libva-tpi
-
-include $(BUILD_SHARED_LIBRARY)
