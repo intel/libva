@@ -32,7 +32,7 @@ in channel ##intel-media on [Freenode](https://freenode.net/kb/answer/chat).
 
 We also use [#Slack](https://slack.com) and host [VAAPI Media Slack
 Team](https://intel-media.slack.com).  You can signup by submitting your email 
-address to our [Slack Team invite page](https://intelmedia.stamplayapp.com).
+address to our [Slack Team invite page](https://slack-join-intel-media.herokuapp.com).
 
 Slack complements our other means of communication.  Pick the one that works
 best for you!
