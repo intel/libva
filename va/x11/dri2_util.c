@@ -130,7 +130,6 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     buffers = VA_DRI2GetBuffers(ctx->native_dpy, dri_drawable->x_drawable,
 			     &dri2_drawable->width, &dri2_drawable->height, 
                              attachments, i, &count);
-    assert(buffers);
     if (buffers == NULL)
         return NULL;
 
