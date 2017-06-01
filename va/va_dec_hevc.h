@@ -192,42 +192,6 @@ typedef struct  _VAPictureParameterBufferHEVC
 
 } VAPictureParameterBufferHEVC;
 
-
-
-/**
- * \brief HEVC Slice Parameter Buffer Structure For Short Format
- *
- * VASliceParameterBufferBaseHEVC structure should be accompanied by a
- * slice data buffer, which holds the whole raw slice NAL unit bit streams
- * including start code prefix and emulation prevention bytes not removed.
- *
- * This structure conveys parameters related to slice segment header and should
- * be sent once per slice.
- *
- * For long format, this data structure is not sent by application.
- *
- */
-typedef struct  _VASliceParameterBufferBaseHEVC
-{
-    /** @name Codec-independent Slice Parameter Buffer base. */
-
-    /**@{*/
-
-    /** \brief Number of bytes in the slice data buffer for this slice
-     *  counting from and including NAL unit header.
-     */
-    uint32_t                slice_data_size;
-    /** \brief The offset to the NAL unit header for this slice */
-    uint32_t                slice_data_offset;
-    /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_XXX. */
-    uint16_t                slice_data_flag;
-    /**@}*/
-
-} VASliceParameterBufferBaseHEVC;
-
-
-
-
 /**
  * \brief HEVC Slice Parameter Buffer Structure For Long Format
  *
