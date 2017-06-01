@@ -158,12 +158,6 @@ AC_ARG_ENABLE([va-messaging],
                     [build with va info and error messaging @<:@default=yes@:>@])],
     [], [enable_va_messaging="yes"])
 
-AC_ARG_ENABLE(dummy-driver,
-    [AC_HELP_STRING([--enable-dummy-driver],
-                    [build dummy video driver @<:@default=yes@:>@])],
-    [], [enable_dummy_driver="yes"])
-AM_CONDITIONAL(BUILD_DUMMY_DRIVER, test x$enable_dummy_driver = xyes)
-
 AC_ARG_WITH(drivers-path,
     [AC_HELP_STRING([--with-drivers-path=[[path]]],
                     [drivers path])],
@@ -311,15 +305,9 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
-# Define __vaDriverInit*() function name for dummy backend
-VA_DRIVER_INIT_FUNC="__vaDriverInit_${VA_API_MAJOR_VERSION}_${VA_API_MINOR_VERSION}"
-AC_DEFINE_UNQUOTED([VA_DRIVER_INIT_FUNC], [$VA_DRIVER_INIT_FUNC],
-    [Defined to the versioned __vaDriverInit function name])
-
 AC_OUTPUT([
     Makefile
     doc/Makefile
-    dummy_drv_video/Makefile
     pkgconfig/Makefile
     pkgconfig/libva-drm.pc
     pkgconfig/libva-egl.pc
@@ -351,7 +339,6 @@ echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
-echo Build dummy driver ............... : $enable_dummy_driver
 echo Build documentation .............. : $enable_docs
 echo Build with messaging ............. : $enable_va_messaging
 echo
