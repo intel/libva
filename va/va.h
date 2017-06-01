@@ -648,12 +648,16 @@ typedef struct _VAConfigAttrib {
 
 /** @name Attribute values for VAConfigAttribEncSliceStructure */
 /**@{*/
-/** \brief Driver supports an arbitrary number of rows per slice. */
-#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000000
 /** \brief Driver supports a power-of-two number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
 /** \brief Driver supports an arbitrary number of macroblocks per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
+/** \brief Dirver support 1 rows  per slice */
+#define VA_ENC_SLICE_STRUCTURE_EQUAL_ROWS               0x00000004
+/** \brief Dirver support max encoded slice size per slice */
+#define VA_ENC_SLICE_STRUCTURE_MAX_SLICE_SIZE           0x00000008
+/** \brief Driver supports an arbitrary number of rows per slice. */
+#define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000010
 /**@}*/
 
 /** \brief Attribute value for VAConfigAttribEncJPEG */
