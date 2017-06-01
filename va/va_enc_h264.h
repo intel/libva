@@ -554,8 +554,8 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
     union {
         /** @name Data for intra macroblock */
         /**@{*/
-        struct {
-            union {
+        union {
+            struct {
                 /**
                  * \brief Flag specified to override MB neighbour
                  * availability bits from VME stage.
@@ -582,8 +582,9 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
 
         /** @name Data for inter macroblock */
         /**@{*/
-        struct {
-            union {
+        union {
+            struct {
+                unsigned int reserved;
             } bits;
             unsigned int value;
         } inter_fields;
