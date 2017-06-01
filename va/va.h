@@ -644,15 +644,15 @@ typedef union _VAConfigAttribValEncROI {
         /**
          * \brief A flag indicates whether ROI delta QP is supported
          *
-         * \ref roi_rc_qp_delat_support equal to 1 specifies the underlying driver supports
+         * \ref roi_rc_qp_delta_support equal to 1 specifies the underlying driver supports
          * ROI delta QP when VAConfigAttribRateControl != VA_RC_CQP, user can use \c roi_value
-         * in #VAEncROI to set ROI delta QP. \ref roi_rc_qp_delat_support equal to 0 specifies
+         * in #VAEncROI to set ROI delta QP. \ref roi_rc_qp_delta_support equal to 0 specifies
          * the underlying driver doesn't support ROI delta QP.
          *
-         * User should ignore \ref roi_rc_qp_delat_support when VAConfigAttribRateControl == VA_RC_CQP
+         * User should ignore \ref roi_rc_qp_delta_support when VAConfigAttribRateControl == VA_RC_CQP
          * because ROI delta QP is always required when VAConfigAttribRateControl == VA_RC_CQP.
          */
-        unsigned int roi_rc_qp_delat_support    : 1;
+        unsigned int roi_rc_qp_delta_support    : 1;
         unsigned int reserved                   : 22;
      } bits;
      unsigned int value;
@@ -1461,7 +1461,7 @@ typedef struct _VAEncMiscParameterBufferROI {
              * in #VAEncROI should be used as ROI priority.
              *
              * \ref roi_value_is_qp_delta is only available when VAConfigAttribRateControl != VA_RC_CQP,
-             * the setting must comply with \c roi_rc_priority_support and \c roi_rc_qp_delat_support in
+             * the setting must comply with \c roi_rc_priority_support and \c roi_rc_qp_delta_support in
              * #VAConfigAttribValEncROI. The underlying driver should ignore this field
              * when VAConfigAttribRateControl == VA_RC_CQP.
              */
