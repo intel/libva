@@ -254,7 +254,7 @@ typedef struct  _VASliceParameterBufferHEVC
     /** \brief The offset to the NAL unit header for this slice */
     uint32_t                slice_data_offset;
     /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_XXX. */
-    uint16_t                slice_data_flag;
+    uint32_t                slice_data_flag;
     /**
      * \brief Byte offset from NAL unit header to the begining of slice_data().
      *
