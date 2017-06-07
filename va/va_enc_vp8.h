@@ -130,8 +130,21 @@ typedef struct  _VAEncPictureParameterBufferVP8
             uint32_t no_ref_gf                      : 1;
             /* don't reference the alternate reference frame */
             uint32_t no_ref_arf                     : 1;
+            /* The temporal id the frame belongs to. */
+            uint32_t temporal_id                    : 8;
+            /**
+            *  following two flags indicate the reference order
+            *  LastRef is specified by 01b;
+            *  GoldRef is specified by 10b;
+            *  AltRef  is specified by 11b;
+            *  first_ref specifies the reference frame which is searched first.
+            *  second_ref specifies the reference frame which is searched second
+            *  if there is.
+            */
+            uint32_t first_ref                      : 2;
+            uint32_t second_ref                     : 2;
             /** \brief Reserved for future use, must be zero */
-            uint32_t reserved                       : 28;
+            uint32_t reserved                       : 16;
         } bits;
         uint32_t value;
     } ref_flags;
