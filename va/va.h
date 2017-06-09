@@ -230,6 +230,16 @@ typedef struct _VARectangle
     unsigned short height;
 } VARectangle;
 
+/** \brief Generic motion vector data structure. */
+typedef struct _VAMotionVector {
+    /** \mv0[0]: horizontal motion vector for past reference */
+    /** \mv0[1]: vertical motion vector for past reference */
+    /** \mv1[0]: horizontal motion vector for future reference */
+    /** \mv1[1]: vertical motion vector for future reference */
+    int16_t  mv0[2];  /* past reference */
+    int16_t  mv1[2];  /* future reference */
+} VAMotionVector;
+
 /** Type of a message callback, used for both error and info log. */
 typedef void (*vaMessageCallback)(const char *message);
 
@@ -354,6 +364,42 @@ typedef enum
      */
     VAEntrypointEncSliceLP 	= 8,
     VAEntrypointVideoProc       = 10,   /**< Video pre/post-processing. */
+    /**
+     * \brief VAEntrypointFEI
+     *
+     * The purpose of FEI (Flexible Encoding Infrastructure) is to allow applications to
+     * have more controls and trade off quality for speed with their own IPs.
+     * The application can optionally provide input to ENC for extra encode control
+     * and get the output from ENC. Application can chose to modify the ENC
+     * output/PAK input during encoding, but the performance impact is significant.
+     *
+     * On top of the existing buffers for normal encode, there will be
+     * one extra input buffer (VAEncMiscParameterFEIFrameControl) and
+     * three extra output buffers (VAEncFEIMVBufferType, VAEncFEIMBModeBufferType
+     * and VAEncFEIDistortionBufferType) for VAEntrypointFEI entry function.
+     * If separate PAK is set, two extra input buffers
+     * (VAEncFEIMVBufferType, VAEncFEIMBModeBufferType) are needed for PAK input.
+     **/
+    VAEntrypointFEI         = 11,
+    /**
+     * \brief VAEntrypointStats
+     *
+     * Statistics for FEI and non-FEI. A pre-processing function for getting some
+     * statistics and motion vectors is added, and some extra controls for Encode
+     * pipeline are provided. The application can optionally call the statistics
+     * function to get motion vectors and statistics like variances, distortions before
+     * calling Encode function via this entry point.
+     *
+     * Checking whether Statistics is supported can be performed with vaQueryConfigEntrypoints()
+     * and the profile argument set to #VAProfileNone. If Statistics entry point is supported,
+     * then the list of returned entry-points will include #VAEntrypointStats.
+     * Supported pixel format, maximum resolution and statistics specific attributes
+     * can be obtained via normal attribute query.
+     * One input buffer (VAStatsStatisticsParameterBufferType) and one or two
+     * output buffers (VAStatsStatisticsBufferType, VAStatsStatisticsBottomFieldBufferType
+     * (for interlace only) and VAStatsMVBufferType) are needed for this entry point.
+     **/
+    VAEntrypointStats       = 12,
 } VAEntrypoint;
 
 /** Currently defined configuration attribute types */
@@ -495,6 +541,31 @@ typedef enum
      */
     VAConfigAttribEncRateControlExt   = 26,
 
+    /**
+     * \brief Encode function type for FEI.
+     *
+     * This attribute conveys whether the driver supports different function types for encode.
+     * It can be VA_FEI_FUNCTION_ENC, VA_FEI_FUNCTION_PAK, or VA_FEI_FUNCTION_ENC_PAK. Currently
+     * it is for FEI entry point only.
+     * Default is VA_FEI_FUNCTION_ENC_PAK.
+     */
+    VAConfigAttribFEIFunctionType     = 32,
+    /**
+     * \brief Maximum number of FEI MV predictors. Read-only.
+     *
+     * This attribute determines the maximum number of MV predictors the driver
+     * can support to encode a single frame. 0 means no MV predictor is supported.
+     * Currently it is for FEI entry point only.
+     */
+    VAConfigAttribFEIMVPredictors     = 33,
+    /**
+     * \brief Statistics attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the VAEntrypointStats entry
+     * point. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValStats union. Currently it is for VAEntrypointStats only.
+     */
+    VAConfigAttribStats               = 34,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1123,6 +1194,7 @@ typedef enum
     VAEncMiscParameterBufferType	= 27,
     VAEncMacroblockParameterBufferType	= 28,
     VAEncMacroblockMapBufferType        = 29,
+    VAEncQpBufferType                   = 30,
 /* Following are video processing buffer types */
     /**
      * \brief Video processing pipeline parameter buffer.
@@ -1144,6 +1216,21 @@ typedef enum
      * color balance (#VAProcFilterParameterBufferColorBalance), etc.
      */
     VAProcFilterParameterBufferType     = 42,
+    /**
+     * \brief FEI specific buffer types
+     */
+    VAEncFEIMVBufferType                = 43,
+    VAEncFEIMBCodeBufferType            = 44,
+    VAEncFEIDistortionBufferType        = 45,
+    VAEncFEIMBControlBufferType         = 46,
+    VAEncFEIMVPredictorBufferType       = 47,
+    VAStatsStatisticsParameterBufferType = 48,
+    /** \brief Statistics output for VAEntrypointStats progressive and top field of interlaced case*/
+    VAStatsStatisticsBufferType         = 49,
+    /** \brief Statistics output for VAEntrypointStats bottom field of interlaced case*/
+    VAStatsStatisticsBottomFieldBufferType = 50,
+    VAStatsMVBufferType                 = 51,
+    VAStatsMVPredictorBufferType        = 52,
     VABufferTypeMax
 } VABufferType;
 
@@ -1165,6 +1252,8 @@ typedef enum
     VAEncMiscParameterTypeROI           = 10,
     /** \brief Buffer type used for temporal layer structure */
     VAEncMiscParameterTypeTemporalLayerStructure   = 12,
+    /** \brief Buffer type used for FEI input frame level parameters */
+    VAEncMiscParameterTypeFEIFrameControl = 18,
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -3121,6 +3210,8 @@ typedef struct _VAPictureHEVC
 #include <va/va_enc_mpeg2.h>
 #include <va/va_enc_vp8.h>
 #include <va/va_enc_vp9.h>
+#include <va/va_fei.h>
+#include <va/va_fei_h264.h>
 #include <va/va_vpp.h>
 
 /**@}*/
