@@ -401,6 +401,23 @@ typedef enum
      * (VAEncFEIMVBufferType, VAEncFEIMBModeBufferType) are needed for PAK input.
      **/
     VAEntrypointFEI         = 11,
+    /**
+     * \brief VAEntrypointStats
+     *
+     * A pre-processing function for getting some statistics and motion vectors is added,
+     * and some extra controls for Encode pipeline are provided. The application can
+     * optionally call the statistics function to get motion vectors and statistics like
+     * variances, distortions before calling Encode function via this entry point.
+     *
+     * Checking whether Statistics is supported can be performed with vaQueryConfigEntrypoints().
+     * If Statistics entry point is supported, then the list of returned entry-points will
+     * include #VAEntrypointStats. Supported pixel format, maximum resolution and statistics
+     * specific attributes can be obtained via normal attribute query. One input buffer
+     * (VAStatsStatisticsParameterBufferType) and one or two output buffers
+     * (VAStatsStatisticsBufferType, VAStatsStatisticsBottomFieldBufferType (for interlace only)
+     * and VAStatsMVBufferType) are needed for this entry point.
+     **/
+    VAEntrypointStats       = 12,
 } VAEntrypoint;
 
 /** Currently defined configuration attribute types */
@@ -678,6 +695,14 @@ typedef enum
      * Currently it is for FEI entry point only.
      */
     VAConfigAttribFEIMVPredictors     = 33,
+    /**
+     * \brief Statistics attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the VAEntrypointStats entry
+     * point. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValStats union. Currently it is for VAEntrypointStats only.
+     */
+    VAConfigAttribStats               = 34,
      /**
      * \brief Tile Support Attribute. Read-only.
      *
@@ -1550,6 +1575,13 @@ typedef enum
     VAEncFEIDistortionBufferType        = 45,
     VAEncFEIMBControlBufferType         = 46,
     VAEncFEIMVPredictorBufferType       = 47,
+    VAStatsStatisticsParameterBufferType = 48,
+    /** \brief Statistics output for VAEntrypointStats progressive and top field of interlaced case*/
+    VAStatsStatisticsBufferType         = 49,
+    /** \brief Statistics output for VAEntrypointStats bottom field of interlaced case*/
+    VAStatsStatisticsBottomFieldBufferType = 50,
+    VAStatsMVBufferType                 = 51,
+    VAStatsMVPredictorBufferType        = 52,
     /** Force MB's to be non skip for encode.it's per-mb control buffer, The width of the MB map
      * Surface is (width of the Picture in MB unit) * 1 byte, multiple of 64 bytes.
      * The height is (height of the picture in MB unit). The picture is either
