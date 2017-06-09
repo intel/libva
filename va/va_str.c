@@ -71,6 +71,7 @@ const char *vaEntrypointStr(VAEntrypoint entrypoint)
     TOSTR(VAEntrypointEncSliceLP);
     TOSTR(VAEntrypointVideoProc);
     TOSTR(VAEntrypointFEI);
+    TOSTR(VAEntrypointStats);
     }
     return "<unknown entrypoint>";
 }
@@ -112,6 +113,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribEncTileSupport);
     TOSTR(VAConfigAttribCustomRoundingControl);
     TOSTR(VAConfigAttribQPBlockSize);
+    TOSTR(VAConfigAttribStats);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
@@ -153,6 +155,11 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncFEIMVPredictorBufferType);
     TOSTR(VAEncMacroblockDisableSkipMapBufferType);
     TOSTR(VADecodeStreamoutBufferType);
+    TOSTR(VAStatsStatisticsParameterBufferType);
+    TOSTR(VAStatsStatisticsBufferType);
+    TOSTR(VAStatsStatisticsBottomFieldBufferType);
+    TOSTR(VAStatsMVBufferType);
+    TOSTR(VAStatsMVPredictorBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
