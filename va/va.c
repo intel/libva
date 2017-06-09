@@ -159,6 +159,24 @@ vaMessageCallback vaSetInfoCallback(vaMessageCallback callback)
     return old_callback;
 }
 
+void va_MessagingInit()
+{
+#if ENABLE_VA_MESSAGING
+    char env_value[1024];
+
+    if (va_parseConfig("LIBVA_MESSAGING_LEVEL", &env_value[0]) == 0) {
+        if (strcmp(env_value, "0") == 0) {
+            vaSetInfoCallback(NULL);
+            vaSetErrorCallback(NULL);
+        }
+
+        if (strcmp(env_value, "1") == 0) {
+            vaSetInfoCallback(NULL);
+        }
+    }
+#endif
+}
+
 void va_errorMessage(const char *msg, ...)
 {
 #if ENABLE_VA_MESSAGING
@@ -590,6 +608,8 @@ VAStatus vaInitialize (
     va_TraceInit(dpy);
 
     va_FoolInit(dpy);
+
+    va_MessagingInit();
 
     va_infoMessage("VA-API version %s\n", VA_VERSION_S);
 
