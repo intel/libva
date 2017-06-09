@@ -51,6 +51,8 @@ libva_source_h = \
 	va_enc_h264.h		\
 	va_enc_jpeg.h		\
 	va_enc_vp8.h		\
+	va_fei.h    		\
+	va_fei_h264.h		\
 	va_enc_mpeg2.h		\
 	va_enc_vp9.h            \
 	va_tpi.h		\
