@@ -60,7 +60,7 @@
 
 /*
  * read a config "env" for libva.conf or from environment setting
- * liva.conf has higher priority
+ * libva.conf has higher priority
  * return 0: the "env" is set, and the value is copied into env_value
  *        1: the env is not set
  */
@@ -75,13 +75,13 @@ int va_parseConfig(char *env, char *env_value)
     
     fp = fopen("/etc/libva.conf", "r");
     while (fp && (fgets(oneline, 1024, fp) != NULL)) {
-	if (strlen(oneline) == 1)
-	    continue;
+        if (strlen(oneline) == 1)
+            continue;
         token = strtok_r(oneline, "=\n", &saveptr);
-	value = strtok_r(NULL, "=\n", &saveptr);
+        value = strtok_r(NULL, "=\n", &saveptr);
 
-	if (NULL == token || NULL == value)
-	    continue;
+        if (NULL == token || NULL == value)
+            continue;
 
         if (strcmp(token, env) == 0) {
             if (env_value) {
