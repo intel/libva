@@ -530,6 +530,13 @@ typedef enum
      */
     VAConfigAttribEncQuantization     = 22,	
     /**
+     * \brief Encoding intra refresh attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports certain types of intra refresh methods
+     * for encoding (e.g. adaptive intra refresh or rolling intra refresh). 
+     */
+    VAConfigAttribEncIntraRefresh     = 23,
+    /**
      * \brief Encoding skip frame attribute. Read-only.
      *
      * This attribute conveys whether the driver supports sending skip frame parameters 
@@ -698,6 +705,22 @@ typedef union _VAConfigAttribValEncJPEG {
 /** \brief Driver supports trellis quantization */
 #define VA_ENC_QUANTIZATION_TRELLIS_SUPPORTED           0x00000001
 /**@}*/
+
+/** @name Attribute values for VAConfigAttribEncIntraRefresh */
+/**@{*/
+/** \brief Driver does not support intra refresh */
+#define VA_ENC_INTRA_REFRESH_NONE                       0x00000000
+/** \brief Driver supports column based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_COLUMN             0x00000001
+/** \brief Driver supports row based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_ROW                0x00000002
+/** \brief Driver supports adaptive intra refresh */
+#define VA_ENC_INTRA_REFRESH_ADAPTIVE                   0x00000010
+/** \brief Driver supports cyclic intra refresh */
+#define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
+
+/**@}*/
+
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
     struct {
@@ -1244,6 +1267,8 @@ typedef enum
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
     VAEncMiscParameterTypeQualityLevel  = 6,
+    /** \brief Buffer type used for Rolling intra refresh */
+    VAEncMiscParameterTypeRIR           = 7,
     VAEncMiscParameterTypeQuantization  = 8,
     /** \brief Buffer type used for sending skip frame parameters to the encoder's
       * rate control, when the user has externally skipped frames. */
@@ -1412,6 +1437,51 @@ typedef struct _VAEncMiscParameterAIR
     unsigned int air_threshold;
     unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
 } VAEncMiscParameterAIR;
+
+/*
+ * \brief Rolling intra refresh data structure for encoding.
+ */
+typedef struct _VAEncMiscParameterRIR
+{
+    union
+    {
+        struct
+	/**
+	 * \brief Indicate if intra refresh is enabled in column/row. 
+	 *
+	 * App should query VAConfigAttribEncIntraRefresh to confirm RIR support 
+	 * by the driver before sending this structure. The following RIR restrictions
+	 * apply:
+	 *  - No field encoding.
+	 *  - No B frames.
+	 *  - No multiple references.
+	 */
+        {
+	    /* \brief enable RIR in column */
+            unsigned int enable_rir_column : 1;
+	    /* \brief enable RIR in row */
+            unsigned int enable_rir_row : 1;
+	    unsigned int reserved : 30;
+        } bits;
+        unsigned int value;
+    } rir_flags;
+    /** 
+     * \brief Indicates the column or row location in MB. It is ignored if 
+     * rir_flags is 0. 
+     */
+    unsigned short intra_insertion_location;
+    /** 
+     * \brief Indicates the number of columns or rows in MB. It is ignored if 
+     * rir_flags is 0.
+     */
+    unsigned short intra_insert_size;
+    /** 
+     * \brief indicates the Qp difference for inserted intra columns or rows. 
+     * App can use this to adjust intra Qp based on bitrate & max frame size.
+     */
+    char qp_delta_for_inserted_intra;
+	
+} VAEncMiscParameterRIR;
 
 typedef struct _VAEncMiscParameterHRD
 {
