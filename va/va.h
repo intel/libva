@@ -2297,6 +2297,7 @@ typedef struct _VAPictureH264
 #define VA_PICTURE_H264_BOTTOM_FIELD		0x00000004
 #define VA_PICTURE_H264_SHORT_TERM_REFERENCE	0x00000008
 #define VA_PICTURE_H264_LONG_TERM_REFERENCE	0x00000010
+#define VA_PICTURE_H264_NON_EXISTING		0x00000020
 
 /** H.264 Picture Parameter Buffer */
 /* 
@@ -2351,6 +2352,8 @@ typedef struct _VAPictureParameterBufferH264
         unsigned int value;
     } pic_fields;
     unsigned short frame_num;
+    unsigned char num_ref_idx_l0_default_active_minus1;
+    unsigned char num_ref_idx_l1_default_active_minus1;
 } VAPictureParameterBufferH264;
 
 /** H.264 Inverse Quantization Matrix Buffer */
