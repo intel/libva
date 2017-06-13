@@ -78,7 +78,8 @@ m4_define([libva_lt_age],
 m4_define([libdrm_version], [2.4])
 
 # Wayland minimum version number
-m4_define([wayland_api_version], [1.0.0])
+# 1.11.0 for wl_proxy_create_wrapper
+m4_define([wayland_api_version], [1.11.0])
 
 AC_PREREQ(2.57)
 AC_INIT([libva],
