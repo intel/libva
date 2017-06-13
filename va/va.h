@@ -492,6 +492,20 @@ typedef enum
      */
     VAConfigAttribEncMacroblockInfo     = 16,
     /**
+     * \brief Maximum picture width. Read-only.
+     *
+     * This attribute determines the maximum picture width the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureWidth     = 18,
+    /**
+     * \brief Maximum picture height. Read-only.
+     *
+     * This attribute determines the maximum picture height the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureHeight    = 19,	
+    /**
      * \brief JPEG encoding attribute. Read-only.
      *
      * This attribute exposes a number of capabilities of the underlying
