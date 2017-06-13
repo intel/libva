@@ -70,6 +70,10 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
     }                   components[255];
     /** \brief Number of components in frame (Nf). */
     unsigned char       num_components;
+    /** \brief Input color space 0: YUV, 1: RGB, 2: BGR, others: reserved */
+    unsigned char       color_space;
+    /** \brief Set to VA_ROTATION_* for a single rotation angle reported by VAConfigAttribDecJPEG. */
+    unsigned int 	rotation;
 } VAPictureParameterBufferJPEGBaseline;
 
 /**
