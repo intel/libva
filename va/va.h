@@ -2242,6 +2242,8 @@ typedef struct _VAPictureParameterBufferVC1
         } bits;
         unsigned int value;
     } transform_fields;
+    unsigned char luma_scale2;		/* PICTURE_LAYER::LUMSCALE2 */
+    unsigned char luma_shift2;		/* PICTURE_LAYER::LUMSHIFT2 */
 } VAPictureParameterBufferVC1;
 
 /** VC-1 Bitplane Buffer
