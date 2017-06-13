@@ -919,6 +919,21 @@ VAStatus vaQueryConfigAttributes (
   return ctx->vtable->vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
+VAStatus vaQueryProcessingRate (
+    VADisplay dpy,
+    VAConfigID config_id,
+    VAProcessingRateParameter *proc_buf,
+    unsigned int *processing_rate	/* out */
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(!ctx->vtable->vaQueryProcessingRate)
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+  return ctx->vtable->vaQueryProcessingRate( ctx, config_id, proc_buf, processing_rate);
+}
+
 /* XXX: this is a slow implementation that will be removed */
 static VAStatus
 va_impl_query_surface_attributes(
