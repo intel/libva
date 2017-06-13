@@ -588,6 +588,20 @@ typedef enum
      * See \c VA_PROCESSING_RATE_xxx for encode/decode processing rate
      */
     VAConfigAttribProcessingRate    = 27,
+    /**
+     * \brief Encoding dirty rectangle. Read-only.
+     *
+     * This attribute conveys whether the driver supports dirty rectangle.
+     * encoding, based on user provided ROI rectangles which indicate the rectangular areas
+     * where the content has changed as compared to the previous picture.  The regions of the
+     * picture that are not covered by dirty rect rectangles are assumed to have not changed
+     * compared to the previous picture.  The encoder may do some optimizations based on
+     * this information.  The attribute value returned indicates the number of regions that
+     * are supported.  e.g. A value of 0 means dirty rect encoding is not supported.  If dirty
+     * rect encoding is supported, the ROI information is passed to the driver using
+     * VAEncMiscParameterTypeDirtyRect.
+     */
+     VAConfigAttribEncDirtyRect       = 28,
 
     /**
      * \brief Encode function type for FEI.
@@ -1517,6 +1531,8 @@ typedef enum
     VAEncMiscParameterTypeROI           = 10,
     /** \brief Buffer type used for temporal layer structure */
     VAEncMiscParameterTypeTemporalLayerStructure   = 12,
+    /** \brief Buffer type used for dirty region-of-interest (ROI) parameters. */
+    VAEncMiscParameterTypeDirtyRect      = 13,
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
 } VAEncMiscParameterType;
@@ -1922,6 +1938,25 @@ typedef struct _VAEncMiscParameterBufferROI {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferROI;
+/*
+ * \brief Dirty rectangle data structure for encoding.
+ *
+ * The encoding dirty rect can be set through VAEncMiscParameterBufferDirtyRect, if the
+ * implementation supports dirty rect input. The rect set through this structure is applicable
+ * only to the current frame or field, so must be sent every frame or field to be applied.
+ * The number of supported rects can be queried through the VAConfigAttribEncDirtyRect.  The
+ * encoder will use the rect information to know those rectangle areas have changed while the
+ * areas not covered by dirty rect rectangles are assumed to have not changed compared to the
+ * previous picture.  The encoder may do some internal optimizations.
+ */
+typedef struct _VAEncMiscParameterBufferDirtyRect
+{
+    /** \brief Number of Rectangle being sent.*/
+    uint32_t    num_roi_rectangle;
+
+    /** \brief Pointer to a VARectangle array with num_roi_rectangle elements.*/
+     VARectangle    *roi_rectangle;
+} VAEncMiscParameterBufferDirtyRect;
 
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
