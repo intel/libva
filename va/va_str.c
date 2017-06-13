@@ -99,6 +99,8 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribFEIFunctionType);
     TOSTR(VAConfigAttribFEIMVPredictors);
     TOSTR(VAConfigAttribDecJPEG);
+    TOSTR(VAConfigAttribMaxPictureWidth);
+    TOSTR(VAConfigAttribMaxPictureHeight);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
