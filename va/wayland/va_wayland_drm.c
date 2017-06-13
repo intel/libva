@@ -46,6 +46,7 @@
 typedef struct va_wayland_drm_context {
     struct va_wayland_context   base;
     void                       *handle;
+    struct wl_event_queue      *queue;
     struct wl_drm              *drm;
     struct wl_registry         *registry;
     void                       *drm_interface;
@@ -150,6 +151,11 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
         wl_drm_ctx->registry = NULL;
     }
 
+    if (wl_drm_ctx->queue) {
+        wl_event_queue_destroy(wl_drm_ctx->queue);
+        wl_drm_ctx->queue = NULL;
+    }
+
     if (wl_drm_ctx->handle) {
         dlclose(wl_drm_ctx->handle);
         wl_drm_ctx->handle = NULL;
@@ -187,6 +193,19 @@ static const struct wl_registry_listener registry_listener = {
     NULL,
 };
 
+static bool
+wayland_roundtrip_queue(struct wl_display *display,
+                         struct wl_event_queue *queue)
+{
+    if (wl_display_roundtrip_queue(display, queue) < 0) {
+        int err = wl_display_get_error(display);
+        va_wayland_error("Wayland roundtrip error: %s (errno %d)", strerror(err), err);
+        return false;
+    } else {
+        return true;
+    }
+}
+
 bool
 va_wayland_drm_create(VADisplayContextP pDisplayContext)
 {
@@ -194,12 +213,16 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     struct va_wayland_drm_context *wl_drm_ctx;
     struct drm_state *drm_state;
     struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
+    struct wl_display *wrapped_display;
 
     wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
-    if (!wl_drm_ctx)
+    if (!wl_drm_ctx) {
+        va_wayland_error("could not allocate wl_drm_ctx");
         return false;
+    }
     wl_drm_ctx->base.destroy            = va_wayland_drm_destroy;
     wl_drm_ctx->handle                  = NULL;
+    wl_drm_ctx->queue                   = NULL;
     wl_drm_ctx->drm                     = NULL;
     wl_drm_ctx->drm_interface           = NULL;
     wl_drm_ctx->registry                = NULL;
@@ -208,8 +231,10 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
 
     drm_state = calloc(1, sizeof(struct drm_state));
-    if (!drm_state)
+    if (!drm_state) {
+        va_wayland_error("could not allocate drm_state");
         return false;
+    }
     drm_state->fd        = -1;
     drm_state->auth_type = 0;
     ctx->drm_state       = drm_state;
@@ -224,27 +249,61 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
 
     wl_drm_ctx->drm_interface =
         dlsym(wl_drm_ctx->handle, "wl_drm_interface");
-    if (!wl_drm_ctx->drm_interface)
+    if (!wl_drm_ctx->drm_interface) {
+        va_wayland_error("wl_drm_interface not found in library");
+        return false;
+    }
+
+    /* Use wrapped wl_display with private event queue to prevent
+     * thread safety issues with applications that e.g. run an event pump
+     * parallel to libva initialization.
+     * Using the default queue, events might get lost and crashes occur
+     * because wl_display_roundtrip is not thread-safe with respect to the
+     * same queue.
+     */
+    wl_drm_ctx->queue = wl_display_create_queue(ctx->native_dpy);
+    if (!wl_drm_ctx->queue) {
+        va_wayland_error("could not create Wayland event queue");
+        return false;
+    }
+
+    wrapped_display = wl_proxy_create_wrapper(ctx->native_dpy);
+    if (!wrapped_display) {
+        va_wayland_error("could not create Wayland proxy wrapper");
+        return false;
+    }
+
+    /* All created objects will inherit this queue */
+    wl_proxy_set_queue((struct wl_proxy *) wrapped_display, wl_drm_ctx->queue);
+    wl_drm_ctx->registry = wl_display_get_registry(wrapped_display);
+    wl_proxy_wrapper_destroy(wrapped_display);
+    wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx);
+    if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
         return false;
 
-    wl_drm_ctx->registry = wl_display_get_registry(ctx->native_dpy);
-    wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx);
-    wl_display_roundtrip(ctx->native_dpy);
-
     /* registry_handle_global should have been called by the
-     * wl_display_roundtrip above
+     * wl_display_roundtrip_queue above
      */
 
+    /* Do not print an error, the compositor might just not support wl_drm */
     if (!wl_drm_ctx->drm)
         return false;
 
     wl_drm_add_listener(wl_drm_ctx->drm, &drm_listener, pDisplayContext);
-    wl_display_roundtrip(ctx->native_dpy);
-    if (drm_state->fd < 0)
+    if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
+        return false;
+    if (drm_state->fd < 0) {
+        va_wayland_error("did not get DRM device");
+        return false;
+    }
+
+    if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
         return false;
 
-    wl_display_roundtrip(ctx->native_dpy);
-    if (!wl_drm_ctx->is_authenticated)
+    if (!wl_drm_ctx->is_authenticated) {
+        va_wayland_error("Wayland compositor did not respond to DRM authentication");
         return false;
+    }
+
     return true;
 }
