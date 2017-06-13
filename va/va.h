@@ -427,7 +427,14 @@ typedef enum
      * See \c VA_DEC_SLICE_MODE_xxx for the list of slice decoding modes.
      */
     VAConfigAttribDecSliceMode		= 6,
-
+   /**
+     * \brief JPEG decoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * JPEG implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValDecJPEG union.
+     */
+    VAConfigAttribDecJPEG             = 7,
     /** @name Attributes for encoding */
     /**@{*/
     /**
@@ -615,6 +622,19 @@ typedef struct _VAConfigAttrib {
 #define VA_DEC_SLICE_MODE_NORMAL       0x00000001
 /** \brief Driver supports base mode for slice decoding */
 #define VA_DEC_SLICE_MODE_BASE         0x00000002
+
+/** @name Attribute values for VAConfigAttribDecJPEG */
+/**@{*/
+typedef union _VAConfigAttribValDecJPEG {
+    struct{
+    /** \brief Set to (1 << VA_ROTATION_xxx) for supported rotation angles. */
+    uint32_t rotation : 4;
+    /** \brief Reserved for future use. */
+    uint32_t reserved : 28;
+    }bits;
+    uint32_t value;
+    uint32_t va_reserved[VA_PADDING_LOW];
+} VAConfigAttribValDecJPEG;
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
