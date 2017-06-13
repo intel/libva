@@ -37,19 +37,11 @@
 #include "va_wayland_private.h"
 #include "wayland-drm-client-protocol.h"
 
-/* XXX: Wayland/DRM support currently lives in Mesa libEGL.so.* library */
-/* First try the soname of a glvnd enabled mesa build */
-#define LIBWAYLAND_DRM_NAME "libEGL_mesa.so.0"
-/* Then fallback to plain libEGL.so.1 (which might not be mesa) */
-#define LIBWAYLAND_DRM_NAME_FALLBACK "libEGL.so.1"
-
 typedef struct va_wayland_drm_context {
     struct va_wayland_context   base;
-    void                       *handle;
     struct wl_event_queue      *queue;
     struct wl_drm              *drm;
     struct wl_registry         *registry;
-    void                       *drm_interface;
     unsigned int                is_authenticated        : 1;
 } VADisplayContextWaylandDRM;
 
@@ -156,11 +148,6 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
         wl_drm_ctx->queue = NULL;
     }
 
-    if (wl_drm_ctx->handle) {
-        dlclose(wl_drm_ctx->handle);
-        wl_drm_ctx->handle = NULL;
-    }
-
     if (drm_state) {
         if (drm_state->fd >= 0) {
             close(drm_state->fd);
@@ -187,7 +174,7 @@ registry_handle_global(
          * compositor does not have v2
          */
         wl_drm_ctx->drm =
-            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface,
+            wl_registry_bind(wl_drm_ctx->registry, id, &wl_drm_interface,
                              (version < 2) ? version : 2);
     }
 }
@@ -225,10 +212,8 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
         return false;
     }
     wl_drm_ctx->base.destroy            = va_wayland_drm_destroy;
-    wl_drm_ctx->handle                  = NULL;
     wl_drm_ctx->queue                   = NULL;
     wl_drm_ctx->drm                     = NULL;
-    wl_drm_ctx->drm_interface           = NULL;
     wl_drm_ctx->registry                = NULL;
     wl_drm_ctx->is_authenticated        = 0;
     pDisplayContext->opaque             = wl_drm_ctx;
@@ -243,20 +228,6 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     drm_state->auth_type = 0;
     ctx->drm_state       = drm_state;
     vtable->has_prime_sharing = 0;
-
-    wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME, RTLD_LAZY|RTLD_LOCAL);
-    if (!wl_drm_ctx->handle) {
-        wl_drm_ctx->handle = dlopen(LIBWAYLAND_DRM_NAME_FALLBACK, RTLD_LAZY|RTLD_LOCAL);
-        if (!wl_drm_ctx->handle)
-            return false;
-    }
-
-    wl_drm_ctx->drm_interface =
-        dlsym(wl_drm_ctx->handle, "wl_drm_interface");
-    if (!wl_drm_ctx->drm_interface) {
-        va_wayland_error("wl_drm_interface not found in library");
-        return false;
-    }
 
     /* Use wrapped wl_display with private event queue to prevent
      * thread safety issues with applications that e.g. run an event pump
