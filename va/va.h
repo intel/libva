@@ -523,6 +523,13 @@ typedef enum
      */
     VAConfigAttribEncQualityRange     = 21,
     /**
+     * \brief Encoding quantization attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports certain types of quantization methods
+     * for encoding (e.g. trellis).
+     */
+    VAConfigAttribEncQuantization     = 22,	
+    /**
      * \brief Encoding skip frame attribute. Read-only.
      *
      * This attribute conveys whether the driver supports sending skip frame parameters 
@@ -684,6 +691,13 @@ typedef union _VAConfigAttribValEncJPEG {
     unsigned int value;
 } VAConfigAttribValEncJPEG;
 
+/** @name Attribute values for VAConfigAttribEncQuantization */
+/**@{*/
+/** \brief Driver does not support special types of quantization */
+#define VA_ENC_QUANTIZATION_NONE                        0x00000000
+/** \brief Driver supports trellis quantization */
+#define VA_ENC_QUANTIZATION_TRELLIS_SUPPORTED           0x00000001
+/**@}*/
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
     struct {
@@ -1230,6 +1244,7 @@ typedef enum
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
     VAEncMiscParameterTypeQualityLevel  = 6,
+    VAEncMiscParameterTypeQuantization  = 8,
     /** \brief Buffer type used for sending skip frame parameters to the encoder's
       * rate control, when the user has externally skipped frames. */
     VAEncMiscParameterTypeSkipFrame     = 9,
@@ -1437,6 +1452,33 @@ typedef struct _VAEncMiscParameterBufferQualityLevel {
      */
     unsigned int                quality_level;
 } VAEncMiscParameterBufferQualityLevel;
+
+/**
+ * \brief Quantization settings for encoding.
+ *
+ * Some encoders support special types of quantization such as trellis, and this structure
+ * can be used by the app to control these special types of quantization by the encoder.
+ */
+typedef struct _VAEncMiscParameterQuantization
+{
+    union
+    {
+    /* if no flags is set then quantization is determined by the driver */
+        struct
+        {
+	    /* \brief disable trellis for all frames/fields */
+            unsigned int disable_trellis : 1; 
+	    /* \brief enable trellis for I frames/fields */
+            unsigned int enable_trellis_I : 1; 
+	    /* \brief enable trellis for P frames/fields */
+            unsigned int enable_trellis_P : 1; 
+	    /* \brief enable trellis for B frames/fields */
+            unsigned int enable_trellis_B : 1; 
+            unsigned int reserved : 28;
+        } bits;
+        unsigned int value;
+    } quantization_flags;
+} VAEncMiscParameterQuantization;
 
 /**
  * \brief Encoding skip frame.
