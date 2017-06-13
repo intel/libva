@@ -197,6 +197,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     wl_drm_ctx->handle                  = NULL;
     wl_drm_ctx->drm                     = NULL;
     wl_drm_ctx->drm_interface           = NULL;
+    wl_drm_ctx->registry                = NULL;
     wl_drm_ctx->is_authenticated        = 0;
     pDisplayContext->opaque             = wl_drm_ctx;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
