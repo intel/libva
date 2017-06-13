@@ -470,7 +470,14 @@ struct VADriverVTable
             VABufferID *buf_id                  /* out */
 	);
 
-        unsigned long reserved[59];
+        VAStatus (*vaQueryProcessingRate) (
+            VADriverContextP ctx,               /* in */
+            VAConfigID config_id,               /* in */
+            VAProcessingRateParameter *proc_buf,/* in */
+            unsigned int *processing_rate	/* out */
+        );
+        /** \brief Reserved bytes for future use, must be zero */
+        unsigned long reserved[58];
 };
 
 struct VADriverContext
