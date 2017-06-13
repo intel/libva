@@ -172,8 +172,12 @@ registry_handle_global(
     struct va_wayland_drm_context *wl_drm_ctx = data;
 
     if (strcmp(interface, "wl_drm") == 0) {
+        /* bind to at most version 2, but also support version 1 if
+         * compositor does not have v2
+         */
         wl_drm_ctx->drm =
-            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface, 2);
+            wl_registry_bind(wl_drm_ctx->registry, id, wl_drm_ctx->drm_interface,
+                             (version < 2) ? version : 2);
     }
 }
 
