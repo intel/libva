@@ -145,6 +145,11 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
     }
     wl_drm_ctx->is_authenticated = 0;
 
+    if (wl_drm_ctx->registry) {
+        wl_registry_destroy(wl_drm_ctx->registry);
+        wl_drm_ctx->registry = NULL;
+    }
+
     if (wl_drm_ctx->handle) {
         dlclose(wl_drm_ctx->handle);
         wl_drm_ctx->handle = NULL;
