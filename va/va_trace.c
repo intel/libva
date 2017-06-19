@@ -28,6 +28,7 @@
 #include "va.h"
 #include "va_enc_h264.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_enc_h264.h"
 #include "va_enc_jpeg.h"
@@ -233,12 +234,6 @@ struct va_trace {
     va_TraceMsg(trace_ctx, "") ; \
 } while (0)
 
-/* Prototype declarations (functions defined in va.c) */
-
-void va_errorMessage(const char *msg, ...);
-void va_infoMessage(const char *msg, ...);
-
-int va_parseConfig(char *env, char *env_value);
 
 VAStatus vaBufferInfo(
     VADisplay dpy,
