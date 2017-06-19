@@ -2670,9 +2670,6 @@ static void va_TraceVAPictureParameterBufferH264(
     va_TraceMsg(trace_ctx, "\tmb_adaptive_frame_field_flag = %d\n", p->seq_fields.bits.mb_adaptive_frame_field_flag);
     va_TraceMsg(trace_ctx, "\tdirect_8x8_inference_flag = %d\n", p->seq_fields.bits.direct_8x8_inference_flag);
     va_TraceMsg(trace_ctx, "\tMinLumaBiPredSize8x8 = %d\n", p->seq_fields.bits.MinLumaBiPredSize8x8);
-    va_TraceMsg(trace_ctx, "\tnum_slice_groups_minus1 = %d\n", p->num_slice_groups_minus1);
-    va_TraceMsg(trace_ctx, "\tslice_group_map_type = %d\n", p->slice_group_map_type);
-    va_TraceMsg(trace_ctx, "\tslice_group_change_rate_minus1 = %d\n", p->slice_group_change_rate_minus1);
     va_TraceMsg(trace_ctx, "\tpic_init_qp_minus26 = %d\n", p->pic_init_qp_minus26);
     va_TraceMsg(trace_ctx, "\tpic_init_qs_minus26 = %d\n", p->pic_init_qs_minus26);
     va_TraceMsg(trace_ctx, "\tchroma_qp_index_offset = %d\n", p->chroma_qp_index_offset);
