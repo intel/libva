@@ -33,4 +33,6 @@ void va_infoMessage(const char *msg, ...);
 
 int  va_parseConfig(char *env, char *env_value);
 
+VADisplayContextP va_newDisplayContext(void);
+
 #endif /* VA_INTERNAL_H */

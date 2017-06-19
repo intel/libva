@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_x11.h"
@@ -163,13 +164,11 @@ VADisplay vaGetDisplay (
       /* create new entry */
       VADriverContextP pDriverContext;
       struct dri_state *dri_state;
-      pDisplayContext = calloc(1, sizeof(*pDisplayContext));
+      pDisplayContext = va_newDisplayContext();
       pDriverContext  = calloc(1, sizeof(*pDriverContext));
       dri_state       = calloc(1, sizeof(*dri_state));
       if (pDisplayContext && pDriverContext && dri_state)
       {
-	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
-
 	  pDriverContext->native_dpy       = (void *)native_dpy;
 	  pDriverContext->x11_screen       = XDefaultScreen(native_dpy);
           pDriverContext->display_type     = VA_DISPLAY_X11;

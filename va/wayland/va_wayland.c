@@ -32,6 +32,7 @@
 #include "va_wayland_private.h"
 #include "va_backend.h"
 #include "va_backend_wayland.h"
+#include "va_internal.h"
 
 static inline VADriverContextP
 get_driver_context(VADisplay dpy)
@@ -120,11 +121,10 @@ vaGetDisplayWl(struct wl_display *display)
     struct VADriverVTableWayland *vtable;
     unsigned int i;
 
-    pDisplayContext = calloc(1, sizeof(*pDisplayContext));
+    pDisplayContext = va_newDisplayContext();
     if (!pDisplayContext)
         return NULL;
 
-    pDisplayContext->vadpy_magic        = VA_DISPLAY_MAGIC;
     pDisplayContext->vaIsValid          = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy          = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
