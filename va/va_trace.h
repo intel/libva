@@ -29,7 +29,7 @@
 extern "C" {
 #endif
 
-extern int trace_flag;
+extern int va_trace_flag;
 
 #define VA_TRACE_FLAG_LOG             0x1
 #define VA_TRACE_FLAG_BUFDATA         0x2
@@ -42,11 +42,11 @@ extern int trace_flag;
                                        VA_TRACE_FLAG_SURFACE_JPEG)
 
 #define VA_TRACE_LOG(trace_func,...)            \
-    if (trace_flag & VA_TRACE_FLAG_LOG) {       \
+    if (va_trace_flag & VA_TRACE_FLAG_LOG) {    \
         trace_func(__VA_ARGS__);                \
     }
 #define VA_TRACE_ALL(trace_func,...)            \
-    if (trace_flag) {                           \
+    if (va_trace_flag) {                        \
         trace_func(__VA_ARGS__);                \
     }
 

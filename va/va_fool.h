@@ -32,15 +32,15 @@
 extern "C" {
 #endif
 
-extern int fool_codec;
-extern int fool_postp;
+extern int va_fool_codec;
+extern int va_fool_postp;
 
 #define VA_FOOL_FLAG_DECODE  0x1
 #define VA_FOOL_FLAG_ENCODE  0x2
 #define VA_FOOL_FLAG_JPEG    0x4
 
 #define VA_FOOL_FUNC(fool_func,...)            \
-    if (fool_codec) {                          \
+    if (va_fool_codec) {                       \
         if (fool_func(__VA_ARGS__))            \
             return VA_STATUS_SUCCESS;          \
     }
