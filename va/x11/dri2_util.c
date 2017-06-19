@@ -166,14 +166,14 @@ dri2Close(VADriverContextP ctx)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
-    free_drawable_hashtable(ctx);
+    va_dri_free_drawable_hashtable(ctx);
 
     if (dri_state->base.fd >= 0)
 	close(dri_state->base.fd);
 }
 
 Bool 
-isDRI2Connected(VADriverContextP ctx, char **driver_name)
+va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int major, minor;
