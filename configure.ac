@@ -144,11 +144,6 @@ AC_ARG_ENABLE(glx,
                     [build with VA/GLX API support @<:@default=auto@:>@])],
     [], [enable_glx="auto"])
 
-AC_ARG_ENABLE(egl,
-    [AC_HELP_STRING([--enable-egl],
-                    [build with VA/EGL API support @<:@default=auto@:>@])],
-    [], [enable_egl="auto"])
-
 AC_ARG_ENABLE([wayland],
     [AC_HELP_STRING([--enable-wayland],
                     [build with VA/Wayland API support @<:@default=auto@:>@])],
@@ -269,29 +264,6 @@ if test "$USE_X11:$enable_glx" != "yes:no"; then
 fi
 AM_CONDITIONAL(USE_GLX, test "$USE_GLX" = "yes")
 
-# Check for EGL
-USE_EGL="no"
-if test "x$enable_egl" != "xno"; then
-    PKG_CHECK_MODULES([EGL], [egl], [USE_EGL="yes"], [:])
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_LIBS="$LIBS"
-    CPPFLAGS="$CPPFLAGS $EGL_CFLAGS"
-    LIBS="$LIBS $EGL_LIBS"
-    AC_CHECK_HEADERS([EGL/egl.h], [:], [USE_EGL="no"])
-    AC_CHECK_LIB([EGL], [eglGetDisplay], [:], [USE_EGL="no"])
-    CPPFLAGS="$saved_CPPFLAGS"
-    LIBS="$saved_LIBS"
-
-    if test "x$USE_EGL" = "xno" -a "x$enable_egl" = "xyes"; then
-       AC_MSG_ERROR([VA/EGL explicitly enabled, but libEGL couldn't be found])
-    fi
-
-    if test "$USE_EGL" = "yes"; then
-        AC_DEFINE([HAVE_VA_EGL], [1], [Defined to 1 if VA/EGL API is built])
-    fi
-fi
-AM_CONDITIONAL(USE_EGL, test "$USE_EGL" = "yes")
-
 # Check for Wayland
 WAYLAND_API_VERSION=wayland_api_version
 AC_SUBST(WAYLAND_API_VERSION)
@@ -334,15 +306,12 @@ AC_OUTPUT([
     doc/Makefile
     pkgconfig/Makefile
     pkgconfig/libva-drm.pc
-    pkgconfig/libva-egl.pc
     pkgconfig/libva-glx.pc
-    pkgconfig/libva-tpi.pc
     pkgconfig/libva-wayland.pc
     pkgconfig/libva-x11.pc
     pkgconfig/libva.pc
     va/Makefile
     va/drm/Makefile
-    va/egl/Makefile
     va/glx/Makefile
     va/va_version.h
     va/wayland/Makefile
@@ -354,7 +323,6 @@ BACKENDS=""
 AS_IF([test x$USE_DRM = xyes], [BACKENDS="$BACKENDS drm"])
 AS_IF([test x$USE_X11 = xyes], [BACKENDS="$BACKENDS x11"])
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="$BACKENDS glx"])
-AS_IF([test x$USE_EGL = xyes], [BACKENDS="$BACKENDS egl"])
 AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="$BACKENDS wayland"])
 
 echo
