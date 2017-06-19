@@ -67,7 +67,7 @@
 /* global settings */
 
 /* LIBVA_TRACE */
-int trace_flag = 0;
+int va_trace_flag = 0;
 
 #define MAX_TRACE_CTX_NUM   64
 #define TRACE_CTX_ID_MASK      (MAX_TRACE_CTX_NUM - 1)
@@ -745,7 +745,7 @@ void va_TraceInit(VADisplay dpy)
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
         if(trace_ctx->plog_file) {
             trace_ctx->plog_file_list[0] = trace_ctx->plog_file;
-            trace_flag = VA_TRACE_FLAG_LOG;
+            va_trace_flag = VA_TRACE_FLAG_LOG;
 
             va_infoMessage("LIBVA_TRACE is on, save log into %s\n",
                 trace_ctx->plog_file->fn_log);
@@ -755,8 +755,8 @@ void va_TraceInit(VADisplay dpy)
     }
 
     /* may re-get the global settings for multiple context */
-    if ((trace_flag & VA_TRACE_FLAG_LOG) && (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)) {
-        trace_flag |= VA_TRACE_FLAG_BUFDATA;
+    if ((va_trace_flag & VA_TRACE_FLAG_LOG) && (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)) {
+        va_trace_flag |= VA_TRACE_FLAG_BUFDATA;
 
         va_infoMessage(dpy, "LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
     }
@@ -764,7 +764,7 @@ void va_TraceInit(VADisplay dpy)
     /* per-context setting */
     if (va_parseConfig("LIBVA_TRACE_CODEDBUF", &env_value[0]) == 0) {
         pva_trace->fn_codedbuf_env = strdup(env_value);
-        trace_flag |= VA_TRACE_FLAG_CODEDBUF;
+        va_trace_flag |= VA_TRACE_FLAG_CODEDBUF;
     }
 
     if (va_parseConfig("LIBVA_TRACE_SURFACE", &env_value[0]) == 0) {
@@ -777,11 +777,11 @@ void va_TraceInit(VADisplay dpy)
          * if no dec/enc in file name, set both
          */
         if (strstr(env_value, "dec"))
-            trace_flag |= VA_TRACE_FLAG_SURFACE_DECODE;
+            va_trace_flag |= VA_TRACE_FLAG_SURFACE_DECODE;
         if (strstr(env_value, "enc"))
-            trace_flag |= VA_TRACE_FLAG_SURFACE_ENCODE;
+            va_trace_flag |= VA_TRACE_FLAG_SURFACE_ENCODE;
         if (strstr(env_value, "jpeg") || strstr(env_value, "jpg"))
-            trace_flag |= VA_TRACE_FLAG_SURFACE_JPEG;
+            va_trace_flag |= VA_TRACE_FLAG_SURFACE_JPEG;
 
         if (va_parseConfig("LIBVA_TRACE_SURFACE_GEOMETRY", &env_value[0]) == 0) {
             char *p = env_value, *q;
@@ -811,7 +811,7 @@ void va_TraceInit(VADisplay dpy)
     ((VADisplayContextP)dpy)->vatrace = (void *)pva_trace;
     pva_trace->dpy = dpy;
 
-    if(!trace_flag)
+    if(!va_trace_flag)
         va_TraceEnd(dpy);
 }
 
@@ -889,7 +889,7 @@ static void va_TraceVPrint(struct trace_context *trace_ctx, const char *msg, va_
 {
     FILE *fp = NULL;
 
-    if (!(trace_flag & VA_TRACE_FLAG_LOG)
+    if (!(va_trace_flag & VA_TRACE_FLAG_LOG)
         || !trace_ctx->plog_file)
         return;
 
@@ -1326,7 +1326,7 @@ void va_TraceCreateContext(
     trace_ctx->trace_profile = pva_trace->config_info[i].trace_profile;
     trace_ctx->trace_entrypoint = pva_trace->config_info[i].trace_entrypoint;
 
-    if(trace_flag & VA_TRACE_FLAG_LOG) {
+    if(va_trace_flag & VA_TRACE_FLAG_LOG) {
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
         if(!trace_ctx->plog_file) {
             va_errorMessage(dpy, "Can't get trace log file for ctx 0x%08x\n",
@@ -1343,7 +1343,7 @@ void va_TraceCreateContext(
 
     trace_ctx->trace_context = *context;
     TRACE_FUNCNAME(idx);
-    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x trace_flag 0x%x\n", *context, trace_flag);
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x va_trace_flag 0x%x\n", *context, va_trace_flag);
     va_TraceMsg(trace_ctx, "\tprofile = %d entrypoint = %d\n", trace_ctx->trace_profile,
         trace_ctx->trace_entrypoint);
     va_TraceMsg(trace_ctx, "\tconfig = 0x%08x\n", config_id);
@@ -1371,21 +1371,21 @@ void va_TraceCreateContext(
     encode = (trace_ctx->trace_entrypoint == VAEntrypointEncSlice);
     decode = (trace_ctx->trace_entrypoint == VAEntrypointVLD);
     jpeg = (trace_ctx->trace_entrypoint == VAEntrypointEncPicture);
-    if ((encode && (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE)) ||
-        (decode && (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE)) ||
-        (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG))) {
+    if ((encode && (va_trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE)) ||
+        (decode && (va_trace_flag & VA_TRACE_FLAG_SURFACE_DECODE)) ||
+        (jpeg && (va_trace_flag & VA_TRACE_FLAG_SURFACE_JPEG))) {
         if(open_tracing_specil_file(pva_trace, trace_ctx, 1) < 0) {
             va_errorMessage(dpy, "Open surface fail failed for ctx 0x%08x\n", *context);
 
-            trace_flag &= ~(VA_TRACE_FLAG_SURFACE);
+            va_trace_flag &= ~(VA_TRACE_FLAG_SURFACE);
         }
     }
 
-    if (encode && (trace_flag & VA_TRACE_FLAG_CODEDBUF)) {
+    if (encode && (va_trace_flag & VA_TRACE_FLAG_CODEDBUF)) {
         if(open_tracing_specil_file(pva_trace, trace_ctx, 0) < 0) {
             va_errorMessage(dpy, "Open codedbuf fail failed for ctx 0x%08x\n", *context);
 
-            trace_flag &= ~(VA_TRACE_FLAG_CODEDBUF);
+            va_trace_flag &= ~(VA_TRACE_FLAG_CODEDBUF);
         }
     }
 
@@ -1658,7 +1658,7 @@ static void va_TraceVABuffers(
     if(trace_ctx->plog_file)
         fp = trace_ctx->plog_file->fp_log;
 
-    if ((trace_flag & VA_TRACE_FLAG_BUFDATA) && fp) {
+    if ((va_trace_flag & VA_TRACE_FLAG_BUFDATA) && fp) {
         for (i=0; i<size; i++) {
             unsigned char value =  p[i];
 
@@ -4886,12 +4886,12 @@ void va_TraceEndPicture(
     jpeg = (trace_ctx->trace_entrypoint == VAEntrypointEncPicture);
 
     /* trace encode source surface, can do it before HW completes rendering */
-    if ((encode && (trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE))||
-        (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
+    if ((encode && (va_trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE))||
+        (jpeg && (va_trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
         va_TraceSurface(dpy, context);
     
     /* trace decoded surface, do it after HW completes rendering */
-    if (decode && ((trace_flag & VA_TRACE_FLAG_SURFACE_DECODE))) {
+    if (decode && ((va_trace_flag & VA_TRACE_FLAG_SURFACE_DECODE))) {
         vaSyncSurface(dpy, trace_ctx->trace_rendertarget);
         va_TraceSurface(dpy, context);
     }
