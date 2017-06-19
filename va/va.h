@@ -324,7 +324,7 @@ typedef enum
     VAProfileMPEG4Simple		= 2,
     VAProfileMPEG4AdvancedSimple	= 3,
     VAProfileMPEG4Main			= 4,
-    VAProfileH264Baseline		= 5,
+    VAProfileH264Baseline va_deprecated_enum = 5,
     VAProfileH264Main			= 6,
     VAProfileH264High			= 7,
     VAProfileVC1Simple			= 8,
@@ -1992,9 +1992,10 @@ typedef struct _VAPictureParameterBufferH264
         } bits;
         unsigned int value;
     } seq_fields;
-    unsigned char num_slice_groups_minus1;
-    unsigned char slice_group_map_type;
-    unsigned short slice_group_change_rate_minus1;
+    // FMO is not supported.
+    va_deprecated unsigned char num_slice_groups_minus1;
+    va_deprecated unsigned char slice_group_map_type;
+    va_deprecated unsigned short slice_group_change_rate_minus1;
     signed char pic_init_qp_minus26;
     signed char pic_init_qs_minus26;
     signed char chroma_qp_index_offset;
@@ -2025,16 +2026,6 @@ typedef struct _VAIQMatrixBufferH264
     /** \brief 8x8 scaling list, in raster scan order. */
     unsigned char ScalingList8x8[2][64];
 } VAIQMatrixBufferH264;
-
-/**
- * H.264 Slice Group Map Buffer 
- * When VAPictureParameterBufferH264::num_slice_group_minus1 is not equal to 0,
- * A slice group map buffer should be sent for each picture if required. The buffer
- * is sent only when there is a change in the mapping values.
- * The slice group map buffer map "map units" to slice groups as specified in 
- * section 8.2.2 of the H.264 spec. The buffer will contain one byte for each macroblock 
- * in raster scan order
- */ 
 
 /** H.264 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferH264
