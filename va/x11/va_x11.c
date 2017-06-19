@@ -81,7 +81,7 @@ static VAStatus va_DRI2GetDriverName (
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
 
-    if (!isDRI2Connected(ctx, driver_name))
+    if (!va_isDRI2Connected(ctx, driver_name))
         return VA_STATUS_ERROR_UNKNOWN;
 
     return VA_STATUS_SUCCESS;
