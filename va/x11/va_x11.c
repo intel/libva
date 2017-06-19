@@ -232,7 +232,7 @@ VAStatus vaPutSurface (
 {
   VADriverContextP ctx;
 
-  if (fool_postp)
+  if (va_fool_postp)
       return VA_STATUS_SUCCESS;
 
   CHECK_DISPLAY(dpy);
