@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_android.h"
@@ -135,13 +136,11 @@ VADisplay vaGetDisplay (
         /* create new entry */
         VADriverContextP pDriverContext = 0;
         struct drm_state *drm_state = 0;
-        pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
+        pDisplayContext = va_newDisplayContext();
         pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
         drm_state       = (struct drm_state*)calloc(1, sizeof(*drm_state));
         if (pDisplayContext && pDriverContext && drm_state)
         {
-            pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
-
             pDriverContext->native_dpy       = (void *)native_dpy;
             pDriverContext->display_type     = VA_DISPLAY_ANDROID;
             pDisplayContext->pDriverContext  = pDriverContext;
