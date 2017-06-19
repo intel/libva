@@ -195,8 +195,6 @@ VADisplay vaGetDisplay (
   return dpy;
 }
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 void va_TracePutSurface (
     VADisplay dpy,
