@@ -27,6 +27,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_backend_vpp.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 
@@ -232,6 +233,17 @@ void va_infoMessage(const char *msg, ...)
     else if (len > 0)
         va_log_info(buf);
 #endif
+}
+
+VADisplayContextP va_newDisplayContext(void)
+{
+    VADisplayContextP dctx = calloc(1, sizeof(*dctx));
+    if (!dctx)
+        return NULL;
+
+    dctx->vadpy_magic = VA_DISPLAY_MAGIC;
+
+    return dctx;
 }
 
 static bool va_checkVtable(void *ptr, char *function)
