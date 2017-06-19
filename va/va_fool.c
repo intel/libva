@@ -269,6 +269,7 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
     struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
+    ssize_t ret;
 
     /* try file_name.file_count, if fail, try file_name.file_count-- */
     for (i=0; i<=1; i++) {
@@ -285,7 +286,9 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
     }
     if (fd != -1) {
         fool_ctx->segbuf_enc = realloc(fool_ctx->segbuf_enc, file_stat.st_size);
-        read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
+        ret = read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
+        if (ret < file_stat.st_size)
+            va_errorMessage("Reading file %s failed.\n", file_name);
         close(fd);
     } else
         va_errorMessage("Open file %s failed:%s\n", file_name, strerror(errno));
@@ -306,11 +309,14 @@ static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
     struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int fd = -1;
+    ssize_t ret;
 
     if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
         fstat(fd, &file_stat);
         fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
-        read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
+        ret = read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
+        if (ret < file_stat.st_size)
+            va_errorMessage("Reading file %s failed.\n", fool_ctx->fn_jpg);
         close(fd);
     } else
         va_errorMessage("Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
