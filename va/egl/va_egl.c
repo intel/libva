@@ -57,9 +57,8 @@
 #include "va.h"
 #include "va_backend_egl.h"
 #include "va_egl.h"
+#include "va_internal.h"
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 VAStatus vaGetEGLClientBufferFromSurface (
     VADisplay dpy,
