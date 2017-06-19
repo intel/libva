@@ -62,14 +62,14 @@
 
 
 /* global settings */
-int fool_codec = 0;
-int fool_postp  = 0;
+int va_fool_codec = 0;
+int va_fool_postp  = 0;
 
 #define FOOL_BUFID_MAGIC   0x12345600
 #define FOOL_BUFID_MASK    0xffffff00
 
 struct fool_context {
-    int enabled; /* fool_codec is global, and it is for concurent encode/decode */
+    int enabled; /* va_fool_codec is global, and it is for concurent encode/decode */
     char *fn_enc;/* file pattern with codedbuf content for encode */
     char *segbuf_enc; /* the segment buffer of coded buffer, load frome fn_enc */
     int file_count;
@@ -114,22 +114,22 @@ void va_FoolInit(VADisplay dpy)
         return;
     
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
-        fool_postp = 1;
+        va_fool_postp = 1;
         va_infoMessage(dpy, "LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
     
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_DECODE;
+        va_fool_codec  |= VA_FOOL_FLAG_DECODE;
         va_infoMessage(dpy, "LIBVA_FOOL_DECODE is on, dummy decode\n");
     }
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_ENCODE;
+        va_fool_codec  |= VA_FOOL_FLAG_ENCODE;
         fool_ctx->fn_enc = strdup(env_value);
         va_infoMessage(dpy, "LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_enc);
     }
     if (va_parseConfig("LIBVA_FOOL_JPEG", &env_value[0]) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_JPEG;
+        va_fool_codec  |= VA_FOOL_FLAG_JPEG;
         fool_ctx->fn_jpg = strdup(env_value);
         va_infoMessage(dpy, "LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_jpg);
@@ -177,15 +177,15 @@ int va_FoolCreateConfig(
     fool_ctx->entrypoint = entrypoint;
     
     /*
-     * check fool_codec to align with current context
-     * e.g. fool_codec = decode then for encode, the
+     * check va_fool_codec to align with current context
+     * e.g. va_fool_codec = decode then for encode, the
      * vaBegin/vaRender/vaEnd also run into fool path
      * which is not desired
      */
-    if (((fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
-        ((fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
+    if (((va_fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
+        ((va_fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
         fool_ctx->enabled = 1;
-    else if ((fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
+    else if ((va_fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
         /* H264 is desired */
         if (((profile == VAProfileH264Baseline ||
               profile == VAProfileH264Main ||
