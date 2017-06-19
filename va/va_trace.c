@@ -162,6 +162,7 @@ struct va_trace {
 
     pthread_mutex_t resource_mutex;
     pthread_mutex_t context_mutex;
+    VADisplay dpy;
 };
 
 #define LOCK_RESOURCE(pva_trace)                                    \
@@ -392,7 +393,7 @@ static void add_trace_buf_info(
     }
 
     if(i >= MAX_TRACE_BUF_INFO_HASH_LEVEL)
-        va_errorMessage("Add buf info failed\n");
+        va_errorMessage(pva_trace->dpy, "Add buf info failed\n");
 
     UNLOCK_RESOURCE(pva_trace);
 }
@@ -581,7 +582,7 @@ static int open_tracing_log_file(
     int new_fn_flag = 0;
 
     if(plog_file->used && plog_file->thread_id != thd_id) {
-        va_errorMessage("Try to open a busy log file occupied by other thread\n");
+        va_errorMessage(pva_trace->dpy, "Try to open a busy log file occupied by other thread\n");
 
         return -1;
     }
@@ -757,7 +758,7 @@ void va_TraceInit(VADisplay dpy)
     if ((trace_flag & VA_TRACE_FLAG_LOG) && (va_parseConfig("LIBVA_TRACE_BUFDATA", NULL) == 0)) {
         trace_flag |= VA_TRACE_FLAG_BUFDATA;
 
-        va_infoMessage("LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
+        va_infoMessage(dpy, "LIBVA_TRACE_BUFDATA is on, dump buffer into log file\n");
     }
 
     /* per-context setting */
@@ -793,7 +794,7 @@ void va_TraceInit(VADisplay dpy)
             p = q+1; /* skip "+" */
             trace_ctx->trace_surface_yoff = strtod(p, &q);
 
-            va_infoMessage("LIBVA_TRACE_SURFACE_GEOMETRY is on, only dump surface %dx%d+%d+%d content\n",
+            va_infoMessage(dpy, "LIBVA_TRACE_SURFACE_GEOMETRY is on, only dump surface %dx%d+%d+%d content\n",
                            trace_ctx->trace_surface_width,
                            trace_ctx->trace_surface_height,
                            trace_ctx->trace_surface_xoff,
@@ -808,6 +809,7 @@ void va_TraceInit(VADisplay dpy)
     pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM] = trace_ctx;
 
     ((VADisplayContextP)dpy)->vatrace = (void *)pva_trace;
+    pva_trace->dpy = dpy;
 
     if(!trace_flag)
         va_TraceEnd(dpy);
@@ -1291,7 +1293,7 @@ void va_TraceCreateContext(
     if(!context
         || *context == VA_INVALID_ID
         || !pva_trace) {
-        va_errorMessage("Invalid context id 0x%08x\n",
+        va_errorMessage(dpy, "Invalid context id 0x%08x\n",
                 context == NULL ? 0 : (int)*context);
         return;
     }
@@ -1300,7 +1302,7 @@ void va_TraceCreateContext(
 
     tra_ctx_id = get_free_ctx_idx(pva_trace, *context);
     if(tra_ctx_id >= MAX_TRACE_CTX_NUM) {
-        va_errorMessage("Can't get trace context for ctx 0x%08x\n",
+        va_errorMessage(dpy, "Can't get trace context for ctx 0x%08x\n",
                 *context);
         
         goto FAIL;
@@ -1308,7 +1310,7 @@ void va_TraceCreateContext(
 
     trace_ctx = calloc(sizeof(struct trace_context), 1);
     if(trace_ctx == NULL) {
-        va_errorMessage("Allocate trace context failed for ctx 0x%08x\n",
+        va_errorMessage(dpy, "Allocate trace context failed for ctx 0x%08x\n",
                 *context);
         
         goto FAIL;
@@ -1316,7 +1318,7 @@ void va_TraceCreateContext(
 
     i = get_valid_config_idx(pva_trace, config_id);
     if(i >= MAX_TRACE_CTX_NUM) {
-        va_errorMessage("Can't get trace config id for ctx 0x%08x cfg %x\n",
+        va_errorMessage(dpy, "Can't get trace config id for ctx 0x%08x cfg %x\n",
                 *context, config_id);
 
         goto FAIL;
@@ -1327,13 +1329,13 @@ void va_TraceCreateContext(
     if(trace_flag & VA_TRACE_FLAG_LOG) {
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
         if(!trace_ctx->plog_file) {
-            va_errorMessage("Can't get trace log file for ctx 0x%08x\n",
+            va_errorMessage(dpy, "Can't get trace log file for ctx 0x%08x\n",
                     *context);
 
             goto FAIL;
         }
         else
-            va_infoMessage("Save context 0x%08x into log file %s\n", *context,
+            va_infoMessage(dpy, "Save context 0x%08x into log file %s\n", *context,
                 trace_ctx->plog_file->fn_log);
 
         trace_ctx->plog_file_list[0] = trace_ctx->plog_file;
@@ -1373,7 +1375,7 @@ void va_TraceCreateContext(
         (decode && (trace_flag & VA_TRACE_FLAG_SURFACE_DECODE)) ||
         (jpeg && (trace_flag & VA_TRACE_FLAG_SURFACE_JPEG))) {
         if(open_tracing_specil_file(pva_trace, trace_ctx, 1) < 0) {
-            va_errorMessage("Open surface fail failed for ctx 0x%08x\n", *context);
+            va_errorMessage(dpy, "Open surface fail failed for ctx 0x%08x\n", *context);
 
             trace_flag &= ~(VA_TRACE_FLAG_SURFACE);
         }
@@ -1381,7 +1383,7 @@ void va_TraceCreateContext(
 
     if (encode && (trace_flag & VA_TRACE_FLAG_CODEDBUF)) {
         if(open_tracing_specil_file(pva_trace, trace_ctx, 0) < 0) {
-            va_errorMessage("Open codedbuf fail failed for ctx 0x%08x\n", *context);
+            va_errorMessage(dpy, "Open codedbuf fail failed for ctx 0x%08x\n", *context);
 
             trace_flag &= ~(VA_TRACE_FLAG_CODEDBUF);
         }
