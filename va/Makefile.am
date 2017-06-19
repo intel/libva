@@ -39,7 +39,6 @@ libva_source_c = \
 libva_source_h = \
 	va.h			\
 	va_backend.h		\
-	va_backend_tpi.h	\
 	va_backend_vpp.h	\
 	va_compat.h		\
 	va_dec_hevc.h		\
@@ -47,6 +46,7 @@ libva_source_h = \
 	va_dec_vp8.h		\
 	va_dec_vp9.h		\
 	va_drmcommon.h		\
+	va_egl.h		\
 	va_enc_hevc.h		\
 	va_enc_h264.h		\
 	va_enc_jpeg.h		\
@@ -77,12 +77,6 @@ libva_la_SOURCES		= $(libva_source_c)
 libva_la_LDFLAGS		= $(libva_ldflags)
 libva_la_DEPENDENCIES		= libva.syms
 libva_la_LIBADD			= $(LIBVA_LIBS) -ldl
-
-lib_LTLIBRARIES			+= libva-tpi.la
-libva_tpi_la_SOURCES		= va_tpi.c
-libva_tpi_la_LDFLAGS		= $(LDADD) -no-undefined
-libva_tpi_la_DEPENDENCIES	= libva.la 
-libva_tpi_la_LIBADD		= libva.la -ldl
 
 if USE_DRM
 SUBDIRS				+= drm
@@ -115,16 +109,6 @@ libva_glx_la_LIBADD		= libva.la glx/libva_glx.la libva-x11.la \
 	$(GLX_LIBS) -ldl
 endif
 
-if USE_EGL
-SUBDIRS				+= egl
-lib_LTLIBRARIES			+= libva-egl.la
-libva_egl_la_SOURCES		=
-libva_egl_la_LDFLAGS		= $(LDADD)
-libva_egl_la_DEPENDENCIES	= libva.la egl/libva_egl.la 
-libva_egl_la_LIBADD		= libva.la egl/libva_egl.la \
-	$(EGL_LIBS) -ldl
-endif
-
 if USE_WAYLAND
 SUBDIRS				+= wayland
 lib_LTLIBRARIES			+= libva-wayland.la
@@ -135,7 +119,7 @@ libva_wayland_la_LIBADD		= libva.la wayland/libva_wayland.la \
 	$(WAYLAND_LIBS) $(DRM_LIBS) -ldl
 endif
 
-DIST_SUBDIRS = x11 glx egl drm wayland
+DIST_SUBDIRS = x11 glx drm wayland
 
 DISTCLEANFILES = \
 	va_version.h		\
