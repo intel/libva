@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 
@@ -102,12 +103,6 @@ struct fool_context {
     if ((fool_ctx == NULL) || (fool_ctx->enabled == 0))  \
         return 0; /* no fool for the context */          \
 
-/* Prototype declarations (functions defined in va.c) */
-
-void va_errorMessage(const char *msg, ...);
-void va_infoMessage(const char *msg, ...);
-
-int  va_parseConfig(char *env, char *env_value);
 
 void va_FoolInit(VADisplay dpy)
 {
