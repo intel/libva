@@ -166,8 +166,8 @@ VADisplay vaGetDisplay (
 
 
 extern "C"  {
-    extern int fool_postp; /* do nothing for vaPutSurface if set */
-    extern int trace_flag; /* trace vaPutSurface parameters */
+    extern int va_fool_postp; /* do nothing for vaPutSurface if set */
+    extern int va_trace_flag; /* trace vaPutSurface parameters */
 
     void va_TracePutSurface (
         VADisplay dpy,
