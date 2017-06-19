@@ -21,7 +21,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 pcfiles		 = libva.pc
-pcfiles		+= libva-tpi.pc
 if USE_DRM
 pcfiles		+= libva-drm.pc
 endif
@@ -31,19 +30,14 @@ endif
 if USE_GLX
 pcfiles		+= libva-glx.pc
 endif
-if USE_EGL
-pcfiles		+= libva-egl.pc
-endif
 if USE_WAYLAND
 pcfiles		+= libva-wayland.pc
 endif
 
 all_pcfiles_in	 = libva.pc.in
-all_pcfiles_in	+= libva-tpi.pc.in
 all_pcfiles_in	+= libva-drm.pc.in
 all_pcfiles_in	+= libva-x11.pc.in
 all_pcfiles_in	+= libva-glx.pc.in
-all_pcfiles_in	+= libva-egl.pc.in
 all_pcfiles_in	+= libva-wayland.pc.in
 
 pkgconfigdir = @pkgconfigdir@
