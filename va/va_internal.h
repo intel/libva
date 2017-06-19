@@ -28,8 +28,8 @@
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
-void va_errorMessage(const char *msg, ...);
-void va_infoMessage(const char *msg, ...);
+void va_errorMessage(VADisplay dpy, const char *msg, ...);
+void va_infoMessage(VADisplay dpy, const char *msg, ...);
 
 int  va_parseConfig(char *env, char *env_value);
 

@@ -115,23 +115,23 @@ void va_FoolInit(VADisplay dpy)
     
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
         fool_postp = 1;
-        va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
+        va_infoMessage(dpy, "LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
     
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
         fool_codec  |= VA_FOOL_FLAG_DECODE;
-        va_infoMessage("LIBVA_FOOL_DECODE is on, dummy decode\n");
+        va_infoMessage(dpy, "LIBVA_FOOL_DECODE is on, dummy decode\n");
     }
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
         fool_codec  |= VA_FOOL_FLAG_ENCODE;
         fool_ctx->fn_enc = strdup(env_value);
-        va_infoMessage("LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
+        va_infoMessage(dpy, "LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_enc);
     }
     if (va_parseConfig("LIBVA_FOOL_JPEG", &env_value[0]) == 0) {
         fool_codec  |= VA_FOOL_FLAG_JPEG;
         fool_ctx->fn_jpg = strdup(env_value);
-        va_infoMessage("LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
+        va_infoMessage(dpy, "LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_jpg);
     }
     
@@ -200,9 +200,9 @@ int va_FoolCreateConfig(
             fool_ctx->enabled = 1;
     }
     if (fool_ctx->enabled)
-        va_infoMessage("FOOL is enabled for this context\n");
+        va_infoMessage(dpy, "FOOL is enabled for this context\n");
     else
-        va_infoMessage("FOOL is not enabled for this context\n");
+        va_infoMessage(dpy, "FOOL is not enabled for this context\n");
 
     
     return 0; /* continue */
