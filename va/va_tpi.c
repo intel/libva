@@ -27,6 +27,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_backend_tpi.h"
+#include "va_internal.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -35,9 +36,6 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
-
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 
 /*
