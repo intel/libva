@@ -84,11 +84,11 @@ struct dri_state
 #endif
 };
 
-Bool isDRI2Connected(VADriverContextP ctx, char **driver_name);
-void free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable);
-void free_drawable_hashtable(VADriverContextP ctx);
-struct dri_drawable *dri_get_drawable(VADriverContextP ctx, XID drawable);
-void dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
-union dri_buffer *dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
+Bool va_isDRI2Connected(VADriverContextP ctx, char **driver_name);
+void va_dri_free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable);
+void va_dri_free_drawable_hashtable(VADriverContextP ctx);
+struct dri_drawable *va_dri_get_drawable(VADriverContextP ctx, XID drawable);
+void va_dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
+union dri_buffer *va_dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
 
 #endif /* _VA_DRICOMMON_H_ */
