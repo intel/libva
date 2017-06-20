@@ -116,8 +116,13 @@ typedef enum {
      * sei_message() elements if necessary.
      *
      * Note: packed \c nal_unit_type shall be equal to 6.
+     *
+     * @deprecated
+     * This is a deprecated packed header flag, All applications can use
+     * \c VA_ENC_PACKED_HEADER_RAW_DATA to pass the corresponding packed
+     * SEI header data buffer to the driver
      */
-    VAEncPackedHeaderH264_SEI   = (VAEncPackedHeaderMiscMask | 1),
+    VAEncPackedHeaderH264_SEI va_deprecated_enum  = (VAEncPackedHeaderMiscMask | 1),
 } VAEncPackedHeaderTypeH264;
 
 /**

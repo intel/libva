@@ -575,7 +575,14 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_PACKED_HEADER_PICTURE    0x00000002
 /** \brief Driver supports packed slice headers. e.g. \c slice_header() for H.264. */
 #define VA_ENC_PACKED_HEADER_SLICE      0x00000004
-/** \brief Driver supports misc packed headers. e.g. SEI for H.264. */
+/**
+ * \brief Driver supports misc packed headers. e.g. SEI for H.264.
+ *
+ * @deprecated
+ * This is a deprecated packed header flag, All applications can use
+ * \c VA_ENC_PACKED_HEADER_RAW_DATA to pass the corresponding packed
+ * header data buffer to the driver
+ */
 #define VA_ENC_PACKED_HEADER_MISC       0x00000008
 /** \brief Driver supports raw packed header, see VAEncPackedHeaderRawData */
 #define VA_ENC_PACKED_HEADER_RAW_DATA   0x00000010
@@ -1196,8 +1203,14 @@ typedef enum {
      * in the packed header parameter structure.
      */
     VAEncPackedHeaderRawData    = 4,
-    /** \brief Misc packed header. See codec-specific definitions. */
-    VAEncPackedHeaderMiscMask   = 0x80000000,
+    /**
+     * \brief Misc packed header. See codec-specific definitions.
+     *
+     * @deprecated
+     * This is a deprecated packed header type. All applications can use
+     * \c VAEncPackedHeaderRawData to insert a codec-specific packed header
+     */
+    VAEncPackedHeaderMiscMask va_deprecated_enum  = 0x80000000,
 } VAEncPackedHeaderType;
 
 /** \brief Packed header parameter. */
