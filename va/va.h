@@ -1814,7 +1814,7 @@ typedef struct _VAPictureParameterBufferVC1
         unsigned int value;
     } range_mapping_fields;
 
-    unsigned char b_picture_fraction;	/* PICTURE_LAYER::BFRACTION */
+    unsigned char b_picture_fraction;	/* Index for PICTURE_LAYER::BFRACTION value in Table 40 (7.1.1.14) */
     unsigned char cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
     unsigned char mb_mode_table;	/* PICTURE_LAYER::MBMODETAB */
     unsigned char range_reduction_frame;/* PICTURE_LAYER::RANGEREDFRM */
