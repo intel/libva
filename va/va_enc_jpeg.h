@@ -53,9 +53,9 @@ typedef struct  _VAEncPictureParameterBufferJPEG
     /** \brief holds reconstructed picture. */
     VASurfaceID reconstructed_picture;
     /** \brief picture width. */
-    unsigned short picture_width;
+    uint16_t picture_width;
     /** \brief picture height. */
-    unsigned short picture_height;
+    uint16_t picture_height;
     /** \brief holds coded data. */
     VABufferID coded_buf;
 
@@ -69,43 +69,43 @@ typedef struct  _VAEncPictureParameterBufferJPEG
              * \brief profile: 
              * 0 - Baseline, 1 - Extended, 2 - Lossless, 3 - Hierarchical
              */ 
-            unsigned int profile     : 2;
+            uint32_t profile     : 2;
             /** 
              * \brief progressive: 
              * 0 - sequential, 1 - extended, 2 - progressive
              */ 
-            unsigned int progressive : 1;
+            uint32_t progressive : 1;
             /** 
              * \brief huffman: 
              * 0 - arithmetic, 1 - huffman
              */ 
-            unsigned int huffman     : 1;
+            uint32_t huffman     : 1;
             /** 
              * \brief interleaved: 
              * 0 - non interleaved, 1 - interleaved
              */ 
-            unsigned int interleaved : 1;
+            uint32_t interleaved : 1;
             /** 
              * \brief differential: 
              * 0 - non differential, 1 - differential
              */ 
-            unsigned int differential   : 1;
+            uint32_t differential   : 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } pic_flags;
 
     /** \brief number of bits per sample. */
-    unsigned char    sample_bit_depth;
+    uint8_t    sample_bit_depth;
     /** \brief total number of scans in image. */
-    unsigned char    num_scan;
+    uint8_t    num_scan;
     /** \brief number of image components in frame. */
-    unsigned short   num_components;
+    uint16_t   num_components;
     /** \brief Component identifier (Ci). */
-    unsigned char    component_id[4];
+    uint8_t    component_id[4];
     /** \brief Quantization table selector (Tqi). */
-    unsigned char    quantiser_table_selector[4];
+    uint8_t    quantiser_table_selector[4];
     /** \brief number from 1 to 100 that specifies quality of image. */
-    unsigned char    quality;
+    uint8_t    quality;
 
 } VAEncPictureParameterBufferJPEG;
 
@@ -118,16 +118,16 @@ typedef struct  _VAEncPictureParameterBufferJPEG
  */
 typedef struct _VAEncSliceParameterBufferJPEG {
     /** \brief Restart interval definition (Ri). */
-    unsigned short    restart_interval;
+    uint16_t    restart_interval;
     /** \brief number of image components in a scan. */
-    unsigned short    num_components;
+    uint16_t    num_components;
     struct {
         /** \brief Scan component selector (Csj). */
-        unsigned char   component_selector;
+        uint8_t   component_selector;
         /** \brief DC entropy coding table selector (Tdj). */
-        unsigned char   dc_table_selector;
+        uint8_t   dc_table_selector;
         /** \brief AC entropy coding table selector (Taj). */
-        unsigned char   ac_table_selector;
+        uint8_t   ac_table_selector;
     } components[4];
 } VAEncSliceParameterBufferJPEG;
 
@@ -138,13 +138,13 @@ typedef struct _VAEncSliceParameterBufferJPEG {
 typedef struct _VAQMatrixBufferJPEG
 {
     /** \brief load luma quantization table. */
-    int load_lum_quantiser_matrix;
+    int32_t load_lum_quantiser_matrix;
     /** \brief load chroma quantization table. */
-    int load_chroma_quantiser_matrix;
+    int32_t load_chroma_quantiser_matrix;
     /** \brief luma quantization table. */
-    unsigned char lum_quantiser_matrix[64];
+    uint8_t lum_quantiser_matrix[64];
     /** \brief chroma quantization table. */
-    unsigned char chroma_quantiser_matrix[64];
+    uint8_t chroma_quantiser_matrix[64];
 } VAQMatrixBufferJPEG;
 
 /**@}*/
