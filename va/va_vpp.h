@@ -339,21 +339,21 @@ typedef enum _VAProcColorStandardType {
 /** \brief Video processing pipeline capabilities. */
 typedef struct _VAProcPipelineCaps {
     /** \brief Pipeline flags. See VAProcPipelineParameterBuffer::pipeline_flags. */
-    unsigned int        pipeline_flags;
+    uint32_t        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
-    unsigned int        filter_flags;
+    uint32_t        filter_flags;
     /** \brief Number of forward reference frames that are needed. */
-    unsigned int        num_forward_references;
+    uint32_t        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
-    unsigned int        num_backward_references;
+    uint32_t        num_backward_references;
     /** \brief List of color standards supported on input. */
     VAProcColorStandardType *input_color_standards;
     /** \brief Number of elements in \ref input_color_standards array. */
-    unsigned int        num_input_color_standards;
+    uint32_t        num_input_color_standards;
     /** \brief List of color standards supported on output. */
     VAProcColorStandardType *output_color_standards;
     /** \brief Number of elements in \ref output_color_standards array. */
-    unsigned int        num_output_color_standards;
+    uint32_t        num_output_color_standards;
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -448,7 +448,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * appropriate background color. Next, the driver will blend this
      * temporary surface into the target surface.
      */
-    unsigned int        output_background_color;
+    uint32_t        output_background_color;
     /**
      * \brief Requested output color primaries.
      */
@@ -460,7 +460,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * or not, notify the driver that it can opt for power optimizations,
      * should this be needed.
      */
-    unsigned int        pipeline_flags;
+    uint32_t        pipeline_flags;
     /**
      * \brief Extra filter flags. See vaPutSurface() flags.
      *
@@ -477,7 +477,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
      */
-    unsigned int        filter_flags;
+    uint32_t        filter_flags;
     /**
      * \brief Array of filters to apply to the surface.
      *
@@ -492,15 +492,15 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     VABufferID         *filters;
     /** \brief Actual number of filters. */
-    unsigned int        num_filters;
+    uint32_t        num_filters;
     /** \brief Array of forward reference frames. */
     VASurfaceID        *forward_references;
     /** \brief Number of forward reference frames that were supplied. */
-    unsigned int        num_forward_references;
+    uint32_t        num_forward_references;
     /** \brief Array of backward reference frames. */
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
-    unsigned int        num_backward_references;
+    uint32_t        num_backward_references;
 } VAProcPipelineParameterBuffer;
 
 /**
@@ -554,7 +554,7 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
     /** \brief Deinterlacing flags. */
-    unsigned int     		flags;
+    uint32_t     		flags;
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**

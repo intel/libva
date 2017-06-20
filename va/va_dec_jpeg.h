@@ -54,22 +54,22 @@ extern "C" {
  */
 typedef struct _VAPictureParameterBufferJPEGBaseline {
     /** \brief Picture width in pixels. */
-    unsigned short      picture_width;
+    uint16_t      picture_width;
     /** \brief Picture height in pixels. */
-    unsigned short      picture_height;
+    uint16_t      picture_height;
 
     struct {
         /** \brief Component identifier (Ci). */
-        unsigned char   component_id;
+        uint8_t   component_id;
         /** \brief Horizontal sampling factor (Hi). */
-        unsigned char   h_sampling_factor;
+        uint8_t   h_sampling_factor;
         /** \brief Vertical sampling factor (Vi). */
-        unsigned char   v_sampling_factor;
+        uint8_t   v_sampling_factor;
         /* \brief Quantization table selector (Tqi). */
-        unsigned char   quantiser_table_selector;
+        uint8_t   quantiser_table_selector;
     }                   components[255];
     /** \brief Number of components in frame (Nf). */
-    unsigned char       num_components;
+    uint8_t       num_components;
 } VAPictureParameterBufferJPEGBaseline;
 
 /**
@@ -88,9 +88,9 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
  */
 typedef struct _VAIQMatrixBufferJPEGBaseline {
     /** \brief Specifies which #quantiser_table is valid. */
-    unsigned char       load_quantiser_table[4];
+    uint8_t       load_quantiser_table[4];
     /** \brief Quanziation tables indexed by table identifier (Tqi). */
-    unsigned char       quantiser_table[4][64];
+    uint8_t       quantiser_table[4][64];
 } VAIQMatrixBufferJPEGBaseline;
 
 /**
@@ -104,33 +104,33 @@ typedef struct _VASliceParameterBufferJPEGBaseline {
     /** @name Codec-independent Slice Parameter Buffer base. */
     /**@{*/
     /** \brief Number of bytes in the slice data buffer for this slice. */
-    unsigned int        slice_data_size;
+    uint32_t        slice_data_size;
     /** \brief The offset to the first byte of the first MCU. */
-    unsigned int        slice_data_offset;
+    uint32_t        slice_data_offset;
     /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_xxx. */
-    unsigned int        slice_data_flag;
+    uint32_t        slice_data_flag;
     /**@}*/
 
     /** \brief Scan horizontal position. */
-    unsigned int        slice_horizontal_position;
+    uint32_t        slice_horizontal_position;
     /** \brief Scan vertical position. */
-    unsigned int        slice_vertical_position;
+    uint32_t        slice_vertical_position;
 
     struct {
         /** \brief Scan component selector (Csj). */
-        unsigned char   component_selector;
+        uint8_t   component_selector;
         /** \brief DC entropy coding table selector (Tdj). */
-        unsigned char   dc_table_selector;
+        uint8_t   dc_table_selector;
         /** \brief AC entropy coding table selector (Taj). */
-        unsigned char   ac_table_selector;
+        uint8_t   ac_table_selector;
     }                   components[4];
     /** \brief Number of components in scan (Ns). */
-    unsigned char       num_components;
+    uint8_t       num_components;
 
     /** \brief Restart interval definition (Ri). */
-    unsigned short      restart_interval;
+    uint16_t      restart_interval;
     /** \brief Number of MCUs in a scan. */
-    unsigned int        num_mcus;
+    uint32_t        num_mcus;
 } VASliceParameterBufferJPEGBaseline;
 
 /**@}*/

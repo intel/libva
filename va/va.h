@@ -236,10 +236,10 @@ const char *vaErrorStr(VAStatus error_status);
 
 typedef struct _VARectangle
 {
-    short x;
-    short y;
-    unsigned short width;
-    unsigned short height;
+    int16_t x;
+    int16_t y;
+    uint16_t width;
+    uint16_t height;
 } VARectangle;
 
 /** Type of a message callback, used for both error and info log. */
@@ -519,7 +519,7 @@ typedef enum
  */
 typedef struct _VAConfigAttrib {
     VAConfigAttribType type;
-    unsigned int value; /* OR'd flags (bits) for this attribute */
+    uint32_t value; /* OR'd flags (bits) for this attribute */
 } VAConfigAttrib;
 
 /** attribute value for VAConfigAttribRTFormat */
@@ -616,26 +616,26 @@ typedef struct _VAConfigAttrib {
 typedef union _VAConfigAttribValEncJPEG {
     struct {
         /** \brief set to 1 for arithmatic coding. */
-        unsigned int arithmatic_coding_mode : 1;
+        uint32_t arithmatic_coding_mode : 1;
         /** \brief set to 1 for progressive dct. */
-        unsigned int progressive_dct_mode : 1;
+        uint32_t progressive_dct_mode : 1;
         /** \brief set to 1 for non-interleaved. */
-        unsigned int non_interleaved_mode : 1;
+        uint32_t non_interleaved_mode : 1;
         /** \brief set to 1 for differential. */
-        unsigned int differential_mode : 1;
-        unsigned int max_num_components : 3;
-        unsigned int max_num_scans : 4;
-        unsigned int max_num_huffman_tables : 3;
-        unsigned int max_num_quantization_tables : 3;
+        uint32_t differential_mode : 1;
+        uint32_t max_num_components : 3;
+        uint32_t max_num_scans : 4;
+        uint32_t max_num_huffman_tables : 3;
+        uint32_t max_num_quantization_tables : 3;
     } bits;
-    unsigned int value;
+    uint32_t value;
 } VAConfigAttribValEncJPEG;
 
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
     struct {
         /** \brief The number of ROI regions supported, 0 if ROI is not supported. */
-        unsigned int num_roi_regions 		: 8;
+        uint32_t num_roi_regions 		: 8;
         /**
          * \brief A flag indicates whether ROI priority is supported
          *
@@ -647,7 +647,7 @@ typedef union _VAConfigAttribValEncROI {
          * User should ignore \ref roi_rc_priority_support when VAConfigAttribRateControl == VA_RC_CQP
          * because ROI delta QP is always required when VAConfigAttribRateControl == VA_RC_CQP.
          */
-        unsigned int roi_rc_priority_support	: 1;
+        uint32_t roi_rc_priority_support	: 1;
         /**
          * \brief A flag indicates whether ROI delta QP is supported
          *
@@ -659,10 +659,10 @@ typedef union _VAConfigAttribValEncROI {
          * User should ignore \ref roi_rc_qp_delta_support when VAConfigAttribRateControl == VA_RC_CQP
          * because ROI delta QP is always required when VAConfigAttribRateControl == VA_RC_CQP.
          */
-        unsigned int roi_rc_qp_delta_support    : 1;
-        unsigned int reserved                   : 22;
+        uint32_t roi_rc_qp_delta_support    : 1;
+        uint32_t reserved                   : 22;
      } bits;
-     unsigned int value;
+     uint32_t value;
 } VAConfigAttribValEncROI;
 
 /** \brief Attribute value for VAConfigAttribEncRateControlExt */
@@ -675,7 +675,7 @@ typedef union _VAConfigAttribValEncRateControlExt {
          * layers that supported by the underlying driver. \ref max_num_temporal_layers_minus1
          * equal to 0 implies the underlying driver doesn't support encoding with temporal layer.
          */
-        unsigned int max_num_temporal_layers_minus1      : 8;
+        uint32_t max_num_temporal_layers_minus1      : 8;
 
         /**
          * /brief support temporal layer bit-rate control flag
@@ -700,10 +700,10 @@ typedef union _VAConfigAttribValEncRateControlExt {
          * in #VAEncMiscParameterRateControl and #VAEncMiscParameterFrameRate if
          * \ref temporal_layer_bitrate_control_flag is equal to 0 or #VAConfigAttribRateControl == #VA_RC_CQP
          */
-        unsigned int temporal_layer_bitrate_control_flag : 1;
-        unsigned int reserved                            : 23;
+        uint32_t temporal_layer_bitrate_control_flag : 1;
+        uint32_t reserved                            : 23;
     } bits;
-    unsigned int value;
+    uint32_t value;
 } VAConfigAttribValEncRateControlExt;
 
 /**
@@ -854,7 +854,7 @@ typedef struct _VAGenericValue {
     /** \brief Value holder. */
     union {
         /** \brief 32-bit signed integer. */
-        int             i;
+        int32_t             i;
         /** \brief 32-bit float. */
         float           f;
         /** \brief Generic pointer. */
@@ -912,7 +912,7 @@ typedef struct _VASurfaceAttrib {
     /** \brief Type. */
     VASurfaceAttribType type;
     /** \brief Flags. See "Surface attribute flags". */
-    unsigned int        flags;
+    uint32_t        flags;
     /** \brief Value. See "Surface attribute types" for the expected types. */
     VAGenericValue      value;
 } VASurfaceAttrib;
@@ -938,25 +938,25 @@ typedef struct _VASurfaceAttrib {
  */
 typedef struct _VASurfaceAttribExternalBuffers {
     /** \brief pixel format in fourcc. */
-    unsigned int pixel_format;
+    uint32_t pixel_format;
     /** \brief width in pixels. */
-    unsigned int width;
+    uint32_t width;
     /** \brief height in pixels. */
-    unsigned int height;
+    uint32_t height;
     /** \brief total size of the buffer in bytes. */
-    unsigned int data_size;
+    uint32_t data_size;
     /** \brief number of planes for planar layout */
-    unsigned int num_planes;
+    uint32_t num_planes;
     /** \brief pitch for each plane in bytes */
-    unsigned int pitches[4];
+    uint32_t pitches[4];
     /** \brief offset for each plane in bytes */
-    unsigned int offsets[4];
+    uint32_t offsets[4];
     /** \brief buffer handles or user pointers */
-    unsigned long *buffers;
+    uintptr_t *buffers;
     /** \brief number of elements in the "buffers" array */
-    unsigned int num_buffers;
+    uint32_t num_buffers;
     /** \brief flags. See "Surface external buffer descriptor flags". */
-    unsigned int flags;
+    uint32_t flags;
     /** \brief reserved for passing private data */
     void *private_data;
 } VASurfaceAttribExternalBuffers;
@@ -1216,11 +1216,11 @@ typedef enum {
 /** \brief Packed header parameter. */
 typedef struct _VAEncPackedHeaderParameterBuffer {
     /** Type of the packed header buffer. See #VAEncPackedHeaderType. */
-    unsigned int                type;
+    uint32_t                type;
     /** \brief Size of the #VAEncPackedHeaderDataBuffer in bits. */
-    unsigned int                bit_length;
+    uint32_t                bit_length;
     /** \brief Flag: buffer contains start code emulation prevention bytes? */
-    unsigned char               has_emulation_bytes;
+    uint8_t               has_emulation_bytes;
 } VAEncPackedHeaderParameterBuffer;
 
 /**
@@ -1243,23 +1243,23 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
 typedef struct _VAEncMiscParameterBuffer
 {
     VAEncMiscParameterType type;
-    unsigned int data[0];
+    uint32_t data[0];
 } VAEncMiscParameterBuffer;
 
 /** \brief Temporal layer Structure*/
 typedef struct _VAEncMiscParameterTemporalLayerStructure
 {
     /** \brief The number of temporal layers */
-    unsigned int number_of_layers;
+    uint32_t number_of_layers;
     /** \brief The length of the array defining frame layer membership. Should be 1-32 */
-    unsigned int periodicity;
+    uint32_t periodicity;
     /**
      * \brief The array indicating the layer id for each frame
      *
      * The layer id for the first frame in a coded sequence is always 0, so layer_id[] specifies the layer
      * ids for frames starting from the 2nd frame.
      */
-    unsigned int layer_id[32];
+    uint32_t layer_id[32];
 } VAEncMiscParameterTemporalLayerStructure;
 
 
@@ -1267,35 +1267,35 @@ typedef struct _VAEncMiscParameterTemporalLayerStructure
 typedef struct _VAEncMiscParameterRateControl
 {
     /* this is the maximum bit-rate to be constrained by the rate control implementation */
-    unsigned int bits_per_second;
+    uint32_t bits_per_second;
     /* this is the bit-rate the rate control is targeting, as a percentage of the maximum
      * bit-rate for example if target_percentage is 95 then the rate control will target
      * a bit-rate that is 95% of the maximum bit-rate
      */
-    unsigned int target_percentage;
+    uint32_t target_percentage;
     /* windows size in milliseconds. For example if this is set to 500,
      * then the rate control will guarantee the target bit-rate over a 500 ms window
      */
-    unsigned int window_size;
+    uint32_t window_size;
     /* initial QP at I frames */
-    unsigned int initial_qp;
-    unsigned int min_qp;
-    unsigned int basic_unit_size;
+    uint32_t initial_qp;
+    uint32_t min_qp;
+    uint32_t basic_unit_size;
     union
     {
         struct
         {
-            unsigned int reset : 1;
-            unsigned int disable_frame_skip : 1; /* Disable frame skip in rate control mode */
-            unsigned int disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
-            unsigned int mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
+            uint32_t reset : 1;
+            uint32_t disable_frame_skip : 1; /* Disable frame skip in rate control mode */
+            uint32_t disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
+            uint32_t mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
             /*
              * The temporal layer that the rate control parameters are specified for.
              */
-            unsigned int temporal_id : 8;
-            unsigned int reserved : 17;
+            uint32_t temporal_id : 8;
+            uint32_t reserved : 17;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } rc_flags;
 } VAEncMiscParameterRateControl;
 
@@ -1319,7 +1319,7 @@ typedef struct _VAEncMiscParameterFrameRate
      * it takes the value one instead, so the framerate is just the integer
      * in the low 2 bytes.
      */
-    unsigned int framerate;
+    uint32_t framerate;
     union
     {
         struct
@@ -1327,10 +1327,10 @@ typedef struct _VAEncMiscParameterFrameRate
             /*
              * The temporal id the framerate parameters are specified for.
              */
-            unsigned int temporal_id : 8;
-            unsigned int reserved : 24;
+            uint32_t temporal_id : 8;
+            uint32_t reserved : 24;
          } bits;
-         unsigned int value;
+         uint32_t value;
      } framerate_flags;
 } VAEncMiscParameterFrameRate;
 
@@ -1341,20 +1341,20 @@ typedef struct _VAEncMiscParameterFrameRate
  */
 typedef struct _VAEncMiscParameterMaxSliceSize
 {
-    unsigned int max_slice_size;
+    uint32_t max_slice_size;
 } VAEncMiscParameterMaxSliceSize;
 
 typedef struct _VAEncMiscParameterAIR
 {
-    unsigned int air_num_mbs;
-    unsigned int air_threshold;
-    unsigned int air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
+    uint32_t air_num_mbs;
+    uint32_t air_threshold;
+    uint32_t air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
 } VAEncMiscParameterAIR;
 
 typedef struct _VAEncMiscParameterHRD
 {
-    unsigned int initial_buffer_fullness;       /* in bits */
-    unsigned int buffer_size;                   /* in bits */
+    uint32_t initial_buffer_fullness;       /* in bits */
+    uint32_t buffer_size;                   /* in bits */
 } VAEncMiscParameterHRD;
 
 /**
@@ -1370,7 +1370,7 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     /** \brief Type. Shall be set to #VAEncMiscParameterTypeMaxFrameSize. */
     VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in bits). */
-    unsigned int                max_frame_size;
+    uint32_t                max_frame_size;
 } VAEncMiscParameterBufferMaxFrameSize;
 
 /**
@@ -1388,7 +1388,7 @@ typedef struct _VAEncMiscParameterBufferQualityLevel {
     /** \brief Encoding quality level setting. When set to 0, default quality
      * level is used.
      */
-    unsigned int                quality_level;
+    uint32_t                quality_level;
 } VAEncMiscParameterBufferQualityLevel;
 
 /**
@@ -1407,12 +1407,12 @@ typedef struct _VAEncMiscParameterSkipFrame {
       * 2: The current frame is to be skipped, do not encode it but pack/encrypt the packed header contents
       *    (all except VAEncPackedHeaderSlice) which could contain actual frame contents (e.g. pack the frame 
       *    in VAEncPackedHeaderPicture).  */
-    unsigned char               skip_frame_flag;
+    uint8_t               skip_frame_flag;
     /** \brief The number of frames skipped prior to the current frame.  Valid when skip_frame_flag = 1. */
-    unsigned char               num_skip_frames;
+    uint8_t               num_skip_frames;
     /** \brief When skip_frame_flag = 1, the size of the skipped frames in bits.   When skip_frame_flag = 2, 
       * the size of the current skipped frame that is to be packed/encrypted in bits. */
-    unsigned int                size_skip_frames;
+    uint32_t                size_skip_frames;
 } VAEncMiscParameterSkipFrame;
 
 /**
@@ -1448,18 +1448,18 @@ typedef struct _VAEncROI
          * VAConfigAttribRateControl != VA_RC_CQP. \ref roi_value specifies ROI_delta QP if \c roi_value_is_qp_delta
          * in VAEncMiscParameterBufferROI is 1, otherwise \ref roi_value specifies ROI priority.
          */
-        char            roi_value;
+        int8_t            roi_value;
 } VAEncROI;
 
 typedef struct _VAEncMiscParameterBufferROI {
     /** \brief Number of ROIs being sent.*/
-    unsigned int        num_roi;
+    uint32_t        num_roi;
 
     /** \brief Valid when VAConfigAttribRateControl != VA_RC_CQP, then the encoder's
      *  rate control will determine actual delta QPs.  Specifies the max/min allowed delta
      *  QPs. */
-    char                max_delta_qp;
-    char                min_delta_qp;
+    int8_t                max_delta_qp;
+    int8_t                min_delta_qp;
 
    /** \brief Pointer to a VAEncROI array with num_roi elements.  It is relative to frame
      *  coordinates for the frame case and to field coordinates for the field case.*/
@@ -1501,9 +1501,9 @@ typedef struct _VAEncMiscParameterBufferROI {
 /* Codec-independent Slice Parameter Buffer base */
 typedef struct _VASliceParameterBufferBase
 {
-    unsigned int slice_data_size;	/* number of bytes in the slice data buffer for this slice */
-    unsigned int slice_data_offset;	/* the offset to the first byte of slice data */
-    unsigned int slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
+    uint32_t slice_data_size;	/* number of bytes in the slice data buffer for this slice */
+    uint32_t slice_data_offset;	/* the offset to the first byte of slice data */
+    uint32_t slice_data_flag;	/* see VA_SLICE_DATA_FLAG_XXX definitions */
 } VASliceParameterBufferBase;
 
 /**********************************
@@ -1523,24 +1523,24 @@ typedef struct _VASliceParameterBufferBase
  */
 typedef struct _VAHuffmanTableBufferJPEGBaseline {
     /** \brief Specifies which #huffman_table is valid. */
-    unsigned char       load_huffman_table[2];
+    uint8_t       load_huffman_table[2];
     /** \brief Huffman tables indexed by table identifier (Th). */
     struct {
         /** @name DC table (up to 12 categories) */
         /**@{*/
         /** \brief Number of Huffman codes of length i + 1 (Li). */
-        unsigned char   num_dc_codes[16];
+        uint8_t   num_dc_codes[16];
         /** \brief Value associated with each Huffman code (Vij). */
-        unsigned char   dc_values[12];
+        uint8_t   dc_values[12];
         /**@}*/
         /** @name AC table (2 special codes + up to 16 * 10 codes) */
         /**@{*/
         /** \brief Number of Huffman codes of length i + 1 (Li). */
-        unsigned char   num_ac_codes[16];
+        uint8_t   num_ac_codes[16];
         /** \brief Value associated with each Huffman code (Vij). */
-        unsigned char   ac_values[162];
+        uint8_t   ac_values[162];
         /** \brief Padding to 4-byte boundaries. Must be set to zero. */
-        unsigned char   pad[2];
+        uint8_t   pad[2];
         /**@}*/
     }                   huffman_table[2];
 } VAHuffmanTableBufferJPEGBaseline;
@@ -1556,30 +1556,30 @@ typedef struct _VAHuffmanTableBufferJPEGBaseline {
  */
 typedef struct _VAPictureParameterBufferMPEG2
 {
-    unsigned short horizontal_size;
-    unsigned short vertical_size;
+    uint16_t horizontal_size;
+    uint16_t vertical_size;
     VASurfaceID forward_reference_picture;
     VASurfaceID backward_reference_picture;
     /* meanings of the following fields are the same as in the standard */
-    int picture_coding_type;
-    int f_code; /* pack all four fcode into this */
+    int32_t picture_coding_type;
+    int32_t f_code; /* pack all four fcode into this */
     union {
         struct {
-            unsigned int intra_dc_precision		: 2; 
-            unsigned int picture_structure		: 2; 
-            unsigned int top_field_first		: 1; 
-            unsigned int frame_pred_frame_dct		: 1; 
-            unsigned int concealment_motion_vectors	: 1;
-            unsigned int q_scale_type			: 1;
-            unsigned int intra_vlc_format		: 1;
-            unsigned int alternate_scan			: 1;
-            unsigned int repeat_first_field		: 1;
-            unsigned int progressive_frame		: 1;
-            unsigned int is_first_field			: 1; /* indicate whether the current field
+            uint32_t intra_dc_precision		: 2; 
+            uint32_t picture_structure		: 2; 
+            uint32_t top_field_first		: 1; 
+            uint32_t frame_pred_frame_dct		: 1; 
+            uint32_t concealment_motion_vectors	: 1;
+            uint32_t q_scale_type			: 1;
+            uint32_t intra_vlc_format		: 1;
+            uint32_t alternate_scan			: 1;
+            uint32_t repeat_first_field		: 1;
+            uint32_t progressive_frame		: 1;
+            uint32_t is_first_field			: 1; /* indicate whether the current field
                                                               * is the first field for field picture
                                                               */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } picture_coding_extension;
 } VAPictureParameterBufferMPEG2;
 
@@ -1587,55 +1587,55 @@ typedef struct _VAPictureParameterBufferMPEG2
 typedef struct _VAIQMatrixBufferMPEG2
 {
     /** \brief Same as the MPEG-2 bitstream syntax element. */
-    int load_intra_quantiser_matrix;
+    int32_t load_intra_quantiser_matrix;
     /** \brief Same as the MPEG-2 bitstream syntax element. */
-    int load_non_intra_quantiser_matrix;
+    int32_t load_non_intra_quantiser_matrix;
     /** \brief Same as the MPEG-2 bitstream syntax element. */
-    int load_chroma_intra_quantiser_matrix;
+    int32_t load_chroma_intra_quantiser_matrix;
     /** \brief Same as the MPEG-2 bitstream syntax element. */
-    int load_chroma_non_intra_quantiser_matrix;
+    int32_t load_chroma_non_intra_quantiser_matrix;
     /** \brief Luminance intra matrix, in zig-zag scan order. */
-    unsigned char intra_quantiser_matrix[64];
+    uint8_t intra_quantiser_matrix[64];
     /** \brief Luminance non-intra matrix, in zig-zag scan order. */
-    unsigned char non_intra_quantiser_matrix[64];
+    uint8_t non_intra_quantiser_matrix[64];
     /** \brief Chroma intra matrix, in zig-zag scan order. */
-    unsigned char chroma_intra_quantiser_matrix[64];
+    uint8_t chroma_intra_quantiser_matrix[64];
     /** \brief Chroma non-intra matrix, in zig-zag scan order. */
-    unsigned char chroma_non_intra_quantiser_matrix[64];
+    uint8_t chroma_non_intra_quantiser_matrix[64];
 } VAIQMatrixBufferMPEG2;
 
 /** MPEG-2 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferMPEG2
 {
-    unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
-    unsigned int slice_data_offset;/* the offset to the first byte of slice data */
-    unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
-    unsigned int macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
-    unsigned int slice_horizontal_position;
-    unsigned int slice_vertical_position;
-    int quantiser_scale_code;
-    int intra_slice_flag;
+    uint32_t slice_data_size;/* number of bytes in the slice data buffer for this slice */
+    uint32_t slice_data_offset;/* the offset to the first byte of slice data */
+    uint32_t slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
+    uint32_t macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
+    uint32_t slice_horizontal_position;
+    uint32_t slice_vertical_position;
+    int32_t quantiser_scale_code;
+    int32_t intra_slice_flag;
 } VASliceParameterBufferMPEG2;
 
 /** MPEG-2 Macroblock Parameter Buffer */
 typedef struct _VAMacroblockParameterBufferMPEG2
 {
-    unsigned short macroblock_address;
+    uint16_t macroblock_address;
     /* 
      * macroblock_address (in raster scan order)
      * top-left: 0
      * bottom-right: picture-height-in-mb*picture-width-in-mb - 1
      */
-    unsigned char macroblock_type;  /* see definition below */
+    uint8_t macroblock_type;  /* see definition below */
     union {
         struct {
-            unsigned int frame_motion_type		: 2; 
-            unsigned int field_motion_type		: 2; 
-            unsigned int dct_type			: 1; 
+            uint32_t frame_motion_type		: 2; 
+            uint32_t field_motion_type		: 2; 
+            uint32_t dct_type			: 1; 
         } bits;
-        unsigned int value;
+        uint32_t value;
     } macroblock_modes;
-    unsigned char motion_vertical_field_select; 
+    uint8_t motion_vertical_field_select; 
     /* 
      * motion_vertical_field_select:
      * see section 6.3.17.2 in the spec
@@ -1645,15 +1645,15 @@ typedef struct _VAMacroblockParameterBufferMPEG2
      * bit 2: second vector forward
      * bit 3: second vector backward
      */
-    short PMV[2][2][2]; /* see Table 7-7 in the spec */
-    unsigned short coded_block_pattern;
+    int16_t PMV[2][2][2]; /* see Table 7-7 in the spec */
+    uint16_t coded_block_pattern;
     /* 
      * The bitplanes for coded_block_pattern are described 
      * in Figure 6.10-12 in the spec
      */
      
     /* Number of skipped macroblocks after this macroblock */
-    unsigned short num_skipped_macroblocks;
+    uint16_t num_skipped_macroblocks;
 } VAMacroblockParameterBufferMPEG2;
 
 /* 
@@ -1681,74 +1681,74 @@ typedef struct _VAMacroblockParameterBufferMPEG2
  */
 typedef struct _VAPictureParameterBufferMPEG4
 {
-    unsigned short vop_width;
-    unsigned short vop_height;
+    uint16_t vop_width;
+    uint16_t vop_height;
     VASurfaceID forward_reference_picture;
     VASurfaceID backward_reference_picture;
     union {
         struct {
-            unsigned int short_video_header		: 1; 
-            unsigned int chroma_format			: 2; 
-            unsigned int interlaced			: 1; 
-            unsigned int obmc_disable			: 1; 
-            unsigned int sprite_enable			: 2; 
-            unsigned int sprite_warping_accuracy	: 2; 
-            unsigned int quant_type			: 1; 
-            unsigned int quarter_sample			: 1; 
-            unsigned int data_partitioned		: 1; 
-            unsigned int reversible_vlc			: 1; 
-            unsigned int resync_marker_disable		: 1; 
+            uint32_t short_video_header		: 1; 
+            uint32_t chroma_format			: 2; 
+            uint32_t interlaced			: 1; 
+            uint32_t obmc_disable			: 1; 
+            uint32_t sprite_enable			: 2; 
+            uint32_t sprite_warping_accuracy	: 2; 
+            uint32_t quant_type			: 1; 
+            uint32_t quarter_sample			: 1; 
+            uint32_t data_partitioned		: 1; 
+            uint32_t reversible_vlc			: 1; 
+            uint32_t resync_marker_disable		: 1; 
         } bits;
-        unsigned int value;
+        uint32_t value;
     } vol_fields;
-    unsigned char no_of_sprite_warping_points;
-    short sprite_trajectory_du[3];
-    short sprite_trajectory_dv[3];
-    unsigned char quant_precision;
+    uint8_t no_of_sprite_warping_points;
+    int16_t sprite_trajectory_du[3];
+    int16_t sprite_trajectory_dv[3];
+    uint8_t quant_precision;
     union {
         struct {
-            unsigned int vop_coding_type		: 2; 
-            unsigned int backward_reference_vop_coding_type	: 2; 
-            unsigned int vop_rounding_type		: 1; 
-            unsigned int intra_dc_vlc_thr		: 3; 
-            unsigned int top_field_first		: 1; 
-            unsigned int alternate_vertical_scan_flag	: 1; 
+            uint32_t vop_coding_type		: 2; 
+            uint32_t backward_reference_vop_coding_type	: 2; 
+            uint32_t vop_rounding_type		: 1; 
+            uint32_t intra_dc_vlc_thr		: 3; 
+            uint32_t top_field_first		: 1; 
+            uint32_t alternate_vertical_scan_flag	: 1; 
         } bits;
-        unsigned int value;
+        uint32_t value;
     } vop_fields;
-    unsigned char vop_fcode_forward;
-    unsigned char vop_fcode_backward;
-    unsigned short vop_time_increment_resolution;
+    uint8_t vop_fcode_forward;
+    uint8_t vop_fcode_backward;
+    uint16_t vop_time_increment_resolution;
     /* short header related */
-    unsigned char num_gobs_in_vop;
-    unsigned char num_macroblocks_in_gob;
+    uint8_t num_gobs_in_vop;
+    uint8_t num_macroblocks_in_gob;
     /* for direct mode prediction */
-    short TRB;
-    short TRD;
+    int16_t TRB;
+    int16_t TRD;
 } VAPictureParameterBufferMPEG4;
 
 /** MPEG-4 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferMPEG4
 {
     /** Same as the MPEG-4:2 bitstream syntax element. */
-    int load_intra_quant_mat;
+    int32_t load_intra_quant_mat;
     /** Same as the MPEG-4:2 bitstream syntax element. */
-    int load_non_intra_quant_mat;
+    int32_t load_non_intra_quant_mat;
     /** The matrix for intra blocks, in zig-zag scan order. */
-    unsigned char intra_quant_mat[64];
+    uint8_t intra_quant_mat[64];
     /** The matrix for non-intra blocks, in zig-zag scan order. */
-    unsigned char non_intra_quant_mat[64];
+    uint8_t non_intra_quant_mat[64];
 } VAIQMatrixBufferMPEG4;
 
 /** MPEG-4 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferMPEG4
 {
-    unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
-    unsigned int slice_data_offset;/* the offset to the first byte of slice data */
-    unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
-    unsigned int macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
-    unsigned int macroblock_number;
-    int quant_scale;
+    uint32_t slice_data_size;/* number of bytes in the slice data buffer for this slice */
+    uint32_t slice_data_offset;/* the offset to the first byte of slice data */
+    uint32_t slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
+    uint32_t macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
+    uint32_t macroblock_number;
+    int32_t quant_scale;
 } VASliceParameterBufferMPEG4;
 
 /**
@@ -1789,137 +1789,138 @@ typedef struct _VAPictureParameterBufferVC1
     /* sequence layer for AP or meta data for SP and MP */
     union {
         struct {
-            unsigned int pulldown	: 1; /* SEQUENCE_LAYER::PULLDOWN */
-            unsigned int interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
-            unsigned int tfcntrflag	: 1; /* SEQUENCE_LAYER::TFCNTRFLAG */
-            unsigned int finterpflag	: 1; /* SEQUENCE_LAYER::FINTERPFLAG */
-            unsigned int psf		: 1; /* SEQUENCE_LAYER::PSF */
-            unsigned int multires	: 1; /* METADATA::MULTIRES */
-            unsigned int overlap	: 1; /* METADATA::OVERLAP */
-            unsigned int syncmarker	: 1; /* METADATA::SYNCMARKER */
-            unsigned int rangered	: 1; /* METADATA::RANGERED */
-            unsigned int max_b_frames	: 3; /* METADATA::MAXBFRAMES */
-            unsigned int profile	: 2; /* SEQUENCE_LAYER::PROFILE or The MSB of METADATA::PROFILE */
+            uint32_t pulldown	: 1; /* SEQUENCE_LAYER::PULLDOWN */
+            uint32_t interlace	: 1; /* SEQUENCE_LAYER::INTERLACE */
+            uint32_t tfcntrflag	: 1; /* SEQUENCE_LAYER::TFCNTRFLAG */
+            uint32_t finterpflag	: 1; /* SEQUENCE_LAYER::FINTERPFLAG */
+            uint32_t psf		: 1; /* SEQUENCE_LAYER::PSF */
+            uint32_t multires	: 1; /* METADATA::MULTIRES */
+            uint32_t overlap	: 1; /* METADATA::OVERLAP */
+            uint32_t syncmarker	: 1; /* METADATA::SYNCMARKER */
+            uint32_t rangered	: 1; /* METADATA::RANGERED */
+            uint32_t max_b_frames	: 3; /* METADATA::MAXBFRAMES */
+            uint32_t profile	: 2; /* SEQUENCE_LAYER::PROFILE or The MSB of METADATA::PROFILE */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } sequence_fields;
 
-    unsigned short coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
-    unsigned short coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
+    uint16_t coded_width;		/* ENTRY_POINT_LAYER::CODED_WIDTH */
+    uint16_t coded_height;	/* ENTRY_POINT_LAYER::CODED_HEIGHT */
     union {
 	struct {
-            unsigned int broken_link	: 1; /* ENTRY_POINT_LAYER::BROKEN_LINK */
-            unsigned int closed_entry	: 1; /* ENTRY_POINT_LAYER::CLOSED_ENTRY */
-            unsigned int panscan_flag	: 1; /* ENTRY_POINT_LAYER::PANSCAN_FLAG */
-            unsigned int loopfilter	: 1; /* ENTRY_POINT_LAYER::LOOPFILTER */
+            uint32_t broken_link	: 1; /* ENTRY_POINT_LAYER::BROKEN_LINK */
+            uint32_t closed_entry	: 1; /* ENTRY_POINT_LAYER::CLOSED_ENTRY */
+            uint32_t panscan_flag	: 1; /* ENTRY_POINT_LAYER::PANSCAN_FLAG */
+            uint32_t loopfilter	: 1; /* ENTRY_POINT_LAYER::LOOPFILTER */
 	} bits;
-	unsigned int value;
+	uint32_t value;
     } entrypoint_fields;
-    unsigned char conditional_overlap_flag; /* ENTRY_POINT_LAYER::CONDOVER */
-    unsigned char fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
+    uint8_t conditional_overlap_flag; /* ENTRY_POINT_LAYER::CONDOVER */
+    uint8_t fast_uvmc_flag;	/* ENTRY_POINT_LAYER::FASTUVMC */
     union {
         struct {
-            unsigned int luma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
-            unsigned int luma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
-            unsigned int chroma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
-            unsigned int chroma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
+            uint32_t luma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPY_FLAG */
+            uint32_t luma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPY */
+            uint32_t chroma_flag	: 1; /* ENTRY_POINT_LAYER::RANGE_MAPUV_FLAG */
+            uint32_t chroma		: 3; /* ENTRY_POINT_LAYER::RANGE_MAPUV */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } range_mapping_fields;
 
-    unsigned char b_picture_fraction;	/* Index for PICTURE_LAYER::BFRACTION value in Table 40 (7.1.1.14) */
-    unsigned char cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
-    unsigned char mb_mode_table;	/* PICTURE_LAYER::MBMODETAB */
-    unsigned char range_reduction_frame;/* PICTURE_LAYER::RANGEREDFRM */
-    unsigned char rounding_control;	/* PICTURE_LAYER::RNDCTRL */
-    unsigned char post_processing;	/* PICTURE_LAYER::POSTPROC */
-    unsigned char picture_resolution_index;	/* PICTURE_LAYER::RESPIC */
-    unsigned char luma_scale;		/* PICTURE_LAYER::LUMSCALE */
-    unsigned char luma_shift;		/* PICTURE_LAYER::LUMSHIFT */
+    uint8_t b_picture_fraction;	/* Index for PICTURE_LAYER::BFRACTION value in Table 40 (7.1.1.14) */
+    uint8_t cbp_table;		/* PICTURE_LAYER::CBPTAB/ICBPTAB */
+    uint8_t mb_mode_table;	/* PICTURE_LAYER::MBMODETAB */
+    uint8_t range_reduction_frame;/* PICTURE_LAYER::RANGEREDFRM */
+    uint8_t rounding_control;	/* PICTURE_LAYER::RNDCTRL */
+    uint8_t post_processing;	/* PICTURE_LAYER::POSTPROC */
+    uint8_t picture_resolution_index;	/* PICTURE_LAYER::RESPIC */
+    uint8_t luma_scale;		/* PICTURE_LAYER::LUMSCALE */
+    uint8_t luma_shift;		/* PICTURE_LAYER::LUMSHIFT */
+
     union {
         struct {
-            unsigned int picture_type		: 3; /* PICTURE_LAYER::PTYPE */
-            unsigned int frame_coding_mode	: 3; /* PICTURE_LAYER::FCM */
-            unsigned int top_field_first	: 1; /* PICTURE_LAYER::TFF */
-            unsigned int is_first_field		: 1; /* set to 1 if it is the first field */
-            unsigned int intensity_compensation	: 1; /* PICTURE_LAYER::INTCOMP */
+            uint32_t picture_type		: 3; /* PICTURE_LAYER::PTYPE */
+            uint32_t frame_coding_mode	: 3; /* PICTURE_LAYER::FCM */
+            uint32_t top_field_first	: 1; /* PICTURE_LAYER::TFF */
+            uint32_t is_first_field		: 1; /* set to 1 if it is the first field */
+            uint32_t intensity_compensation	: 1; /* PICTURE_LAYER::INTCOMP */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } picture_fields;
     union {
         struct {
-            unsigned int mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
-            unsigned int direct_mb	: 1; 	/* PICTURE::DIRECTMB */
-            unsigned int skip_mb	: 1; 	/* PICTURE::SKIPMB */
-            unsigned int field_tx	: 1; 	/* PICTURE::FIELDTX */
-            unsigned int forward_mb	: 1;	/* PICTURE::FORWARDMB */
-            unsigned int ac_pred	: 1;	/* PICTURE::ACPRED */
-            unsigned int overflags	: 1;	/* PICTURE::OVERFLAGS */
+            uint32_t mv_type_mb	: 1; 	/* PICTURE::MVTYPEMB */
+            uint32_t direct_mb	: 1; 	/* PICTURE::DIRECTMB */
+            uint32_t skip_mb	: 1; 	/* PICTURE::SKIPMB */
+            uint32_t field_tx	: 1; 	/* PICTURE::FIELDTX */
+            uint32_t forward_mb	: 1;	/* PICTURE::FORWARDMB */
+            uint32_t ac_pred	: 1;	/* PICTURE::ACPRED */
+            uint32_t overflags	: 1;	/* PICTURE::OVERFLAGS */
         } flags;
-        unsigned int value;
+        uint32_t value;
     } raw_coding;
     union {
         struct {
-            unsigned int bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
-            unsigned int bp_direct_mb    : 1;    /* PICTURE::DIRECTMB */
-            unsigned int bp_skip_mb      : 1;    /* PICTURE::SKIPMB */  
-            unsigned int bp_field_tx     : 1;    /* PICTURE::FIELDTX */ 
-            unsigned int bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
-            unsigned int bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
-            unsigned int bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
+            uint32_t bp_mv_type_mb   : 1;    /* PICTURE::MVTYPEMB */
+            uint32_t bp_direct_mb    : 1;    /* PICTURE::DIRECTMB */
+            uint32_t bp_skip_mb      : 1;    /* PICTURE::SKIPMB */  
+            uint32_t bp_field_tx     : 1;    /* PICTURE::FIELDTX */ 
+            uint32_t bp_forward_mb   : 1;    /* PICTURE::FORWARDMB */
+            uint32_t bp_ac_pred      : 1;    /* PICTURE::ACPRED */   
+            uint32_t bp_overflags    : 1;    /* PICTURE::OVERFLAGS */
         } flags;
-        unsigned int value;
+        uint32_t value;
     } bitplane_present; /* signal what bitplane is being passed via the bitplane buffer */
     union {
         struct {
-            unsigned int reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
-            unsigned int reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
-            unsigned int num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
-            unsigned int reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
+            uint32_t reference_distance_flag : 1;/* PICTURE_LAYER::REFDIST_FLAG */
+            uint32_t reference_distance	: 5;/* PICTURE_LAYER::REFDIST */
+            uint32_t num_reference_pictures: 1;/* PICTURE_LAYER::NUMREF */
+            uint32_t reference_field_pic_indicator	: 1;/* PICTURE_LAYER::REFFIELD */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } reference_fields;
     union {
         struct {
-            unsigned int mv_mode		: 3; /* PICTURE_LAYER::MVMODE */
-            unsigned int mv_mode2		: 3; /* PICTURE_LAYER::MVMODE2 */
-            unsigned int mv_table		: 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
-            unsigned int two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
-            unsigned int four_mv_switch		: 1; /* PICTURE_LAYER::4MVSWITCH */
-            unsigned int four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
-            unsigned int extended_mv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
-            unsigned int extended_mv_range	: 2; /* PICTURE_LAYER::MVRANGE */
-            unsigned int extended_dmv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_DMV */
-            unsigned int extended_dmv_range	: 2; /* PICTURE_LAYER::DMVRANGE */
+            uint32_t mv_mode		: 3; /* PICTURE_LAYER::MVMODE */
+            uint32_t mv_mode2		: 3; /* PICTURE_LAYER::MVMODE2 */
+            uint32_t mv_table		: 3; /* PICTURE_LAYER::MVTAB/IMVTAB */
+            uint32_t two_mv_block_pattern_table: 2; /* PICTURE_LAYER::2MVBPTAB */
+            uint32_t four_mv_switch		: 1; /* PICTURE_LAYER::4MVSWITCH */
+            uint32_t four_mv_block_pattern_table : 2; /* PICTURE_LAYER::4MVBPTAB */
+            uint32_t extended_mv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_MV */
+            uint32_t extended_mv_range	: 2; /* PICTURE_LAYER::MVRANGE */
+            uint32_t extended_dmv_flag	: 1; /* ENTRY_POINT_LAYER::EXTENDED_DMV */
+            uint32_t extended_dmv_range	: 2; /* PICTURE_LAYER::DMVRANGE */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } mv_fields;
     union {
         struct {
-            unsigned int dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
-            unsigned int quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
-            unsigned int half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
-            unsigned int pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
-            unsigned int pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
-            unsigned int dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
-            unsigned int dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
-            unsigned int dq_sb_edge	: 2; 	/* VOPDQUANT::DQSBEDGE */
-            unsigned int dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
-            unsigned int dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
-            unsigned int alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
+            uint32_t dquant	: 2; 	/* ENTRY_POINT_LAYER::DQUANT */
+            uint32_t quantizer     : 2; 	/* ENTRY_POINT_LAYER::QUANTIZER */
+            uint32_t half_qp	: 1; 	/* PICTURE_LAYER::HALFQP */
+            uint32_t pic_quantizer_scale : 5;/* PICTURE_LAYER::PQUANT */
+            uint32_t pic_quantizer_type : 1;/* PICTURE_LAYER::PQUANTIZER */
+            uint32_t dq_frame	: 1; 	/* VOPDQUANT::DQUANTFRM */
+            uint32_t dq_profile	: 2; 	/* VOPDQUANT::DQPROFILE */
+            uint32_t dq_sb_edge	: 2; 	/* VOPDQUANT::DQSBEDGE */
+            uint32_t dq_db_edge 	: 2; 	/* VOPDQUANT::DQDBEDGE */
+            uint32_t dq_binary_level : 1; 	/* VOPDQUANT::DQBILEVEL */
+            uint32_t alt_pic_quantizer : 5;/* VOPDQUANT::ALTPQUANT */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } pic_quantizer_fields;
     union {
         struct {
-            unsigned int variable_sized_transform_flag	: 1;/* ENTRY_POINT_LAYER::VSTRANSFORM */
-            unsigned int mb_level_transform_type_flag	: 1;/* PICTURE_LAYER::TTMBF */
-            unsigned int frame_level_transform_type	: 2;/* PICTURE_LAYER::TTFRM */
-            unsigned int transform_ac_codingset_idx1	: 2;/* PICTURE_LAYER::TRANSACFRM */
-            unsigned int transform_ac_codingset_idx2	: 2;/* PICTURE_LAYER::TRANSACFRM2 */
-            unsigned int intra_transform_dc_table	: 1;/* PICTURE_LAYER::TRANSDCTAB */
+            uint32_t variable_sized_transform_flag	: 1;/* ENTRY_POINT_LAYER::VSTRANSFORM */
+            uint32_t mb_level_transform_type_flag	: 1;/* PICTURE_LAYER::TTMBF */
+            uint32_t frame_level_transform_type	: 2;/* PICTURE_LAYER::TTFRM */
+            uint32_t transform_ac_codingset_idx1	: 2;/* PICTURE_LAYER::TRANSACFRM */
+            uint32_t transform_ac_codingset_idx2	: 2;/* PICTURE_LAYER::TRANSACFRM2 */
+            uint32_t intra_transform_dc_table	: 1;/* PICTURE_LAYER::TRANSDCTAB */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } transform_fields;
 } VAPictureParameterBufferVC1;
 
@@ -1944,11 +1945,11 @@ Macroblock #2 in the first row.
 /* VC-1 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferVC1
 {
-    unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
-    unsigned int slice_data_offset;/* the offset to the first byte of slice data */
-    unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
-    unsigned int macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
-    unsigned int slice_vertical_position;
+    uint32_t slice_data_size;/* number of bytes in the slice data buffer for this slice */
+    uint32_t slice_data_offset;/* the offset to the first byte of slice data */
+    uint32_t slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
+    uint32_t macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
+    uint32_t slice_vertical_position;
 } VASliceParameterBufferVC1;
 
 /* VC-1 Slice Data Buffer */
@@ -1963,10 +1964,10 @@ This is simplely a buffer containing raw bit-stream bytes
 typedef struct _VAPictureH264
 {
     VASurfaceID picture_id;
-    unsigned int frame_idx;
-    unsigned int flags;
-    signed int TopFieldOrderCnt;
-    signed int BottomFieldOrderCnt;
+    uint32_t frame_idx;
+    uint32_t flags;
+    int32_t TopFieldOrderCnt;
+    int32_t BottomFieldOrderCnt;
 } VAPictureH264;
 /* flags in VAPictureH264 could be OR of the following */
 #define VA_PICTURE_H264_INVALID			0x00000001
@@ -1984,69 +1985,69 @@ typedef struct _VAPictureParameterBufferH264
 {
     VAPictureH264 CurrPic;
     VAPictureH264 ReferenceFrames[16];	/* in DPB */
-    unsigned short picture_width_in_mbs_minus1;
-    unsigned short picture_height_in_mbs_minus1;
-    unsigned char bit_depth_luma_minus8;
-    unsigned char bit_depth_chroma_minus8;
-    unsigned char num_ref_frames;
+    uint16_t picture_width_in_mbs_minus1;
+    uint16_t picture_height_in_mbs_minus1;
+    uint8_t bit_depth_luma_minus8;
+    uint8_t bit_depth_chroma_minus8;
+    uint8_t num_ref_frames;
     union {
         struct {
-            unsigned int chroma_format_idc			: 2; 
-            unsigned int residual_colour_transform_flag		: 1; /* Renamed to separate_colour_plane_flag in newer standard versions. */
-            unsigned int gaps_in_frame_num_value_allowed_flag	: 1; 
-            unsigned int frame_mbs_only_flag			: 1; 
-            unsigned int mb_adaptive_frame_field_flag		: 1; 
-            unsigned int direct_8x8_inference_flag		: 1; 
-            unsigned int MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
-            unsigned int log2_max_frame_num_minus4		: 4;
-            unsigned int pic_order_cnt_type			: 2;
-            unsigned int log2_max_pic_order_cnt_lsb_minus4	: 4;
-            unsigned int delta_pic_order_always_zero_flag	: 1;
+            uint32_t chroma_format_idc			: 2; 
+            uint32_t residual_colour_transform_flag		: 1; /* Renamed to separate_colour_plane_flag in newer standard versions. */
+            uint32_t gaps_in_frame_num_value_allowed_flag	: 1; 
+            uint32_t frame_mbs_only_flag			: 1; 
+            uint32_t mb_adaptive_frame_field_flag		: 1; 
+            uint32_t direct_8x8_inference_flag		: 1; 
+            uint32_t MinLumaBiPredSize8x8			: 1; /* see A.3.3.2 */
+            uint32_t log2_max_frame_num_minus4		: 4;
+            uint32_t pic_order_cnt_type			: 2;
+            uint32_t log2_max_pic_order_cnt_lsb_minus4	: 4;
+            uint32_t delta_pic_order_always_zero_flag	: 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } seq_fields;
     // FMO is not supported.
-    va_deprecated unsigned char num_slice_groups_minus1;
-    va_deprecated unsigned char slice_group_map_type;
-    va_deprecated unsigned short slice_group_change_rate_minus1;
-    signed char pic_init_qp_minus26;
-    signed char pic_init_qs_minus26;
-    signed char chroma_qp_index_offset;
-    signed char second_chroma_qp_index_offset;
+    va_deprecated uint8_t num_slice_groups_minus1;
+    va_deprecated uint8_t slice_group_map_type;
+    va_deprecated uint16_t slice_group_change_rate_minus1;
+    int8_t pic_init_qp_minus26;
+    int8_t pic_init_qs_minus26;
+    int8_t chroma_qp_index_offset;
+    int8_t second_chroma_qp_index_offset;
     union {
         struct {
-            unsigned int entropy_coding_mode_flag	: 1;
-            unsigned int weighted_pred_flag		: 1;
-            unsigned int weighted_bipred_idc		: 2;
-            unsigned int transform_8x8_mode_flag	: 1;
-            unsigned int field_pic_flag			: 1;
-            unsigned int constrained_intra_pred_flag	: 1;
-            unsigned int pic_order_present_flag			: 1; /* Renamed to bottom_field_pic_order_in_frame_present_flag in newer standard versions. */
-            unsigned int deblocking_filter_control_present_flag : 1;
-            unsigned int redundant_pic_cnt_present_flag		: 1;
-            unsigned int reference_pic_flag			: 1; /* nal_ref_idc != 0 */
+            uint32_t entropy_coding_mode_flag	: 1;
+            uint32_t weighted_pred_flag		: 1;
+            uint32_t weighted_bipred_idc		: 2;
+            uint32_t transform_8x8_mode_flag	: 1;
+            uint32_t field_pic_flag			: 1;
+            uint32_t constrained_intra_pred_flag	: 1;
+            uint32_t pic_order_present_flag			: 1; /* Renamed to bottom_field_pic_order_in_frame_present_flag in newer standard versions. */
+            uint32_t deblocking_filter_control_present_flag : 1;
+            uint32_t redundant_pic_cnt_present_flag		: 1;
+            uint32_t reference_pic_flag			: 1; /* nal_ref_idc != 0 */
         } bits;
-        unsigned int value;
+        uint32_t value;
     } pic_fields;
-    unsigned short frame_num;
+    uint16_t frame_num;
 } VAPictureParameterBufferH264;
 
 /** H.264 Inverse Quantization Matrix Buffer */
 typedef struct _VAIQMatrixBufferH264
 {
     /** \brief 4x4 scaling list, in raster scan order. */
-    unsigned char ScalingList4x4[6][16];
+    uint8_t ScalingList4x4[6][16];
     /** \brief 8x8 scaling list, in raster scan order. */
-    unsigned char ScalingList8x8[2][64];
+    uint8_t ScalingList8x8[2][64];
 } VAIQMatrixBufferH264;
 
 /** H.264 Slice Parameter Buffer */
 typedef struct _VASliceParameterBufferH264
 {
-    unsigned int slice_data_size;/* number of bytes in the slice data buffer for this slice */
+    uint32_t slice_data_size;/* number of bytes in the slice data buffer for this slice */
     /** \brief Byte offset to the NAL Header Unit for this slice. */
-    unsigned int slice_data_offset;
-    unsigned int slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
+    uint32_t slice_data_offset;
+    uint32_t slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
     /**
      * \brief Bit offset from NAL Header Unit to the begining of slice_data().
      *
@@ -2057,33 +2058,33 @@ typedef struct _VASliceParameterBufferH264
      * the original bitstream, thus including any emulation prevention
      * bytes.
      */
-    unsigned short slice_data_bit_offset;
-    unsigned short first_mb_in_slice;
-    unsigned char slice_type;
-    unsigned char direct_spatial_mv_pred_flag;
-    unsigned char num_ref_idx_l0_active_minus1;
-    unsigned char num_ref_idx_l1_active_minus1;
-    unsigned char cabac_init_idc;
-    char slice_qp_delta;
-    unsigned char disable_deblocking_filter_idc;
-    char slice_alpha_c0_offset_div2;
-    char slice_beta_offset_div2;
+    uint16_t slice_data_bit_offset;
+    uint16_t first_mb_in_slice;
+    uint8_t slice_type;
+    uint8_t direct_spatial_mv_pred_flag;
+    uint8_t num_ref_idx_l0_active_minus1;
+    uint8_t num_ref_idx_l1_active_minus1;
+    uint8_t cabac_init_idc;
+    int8_t slice_qp_delta;
+    uint8_t disable_deblocking_filter_idc;
+    int8_t slice_alpha_c0_offset_div2;
+    int8_t slice_beta_offset_div2;
     VAPictureH264 RefPicList0[32];	/* See 8.2.4.2 */
     VAPictureH264 RefPicList1[32];	/* See 8.2.4.2 */
-    unsigned char luma_log2_weight_denom;
-    unsigned char chroma_log2_weight_denom;
-    unsigned char luma_weight_l0_flag;
-    short luma_weight_l0[32];
-    short luma_offset_l0[32];
-    unsigned char chroma_weight_l0_flag;
-    short chroma_weight_l0[32][2];
-    short chroma_offset_l0[32][2];
-    unsigned char luma_weight_l1_flag;
-    short luma_weight_l1[32];
-    short luma_offset_l1[32];
-    unsigned char chroma_weight_l1_flag;
-    short chroma_weight_l1[32][2];
-    short chroma_offset_l1[32][2];
+    uint8_t luma_log2_weight_denom;
+    uint8_t chroma_log2_weight_denom;
+    uint8_t luma_weight_l0_flag;
+    int16_t luma_weight_l0[32];
+    int16_t luma_offset_l0[32];
+    uint8_t chroma_weight_l0_flag;
+    int16_t chroma_weight_l0[32][2];
+    int16_t chroma_offset_l0[32][2];
+    uint8_t luma_weight_l1_flag;
+    int16_t luma_weight_l1[32];
+    int16_t luma_offset_l1[32];
+    uint8_t chroma_weight_l1_flag;
+    int16_t chroma_weight_l1[32][2];
+    int16_t chroma_offset_l1[32][2];
 } VASliceParameterBufferH264;
 
 /****************************
@@ -2099,16 +2100,16 @@ typedef enum
 /* Encode Slice Parameter Buffer */
 typedef struct _VAEncSliceParameterBuffer
 {
-    unsigned int start_row_number;	/* starting MB row number for this slice */
-    unsigned int slice_height;	/* slice height measured in MB */
+    uint32_t start_row_number;	/* starting MB row number for this slice */
+    uint32_t slice_height;	/* slice height measured in MB */
     union {
         struct {
-            unsigned int is_intra	: 1;
-            unsigned int disable_deblocking_filter_idc : 2;
-            unsigned int uses_long_term_ref		:1;
-            unsigned int is_long_term_ref		:1;
+            uint32_t is_intra	: 1;
+            uint32_t disable_deblocking_filter_idc : 2;
+            uint32_t uses_long_term_ref		:1;
+            uint32_t is_long_term_ref		:1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } slice_flags;
 } VAEncSliceParameterBuffer;
 
@@ -2119,11 +2120,11 @@ typedef struct _VAEncSliceParameterBuffer
 
 typedef struct _VAEncSequenceParameterBufferH263
 {
-    unsigned int intra_period;
-    unsigned int bits_per_second;
-    unsigned int frame_rate;
-    unsigned int initial_qp;
-    unsigned int min_qp;
+    uint32_t intra_period;
+    uint32_t bits_per_second;
+    uint32_t frame_rate;
+    uint32_t initial_qp;
+    uint32_t min_qp;
 } VAEncSequenceParameterBufferH263;
 
 typedef struct _VAEncPictureParameterBufferH263
@@ -2131,8 +2132,8 @@ typedef struct _VAEncPictureParameterBufferH263
     VASurfaceID reference_picture;
     VASurfaceID reconstructed_picture;
     VABufferID coded_buf;
-    unsigned short picture_width;
-    unsigned short picture_height;
+    uint16_t picture_width;
+    uint16_t picture_height;
     VAEncPictureType picture_type;
 } VAEncPictureParameterBufferH263;
 
@@ -2142,17 +2143,17 @@ typedef struct _VAEncPictureParameterBufferH263
 
 typedef struct _VAEncSequenceParameterBufferMPEG4
 {
-    unsigned char profile_and_level_indication;
-    unsigned int intra_period;
-    unsigned int video_object_layer_width;
-    unsigned int video_object_layer_height;
-    unsigned int vop_time_increment_resolution;
-    unsigned int fixed_vop_rate;
-    unsigned int fixed_vop_time_increment;
-    unsigned int bits_per_second;
-    unsigned int frame_rate;
-    unsigned int initial_qp;
-    unsigned int min_qp;
+    uint8_t profile_and_level_indication;
+    uint32_t intra_period;
+    uint32_t video_object_layer_width;
+    uint32_t video_object_layer_height;
+    uint32_t vop_time_increment_resolution;
+    uint32_t fixed_vop_rate;
+    uint32_t fixed_vop_time_increment;
+    uint32_t bits_per_second;
+    uint32_t frame_rate;
+    uint32_t initial_qp;
+    uint32_t min_qp;
 } VAEncSequenceParameterBufferMPEG4;
 
 typedef struct _VAEncPictureParameterBufferMPEG4
@@ -2160,10 +2161,10 @@ typedef struct _VAEncPictureParameterBufferMPEG4
     VASurfaceID reference_picture;
     VASurfaceID reconstructed_picture;
     VABufferID coded_buf;
-    unsigned short picture_width;
-    unsigned short picture_height;
-    unsigned int modulo_time_base; /* number of 1s */
-    unsigned int vop_time_increment;
+    uint16_t picture_width;
+    uint16_t picture_height;
+    uint32_t modulo_time_base; /* number of 1s */
+    uint32_t vop_time_increment;
     VAEncPictureType picture_type;
 } VAEncPictureParameterBufferMPEG4;
 
@@ -2261,13 +2262,13 @@ typedef  struct _VACodedBufferSegment  {
     /**
      * \brief Size of the data buffer in this segment (in bytes).
      */
-    unsigned int        size;
+    uint32_t        size;
     /** \brief Bit offset into the data buffer where the video data starts. */
-    unsigned int        bit_offset;
+    uint32_t        bit_offset;
     /** \brief Status set by the driver. See \c VA_CODED_BUF_STATUS_*. */
-    unsigned int        status;
+    uint32_t        status;
     /** \brief Reserved for future use. */
-    unsigned int        reserved;
+    uint32_t        reserved;
     /** \brief Pointer to the start of the data buffer. */
     void               *buf;
     /**
@@ -2502,9 +2503,9 @@ typedef enum
 */
 typedef struct _VASurfaceDecodeMBErrors
 {
-    int status; /* 1 if hardware has returned detailed info below, -1 means this record is invalid */
-    unsigned int start_mb; /* start mb address with errors */
-    unsigned int end_mb;  /* end mb address with errors */
+    int32_t status; /* 1 if hardware has returned detailed info below, -1 means this record is invalid */
+    uint32_t start_mb; /* start mb address with errors */
+    uint32_t end_mb;  /* end mb address with errors */
     VADecodeErrorType decode_error_type;
 } VASurfaceDecodeMBErrors;
 
@@ -2587,15 +2588,15 @@ VAStatus vaQuerySurfaceError(
 
 typedef struct _VAImageFormat
 {
-    unsigned int	fourcc;
-    unsigned int	byte_order; /* VA_LSB_FIRST, VA_MSB_FIRST */
-    unsigned int	bits_per_pixel;
+    uint32_t	fourcc;
+    uint32_t	byte_order; /* VA_LSB_FIRST, VA_MSB_FIRST */
+    uint32_t	bits_per_pixel;
     /* for RGB formats */
-    unsigned int	depth; /* significant bits per pixel */
-    unsigned int	red_mask;
-    unsigned int	green_mask;
-    unsigned int	blue_mask;
-    unsigned int	alpha_mask;
+    uint32_t	depth; /* significant bits per pixel */
+    uint32_t	red_mask;
+    uint32_t	green_mask;
+    uint32_t	blue_mask;
+    uint32_t	alpha_mask;
 } VAImageFormat;
 
 typedef VAGenericID VAImageID;
@@ -2612,33 +2613,33 @@ typedef struct _VAImage
      * size and format. This buffer is managed by the library implementation, and 
      * accessed by the client through the buffer Map/Unmap functions.
      */
-    unsigned short	width; 
-    unsigned short	height;
-    unsigned int	data_size;
-    unsigned int	num_planes;	/* can not be greater than 3 */
+    uint16_t	width; 
+    uint16_t	height;
+    uint32_t	data_size;
+    uint32_t	num_planes;	/* can not be greater than 3 */
     /* 
      * An array indicating the scanline pitch in bytes for each plane.
      * Each plane may have a different pitch. Maximum 3 planes for planar formats
      */
-    unsigned int	pitches[3];
+    uint32_t	pitches[3];
     /* 
      * An array indicating the byte offset from the beginning of the image data 
      * to the start of each plane.
      */
-    unsigned int	offsets[3];
+    uint32_t	offsets[3];
 
     /* The following fields are only needed for paletted formats */
-    int num_palette_entries;   /* set to zero for non-palette images */
+    int32_t num_palette_entries;   /* set to zero for non-palette images */
     /* 
      * Each component is one byte and entry_bytes indicates the number of components in 
      * each entry (eg. 3 for YUV palette entries). set to zero for non-palette images   
      */
-    int entry_bytes; 
+    int32_t entry_bytes; 
     /*
      * An array of ascii characters describing the order of the components within the bytes.
      * Only entry_bytes characters of the string are used.
      */
-    char component_order[4];
+    int8_t component_order[4];
 } VAImage;
 
 /** Get maximum number of image formats supported by the implementation */
@@ -2867,19 +2868,19 @@ VAStatus vaAssociateSubpicture (
     VASubpictureID subpicture,
     VASurfaceID *target_surfaces,
     int num_surfaces,
-    short src_x, /* upper left offset in subpicture */
-    short src_y,
-    unsigned short src_width,
-    unsigned short src_height,
-    short dest_x, /* upper left offset in surface */
-    short dest_y,
-    unsigned short dest_width,
-    unsigned short dest_height,
+    int16_t src_x, /* upper left offset in subpicture */
+    int16_t src_y,
+    uint16_t src_width,
+    uint16_t src_height,
+    int16_t dest_x, /* upper left offset in surface */
+    int16_t dest_y,
+    uint16_t dest_width,
+    uint16_t dest_height,
     /*
      * whether to enable chroma-keying, global-alpha, or screen relative mode
      * see VA_SUBPICTURE_XXX values
      */
-    unsigned int flags
+    uint32_t flags
 );
 
 /**
@@ -3013,11 +3014,11 @@ typedef enum
 typedef struct _VADisplayAttribute
 {
     VADisplayAttribType type;
-    int min_value;
-    int max_value;
-    int value;	/* used by the set/get attribute functions */
+    int32_t min_value;
+    int32_t max_value;
+    int32_t value;	/* used by the set/get attribute functions */
 /* flags can be VA_DISPLAY_ATTRIB_GETTABLE or VA_DISPLAY_ATTRIB_SETTABLE or OR'd together */
-    unsigned int flags;
+    uint32_t flags;
 } VADisplayAttribute;
 
 /** Get maximum number of display attributs supported by the implementation */

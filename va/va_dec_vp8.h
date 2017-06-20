@@ -51,15 +51,15 @@ extern "C" {
 typedef struct _VABoolCoderContextVPX
 {
     /* partition 0 "range" */
-    unsigned char range;
+    uint8_t range;
     /* partition 0 "value" */
-    unsigned char value;
+    uint8_t value;
     /*
      * 'partition 0 number of shifts before an output byte is available'
      * it is the number of remaining bits in 'value' for decoding, range [0, 7].
      */
 
-    unsigned char count;
+    uint8_t count;
 } VABoolCoderContextVPX;
 
 /**
@@ -72,9 +72,9 @@ typedef struct _VABoolCoderContextVPX
 typedef struct  _VAPictureParameterBufferVP8
 {
     /* frame width in pixels */
-    unsigned int frame_width;
+    uint32_t frame_width;
     /* frame height in pixels */
-    unsigned int frame_height;
+    uint32_t frame_height;
 
     /* specifies the "last" reference frame */
     VASurfaceID last_ref_frame;
@@ -88,72 +88,72 @@ typedef struct  _VAPictureParameterBufferVP8
     union {
         struct {
 	    /* same as key_frame in bitstream syntax, 0 means a key frame */
-            unsigned int key_frame			: 1; 
+            uint32_t key_frame			: 1; 
 	    /* same as version in bitstream syntax */
-            unsigned int version			: 3;
+            uint32_t version			: 3;
 	    /* same as segmentation_enabled in bitstream syntax */
-            unsigned int segmentation_enabled		: 1;
+            uint32_t segmentation_enabled		: 1;
 	    /* same as update_mb_segmentation_map in bitstream syntax */
-            unsigned int update_mb_segmentation_map	: 1;
+            uint32_t update_mb_segmentation_map	: 1;
 	    /* same as update_segment_feature_data in bitstream syntax */
-            unsigned int update_segment_feature_data	: 1;
+            uint32_t update_segment_feature_data	: 1;
 	    /* same as filter_type in bitstream syntax */
-            unsigned int filter_type			: 1; 
+            uint32_t filter_type			: 1; 
 	    /* same as sharpness_level in bitstream syntax */
-            unsigned int sharpness_level		: 3; 
+            uint32_t sharpness_level		: 3; 
 	    /* same as loop_filter_adj_enable in bitstream syntax */
-            unsigned int loop_filter_adj_enable		: 1; 
+            uint32_t loop_filter_adj_enable		: 1; 
 	    /* same as mode_ref_lf_delta_update in bitstream syntax */
-            unsigned int mode_ref_lf_delta_update	: 1; 
+            uint32_t mode_ref_lf_delta_update	: 1; 
 	    /* same as sign_bias_golden in bitstream syntax */
-            unsigned int sign_bias_golden		: 1; 
+            uint32_t sign_bias_golden		: 1; 
 	    /* same as sign_bias_alternate in bitstream syntax */
-            unsigned int sign_bias_alternate		: 1; 
+            uint32_t sign_bias_alternate		: 1; 
 	    /* same as mb_no_coeff_skip in bitstream syntax */
-            unsigned int mb_no_coeff_skip		: 1; 
+            uint32_t mb_no_coeff_skip		: 1; 
 	    /* flag to indicate that loop filter should be disabled */
-            unsigned int loop_filter_disable		: 1; 
+            uint32_t loop_filter_disable		: 1; 
         } bits;
-        unsigned int value;
+        uint32_t value;
     } pic_fields;
 
     /*
      * probabilities of the segment_id decoding tree and same as 
      * mb_segment_tree_probs in the spec.
      */
-    unsigned char mb_segment_tree_probs[3];
+    uint8_t mb_segment_tree_probs[3];
 
     /* Post-adjustment loop filter levels for the 4 segments */
-    unsigned char loop_filter_level[4];
+    uint8_t loop_filter_level[4];
     /* loop filter deltas for reference frame based MB level adjustment */
-    char loop_filter_deltas_ref_frame[4];
+    int8_t loop_filter_deltas_ref_frame[4];
     /* loop filter deltas for coding mode based MB level adjustment */
-    char loop_filter_deltas_mode[4];
+    int8_t loop_filter_deltas_mode[4];
 
     /* same as prob_skip_false in bitstream syntax */
-    unsigned char prob_skip_false;
+    uint8_t prob_skip_false;
     /* same as prob_intra in bitstream syntax */
-    unsigned char prob_intra;
+    uint8_t prob_intra;
     /* same as prob_last in bitstream syntax */
-    unsigned char prob_last;
+    uint8_t prob_last;
     /* same as prob_gf in bitstream syntax */
-    unsigned char prob_gf;
+    uint8_t prob_gf;
 
     /* 
      * list of 4 probabilities of the luma intra prediction mode decoding
      * tree and same as y_mode_probs in frame header
      */
-    unsigned char y_mode_probs[4]; 
+    uint8_t y_mode_probs[4]; 
     /*
      * list of 3 probabilities of the chroma intra prediction mode decoding
      * tree and same as uv_mode_probs in frame header
      */
-    unsigned char uv_mode_probs[3];
+    uint8_t uv_mode_probs[3];
     /* 
      * updated mv decoding probabilities and same as mv_probs in 
      * frame header
      */
-    unsigned char mv_probs[2][19];
+    uint8_t mv_probs[2][19];
 
     VABoolCoderContextVPX bool_coder_ctx;
 
@@ -172,31 +172,31 @@ typedef struct  _VASliceParameterBufferVP8
     /*
      * number of bytes in the slice data buffer for the partitions 
      */
-    unsigned int slice_data_size;
+    uint32_t slice_data_size;
     /*
      * offset to the first byte of partition data (control partition)
      */
-    unsigned int slice_data_offset;
+    uint32_t slice_data_offset;
     /*
      * see VA_SLICE_DATA_FLAG_XXX definitions
      */
-    unsigned int slice_data_flag; 
+    uint32_t slice_data_flag; 
     /*
      * offset to the first bit of MB from the first byte of partition data(slice_data_offset)
      */
-    unsigned int macroblock_offset;
+    uint32_t macroblock_offset;
 
     /*
      * Partitions
      * (1<<log2_nbr_of_dct_partitions)+1, count both control partition (frame header) and toke partition
      */
-    unsigned char num_of_partitions;
+    uint8_t num_of_partitions;
     /*
      * partition_size[0] is remaining bytes of control partition after parsed by application.
      * exclude current byte for the remaining bits in bool_coder_ctx.
      * exclude the uncompress data chunk since first_part_size 'excluding the uncompressed data chunk'
      */
-    unsigned int partition_size[9];
+    uint32_t partition_size[9];
 } VASliceParameterBufferVP8;
 
 /**
@@ -215,7 +215,7 @@ typedef struct  _VASliceParameterBufferVP8
  */
 typedef struct _VAProbabilityDataBufferVP8
 {
-    unsigned char dct_coeff_probs[4][8][3][11];
+    uint8_t dct_coeff_probs[4][8][3][11];
 } VAProbabilityDataBufferVP8;
 
 /**
@@ -231,7 +231,7 @@ typedef struct _VAIQMatrixBufferVP8
      * array first dimensional is segment and 2nd dimensional is Q index
      * all Q indexs should be clipped to be range [0, 127]
      */
-    unsigned short quantization_index[4][6];
+    uint16_t quantization_index[4][6];
 } VAIQMatrixBufferVP8;
 
 /**@}*/
