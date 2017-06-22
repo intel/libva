@@ -86,6 +86,18 @@
 extern "C" {
 #endif
 
+#ifdef __GNUC__
+#define va_deprecated __attribute__((deprecated))
+#if __GNUC__ >= 6
+#define va_deprecated_enum va_deprecated
+#else
+#define va_deprecated_enum
+#endif
+#else
+#define va_deprecated
+#define va_deprecated_enum
+#endif
+
 /**
  * \mainpage Video Acceleration (VA) API
  *
