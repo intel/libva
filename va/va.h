@@ -1979,7 +1979,7 @@ typedef struct _VAPictureParameterBufferH264
     union {
         struct {
             unsigned int chroma_format_idc			: 2; 
-            unsigned int residual_colour_transform_flag		: 1; 
+            unsigned int residual_colour_transform_flag		: 1; /* Renamed to separate_colour_plane_flag in newer standard versions. */
             unsigned int gaps_in_frame_num_value_allowed_flag	: 1; 
             unsigned int frame_mbs_only_flag			: 1; 
             unsigned int mb_adaptive_frame_field_flag		: 1; 
@@ -2008,7 +2008,7 @@ typedef struct _VAPictureParameterBufferH264
             unsigned int transform_8x8_mode_flag	: 1;
             unsigned int field_pic_flag			: 1;
             unsigned int constrained_intra_pred_flag	: 1;
-            unsigned int pic_order_present_flag			: 1;
+            unsigned int pic_order_present_flag			: 1; /* Renamed to bottom_field_pic_order_in_frame_present_flag in newer standard versions. */
             unsigned int deblocking_filter_control_present_flag : 1;
             unsigned int redundant_pic_cnt_present_flag		: 1;
             unsigned int reference_pic_flag			: 1; /* nal_ref_idc != 0 */
