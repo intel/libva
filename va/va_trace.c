@@ -3206,6 +3206,14 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
         break;
     }
+    case VAEncMiscParameterTypeQualityLevel:
+    {
+        VAEncMiscParameterBufferQualityLevel *p = (VAEncMiscParameterBufferQualityLevel *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferQualityLevel\n");
+        va_TraceMsg(trace_ctx, "\tquality_level = %d\n", p->quality_level);
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
