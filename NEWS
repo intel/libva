@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2017-06-xx
+libva NEWS -- summary of user visible changes.  2017-06-28
 Copyright (C) 2009-2017 Intel Corporation
 
-Version 1.8.3 - DD.Jun.2017
+Version 1.8.3 - 28.Jun.2017
 * Bump libva to 1.8.3
 * Fix build issue on Android
 * Remove the dummy driver
