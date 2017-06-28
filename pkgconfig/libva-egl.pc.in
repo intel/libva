@@ -1,13 +1,13 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
-includedir=@includedir@
+includedir=@includedir@-@LIBVA_LIB_VERSION@
 display=egl
 
 Name: libva-${display}
 Description: Userspace Video Acceleration (VA) ${display} interface
-Requires: libva
+Requires: libva-@LIBVA_LIB_VERSION@
 Version: @VA_API_VERSION@
-Libs: -L${libdir} -lva-${display}
+Libs: -L${libdir} -lva-${display}-@LIBVA_LIB_VERSION@
 Cflags: -I${includedir}
 

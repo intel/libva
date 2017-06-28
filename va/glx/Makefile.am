@@ -45,7 +45,7 @@ source_h_priv = \
 	$(NULL)
 
 noinst_LTLIBRARIES		 = libva_glx.la
-libva_glxincludedir		 = ${includedir}/va
+libva_glxincludedir		 = ${includedir}/va-@LIBVA_LIB_VERSION@/va
 libva_glxinclude_HEADERS	 = $(source_h)
 libva_glx_la_SOURCES		 = $(source_c)
 noinst_HEADERS			 = $(source_h_priv)

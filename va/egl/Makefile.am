@@ -37,7 +37,7 @@ source_h = \
 source_h_priv = 
 
 noinst_LTLIBRARIES	 = libva_egl.la
-libva_eglincludedir	 = ${includedir}/va
+libva_eglincludedir	 = ${includedir}/va-@LIBVA_LIB_VERSION@/va
 libva_eglinclude_HEADERS = $(source_h)
 libva_egl_la_SOURCES	 = $(source_c)
 noinst_HEADERS		 = $(source_h_priv)

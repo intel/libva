@@ -51,7 +51,7 @@ protocol_source_h = \
 	$(NULL)
 
 noinst_LTLIBRARIES		= libva_wayland.la
-libva_waylandincludedir		= ${includedir}/va
+libva_waylandincludedir		= ${includedir}/va-@LIBVA_LIB_VERSION@/va
 libva_waylandinclude_HEADERS	= $(source_h)
 libva_wayland_la_SOURCES	= $(source_c)
 noinst_HEADERS			= $(source_h_priv)
