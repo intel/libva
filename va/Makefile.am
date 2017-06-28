@@ -69,69 +69,69 @@ libva_ldflags = \
 	-Wl,-version-script,${srcdir}/libva.syms \
 	$(NULL)
 
-lib_LTLIBRARIES			= libva.la
-libvaincludedir			= ${includedir}/va
-libvainclude_HEADERS		= $(libva_source_h)
-noinst_HEADERS			= $(libva_source_h_priv)
-libva_la_SOURCES		= $(libva_source_c)
-libva_la_LDFLAGS		= $(libva_ldflags)
-libva_la_DEPENDENCIES		= libva.syms
-libva_la_LIBADD			= $(LIBVA_LIBS) -ldl
+lib_LTLIBRARIES				= libva-@LIBVA_LIB_VERSION@.la
+libva_@LIBVA_LIB_VERSION@_includedir		= ${includedir}/va-@LIBVA_LIB_VERSION@/va
+libva_@LIBVA_LIB_VERSION@_include_HEADERS	= $(libva_source_h)
+noinst_HEADERS					= $(libva_source_h_priv)
+libva_@LIBVA_LIB_VERSION@_la_SOURCES		= $(libva_source_c)
+libva_@LIBVA_LIB_VERSION@_la_LDFLAGS		= $(libva_ldflags)
+libva_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva.syms
+libva_@LIBVA_LIB_VERSION@_la_LIBADD		= $(LIBVA_LIBS) -ldl
 
-lib_LTLIBRARIES			+= libva-tpi.la
-libva_tpi_la_SOURCES		= va_tpi.c
-libva_tpi_la_LDFLAGS		= $(LDADD) -no-undefined
-libva_tpi_la_DEPENDENCIES	= libva.la 
-libva_tpi_la_LIBADD		= libva.la -ldl
+lib_LTLIBRARIES				+= libva-tpi-@LIBVA_LIB_VERSION@.la
+libva_tpi_@LIBVA_LIB_VERSION@_la_SOURCES	= va_tpi.c
+libva_tpi_@LIBVA_LIB_VERSION@_la_LDFLAGS	= $(LDADD) -no-undefined
+libva_tpi_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la
+libva_tpi_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la -ldl
 
 if USE_DRM
 SUBDIRS				+= drm
-lib_LTLIBRARIES			+= libva-drm.la
-libva_drm_la_SOURCES		=
-libva_drm_la_LDFLAGS		= $(LDADD)
-libva_drm_la_DEPENDENCIES	= libva.la drm/libva_drm.la
-libva_drm_la_LIBADD		= libva.la drm/libva_drm.la \
+lib_LTLIBRARIES			+= libva-drm-@LIBVA_LIB_VERSION@.la
+libva_drm_@LIBVA_LIB_VERSION@_la_SOURCES	=
+libva_drm_@LIBVA_LIB_VERSION@_la_LDFLAGS	= $(LDADD)
+libva_drm_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la drm/libva_drm.la
+libva_drm_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la drm/libva_drm.la \
 	$(LIBVA_LIBS) $(DRM_LIBS) -ldl
 endif
 
 if USE_X11
 SUBDIRS				+= x11
-lib_LTLIBRARIES			+= libva-x11.la
-libva_source_h			+= va_x11.h
-libva_x11_la_SOURCES		= 
-libva_x11_la_LDFLAGS		= $(LDADD)
-libva_x11_la_DEPENDENCIES	= libva.la x11/libva_x11.la
-libva_x11_la_LIBADD		= libva.la x11/libva_x11.la \
+lib_LTLIBRARIES			+= libva-x11-@LIBVA_LIB_VERSION@.la
+libva_source_h					+= va_x11.h
+libva_x11_@LIBVA_LIB_VERSION@_la_SOURCES	=
+libva_x11_@LIBVA_LIB_VERSION@_la_LDFLAGS	= $(LDADD)
+libva_x11_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la x11/libva_x11.la
+libva_x11_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la x11/libva_x11.la \
 	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(XFIXES_LIBS) $(DRM_LIBS) -ldl
 endif
 
 if USE_GLX
 SUBDIRS				+= glx
-lib_LTLIBRARIES			+= libva-glx.la
-libva_glx_la_SOURCES		=
-libva_glx_la_LDFLAGS		= $(LDADD)
-libva_glx_la_DEPENDENCIES	= libva.la glx/libva_glx.la libva-x11.la
-libva_glx_la_LIBADD		= libva.la glx/libva_glx.la libva-x11.la \
+lib_LTLIBRARIES			+= libva-glx-@LIBVA_LIB_VERSION@.la
+libva_glx_@LIBVA_LIB_VERSION@_la_SOURCES	=
+libva_glx_@LIBVA_LIB_VERSION@_la_LDFLAGS	= $(LDADD)
+libva_glx_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la glx/libva_glx.la libva-x11-@LIBVA_LIB_VERSION@.la
+libva_glx_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la glx/libva_glx.la libva-x11-@LIBVA_LIB_VERSION@.la \
 	$(GLX_LIBS) -ldl
 endif
 
 if USE_EGL
 SUBDIRS				+= egl
-lib_LTLIBRARIES			+= libva-egl.la
-libva_egl_la_SOURCES		=
-libva_egl_la_LDFLAGS		= $(LDADD)
-libva_egl_la_DEPENDENCIES	= libva.la egl/libva_egl.la 
-libva_egl_la_LIBADD		= libva.la egl/libva_egl.la \
+lib_LTLIBRARIES			+= libva-egl-@LIBVA_LIB_VERSION@.la
+libva_egl_@LIBVA_LIB_VERSION@_la_SOURCES	=
+libva_egl_@LIBVA_LIB_VERSION@_la_LDFLAGS	= $(LDADD)
+libva_egl_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la egl/libva_egl.la
+libva_egl_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la egl/libva_egl.la \
 	$(EGL_LIBS) -ldl
 endif
 
 if USE_WAYLAND
 SUBDIRS				+= wayland
-lib_LTLIBRARIES			+= libva-wayland.la
-libva_wayland_la_SOURCES	=
-libva_wayland_la_LDFLAGS	= $(LDADD)
-libva_wayland_la_DEPENDENCIES	= libva.la wayland/libva_wayland.la
-libva_wayland_la_LIBADD		= libva.la wayland/libva_wayland.la \
+lib_LTLIBRARIES			+= libva-wayland-@LIBVA_LIB_VERSION@.la
+libva_wayland_@LIBVA_LIB_VERSION@_la_SOURCES		=
+libva_wayland_@LIBVA_LIB_VERSION@_la_LDFLAGS		= $(LDADD)
+libva_wayland_@LIBVA_LIB_VERSION@_la_DEPENDENCIES	= libva-@LIBVA_LIB_VERSION@.la wayland/libva_wayland.la
+libva_wayland_@LIBVA_LIB_VERSION@_la_LIBADD		= libva-@LIBVA_LIB_VERSION@.la wayland/libva_wayland.la \
 	$(WAYLAND_LIBS) $(DRM_LIBS) -ldl
 endif
 

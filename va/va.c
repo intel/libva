@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#define DRIVER_EXTENSION	"_drv_video.so"
+#define DRIVER_EXTENSION	"_drv_video-2.0.so"
 
 #define ASSERT		assert
 #define CHECK_VTABLE(s, ctx, func) if (!va_checkVtable(dpy, ctx->vtable->va##func, #func)) s = VA_STATUS_ERROR_UNKNOWN;

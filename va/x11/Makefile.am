@@ -50,7 +50,7 @@ source_h_priv = \
 	$(NULL)
 
 noinst_LTLIBRARIES		= libva_x11.la	
-libva_x11includedir		= ${includedir}/va
+libva_x11includedir		= ${includedir}/va-@LIBVA_LIB_VERSION@/va
 libva_x11include_HEADERS	= $(source_h)
 libva_x11_la_SOURCES		= $(source_c)
 noinst_HEADERS			= $(source_h_priv)

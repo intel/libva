@@ -49,7 +49,7 @@ AM_CPPFLAGS			+= $(X11_CFLAGS)
 endif
 
 noinst_LTLIBRARIES		= libva_drm.la
-libva_drmincludedir		= ${includedir}/va
+libva_drmincludedir		= ${includedir}/va-@LIBVA_LIB_VERSION@/va
 libva_drminclude_HEADERS	= $(source_h)
 libva_drm_la_SOURCES		= $(source_c)
 noinst_HEADERS			= $(source_h_priv)

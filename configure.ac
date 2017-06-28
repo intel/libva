@@ -51,28 +51,22 @@ m4_if(libva_pre_version, [0], [], [
 m4_append([libva_version], libva_pre_version, [.pre])
 ])
 
-# libva library version number (generated, do not change)
-# XXX: we want the SONAME to remain at libva.so.1 for VA-API major == 0
+# libva library name (generated, do not change)
 #
-# The library name is generated libva.<x>.<y>.0 where
+# The library name is generated libva-<x>.0.so.0.<y>.0 where
 # <x> = VA-API major version + 1
 # <y> = 100 * VA-API minor version + VA-API micro version
 #
 # For example:
-# VA-API 0.32.0 generates libva.so.1.3200.0
-# VA-API 0.34.1 generates libva.so.1.3401.0
-# VA-API 1.2.13 generates libva.so.2.213.0
-m4_define([libva_interface_bias], [m4_eval(va_api_major_version + 1)])
-m4_define([libva_interface_age],  [0])
-m4_define([libva_binary_age],
-          [m4_eval(100 * va_api_minor_version + va_api_micro_version - libva_interface_age)])
-
+# VA-API 1.0.0 generates libva-2.0.so.0.0.0
+# VA-API 1.0.1 generates libva-2.0.so.0.1.0
+# VA-API 1.1.1 generates libva-2.0.so.0.101.0
 m4_define([libva_lt_current],
-          [m4_eval(100 * va_api_minor_version + va_api_micro_version + libva_interface_bias)])
+          [m4_eval(100 * va_api_minor_version + va_api_micro_version)])
 m4_define([libva_lt_revision],
-          [m4_eval(libva_interface_age)])
+          [0])
 m4_define([libva_lt_age],
-          [m4_eval(libva_binary_age - libva_interface_age)])
+          [m4_eval(100 * va_api_micro_version + va_api_micro_version)])
 
 # libdrm minimun version requirement
 m4_define([libdrm_version], [2.4])
@@ -123,6 +117,13 @@ LIBVA_LT_VERSION="$LIBVA_LT_CURRENT:$LIBVA_LT_REV:$LIBVA_LT_AGE"
 LIBVA_LT_LDFLAGS="-version-info $LIBVA_LT_VERSION"
 AC_SUBST(LIBVA_LT_VERSION)
 AC_SUBST(LIBVA_LT_LDFLAGS)
+
+dnl our libraries and install dirs use LIBVA_LIB_VERSION in the filename
+dnl to allow side-by-side installation of different library versions
+LIBVA_LIB_VERSION=2.0
+AC_SUBST([LIBVA_LIB_VERSION])
+AC_DEFINE_UNQUOTED([LIBVA_LIB_VERSION], ["$LIBVA_LIB_VERSION"],
+  [Libva Library Version])
 
 AC_ARG_ENABLE(docs,
     [AC_HELP_STRING([--enable-docs],
