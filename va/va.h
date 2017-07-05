@@ -543,6 +543,14 @@ typedef enum
      */
     VAConfigAttribEncQuantization     = 22,
     /**
+     * \brief Encoding intra refresh attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports certain types of intra refresh methods
+     * for encoding (e.g. adaptive intra refresh or rolling intra refresh).
+     * See \c VA_ENC_INTRA_REFRESH_xxx for intra refresh methods
+     */
+    VAConfigAttribEncIntraRefresh     = 23,
+    /**
      * \brief Encoding skip frame attribute. Read-only.
      *
      * This attribute conveys whether the driver supports sending skip frame parameters 
@@ -750,6 +758,28 @@ typedef union _VAConfigAttribValEncJPEG {
 /** \brief Driver supports trellis quantization */
 #define VA_ENC_QUANTIZATION_TRELLIS_SUPPORTED           0x00000001
 /**@}*/
+
+/** @name Attribute values for VAConfigAttribEncIntraRefresh */
+/**@{*/
+/** \brief Driver does not support intra refresh */
+#define VA_ENC_INTRA_REFRESH_NONE                       0x00000000
+/** \brief Driver supports column based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_COLUMN             0x00000001
+/** \brief Driver supports row based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_ROW                0x00000002
+/** \brief Driver supports adaptive intra refresh */
+#define VA_ENC_INTRA_REFRESH_ADAPTIVE                   0x00000010
+/** \brief Driver supports cyclic intra refresh */
+#define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
+/** \brief Driver supports intra refresh of P frame*/
+#define VA_ENC_INTRA_REFRESH_P_FRAME                    0x00010000
+/** \brief Driver supports intra refresh of B frame */
+#define VA_ENC_INTRA_REFRESH_B_FRAME                    0x00020000
+/** \brief Driver supports intra refresh of multiple reference encoder */
+#define VA_ENC_INTRA_REFRESH_MULTI_REF                  0x00040000
+
+/**@}*/
+
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
     struct {
@@ -1394,6 +1424,8 @@ typedef enum
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
     VAEncMiscParameterTypeQualityLevel  = 6,
+    /** \brief Buffer type used for Rolling intra refresh */
+    VAEncMiscParameterTypeRIR           = 7,
     /** \brief Buffer type used for quantization parameters, it's per-sequence parameter*/
     VAEncMiscParameterTypeQuantization  = 8,
     /** \brief Buffer type used for sending skip frame parameters to the encoder's
@@ -1590,6 +1622,48 @@ typedef struct _VAEncMiscParameterAIR
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterAIR;
+
+/*
+ * \brief Rolling intra refresh data structure for encoding.
+ */
+typedef struct _VAEncMiscParameterRIR
+{
+    union
+    {
+        struct
+	/**
+	 * \brief Indicate if intra refresh is enabled in column/row.
+	 *
+	 * App should query VAConfigAttribEncIntraRefresh to confirm RIR support
+	 * by the driver before sending this structure.
+         */
+        {
+	    /* \brief enable RIR in column */
+            uint32_t enable_rir_column : 1;
+	    /* \brief enable RIR in row */
+            uint32_t enable_rir_row : 1;
+	    uint32_t reserved : 30;
+        } bits;
+        uint32_t value;
+    } rir_flags;
+    /**
+     * \brief Indicates the column or row location in MB. It is ignored if
+     * rir_flags is 0.
+     */
+    uint16_t intra_insertion_location;
+    /**
+     * \brief Indicates the number of columns or rows in MB. It is ignored if
+     * rir_flags is 0.
+     */
+    uint16_t intra_insert_size;
+    /**
+     * \brief indicates the Qp difference for inserted intra columns or rows.
+     * App can use this to adjust intra Qp based on bitrate & max frame size.
+     */
+    uint8_t  qp_delta_for_inserted_intra;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
+} VAEncMiscParameterRIR;
 
 typedef struct _VAEncMiscParameterHRD
 {
