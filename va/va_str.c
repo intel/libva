@@ -105,6 +105,8 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribEncIntraRefresh);
     TOSTR(VAConfigAttribProcessingRate);
     TOSTR(VAConfigAttribEncDirtyRect);
+    TOSTR(VAConfigAttribEncParallelRateControl);
+    TOSTR(VAConfigAttribEncDynamicScaling);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
