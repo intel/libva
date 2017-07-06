@@ -435,6 +435,39 @@ typedef enum
      * VAConfigAttribValDecJPEG union.
      */
     VAConfigAttribDecJPEG             = 7,
+    /**
+     * \brief Decode processing support. Read/write.
+     *
+     * This attribute determines if the driver supports video processing
+     * with decoding using the decoding context in a single call, through
+     * vaGetConfigAttributes(); and if the user may use this feature,
+     * through vaCreateConfig(), if the driver supports the user scenario.
+     * The user will essentially create a regular decode VAContext.  Therefore,
+     * the parameters of vaCreateContext() such as picture_width, picture_height
+     * and render_targets are in relation to the decode output parameters
+     * (not processing output parameters) as normal.
+     * If this attribute is not set by the user then it is assumed that no
+     * extra processing is done after decoding for this decode context.
+     *
+     * Since essentially the application is creating a decoder config and context,
+     * all function calls that take in the config (e.g. vaQuerySurfaceAttributes())
+     * or context are in relation to the decoder, except those video processing
+     * function specified in the next paragraph.
+     *
+     * Once the decode config and context are created, the user must further
+     * query the supported processing filters using vaQueryVideoProcFilters(),
+     * vaQueryVideoProcFilterCaps(), vaQueryVideoProcPipelineCaps() by specifying
+     * the created decode context.  The user must provide processing information
+     * and extra processing output surfaces as "additional_outputs" to the driver
+     * through VAProcPipelineParameterBufferType.  The render_target specified
+     * at vaBeginPicture() time refers to the decode output surface.  The
+     * target surface for the output of processing needs to be a different
+     * surface since the decode process requires the original reconstructed buffer.
+     * The “surface” member of VAProcPipelineParameterBuffer should be set to the
+     * same as “render_target” set in vaBeginPicture(), but the driver may choose
+     * to ignore this parameter.
+     */
+    VAConfigAttribDecProcessing		= 8,
     /** @name Attributes for encoding */
     /**@{*/
     /**
@@ -623,7 +656,6 @@ typedef enum
      * If it is supported,for VP9, suggested frame resolution can be retrieved from VACodedBufferVP9Status.
      */
      VAConfigAttribEncDynamicScaling        = 30,
-
     /**
      * \brief Encode function type for FEI.
      *
@@ -732,6 +764,12 @@ typedef union _VAConfigAttribValDecJPEG {
     uint32_t value;
     uint32_t va_reserved[VA_PADDING_LOW];
 } VAConfigAttribValDecJPEG;
+/** @name Attribute values for VAConfigAttribDecProcessing */
+/**@{*/
+/** \brief No decoding + processing in a single decoding call. */
+#define VA_DEC_PROCESSING_NONE     0x00000000
+/** \brief Decode + processing in a single decoding call. */
+#define VA_DEC_PROCESSING          0x00000001
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
