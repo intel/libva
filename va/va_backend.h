@@ -435,6 +435,15 @@ struct VADriverVTable
             VADriverContextP    ctx,
             VABufferID          buf_id          /* in */
         );
+
+        VAStatus
+        (*vaExportSurfaceHandle)(
+            VADriverContextP    ctx,
+            VASurfaceID         surface_id,     /* in */
+            uint32_t            mem_type,       /* in */
+            uint32_t            flags,          /* in */
+            void               *descriptor      /* out */
+        );
 };
 
 struct VADriverContext
