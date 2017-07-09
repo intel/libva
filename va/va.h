@@ -2540,7 +2540,9 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_NV11          0x3131564e
 #define VA_FOURCC_YV12          0x32315659
 #define VA_FOURCC_P208          0x38303250
+/* IYUV same as I420, but most user perfer I420, will deprecate it */
 #define VA_FOURCC_IYUV          0x56555949
+#define VA_FOURCC_I420          0x30323449
 #define VA_FOURCC_YV24          0x34325659
 #define VA_FOURCC_YV32          0x32335659
 #define VA_FOURCC_Y800          0x30303859
