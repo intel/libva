@@ -476,8 +476,18 @@ struct VADriverVTable
             VAProcessingRateParameter *proc_buf,/* in */
             unsigned int *processing_rate	/* out */
         );
+
+        VAStatus
+        (*vaExportSurfaceHandle)(
+            VADriverContextP    ctx,
+            VASurfaceID         surface_id,     /* in */
+            uint32_t            mem_type,       /* in */
+            uint32_t            flags,          /* in */
+            void               *descriptor      /* out */
+        );
+
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[58];
+        unsigned long reserved[57];
 };
 
 struct VADriverContext
