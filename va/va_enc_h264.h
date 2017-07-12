@@ -368,6 +368,15 @@ typedef struct _VAEncPictureParameterBufferH264 {
     } pic_fields;
 } VAEncPictureParameterBufferH264;
 
+typedef struct _VAEncQPBufferH264 {
+    /*
+     * \brief This structure holds QP per 16x16 macroblock. Buffer size shall be
+     * sufficient to fit the slice or frame to be encoded depending on if it is a
+     * slice level or frame level encoding.
+     */
+    uint8_t qp;
+} VAEncQPBufferH264;
+
 /**
  * \brief Slice parameter for H.264 encoding in baseline, main & high profiles.
  *

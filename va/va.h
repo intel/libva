@@ -1123,6 +1123,15 @@ typedef enum
     VAEncMiscParameterBufferType	= 27,
     VAEncMacroblockParameterBufferType	= 28,
     VAEncMacroblockMapBufferType        = 29,
+
+    /**
+     * \brief Encoding QP buffer
+     *
+     * This buffer contains QP per MB for encoding. Currently
+     * VAEncQPBufferH264 is defined for H.264 encoding, see
+     * #VAEncQPBufferH264 for details
+     */
+    VAEncQPBufferType                   = 30,
 /* Following are video processing buffer types */
     /**
      * \brief Video processing pipeline parameter buffer.
