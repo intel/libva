@@ -140,7 +140,7 @@ struct VADriverVTable
 		unsigned int size,		/* in */
 		unsigned int num_elements,	/* in */
 		void *data,			/* in */
-		VABufferID *buf_id		/* out */
+                VABufferID *buf_id
 	);
 
 	VAStatus (*vaBufferSetNumElements) (
@@ -459,8 +459,18 @@ struct VADriverVTable
             VAContextID *contexts,
             int num_contexts
         );
-        /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[60];
+	VAStatus (*vaCreateBuffer2) (
+            VADriverContextP ctx,
+            VAContextID context,                /* in */
+            VABufferType type,                  /* in */
+            unsigned int width,                 /* in */
+            unsigned int height,                /* in */
+            unsigned int *unit_size,            /* out */
+            unsigned int *pitch,                /* out */
+            VABufferID *buf_id                  /* out */
+	);
+
+        unsigned long reserved[59];
 };
 
 struct VADriverContext
