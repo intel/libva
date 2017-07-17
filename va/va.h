@@ -2476,6 +2476,28 @@ VAStatus vaCreateBuffer (
 );
 
 /**
+ * Create a buffer for given width & height get unit_size, pitch, buf_id for 2D buffer
+ * for permb qp buffer, it will return unit_size for one MB or LCU and the pitch for alignments
+ * can call vaMapBuffer with this Buffer ID to get virtual address.
+ * e.g. AVC 1080P encode, 1920x1088, the size in MB is 120x68,but inside driver,
+ * maybe it should align with 256, and one byte present one Qp.so, call the function.
+ * then get unit_size = 1, pitch = 256. call vaMapBuffer to get the virtual address (pBuf).
+ * then read write the memory like 2D. the size is 256x68, application can only use 120x68
+ * pBuf + 256 is the start of next line.
+ * different driver implementation maybe return different unit_size and pitch
+ */
+VAStatus vaCreateBuffer2(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferType type,
+    unsigned int width,
+    unsigned int height,
+    unsigned int *unit_size,
+    unsigned int *pitch,
+    VABufferID *buf_id
+);
+
+/**
  * Convey to the server how many valid elements are in the buffer. 
  * e.g. if multiple slice parameters are being held in a single buffer,
  * this will communicate to the server the number of slice parameters
