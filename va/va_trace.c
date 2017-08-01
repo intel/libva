@@ -172,6 +172,13 @@ void va_TraceInit(VADisplay dpy)
         if (!strncmp(env_value, "/", sizeof(env_value))
             || !strncmp(env_value, "/etc/", 5)
             || !strncmp(env_value, "../", 3)) {
+
+            if (trace_ctx->trace_log_fn)
+                free(trace_ctx->trace_log_fn);
+
+            if (trace_ctx)
+                free(trace_ctx);
+
             va_errorMessage("Illegal path may expose to path traversal attack, env_value=%s\n",env_value);
             return;
         }
