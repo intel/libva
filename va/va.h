@@ -1589,6 +1589,16 @@ typedef enum
      *surface, it will override the "skipCheckDisable" setting in VAEncMiscParameterEncQuality.
      */
     VAEncMacroblockDisableSkipMapBufferType = 53,
+    /**
+     * \brief HEVC FEI CTB level cmd buffer
+     * it is CTB level information for future usage.
+     */
+    VAEncFEICTBCmdBufferType            = 54,
+    /**
+     * \brief HEVC FEI CU level data buffer
+     * it's CTB level information for future usage
+     */
+    VAEncFEICURecordBufferType          = 55,
     /** decode stream out buffer, intermedia data of decode, it may include MV, MB mode etc.
       * it can be used to detect motion and analyze the frame contain  */
     VADecodeStreamoutBufferType             = 56,
@@ -4075,6 +4085,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
 #include <va/va_enc_hevc.h>
+#include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>
 #include <va/va_enc_jpeg.h>
 #include <va/va_enc_mpeg2.h>

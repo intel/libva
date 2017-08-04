@@ -160,6 +160,8 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAStatsStatisticsBottomFieldBufferType);
     TOSTR(VAStatsMVBufferType);
     TOSTR(VAStatsMVPredictorBufferType);
+    TOSTR(VAEncFEICTBCmdBufferType);
+    TOSTR(VAEncFEICURecordBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
