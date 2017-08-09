@@ -340,7 +340,7 @@ static VAContextID get_ctx_by_buf(
     struct trace_buf_manager *pbuf_mgr = &pva_trace->buf_manager;
     struct trace_buf_info *pbuf_info = pbuf_mgr->pbuf_info[0];
     VAContextID context = VA_INVALID_ID;
-    int i = 0, idx = 0, valid = 0;
+    int i = 0, idx = 0;
 
     LOCK_RESOURCE(pva_trace);
 
@@ -734,8 +734,6 @@ static void refresh_log_file(
 void va_TraceInit(VADisplay dpy)
 {
     char env_value[1024];
-    unsigned short suffix = 0xffff & ((unsigned int)time(NULL));
-    FILE *tmp;
     struct va_trace *pva_trace = calloc(sizeof(struct va_trace), 1);
     struct trace_context *trace_ctx = calloc(sizeof(struct trace_context), 1);
 
@@ -823,7 +821,7 @@ void va_TraceInit(VADisplay dpy)
 void va_TraceEnd(VADisplay dpy)
 {
     struct va_trace *pva_trace = NULL;
-    int i = 0, j = 0;
+    int i = 0;
 
     pva_trace = (struct va_trace *)(((VADisplayContextP)dpy)->vatrace);
     if(!pva_trace)
@@ -3563,7 +3561,6 @@ static void va_TraceVAEncSequenceParameterBufferVP9(
 {
     VAEncSequenceParameterBufferVP9 *p = (VAEncSequenceParameterBufferVP9 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    int i;
 
     va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferVP9\n");
 
