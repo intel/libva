@@ -205,7 +205,7 @@ static int check_extension3(const char *name)
     for(i = 0; i < nbExtensions; i++)
     {
         const GLubyte *strExtension = glGetStringi(GL_EXTENSIONS, i);
-        if(strcmp(strExtension, (const GLubyte *)name) == 0)
+        if(strcmp((const char *) strExtension, name) == 0)
             return 1;
     }
 
