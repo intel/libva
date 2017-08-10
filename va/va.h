@@ -589,7 +589,7 @@ typedef struct _VAConfigAttrib {
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000000
 /** \brief Driver supports a power-of-two number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
-/** \brief Driver supports an arbitrary number of rows per slice. */
+/** \brief Driver supports an arbitrary number of macroblocks per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
 /**@}*/
 
