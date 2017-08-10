@@ -994,11 +994,10 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /**
  * \brief Queries surface attributes for the supplied config.
  *
- * Unlike vaGetSurfaceAttributes(), this function queries for all
- * supported attributes for the supplied VA @config. In particular, if
- * the underlying hardware supports the creation of VA surfaces in
- * various formats, then this function will enumerate all pixel
- * formats that are supported.
+ * This function queries for all supported attributes for the
+ * supplied VA @config. In particular, if the underlying hardware
+ * supports the creation of VA surfaces in various formats, then
+ * this function will enumerate all pixel formats that are supported.
  *
  * The \c attrib_list array is allocated by the user and \c
  * num_attribs shall be initialized to the number of allocated
@@ -1031,9 +1030,8 @@ vaQuerySurfaceAttributes(
  * \brief Creates an array of surfaces
  *
  * Creates an array of surfaces. The optional list of attributes shall
- * be constructed and validated through vaGetSurfaceAttributes() or
- * constructed based based on what the underlying hardware could
- * expose through vaQuerySurfaceAttributes().
+ * be constructed based on what the underlying hardware could expose
+ * through vaQuerySurfaceAttributes().
  *
  * @param[in] dpy               the VA display
  * @param[in] format            the desired surface format. See \c VA_RT_FORMAT_*
