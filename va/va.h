@@ -656,7 +656,12 @@ typedef enum
      * If it is supported,for VP9, suggested frame resolution can be retrieved from VACodedBufferVP9Status.
      */
      VAConfigAttribEncDynamicScaling        = 30,
-    /**
+     /**
+     * \brief frame size tolerance support
+     * it indicates the tolerance of frame size
+     */
+     VAConfigAttribFrameSizeToleranceSupport = 31,
+     /**
      * \brief Encode function type for FEI.
      *
      * This attribute conveys whether the driver supports different function types for encode.
@@ -664,7 +669,7 @@ typedef enum
      * it is for FEI entry point only.
      * Default is VA_FEI_FUNCTION_ENC_PAK.
      */
-    VAConfigAttribFEIFunctionType     = 32,
+     VAConfigAttribFEIFunctionType     = 32,
     /**
      * \brief Maximum number of FEI MV predictors. Read-only.
      *
@@ -673,6 +678,14 @@ typedef enum
      * Currently it is for FEI entry point only.
      */
     VAConfigAttribFEIMVPredictors     = 33,
+     /**
+     * \brief Tile Support Attribute. Read-only.
+     *
+     * This attribute conveys whether encoder is capable to support tiles.
+     * If not supported, the tile related parameters sent to encoder, such as
+     * tiling structure, should be ignored. 0 - unsupported, 1 - supported.
+     */
+     VAConfigAttribEncTileSupport        = 35,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1736,7 +1749,21 @@ typedef struct _VAEncMiscParameterRateControl
             uint32_t cfs_I_frames : 1; /* I frame also follows CFS */
             uint32_t enable_parallel_brc    : 1;
             uint32_t enable_dynamic_scaling : 1;
-            uint32_t reserved               : 14;
+             /**  \brief Frame Tolerance Mode
+             *  Indicates the tolerance the application has to variations in the frame size.
+             *  For example, wireless display scenarios may require very steady bit rate to
+             *  reduce buffering time. It affects the rate control algorithm used,
+             *  but may or may not have an effect based on the combination of other BRC
+             *  parameters.  Only valid when the driver reports support for
+             *  #VAConfigAttribFrameSizeToleranceSupport.
+             *
+             *  equals 0    -- normal mode;
+             *  equals 1    -- maps to sliding window;
+             *  equals 2    -- maps to low delay mode;
+             *  other       -- invalid.
+             */
+            uint32_t frame_tolerance_mode   : 2;
+            uint32_t reserved               : 12;
         } bits;
         uint32_t value;
     } rc_flags;
