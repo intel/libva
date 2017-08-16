@@ -154,7 +154,8 @@ registry_handle_global(
     uint32_t            version
 )
 {
-    struct va_wayland_drm_context *wl_drm_ctx = data;
+    VADisplayContextP const pDisplayContext = data;
+    struct va_wayland_drm_context * const wl_drm_ctx = pDisplayContext->opaque;
 
     if (strcmp(interface, "wl_drm") == 0) {
         /* bind to at most version 2, but also support version 1 if
@@ -164,6 +165,13 @@ registry_handle_global(
         wl_drm_ctx->drm =
             wl_registry_bind(wl_drm_ctx->registry, name, &wl_drm_interface,
                              (version < 2) ? version : 2);
+
+        if (wl_drm_ctx->drm
+            && wl_drm_add_listener(wl_drm_ctx->drm, &drm_listener, pDisplayContext) != 0) {
+            va_wayland_error("could not add listener to wl_drm");
+            wl_drm_destroy(wl_drm_ctx->drm);
+            wl_drm_ctx->drm = NULL;
+        }
     }
 }
 
@@ -259,7 +267,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
         va_wayland_error("could not create wl_registry");
         goto end;
     }
-    if (wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx) != 0) {
+    if (wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, pDisplayContext) != 0) {
         va_wayland_error("could not add listener to wl_registry");
         goto end;
     }
@@ -273,11 +281,6 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     /* Do not print an error, the compositor might just not support wl_drm */
     if (!wl_drm_ctx->drm)
         goto end;
-
-    if (wl_drm_add_listener(wl_drm_ctx->drm, &drm_listener, pDisplayContext) != 0) {
-        va_wayland_error("could not add listener to wl_drm");
-        goto end;
-    }
     if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
         goto end;
     if (drm_state->fd < 0) {
