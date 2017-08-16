@@ -41,6 +41,7 @@ typedef struct va_wayland_drm_context {
     struct va_wayland_context   base;
     struct wl_event_queue      *queue;
     struct wl_drm              *drm;
+    uint32_t                    drm_name;
     struct wl_registry         *registry;
     unsigned int                is_authenticated        : 1;
 } VADisplayContextWaylandDRM;
@@ -148,7 +149,7 @@ static void
 registry_handle_global(
     void               *data,
     struct wl_registry *registry,
-    uint32_t            id,
+    uint32_t            name,
     const char         *interface,
     uint32_t            version
 )
@@ -159,15 +160,31 @@ registry_handle_global(
         /* bind to at most version 2, but also support version 1 if
          * compositor does not have v2
          */
+        wl_drm_ctx->drm_name = name;
         wl_drm_ctx->drm =
-            wl_registry_bind(wl_drm_ctx->registry, id, &wl_drm_interface,
+            wl_registry_bind(wl_drm_ctx->registry, name, &wl_drm_interface,
                              (version < 2) ? version : 2);
+    }
+}
+
+static void
+registry_handle_global_remove(
+    void               *data,
+    struct wl_registry *registry,
+    uint32_t            name
+)
+{
+    struct va_wayland_drm_context *wl_drm_ctx = data;
+
+    if (wl_drm_ctx->drm && name == wl_drm_ctx->drm_name) {
+        wl_drm_destroy(wl_drm_ctx->drm);
+        wl_drm_ctx->drm = NULL;
     }
 }
 
 static const struct wl_registry_listener registry_listener = {
     registry_handle_global,
-    NULL,
+    registry_handle_global_remove
 };
 
 static bool
