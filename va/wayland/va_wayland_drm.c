@@ -132,21 +132,7 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
 
     vtable->has_prime_sharing = 0;
 
-    if (wl_drm_ctx->drm) {
-        wl_drm_destroy(wl_drm_ctx->drm);
-        wl_drm_ctx->drm = NULL;
-    }
     wl_drm_ctx->is_authenticated = 0;
-
-    if (wl_drm_ctx->registry) {
-        wl_registry_destroy(wl_drm_ctx->registry);
-        wl_drm_ctx->registry = NULL;
-    }
-
-    if (wl_drm_ctx->queue) {
-        wl_event_queue_destroy(wl_drm_ctx->queue);
-        wl_drm_ctx->queue = NULL;
-    }
 
     if (drm_state) {
         if (drm_state->fd >= 0) {
@@ -200,16 +186,17 @@ wayland_roundtrip_queue(struct wl_display *display,
 bool
 va_wayland_drm_create(VADisplayContextP pDisplayContext)
 {
+    bool result = false;
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct va_wayland_drm_context *wl_drm_ctx;
     struct drm_state *drm_state;
     struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
-    struct wl_display *wrapped_display;
+    struct wl_display *wrapped_display = NULL;
 
     wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
     if (!wl_drm_ctx) {
         va_wayland_error("could not allocate wl_drm_ctx");
-        return false;
+        goto end;
     }
     wl_drm_ctx->base.destroy            = va_wayland_drm_destroy;
     wl_drm_ctx->queue                   = NULL;
@@ -222,7 +209,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     drm_state = calloc(1, sizeof(struct drm_state));
     if (!drm_state) {
         va_wayland_error("could not allocate drm_state");
-        return false;
+        goto end;
     }
     drm_state->fd        = -1;
     drm_state->auth_type = 0;
@@ -239,22 +226,28 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     wl_drm_ctx->queue = wl_display_create_queue(ctx->native_dpy);
     if (!wl_drm_ctx->queue) {
         va_wayland_error("could not create Wayland event queue");
-        return false;
+        goto end;
     }
 
     wrapped_display = wl_proxy_create_wrapper(ctx->native_dpy);
     if (!wrapped_display) {
         va_wayland_error("could not create Wayland proxy wrapper");
-        return false;
+        goto end;
     }
 
     /* All created objects will inherit this queue */
     wl_proxy_set_queue((struct wl_proxy *) wrapped_display, wl_drm_ctx->queue);
     wl_drm_ctx->registry = wl_display_get_registry(wrapped_display);
-    wl_proxy_wrapper_destroy(wrapped_display);
-    wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx);
+    if (!wl_drm_ctx->registry) {
+        va_wayland_error("could not create wl_registry");
+        goto end;
+    }
+    if (wl_registry_add_listener(wl_drm_ctx->registry, &registry_listener, wl_drm_ctx) != 0) {
+        va_wayland_error("could not add listener to wl_registry");
+        goto end;
+    }
     if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
-        return false;
+        goto end;
 
     /* registry_handle_global should have been called by the
      * wl_display_roundtrip_queue above
@@ -262,23 +255,51 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
 
     /* Do not print an error, the compositor might just not support wl_drm */
     if (!wl_drm_ctx->drm)
-        return false;
+        goto end;
 
-    wl_drm_add_listener(wl_drm_ctx->drm, &drm_listener, pDisplayContext);
+    if (wl_drm_add_listener(wl_drm_ctx->drm, &drm_listener, pDisplayContext) != 0) {
+        va_wayland_error("could not add listener to wl_drm");
+        goto end;
+    }
     if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
-        return false;
+        goto end;
     if (drm_state->fd < 0) {
         va_wayland_error("did not get DRM device");
-        return false;
+        goto end;
     }
 
     if (!wayland_roundtrip_queue(ctx->native_dpy, wl_drm_ctx->queue))
-        return false;
+        goto end;
 
     if (!wl_drm_ctx->is_authenticated) {
         va_wayland_error("Wayland compositor did not respond to DRM authentication");
-        return false;
+        goto end;
     }
 
-    return true;
+    result = true;
+
+end:
+    if (wrapped_display) {
+        wl_proxy_wrapper_destroy(wrapped_display);
+        wrapped_display = NULL;
+    }
+
+    if (wl_drm_ctx) {
+        if (wl_drm_ctx->drm) {
+            wl_drm_destroy(wl_drm_ctx->drm);
+            wl_drm_ctx->drm = NULL;
+        }
+
+        if (wl_drm_ctx->registry) {
+            wl_registry_destroy(wl_drm_ctx->registry);
+            wl_drm_ctx->registry = NULL;
+        }
+
+        if (wl_drm_ctx->queue) {
+            wl_event_queue_destroy(wl_drm_ctx->queue);
+            wl_drm_ctx->queue = NULL;
+        }
+    }
+
+    return result;
 }
