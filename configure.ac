@@ -28,7 +28,7 @@
 # - reset minor version to zero when major version is incremented
 m4_define([va_api_major_version], [0])
 m4_define([va_api_minor_version], [40])
-m4_define([va_api_micro_version], [0])
+m4_define([va_api_micro_version], [1])
 
 m4_define([va_api_version],
           [va_api_major_version.va_api_minor_version.va_api_micro_version])
