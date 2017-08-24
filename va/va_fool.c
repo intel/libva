@@ -187,8 +187,7 @@ int va_FoolCreateConfig(
         fool_ctx->enabled = 1;
     else if ((va_fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
         /* H264 is desired */
-        if (((profile == VAProfileH264Baseline ||
-              profile == VAProfileH264Main ||
+        if (((profile == VAProfileH264Main ||
               profile == VAProfileH264High ||
               profile == VAProfileH264ConstrainedBaseline)) &&
             strstr(fool_ctx->fn_enc, "h264"))

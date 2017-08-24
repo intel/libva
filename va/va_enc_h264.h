@@ -122,7 +122,7 @@ typedef enum {
      * \c VA_ENC_PACKED_HEADER_RAW_DATA to pass the corresponding packed
      * SEI header data buffer to the driver
      */
-    VAEncPackedHeaderH264_SEI va_deprecated_enum  = (VAEncPackedHeaderMiscMask | 1),
+    VAEncPackedHeaderH264_SEI va_deprecated_enum  = (0x80000000 | 1),
 } VAEncPackedHeaderTypeH264;
 
 /**
