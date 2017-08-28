@@ -3134,6 +3134,23 @@ typedef enum
 #define VA_ROTATION_90          0x00000001
 #define VA_ROTATION_180         0x00000002
 #define VA_ROTATION_270         0x00000003
+/**@}*/
+
+/**
+ * @name Mirroring directions
+ *
+ * Those values could be used for VADisplayAttribMirror attribute or
+ * VAProcPipelineParameterBuffer::mirror_state.
+
+ */
+/**@{*/
+/** \brief No Mirroring. */
+#define VA_MIRROR_NONE              0x00000000
+/** \brief Horizontal Mirroring. */
+#define VA_MIRROR_HORIZONTAL        0x00000001
+/** \brief Vertical Mirroring. */
+#define VA_MIRROR_VERTICAL          0x00000002
+/**@}*/
 
 /** attribute value for VADisplayAttribOutOfLoopDeblock */
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000
