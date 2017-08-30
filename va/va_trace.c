@@ -1443,8 +1443,6 @@ void va_TraceCreateMFContext (
     VAMFContextID *mf_context    /* out */
 )
 {
-    DPY2TRACECTX(dpy);
-
     TRACE_FUNCNAME(idx);
     if (mf_context) {
         va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", *mf_context);
@@ -1459,10 +1457,11 @@ void va_TraceMFAddContext (
     VAMFContextID mf_context
 )
 {
-    DPY2TRACECTX(dpy);
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
 }
 
@@ -1472,10 +1471,11 @@ void va_TraceMFReleaseContext (
     VAMFContextID mf_context
 )
 {
-    DPY2TRACECTX(dpy);
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
 }
 
@@ -1488,13 +1488,15 @@ void va_TraceMFSubmit (
 {
     int i;
 
-    DPY2TRACECTX(dpy);
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
 
-    for(i = 0; i < num_contexts; i++)
+    for(i = 0; i < num_contexts; i++){
+        DPY2TRACECTX(dpy, context[i], VA_INVALID_ID);
         va_TraceMsg(trace_ctx, "\t\tcontext[%d] = 0x%08x\n", i, contexts[i]);
+	}
 }
 
 static char * buffer_type_to_string(int type)
