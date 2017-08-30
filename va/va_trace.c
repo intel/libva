@@ -1437,12 +1437,13 @@ void va_TraceDestroyContext (
 
     UNLOCK_CONTEXT(pva_trace);
 }
-
+/*
 void va_TraceCreateMFContext (
     VADisplay dpy,
     VAMFContextID *mf_context    /* out */
 )
 {
+    DPY2TRACECTX(dpy, VA_INVALID_ID, VA_INVALID_ID);
     TRACE_FUNCNAME(idx);
     if (mf_context) {
         va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", *mf_context);
@@ -1461,7 +1462,7 @@ void va_TraceMFAddContext (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
-    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+    trace_ctx->trace_context
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
 }
 
@@ -1498,7 +1499,7 @@ void va_TraceMFSubmit (
         va_TraceMsg(trace_ctx, "\t\tcontext[%d] = 0x%08x\n", i, contexts[i]);
 	}
 }
-
+*/
 static char * buffer_type_to_string(int type)
 {
     switch (type) {
