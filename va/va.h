@@ -1154,7 +1154,11 @@ VAStatus vaCreateMFContext (
  *  context: VAContextID to be added
  *  mf_context: VAMFContextID where context is added
  */
-VAStatus vaMFAddContext (VADisplay dpy, VAContextID context, VAMFContextID mfe_context)
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mfe_context
+);
 
 /**
  * vaMFReleaseContext - Removes context from multi-frame and
@@ -1164,7 +1168,11 @@ VAStatus vaMFAddContext (VADisplay dpy, VAContextID context, VAMFContextID mfe_c
  *  context: VAContextID to be added
  *  mf_context: VAMFContextID where context is added
  */
-VAStatus vaMFReleaseContext (VADisplay dpy, VAContextID context, VAMFContextID mfe_context)
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mfe_context
+);
 
 /**
  * Buffers 
