@@ -1119,7 +1119,7 @@ VAStatus vaCreateContext (
     int num_render_targets,
     VAContextID *context		/* out */
 );
-	
+
 /**
  * vaDestroyContext - Destroy a context 
  *  dpy: display
@@ -1136,7 +1136,7 @@ typedef VAGenericID VAMFContextID;
  * vaCreateMFContext - Create a multi-frame context
  *  Multi-frame context allow to run tasks from different
  *  contexts in single batch buffer for performance optimization.
- *  Multi-frame context destroyd by vaDestroyContext
+ *  Multi-frame context is destroyed through vaDestroyContext
  *  dpy: display
  *  mf_context: created multi-frame context id upon return
  */
@@ -2541,7 +2541,7 @@ VAStatus vaEndPicture (
 /**
  * Make the end of rendering for a pictures in contexts passed with submission. 
  * The server should start processing all pending operations for contexts.
- * All contexts passed to should be associated through vaMFAddContext
+ * All contexts passed should be associated through vaMFAddContext
  * and call sequence Begin/Render/End performed.
  * This call is non-blocking. The client can start another 
  * Begin/Render/End/vaMFSubmit sequence on a different render targets.
