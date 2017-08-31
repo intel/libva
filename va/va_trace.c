@@ -1496,7 +1496,7 @@ void va_TraceMFSubmit (
         va_TraceMsg(trace_ctx, "\t\tcontext[%d] = 0x%08x\n", i, contexts[i]);
 	}
 }
-*/
+
 static char * buffer_type_to_string(int type)
 {
     switch (type) {
