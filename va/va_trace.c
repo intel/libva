@@ -1437,7 +1437,7 @@ void va_TraceDestroyContext (
 
     UNLOCK_CONTEXT(pva_trace);
 }
-/*
+
 void va_TraceCreateMFContext (
     VADisplay dpy,
     VAMFContextID *mf_context    /* out */
@@ -1462,7 +1462,6 @@ void va_TraceMFAddContext (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
-    trace_ctx->trace_context
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
 }
 
@@ -1476,7 +1475,6 @@ void va_TraceMFReleaseContext (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
-    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
 }
 
@@ -1495,7 +1493,6 @@ void va_TraceMFSubmit (
     va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
 
     for(i = 0; i < num_contexts; i++){
-        DPY2TRACECTX(dpy, context[i], VA_INVALID_ID);
         va_TraceMsg(trace_ctx, "\t\tcontext[%d] = 0x%08x\n", i, contexts[i]);
 	}
 }
