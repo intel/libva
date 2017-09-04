@@ -1147,6 +1147,50 @@ VAStatus vaDestroyContext (
     VAContextID context
 );
 
+//Multi-frame context
+typedef VAGenericID VAMFContextID;
+/**
+ * vaCreateMFContext - Create a multi-frame context
+ *  Multi-frame context allow to run tasks from different
+ *  contexts in single batch buffer for performance optimization.
+ *  Multi-frame context is destroyed through vaDestroyContext
+ *  dpy: display
+ *  mf_context: created multi-frame context id upon return
+ */
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+);
+
+/**
+ * vaMFAddContext - Add context into multi-frame and cerate
+ *  association with multi-frame context.
+ *  After association is done, current context will not submit 
+ *  render targets during vaEndPicture, but during vaMFSubmit.
+ *  dpy: display
+ *  context: VAContextID to be added
+ *  mf_context: VAMFContextID where context is added
+ */
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mfe_context
+);
+
+/**
+ * vaMFReleaseContext - Removes context from multi-frame and
+ *  association with multi-frame context.
+ *  After association removed vaEndPicture will submit tasks, but not vaMFSubmit.
+ *  dpy: display
+ *  context: VAContextID to be added
+ *  mf_context: VAMFContextID where context is added
+ */
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mfe_context
+);
+
 /**
  * Buffers 
  * Buffers are used to pass various types of data from the
@@ -2515,6 +2559,24 @@ VAStatus vaRenderPicture (
 VAStatus vaEndPicture (
     VADisplay dpy,
     VAContextID context
+);
+
+/**
+ * Make the end of rendering for a pictures in contexts passed with submission. 
+ * The server should start processing all pending operations for contexts.
+ * All contexts passed should be associated through vaMFAddContext
+ * and call sequence Begin/Render/End performed.
+ * This call is non-blocking. The client can start another 
+ * Begin/Render/End/vaMFSubmit sequence on a different render targets.
+ * dpy: display
+ * mf_context: Multi-Frame context
+ * contexts: list of contexts submitting their tasks for multi-frame operation. 
+ */
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID * contexts,
+    int num_contexts
 );
 
 /*

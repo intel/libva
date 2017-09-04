@@ -431,6 +431,9 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, DestroySurfaces);
                     CHECK_VTABLE(vaStatus, ctx, CreateContext);
                     CHECK_VTABLE(vaStatus, ctx, DestroyContext);
+                    CHECK_VTABLE(vaStatus, ctx, CreateMFContext);
+                    CHECK_VTABLE(vaStatus, ctx, MFAddContext);
+                    CHECK_VTABLE(vaStatus, ctx, MFReleaseContext);
                     CHECK_VTABLE(vaStatus, ctx, CreateBuffer);
                     CHECK_VTABLE(vaStatus, ctx, BufferSetNumElements);
                     CHECK_VTABLE(vaStatus, ctx, MapBuffer);
@@ -439,6 +442,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, BeginPicture);
                     CHECK_VTABLE(vaStatus, ctx, RenderPicture);
                     CHECK_VTABLE(vaStatus, ctx, EndPicture);
+                    CHECK_VTABLE(vaStatus, ctx, MFSubmit);
                     CHECK_VTABLE(vaStatus, ctx, SyncSurface);
                     CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
                     CHECK_VTABLE(vaStatus, ctx, PutSurface);
@@ -1149,6 +1153,78 @@ VAStatus vaDestroyContext (
   VA_TRACE_ALL(va_TraceDestroyContext, dpy, context);
 
   return vaStatus;
+}
+
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    vaStatus = ctx->vtable->vaCreateMFContext( ctx, mf_context);
+    VA_TRACE_ALL(va_TraceCreateMFContext, dpy, mf_context);
+
+    return vaStatus;
+}
+
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mf_context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    vaStatus = ctx->vtable->vaMFAddContext( ctx, context, mf_context);
+    VA_TRACE_ALL(va_TraceMFAddContext, dpy, context, mf_context);
+
+    return vaStatus;
+}
+
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAContextID context,
+    VAMFContextID mf_context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    vaStatus = ctx->vtable->vaMFReleaseContext( ctx, context, mf_context);
+    VA_TRACE_ALL(va_TraceMFReleaseContext, dpy, context, mf_context);
+
+    return vaStatus;
+}
+
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    vaStatus = ctx->vtable->vaMFSubmit( ctx, mf_context, contexts, num_contexts);
+    VA_TRACE_ALL(va_TraceMFSubmit, dpy, mf_context, contexts, num_contexts);
+
+    return vaStatus;
 }
 
 VAStatus vaCreateBuffer (

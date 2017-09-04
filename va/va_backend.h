@@ -133,6 +133,30 @@ struct VADriverVTable
 		VAContextID context
 	);
 
+	VAStatus (*vaCreateMFContext) (
+		VADriverContextP ctx,
+		VAMFContextID *mfe_context    /* out */
+	);
+
+	VAStatus (*vaMFAddContext) (
+		VADriverContextP ctx,
+		VAContextID context,
+		VAMFContextID mf_context
+	);
+
+	VAStatus (*vaMFReleaseContext) (
+		VADriverContextP ctx,
+		VAContextID context,
+		VAMFContextID mf_context
+	);
+
+	VAStatus (*vaMFSubmit) (
+		VADriverContextP ctx,
+		VAMFContextID mf_context,
+		VAContextID *contexts,
+		int num_contexts
+	);
+
 	VAStatus (*vaCreateBuffer) (
 		VADriverContextP ctx,
 		VAContextID context,		/* in */
