@@ -1177,6 +1177,86 @@ VAStatus vaDestroyContext (
     VAContextID context
 );
 
+//Multi-frame context
+typedef VAGenericID VAMFContextID;
+/**
+ * vaCreateMFContext - Create a multi-frame context
+ *  interface encapsulating common for all streams memory objects and structures
+ *  required for single GPU task submission from several VAContextID's.
+ *  Allocation: This call only creates an instance, doesn't allocate any additional memory.
+ *  Support identification: Application can identify multi-frame feature support by ability
+ *  to create multi-frame context. If driver supports multi-frame - call successful,
+ *  mf_context != NULL and VAStatus = VA_STATUS_SUCCESS, otherwise if multi-frame processing
+ *  not supported driver returns VA_STATUS_ERROR_UNIMPLEMENTED and mf_context = NULL.
+ *  return values:
+ *  VA_STATUS_SUCCESS - operation successful.
+ *  VA_STATUS_ERROR_UNIMPLEMENTED - no support for multi-frame.
+ *  dpy: display adapter.
+ *  mf_context: Multi-Frame context encapsulating all associated context
+ *  for multi-frame submission.
+ */
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+);
+
+/**
+ * vaMFAddContext - Provide ability to associate each context used for
+ *  Multi-Frame submission and common Multi-Frame context.
+ *  Try to add context to understand if it is supported.
+ *  Allocation: this call allocates and/or reallocates all memory objects
+ *  common for all contexts associated with particular Multi-Frame context.
+ *  All memory required for each context(pixel buffers, internal driver
+ *  buffers required for processing) allocated during standard vaCreateContext call for each context.
+ *  Runtime dependency - if current implementation doesn't allow to run different entry points/profile,
+ *  first context added will set entry point/profile for whole Multi-Frame context,
+ *  all other entry points and profiles can be rejected to be added.
+ *  Return values:
+ *  VA_STATUS_SUCCESS - operation successful, context was added.
+ *  VA_STATUS_ERROR_OPERATION_FAILED - something unexpected happened - application have to close
+ *  current mf_context and associated contexts and start working with new ones.
+ *  VA_STATUS_ERROR_INVALID_CONTEXT - ContextID is invalid, means:
+ *  1 - mf_context is not valid context or
+ *  2 - driver can't suport different VAEntrypoint or VAProfile simultaneosly
+ *  and current context contradicts with previously added, application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode or other mf_context.
+ *  VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT - particular context being added was created with with
+ *  unsupported VAEntrypoint. Application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode.
+ *  VA_STATUS_ERROR_UNSUPPORTED_PROFILE - Current context with Particular VAEntrypoint is supported
+ *  but VAProfile is not supported. Application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode.
+ *  dpy: display adapter.
+ *  context: context being associated with Multi-Frame context.
+ *  mf_context: - multi-frame context used to associate contexts for multi-frame submission.
+ */
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
+/**
+ * vaMFReleaseContext - Removes context from multi-frame and
+ *  association with multi-frame context.
+ *  After association removed vaEndPicture will submit tasks, but not vaMFSubmit.
+ *  Return values:
+ *  VA_STATUS_SUCCESS - operation successful, context was removed.
+ *  VA_STATUS_ERROR_OPERATION_FAILED - something unexpected happened.
+ *  application need to destroy this VAMFContextID and all assotiated VAContextID
+ *  dpy: display
+ *  mf_context: VAMFContextID where context is added
+ *  context: VAContextID to be added
+ */
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
 /**
  * Buffers 
  * Buffers are used to pass various types of data from the
@@ -2654,10 +2734,38 @@ VAStatus vaRenderPicture (
  * The server should start processing all pending operations for this 
  * surface. This call is non-blocking. The client can start another 
  * Begin/Render/End sequence on a different render target.
+ * if VAContextID used in this function previously successfully passed
+ * vaMFAddContext call, real processing will be started during vaMFSubmit
  */
 VAStatus vaEndPicture (
     VADisplay dpy,
     VAContextID context
+);
+
+/**
+ * Make the end of rendering for a pictures in contexts passed with submission.
+ * The server should start processing all pending operations for contexts.
+ * All contexts passed should be associated through vaMFAddContext
+ * and call sequence Begin/Render/End performed.
+ * This call is non-blocking. The client can start another
+ * Begin/Render/End/vaMFSubmit sequence on a different render targets.
+ * Return values:
+ * VA_STATUS_SUCCESS - operation successful, context was removed.
+ * VA_STATUS_ERROR_INVALID_CONTEXT - mf_context or one of contexts are invalid
+ * due to mf_context not created or one of contexts not assotiated with mf_context
+ * through vaAddContext.
+ * VA_STATUS_ERROR_INVALID_PARAMETER - one of context has not submitted it's frame
+ * through vaBeginPicture vaRenderPicture vaEndPicture call sequence.
+ * dpy: display
+ * mf_context: Multi-Frame context
+ * contexts: list of contexts submitting their tasks for multi-frame operation.
+ * num_contexts: number of passed contexts.
+ */
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID * contexts,
+    int num_contexts
 );
 
 /*

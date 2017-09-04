@@ -436,8 +436,31 @@ struct VADriverVTable
             VABufferID          buf_id          /* in */
         );
 
+        VAStatus (*vaCreateMFContext) (
+            VADriverContextP ctx,
+            VAMFContextID *mfe_context    /* out */
+        );
+
+        VAStatus (*vaMFAddContext) (
+            VADriverContextP ctx,
+            VAMFContextID mf_context,
+            VAContextID context
+        );
+
+        VAStatus (*vaMFReleaseContext) (
+            VADriverContextP ctx,
+            VAMFContextID mf_context,
+            VAContextID context
+        );
+
+        VAStatus (*vaMFSubmit) (
+            VADriverContextP ctx,
+            VAMFContextID mf_context,
+            VAContextID *contexts,
+            int num_contexts
+        );
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[64];
+        unsigned long reserved[60];
 };
 
 struct VADriverContext

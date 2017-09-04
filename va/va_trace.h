@@ -121,6 +121,34 @@ void va_TraceDestroyContext (
 );
 
 DLL_HIDDEN
+void va_TraceCreateMFContext (
+    VADisplay dpy,
+    VAContextID *mf_context	/* out */
+);
+
+DLL_HIDDEN
+void va_TraceMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
+DLL_HIDDEN
+void va_TraceMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
+DLL_HIDDEN
+void va_TraceMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+);
+
+DLL_HIDDEN
 void va_TraceCreateBuffer (
     VADisplay dpy,
     VAContextID context,	/* in */
