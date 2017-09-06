@@ -864,14 +864,17 @@ VAStatus vaQueryConfigAttributes (
 /**
  * Contexts and Surfaces
  *
- * Context represents a "virtual" video decode pipeline. Surfaces are render 
- * targets for a given context. The data in the surfaces are not accessible  
- * to the client and the internal data format of the surface is implementatin 
- * specific. 
+ * Context represents a "virtual" video decode, encode or video processing
+ * pipeline. Surfaces are render targets for a given context. The data in the
+ * surfaces are not accessible to the client except if derived image is supported
+ * and the internal data format of the surface is implementation specific.
  *
- * Surfaces will be bound to a context when the context is created. Once
- * a surface is bound to a given context, it can not be used to create  
- * another context. The association is removed when the context is destroyed
+ * Surfaces are provided as a hint of what surfaces will be used when the context
+ * is created through vaCreateContext(). A surface may be used by different contexts
+ * at the same time as soon as application can make sure the operations are synchronized
+ * between different contexts, e.g. a surface is used as the output of a decode context
+ * and the input of a video process context. Surfaces can only be destroyed after all
+ * contexts using these surfaces have been destroyed.
  * 
  * Both contexts and surfaces are identified by unique IDs and its
  * implementation specific internals are kept opaque to the clients
@@ -1105,7 +1108,7 @@ vaCreateSurfaces(
     
 /**
  * vaDestroySurfaces - Destroy resources associated with surfaces. 
- *  Surfaces can only be destroyed after the context associated has been 
+ *  Surfaces can only be destroyed after all contexts using these surfaces have been
  *  destroyed.  
  *  dpy: display
  *  surfaces: array of surfaces to destroy
@@ -1126,7 +1129,7 @@ VAStatus vaDestroySurfaces (
  *  picture_height: coded picture height
  *  flag: any combination of the following:
  *    VA_PROGRESSIVE (only progressive frame pictures in the sequence when set)
- *  render_targets: render targets (surfaces) tied to the context
+ *  render_targets: a hint for render targets (surfaces) tied to the context
  *  num_render_targets: number of render targets in the above array
  *  context: created context id upon return
  */
