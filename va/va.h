@@ -3237,9 +3237,9 @@ typedef struct _VASurfaceDecodeMBErrors
     uint32_t start_mb; /* start mb address with errors */
     uint32_t end_mb;  /* end mb address with errors */
     VADecodeErrorType decode_error_type;
-
+    uint32_t num_mb;   /* number of mbs with errors */
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VASurfaceDecodeMBErrors;
 
 /**
