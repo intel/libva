@@ -617,6 +617,40 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMacroblockParameterBufferH264;
 
+/**
+ * \brief MB partition modes and 1/2 1/4 motion search configuration
+ *
+ * Specifies MB partition modes that are disabled. Specifies Half-pel
+ * mode and Quarter-pel mode searching
+ */
+typedef struct _VAEncMiscParameterSubMbPartPelH264
+{
+    uint32_t disable_inter_sub_mb_partition;
+    union {
+        struct {
+            uint32_t disable_16x16_inter_mb_partition        : 1;
+            uint32_t disable_16x8_inter_mb_partition         : 1;
+            uint32_t disable_8x16_inter_mb_partition         : 1;
+            uint32_t disable_8x8_inter_mb_partition          : 1;
+            uint32_t disable_8x4_inter_mb_partition          : 1;
+            uint32_t disable_4x8_inter_mb_partition          : 1;
+            uint32_t disable_4x4_inter_mb_partition          : 1;
+            uint32_t reserved                                : 1;
+        } bits;
+         uint8_t value;
+    } inter_sub_mb_partition_mask;
+
+    /**
+     * \brief Precison of motion search
+     * 0:Integer mode searching
+     * 1:Half-pel mode searching
+     * 2:Reserved
+     * 3:Quarter-pel mode searching
+     */
+    uint32_t enable_sub_pel_mode;
+    uint8_t sub_pel_mode;
+    uint8_t reserved[3];
+} VAEncMiscParameterSubMbPartPelH264;
 /**@}*/
 
 #ifdef __cplusplus
