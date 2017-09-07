@@ -501,7 +501,7 @@ static void va_TraceSurfaceAttributes(
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
-                int j;
+                unsigned int j;
                 
                 va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
                 va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
@@ -2311,7 +2311,7 @@ static void va_TraceVAEncMiscParameterBuffer(
     unsigned int num_elements,
     void *data)
 {
-    int i;
+    unsigned int i;
     VAEncMiscParameterBuffer* tmp = (VAEncMiscParameterBuffer*)data;
     DPY2TRACECTX(dpy);
     
@@ -3742,7 +3742,7 @@ va_TraceProcFilterParameterBuffer(
     unsigned int size;
     unsigned int num_elements;
     VAProcFilterParameterBufferBase *base_filter = NULL;
-    int i;
+    unsigned int i;
 
     DPY2TRACECTX(dpy);
 
@@ -3807,7 +3807,7 @@ va_TraceVAProcPipelineParameterBuffer(
 )
 {
     VAProcPipelineParameterBuffer *p = (VAProcPipelineParameterBuffer *)data;
-    int i;
+    unsigned int i;
 
     DPY2TRACECTX(dpy);
 

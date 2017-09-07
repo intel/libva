@@ -250,7 +250,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 { 0, 34 },
                 { 0, 33 },
                 { 0, 32 },
-                { -1, }
+                { -1, -1}
             };
 
             for (i = 0; compatible_versions[i].major >= 0; i++) {
@@ -455,7 +455,8 @@ VAStatus vaSetDriverName(
     VADriverContextP ctx;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     char *override_driver_name = NULL;
-    int i, found;
+    int found;
+    unsigned int i;
     ctx = CTX(dpy);
 
     if (geteuid() != getuid()) {
@@ -554,7 +555,7 @@ VAStatus vaInitialize (
     }
 
     if ((VA_STATUS_SUCCESS == vaStatus) && (driver_name != NULL)) {
-        if (!strncmp(driver_name, "/", sizeof(driver_name))
+        if (!strcmp(driver_name, "/")
             || !strncmp(driver_name, "/etc/", 5)
             || !strncmp(driver_name, "../", 3)) {
             va_errorMessage("Illegal path may expose to path traversal attack, driver_name=%s\n",driver_name);
@@ -808,7 +809,7 @@ va_impl_query_surface_attributes(
         { VASurfaceAttribMinHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMaxHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMemoryType,    VAGenericValueTypeInteger },
-        { VASurfaceAttribNone, }
+        { VASurfaceAttribNone,          VAGenericValueTypeInteger }
     };
 
     if (!out_attribs || !out_num_attribs_ptr)

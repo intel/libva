@@ -271,10 +271,11 @@ VAStatus va_FoolBufferInfo(
 static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
 {
     char file_name[1024];
-    struct stat file_stat = {0};
+    struct stat file_stat;
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
 
+    memset(&file_stat, 0, sizeof(file_stat));
     /* try file_name.file_count, if fail, try file_name.file_count-- */
     for (i=0; i<=1; i++) {
         snprintf(file_name, 1024, "%s.%d",
@@ -308,10 +309,11 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
 
 static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
 {
-    struct stat file_stat = {0};
+    struct stat file_stat;
     VACodedBufferSegment *codedbuf;
     int fd = -1;
 
+    memset(&file_stat, 0, sizeof(file_stat));
     if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
         fstat(fd, &file_stat);
         fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);

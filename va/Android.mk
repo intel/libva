@@ -56,9 +56,9 @@ LOCAL_CFLAGS_64 += \
 
 # Android Jelly Bean defined ALOGx, older versions use LOGx
 ifeq ($(ALOG_VERSION), $(ALOG_VERSION_REQ))
-LOCAL_CFLAGS += -DANDROID_ALOG
+LOCAL_CFLAGS += -DANDROID_ALOG  -Wno-unused-parameter
 else
-LOCAL_CFLAGS += -DANDROID_LOG
+LOCAL_CFLAGS += -DANDROID_LOG  -Wno-unused-parameter
 endif
 
 LOCAL_C_INCLUDES += \
