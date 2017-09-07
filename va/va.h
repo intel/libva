@@ -686,6 +686,12 @@ typedef enum
      * tiling structure, should be ignored. 0 - unsupported, 1 - supported.
      */
      VAConfigAttribEncTileSupport        = 35,
+    /**
+     * \brief whether accept rouding setting from application. Read-only.
+     * This attribute is for encode quality, if it is report,
+     * application can change the rounding setting by VAEncMiscParameterTypeCustomRoundingControl
+     */
+    VAConfigAttribCustomRoundingControl = 36,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1581,7 +1587,7 @@ typedef struct _VAProcessingRateParameter {
  * This function queries the processing rate based on parameters in
  * \c proc_buf for the given \c config. Upon successful return, the processing
  * rate value will be stored in \c processing_rate. Processing rate is
- * specified as the number of macroblocks per second.
+ * specified as the number of macroblocks/CTU per second.
  *
  * If NULL is passed to the \c proc_buf, the default processing rate for the
  * given configuration will be returned.
@@ -1629,6 +1635,12 @@ typedef enum
     VAEncMiscParameterTypeDirtyRect      = 13,
     /** \brief Buffer type used for parallel BRC parameters. */
     VAEncMiscParameterTypeParallelBRC   = 14,
+    /** \brief Set MB partion mode mask and Half-pel/Quant-pel motion search */
+    VAEncMiscParameterTypeSubMbPartPel = 15,
+    /** \brief set encode quality tuning */
+    VAEncMiscParameterTypeEncQuality = 16,
+    /** \brief Buffer type used for encoder rounding offset parameters. */
+    VAEncMiscParameterTypeCustomRoundingControl = 17,
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
 } VAEncMiscParameterType;
@@ -2082,6 +2094,117 @@ typedef struct _VAEncMiscParameterParallelRateControl {
     uint32_t *num_b_in_gop;
 } VAEncMiscParameterParallelRateControl;
 
+/** per frame encoder quality controls, once set they will persist for all future frames
+  *till it is updated again. */
+typedef struct _VAEncMiscParameterEncQuality
+{
+    union
+    {
+        struct
+        {
+            /** Use raw frames for reference instead of reconstructed frames.
+              * it only impact motion estimation (ME)  stage, and will not impact MC stage
+              * so the reconstruct picture will can match with decode side */
+            uint32_t useRawPicForRef                    : 1;
+            /**  Disables skip check for ME stage, it will increase the bistream size
+              * but will improve the qulity */
+            uint32_t skipCheckDisable                   : 1;
+            /**  Indicates app will override default driver FTQ settings using FTQEnable.
+              *  FTQ is forward transform quantization */
+            uint32_t FTQOverride                        : 1;
+            /** Enables/disables FTQ. */
+            uint32_t FTQEnable                          : 1;
+            /** Indicates the app will provide the Skip Threshold LUT to use when FTQ is
+              * enabled (FTQSkipThresholdLUT), else default driver thresholds will be used. */
+            uint32_t FTQSkipThresholdLUTInput           : 1;
+            /** Indicates the app will provide the Skip Threshold LUT to use when FTQ is
+              * disabled (NonFTQSkipThresholdLUT), else default driver thresholds will be used. */
+            uint32_t NonFTQSkipThresholdLUTInput        : 1;
+            uint32_t ReservedBit                        : 1;
+            /** Control to enable the ME mode decision algorithm to bias to fewer B Direct/Skip types.
+              * Applies only to B frames, all other frames will ignore this setting.  */
+            uint32_t directBiasAdjustmentEnable         : 1;
+            /** Enables global motion bias. global motion also is called HME (Heirarchical Motion Estimation )
+              * HME is used to handle large motions and avoiding local minima in the video encoding process
+              * down scaled the input and reference picture, then do ME. the result will be a predictor to next level HME or ME
+              * current interface divide the HME to 3 level. UltraHME , SuperHME, and HME, result of UltraHME will be input of SurperHME,
+              * result of superHME will be a input for HME. HME result will be input of ME. it is a switch for HMEMVCostScalingFactor
+              * can change the HME bias inside RDO stage*/
+            uint32_t globalMotionBiasAdjustmentEnable   : 1;
+            /** MV cost scaling ratio for HME ( predictors.  It is used when
+              * globalMotionBiasAdjustmentEnable == 1, else it is ignored.  Values are:
+              *     0: set MV cost to be 0 for HME predictor.
+              *     1: scale MV cost to be 1/2 of the default value for HME predictor.
+              *     2: scale MV cost to be 1/4 of the default value for HME predictor.
+              *     3: scale MV cost to be 1/8 of the default value for HME predictor. */
+            uint32_t HMEMVCostScalingFactor             : 2;
+            /**disable HME, if it is disabled. Super*ultraHME should also be disabled  */
+            uint32_t HMEDisable                         : 1;
+            /**disable Super HME, if it is disabled, ultraHME should be disabled */
+            uint32_t SuperHMEDisable                    : 1;
+            /** disable Ultra HME */
+            uint32_t UltraHMEDisable                    : 1;
+            /** disable panic mode. Panic mode happened when there are extreme BRC (bit rate control) requirement
+              * frame size cant achieve the target of BRC.  when Panic mode is triggered, Coefficients will
+              *  be set to zero. disable panic mode will improve quality but will impact BRC */
+            uint32_t PanicModeDisable                   : 1;
+            /** Force RepartitionCheck
+             *  0: DEFAULT - follow driver default settings.
+             *  1: FORCE_ENABLE - enable this feature totally for all cases.
+             *  2: FORCE_DISABLE - disable this feature totally for all cases. */
+            uint32_t ForceRepartitionCheck              : 2;
+
+        };
+        uint32_t encControls;
+    };
+
+    /** Maps QP to skip thresholds when FTQ is enabled.  Valid range is 0-255. */
+    uint8_t FTQSkipThresholdLUT[52];
+    /** Maps QP to skip thresholds when FTQ is disabled.  Valid range is 0-65535. */
+    uint16_t NonFTQSkipThresholdLUT[52];
+
+    uint32_t reserved[VA_PADDING_HIGH];  // Reserved for future use.
+
+} VAEncMiscParameterEncQuality;
+
+/**
+ *  \brief Custom Encoder Rounding Offset Control.
+ *  Application may use this structure to set customized rounding
+ *  offset parameters for quantization.
+ *  Valid when \c VAConfigAttribCustomRoundingControl equals 1.
+ */
+typedef struct _VAEncMiscParameterCustomRoundingControl
+{
+    union {
+        struct {
+            /** \brief Enable customized rounding offset for intra blocks.
+             *  If 0, default value would be taken by driver for intra
+             *  rounding offset.
+             */
+            uint32_t    enable_custom_rouding_intra     : 1 ;
+
+            /** \brief Intra rounding offset
+             *  Ignored if \c enable_custom_rouding_intra equals 0.
+             */
+            uint32_t    rounding_offset_intra           : 7;
+
+            /** \brief Enable customized rounding offset for inter blocks.
+             *  If 0, default value would be taken by driver for inter
+             *  rounding offset.
+             */
+            uint32_t    enable_custom_rounding_inter    : 1 ;
+
+            /** \brief Inter rounding offset
+             *  Ignored if \c enable_custom_rouding_inter equals 0.
+             */
+            uint32_t    rounding_offset_inter           : 7;
+
+           /* Reserved */
+            uint32_t    reserved                        :16;
+        }  bits;
+        uint32_t    value;
+    }   rounding_offset_setting;
+} VAEncMiscParameterCustomRoundingControl;
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
  * the data for the entire slice, and the following flags will be used in the slice
