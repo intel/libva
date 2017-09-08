@@ -615,11 +615,26 @@ typedef struct _VAConfigAttrib {
 /**@{*/
 /** \brief Driver does not support any packed headers mode. */
 #define VA_ENC_PACKED_HEADER_NONE       0x00000000
-/** \brief Driver supports packed sequence headers. e.g. SPS for H.264. */
+/**
+ * \brief Driver supports packed sequence headers. e.g. SPS for H.264.
+ *
+ * Application must provide it to driver once this flag is returned through
+ * vaGetConfigAttributes()
+ */
 #define VA_ENC_PACKED_HEADER_SEQUENCE   0x00000001
-/** \brief Driver supports packed picture headers. e.g. PPS for H.264. */
+/**
+ * \brief Driver supports packed picture headers. e.g. PPS for H.264.
+ *
+ * Application must provide it to driver once this falg is returned through
+ * vaGetConfigAttributes()
+ */
 #define VA_ENC_PACKED_HEADER_PICTURE    0x00000002
-/** \brief Driver supports packed slice headers. e.g. \c slice_header() for H.264. */
+/**
+ * \brief Driver supports packed slice headers. e.g. slice_header() for H.264.
+ *
+ * Application must provide it to driver once this flag is returned through
+ * vaGetConfigAttributes()
+ */
 #define VA_ENC_PACKED_HEADER_SLICE      0x00000004
 /**
  * \brief Driver supports misc packed headers. e.g. SEI for H.264.
