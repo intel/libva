@@ -107,11 +107,13 @@ extern "C" {
  * enable hardware accelerated video decode and encode at various
  * entry-points (VLD, IDCT, Motion Compensation etc.) for the
  * prevailing coding standards today (MPEG-2, MPEG-4 ASP/H.263, MPEG-4
- * AVC/H.264, VC-1/VMW3, and JPEG).
+ * AVC/H.264, VC-1/VMW3, and JPEG, HEVC/H265, VP8, VP9) and video pre/post
+ * processing
  *
  * VA-API is split into several modules:
  * - \ref api_core
- * - \ref api_enc_h264
+ * - \ref api_enc_xxx (xxx = h264, hevc, jpec, mpeg2, vp8, vp9)
+ * - \ref api_dec_xxx (xxx = hevc, jpec, vp8, vp9)
  * - \ref api_vpp
  */
 
@@ -124,9 +126,9 @@ extern "C" {
 /**
 Overview 
 
-The VA API is intended to provide an interface between a video decode/encode/display
+The VA API is intended to provide an interface between a video decode/encode/processing
 application (client) and a hardware accelerator (server), to off-load 
-video decode/encode/display operations from the host to the hardware accelerator at various 
+video decode/encode/processing operations from the host to the hardware accelerator at various
 entry-points.
 
 The basic operation steps are:
@@ -134,18 +136,18 @@ The basic operation steps are:
 - Negotiate a mutually acceptable configuration with the server to lock
   down profile, entrypoints, and other attributes that will not change on 
   a frame-by-frame basis.
-- Create a decode context which represents a "virtualized" hardware decode 
-  device
-- Get and fill decode buffers with picture level, slice level and macroblock 
-  level data (depending on entrypoints)
-- Pass the decode buffers to the server to decode the current frame
+- Create a video decode, encode or processing context which represents a
+  "virtualized" hardware device
+- Get and fill the render buffers with the corresponding data (depending on
+  profiles and entrypoints)
+- Pass the render buffers to the server to handle the current frame
 
 Initialization & Configuration Management 
 
 - Find out supported profiles
 - Find out entrypoints for a given profile
 - Find out configuration attributes for a given profile/entrypoint pair
-- Create a configuration for use by the decoder
+- Create a configuration for use by the application
 
 */
 
@@ -822,7 +824,7 @@ typedef unsigned int VAGenericID;
 typedef VAGenericID VAConfigID;
 
 /**
- * Create a configuration for the decode pipeline 
+ * Create a configuration for the video decode/encode/processing pipeline
  * it passes in the attribute list that specifies the attributes it cares 
  * about, with the rest taking default values.  
  */
@@ -2486,16 +2488,20 @@ vaAcquireBufferHandle(VADisplay dpy, VABufferID buf_id, VABufferInfo *buf_info);
 VAStatus
 vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id);
 
-/*
-Render (Decode) Pictures
-
-A picture represents either a frame or a field.
-
-The Begin/Render/End sequence sends the decode buffers to the server
-*/
+/**
+ * Render (Video Decode/Encode/Processing) Pictures
+ *
+ * A picture represents either a frame or a field.
+ *
+ * The Begin/Render/End sequence sends the video decode/encode/processing buffers
+ * to the server
+ */
 
 /**
- * Get ready to decode a picture to a target surface
+ * Get ready for a video pipeline
+ * - decode a picture to a target surface
+ * - encode a picture from a target surface
+ * - process a picture to a target surface
  */
 VAStatus vaBeginPicture (
     VADisplay dpy,
@@ -2504,7 +2510,7 @@ VAStatus vaBeginPicture (
 );
 
 /**
- * Send decode buffers to the server.
+ * Send video decode, encode or processing buffers to the server.
  */
 VAStatus vaRenderPicture (
     VADisplay dpy,
