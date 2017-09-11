@@ -246,6 +246,8 @@ typedef struct _VAEncSequenceParameterBufferH264 {
             uint32_t log2_max_mv_length_horizontal          : 5;
             /** \brief Range: 0 to 16, inclusive. */
             uint32_t log2_max_mv_length_vertical            : 5;
+            /** \brief Reserved for future use, must be zero */
+            uint32_t reserved                               : 19;
         } bits;
         uint32_t value;
     } vui_fields;
@@ -259,6 +261,9 @@ typedef struct _VAEncSequenceParameterBufferH264 {
     uint32_t    num_units_in_tick;
     /** \brief Same as the H.264 bitstream syntax element. */
     uint32_t    time_scale;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
     /**@}*/
 } VAEncSequenceParameterBufferH264;
 
@@ -371,6 +376,9 @@ typedef struct _VAEncPictureParameterBufferH264 {
         } bits;
         uint32_t value;
     } pic_fields;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferH264;
 
 typedef struct _VAEncQPBufferH264 {
@@ -514,6 +522,9 @@ typedef struct _VAEncSliceParameterBufferH264 {
     int8_t     slice_alpha_c0_offset_div2;
     /** \brief Same as the H.264 bitstream syntax element. */
     int8_t     slice_beta_offset_div2;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
     /**@}*/
 } VAEncSliceParameterBufferH264;
 
@@ -595,6 +606,9 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
         } inter_fields;
         /**@}*/
     } info;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMacroblockParameterBufferH264;
 
 /**@}*/

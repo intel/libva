@@ -190,6 +190,8 @@ typedef struct  _VAPictureParameterBufferHEVC
      */
     uint32_t                st_rps_bits;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAPictureParameterBufferHEVC;
 
 /**
@@ -321,6 +323,8 @@ typedef struct  _VASliceParameterBufferHEVC
     uint8_t                 five_minus_max_num_merge_cand;
     /**@}*/
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferHEVC;
 
 
@@ -379,6 +383,9 @@ typedef struct _VAIQMatrixBufferHEVC
      * with sizeID = 3 and matrixID in the range of 0 to 1, inclusive.
      */
     uint8_t                 ScalingListDC32x32[2];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferHEVC;
 
 

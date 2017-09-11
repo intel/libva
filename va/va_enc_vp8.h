@@ -93,6 +93,8 @@ typedef struct  _VAEncSequenceParameterBufferVP8
      */
     VASurfaceID reference_frames[4];
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferVP8;
 
 
@@ -128,6 +130,7 @@ typedef struct  _VAEncPictureParameterBufferVP8
             uint32_t no_ref_gf                      : 1;
             /* don't reference the alternate reference frame */
             uint32_t no_ref_arf                     : 1;
+            /** \brief Reserved for future use, must be zero */
             uint32_t reserved                       : 28;
         } bits;
         uint32_t value;
@@ -278,7 +281,9 @@ typedef struct  _VAEncPictureParameterBufferVP8
      * otherwise they are ignored. 
      */
     uint8_t clamp_qindex_low;
-	
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferVP8;
 
 
@@ -302,6 +307,9 @@ typedef struct _VAEncMBMapBufferVP8
      * per MB Segmentation ID Buffer
      */
     uint8_t *mb_segment_id;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMBMapBufferVP8;
 
 
@@ -317,6 +325,9 @@ typedef struct _VAQMatrixBufferVP8
 {
     uint16_t quantization_index[4];
     int16_t quantization_index_delta[5];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAQMatrixBufferVP8;
 
 

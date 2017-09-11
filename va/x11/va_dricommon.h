@@ -55,6 +55,8 @@ union dri_buffer
         unsigned int pitch;
         unsigned int cpp;
         unsigned int flags;
+        /** \brief Reserved bytes for future use, must be zero */
+        unsigned int va_reserved[8];
     } dri2;
 };
 
@@ -82,6 +84,8 @@ struct dri_state
     union dri_buffer *(*getRenderingBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     void (*close)(VADriverContextP ctx);
 #endif
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long  va_reserved[16];
 };
 
 Bool va_isDRI2Connected(VADriverContextP ctx, char **driver_name);

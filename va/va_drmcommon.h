@@ -66,6 +66,8 @@ struct drm_state {
     int         fd;
     /** \brief DRM authentication type. */
     int         auth_type;
+    /** \brief Reserved bytes for future use, must be zero */
+    int         va_reserved[8];
 };
 
 /** \brief Kernel DRM buffer memory type.  */

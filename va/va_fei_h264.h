@@ -134,7 +134,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
     uint32_t      num_passes;
     /** \brief delta QP list for every pass */
     uint8_t       *delta_qp;
-    uint32_t      reserved3[2];
+    uint32_t      reserved3[VA_PADDING_LOW];
 } VAEncMiscParameterFEIFrameControlH264;
 
 /** \brief FEI MB level control data structure */

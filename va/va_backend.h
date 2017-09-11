@@ -435,6 +435,9 @@ struct VADriverVTable
             VADriverContextP    ctx,
             VABufferID          buf_id          /* in */
         );
+
+        /** \brief Reserved bytes for future use, must be zero */
+        unsigned long reserved[64];
 };
 
 struct VADriverContext
@@ -558,6 +561,9 @@ struct VADisplayContext
     void *error_callback_user_context;
     VAMessageCallback info_callback;
     void *info_callback_user_context;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long reserved[32];
 };
 
 typedef VAStatus (*VADriverInit) (

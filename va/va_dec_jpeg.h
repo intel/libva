@@ -70,6 +70,9 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
     }                   components[255];
     /** \brief Number of components in frame (Nf). */
     uint8_t       num_components;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAPictureParameterBufferJPEGBaseline;
 
 /**
@@ -91,6 +94,9 @@ typedef struct _VAIQMatrixBufferJPEGBaseline {
     uint8_t       load_quantiser_table[4];
     /** \brief Quanziation tables indexed by table identifier (Tqi). */
     uint8_t       quantiser_table[4][64];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferJPEGBaseline;
 
 /**
@@ -131,6 +137,9 @@ typedef struct _VASliceParameterBufferJPEGBaseline {
     uint16_t      restart_interval;
     /** \brief Number of MCUs in a scan. */
     uint32_t        num_mcus;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferJPEGBaseline;
 
 /**@}*/

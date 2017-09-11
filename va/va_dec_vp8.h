@@ -157,6 +157,8 @@ typedef struct  _VAPictureParameterBufferVP8
 
     VABoolCoderContextVPX bool_coder_ctx;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAPictureParameterBufferVP8;
 
 /**
@@ -197,6 +199,9 @@ typedef struct  _VASliceParameterBufferVP8
      * exclude the uncompress data chunk since first_part_size 'excluding the uncompressed data chunk'
      */
     uint32_t partition_size[9];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferVP8;
 
 /**
@@ -216,6 +221,9 @@ typedef struct  _VASliceParameterBufferVP8
 typedef struct _VAProbabilityDataBufferVP8
 {
     uint8_t dct_coeff_probs[4][8][3][11];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProbabilityDataBufferVP8;
 
 /**
@@ -232,6 +240,9 @@ typedef struct _VAIQMatrixBufferVP8
      * all Q indexs should be clipped to be range [0, 127]
      */
     uint16_t quantization_index[4][6];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferVP8;
 
 /**@}*/
