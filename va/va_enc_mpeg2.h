@@ -165,6 +165,9 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
         } bits;
         uint32_t value;
     } gop_header;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferMPEG2;
 
 /**
@@ -261,6 +264,9 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
         } bits;
         uint32_t value;
     } composite_display;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferMPEG2;
 
 /**
@@ -276,6 +282,9 @@ typedef struct _VAEncSliceParameterBufferMPEG2 {
     int32_t quantiser_scale_code;
     /** \brief Flag to indicate intra slice */
     int32_t is_intra_slice;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSliceParameterBufferMPEG2;
 
 /**@}*/

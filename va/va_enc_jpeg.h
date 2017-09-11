@@ -107,6 +107,8 @@ typedef struct  _VAEncPictureParameterBufferJPEG
     /** \brief number from 1 to 100 that specifies quality of image. */
     uint8_t    quality;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferJPEG;
 
 
@@ -129,6 +131,9 @@ typedef struct _VAEncSliceParameterBufferJPEG {
         /** \brief AC entropy coding table selector (Taj). */
         uint8_t   ac_table_selector;
     } components[4];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSliceParameterBufferJPEG;
 
 /**
@@ -145,6 +150,9 @@ typedef struct _VAQMatrixBufferJPEG
     uint8_t lum_quantiser_matrix[64];
     /** \brief chroma quantization table. */
     uint8_t chroma_quantiser_matrix[64];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAQMatrixBufferJPEG;
 
 /**@}*/

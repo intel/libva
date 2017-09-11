@@ -354,6 +354,9 @@ typedef struct _VAProcPipelineCaps {
     VAProcColorStandardType *output_color_standards;
     /** \brief Number of elements in \ref output_color_standards array. */
     uint32_t        num_output_color_standards;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LARGE];
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -366,6 +369,9 @@ typedef struct _VAProcFilterValueRange {
     float               default_value;
     /** \brief Step value that alters the filter behaviour in a sensible way. */
     float               step;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterValueRange;
 
 /**
@@ -501,6 +507,9 @@ typedef struct _VAProcPipelineParameterBuffer {
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
     uint32_t        num_backward_references;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LARGE];
 } VAProcPipelineParameterBuffer;
 
 /**
@@ -526,6 +535,9 @@ typedef struct _VAProcFilterParameterBuffer {
     VAProcFilterType    type;
     /** \brief Value. */
     float               value;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBuffer;
 
 /** @name De-interlacing flags */
@@ -555,6 +567,9 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     VAProcDeinterlacingType     algorithm;
     /** \brief Deinterlacing flags. */
     uint32_t     		flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**
@@ -616,6 +631,9 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
      *   disabled and other attribute of the same type is used instead.
      */
     float                       value;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBufferColorBalance;
 
 /**
@@ -627,12 +645,18 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
 typedef struct _VAProcFilterCap {
     /** \brief Range of supported values for the filter. */
     VAProcFilterValueRange      range;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCap;
 
 /** \brief Capabilities specification for the deinterlacing filter. */
 typedef struct _VAProcFilterCapDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     type;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCapDeinterlacing;
 
 /** \brief Capabilities specification for the color balance filter. */
@@ -641,6 +665,9 @@ typedef struct _VAProcFilterCapColorBalance {
     VAProcColorBalanceType      type;
     /** \brief Range of supported values for the specified operation. */
     VAProcFilterValueRange      range;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCapColorBalance;
 
 /**

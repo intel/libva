@@ -231,6 +231,12 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
+/** Padding size in 4-bytes */
+#define VA_PADDING_LOW          4
+#define VA_PADDING_MEDIUM       8
+#define VA_PADDING_HIGH         16
+#define VA_PADDING_LARGE        32
+
 /**
  * Returns a short english description of error_status
  */
@@ -1306,6 +1312,9 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
     uint32_t                bit_length;
     /** \brief Flag: buffer contains start code emulation prevention bytes? */
     uint8_t               has_emulation_bytes;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPackedHeaderParameterBuffer;
 
 /**
@@ -1345,6 +1354,9 @@ typedef struct _VAEncMiscParameterTemporalLayerStructure
      * ids for frames starting from the 2nd frame.
      */
     uint32_t layer_id[32];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterTemporalLayerStructure;
 
 
@@ -1378,10 +1390,14 @@ typedef struct _VAEncMiscParameterRateControl
              * The temporal layer that the rate control parameters are specified for.
              */
             uint32_t temporal_id : 8;
+            /** \brief Reserved for future use, must be zero */
             uint32_t reserved : 17;
         } bits;
         uint32_t value;
     } rc_flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
@@ -1417,6 +1433,9 @@ typedef struct _VAEncMiscParameterFrameRate
          } bits;
          uint32_t value;
      } framerate_flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterFrameRate;
 
 /**
@@ -1427,6 +1446,9 @@ typedef struct _VAEncMiscParameterFrameRate
 typedef struct _VAEncMiscParameterMaxSliceSize
 {
     uint32_t max_slice_size;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterMaxSliceSize;
 
 typedef struct _VAEncMiscParameterAIR
@@ -1434,12 +1456,18 @@ typedef struct _VAEncMiscParameterAIR
     uint32_t air_num_mbs;
     uint32_t air_threshold;
     uint32_t air_auto; /* if set to 1 then hardware auto-tune the AIR threshold */
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterAIR;
 
 typedef struct _VAEncMiscParameterHRD
 {
     uint32_t initial_buffer_fullness;       /* in bits */
     uint32_t buffer_size;                   /* in bits */
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterHRD;
 
 /**
@@ -1456,6 +1484,9 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in bits). */
     uint32_t                max_frame_size;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferMaxFrameSize;
 
 /**
@@ -1474,6 +1505,9 @@ typedef struct _VAEncMiscParameterBufferQualityLevel {
      * level is used.
      */
     uint32_t                quality_level;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferQualityLevel;
 
 /**
@@ -1498,6 +1532,9 @@ typedef struct _VAEncMiscParameterSkipFrame {
     /** \brief When skip_frame_flag = 1, the size of the skipped frames in bits.   When skip_frame_flag = 2, 
       * the size of the current skipped frame that is to be packed/encrypted in bits. */
     uint32_t                size_skip_frames;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterSkipFrame;
 
 /**
@@ -1568,6 +1605,9 @@ typedef struct _VAEncMiscParameterBufferROI {
         } bits;
         uint32_t value;
     } roi_flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferROI;
 
 /**
@@ -1628,6 +1668,9 @@ typedef struct _VAHuffmanTableBufferJPEGBaseline {
         uint8_t   pad[2];
         /**@}*/
     }                   huffman_table[2];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAHuffmanTableBufferJPEGBaseline;
 
 /****************************
@@ -1666,6 +1709,9 @@ typedef struct _VAPictureParameterBufferMPEG2
         } bits;
         uint32_t value;
     } picture_coding_extension;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAPictureParameterBufferMPEG2;
 
 /** MPEG-2 Inverse Quantization Matrix Buffer */
@@ -1687,6 +1733,9 @@ typedef struct _VAIQMatrixBufferMPEG2
     uint8_t chroma_intra_quantiser_matrix[64];
     /** \brief Chroma non-intra matrix, in zig-zag scan order. */
     uint8_t chroma_non_intra_quantiser_matrix[64];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferMPEG2;
 
 /** MPEG-2 Slice Parameter Buffer */
@@ -1700,6 +1749,9 @@ typedef struct _VASliceParameterBufferMPEG2
     uint32_t slice_vertical_position;
     int32_t quantiser_scale_code;
     int32_t intra_slice_flag;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferMPEG2;
 
 /** MPEG-2 Macroblock Parameter Buffer */
@@ -1739,6 +1791,9 @@ typedef struct _VAMacroblockParameterBufferMPEG2
      
     /* Number of skipped macroblocks after this macroblock */
     uint16_t num_skipped_macroblocks;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAMacroblockParameterBufferMPEG2;
 
 /* 
@@ -1810,6 +1865,9 @@ typedef struct _VAPictureParameterBufferMPEG4
     /* for direct mode prediction */
     int16_t TRB;
     int16_t TRD;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAPictureParameterBufferMPEG4;
 
 /** MPEG-4 Inverse Quantization Matrix Buffer */
@@ -1823,6 +1881,9 @@ typedef struct _VAIQMatrixBufferMPEG4
     uint8_t intra_quant_mat[64];
     /** The matrix for non-intra blocks, in zig-zag scan order. */
     uint8_t non_intra_quant_mat[64];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferMPEG4;
 
 /** MPEG-4 Slice Parameter Buffer */
@@ -1834,6 +1895,9 @@ typedef struct _VASliceParameterBufferMPEG4
     uint32_t macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
     uint32_t macroblock_number;
     int32_t quant_scale;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferMPEG4;
 
 /**
@@ -2007,6 +2071,9 @@ typedef struct _VAPictureParameterBufferVC1
         } bits;
         uint32_t value;
     } transform_fields;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAPictureParameterBufferVC1;
 
 /** VC-1 Bitplane Buffer
@@ -2035,6 +2102,9 @@ typedef struct _VASliceParameterBufferVC1
     uint32_t slice_data_flag; /* see VA_SLICE_DATA_FLAG_XXX defintions */
     uint32_t macroblock_offset;/* the offset to the first bit of MB from the first byte of slice data */
     uint32_t slice_vertical_position;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferVC1;
 
 /* VC-1 Slice Data Buffer */
@@ -2053,6 +2123,9 @@ typedef struct _VAPictureH264
     uint32_t flags;
     int32_t TopFieldOrderCnt;
     int32_t BottomFieldOrderCnt;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAPictureH264;
 /* flags in VAPictureH264 could be OR of the following */
 #define VA_PICTURE_H264_INVALID			0x00000001
@@ -2115,6 +2188,9 @@ typedef struct _VAPictureParameterBufferH264
         uint32_t value;
     } pic_fields;
     uint16_t frame_num;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAPictureParameterBufferH264;
 
 /** H.264 Inverse Quantization Matrix Buffer */
@@ -2124,6 +2200,9 @@ typedef struct _VAIQMatrixBufferH264
     uint8_t ScalingList4x4[6][16];
     /** \brief 8x8 scaling list, in raster scan order. */
     uint8_t ScalingList8x8[2][64];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferH264;
 
 /** H.264 Slice Parameter Buffer */
@@ -2182,6 +2261,9 @@ typedef struct _VASliceParameterBufferH264
     uint8_t chroma_weight_l1_flag;
     int16_t chroma_weight_l1[32][2];
     int16_t chroma_offset_l1[32][2];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferH264;
 
 /****************************
@@ -2208,6 +2290,9 @@ typedef struct _VAEncSliceParameterBuffer
         } bits;
         uint32_t value;
     } slice_flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSliceParameterBuffer;
 
 
@@ -2222,6 +2307,9 @@ typedef struct _VAEncSequenceParameterBufferH263
     uint32_t frame_rate;
     uint32_t initial_qp;
     uint32_t min_qp;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferH263;
 
 typedef struct _VAEncPictureParameterBufferH263
@@ -2232,6 +2320,9 @@ typedef struct _VAEncPictureParameterBufferH263
     uint16_t picture_width;
     uint16_t picture_height;
     VAEncPictureType picture_type;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferH263;
 
 /****************************
@@ -2251,6 +2342,9 @@ typedef struct _VAEncSequenceParameterBufferMPEG4
     uint32_t frame_rate;
     uint32_t initial_qp;
     uint32_t min_qp;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferMPEG4;
 
 typedef struct _VAEncPictureParameterBufferMPEG4
@@ -2263,6 +2357,9 @@ typedef struct _VAEncPictureParameterBufferMPEG4
     uint32_t modulo_time_base; /* number of 1s */
     uint32_t vop_time_increment;
     VAEncPictureType picture_type;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferMPEG4;
 
 
@@ -2373,6 +2470,9 @@ typedef  struct _VACodedBufferSegment  {
      * or \c NULL if there is none.
      */
     void               *next;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VACodedBufferSegment;
      
 /**
@@ -2430,6 +2530,9 @@ typedef struct {
     uint32_t            mem_type;
     /** \brief Size of the underlying buffer. */
     size_t              mem_size;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VABufferInfo;
 
 /**
@@ -2608,6 +2711,9 @@ typedef struct _VASurfaceDecodeMBErrors
     uint32_t start_mb; /* start mb address with errors */
     uint32_t end_mb;  /* end mb address with errors */
     VADecodeErrorType decode_error_type;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASurfaceDecodeMBErrors;
 
 /**
@@ -2700,6 +2806,9 @@ typedef struct _VAImageFormat
     uint32_t	green_mask;
     uint32_t	blue_mask;
     uint32_t	alpha_mask;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAImageFormat;
 
 typedef VAGenericID VAImageID;
@@ -2743,6 +2852,9 @@ typedef struct _VAImage
      * Only entry_bytes characters of the string are used.
      */
     int8_t component_order[4];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAImage;
 
 /** Get maximum number of image formats supported by the implementation */
@@ -3122,6 +3234,9 @@ typedef struct _VADisplayAttribute
     int32_t value;	/* used by the set/get attribute functions */
 /* flags can be VA_DISPLAY_ATTRIB_GETTABLE or VA_DISPLAY_ATTRIB_SETTABLE or OR'd together */
     uint32_t flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VADisplayAttribute;
 
 /** Get maximum number of display attributs supported by the implementation */
@@ -3190,6 +3305,9 @@ typedef struct _VAPictureHEVC
     int32_t                 pic_order_cnt;
     /* described below */
     uint32_t                flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAPictureHEVC;
 
 /* flags in VAPictureHEVC could be OR of the following */

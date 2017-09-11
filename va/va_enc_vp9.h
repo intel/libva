@@ -83,6 +83,8 @@ typedef struct  _VACodedBufferVP9Status
     /* suggested next frame height */
     uint16_t	next_frame_height;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VACodedBufferVP9Status;
 
 /**
@@ -136,6 +138,8 @@ typedef struct  _VAEncSequenceParameterBufferVP9
     /* Period between key frames */
     uint32_t    intra_period;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferVP9;
 
 
@@ -506,6 +510,8 @@ typedef struct  _VAEncPictureParameterBufferVP9
      */
     uint32_t    skip_frames_size;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t    va_reserved[VA_PADDING_MEDIUM];
 } VAEncPictureParameterBufferVP9;
 
 
@@ -557,6 +563,8 @@ typedef struct _VAEncSegParamVP9
      */
     int16_t     segment_qindex_delta;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSegParamVP9;
 
 /**
@@ -575,6 +583,8 @@ typedef struct _VAEncMiscParameterTypeVP9PerSegmantParam
      */
     VAEncSegParamVP9    seg_data[8];
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterTypeVP9PerSegmantParam;
 
 

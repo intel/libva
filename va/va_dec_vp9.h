@@ -191,6 +191,9 @@ typedef struct  _VADecPictureParameterBufferVP9
      */
     uint8_t                 bit_depth;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+
     /**@}*/
 
 } VADecPictureParameterBufferVP9;
@@ -263,6 +266,9 @@ typedef struct  _VASegmentParameterVP9
      */
     int16_t                 chroma_dc_quant_scale;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
+
     /**@}*/
 
 } VASegmentParameterVP9;
@@ -307,6 +313,8 @@ typedef struct _VASliceParameterBufferVP9
      */
     VASegmentParameterVP9   seg_param[8];
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
     /**@}*/
 
 } VASliceParameterBufferVP9;

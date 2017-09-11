@@ -63,6 +63,9 @@ struct VADriverVTableWayland {
 
     /** \brief Indicate whether buffer sharing with prime fd is supported. */
     unsigned int has_prime_sharing;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long reserved[8];
 };
 
 #endif /* VA_BACKEND_WAYLAND_H */
