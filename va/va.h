@@ -2132,7 +2132,19 @@ typedef struct _VASliceParameterBufferH264
     uint16_t first_mb_in_slice;
     uint8_t slice_type;
     uint8_t direct_spatial_mv_pred_flag;
+    /**
+     * H264/AVC syntax element
+     *
+     * if num_ref_idx_active_override_flag equals 0, host decoder should
+     * set its value to num_ref_idx_l0_default_active_minus1.
+     */
     uint8_t num_ref_idx_l0_active_minus1;
+    /**
+     * H264/AVC syntax element
+     *
+     * if num_ref_idx_active_override_flag equals 0, host decoder should
+     * set its value to num_ref_idx_l1_default_active_minus1.
+     */
     uint8_t num_ref_idx_l1_active_minus1;
     uint8_t cabac_init_idc;
     int8_t slice_qp_delta;
