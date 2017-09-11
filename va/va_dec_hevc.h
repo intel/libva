@@ -279,12 +279,12 @@ typedef struct  _VASliceParameterBufferHEVC
     uint8_t                 collocated_ref_idx;
     /** HEVC syntax element.
      * if num_ref_idx_active_override_flag equals 0, host decoder should
-     * set its value to num_ref_idx_l0_default_minus1.
+     * set its value to num_ref_idx_l0_default_active_minus1.
      */
     uint8_t                 num_ref_idx_l0_active_minus1;
     /** HEVC syntax element.
      * if num_ref_idx_active_override_flag equals 0, host decoder should
-     * set its value to num_ref_idx_l1_default_minus1.
+     * set its value to num_ref_idx_l1_default_active_minus1.
      */
     uint8_t                 num_ref_idx_l1_active_minus1;
     /** HEVC syntax element. */
