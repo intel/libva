@@ -1281,7 +1281,7 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
 typedef struct _VAEncMiscParameterBuffer
 {
     VAEncMiscParameterType type;
-    unsigned int data[0];
+    unsigned int data[];
 } VAEncMiscParameterBuffer;
 
 /** \brief Temporal layer Structure*/
