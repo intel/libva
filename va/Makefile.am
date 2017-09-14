@@ -33,6 +33,7 @@ libva_source_c = \
 	va.c			\
 	va_compat.c		\
 	va_fool.c		\
+	va_str.c		\
 	va_trace.c		\
 	$(NULL)
 
@@ -55,6 +56,7 @@ libva_source_h = \
 	va_fei_h264.h		\
 	va_enc_mpeg2.h		\
 	va_enc_vp9.h            \
+	va_str.h		\
 	va_tpi.h		\
 	va_version.h		\
 	va_vpp.h		\
