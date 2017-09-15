@@ -37,6 +37,7 @@
 #include "va_dec_vp8.h"
 #include "va_dec_vp9.h"
 #include "va_dec_hevc.h"
+#include "va_str.h"
 #include "va_vpp.h"
 #include <assert.h>
 #include <stdarg.h>
@@ -1435,37 +1436,6 @@ void va_TraceDestroyContext (
     UNLOCK_CONTEXT(pva_trace);
 }
 
-static char * buffer_type_to_string(int type)
-{
-    switch (type) {
-    case VAPictureParameterBufferType: return "VAPictureParameterBufferType";
-    case VAIQMatrixBufferType: return "VAIQMatrixBufferType";
-    case VABitPlaneBufferType: return "VABitPlaneBufferType";
-    case VASliceGroupMapBufferType: return "VASliceGroupMapBufferType";
-    case VASliceParameterBufferType: return "VASliceParameterBufferType";
-    case VASliceDataBufferType: return "VASliceDataBufferType";
-    case VAProtectedSliceDataBufferType: return "VAProtectedSliceDataBufferType";
-    case VAMacroblockParameterBufferType: return "VAMacroblockParameterBufferType";
-    case VAResidualDataBufferType: return "VAResidualDataBufferType";
-    case VADeblockingParameterBufferType: return "VADeblockingParameterBufferType";
-    case VAImageBufferType: return "VAImageBufferType";
-    case VAQMatrixBufferType: return "VAQMatrixBufferType";
-    case VAHuffmanTableBufferType: return "VAHuffmanTableBufferType";
-/* Following are encode buffer types */
-    case VAEncCodedBufferType: return "VAEncCodedBufferType";
-    case VAEncSequenceParameterBufferType: return "VAEncSequenceParameterBufferType";
-    case VAEncPictureParameterBufferType: return "VAEncPictureParameterBufferType";
-    case VAEncSliceParameterBufferType: return "VAEncSliceParameterBufferType";
-    case VAEncPackedHeaderParameterBufferType: return "VAEncPackedHeaderParameterBufferType";
-    case VAEncPackedHeaderDataBufferType: return "VAEncPackedHeaderDataBufferType";
-    case VAEncMiscParameterBufferType: return "VAEncMiscParameterBufferType";
-    case VAEncMacroblockParameterBufferType: return "VAEncMacroblockParameterBufferType";
-    case VAProcPipelineParameterBufferType: return "VAProcPipelineParameterBufferType";
-    case VAProcFilterParameterBufferType: return "VAProcFilterParameterBufferType";
-    default: return "UnknowBuffer";
-    }
-}
-
 void va_TraceCreateBuffer (
     VADisplay dpy,
     VAContextID context,	/* in */
@@ -1488,7 +1458,7 @@ void va_TraceCreateBuffer (
         return;
 
     TRACE_FUNCNAME(idx);
-    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", vaBufferTypeStr(type));
     if (buf_id)
         va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", *buf_id);
     va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
@@ -1520,7 +1490,7 @@ void va_TraceDestroyBuffer (
         return;
 
     TRACE_FUNCNAME(idx);
-    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", vaBufferTypeStr(type));
     va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", buf_id);
     va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
     va_TraceMsg(trace_ctx, "\tnum_elements=%u\n", num_elements);
@@ -1606,7 +1576,7 @@ void va_TraceMapBuffer (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", buf_id);
-    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", buffer_type_to_string(type));
+    va_TraceMsg(trace_ctx, "\tbuf_type=%s\n", vaBufferTypeStr(type));
     if ((pbuf == NULL) || (*pbuf == NULL))
         return;
 
@@ -1653,7 +1623,7 @@ static void va_TraceVABuffers(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
     
-    va_TracePrint(trace_ctx, "--%s\n", buffer_type_to_string(type));
+    va_TracePrint(trace_ctx, "--%s\n", vaBufferTypeStr(type));
 
     if(trace_ctx->plog_file)
         fp = trace_ctx->plog_file->fp_log;
@@ -4767,7 +4737,7 @@ void va_TraceRenderPicture(
 
         va_TraceMsg(trace_ctx, "\t---------------------------\n");
         va_TraceMsg(trace_ctx, "\tbuffers[%d] = 0x%08x\n", i, buffers[i]);
-        va_TraceMsg(trace_ctx, "\t  type = %s\n", buffer_type_to_string(type));
+        va_TraceMsg(trace_ctx, "\t  type = %s\n", vaBufferTypeStr(type));
         va_TraceMsg(trace_ctx, "\t  size = %d\n", size);
         va_TraceMsg(trace_ctx, "\t  num_elements = %d\n", num_elements);
 
