@@ -63,6 +63,7 @@ libva_source_h = \
 libva_source_h_priv = \
 	sysdeps.h		\
 	va_fool.h		\
+	va_internal.h		\
 	va_trace.h		\
 	$(NULL)
 
