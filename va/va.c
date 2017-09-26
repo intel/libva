@@ -1292,6 +1292,23 @@ vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id)
     return ctx->vtable->vaReleaseBufferHandle(ctx, buf_id);
 }
 
+VAStatus
+vaExportSurfaceHandle(VADisplay dpy, VASurfaceID surface_id,
+                      uint32_t mem_type, uint32_t flags,
+                      void *descriptor)
+{
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaExportSurfaceHandle)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaExportSurfaceHandle(ctx, surface_id,
+                                              mem_type, flags,
+                                              descriptor);
+}
+
 VAStatus vaBeginPicture (
     VADisplay dpy,
     VAContextID context,

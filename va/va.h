@@ -2483,6 +2483,68 @@ vaAcquireBufferHandle(VADisplay dpy, VABufferID buf_id, VABufferInfo *buf_info);
 VAStatus
 vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id);
 
+/** @name vaExportSurfaceHandle() flags
+ *
+ * @{
+ */
+/** Export surface to be read by external API. */
+#define VA_EXPORT_SURFACE_READ_ONLY        0x0001
+/** Export surface to be written by external API. */
+#define VA_EXPORT_SURFACE_WRITE_ONLY       0x0002
+/** Export surface to be both read and written by external API. */
+#define VA_EXPORT_SURFACE_READ_WRITE       0x0003
+/** Export surface with separate layers.
+ *
+ * For example, NV12 surfaces should be exported as two separate
+ * planes for luma and chroma.
+ */
+#define VA_EXPORT_SURFACE_SEPARATE_LAYERS  0x0004
+/** Export surface with composed layers.
+ *
+ * For example, NV12 surfaces should be exported as a single NV12
+ * composed object.
+ */
+#define VA_EXPORT_SURFACE_COMPOSED_LAYERS  0x0008
+
+/** @} */
+
+/**
+ * \brief Export a handle to a surface for use with an external API
+ *
+ * The exported handles are owned by the caller, and the caller is
+ * responsible for freeing them when no longer needed (e.g. by closing
+ * DRM PRIME file descriptors).
+ *
+ * This does not perform any synchronisation.  If the contents of the
+ * surface will be read, vaSyncSurface() must be called before doing so.
+ * If the contents of the surface are written, then all operations must
+ * be completed externally before using the surface again by via VA-API
+ * functions.
+ *
+ * @param[in] dpy          VA display.
+ * @param[in] surface_id   Surface to export.
+ * @param[in] mem_type     Memory type to export to.
+ * @param[in] flags        Combination of flags to apply
+ *   (VA_EXPORT_SURFACE_*).
+ * @param[out] descriptor  Pointer to the descriptor structure to fill
+ *   with the handle details.  The type of this structure depends on
+ *   the value of mem_type.
+ *
+ * @return Status code:
+ * - VA_STATUS_SUCCESS:    Success.
+ * - VA_STATUS_ERROR_INVALID_DISPLAY:  The display is not valid.
+ * - VA_STATUS_ERROR_UNIMPLEMENTED:  The driver does not implement
+ *     this interface.
+ * - VA_STATUS_ERROR_INVALID_SURFACE:  The surface is not valid, or
+ *     the surface is not exportable in the specified way.
+ * - VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:  The driver does not
+ *     support exporting surfaces to the specified memory type.
+ */
+VAStatus vaExportSurfaceHandle(VADisplay dpy,
+                               VASurfaceID surface_id,
+                               uint32_t mem_type, uint32_t flags,
+                               void *descriptor);
+
 /*
 Render (Decode) Pictures
 
