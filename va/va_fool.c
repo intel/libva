@@ -262,7 +262,7 @@ VAStatus va_FoolBufferInfo(
     return 1; /* fool is valid */
 }
 
-static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
 {
     char file_name[1024];
     struct stat file_stat = {0};
@@ -287,10 +287,10 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
         fool_ctx->segbuf_enc = realloc(fool_ctx->segbuf_enc, file_stat.st_size);
         ret = read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
         if (ret < file_stat.st_size)
-            va_errorMessage("Reading file %s failed.\n", file_name);
+            va_errorMessage(dpy, "Reading file %s failed.\n", file_name);
         close(fd);
     } else
-        va_errorMessage("Open file %s failed:%s\n", file_name, strerror(errno));
+        va_errorMessage(dpy, "Open file %s failed:%s\n", file_name, strerror(errno));
 
     codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
@@ -303,7 +303,7 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
     return 0;
 }
 
-static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBufJPG(VADisplay dpy, struct fool_context *fool_ctx)
 {
     struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
@@ -315,10 +315,10 @@ static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
         fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
         ret = read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
         if (ret < file_stat.st_size)
-            va_errorMessage("Reading file %s failed.\n", fool_ctx->fn_jpg);
+            va_errorMessage(dpy, "Reading file %s failed.\n", fool_ctx->fn_jpg);
         close(fd);
     } else
-        va_errorMessage("Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
+        va_errorMessage(dpy, "Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
 
     codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
@@ -332,12 +332,12 @@ static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
 }
 
 
-static int va_FoolFillCodedBuf(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBuf(VADisplay dpy, struct fool_context *fool_ctx)
 {
     if (fool_ctx->entrypoint == VAEntrypointEncSlice)
-        va_FoolFillCodedBufEnc(fool_ctx);
+        va_FoolFillCodedBufEnc(dpy, fool_ctx);
     else if (fool_ctx->entrypoint == VAEntrypointEncPicture)
-        va_FoolFillCodedBufJPG(fool_ctx);
+        va_FoolFillCodedBufJPG(dpy, fool_ctx);
         
     return 0;
 }
@@ -361,7 +361,7 @@ VAStatus va_FoolMapBuffer(
 
     /* it is coded buffer, fill coded segment from file */
     if (*pbuf && (buftype == VAEncCodedBufferType))
-        va_FoolFillCodedBuf(fool_ctx);
+        va_FoolFillCodedBuf(dpy, fool_ctx);
     
     return 1; /* fool is valid */
 }
