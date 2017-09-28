@@ -561,13 +561,13 @@ static int open_tracing_specil_file(
     if(type == 0) {
         ptra_ctx->trace_codedbuf_fn = fn_env;
         ptra_ctx->trace_fp_codedbuf = fp;
-        va_infoMessage("LIBVA_TRACE_CODEDBUF is on, save codedbuf into %s\n",
+        va_infoMessage(pva_trace->dpy, "LIBVA_TRACE_CODEDBUF is on, save codedbuf into %s\n",
             fn_env);
     }
     else {
         ptra_ctx->trace_surface_fn = fn_env;
         ptra_ctx->trace_fp_surface = fp;
-        va_infoMessage("LIBVA_TRACE_SURFACE is on, save surface into %s\n",
+        va_infoMessage(pva_trace->dpy, "LIBVA_TRACE_SURFACE is on, save surface into %s\n",
             fn_env);
     }
 
@@ -615,7 +615,7 @@ static int open_tracing_log_file(
         if(!pfp)
             goto FAIL;
 
-        va_infoMessage("%s %s for the thread 0x%08x\n",
+        va_infoMessage(pva_trace->dpy, "%s %s for the thread 0x%08x\n",
             new_fn_flag ? "Open new log file" : "Append to log file",
             plog_file->fn_log, thd_id);
 
@@ -741,6 +741,8 @@ void va_TraceInit(VADisplay dpy)
         return;
     }
 
+    pva_trace->dpy = dpy;
+
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         pva_trace->fn_log_env = strdup(env_value);
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
@@ -748,11 +750,11 @@ void va_TraceInit(VADisplay dpy)
             trace_ctx->plog_file_list[0] = trace_ctx->plog_file;
             va_trace_flag = VA_TRACE_FLAG_LOG;
 
-            va_infoMessage("LIBVA_TRACE is on, save log into %s\n",
+            va_infoMessage(dpy, "LIBVA_TRACE is on, save log into %s\n",
                 trace_ctx->plog_file->fn_log);
         }
         else
-            va_errorMessage("Open file %s failed (%s)\n", env_value, strerror(errno));
+            va_errorMessage(dpy, "Open file %s failed (%s)\n", env_value, strerror(errno));
     }
 
     /* may re-get the global settings for multiple context */
@@ -810,7 +812,6 @@ void va_TraceInit(VADisplay dpy)
     pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM] = trace_ctx;
 
     ((VADisplayContextP)dpy)->vatrace = (void *)pva_trace;
-    pva_trace->dpy = dpy;
 
     if(!va_trace_flag)
         va_TraceEnd(dpy);
@@ -882,6 +883,7 @@ void va_TraceEnd(VADisplay dpy)
     }
     free(pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM]);
 
+    pva_trace->dpy = NULL;
     free(pva_trace);
     ((VADisplayContextP)dpy)->vatrace = NULL;
 }
