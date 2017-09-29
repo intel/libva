@@ -25,6 +25,10 @@
 #ifndef VA_INTERNAL_H
 #define VA_INTERNAL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
@@ -34,5 +38,9 @@ void va_infoMessage(VADisplay dpy, const char *msg, ...);
 int  va_parseConfig(char *env, char *env_value);
 
 VADisplayContextP va_newDisplayContext(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* VA_INTERNAL_H */
