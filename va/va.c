@@ -275,6 +275,17 @@ VADisplayContextP va_newDisplayContext(void)
     return dctx;
 }
 
+VADriverContextP va_newDriverContext(VADisplayContextP dctx)
+{
+    VADriverContextP ctx = calloc(1, sizeof(*ctx));
+    if (!ctx)
+        return NULL;
+
+    dctx->pDriverContext = ctx;
+
+    return ctx;
+}
+
 static bool va_checkVtable(VADisplay dpy, void *ptr, char *function)
 {
     if (!ptr) {
