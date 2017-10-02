@@ -261,6 +261,24 @@ void va_infoMessage(VADisplay dpy, const char *msg, ...)
 #endif
 }
 
+static void va_driverErrorCallback(VADriverContextP ctx,
+                                   const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->error_callback(dctx->error_callback_user_context, message);
+}
+
+static void va_driverInfoCallback(VADriverContextP ctx,
+                                  const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->info_callback(dctx->info_callback_user_context, message);
+}
+
 VADisplayContextP va_newDisplayContext(void)
 {
     VADisplayContextP dctx = calloc(1, sizeof(*dctx));
@@ -282,6 +300,10 @@ VADriverContextP va_newDriverContext(VADisplayContextP dctx)
         return NULL;
 
     dctx->pDriverContext = ctx;
+    ctx->pDisplayContext = dctx;
+
+    ctx->error_callback = va_driverErrorCallback;
+    ctx->info_callback  = va_driverInfoCallback;
 
     return ctx;
 }
