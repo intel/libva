@@ -177,7 +177,7 @@ VAMessageCallback vaSetInfoCallback(VADisplay dpy, VAMessageCallback callback, v
         return NULL;
 
     dctx = (VADisplayContextP)dpy;
-    old_callback = dctx->error_callback;
+    old_callback = dctx->info_callback;
 
     dctx->info_callback = callback;
     dctx->info_callback_user_context = user_context;
