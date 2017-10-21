@@ -1,7 +1,7 @@
-libva NEWS -- summary of user visible changes.  2017-10-xx
+libva NEWS -- summary of user visible changes.  2017-10-21
 Copyright (C) 2009-2017 Intel Corporation
 
-Version 2.0.0 - DD.Oct.2017
+Version 2.0.0 - 21.Oct.2017
 * Bump VA-API version to 1.0.0 and libva to 2.0.0
 * Add new API for H264 FEI support
 * Add definition of VA_FOURCC_I420
