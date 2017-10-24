@@ -3061,6 +3061,10 @@ VAStatus vaBufferSetNumElements (
  * #VAEncMiscParameterTypeMaxFrameSize.
  */
 #define VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW         0x1000
+/**
+ * \brief the bitstream is bad or corrupt.
+ */
+#define VA_CODED_BUF_STATUS_BAD_BITSTREAM               0x8000
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /**
