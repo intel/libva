@@ -1643,6 +1643,8 @@ typedef enum
     VAEncMiscParameterTypeCustomRoundingControl = 17,
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
+    /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
+    VAEncMiscParameterTypeExtensionData = 19
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
