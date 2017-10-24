@@ -1,5 +1,19 @@
-libva NEWS -- summary of user visible changes.  2017-06-28
+libva NEWS -- summary of user visible changes.  2017-10-21
 Copyright (C) 2009-2017 Intel Corporation
+
+Version 2.0.0 - 21.Oct.2017
+* Bump VA-API version to 1.0.0 and libva to 2.0.0
+* Add new API for H264 FEI support
+* Add definition of VA_FOURCC_I420
+* Add functions for converting common enums to strings
+* Deprecate H.264 baseline profile and FMO support
+* Deprecate packed misc packed header flag
+* Delete libva-tpi and libva-egl backends
+* Refine VASliceParameterBufferHEVC, VAEncMiscParameterBuffer
+* Fix errors in VAConfigAttribValEncROI, VAEncMacroblockParameterBufferH264
+* Fix race condition in wayland support
+* Rename vaMessageCallback to VAMessageCallback
+* Make logging callbacks library-safe
 
 Version 1.8.3 - 28.Jun.2017
 * Bump libva to 1.8.3
