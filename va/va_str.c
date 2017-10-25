@@ -111,6 +111,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribFrameSizeToleranceSupport);
     TOSTR(VAConfigAttribEncTileSupport);
     TOSTR(VAConfigAttribCustomRoundingControl);
+    TOSTR(VAConfigAttribQPBlockSize);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";

@@ -692,6 +692,12 @@ typedef enum
      * application can change the rounding setting by VAEncMiscParameterTypeCustomRoundingControl
      */
     VAConfigAttribCustomRoundingControl = 36,
+    /**
+     * \brief Encoding QP info block size attribute. Read-only.
+     * This attribute conveys the block sizes that underlying driver
+     * support for QP info for buffer #VAEncQpBuffer.
+     */
+    VAConfigAttribQPBlockSize            = 37,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
