@@ -151,6 +151,7 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncFEIMBControlBufferType);
     TOSTR(VAEncFEIMVPredictorBufferType);
     TOSTR(VAEncMacroblockDisableSkipMapBufferType);
+    TOSTR(VADecodeStreamoutBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
