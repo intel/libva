@@ -48,7 +48,7 @@ VADisplay vaGetDisplay (
 
 #ifdef __cplusplus
 #ifdef ANDROID
-#ifdef ANDROID_O
+#ifndef __ANDROID_VNDK__
 #include <system/window.h>
 #else
 #include <vndk/window.h>

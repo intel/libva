@@ -127,12 +127,11 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
 LOCAL_PROPRIETARY_MODULE := true
 
-LOCAL_SHARED_LIBRARIES := libva libdrm
+LOCAL_SHARED_LIBRARIES := libva libdrm libnativewindow
 
-ifeq ($(PLATFORM_VERSION), 8.0.0)
-LOCAL_CFLAGS += -DANDROID_O
-else
-LOCAL_SHARED_LIBRARIES += libnativewindow
+ifdef BOARD_VNDK_VERSION
+LOCAL_STATIC_LIBRARIES += libarect
+LOCAL_HEADER_LIBRARIES += libnativebase_headers
 endif
 
 include $(BUILD_SHARED_LIBRARY)
