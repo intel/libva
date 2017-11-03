@@ -21,7 +21,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AM_CPPFLAGS = \
-	-DLINUX			\
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	-I$(top_srcdir)/va/x11	\
