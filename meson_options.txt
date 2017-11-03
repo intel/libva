@@ -1,0 +1,5 @@
+option('driverdir', type : 'string', description : 'drivers path')
+option('disable_drm', type : 'boolean', value : false)
+option('with_x11', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
+option('with_glx', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
+option('with_wayland', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
