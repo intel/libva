@@ -46,38 +46,4 @@ VADisplay vaGetDisplay (
 }
 #endif
 
-#ifdef __cplusplus
-#ifdef ANDROID
-#include <system/window.h>
-#include <utils/StrongPointer.h>
-using namespace android;
-
-/*
- * Output rendering
- * Following is the rendering interface for Android system, 
- * to get the decode output surface to an ISurface object.
- * It basically performs a de-interlacing (if needed), 
- * color space conversion and scaling to the destination
- * rectangle
- */
-VAStatus vaPutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,	
-    sp<ANativeWindow> draw, /* Android Native Window */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied destination clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* PutSurface flags */
-);
-
-#endif /* ANDROID */
-#endif /* __cplusplus */
-
 #endif /* _VA_ANDROID_H_ */
