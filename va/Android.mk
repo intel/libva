@@ -129,7 +129,7 @@ LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libva libdrm libnativewindow
 
-ifdef BOARD_VNDK_VERSION
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 27; echo $$?), 0)
 LOCAL_STATIC_LIBRARIES += libarect
 LOCAL_HEADER_LIBRARIES += libnativebase_headers
 endif
