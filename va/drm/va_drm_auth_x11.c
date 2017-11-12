@@ -28,8 +28,6 @@
 #include <X11/Xlib.h>
 #include "va_drm_auth_x11.h"
 
-#define LIBVA_MAJOR_VERSION 1
-
 typedef struct drm_auth_x11             DRMAuthX11;
 typedef struct drm_auth_x11_vtable      DRMAuthX11VTable;
 
