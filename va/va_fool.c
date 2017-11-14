@@ -277,11 +277,17 @@ static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
                  fool_ctx->file_count);
 
         if ((fd = open(file_name, O_RDONLY)) != -1) {
-            fstat(fd, &file_stat);
-            fool_ctx->file_count++; /* open next file */
-            break;
-        } else /* fall back to the first file file */
-            fool_ctx->file_count = 0;
+            if (fstat(fd, &file_stat) != -1) {
+                fool_ctx->file_count++; /* open next file */
+                break;
+            }
+            va_errorMessage(dpy, "Identify file %s failed:%s\n",
+                            file_name, strerror(errno));
+            close(fd);
+            fd = -1;
+        }
+        /* fall back to the first file file */
+        fool_ctx->file_count = 0;
     }
     if (fd != -1) {
         fool_ctx->segbuf_enc = realloc(fool_ctx->segbuf_enc, file_stat.st_size);
@@ -311,11 +317,15 @@ static int va_FoolFillCodedBufJPG(VADisplay dpy, struct fool_context *fool_ctx)
     ssize_t ret;
 
     if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
-        fstat(fd, &file_stat);
-        fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
-        ret = read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
-        if (ret < file_stat.st_size)
-            va_errorMessage(dpy, "Reading file %s failed.\n", fool_ctx->fn_jpg);
+        if (fstat(fd, &file_stat) != -1) {
+            fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
+            ret = read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
+            if (ret < file_stat.st_size)
+                va_errorMessage(dpy, "Reading file %s failed.\n", fool_ctx->fn_jpg);
+        } else {
+            va_errorMessage(dpy, "Identify file %s failed:%s\n",
+                            fool_ctx->fn_jpg, strerror(errno));
+        }
         close(fd);
     } else
         va_errorMessage(dpy, "Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
