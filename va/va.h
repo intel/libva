@@ -2072,8 +2072,12 @@ typedef struct _VAPictureParameterBufferVC1
         uint32_t value;
     } transform_fields;
 
+    uint8_t luma_scale2;                  /* PICTURE_LAYER::LUMSCALE2 */
+    uint8_t luma_shift2;                  /* PICTURE_LAYER::LUMSHIFT2 */
+    uint8_t intensity_compensation_field; /* Index for PICTURE_LAYER::INTCOMPFIELD value in Table 109 (9.1.1.48) */
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 1];
 } VAPictureParameterBufferVC1;
 
 /** VC-1 Bitplane Buffer
