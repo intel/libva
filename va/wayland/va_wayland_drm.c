@@ -55,25 +55,29 @@ drm_handle_device(void *data, struct wl_drm *drm, const char *device)
     struct drm_state * const drm_state = ctx->drm_state;
     drm_magic_t magic;
     struct stat st;
+    int fd = -1;
 
-    if (stat(device, &st) < 0) {
-        va_wayland_error("failed to identify %s: %s (errno %d)",
-                         device, strerror(errno), errno);
-        return;
-    }
-
-    if (!S_ISCHR(st.st_mode)) {
-        va_wayland_error("%s is not a device", device);
-        return;
-    }
-
-    drm_state->fd = open(device, O_RDWR);
-    if (drm_state->fd < 0) {
+    fd = open(device, O_RDWR);
+    if (fd < 0) {
         va_wayland_error("failed to open %s: %s (errno %d)",
                          device, strerror(errno), errno);
         return;
     }
 
+    if (fstat(fd, &st) < 0) {
+        va_wayland_error("failed to identify %s: %s (errno %d)",
+                         device, strerror(errno), errno);
+        close(fd);
+        return;
+    }
+
+    if (!S_ISCHR(st.st_mode)) {
+        va_wayland_error("%s is not a device", device);
+        close(fd);
+        return;
+    }
+
+    drm_state->fd = fd;
     drmGetMagic(drm_state->fd, &magic);
     wl_drm_authenticate(wl_drm_ctx->drm, magic);
 }

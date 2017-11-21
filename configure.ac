@@ -42,7 +42,7 @@ m4_define([va_api_version],
 # - reset micro version to zero when VA-API major or minor version is changed
 m4_define([libva_major_version], [m4_eval(va_api_major_version + 1)])
 m4_define([libva_minor_version], [m4_eval(va_api_minor_version)])
-m4_define([libva_micro_version], [0])
+m4_define([libva_micro_version], [1])
 m4_define([libva_pre_version],   [1])
 
 m4_define([libva_version],
@@ -300,6 +300,9 @@ AC_SUBST(pkgconfigdir)
 if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
+
+AC_SUBST([AM_CFLAGS], ["-Wall -Werror"])
+AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror"])
 
 AC_OUTPUT([
     Makefile
