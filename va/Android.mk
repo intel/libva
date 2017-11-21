@@ -91,6 +91,9 @@ LOCAL_MODULE := libva
 LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils liblog
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 27; echo $$?), 0)
+LOCAL_HEADER_LIBRARIES += libutils_headers
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -131,7 +134,7 @@ LOCAL_SHARED_LIBRARIES := libva libdrm libnativewindow
 
 ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 27; echo $$?), 0)
 LOCAL_STATIC_LIBRARIES += libarect
-LOCAL_HEADER_LIBRARIES += libnativebase_headers
+LOCAL_HEADER_LIBRARIES += libnativebase_headers libutils_headers
 endif
 
 include $(BUILD_SHARED_LIBRARY)
