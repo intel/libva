@@ -115,6 +115,7 @@ extern "C" {
  * - \ref api_enc_xxx (xxx = h264, hevc, jpec, mpeg2, vp8, vp9)
  * - \ref api_dec_xxx (xxx = hevc, jpec, vp8, vp9)
  * - \ref api_vpp
+ * - \ref api_fei_xxx (xxx = h264, hevc)
  */
 
 /**
