@@ -52,6 +52,7 @@ const char *vaProfileStr(VAProfile profile)
     TOSTR(VAProfileVP9Profile1);
     TOSTR(VAProfileVP9Profile2);
     TOSTR(VAProfileVP9Profile3);
+    default: break;
     }
     return "<unknown profile>";
 }
@@ -95,6 +96,9 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribEncSkipFrame);
     TOSTR(VAConfigAttribEncROI);
     TOSTR(VAConfigAttribEncRateControlExt);
+    TOSTR(VAConfigAttribFEIFunctionType);
+    TOSTR(VAConfigAttribFEIMVPredictors);
+    case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
 }
@@ -127,6 +131,13 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncMacroblockMapBufferType);
     TOSTR(VAProcPipelineParameterBufferType);
     TOSTR(VAProcFilterParameterBufferType);
+    TOSTR(VAEncQPBufferType);
+    TOSTR(VAEncFEIMVBufferType);
+    TOSTR(VAEncFEIMBCodeBufferType);
+    TOSTR(VAEncFEIDistortionBufferType);
+    TOSTR(VAEncFEIMBControlBufferType);
+    TOSTR(VAEncFEIMVPredictorBufferType);
+    case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
 }

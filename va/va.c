@@ -1151,6 +1151,96 @@ VAStatus vaDestroyContext (
   return vaStatus;
 }
 
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+    
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaCreateMFContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaCreateMFContext( ctx, mf_context);
+        VA_TRACE_ALL(va_TraceCreateMFContext, dpy, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    
+    if(ctx->vtable->vaMFAddContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFAddContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFAddContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaMFReleaseContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFReleaseContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFReleaseContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    CHECK_VTABLE(vaStatus, ctx, MFSubmit);
+    if(ctx->vtable->vaMFSubmit == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFSubmit( ctx, mf_context, contexts, num_contexts);
+        VA_TRACE_ALL(va_TraceMFSubmit, dpy, mf_context, contexts, num_contexts);
+    }
+
+    return vaStatus;
+}
+
 VAStatus vaCreateBuffer (
     VADisplay dpy,
     VAContextID context,	/* in */
