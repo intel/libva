@@ -562,7 +562,48 @@ struct VADriverContext
 
     char *override_driver_name;
 
-    unsigned long reserved[41];         /* reserve for future add-ins, decrease the subscript accordingly */
+    void *pDisplayContext;
+
+    /**
+     * Error callback.
+     *
+     * This is set by libva when the driver is opened, and will not be
+     * changed thereafter.  The driver can call it with an error message,
+     * which will be propagated to the API user through their error
+     * callbacks, or sent to a default output if no callback is available.
+     *
+     * It is expected that end users will always be able to see these
+     * messages, so it should be called only for serious errors.  For
+     * example, hardware problems or fatal configuration errors.
+     *
+     * @param pDriverContext  Pointer to the driver context structure
+     *                        being used by the current driver.
+     * @param message  Message to send to the API user.  This must be a
+     *                 null-terminated string.
+     */
+    void (*error_callback)(VADriverContextP pDriverContext,
+                           const char *message);
+    /**
+     * Info callback.
+     *
+     * This has the same behaviour as the error callback, but has its
+     * own set of callbacks to the API user.
+     *
+     * It should be used for informational messages which may be useful
+     * for an application programmer or for debugging.  For example, minor
+     * configuration errors, or information about the reason when another
+     * API call generates an error return.  It is not expected that end
+     * users will see these messages.
+     *
+     * @param pDriverContext  Pointer to the driver context structure
+     *                        being used by the current driver.
+     * @param message  Message to send to the API user.  This must be a
+     *                 null-terminated string.
+     */
+    void (*info_callback)(VADriverContextP pDriverContext,
+                          const char *message);
+
+    unsigned long reserved[38];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */
