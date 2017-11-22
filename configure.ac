@@ -301,8 +301,8 @@ if test "$USE_DRM:$USE_X11:$USE_WAYLAND" = "no:no:no"; then
     AC_MSG_ERROR([Please select at least one backend (DRM, X11, Wayland)])
 fi
 
-AC_SUBST([AM_CFLAGS], ["-Wall -Werror"])
-AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror"])
+AC_SUBST([AM_CFLAGS], ["-Wall -Werror -Wno-maybe-uninitialized"])
+AC_SUBST([AM_CXXFLAGS], ["-Wall -Werror -Wno-maybe-uninitialized"])
 
 AC_OUTPUT([
     Makefile
