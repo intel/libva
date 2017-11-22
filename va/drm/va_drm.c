@@ -102,22 +102,23 @@ vaGetDisplayDRM(int fd)
         goto error;
     drm_state->fd = fd;
 
-    pDriverContext = calloc(1, sizeof(*pDriverContext));
+    pDisplayContext = va_newDisplayContext();
+    if (!pDisplayContext)
+        goto error;
+
+    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+
+    pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext)
         goto error;
+
     pDriverContext->native_dpy   = NULL;
     pDriverContext->display_type = is_render_nodes ?
         VA_DISPLAY_DRM_RENDERNODES : VA_DISPLAY_DRM;
     pDriverContext->drm_state    = drm_state;
 
-    pDisplayContext = va_newDisplayContext();
-    if (!pDisplayContext)
-        goto error;
-
-    pDisplayContext->pDriverContext  = pDriverContext;
-    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
-    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
     return pDisplayContext;
 
 error:

@@ -129,10 +129,9 @@ vaGetDisplayWl(struct wl_display *display)
     pDisplayContext->vaDestroy          = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
 
-    pDriverContext = calloc(1, sizeof(*pDriverContext));
+    pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext)
         goto error;
-    pDisplayContext->pDriverContext     = pDriverContext;
 
     pDriverContext->native_dpy          = display;
     pDriverContext->display_type        = VA_DISPLAY_WAYLAND;

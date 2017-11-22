@@ -39,6 +39,8 @@ int  va_parseConfig(char *env, char *env_value);
 
 VADisplayContextP va_newDisplayContext(void);
 
+VADriverContextP va_newDriverContext(VADisplayContextP dctx);
+
 #ifdef __cplusplus
 }
 #endif
