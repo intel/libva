@@ -55,6 +55,7 @@ is_window(Display *dpy, Drawable drawable)
 
     x11_trap_errors();
     XGetWindowAttributes(dpy, drawable, &wattr);
+    XSync(dpy, False);
     return x11_untrap_errors() == 0;
 }
 
