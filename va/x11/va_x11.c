@@ -153,45 +153,41 @@ VADisplay vaGetDisplay (
     Display *native_dpy /* implementation specific */
 )
 {
-  VADisplay dpy = NULL;
-  VADisplayContextP pDisplayContext;
+    VADisplayContextP pDisplayContext;
+    VADriverContextP  pDriverContext;
+    struct dri_state *dri_state;
 
-  if (!native_dpy)
-      return NULL;
+    if (!native_dpy)
+        return NULL;
 
-  if (!dpy)
-  {
-      /* create new entry */
-      VADriverContextP pDriverContext;
-      struct dri_state *dri_state;
-      pDisplayContext = va_newDisplayContext();
-      pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      dri_state       = calloc(1, sizeof(*dri_state));
-      if (pDisplayContext && pDriverContext && dri_state)
-      {
-	  pDriverContext->native_dpy       = (void *)native_dpy;
-	  pDriverContext->x11_screen       = XDefaultScreen(native_dpy);
-          pDriverContext->display_type     = VA_DISPLAY_X11;
-	  pDisplayContext->pDriverContext  = pDriverContext;
-	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
-	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-          pDisplayContext->opaque          = NULL;
-	  pDriverContext->drm_state 	   = dri_state;
-	  dpy                              = (VADisplay)pDisplayContext;
-      }
-      else
-      {
-	  if (pDisplayContext)
-	      free(pDisplayContext);
-	  if (pDriverContext)
-	      free(pDriverContext);
-          if (dri_state)
-              free(dri_state);
-      }
-  }
-  
-  return dpy;
+    pDisplayContext = va_newDisplayContext();
+    if (!pDisplayContext)
+        return NULL;
+
+    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+
+    pDriverContext = va_newDriverContext(pDisplayContext);
+    if (!pDriverContext) {
+        free(pDisplayContext);
+        return NULL;
+    }
+
+    pDriverContext->native_dpy   = (void *)native_dpy;
+    pDriverContext->x11_screen   = XDefaultScreen(native_dpy);
+    pDriverContext->display_type = VA_DISPLAY_X11;
+
+    dri_state = calloc(1, sizeof(*dri_state));
+    if (!dri_state) {
+        free(pDisplayContext);
+        free(pDriverContext);
+        return NULL;
+    }
+
+    pDriverContext->drm_state = dri_state;
+
+    return (VADisplay)pDisplayContext;
 }
 
 

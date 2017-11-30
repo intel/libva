@@ -287,6 +287,19 @@ typedef struct _VAEncSliceParameterBufferMPEG2 {
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSliceParameterBufferMPEG2;
 
+typedef struct _VAEncMiscParameterExtensionDataSeqDisplayMPEG2
+{
+    /** should always be 0x02 to identify it is Sequence Display Extension ISO-13818 */
+    uint8_t extension_start_code_identifier;
+    /** these field should follow ISO-13818 6.3.6 */
+    uint8_t video_format;
+    uint8_t colour_description;
+    uint8_t colour_primaries;
+    uint8_t transfer_characteristics;
+    uint8_t matrix_coefficients;
+    uint16_t display_horizontal_size;
+    uint16_t display_vertical_size;
+} VAEncMiscParameterExtensionDataSeqDisplayMPEG2;
 /**@}*/
 
 #ifdef __cplusplus

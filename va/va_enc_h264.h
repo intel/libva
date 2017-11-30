@@ -246,8 +246,14 @@ typedef struct _VAEncSequenceParameterBufferH264 {
             uint32_t log2_max_mv_length_horizontal          : 5;
             /** \brief Range: 0 to 16, inclusive. */
             uint32_t log2_max_mv_length_vertical            : 5;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            uint32_t fixed_frame_rate_flag                  : 1;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            uint32_t low_delay_hrd_flag                     : 1;
+            /** \brief Same as the H.264 bitstream syntax element. */
+            uint32_t motion_vectors_over_pic_boundaries_flag: 1;
             /** \brief Reserved for future use, must be zero */
-            uint32_t reserved                               : 19;
+            uint32_t reserved                               : 16;
         } bits;
         uint32_t value;
     } vui_fields;
@@ -611,6 +617,40 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMacroblockParameterBufferH264;
 
+/**
+ * \brief MB partition modes and 1/2 1/4 motion search configuration
+ *
+ * Specifies MB partition modes that are disabled. Specifies Half-pel
+ * mode and Quarter-pel mode searching
+ */
+typedef struct _VAEncMiscParameterSubMbPartPelH264
+{
+    uint32_t disable_inter_sub_mb_partition;
+    union {
+        struct {
+            uint32_t disable_16x16_inter_mb_partition        : 1;
+            uint32_t disable_16x8_inter_mb_partition         : 1;
+            uint32_t disable_8x16_inter_mb_partition         : 1;
+            uint32_t disable_8x8_inter_mb_partition          : 1;
+            uint32_t disable_8x4_inter_mb_partition          : 1;
+            uint32_t disable_4x8_inter_mb_partition          : 1;
+            uint32_t disable_4x4_inter_mb_partition          : 1;
+            uint32_t reserved                                : 1;
+        } bits;
+         uint8_t value;
+    } inter_sub_mb_partition_mask;
+
+    /**
+     * \brief Precison of motion search
+     * 0:Integer mode searching
+     * 1:Half-pel mode searching
+     * 2:Reserved
+     * 3:Quarter-pel mode searching
+     */
+    uint32_t enable_sub_pel_mode;
+    uint8_t sub_pel_mode;
+    uint8_t reserved[3];
+} VAEncMiscParameterSubMbPartPelH264;
 /**@}*/
 
 #ifdef __cplusplus

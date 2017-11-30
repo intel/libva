@@ -318,6 +318,137 @@ typedef struct _VAEncFEIDistortionH264 {
     uint32_t    reserved1[2];
 } VAEncFEIDistortionH264;    // 48 bytes
 
+/** \brief Motion Vector and Statistics frame level controls.
+ * VAStatsStatisticsParameterBufferType for H264 16x16 block
+ **/
+typedef struct _VAStatsStatisticsParameterH264
+{
+   VAStatsStatisticsParameter stats_params;
+
+    uint32_t    frame_qp                    : 8;
+    /** \brief length of search path */
+    uint32_t    len_sp                      : 8;
+    /** \brief motion search method definition
+     * 0: default value, diamond search
+     * 1: full search
+     * 2: diamond search
+     **/
+    uint32_t    search_path                 : 8;
+    uint32_t    reserved0                   : 8;
+
+    uint32_t    sub_mb_part_mask            : 7;
+    /** \brief sub pixel mode definition
+     * 00b: integer mode searching
+     * 01b: half-pel mode searching
+     * 10b: reserved
+     * 11b: quarter-pel mode searching
+     **/
+    uint32_t    sub_pel_mode                : 2;
+    /** \brief distortion measure adjustment for inter search SAD comparison
+     * 00b: none
+     * 01b: reserved
+     * 10b: Haar transform adjusted
+     * 11b: reserved
+     **/
+    uint32_t    inter_sad                   : 2;
+    /** \brief distortion measure adjustment for intra search SAD comparison
+     * 00b: none
+     * 01b: reserved
+     * 10b: Haar transform adjusted
+     * 11b: reserved
+     **/
+    uint32_t    intra_sad                   : 2;
+    uint32_t    adaptive_search	            : 1;
+    /** \brief indicate if future or/and past MV in mv_predictor buffer is valid.
+     * 0: MV predictor disabled
+     * 1: MV predictor enabled for past reference
+     * 2: MV predictor enabled for future reference
+     * 3: MV predictor enabled for both past and future references
+     **/
+    uint32_t    mv_predictor_ctrl           : 3;
+    uint32_t    mb_qp                       : 1;
+    /** \brief forward transform enable
+     * 0: disable
+     * 1: enable, needs frame_qp or mb_qp input for transform
+     **/
+    uint32_t    ft_enable                   : 1;
+    /** \brief luma intra mode partition mask
+     * xxxx1: luma_intra_16x16 disabled
+     * xxx1x: luma_intra_8x8 disabled
+     * xx1xx: luma_intra_4x4 disabled
+     * xx111: intra prediction is disabled
+     **/
+    uint32_t    intra_part_mask             : 5;
+    uint32_t    reserved1                   : 8;
+
+    /** \brief motion search window(ref_width * ref_height) */
+    uint32_t    ref_width                   : 8;
+    uint32_t    ref_height                  : 8;
+    /** \brief predefined motion search windows. If selected, len_sp, window(ref_width * ref_eight)
+     * and search_path setting are ignored.
+     * 0: not use predefined search window
+     * 1: Tiny, len_sp=4, 24x24 window and diamond search
+     * 2: Small, len_sp=9, 28x28 window and diamond search
+     * 3: Diamond, len_sp=16, 48x40 window and diamond search
+     * 4: Large Diamond, len_sp=32, 48x40 window and diamond search
+     * 5: Exhaustive, len_sp=48, 48x40 window and full search
+     * 6: Extend Diamond, len_sp=16, 64x40 window and diamond search
+     * 7: Extend Large Diamond, len_sp=32, 64x40 window and diamond search
+     * 8: Extend Exhaustive, len_sp=48, 64x40 window and full search
+     **/
+    uint32_t    search_window               : 4;
+    uint32_t    reserved2                   : 12;
+
+    /** \brief MVOutput. When set to 1, MV output is NOT provided */
+    uint32_t	disable_mv_output           : 1;
+    /** \brief StatisticsOutput. When set to 1, Statistics output is NOT provided. */
+    uint32_t    disable_statistics_output   : 1;
+    /** \brief block 8x8 data enabling in statistics output */
+    uint32_t    enable_8x8_statistics       : 1;
+    uint32_t    reserved3                   : 29;
+    uint32_t    reserved4[2];
+} VAStatsStatisticsParameterH264;
+
+/** \brief VAStatsStatisticsH264. H264 Statistics buffer layout for VAStatsStatisticsBufferType
+ * and VAStatsStatisticsBottomFieldBufferType(for interlaced only).
+ * Statistics output is per 16x16 block. Data structure per 16x16 block is defined below.
+ * The 16x16 block is in raster scan order. The buffer size shall be greater than or equal to
+ * the number of 16x16 blocks multiplied by sizeof(VAStatsStatisticsH264).
+ **/
+typedef struct _VAStatsStatisticsH264
+{
+    /** \brief past reference  */
+    uint32_t    best_inter_distortion0 : 16;
+    uint32_t    inter_mode0            : 16;
+
+    /** \brief future reference  */
+    uint32_t    best_inter_distortion1 : 16;
+    uint32_t    inter_mode1            : 16;
+
+    uint32_t    best_intra_distortion  : 16;
+    uint32_t    intra_mode             : 16;
+
+    uint32_t    num_non_zero_coef      : 16;
+    uint32_t    reserved0              : 16;
+
+    uint32_t    sum_coef;
+
+    /** \brief DWORD 5 flat info **/
+    uint32_t    mb_is_flat             : 1;
+    uint32_t    reserved1              : 31;
+
+    /** \brief DWORD 6 variance for block16x16**/
+    uint32_t    variance_16x16;
+    /** \brief DWORD 7 ~ 10, variance for block8x8 **/
+    uint32_t    variance_8x8[4];
+
+    /** \brief DWORD 11 pixel_average for block16x16 **/
+    uint32_t    pixel_average_16x16;
+    /** \brief DWORD 12 ~ 15, pixel_average for block8x8 **/
+    uint32_t    pixel_average_8x8[4];
+} VAStatsStatisticsH264;  // 64 bytes
+
+
 #ifdef __cplusplus
 }
 #endif

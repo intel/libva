@@ -261,6 +261,24 @@ void va_infoMessage(VADisplay dpy, const char *msg, ...)
 #endif
 }
 
+static void va_driverErrorCallback(VADriverContextP ctx,
+                                   const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->error_callback(dctx->error_callback_user_context, message);
+}
+
+static void va_driverInfoCallback(VADriverContextP ctx,
+                                  const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->info_callback(dctx->info_callback_user_context, message);
+}
+
 VADisplayContextP va_newDisplayContext(void)
 {
     VADisplayContextP dctx = calloc(1, sizeof(*dctx));
@@ -273,6 +291,21 @@ VADisplayContextP va_newDisplayContext(void)
     dctx->info_callback  = default_log_info;
 
     return dctx;
+}
+
+VADriverContextP va_newDriverContext(VADisplayContextP dctx)
+{
+    VADriverContextP ctx = calloc(1, sizeof(*ctx));
+    if (!ctx)
+        return NULL;
+
+    dctx->pDriverContext = ctx;
+    ctx->pDisplayContext = dctx;
+
+    ctx->error_callback = va_driverErrorCallback;
+    ctx->info_callback  = va_driverInfoCallback;
+
+    return ctx;
 }
 
 static bool va_checkVtable(VADisplay dpy, void *ptr, char *function)
@@ -886,6 +919,21 @@ VAStatus vaQueryConfigAttributes (
   return ctx->vtable->vaQueryConfigAttributes( ctx, config_id, profile, entrypoint, attrib_list, num_attribs);
 }
 
+VAStatus vaQueryProcessingRate (
+    VADisplay dpy,
+    VAConfigID config_id,
+    VAProcessingRateParameter *proc_buf,
+    unsigned int *processing_rate	/* out */
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(!ctx->vtable->vaQueryProcessingRate)
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+  return ctx->vtable->vaQueryProcessingRate( ctx, config_id, proc_buf, processing_rate);
+}
+
 /* XXX: this is a slow implementation that will be removed */
 static VAStatus
 va_impl_query_surface_attributes(
@@ -1151,6 +1199,96 @@ VAStatus vaDestroyContext (
   return vaStatus;
 }
 
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+    
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaCreateMFContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaCreateMFContext( ctx, mf_context);
+        VA_TRACE_ALL(va_TraceCreateMFContext, dpy, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    
+    if(ctx->vtable->vaMFAddContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFAddContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFAddContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaMFReleaseContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFReleaseContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFReleaseContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    CHECK_VTABLE(vaStatus, ctx, MFSubmit);
+    if(ctx->vtable->vaMFSubmit == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFSubmit( ctx, mf_context, contexts, num_contexts);
+        VA_TRACE_ALL(va_TraceMFSubmit, dpy, mf_context, contexts, num_contexts);
+    }
+
+    return vaStatus;
+}
+
 VAStatus vaCreateBuffer (
     VADisplay dpy,
     VAContextID context,	/* in */
@@ -1174,6 +1312,33 @@ VAStatus vaCreateBuffer (
   VA_TRACE_LOG(va_TraceCreateBuffer,
                dpy, context, type, size, num_elements, data, buf_id);
   
+  return vaStatus;
+}
+
+VAStatus vaCreateBuffer2 (
+    VADisplay dpy,
+    VAContextID context,
+    VABufferType type,
+    unsigned int width,
+    unsigned int height,
+    unsigned int *unit_size,
+    unsigned int *pitch,
+    VABufferID *buf_id
+)
+{
+  VADriverContextP ctx;
+  VAStatus vaStatus;
+
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(!ctx->vtable->vaCreateBuffer2)
+     return VA_STATUS_ERROR_UNIMPLEMENTED;
+
+  vaStatus = ctx->vtable->vaCreateBuffer2( ctx, context, type, width, height ,unit_size, pitch, buf_id);
+
+  VA_TRACE_LOG(va_TraceCreateBuffer,
+               dpy, context, type, *pitch, height, NULL, buf_id);
+
   return vaStatus;
 }
 
@@ -1290,6 +1455,23 @@ vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id)
     if (!ctx->vtable->vaReleaseBufferHandle)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     return ctx->vtable->vaReleaseBufferHandle(ctx, buf_id);
+}
+
+VAStatus
+vaExportSurfaceHandle(VADisplay dpy, VASurfaceID surface_id,
+                      uint32_t mem_type, uint32_t flags,
+                      void *descriptor)
+{
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaExportSurfaceHandle)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaExportSurfaceHandle(ctx, surface_id,
+                                              mem_type, flags,
+                                              descriptor);
 }
 
 VAStatus vaBeginPicture (
