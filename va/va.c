@@ -579,12 +579,20 @@ const char *vaErrorStr(VAStatus error_status)
             return "surface is in displaying (may by overlay)" ;
         case VA_STATUS_ERROR_INVALID_IMAGE_FORMAT:
             return "invalid VAImageFormat";
+        case VA_STATUS_ERROR_DECODING_ERROR:
+            return "internal decoding error";
+        case VA_STATUS_ERROR_ENCODING_ERROR:
+            return "internal encoding error";
         case VA_STATUS_ERROR_INVALID_VALUE:
             return "an invalid/unsupported value was supplied";
         case VA_STATUS_ERROR_UNSUPPORTED_FILTER:
             return "the requested filter is not supported";
         case VA_STATUS_ERROR_INVALID_FILTER_CHAIN:
             return "an invalid filter chain was supplied";
+        case VA_STATUS_ERROR_HW_BUSY:
+            return "HW busy now";
+        case VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:
+            return "an unsupported memory type was supplied";
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
