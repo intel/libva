@@ -38,6 +38,12 @@ extern "C" {
 #include <stdint.h>
 #include "va_fei.h"
 
+/**
+ * \defgroup api_fei_hevc HEVC FEI encoding API
+ *
+ * @{
+ */
+
 /** \brief FEI frame level control buffer for HEVC */
 typedef struct _VAEncMiscParameterFEIFrameControlHEVC
 {

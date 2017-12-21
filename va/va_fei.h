@@ -37,6 +37,12 @@ extern "C" {
 #include <stdint.h>
 
 /**
+ * \defgroup api_fei FEI encoding common API
+ *
+ * @{
+ */
+
+/**
  * \brief FEI specific attribute definitions
  */
 /** @name Attribute values for VAConfigAttribFEIFunctionType

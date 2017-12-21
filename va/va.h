@@ -112,10 +112,23 @@ extern "C" {
  *
  * VA-API is split into several modules:
  * - \ref api_core
- * - \ref api_enc_xxx (xxx = h264, hevc, jpec, mpeg2, vp8, vp9)
- * - \ref api_dec_xxx (xxx = hevc, jpec, vp8, vp9)
+ * - Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9)
+ * 	- \ref api_enc_h264
+ * 	- \ref api_enc_hevc
+ * 	- \ref api_enc_jpeg
+ * 	- \ref api_enc_mpeg2
+ * 	- \ref api_enc_vp8
+ * 	- \ref api_enc_vp9
+ * - Decoder (HEVC, JPEG, VP8, VP9)
+ *      - \ref api_dec_hevc
+ *      - \ref api_dec_jpeg
+ *      - \ref api_dec_vp8
+ *      - \ref api_dec_vp9
  * - \ref api_vpp
- * - \ref api_fei_xxx (xxx = h264, hevc)
+ * - FEI (H264, HEVC)
+ * 	- \ref api_fei
+ * 	- \ref api_fei_h264
+ * 	- \ref api_fei_hevc
  */
 
 /**
