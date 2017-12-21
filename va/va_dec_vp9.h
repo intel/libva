@@ -57,8 +57,6 @@ extern "C" {
  */
 typedef struct  _VADecPictureParameterBufferVP9
 {
-    /**@{*/
-
     /** \brief picture width
      *  Picture original resolution. The value may not be multiple of 8.
      */
@@ -194,8 +192,6 @@ typedef struct  _VADecPictureParameterBufferVP9
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_MEDIUM];
 
-    /**@}*/
-
 } VADecPictureParameterBufferVP9;
 
 
@@ -210,8 +206,6 @@ typedef struct  _VADecPictureParameterBufferVP9
  */
 typedef struct  _VASegmentParameterVP9
 {
-    /**@{*/
-
     union
     {
         struct
@@ -269,8 +263,6 @@ typedef struct  _VASegmentParameterVP9
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 
-    /**@}*/
-
 } VASegmentParameterVP9;
 
 
@@ -292,7 +284,6 @@ typedef struct  _VASegmentParameterVP9
  */
 typedef struct _VASliceParameterBufferVP9
 {
-    /**@{*/
     /** \brief The byte count of current frame in the bitstream buffer,
      *  starting from first byte of the buffer.
      *  It uses the name slice_data_size to be consitent with other codec,
@@ -315,7 +306,6 @@ typedef struct _VASliceParameterBufferVP9
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
-    /**@}*/
 
 } VASliceParameterBufferVP9;
 

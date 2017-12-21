@@ -37,6 +37,12 @@ extern "C" {
 #include <stdint.h>
 #include "va_fei.h"
 
+/**
+ * \defgroup api_fei_h264 H.264 FEI encoding API
+ *
+ * @{
+ */
+
 /** \brief FEI frame level control buffer for H.264 */
 typedef struct _VAEncMiscParameterFEIFrameControlH264
 {
