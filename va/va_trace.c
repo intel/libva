@@ -272,11 +272,11 @@ static int get_valid_config_idx(
 
     LOCK_RESOURCE(pva_trace);
 
-    pconfig_info = pva_trace->config_info;
-    idx = config_id & TRACE_CTX_ID_MASK;
-    if(!pconfig_info[idx].valid
-        || pconfig_info[idx].config_id != config_id)
-        idx = MAX_TRACE_CTX_NUM;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (pva_trace->config_info[idx].valid &&
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
 
     UNLOCK_RESOURCE(pva_trace);
 
@@ -295,10 +295,15 @@ static void add_trace_config_info(
 
     LOCK_RESOURCE(pva_trace);
 
-    idx = config_id & TRACE_CTX_ID_MASK;
-    pconfig_info = &pva_trace->config_info[idx];
-    if(!pconfig_info->valid ||
-        pconfig_info->config_id == config_id) {
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (!pva_trace->config_info[idx].valid ||
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
+
+    if (idx < MAX_TRACE_CTX_NUM) {
+        pconfig_info = &pva_trace->config_info[idx];
+
         pconfig_info->valid = 1;
         pconfig_info->config_id = config_id;
         pconfig_info->trace_profile = profile;
@@ -315,16 +320,20 @@ static void delete_trace_config_info(
 {
     struct trace_config_info *pconfig_info;
     int idx = 0;
-    pid_t thd_id = syscall(__NR_gettid);
 
     LOCK_RESOURCE(pva_trace);
 
-    idx = config_id & TRACE_CTX_ID_MASK;
-    pconfig_info = &pva_trace->config_info[idx];
-    if(pconfig_info->valid &&
-		pconfig_info->config_id == config_id &&
-		pconfig_info->created_thd_id == thd_id) {
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (pva_trace->config_info[idx].valid &&
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
+
+    if (idx < MAX_TRACE_CTX_NUM) {
+        pconfig_info = &pva_trace->config_info[idx];
+
         pconfig_info->valid = 0;
+        pconfig_info->config_id = -1;
     }
 
     UNLOCK_RESOURCE(pva_trace);
@@ -455,15 +464,14 @@ static int get_free_ctx_idx(
     struct va_trace *pva_trace,
     VAContextID context)
 {
-    int idx = MAX_TRACE_CTX_NUM;
-    int i = 0;
+    int idx;
 
     LOCK_RESOURCE(pva_trace);
 
-    i = context & TRACE_CTX_ID_MASK;
-    if(!pva_trace->ptra_ctx[i]
-        || pva_trace->ptra_ctx[i]->trace_context == context)
-        idx = i;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++)
+        if (!pva_trace->ptra_ctx[idx] ||
+            pva_trace->ptra_ctx[idx]->trace_context == context)
+            break;
 
     UNLOCK_RESOURCE(pva_trace);
 
@@ -474,15 +482,14 @@ static int get_valid_ctx_idx(
     struct va_trace *pva_trace,
     VAContextID context)
 {
-    int idx = MAX_TRACE_CTX_NUM;
-    int i = 0;
+    int idx;
 
     LOCK_RESOURCE(pva_trace);
 
-    i = context & TRACE_CTX_ID_MASK;
-    if(pva_trace->ptra_ctx[i]
-        && pva_trace->ptra_ctx[i]->trace_context == context)
-        idx = i;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++)
+        if (pva_trace->ptra_ctx[idx] &&
+            pva_trace->ptra_ctx[idx]->trace_context == context)
+            break;
 
     UNLOCK_RESOURCE(pva_trace);
 
