@@ -451,7 +451,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_MAXIMUM(vaStatus, ctx, attributes);
                     CHECK_MAXIMUM(vaStatus, ctx, image_formats);
                     CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
-                    CHECK_MAXIMUM(vaStatus, ctx, display_attributes);
                     CHECK_STRING(vaStatus, ctx, vendor);
                     CHECK_VTABLE(vaStatus, ctx, Terminate);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
