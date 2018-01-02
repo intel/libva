@@ -743,6 +743,9 @@ void va_TraceInit(VADisplay dpy)
 
     pva_trace->dpy = dpy;
 
+    pthread_mutex_init(&pva_trace->resource_mutex, NULL);
+    pthread_mutex_init(&pva_trace->context_mutex, NULL);
+
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         pva_trace->fn_log_env = strdup(env_value);
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
@@ -804,9 +807,6 @@ void va_TraceInit(VADisplay dpy)
                            trace_ctx->trace_surface_yoff);
         }
     }
-
-    pthread_mutex_init(&pva_trace->resource_mutex, NULL);
-    pthread_mutex_init(&pva_trace->context_mutex, NULL);
 
     trace_ctx->trace_context = VA_INVALID_ID;
     pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM] = trace_ctx;

@@ -115,6 +115,7 @@ extern "C" {
  * - \ref api_enc_xxx (xxx = h264, hevc, jpec, mpeg2, vp8, vp9)
  * - \ref api_dec_xxx (xxx = hevc, jpec, vp8, vp9)
  * - \ref api_vpp
+ * - \ref api_fei_xxx (xxx = h264, hevc)
  */
 
 /**
@@ -2935,7 +2936,13 @@ typedef enum
     VAEncPictureTypeBidirectional	= 2,
 } VAEncPictureType;
 
-/* Encode Slice Parameter Buffer */
+/**
+ * \brief Encode Slice Parameter Buffer.
+ *
+ * @deprecated
+ * This is a deprecated encode slice parameter buffer, All applications
+ * \c can use VAEncSliceParameterBufferXXX (XXX = MPEG2, HEVC, H264, JPEG)
+ */
 typedef struct _VAEncSliceParameterBuffer
 {
     uint32_t start_row_number;	/* starting MB row number for this slice */
