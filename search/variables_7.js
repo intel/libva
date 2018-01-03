@@ -1,12 +1,11 @@
 var searchData=
 [
-  ['i',['i',['../structVAGenericValue.html#af9ecfba29713f2cfb272bffabd04136b',1,'VAGenericValue']]],
-  ['idr_5fpic_5fflag',['idr_pic_flag',['../structVAEncPictureParameterBufferH264.html#afde9dc1da8fec5bb52261134a501531d',1,'VAEncPictureParameterBufferH264']]],
-  ['idr_5fpic_5fid',['idr_pic_id',['../structVAEncSliceParameterBufferH264.html#ada1ec5272a165bb74ab72f350753eea4',1,'VAEncSliceParameterBufferH264']]],
-  ['input_5fcolor_5fstandards',['input_color_standards',['../structVAProcPipelineCaps.html#a407dfc0c5e29e9fb4473c7c3a5b52cb6',1,'VAProcPipelineCaps']]],
-  ['intra_5fidr_5fperiod',['intra_idr_period',['../structVAEncSequenceParameterBufferH264.html#a4d2b3142086a92cf586404077c5d1d2a',1,'VAEncSequenceParameterBufferH264']]],
-  ['intra_5fperiod',['intra_period',['../structVAEncSequenceParameterBufferH264.html#afbe3ca165732e39a61e6feac80254834',1,'VAEncSequenceParameterBufferH264']]],
-  ['intra_5fquant_5fmat',['intra_quant_mat',['../structVAIQMatrixBufferMPEG4.html#a838ac302c2cc3b6e387827469c9c4389',1,'VAIQMatrixBufferMPEG4']]],
-  ['intra_5fquantiser_5fmatrix',['intra_quantiser_matrix',['../structVAIQMatrixBufferMPEG2.html#a0bc519fa31ad91fdd5f444610c2cdd3c',1,'VAIQMatrixBufferMPEG2']]],
-  ['ip_5fperiod',['ip_period',['../structVAEncSequenceParameterBufferH264.html#ab23f3be50ca3e65305945bcb49afe9ca',1,'VAEncSequenceParameterBufferH264']]]
+  ['h_5fsampling_5ffactor',['h_sampling_factor',['../structVAPictureParameterBufferJPEGBaseline.html#a460cf8d2473d8e15b37bb604d1f251d6',1,'VAPictureParameterBufferJPEGBaseline']]],
+  ['handle',['handle',['../structVABufferInfo.html#ae39b96376411a780159ce4a6645f7fb7',1,'VABufferInfo']]],
+  ['has_5femulation_5fbytes',['has_emulation_bytes',['../structVAEncPackedHeaderParameterBuffer.html#a1771dec9aec4369afe1a32f7103580e3',1,'VAEncPackedHeaderParameterBuffer']]],
+  ['height',['height',['../structVASurfaceAttribExternalBuffers.html#a420abf8d1e1382204c1f22eb6b7055c5',1,'VASurfaceAttribExternalBuffers']]],
+  ['hmedisable',['HMEDisable',['../structVAEncMiscParameterEncQuality.html#a589437585d2d9de89a04a3914782a468',1,'VAEncMiscParameterEncQuality']]],
+  ['hmemvcostscalingfactor',['HMEMVCostScalingFactor',['../structVAEncMiscParameterEncQuality.html#a6f286bf2f535b730b20230fb8e9a24d3',1,'VAEncMiscParameterEncQuality']]],
+  ['huffman',['huffman',['../structVAEncPictureParameterBufferJPEG.html#a83504679e9d52ce36926d2bdc033eac3',1,'VAEncPictureParameterBufferJPEG']]],
+  ['huffman_5ftable',['huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#abf157f5dc5cc4b6235ca782a20d6fd9d',1,'VAHuffmanTableBufferJPEGBaseline']]]
 ];
