@@ -3139,6 +3139,16 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
 
 /**
+ * \brief The coded buffer segment status contains frame encoding passes number
+ *
+ * This is the mask to get the number of encoding passes from the coded
+ * buffer segment status. 
+ * NUMBER_PASS(bit24~bit27): the number for encoding passes executed for the coded frame.
+ * 
+ */
+#define VA_CODED_BUF_STATUS_NUMBER_PASSES_MASK          0xf000000
+
+/**
  * \brief The coded buffer segment contains a single NAL unit. 
  *
  * This flag indicates that the coded buffer segment contains a

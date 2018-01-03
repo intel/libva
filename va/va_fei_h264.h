@@ -95,24 +95,73 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
      * 2: diamond search
      **/
     uint32_t      search_path               : 8;
-    /** \brief maximum number of Search Units, valid range is [1, 63] */
+    /** \brief maximum number of Search Units, valid range is [1, 63]
+     * 0 is treated as 1. reference search locations are grouped in a predefined pattern,
+     * and all locations within the same group must be either all are chosen or all are skipped.
+     * These predefined groups are called search unit (SU).*/
     uint32_t      len_sp                    : 8;
     uint32_t      reserved0	                : 16;
-
+    /** \brief defines the bit-mask for disabling sub-partition
+     * The lower 4 bits are for the major partitions (sub-macroblock) and the higher 3 bits for minor partitions (with sub-partition for 4x(8x8) sub-macroblocks.
+     * xxxxxx1 : 16x16 sub-macroblock disabled
+     * xxxxx1x : 2x(16x8) sub-macroblock within 16x16 disabled
+     * xxxx1xx : 2x(8x16) sub-macroblock within 16x16 disabled
+     * xxx1xxx : 1x(8x8) sub-partition for 4x(8x8) within 16x16 disabled
+     * xx1xxxx : 2x(8x4) sub-partition for 4x(8x8) within 16x16 disabled
+     * x1xxxxx : 2x(4x8) sub-partition for 4x(8x8) within 16x16 disabled
+     * 1xxxxxx : 4x(4x4) sub-partition for 4x(8x8) within 16x16 disabled
+     * 1111111 : Invalid
+     * 0000000 : default value */
     uint32_t      sub_mb_part_mask          : 7;
+    /** specifies which Luma Intra partition is enabled/disabled for intra mode decision.
+     * xxxx1: luma_intra_16x16 disabled
+     * xxx1x: luma_intra_8x8 disabled
+     * xx1xx: luma_intra_4x4 disabled
+     * xx111: intra prediction is disabled */
     uint32_t      intra_part_mask           : 5;
+    /** when set to 1, neighbor MV will be used as predictor; when set to 0, no neighbor MV will be used as predictor.*/
     uint32_t      multi_pred_l0             : 1;
+    /** when set to 1, neighbor MV will be used as predictor; when set to 0, no neighbor MV will be used as predictor.*/
     uint32_t      multi_pred_l1             : 1;
+    /**defines the half/quarter pel modes. The mode is inclusive, ie., higher precision mode samples lower precision locations.
+    * 00b: integer mode searching
+    * 01b: half-pel mode searching
+    * 10b: reserved
+    * 11b: quarter-pel mode searching */
     uint32_t      sub_pel_mode              : 2;
+    /** specifies distortion measure adjustments used for the inter motion search SAD comparison.
+     * 00b: none
+     * 10b: Haar transform adjusted*/
     uint32_t      inter_sad 	            : 2;
+    /** specifies distortion measure adjustments used for the intra motion search SAD comparison.
+     * 00b: none
+     * 10b: Haar transform adjusted*/
     uint32_t      intra_sad                 : 2;
+    /** specifies if the output distortion is the raw distortion or cost adjusted distortion.
+     * 0: Raw Distortion without Cost
+     * 1: Distortion with added Cost */
     uint32_t      distortion_type           : 1;
+    /** when set to 1, enables the additional calls on Fraction & Bidirectional Refinement*/
     uint32_t      repartition_check_enable  : 1;
+    /** defines whether adaptive searching is enabled for IME(Integer Motion Estimation).
+     * 0: disable
+     * 1: enable  */
     uint32_t      adaptive_search           : 1;
+    /** enables using the motion vector as an extra predictor provided by the host. If it is set,
+     *  host needs to provide a buffer with motion vectors and the associated reference index for
+     *  each 16x16 block as defined . The host can call processing function to get motion vectors and use as predictor.
+     *  0: MV predictor disabled
+     *  1: MV predictor enabled */
     uint32_t      mv_predictor_enable       : 1;
+    /** enables using the QP buffer to set the QP for each block*/
     uint32_t      mb_qp                     : 1;
+    /** enable mb_ctrl buffer to handle MB*/
     uint32_t      mb_input                  : 1;
+    /** when this flag is set, mb_ctrl  must be set too and a buffer with per MB input
+     * needs to be provided and MaxSizeInWord and */
     uint32_t      mb_size_ctrl              : 1;
+    /** when this flag is set, extra distortion between the current MB and co-located MB is provided.
+     *  Extra distortion output has performance impact, set it only when it is needed.*/
     uint32_t      colocated_mb_distortion   : 1;
     uint32_t      reserved1	                : 4;
 
@@ -150,6 +199,7 @@ typedef struct _VAEncFEIMBControlH264
     uint32_t force_to_intra                : 1;
     /** \brief when set, correposndent MB is coded as skip */
     uint32_t force_to_skip                 : 1;
+    /** \brief specifies whether this macroblock should be coded as a non-skipped macroblock. */
     uint32_t force_to_nonskip              : 1;
     uint32_t enable_direct_bias_adjustment : 1;
     uint32_t enable_motion_bias_adjustment : 1;
@@ -160,9 +210,10 @@ typedef struct _VAEncFEIMBControlH264
 
     uint32_t reserved2;
 
-    /** \brief when mb_size_ctrl is set, size here is used to budget accumulatively. Set to 0xFF if don't care. */
     uint32_t reserved3                     : 16;
+    /** \brief when mb_size_ctrl is set, size here is used to budget accumulatively. Set to 0xFF if don't care. */
     uint32_t target_size_in_word           : 8;
+    /** \brief specifies the max size of each MB */
     uint32_t max_size_in_word              : 8;
 } VAEncFEIMBControlH264;
 
