@@ -27,6 +27,7 @@
 #include "va.h"
 #include "va_backend.h"
 #include "va_backend_vpp.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 
@@ -37,28 +38,34 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#ifdef ANDROID
+#include <cutils/log.h>
+/* support versions < JellyBean */
+#ifndef ALOGE
+#define ALOGE LOGE
+#endif
+#ifndef ALOGI
+#define ALOGI LOGI
+#endif
+#endif
 
 #define DRIVER_EXTENSION	"_drv_video.so"
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
-
 #define ASSERT		assert
-#define CHECK_VTABLE(s, ctx, func) if (!va_checkVtable(ctx->vtable->va##func, #func)) s = VA_STATUS_ERROR_UNKNOWN;
-#define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
-#define CHECK_STRING(s, ctx, var) if (!va_checkString(ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
-
+#define CHECK_VTABLE(s, ctx, func) if (!va_checkVtable(dpy, ctx->vtable->va##func, #func)) s = VA_STATUS_ERROR_UNKNOWN;
+#define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(dpy, ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
+#define CHECK_STRING(s, ctx, var) if (!va_checkString(dpy, ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
 /*
  * read a config "env" for libva.conf or from environment setting
- * liva.conf has higher priority
+ * libva.conf has higher priority
  * return 0: the "env" is set, and the value is copied into env_value
  *        1: the env is not set
  */
 int va_parseConfig(char *env, char *env_value)
 {
     char *token, *value, *saveptr;
-    char oneline[1024] = {'\0'};
+    char oneline[1024];
     FILE *fp=NULL;
 
     if (env == NULL)
@@ -66,17 +73,19 @@ int va_parseConfig(char *env, char *env_value)
     
     fp = fopen("/etc/libva.conf", "r");
     while (fp && (fgets(oneline, 1024, fp) != NULL)) {
-	if (strlen(oneline) == 1)
-	    continue;
+        if (strlen(oneline) == 1)
+            continue;
         token = strtok_r(oneline, "=\n", &saveptr);
-	value = strtok_r(NULL, "=\n", &saveptr);
+        value = strtok_r(NULL, "=\n", &saveptr);
 
-	if (NULL == token || NULL == value)
-	    continue;
+        if (NULL == token || NULL == value)
+            continue;
 
         if (strcmp(token, env) == 0) {
-            if (env_value)
+            if (env_value) {
                 strncpy(env_value,value, 1024);
+                env_value[1023] = '\0';
+            }
 
             fclose(fp);
 
@@ -89,8 +98,10 @@ int va_parseConfig(char *env, char *env_value)
     /* no setting in config file, use env setting */
     value = getenv(env);
     if (value) {
-        if (env_value)
+        if (env_value) {
             strncpy(env_value, value, 1024);
+            env_value[1023] = '\0';
+        }
         return 0;
     }
     
@@ -103,11 +114,101 @@ int vaDisplayIsValid(VADisplay dpy)
     return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
 }
 
-void va_errorMessage(const char *msg, ...)
+/*
+ * Global log level configured from the config file or environment, which sets
+ * whether default logging appears or not (always overridden by explicitly
+ * user-configured logging).
+ */
+static int default_log_level = 2;
+
+static void default_log_error(void *user_context, const char *buffer)
 {
+    if (default_log_level < 1)
+        return;
+# ifdef ANDROID
+    ALOGE("%s", buffer);
+# else
+    fprintf(stderr, "libva error: %s", buffer);
+# endif
+}
+
+static void default_log_info(void *user_context, const char *buffer)
+{
+    if (default_log_level < 2)
+        return;
+# ifdef ANDROID
+    ALOGI("%s", buffer);
+# else
+    fprintf(stderr, "libva info: %s", buffer);
+# endif
+}
+
+/**
+ * Set the callback for error messages, or NULL for no logging.
+ * Returns the previous one, or NULL if it was disabled.
+ */
+VAMessageCallback vaSetErrorCallback(VADisplay dpy, VAMessageCallback callback, void *user_context)
+{
+    VADisplayContextP dctx;
+    VAMessageCallback old_callback;
+
+    if (!vaDisplayIsValid(dpy))
+        return NULL;
+
+    dctx = (VADisplayContextP)dpy;
+    old_callback = dctx->error_callback;
+
+    dctx->error_callback = callback;
+    dctx->error_callback_user_context = user_context;
+
+    return old_callback;
+}
+
+/**
+ * Set the callback for info messages, or NULL for no logging.
+ * Returns the previous one, or NULL if it was disabled.
+ */
+VAMessageCallback vaSetInfoCallback(VADisplay dpy, VAMessageCallback callback, void *user_context)
+{
+    VADisplayContextP dctx;
+    VAMessageCallback old_callback;
+
+    if (!vaDisplayIsValid(dpy))
+        return NULL;
+
+    dctx = (VADisplayContextP)dpy;
+    old_callback = dctx->info_callback;
+
+    dctx->info_callback = callback;
+    dctx->info_callback_user_context = user_context;
+
+    return old_callback;
+}
+
+static void va_MessagingInit()
+{
+#if ENABLE_VA_MESSAGING
+    char env_value[1024];
+    int ret;
+
+    if (va_parseConfig("LIBVA_MESSAGING_LEVEL", &env_value[0]) == 0) {
+        ret = sscanf(env_value, "%d", &default_log_level);
+        if (ret < 1 || default_log_level < 0 || default_log_level > 2)
+            default_log_level = 2;
+    }
+#endif
+}
+
+void va_errorMessage(VADisplay dpy, const char *msg, ...)
+{
+#if ENABLE_VA_MESSAGING
+    VADisplayContextP dctx = (VADisplayContextP)dpy;
     char buf[512], *dynbuf;
     va_list args;
     int n, len;
+
+    if (dctx->error_callback == NULL)
+        return;
 
     va_start(args, msg);
     len = vsnprintf(buf, sizeof(buf), msg, args);
@@ -121,18 +222,24 @@ void va_errorMessage(const char *msg, ...)
         n = vsnprintf(dynbuf, len + 1, msg, args);
         va_end(args);
         if (n == len)
-            va_log_error(dynbuf);
+            dctx->error_callback(dctx->error_callback_user_context, dynbuf);
         free(dynbuf);
     }
     else if (len > 0)
-        va_log_error(buf);
+        dctx->error_callback(dctx->error_callback_user_context, buf);
+#endif
 }
 
-void va_infoMessage(const char *msg, ...)
+void va_infoMessage(VADisplay dpy, const char *msg, ...)
 {
+#if ENABLE_VA_MESSAGING
+    VADisplayContextP dctx = (VADisplayContextP)dpy;
     char buf[512], *dynbuf;
     va_list args;
     int n, len;
+
+    if (dctx->info_callback == NULL)
+        return;
 
     va_start(args, msg);
     len = vsnprintf(buf, sizeof(buf), msg, args);
@@ -146,35 +253,83 @@ void va_infoMessage(const char *msg, ...)
         n = vsnprintf(dynbuf, len + 1, msg, args);
         va_end(args);
         if (n == len)
-            va_log_info(dynbuf);
+            dctx->info_callback(dctx->info_callback_user_context, dynbuf);
         free(dynbuf);
     }
     else if (len > 0)
-        va_log_info(buf);
+        dctx->info_callback(dctx->info_callback_user_context, buf);
+#endif
 }
 
-static bool va_checkVtable(void *ptr, char *function)
+static void va_driverErrorCallback(VADriverContextP ctx,
+                                   const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->error_callback(dctx->error_callback_user_context, message);
+}
+
+static void va_driverInfoCallback(VADriverContextP ctx,
+                                  const char *message)
+{
+    VADisplayContextP dctx = ctx->pDisplayContext;
+    if (!dctx)
+        return;
+    dctx->info_callback(dctx->info_callback_user_context, message);
+}
+
+VADisplayContextP va_newDisplayContext(void)
+{
+    VADisplayContextP dctx = calloc(1, sizeof(*dctx));
+    if (!dctx)
+        return NULL;
+
+    dctx->vadpy_magic = VA_DISPLAY_MAGIC;
+
+    dctx->error_callback = default_log_error;
+    dctx->info_callback  = default_log_info;
+
+    return dctx;
+}
+
+VADriverContextP va_newDriverContext(VADisplayContextP dctx)
+{
+    VADriverContextP ctx = calloc(1, sizeof(*ctx));
+    if (!ctx)
+        return NULL;
+
+    dctx->pDriverContext = ctx;
+    ctx->pDisplayContext = dctx;
+
+    ctx->error_callback = va_driverErrorCallback;
+    ctx->info_callback  = va_driverInfoCallback;
+
+    return ctx;
+}
+
+static bool va_checkVtable(VADisplay dpy, void *ptr, char *function)
 {
     if (!ptr) {
-        va_errorMessage("No valid vtable entry for va%s\n", function);
+        va_errorMessage(dpy, "No valid vtable entry for va%s\n", function);
         return false;
     }
     return true;
 }
 
-static bool va_checkMaximum(int value, char *variable)
+static bool va_checkMaximum(VADisplay dpy, int value, char *variable)
 {
     if (!value) {
-        va_errorMessage("Failed to define max_%s in init\n", variable);
+        va_errorMessage(dpy, "Failed to define max_%s in init\n", variable);
         return false;
     }
     return true;
 }
 
-static bool va_checkString(const char* value, char *variable)
+static bool va_checkString(VADisplay dpy, const char* value, char *variable)
 {
     if (!value) {
-        va_errorMessage("Failed to define str_%s in init\n", variable);
+        va_errorMessage(dpy, "Failed to define str_%s in init\n", variable);
         return false;
     }
     return true;
@@ -216,9 +371,9 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                                              strlen(driver_name) +
                                              strlen(DRIVER_EXTENSION) + 2 );
         if (!driver_path) {
-            va_errorMessage("%s L%d Out of memory!n",
-                                __FUNCTION__, __LINE__);
-            free(search_path);    
+            va_errorMessage(dpy, "%s L%d Out of memory!n",
+                            __FUNCTION__, __LINE__);
+            free(search_path);
             return VA_STATUS_ERROR_ALLOCATION_FAILED;
         }
 
@@ -227,7 +382,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         strncat( driver_path, driver_name, strlen(driver_name) );
         strncat( driver_path, DRIVER_EXTENSION, strlen(DRIVER_EXTENSION) );
         
-        va_infoMessage("Trying to open %s\n", driver_path);
+        va_infoMessage(dpy, "Trying to open %s\n", driver_path);
 #ifndef ANDROID
         handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
 #else
@@ -236,7 +391,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         if (!handle) {
             /* Don't give errors for non-existing files */
             if (0 == access( driver_path, F_OK))
-                va_errorMessage("dlopen of %s failed: %s\n", driver_path, dlerror());
+                va_errorMessage(dpy, "dlopen of %s failed: %s\n", driver_path, dlerror());
         } else {
             VADriverInit init_func = NULL;
             char init_func_s[256];
@@ -247,10 +402,8 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 int minor;
             } compatible_versions[] = {
                 { VA_MAJOR_VERSION, VA_MINOR_VERSION },
-                { 0, 34 },
-                { 0, 33 },
-                { 0, 32 },
-                { -1, -1}
+				{ 0, 32},
+                { -1, }
             };
 
             for (i = 0; compatible_versions[i].major >= 0; i++) {
@@ -259,14 +412,14 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                                          compatible_versions[i].minor)) {
                     init_func = (VADriverInit)dlsym(handle, init_func_s);
                     if (init_func) {
-                        va_infoMessage("Found init function %s\n", init_func_s);
+                        va_infoMessage(dpy, "Found init function %s\n", init_func_s);
                         break;
                     }
                 }
             }
 
             if (compatible_versions[i].major < 0) {
-                va_errorMessage("%s has no function %s\n",
+                va_errorMessage(dpy, "%s has no function %s\n",
                                 driver_path, init_func_s);
                 dlclose(handle);
             } else {
@@ -299,7 +452,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_MAXIMUM(vaStatus, ctx, attributes);
                     CHECK_MAXIMUM(vaStatus, ctx, image_formats);
                     CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
-                    CHECK_MAXIMUM(vaStatus, ctx, display_attributes);
                     CHECK_STRING(vaStatus, ctx, vendor);
                     CHECK_VTABLE(vaStatus, ctx, Terminate);
                     CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
@@ -343,7 +495,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
                 }
                 if (VA_STATUS_SUCCESS != vaStatus) {
-                    va_errorMessage("%s init failed\n", driver_path);
+                    va_errorMessage(dpy, "%s init failed\n", driver_path);
                     dlclose(handle);
                 }
                 if (VA_STATUS_SUCCESS == vaStatus)
@@ -428,12 +580,20 @@ const char *vaErrorStr(VAStatus error_status)
             return "surface is in displaying (may by overlay)" ;
         case VA_STATUS_ERROR_INVALID_IMAGE_FORMAT:
             return "invalid VAImageFormat";
+        case VA_STATUS_ERROR_DECODING_ERROR:
+            return "internal decoding error";
+        case VA_STATUS_ERROR_ENCODING_ERROR:
+            return "internal encoding error";
         case VA_STATUS_ERROR_INVALID_VALUE:
             return "an invalid/unsupported value was supplied";
         case VA_STATUS_ERROR_UNSUPPORTED_FILTER:
             return "the requested filter is not supported";
         case VA_STATUS_ERROR_INVALID_FILTER_CHAIN:
             return "an invalid filter chain was supplied";
+        case VA_STATUS_ERROR_HW_BUSY:
+            return "HW busy now";
+        case VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:
+            return "an unsupported memory type was supplied";
         case VA_STATUS_ERROR_UNKNOWN:
             return "unknown libva error";
     }
@@ -455,19 +615,18 @@ VAStatus vaSetDriverName(
     VADriverContextP ctx;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     char *override_driver_name = NULL;
-    int found;
-    unsigned int i;
+    int i, found;
     ctx = CTX(dpy);
 
     if (geteuid() != getuid()) {
         vaStatus = VA_STATUS_ERROR_OPERATION_FAILED;
-        va_errorMessage("no permission to vaSetDriverName\n");
+        va_errorMessage(dpy, "no permission to vaSetDriverName\n");
         return vaStatus;
     }
 
     if (strlen(driver_name) == 0 || strlen(driver_name) >=256) {
         vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
-        va_errorMessage("vaSetDriverName returns %s\n",
+        va_errorMessage(dpy, "vaSetDriverName returns %s\n",
                          vaErrorStr(vaStatus));
         return vaStatus;
     }
@@ -484,7 +643,7 @@ VAStatus vaSetDriverName(
 
     if (!found) {
         vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
-        va_errorMessage("vaSetDriverName returns %s. Incorrect parameter\n",
+        va_errorMessage(dpy, "vaSetDriverName returns %s. Incorrect parameter\n",
                          vaErrorStr(vaStatus));
         return vaStatus;
     }
@@ -493,7 +652,7 @@ VAStatus vaSetDriverName(
 
     if (!override_driver_name) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-        va_errorMessage("vaSetDriverName returns %s. Out of Memory\n",
+        va_errorMessage(dpy, "vaSetDriverName returns %s. Out of Memory\n",
                          vaErrorStr(vaStatus));
         return vaStatus;
     }
@@ -521,12 +680,14 @@ VAStatus vaInitialize (
 
     va_FoolInit(dpy);
 
-    va_infoMessage("VA-API version %s\n", VA_VERSION_S);
+    va_MessagingInit();
+
+    va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
 
     vaStatus = va_getDriverName(dpy, &driver_name);
 
     if (!ctx->override_driver_name) {
-        va_infoMessage("va_getDriverName() returns %d\n", vaStatus);
+        va_infoMessage(dpy, "va_getDriverName() returns %d\n", vaStatus);
 
         driver_name_env = getenv("LIBVA_DRIVER_NAME");
     } else if (vaStatus == VA_STATUS_SUCCESS) {
@@ -536,43 +697,36 @@ VAStatus vaInitialize (
         driver_name = strdup(ctx->override_driver_name);
         if (!driver_name) {
             vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-            va_errorMessage("vaInitialize() failed with %s, out of memory\n",
+            va_errorMessage(dpy, "vaInitialize() failed with %s, out of memory\n",
                         vaErrorStr(vaStatus));
             return vaStatus;
         }
-        va_infoMessage("User requested driver '%s'\n", driver_name);
+        va_infoMessage(dpy, "User requested driver '%s'\n", driver_name);
     }
 
-    if ((VA_STATUS_SUCCESS == vaStatus) &&
-        driver_name_env && (geteuid() == getuid())) {
+    if (driver_name_env && (geteuid() == getuid())) {
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
         if (driver_name) /* memory is allocated in va_getDriverName */
             free(driver_name);
-
+        
         driver_name = strdup(driver_name_env);
         vaStatus = VA_STATUS_SUCCESS;
-        va_infoMessage("User requested driver '%s'\n", driver_name);
+        va_infoMessage(dpy, "User requested driver '%s'\n", driver_name);
     }
 
     if ((VA_STATUS_SUCCESS == vaStatus) && (driver_name != NULL)) {
-        if (!strcmp(driver_name, "/")
-            || !strncmp(driver_name, "/etc/", 5)
-            || !strncmp(driver_name, "../", 3)) {
-            va_errorMessage("Illegal path may expose to path traversal attack, driver_name=%s\n",driver_name);
-            return VA_STATUS_ERROR_INVALID_CONFIG;
-        }
         vaStatus = va_openDriver(dpy, driver_name);
-        va_infoMessage("va_openDriver() returns %d\n", vaStatus);
+        va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
 
         *major_version = VA_MAJOR_VERSION;
         *minor_version = VA_MINOR_VERSION;
     } else
-        va_errorMessage("va_getDriverName() failed with %s,driver_name=%s\n",
+        va_errorMessage(dpy, "va_getDriverName() failed with %s,driver_name=%s\n",
                         vaErrorStr(vaStatus), driver_name);
 
     if (driver_name)
         free(driver_name);
-
+    
     VA_TRACE_LOG(va_TraceInitialize, dpy, major_version, minor_version);
 
     return vaStatus;
@@ -581,7 +735,7 @@ VAStatus vaInitialize (
 
 /*
  * After this call, all library internal resources will be cleaned up
- */
+ */ 
 VAStatus vaTerminate (
     VADisplay dpy
 )
@@ -745,10 +899,16 @@ VAStatus vaDestroyConfig (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus = VA_STATUS_SUCCESS;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaDestroyConfig ( ctx, config_id );
+  vaStatus = ctx->vtable->vaDestroyConfig ( ctx, config_id );
+
+  VA_TRACE_ALL(va_TraceDestroyConfig, dpy, config_id);
+
+  return vaStatus;
 }
 
 VAStatus vaQueryConfigAttributes (
@@ -769,15 +929,16 @@ VAStatus vaQueryConfigAttributes (
 
 VAStatus vaQueryProcessingRate (
     VADisplay dpy,
-    VAConfigID config_id, 
-    VAProcessingRateParams *proc_buf,
+    VAConfigID config_id,
+    VAProcessingRateParameter *proc_buf,
     unsigned int *processing_rate	/* out */
 )
 {
   VADriverContextP ctx;
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
-
+  if(!ctx->vtable->vaQueryProcessingRate)
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
   return ctx->vtable->vaQueryProcessingRate( ctx, config_id, proc_buf, processing_rate);
 }
 
@@ -809,7 +970,7 @@ va_impl_query_surface_attributes(
         { VASurfaceAttribMinHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMaxHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMemoryType,    VAGenericValueTypeInteger },
-        { VASurfaceAttribNone,          VAGenericValueTypeInteger }
+        { VASurfaceAttribNone, }
     };
 
     if (!out_attribs || !out_num_attribs_ptr)
@@ -1034,10 +1195,106 @@ VAStatus vaDestroyContext (
 )
 {
   VADriverContextP ctx;
+  VAStatus vaStatus;
+
   CHECK_DISPLAY(dpy);
   ctx = CTX(dpy);
 
-  return ctx->vtable->vaDestroyContext( ctx, context );
+  vaStatus = ctx->vtable->vaDestroyContext( ctx, context );
+
+  VA_TRACE_ALL(va_TraceDestroyContext, dpy, context);
+
+  return vaStatus;
+}
+
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+    
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaCreateMFContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaCreateMFContext( ctx, mf_context);
+        VA_TRACE_ALL(va_TraceCreateMFContext, dpy, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    
+    if(ctx->vtable->vaMFAddContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFAddContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFAddContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if(ctx->vtable->vaMFReleaseContext == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFReleaseContext( ctx, context, mf_context);
+        VA_TRACE_ALL(va_TraceMFReleaseContext, dpy, context, mf_context);
+    }
+
+    return vaStatus;
+}
+
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    CHECK_VTABLE(vaStatus, ctx, MFSubmit);
+    if(ctx->vtable->vaMFSubmit == NULL)
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+    else
+    {
+        vaStatus = ctx->vtable->vaMFSubmit( ctx, mf_context, contexts, num_contexts);
+        VA_TRACE_ALL(va_TraceMFSubmit, dpy, mf_context, contexts, num_contexts);
+    }
+
+    return vaStatus;
 }
 
 VAStatus vaCreateBuffer (
@@ -1063,6 +1320,33 @@ VAStatus vaCreateBuffer (
   VA_TRACE_LOG(va_TraceCreateBuffer,
                dpy, context, type, size, num_elements, data, buf_id);
   
+  return vaStatus;
+}
+
+VAStatus vaCreateBuffer2 (
+    VADisplay dpy,
+    VAContextID context,
+    VABufferType type,
+    unsigned int width,
+    unsigned int height,
+    unsigned int *unit_size,
+    unsigned int *pitch,
+    VABufferID *buf_id
+)
+{
+  VADriverContextP ctx;
+  VAStatus vaStatus;
+
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(!ctx->vtable->vaCreateBuffer2)
+     return VA_STATUS_ERROR_UNIMPLEMENTED;
+
+  vaStatus = ctx->vtable->vaCreateBuffer2( ctx, context, type, width, height ,unit_size, pitch, buf_id);
+
+  VA_TRACE_LOG(va_TraceCreateBuffer,
+               dpy, context, type, *pitch, height, NULL, buf_id);
+
   return vaStatus;
 }
 
@@ -1179,6 +1463,23 @@ vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id)
     if (!ctx->vtable->vaReleaseBufferHandle)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     return ctx->vtable->vaReleaseBufferHandle(ctx, buf_id);
+}
+
+VAStatus
+vaExportSurfaceHandle(VADisplay dpy, VASurfaceID surface_id,
+                      uint32_t mem_type, uint32_t flags,
+                      void *descriptor)
+{
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaExportSurfaceHandle)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaExportSurfaceHandle(ctx, surface_id,
+                                              mem_type, flags,
+                                              descriptor);
 }
 
 VAStatus vaBeginPicture (

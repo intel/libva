@@ -20,26 +20,14 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
+
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = va pkgconfig test debian.upstream doc
+SUBDIRS = va pkgconfig doc
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \
 	aclocal.m4 compile config.guess config.sub \
 	configure depcomp install-sh ltmain.sh     \
 	Makefile.in missing
-
-DEB_BUILDDIR = debian.build
-
-deb:
-	@[ -d debian ] || ln -s debian.upstream debian
-	dpkg-buildpackage -rfakeroot -uc -us
-
-deb.upstream: dist
-	-mkdir -p $(DEB_BUILDDIR)
-	cd $(DEB_BUILDDIR)				&& \
-	rm -rf $(PACKAGE)-$(VERSION)			&& \
-	tar zxvf ../$(PACKAGE)-$(VERSION).tar.gz	&& \
-	cd $(PACKAGE)-$(VERSION)			&& \
-	$(MAKE) deb -f Makefile.am

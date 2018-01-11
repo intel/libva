@@ -247,16 +247,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterColorBalance,
     /** \brief Skin Tone Enhancement. */
     VAProcFilterSkinToneEnhancement,
-    /** \brief Deblocking filter. */
-    VAProcFilterDeblocking,
-    /** \brief Frame rate conversion. */
-    VAProcFilterFrameRateConversion,
     /** \brief Total Color Correction. */
     VAProcFilterTotalColorCorrection,
-    /** \brief Non-Linear Anamorphic Scaling. */
-    VAProcFilterNonLinearAnamorphicScaling,
-    /** \brief Image Stabilization. */
-    VAProcFilterImageStabilization,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -346,26 +338,12 @@ typedef enum _VAProcTotalColorCorrectionType {
     /** \brief Number of color correction attributes. */
     VAProcTotalColorCorrectionCount
 } VAProcTotalColorCorrectionType;
-
-/** \brief ImageStabilization Types. */
-typedef enum _VAProcImageStabilizationType {
-    VAProcImageStabilizationTypeNone = 0,
-    /** \brief Mode Crop - crops the frame by the app provided percentage. */
-    VAProcImageStabilizationTypeCrop,
-    /** \brief Mode Crop Min Zoom - crops and then upscales the frame to half the black boundary. */
-    VAProcImageStabilizationTypeMinZoom,
-    /** \brief Mode Crop Full Zoom - crops and upscales the frame to original size. */
-    VAProcImageStabilizationTypeFullZoom,
-    /** \brief Number of Image Stabilization Type. */
-    VAProcImageStabilizationTypeCount
-} VAProcImageStabilizationType;
-
 /** @name Video blending flags */
 /**@{*/
 /** \brief Global alpha blending. */
-#define VA_BLEND_GLOBAL_ALPHA           0x0002
+#define VA_BLEND_GLOBAL_ALPHA           0x0001
 /** \brief Premultiplied alpha blending (RGBA surfaces only). */
-#define VA_BLEND_PREMULTIPLIED_ALPHA    0x0008
+#define VA_BLEND_PREMULTIPLIED_ALPHA    0x0002
 /** \brief Luma color key (YUV surfaces only). */
 #define VA_BLEND_LUMA_KEY               0x0010
 /**@}*/
@@ -430,37 +408,52 @@ typedef struct _VABlendState {
 
 /** @name Chroma Siting flag */
 /**@{*/
-#define VA_CHROMA_SITING_UNKNOWN              0x00000000
+/** vertical chroma sitting take bit 0-1, horizontal chroma sitting take bit 2-3
+ * vertical chromma siting | horizontal chroma sitting to be chroma sitting */
+#define VA_CHROMA_SITING_UNKNOWN              0x00
 /** \brief Chroma samples are co-sited vertically on the top with the luma samples. */
-#define VA_CHROMA_SITING_VERTICAL_TOP         0x00000001
+#define VA_CHROMA_SITING_VERTICAL_TOP         0x01
 /** \brief Chroma samples are not co-sited vertically with the luma samples. */
-#define VA_CHROMA_SITING_VERTICAL_CENTER      0x00000002
+#define VA_CHROMA_SITING_VERTICAL_CENTER      0x02
 /** \brief Chroma samples are co-sited vertically on the bottom with the luma samples. */
-#define VA_CHROMA_SITING_VERTICAL_BOTTOM      0x00000003
+#define VA_CHROMA_SITING_VERTICAL_BOTTOM      0x03
 /** \brief Chroma samples are co-sited horizontally on the left with the luma samples. */
-#define VA_CHROMA_SITING_HORIZONTAL_LEFT      0x00000004
+#define VA_CHROMA_SITING_HORIZONTAL_LEFT      0x04
 /** \brief Chroma samples are not co-sited horizontally with the luma samples. */
-#define VA_CHROMA_SITING_HORIZONTAL_CENTER    0x00000008
+#define VA_CHROMA_SITING_HORIZONTAL_CENTER    0x08
 /**@}*/
+
+/**
+ * This is to indicate that the color-space conversion uses full range or reduced range.
+ * VA_SOURCE_RANGE_FULL(Full range): Y/Cb/Cr is in [0, 255]. It is mainly used
+ *      for JPEG/JFIF formats. The combination with the BT601 flag means that
+ *      JPEG/JFIF color-space conversion matrix is used.
+ * VA_SOURCE_RANGE_REDUCED(Reduced range): Y is in [16, 235] and Cb/Cr is in [16, 240].
+ *      It is mainly used for the YUV->RGB color-space conversion in SDTV/HDTV/UHDTV.
+ */
+#define VA_SOURCE_RANGE_UNKNOWN         0
+#define VA_SOURCE_RANGE_REDUCED         1
+#define VA_SOURCE_RANGE_FULL            2
 
 /** \brief Video processing pipeline capabilities. */
 typedef struct _VAProcPipelineCaps {
     /** \brief Pipeline flags. See VAProcPipelineParameterBuffer::pipeline_flags. */
-    unsigned int        pipeline_flags;
+    uint32_t        pipeline_flags;
     /** \brief Extra filter flags. See VAProcPipelineParameterBuffer::filter_flags. */
-    unsigned int        filter_flags;
+    uint32_t        filter_flags;
     /** \brief Number of forward reference frames that are needed. */
-    unsigned int        num_forward_references;
+    uint32_t        num_forward_references;
     /** \brief Number of backward reference frames that are needed. */
-    unsigned int        num_backward_references;
+    uint32_t        num_backward_references;
     /** \brief List of color standards supported on input. */
     VAProcColorStandardType *input_color_standards;
     /** \brief Number of elements in \ref input_color_standards array. */
-    unsigned int        num_input_color_standards;
+    uint32_t        num_input_color_standards;
     /** \brief List of color standards supported on output. */
     VAProcColorStandardType *output_color_standards;
     /** \brief Number of elements in \ref output_color_standards array. */
-    unsigned int        num_output_color_standards;
+    uint32_t        num_output_color_standards;
+
     /**
      * \brief Rotation flags.
      *
@@ -486,9 +479,9 @@ typedef struct _VAProcPipelineCaps {
      * }
      * \endcode
      */
-    unsigned int        rotation_flags;
+    uint32_t        rotation_flags;
     /** \brief Blend flags. See "Video blending flags". */
-    unsigned int        blend_flags;
+    uint32_t        blend_flags;
     /**
      * \brief Mirroring flags.
      *
@@ -497,37 +490,42 @@ typedef struct _VAProcPipelineCaps {
      * "Mirroring directions" for a description of mirroring directions.
      *
      */
-    unsigned int        mirror_flags;
+    uint32_t        mirror_flags;
     /** \brief Number of additional output surfaces supported by the pipeline  */
-    unsigned int        num_additional_outputs;
+    uint32_t        num_additional_outputs;
 
     /** \brief Number of elements in \ref input_pixel_format array. */
-    unsigned int        num_input_pixel_formats;
+    uint32_t        num_input_pixel_formats;
     /** \brief List of input pixel formats in fourcc. */
-    unsigned int        *input_pixel_format;
+    uint32_t        *input_pixel_format;
     /** \brief Number of elements in \ref output_pixel_format array. */
-    unsigned int        num_output_pixel_formats;
+    uint32_t        num_output_pixel_formats;
     /** \brief List of output pixel formats in fourcc. */
-    unsigned int        *output_pixel_format;
-  
+    uint32_t        *output_pixel_format;
+
     /** \brief Max supported input width in pixels. */
-    unsigned int        max_input_width;
+    uint32_t        max_input_width;
     /** \brief Max supported input height in pixels. */
-    unsigned int        max_input_height;
+    uint32_t        max_input_height;
     /** \brief Min supported input width in pixels. */
-    unsigned int        min_input_width;
+    uint32_t        min_input_width;
     /** \brief Min supported input height in pixels. */
-    unsigned int        min_input_height;
+    uint32_t        min_input_height;
 
     /** \brief Max supported output width in pixels. */
-    unsigned int        max_output_width;
+    uint32_t        max_output_width;
     /** \brief Max supported output height in pixels. */
-    unsigned int        max_output_height;
+    uint32_t        max_output_height;
     /** \brief Min supported output width in pixels. */
-    unsigned int        min_output_width;
+    uint32_t        min_output_width;
     /** \brief Min supported output height in pixels. */
-    unsigned int        min_output_height;
-
+    uint32_t        min_output_height;
+    /** \brief Reserved bytes for future use, must be zero */
+    #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__) || defined(__LP64__)
+    uint32_t                va_reserved[VA_PADDING_HIGH - 2];
+    #else
+    uint32_t                va_reserved[VA_PADDING_HIGH];
+    #endif
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -540,16 +538,25 @@ typedef struct _VAProcFilterValueRange {
     float               default_value;
     /** \brief Step value that alters the filter behaviour in a sensible way. */
     float               step;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterValueRange;
+
+typedef struct _VAProcColorProperties {
+    /** Chroma sample location.\c VA_CHROMA_SITING_VERTICAL_XXX | VA_CHROMA_SITING_HORIZONTAL_XXX */
+    uint8_t chroma_sample_location;
+    /** Chroma sample location. \c VA_SOURCE_RANGE_XXX*/
+    uint8_t color_range;
+    uint8_t reserved[6];
+} VAProcColorProperties;
 
 /**
  * \brief Video processing pipeline configuration.
  *
- * This buffer defines a video processing pipeline. As for any buffer
- * passed to \c vaRenderPicture(), this is a one-time usage model.
- * However, the actual filters to be applied are provided in the
- * \c filters field, so they can be re-used in other processing
- * pipelines.
+ * This buffer defines a video processing pipeline. The actual filters to
+ * be applied are provided in the \c filters field, they can be re-used
+ * in other processing pipelines.
  *
  * The target surface is specified by the \c render_target argument of
  * \c vaBeginPicture(). The general usage model is described as follows:
@@ -624,7 +631,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * appropriate background color. Next, the driver will blend this
      * temporary surface into the target surface.
      */
-    unsigned int        output_background_color;
+    uint32_t        output_background_color;
     /**
      * \brief Requested output color primaries.
      */
@@ -636,7 +643,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * or not, notify the driver that it can opt for power optimizations,
      * should this be needed.
      */
-    unsigned int        pipeline_flags;
+    uint32_t        pipeline_flags;
     /**
      * \brief Extra filter flags. See vaPutSurface() flags.
      *
@@ -652,9 +659,8 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   \c VA_SRC_SMPTE_240. 
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
-     * - Enable auto noise reduction: \c VA_FILTER_NOISEREDUCTION_AUTO.
      */
-    unsigned int        filter_flags;
+    uint32_t        filter_flags;
     /**
      * \brief Array of filters to apply to the surface.
      *
@@ -666,22 +672,18 @@ typedef struct _VAProcPipelineParameterBuffer {
      * #VA_STATUS_ERROR_UNSUPPORTED_FILTER is returned if the list
      * contains an unsupported filter.
      *
-     * Note: no filter buffer is destroyed after a call to vaRenderPicture(),
-     * only this pipeline buffer will be destroyed as per the core API
-     * specification. This allows for flexibility in re-using the filter for
-     * other surfaces to be processed.
      */
     VABufferID         *filters;
     /** \brief Actual number of filters. */
-    unsigned int        num_filters;
+    uint32_t        num_filters;
     /** \brief Array of forward reference frames. */
     VASurfaceID        *forward_references;
     /** \brief Number of forward reference frames that were supplied. */
-    unsigned int        num_forward_references;
+    uint32_t        num_forward_references;
     /** \brief Array of backward reference frames. */
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
-    unsigned int        num_backward_references;
+    uint32_t        num_backward_references;
     /**
      * \brief Rotation state. See rotation angles.
      *
@@ -706,7 +708,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * perfectly ignore this variable if it does not support any
      * rotation.
      */
-    unsigned int        rotation_state;
+    uint32_t        rotation_state;
     /**
      * \brief blending state. See "Video blending state definition".
      *
@@ -728,44 +730,41 @@ typedef struct _VAProcPipelineParameterBuffer {
     const VABlendState *blend_state;
     /**
      * \bried mirroring state. See "Mirroring directions".
-     * 
-     * Mirroring of an image can be performed either along the 
+     *
+     * Mirroring of an image can be performed either along the
      * horizontal or vertical axis. It is assumed that the rotation
      * operation is always performed before the mirroring operation.
      */
-    unsigned int      mirror_state;
+    uint32_t      mirror_state;
     /** \brief Array of additional output surfaces. */
     VASurfaceID        *additional_outputs;
     /** \brief Number of additional output surfaces. */
-    unsigned int        num_additional_outputs;
+    uint32_t        num_additional_outputs;
     /**
-     * \brief Flag to indicate the input surface flag such as chroma-siting,
-     * range flag and so on.
+     * \brief Flag to indicate the input surface flag
      *
-     * The lower 4 bits are still used as chroma-siting flag
-     * The range_flag bit is used to indicate that the range flag of color-space conversion.
-     * -\ref VA_SOURCE_RANGE_FULL(Full range): Y/Cb/Cr is in [0, 255].It is
-     *   mainly used for JPEG/JFIF formats. The combination with the BT601 flag
-     *   means that JPEG/JFIF color-space conversion matrix is used.
-     * -\ref VA_SOURCE_RANGE_FULL(Reduced range): Y is in [16, 235] and Cb/Cr
-     *   is in [16, 240]. It is mainly used for the YUV<->RGB color-space
-     *   conversion in SDTV/HDTV/UHDTV.
+     * bit0: 0 non-protected 1: protected
+     * bit 1~31 for future
      */
-    unsigned int        input_surface_flag;
+    uint32_t        input_surface_flag;
     /**
-     * \brief Flag to indicate the output surface flag such as chroma-siting,
-     * range flag and so on. This flag should be consistent for all streams.
+     * \brief Flag to indicate the output surface flag
      *
-     * The lower 4 bits are still used as chroma-siting flag
-     * The range_flag bit is used to indicate that the range flag of color-space conversion.
-     * -\ref VA_SOURCE_RANGE_FULL(Full range): Y/Cb/Cr is in [0, 255].It is
-     *   mainly used for JPEG/JFIF formats. The combination with the BT601 flag
-     *   means that JPEG/JFIF color-space conversion matrix is used.
-     * -\ref VA_SOURCE_RANGE_REDUCED(Reduced range): Y is in [16, 235] and Cb/Cr
-     *   is in [16, 240]. It is mainly used for the YUV<->RGB color-space
-     *   conversion in SDTV/HDTV/UHDTV.
+     * bit0: 0 non-protected  1: protected
+     * bit 1~31 for future
      */
-    unsigned int        output_surface_flag;
+    uint32_t        output_surface_flag;
+
+    VAProcColorProperties  input_color_properties;
+
+    VAProcColorProperties  output_color_properties;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__)|| defined(__LP64__)
+    uint32_t                va_reserved[VA_PADDING_LARGE - 13];
+    #else
+    uint32_t                va_reserved[VA_PADDING_LARGE - 11];
+    #endif
 } VAProcPipelineParameterBuffer;
 
 /**
@@ -791,6 +790,9 @@ typedef struct _VAProcFilterParameterBuffer {
     VAProcFilterType    type;
     /** \brief Value. */
     float               value;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBuffer;
 
 /** @name De-interlacing flags */
@@ -810,12 +812,35 @@ typedef struct _VAProcFilterParameterBuffer {
  * if this is not set then assumes the frame contains two interleaved fields.
  */
 #define VA_DEINTERLACING_ONE_FIELD		0x0004
-/** 
+/**
  * \brief Film Mode Detection is enabled. If enabled, driver performs inverse
  * of various pulldowns, such as 3:2 pulldown.
  * if this is not set then assumes FMD is disabled.
  */
 #define VA_DEINTERLACING_FMD_ENABLE		0x0008
+
+//Scene change parameter for ADI on Linux, if enabled, driver use spatial DI(Bob), instead of ADI. if not, use old behavior for ADI
+//Input stream is TFF(set flags = 0), SRC0,1,2,3 are interlaced frame (top +bottom fields), DSTs are progressive frames
+//30i->30p
+//SRC0 -> BOBDI,  no reference, set flag = 0, output DST0
+//SRC1 -> ADI, reference frame=SRC0, set flags = 0, call VP, output DST1
+//SRC2 -> ADI, reference frame=SRC1, set flags = 0x0010(decimal 16), call VP, output DST2(T4)
+//SRC3 -> ADI, reference frame=SRC2, set flags = 0, call VP, output DST3
+//30i->60p
+//SRC0 -> BOBDI, no reference, set flag = 0, output DST0
+//SRC0 -> BOBDI, no reference, set flag =0x0002, output DST1
+
+//SRC1 -> ADI, reference frame =SRC0, set flags = 0, call VP, output DST2
+//SRC1 -> ADI, reference frame =SRC0, set flags = 0x0012(decimal18), call VP, output DST3(B3)
+
+//SRC2 -> ADI, reference frame =SRC1, set flags =  0x0010(decimal 16), call VP, output DST4(T4)
+//SRC2 -> ADI, reference frame =SRC1, set flags =  0x0002, call VP, output DST5
+
+//SRC3 -> ADI, reference frame =SRC2, set flags =  0, call VP, output DST6
+//SRC3 -> ADI, reference frame =SRC1, set flags = 0x0002, call VP, output DST7
+
+#define VA_DEINTERLACING_SCD_ENABLE     0x0010
+
 /**@}*/
 
 /** \brief Deinterlacing filter parametrization. */
@@ -825,7 +850,10 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
     /** \brief Deinterlacing flags. */
-    unsigned int     		flags;
+    uint32_t     		flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBufferDeinterlacing;
 
 /**
@@ -887,39 +915,10 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
      *   disabled and other attribute of the same type is used instead.
      */
     float                       value;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterParameterBufferColorBalance;
-
-/** @name FRC Custom Rate types. */
-/**@{*/
-/** \brief 24p to 60p. */
-#define VA_FRAME_RATE_CONVERSION_24p_60p    0x0001
-/** \brief 30p to 60p. */
-#define VA_FRAME_RATE_CONVERSION_30p_60p    0x0002
-/**@}*/
-
-/** \brief Frame rate conversion filter parametrization. */
-typedef struct _VAProcFilterParamterBufferFrameRateConversion {
-    /** \brief filter type. Shall be set to #VAProcFilterFrameRateConversion. */
-    VAProcFilterType                    type;
-    /** \brief FPS of input sequence. */
-    unsigned int                        input_fps;
-    /** \brief FPS of output sequence. */
-    unsigned int                        output_fps;
-    /** \brief Number of output frames in addition to the first output frame.
-        \brief If num_output_frames returned from pipeline query is 0,
-        \brief vaRenderPicture() will only produce one output frame with each call*/ 
-    unsigned int                        num_output_frames;
-    /** 
-     * \brief Array to store output frames in addition to the first one. 
-     * \brief The first output frame is stored in the render target from vaBeginPicture(). */
-    VASurfaceID*                        output_frames;   
-    /** \brief if frame repeat or not. 1: repeat 0: do not repeat */
-    unsigned int                        repeat_frame;  
-    /** \brief Counter within one complete FRC Cycle.
-        \brief The counter would run from 0 to 4 for 24to60p in each cycle.
-        \brief The counter would run from 0 to 1 for 30to60p in each cycle. */
-    unsigned int                        cyclic_counter;
-} VAProcFilterParameterBufferFrameRateConversion;
 
 /** \brief Total color correction filter parametrization. */
 typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
@@ -930,39 +929,6 @@ typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
     /** \brief Color correction value. */
     float                             value;
 } VAProcFilterParameterBufferTotalColorCorrection;
-
-/** @name ImageStabilization Perf Types. */
-/**@{*/
-/** \brief Fast Mode. */
-#define VA_IMAGE_STABILIZATION_PERF_TYPE_FAST       0x0001
- /** \brief Quality Mode. */
-#define VA_IMAGE_STABILIZATION_PERF_TYPE_QUALITY    0x0002
-/**@}*/
-
-/** \brief Image Stabilization filter parametrization. */
-typedef struct _VAProcFilterParameterBufferImageStabilization {
-    /** \brief Filter type. Shall be set to #VAProcFilterImageStabilization. */
-    VAProcFilterType                  type;
-    /** \brief Image Stabilization Mode. */
-    VAProcImageStabilizationType      mode;
-    /** \brief Image Stabilization Crop percentage. */
-    float                             crop;
-    /** \brief Image Stabilization Perf type. */
-    unsigned int                      perf_type;
-} VAProcFilterParameterBufferImageStabilization;
-
-/** \brief Non-Linear Anamorphic Scaling filter parametrization. */
-typedef struct _VAProcFilterParameterBufferNonLinearAnamorphicScaling {
-    /** \brief filter type. Shall be set to #VAProcFilterNonLinearAnamorphicScaling. */
-    VAProcFilterType    type;
-    /** \brief Vertical crop. */
-    float               vertical_crop;
-    /** \brief HLinear region. */
-    float               horizontal_linear_region;
-    /** \brief Non-linear crop. */
-    float               nonlinear_crop;
-} VAProcFilterParameterBufferNonLinearAnamorphicScaling;
-
 /**
  * \brief Default filter cap specification (single range value).
  *
@@ -972,12 +938,18 @@ typedef struct _VAProcFilterParameterBufferNonLinearAnamorphicScaling {
 typedef struct _VAProcFilterCap {
     /** \brief Range of supported values for the filter. */
     VAProcFilterValueRange      range;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCap;
 
 /** \brief Capabilities specification for the deinterlacing filter. */
 typedef struct _VAProcFilterCapDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     type;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCapDeinterlacing;
 
 /** \brief Capabilities specification for the color balance filter. */
@@ -986,6 +958,9 @@ typedef struct _VAProcFilterCapColorBalance {
     VAProcColorBalanceType      type;
     /** \brief Range of supported values for the specified operation. */
     VAProcFilterValueRange      range;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAProcFilterCapColorBalance;
 
 /** \brief Capabilities specification for the Total Color Correction filter. */
@@ -995,48 +970,6 @@ typedef struct _VAProcFilterCapTotalColorCorrection {
     /** \brief Range of supported values for the specified color. */
     VAProcFilterValueRange            range;
 } VAProcFilterCapTotalColorCorrection;
-
-/** \brief Capabilities specification for the Image Stabilization filter. */
-typedef struct _VAProcFilterCapImageStabilization {
-    /** \brief IS modes supported. */
-    VAProcImageStabilizationType       type[VAProcImageStabilizationTypeCount];
-    /** \brief Range of supported values for crop ratio. */
-    VAProcFilterValueRange             crop_range;
-    /** \brief Maximum number of forward reference frames supported. */
-    unsigned int                       max_forward_reference;
-    /** \brief Maximum number of IS perf modes supported. */
-    unsigned int                       perf_type;
-} VAProcFilterCapImageStabilization;
-
-/** \brief Capabilities specification for the Non-Linear Anamorphic Scaling filter. */
-typedef struct _VAProcFilterCapNonLinearAnamorphicScaling {
-    /** \brief Range of supported values for the vertical crop. */
-    VAProcFilterValueRange      vertical_crop_range;
-    /** \brief Range of supported values for the horizontal linear region. */
-    VAProcFilterValueRange      horizontal_linear_region_range;
-    /** \brief Range of supported values for the non-linear crop. */
-    VAProcFilterValueRange      nonlinear_crop_range;
-} VAProcFilterCapNonLinearAnamorphicScaling;
-
-/** \brief Capabilities specification for the Frame Rate Conversion filter. */
-typedef struct _VAProcFilterCapFrameRateConversion { 
-    /** \brief Should be set to 1 if only supported rates are requested.
-        \brief Set to 0 to get the rest of the caps for the particular custom rate */
-    unsigned int                        bget_custom_rates;
-    /** \brief FRC custom rates supported by the pipeline in the first query
-        \brief App request caps for a custom rate in the second query */
-    unsigned int                        frc_custom_rates;
-    /** \brief FPS of input sequence. */
-    unsigned int                        input_fps;
-    /** \brief FPS of output sequence. */
-    unsigned int                        output_fps;
-    /** \brief Number of input frames. */   
-    unsigned int                        input_frames;
-    /** \brief Number of output frames. */
-    unsigned int                        output_frames;
-   /** \brief Set to 1 if interlaced input is supoorted. */
-    unsigned int                        input_interlaced;
-} VAProcFilterCapFrameRateConversion;
 
 /**
  * \brief Queries video processing filters.

@@ -36,9 +36,6 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
-#include <va/va_enc.h>
-
 /**
  * \defgroup api_enc_h264 H.264 encoding API
  *
@@ -58,13 +55,13 @@ extern "C" {
  *
  * i.e. the driver appends \c end_of_seq() NAL unit to the encoded frame.
  */
-#define H264_LAST_PICTURE_EOSEQ     VA_ENC_LAST_PICTURE_EOSEQ
+#define H264_LAST_PICTURE_EOSEQ     0x01
 /**
  * \brief Marks the last picture in the stream.
  *
  * i.e. the driver appends \c end_of_stream() NAL unit to the encoded frame.
  */
-#define H264_LAST_PICTURE_EOSTREAM  VA_ENC_LAST_PICTURE_EOSTREAM
+#define H264_LAST_PICTURE_EOSTREAM  0x02
 /**@}*/
 
 /**
@@ -119,8 +116,13 @@ typedef enum {
      * sei_message() elements if necessary.
      *
      * Note: packed \c nal_unit_type shall be equal to 6.
+     *
+     * @deprecated
+     * This is a deprecated packed header flag, All applications can use
+     * \c VA_ENC_PACKED_HEADER_RAW_DATA to pass the corresponding packed
+     * SEI header data buffer to the driver
      */
-    VAEncPackedHeaderH264_SEI   = (VAEncPackedHeaderMiscMask | 1),
+    VAEncPackedHeaderH264_SEI va_deprecated_enum  = (0x80000000 | 1),
 } VAEncPackedHeaderTypeH264;
 
 /**
@@ -145,15 +147,15 @@ typedef enum {
  */
 typedef struct _VAEncSequenceParameterBufferH264 {
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   seq_parameter_set_id;
+    uint8_t   seq_parameter_set_id;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   level_idc;
+    uint8_t   level_idc;
     /** \brief Period between I frames. */
-    unsigned int    intra_period;
+    uint32_t    intra_period;
     /** \brief Period between IDR frames. */
-    unsigned int    intra_idr_period;
+    uint32_t    intra_idr_period;
     /** \brief Period between I/P frames. */
-    unsigned int    ip_period;
+    uint32_t    ip_period;
     /**
      * \brief Initial bitrate set for this sequence in CBR or VBR modes.
      *
@@ -165,104 +167,109 @@ typedef struct _VAEncSequenceParameterBufferH264 {
      * The bitrate can be modified later on through
      * #VAEncMiscParameterRateControl buffers.
      */
-    unsigned int    bits_per_second;
+    uint32_t    bits_per_second;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    max_num_ref_frames;
+    uint32_t    max_num_ref_frames;
     /** \brief Picture width in macroblocks. */
-    unsigned short  picture_width_in_mbs;
+    uint16_t  picture_width_in_mbs;
     /** \brief Picture height in macroblocks. */
-    unsigned short  picture_height_in_mbs;
+    uint16_t  picture_height_in_mbs;
 
     union {
         struct {
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int chroma_format_idc                      : 2;
+            uint32_t chroma_format_idc                      : 2;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int frame_mbs_only_flag                    : 1;
+            uint32_t frame_mbs_only_flag                    : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int mb_adaptive_frame_field_flag           : 1;
+            uint32_t mb_adaptive_frame_field_flag           : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int seq_scaling_matrix_present_flag        : 1;
+            uint32_t seq_scaling_matrix_present_flag        : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int direct_8x8_inference_flag              : 1;
+            uint32_t direct_8x8_inference_flag              : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int log2_max_frame_num_minus4              : 4;
+            uint32_t log2_max_frame_num_minus4              : 4;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int pic_order_cnt_type                     : 2;
+            uint32_t pic_order_cnt_type                     : 2;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int log2_max_pic_order_cnt_lsb_minus4      : 4;
+            uint32_t log2_max_pic_order_cnt_lsb_minus4      : 4;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int delta_pic_order_always_zero_flag       : 1;
+            uint32_t delta_pic_order_always_zero_flag       : 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } seq_fields;
 
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   bit_depth_luma_minus8;
+    uint8_t   bit_depth_luma_minus8;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   bit_depth_chroma_minus8;
+    uint8_t   bit_depth_chroma_minus8;
 
     /** if pic_order_cnt_type == 1 */
     /**@{*/
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   num_ref_frames_in_pic_order_cnt_cycle;
+    uint8_t   num_ref_frames_in_pic_order_cnt_cycle;
     /** \brief Same as the H.264 bitstream syntax element. */
-    int             offset_for_non_ref_pic;
+    int32_t             offset_for_non_ref_pic;
     /** \brief Same as the H.264 bitstream syntax element. */
-    int             offset_for_top_to_bottom_field;
+    int32_t             offset_for_top_to_bottom_field;
     /** \brief Same as the H.264 bitstream syntax element. */
-    int             offset_for_ref_frame[256];
+    int32_t             offset_for_ref_frame[256];
     /**@}*/
 
     /** @name Cropping (optional) */
     /**@{*/
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   frame_cropping_flag;
+    uint8_t   frame_cropping_flag;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    frame_crop_left_offset;
+    uint32_t    frame_crop_left_offset;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    frame_crop_right_offset;
+    uint32_t    frame_crop_right_offset;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    frame_crop_top_offset;
+    uint32_t    frame_crop_top_offset;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    frame_crop_bottom_offset;
+    uint32_t    frame_crop_bottom_offset;
     /**@}*/
 
     /** @name VUI parameters (optional) */
     /**@{*/
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   vui_parameters_present_flag;
+    uint8_t   vui_parameters_present_flag;
     union {
         struct {
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int aspect_ratio_info_present_flag         : 1;
+            uint32_t aspect_ratio_info_present_flag         : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int timing_info_present_flag               : 1;
+            uint32_t timing_info_present_flag               : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int bitstream_restriction_flag             : 1;
+            uint32_t bitstream_restriction_flag             : 1;
             /** \brief Range: 0 to 16, inclusive. */
-            unsigned int log2_max_mv_length_horizontal          : 5;
+            uint32_t log2_max_mv_length_horizontal          : 5;
             /** \brief Range: 0 to 16, inclusive. */
-            unsigned int log2_max_mv_length_vertical            : 5;
+            uint32_t log2_max_mv_length_vertical            : 5;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int fixed_frame_rate_flag                  : 1;
+            uint32_t fixed_frame_rate_flag                  : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int low_delay_hrd_flag                     : 1;
+            uint32_t low_delay_hrd_flag                     : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int motion_vectors_over_pic_boundaries_flag : 1;
+            uint32_t motion_vectors_over_pic_boundaries_flag: 1;
+            /** \brief Reserved for future use, must be zero */
+            uint32_t reserved                               : 16;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } vui_fields;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   aspect_ratio_idc;
+    uint8_t   aspect_ratio_idc;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    sar_width;
+    uint32_t    sar_width;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    sar_height;
+    uint32_t    sar_height;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    num_units_in_tick;
+    uint32_t    num_units_in_tick;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned int    time_scale;
+    uint32_t    time_scale;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
     /**@}*/
 } VAEncSequenceParameterBufferH264;
 
@@ -314,9 +321,9 @@ typedef struct _VAEncPictureParameterBufferH264 {
     VABufferID      coded_buf;
 
     /** \brief The picture parameter set referred to in the slice header. */
-    unsigned char   pic_parameter_set_id;
+    uint8_t   pic_parameter_set_id;
     /** \brief The active sequence parameter set. Range: 0 to 31, inclusive. */
-    unsigned char   seq_parameter_set_id;
+    uint8_t   seq_parameter_set_id;
 
     /**
      * \brief OR'd flags describing whether the picture is the last one or not.
@@ -325,57 +332,69 @@ typedef struct _VAEncPictureParameterBufferH264 {
      * one in the stream or sequence. Otherwise, it is a combination of
      * \ref H264_LAST_PICTURE_EOSEQ or \ref H264_LAST_PICTURE_EOSTREAM.
      */
-    unsigned char   last_picture;
+    uint8_t   last_picture;
 
     /** \brief The picture identifier.
      *   Range: 0 to \f$2^{log2\_max\_frame\_num\_minus4 + 4} - 1\f$, inclusive.
      */
-    unsigned short  frame_num;
+    uint16_t  frame_num;
 
     /** \brief \c pic_init_qp_minus26 + 26. */
-    unsigned char   pic_init_qp;
+    uint8_t   pic_init_qp;
     /** \brief Maximum reference index for reference picture list 0.
      *   Range: 0 to 31, inclusive.
      */
-    unsigned char   num_ref_idx_l0_active_minus1;
+    uint8_t   num_ref_idx_l0_active_minus1;
     /** \brief Maximum reference index for reference picture list 1.
      *  Range: 0 to 31, inclusive.
      */
-    unsigned char   num_ref_idx_l1_active_minus1;
+    uint8_t   num_ref_idx_l1_active_minus1;
 
     /** \brief Range: -12 to 12, inclusive. */
-    signed char     chroma_qp_index_offset;
+    int8_t     chroma_qp_index_offset;
     /** \brief Range: -12 to 12, inclusive. */
-    signed char     second_chroma_qp_index_offset;
+    int8_t     second_chroma_qp_index_offset;
 
     union {
         struct {
             /** \brief Is picture an IDR picture? */
-            unsigned int idr_pic_flag                           : 1;
+            uint32_t idr_pic_flag                           : 1;
             /** \brief Is picture a reference picture? */
-            unsigned int reference_pic_flag                     : 2;
+            uint32_t reference_pic_flag                     : 2;
             /** \brief Selects CAVLC (0) or CABAC (1) entropy coding mode. */
-            unsigned int entropy_coding_mode_flag               : 1;
+            uint32_t entropy_coding_mode_flag               : 1;
             /** \brief Is weighted prediction applied to P slices? */
-            unsigned int weighted_pred_flag                     : 1;
+            uint32_t weighted_pred_flag                     : 1;
             /** \brief Range: 0 to 2, inclusive. */
-            unsigned int weighted_bipred_idc                    : 2;
+            uint32_t weighted_bipred_idc                    : 2;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int constrained_intra_pred_flag            : 1;
+            uint32_t constrained_intra_pred_flag            : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int transform_8x8_mode_flag                : 1;
+            uint32_t transform_8x8_mode_flag                : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int deblocking_filter_control_present_flag : 1;
+            uint32_t deblocking_filter_control_present_flag : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int redundant_pic_cnt_present_flag         : 1;
+            uint32_t redundant_pic_cnt_present_flag         : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int pic_order_present_flag                 : 1;
+            uint32_t pic_order_present_flag                 : 1;
             /** \brief Same as the H.264 bitstream syntax element. */
-            unsigned int pic_scaling_matrix_present_flag        : 1;
+            uint32_t pic_scaling_matrix_present_flag        : 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } pic_fields;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferH264;
+
+typedef struct _VAEncQPBufferH264 {
+    /*
+     * \brief This structure holds QP per 16x16 macroblock. Buffer size shall be
+     * sufficient to fit the slice or frame to be encoded depending on if it is a
+     * slice level or frame level encoding.
+     */
+    uint8_t qp;
+} VAEncQPBufferH264;
 
 /**
  * \brief Slice parameter for H.264 encoding in baseline, main & high profiles.
@@ -395,15 +414,14 @@ typedef struct _VAEncPictureParameterBufferH264 {
  *
  * If per-macroblock encoder configuration is needed, \c macroblock_info
  * references a buffer of type #VAEncMacroblockParameterBufferH264. This
- * buffer is not passed to vaRenderPicture(). i.e. it is not destroyed
- * by subsequent calls to vaRenderPicture() and then can be re-used
+ * buffer is not passed to vaRenderPicture() and it can be re-used
  * without re-allocating the whole buffer.
  */
 typedef struct _VAEncSliceParameterBufferH264 {
     /** \brief Starting MB address for this slice. */
-    unsigned int    macroblock_address;
+    uint32_t    macroblock_address;
     /** \brief Number of macroblocks in this slice. */
-    unsigned int    num_macroblocks;
+    uint32_t    num_macroblocks;
     /**
      * \brief Per-MB encoder configuration buffer, or \c VA_INVALID_ID.
      *
@@ -420,28 +438,28 @@ typedef struct _VAEncSliceParameterBufferH264 {
     /** \brief Slice type.
      *  Range: 0..2, 5..7, i.e. no switching slices.
      */
-    unsigned char   slice_type;
+    uint8_t   slice_type;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   pic_parameter_set_id;
+    uint8_t   pic_parameter_set_id;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned short  idr_pic_id;
+    uint16_t  idr_pic_id;
 
     /** @name If pic_order_cnt_type == 0 */
     /**@{*/
     /** \brief The picture order count modulo MaxPicOrderCntLsb. */
-    unsigned short  pic_order_cnt_lsb;
+    uint16_t  pic_order_cnt_lsb;
     /** \brief Valid if \c pic_order_present_flag and this is a bottom field. */
-    int             delta_pic_order_cnt_bottom;
+    int32_t             delta_pic_order_cnt_bottom;
     /**@}*/
     /** @name If pic_order_cnt_type == 1 && !delta_pic_order_always_zero_flag */
     /**@{*/
     /** \brief [0]: top, [1]: bottom. */
-    int             delta_pic_order_cnt[2];
+    int32_t             delta_pic_order_cnt[2];
     /**@}*/
 
     /** @name If slice_type == B */
     /**@{*/
-    unsigned char   direct_spatial_mv_pred_flag;
+    uint8_t   direct_spatial_mv_pred_flag;
     /**@}*/
 
     /** @name If slice_type == P */
@@ -451,15 +469,15 @@ typedef struct _VAEncSliceParameterBufferH264 {
      * \ref _VAEncPictureParameterBufferH264::num_ref_idx_l1_active_minus1 are
      * overriden by the values for this slice.
      */
-    unsigned char   num_ref_idx_active_override_flag;
+    uint8_t   num_ref_idx_active_override_flag;
     /** \brief Maximum reference index for reference picture list 0.
      *  Range: 0 to 31, inclusive.
      */
-    unsigned char   num_ref_idx_l0_active_minus1;
+    uint8_t   num_ref_idx_l0_active_minus1;
     /** \brief Maximum reference index for reference picture list 1.
      *  Range: 0 to 31, inclusive.
      */
-    unsigned char   num_ref_idx_l1_active_minus1;
+    uint8_t   num_ref_idx_l1_active_minus1;
     /** \brief Reference picture list 0 (for P slices). */
     VAPictureH264   RefPicList0[32];
     /** \brief Reference picture list 1 (for B slices). */
@@ -469,29 +487,29 @@ typedef struct _VAEncSliceParameterBufferH264 {
     /** @name pred_weight_table() */
     /**@{*/
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   luma_log2_weight_denom;
+    uint8_t   luma_log2_weight_denom;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   chroma_log2_weight_denom;
+    uint8_t   chroma_log2_weight_denom;
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   luma_weight_l0_flag;
+    uint8_t   luma_weight_l0_flag;
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    luma_weight_l0[32];
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    luma_offset_l0[32];
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   chroma_weight_l0_flag;
+    uint8_t   chroma_weight_l0_flag;
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    chroma_weight_l0[32][2];
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    chroma_offset_l0[32][2];
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   luma_weight_l1_flag;
+    uint8_t   luma_weight_l1_flag;
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    luma_weight_l1[32];
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    luma_offset_l1[32];
     /** \brief Same as the H.264 bitstream syntax element. */
-    unsigned char   chroma_weight_l1_flag;
+    uint8_t   chroma_weight_l1_flag;
     /** \brief Same as the H.264 bitstream syntax element. */
     signed short    chroma_weight_l1[32][2];
     /** \brief Same as the H.264 bitstream syntax element. */
@@ -499,17 +517,20 @@ typedef struct _VAEncSliceParameterBufferH264 {
     /**@}*/
 
     /** \brief Range: 0 to 2, inclusive. */
-    unsigned char   cabac_init_idc;
+    uint8_t   cabac_init_idc;
     /** \brief Same as the H.264 bitstream syntax element. */
-    signed char     slice_qp_delta;
+    int8_t     slice_qp_delta;
     /** @name If deblocking_filter_control_present_flag */
     /**@{*/
     /** \brief Range: 0 to 2, inclusive. */
-    unsigned char   disable_deblocking_filter_idc;
+    uint8_t   disable_deblocking_filter_idc;
     /** \brief Same as the H.264 bitstream syntax element. */
-    signed char     slice_alpha_c0_offset_div2;
+    int8_t     slice_alpha_c0_offset_div2;
     /** \brief Same as the H.264 bitstream syntax element. */
-    signed char     slice_beta_offset_div2;
+    int8_t     slice_beta_offset_div2;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
     /**@}*/
 } VAEncSliceParameterBufferH264;
 
@@ -550,13 +571,13 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
      * If \ref qp is set to 0xff, then the actual value is derived
      * from the slice-level value: \c pic_init_qp + \c slice_qp_delta.
      */
-    unsigned char   qp;
+    uint8_t   qp;
 
     union {
         /** @name Data for intra macroblock */
         /**@{*/
-        struct {
-            union {
+        union {
+            struct {
                 /**
                  * \brief Flag specified to override MB neighbour
                  * availability bits from VME stage.
@@ -565,7 +586,7 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
                  * availability bits from the VME stage are overriden
                  * by the \ref pred_avail_flags hereunder.
                  */
-                unsigned int    pred_avail_override_flag        : 1;
+                uint32_t    pred_avail_override_flag        : 1;
                 /**
                  * \brief Bitwise representation of which macroblocks
                  * are available for intra prediction.
@@ -575,218 +596,61 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
                  * See \ref api_enc_h264_mb_pred_avail_bits
                  * "macroblock neighbour availability" bit definitions.
                  */
-                unsigned int    pred_avail_flags                : 8;
+                uint32_t    pred_avail_flags                : 8;
             } bits;
-            unsigned int value;
+            uint32_t value;
         } intra_fields;
         /**@}*/
 
         /** @name Data for inter macroblock */
         /**@{*/
-        struct {
-            union {
-                char dummy;
+        union {
+            struct {
+                uint32_t reserved;
             } bits;
-            unsigned int value;
+            uint32_t value;
         } inter_fields;
         /**@}*/
     } info;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMacroblockParameterBufferH264;
 
 /**
- * \brief H.264 Mutiview Coding(MVC) Sequence Parameter Buffer
+ * \brief MB partition modes and 1/2 1/4 motion search configuration
  *
+ * Specifies MB partition modes that are disabled. Specifies Half-pel
+ * mode and Quarter-pel mode searching
  */
-typedef struct _VAEncSequenceParameterBufferH264_MVC {
-    /** brief Basic common sequence parameter */
-    VAEncSequenceParameterBufferH264 base;
-
-    /** brief Plus 1 specify the max number of views
-     * coded in the video sequence
-     */
-    uint16_t num_views_minus1;
-
-    /** brief Specify the view information in all layers */
-    struct H264SPSExtMVCViewInfo{
-        /** \brief The current view identifier. */
-        uint16_t view_id;
-        /** \brief Specifies the number of view components for inter-view
-         * prediction in the initialized RefPicList0 in decoding
-         * anchor views.
-         */
-        uint8_t  num_anchor_refs_l0;
-        /** \brief Specifies the view_id for inter-view prediction in
-         * the initialized RefPicList0 in decoding anchor views.
-         */
-        uint16_t anchor_ref_l0[15];
-        /** \brief Specifies the number of view components for inter-view
-         * prediction in the initialized RefPicList1 in decoding
-         * anchor views
-         */
-        uint8_t  num_anchor_refs_l1;
-        /** \brief Specifies the view_id for inter-view prediction in
-         * the initialized RefPicList1 in decoding anchor views.
-         */
-        uint16_t anchor_ref_l1[15];
-        /** \brief Specifies the number of view components for inter-view
-         * prediction in the initialized RefPicList0 in decoding
-         * non-anchor views.
-         */
-        uint8_t  num_non_anchor_refs_l0;
-        /** \brief Specifies the view_id for inter-view prediction in
-         * the initialized RefPicList0 in decoding non-anchor views.
-         */
-        uint16_t non_anchor_ref_l0[15];
-        /** \brief Specifies the number of view components for inter-view
-         * prediction in the initialized RefPicList1 in decoding
-         * non-anchor view.
-         */
-        uint8_t  num_non_anchor_refs_l1;
-        /** \brief Specifies the view_id for inter-view prediction in
-         * the initialized RefPicList1 in decoding non-anchor views.
-         */
-        uint16_t non_anchor_ref_l1[15];
-    }* view_list;
-
-    /** brief Plus 1 specifies the number of level values
-     * signalled for the coded video sequence
-     */
-    uint8_t num_level_values_signalled_minus1;
-
-    /** brief Level values operation for a set of the operation
-     * points in the current sequence
-     */
-    struct H264SPSExtMVCLevelValue {
-        /** \brief Specifies the level value signalled for the coded video sequence */
-        uint8_t level_idc;
-
-        /** \brief Plus 1 specifies the number of operation points to
-         *  which the level indicated by level_idc applies
-         */
-        uint16_t num_applicable_ops_minus1;
-
-        /** \brief Represent the specific operation to the view in the video sequence */
-        struct H264SPSExtMVCLevelValueOps {
-            /** \brief Specify a temporal identifier for the NAL unit */
-            uint8_t   temporal_id;
-            /** \brief Specify the number of the views whose level value will be modified */
-            uint16_t  num_target_views_minus1;
-            /** \brief Specify the views whose level value will be modified */
-            uint16_t* target_view_id_list;
-            /** \brief Specify the number of views whose level value can be modified */
-            uint16_t  num_views_minus1;
-        }* level_value_ops_list;
-
-    }* level_value_list;
-
-} VAEncSequenceParameterBufferH264_MVC;
-
-/**
- * \brief H.264 Multiview Coding(MVC) Picture Parameter Buffer
- *
- */
-typedef struct _VAEncPictureParameterBufferH264_MVC
+typedef struct _VAEncMiscParameterSubMbPartPelH264
 {
-    /** brief Basic common picture parameter */
-    VAEncPictureParameterBufferH264 base;
+    uint32_t disable_inter_sub_mb_partition;
+    union {
+        struct {
+            uint32_t disable_16x16_inter_mb_partition        : 1;
+            uint32_t disable_16x8_inter_mb_partition         : 1;
+            uint32_t disable_8x16_inter_mb_partition         : 1;
+            uint32_t disable_8x8_inter_mb_partition          : 1;
+            uint32_t disable_8x4_inter_mb_partition          : 1;
+            uint32_t disable_4x8_inter_mb_partition          : 1;
+            uint32_t disable_4x4_inter_mb_partition          : 1;
+            uint32_t reserved                                : 1;
+        } bits;
+         uint8_t value;
+    } inter_sub_mb_partition_mask;
 
-    /** brief Specifes the view id for current picture */
-    uint16_t view_id;
-
-    /** brief Specifes whether the picture is one anchor picture */
-    uint8_t  anchor_pic_flag;
-
-    /** brief Specifes whether inter view reference frame
-     * is used to encode current picture.
-     */
-    uint8_t  inter_view_flag;
-} VAEncPictureParameterBufferH264_MVC;
-
-typedef struct _VAEncQpBufferH264 {
-    /*
-     * \brief This structure holds luma Qp per 16x16 macroblock. Buffer size shall be 
-     * sufficient to fit the slice or frame to be encoded depending on if it is a slice level
-     * or frame level encoding.
-     */
-    unsigned char qp_y;
-} VAEncQpBufferH264;
-
-/** \brief Bitstream writer attribute types specific to H.264 encoding. */
-typedef enum {
     /**
-     * \brief Flag: specifies whether to insert emulation prevention
-     * bytes (integer).
+     * \brief Precison of motion search
+     * 0:Integer mode searching
+     * 1:Half-pel mode searching
+     * 2:Reserved
+     * 3:Quarter-pel mode searching
      */
-    VAEncBitstreamAttribEmulationPreventionH264 = (
-        VAEncBitstreamAttribMiscMask | 1),
-} VAEncBitstreamAttribTypeH264;
-
-/**
- * \brief Allocates a new H.264 bitstream writer.
- *
- * Allocates a new bitstream writer. By default, libva allocates and
- * maintains its own buffer. However, the user can pass down his own
- * buffer with the \c VAEncBitstreamAttribBuffer attribute, along with
- * the size of that buffer with the \c VAEncBitstreamAttribBufferSize
- * attribute.
- *
- * By default, emulation prevention bytes are not inserted. However,
- * the user can still request emulation prevention by setting the
- * \c VAEncBitstreamAttribEmulationPreventionH264 attribute to 1.
- *
- * @param[in] attribs       the optional attributes, or NULL
- * @param[in] num_attribs   the number of attributes available in \c attribs
- * @return a new #VAEncBitstream, or NULL if an error occurred
- */
-VAEncBitstream *
-va_enc_bitstream_h264_new(
-    VAEncBitstreamAttrib *attribs,
-    unsigned int          num_attribs
-);
-
-/**
- * \brief Destroys an H.264 bitstream writer.
- *
- * @param[in] bs            the bitstream writer to destroy
- */
-void
-va_enc_bitstream_h264_destroy(VAEncBitstream *bs);
-
-/**
- * \brief Writes an unsigned integer as \c ue(v).
- *
- * Writes a 32-bit unsigned int value by following \c ue(v) from the
- * H.264 specification.
- *
- * @param[in] bs            the bitstream writer
- * @param[in] value         the unsigned int value
- * @return the number of bits written, or a negative value to indicate an error
- */
-int
-va_enc_bitstream_h264_write_ue(VAEncBitstream *bs, unsigned int value);
-
-/**
- * \brief Writes a signed integer as \c se(v).
- *
- * Writes a 32-bit signed int value by following \c se(v) from the
- * H.264 specification.
- *
- * @param[in] bs            the bitstream writer
- * @param[in] value         the signed int value
- * @return the number of bits written, or a negative value to indicate an error
- */
-int
-va_enc_bitstream_h264_write_se(VAEncBitstream *bs, int value);
-
-/**
- * \brief Helper function to write trailing bits into the bitstream.
- *
- * @param[in] bs            the bitstream writer
- * @return the number of bits written, or a negative value to indicate an error
- */
-int
-va_enc_bitstream_h264_write_trailing_bits(VAEncBitstream *bs);
-
+    uint32_t enable_sub_pel_mode;
+    uint8_t sub_pel_mode;
+    uint8_t reserved[3];
+} VAEncMiscParameterSubMbPartPelH264;
 /**@}*/
 
 #ifdef __cplusplus

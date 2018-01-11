@@ -41,7 +41,10 @@ static const struct driver_name_map g_driver_name_map[] = {
     { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
     { "emgd",       4, "emgd"   }, // Intel ECG PVR driver
     { "hybrid",     6, "hybrid" }, // Intel OTC Hybrid driver
-    { NULL,         0,  NULL    }
+    { "nouveau",    7, "nouveau"  }, // Mesa Gallium driver
+    { "radeon",     6, "r600"     }, // Mesa Gallium driver
+    { "amdgpu",     6, "radeonsi" }, // Mesa Gallium driver
+    { NULL, }
 };
 
 /* Returns the VA driver name for the active display */

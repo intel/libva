@@ -20,36 +20,5 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-AM_CPPFLAGS = \
-	-I$(top_srcdir)		\
-	-I$(top_srcdir)/va	\
-	$(X11_CFLAGS)		\
-	$(DRM_CFLAGS)		\
-	$(NULL)
-
-source_c = \
-	dri2_util.c		\
-	va_dri2.c		\
-	va_dricommon.c		\
-	va_fglrx.c		\
-	va_nvctrl.c		\
-	va_x11.c		\
-	$(NULL)
-
-source_h = \
-	va_dri2.h		\
-	va_dricommon.h		\
-	$(NULL)
-
-source_h_priv = \
-	va_dri2str.h		\
-	va_dri2tokens.h		\
-	va_fglrx.h		\
-	va_nvctrl.h		\
-	$(NULL)
-
-noinst_LTLIBRARIES		= libva_x11.la	
-libva_x11includedir		= ${includedir}/va
-libva_x11include_HEADERS	= $(source_h)
-libva_x11_la_SOURCES		= $(source_c)
-noinst_HEADERS			= $(source_h_priv)
+# Extra clean files so that maintainer-clean removes *everything*
+MAINTAINERCLEANFILES = Makefile.in

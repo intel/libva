@@ -20,10 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-SUBDIRS = protocol
-
-INCLUDES = \
-	-DLINUX			\
+AM_CPPFLAGS = \
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	$(WAYLAND_CFLAGS)	\
@@ -48,6 +45,14 @@ source_h_priv = \
 	va_wayland_private.h	\
 	$(NULL)
 
+protocol_source_export_c = \
+	wayland-drm-client-protocol-export.c	\
+	$(NULL)
+
+protocol_source_c = \
+	wayland-drm-client-protocol.c	\
+	$(NULL)
+
 protocol_source_h = \
 	wayland-drm-client-protocol.h	\
 	$(NULL)
@@ -55,12 +60,25 @@ protocol_source_h = \
 noinst_LTLIBRARIES		= libva_wayland.la
 libva_waylandincludedir		= ${includedir}/va
 libva_waylandinclude_HEADERS	= $(source_h)
-libva_wayland_la_SOURCES	= $(source_c) $(protocol_source_h)
+libva_wayland_la_SOURCES	= $(source_c) $(protocol_source_c)
 noinst_HEADERS			= $(source_h_priv)
 
 # Wayland protocol
 va_wayland_drm.c: $(protocol_source_h)
-@wayland_scanner_rules@
+%-client-protocol.h : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
+%-client-protocol-export.c : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) code < $< > $@
+%-client-protocol.c: %-client-protocol-export.c
+	$(AM_V_GEN)$(SED) -e '1i#include "sysdeps.h"' \
+	                   -e 's@WL_EXPORT@DLL_HIDDEN@g' < $< > $@
+
+EXTRA_DIST = \
+	wayland-drm.xml         \
+	$(NULL)
+
+BUILT_SOURCES = $(protocol_source_h) $(protocol_source_c) $(protocol_source_export_c)
+CLEANFILES = $(BUILT_SOURCES)
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in

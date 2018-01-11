@@ -38,7 +38,6 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <va/va_enc.h>
 
 /**
  * \defgroup api_enc_hevc HEVC encoding API
@@ -59,13 +58,13 @@ extern "C" {
  *
  * i.e. the driver appends \c end_of_seq() NAL unit to the encoded frame.
  */
-#define HEVC_LAST_PICTURE_EOSEQ     VA_ENC_LAST_PICTURE_EOSEQ
+#define HEVC_LAST_PICTURE_EOSEQ     0x01
 /**
  * \brief Marks the last picture in the stream.
  *
  * i.e. the driver appends \c end_of_stream() NAL unit to the encoded frame.
  */
-#define HEVC_LAST_PICTURE_EOSTREAM  VA_ENC_LAST_PICTURE_EOSTREAM
+#define HEVC_LAST_PICTURE_EOSTREAM  0x02
 /**@}*/
 
 /**
@@ -129,8 +128,13 @@ typedef enum {
      * sei_message() elements if necessary.
      *
      * Note: packed \c nal_unit_type shall be equal to 39 or 40.
+     *
+     * @deprecated
+     * This is a deprecated packed header flag, All applications can use
+     * \c VA_ENC_PACKED_HEADER_RAW_DATA to pass the corresponding packed
+     * SEI header data buffer to the driver
      */
-    VAEncPackedHeaderHEVC_SEI   = (VAEncPackedHeaderMiscMask | 1),
+    VAEncPackedHeaderHEVC_SEI  va_deprecated_enum = (0x80000000 | 1),
 } VAEncPackedHeaderTypeHEVC;
 
 /**
@@ -312,6 +316,9 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
     uint8_t     max_bytes_per_pic_denom;
     /** \brief Same as the HEVC bitstream syntax element. */
     uint8_t     max_bits_per_min_cu_denom;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
     /**@}*/
 } VAEncSequenceParameterBufferHEVC;
 
@@ -513,6 +520,9 @@ typedef struct _VAEncPictureParameterBufferHEVC {
         } bits;
         uint32_t        value;
     } pic_fields;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_HIGH];
 } VAEncPictureParameterBufferHEVC;
 
 /**
@@ -636,6 +646,9 @@ typedef struct _VAEncSliceParameterBufferHEVC {
         } bits;
         uint32_t        value;
     } slice_fields;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
     /**@}*/
 } VAEncSliceParameterBufferHEVC;
 
@@ -691,17 +704,10 @@ typedef struct _VAQMatrixBufferHEVC
      * with sizeID = 3 and matrixID in the range of 0 to 1, inclusive.
      */
     uint8_t             scaling_list_dc_32x32[2];
-} VAQMatrixBufferHEVC;
 
-/** \brief Bitstream writer attribute types specific to HEVC encoding. */
-typedef enum {
-    /**
-     * \brief Flag: specifies whether to insert emulation prevention
-     * bytes (integer).
-     */
-    VAEncBitstreamAttribEmulationPreventionHEVC = (
-        VAEncBitstreamAttribMiscMask | 1),
-} VAEncBitstreamAttribTypeHEVC;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
+} VAQMatrixBufferHEVC;
 
 /**@}*/
 

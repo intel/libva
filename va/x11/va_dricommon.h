@@ -55,10 +55,9 @@ union dri_buffer
         unsigned int pitch;
         unsigned int cpp;
         unsigned int flags;
+        /** \brief Reserved bytes for future use, must be zero */
+        unsigned int va_reserved[8];
     } dri2;
-
-    struct {
-    } dri1;
 };
 
 struct dri_drawable 
@@ -77,10 +76,6 @@ struct dri_state
 {
     struct drm_state base;
 #ifndef ANDROID
-    drm_handle_t hSAREA;
-    drm_context_t hwContext;
-    drmAddress pSAREA;
-    XID hwContextID;
     struct dri_drawable *drawable_hash[DRAWABLE_HASH_SZ];
 
     struct dri_drawable *(*createDrawable)(VADriverContextP ctx, XID x_drawable);
@@ -89,14 +84,15 @@ struct dri_state
     union dri_buffer *(*getRenderingBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     void (*close)(VADriverContextP ctx);
 #endif
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long  va_reserved[16];
 };
 
-Bool isDRI2Connected(VADriverContextP ctx, char **driver_name);
-Bool isDRI1Connected(VADriverContextP ctx, char **driver_name);
-void free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable);
-void free_drawable_hashtable(VADriverContextP ctx);
-struct dri_drawable *dri_get_drawable(VADriverContextP ctx, XID drawable);
-void dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
-union dri_buffer *dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
+Bool va_isDRI2Connected(VADriverContextP ctx, char **driver_name);
+void va_dri_free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable);
+void va_dri_free_drawable_hashtable(VADriverContextP ctx);
+struct dri_drawable *va_dri_get_drawable(VADriverContextP ctx, XID drawable);
+void va_dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
+union dri_buffer *va_dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
 
 #endif /* _VA_DRICOMMON_H_ */

@@ -47,6 +47,14 @@
 static int
 VA_DRI2Error(Display *dpy, xError *err, XExtCodes *codes, int *ret_code);
 
+static VA_DRI2Buffer *
+VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
+                           Display *dpy, XID drawable,
+                           int *width, int *height,
+                           unsigned int *attachments,
+                           int count,
+                           int *outCount);
+
 static char va_dri2ExtensionName[] = DRI2_NAME;
 static XExtensionInfo _va_dri2_info_data;
 static XExtensionInfo *va_dri2Info = &_va_dri2_info_data;
@@ -70,18 +78,30 @@ static XEXT_GENERATE_FIND_DISPLAY (DRI2FindDisplay, va_dri2Info,
 				   &va_dri2ExtensionHooks, 
 				   0, NULL)
 
+static CARD32 _va_resource_x_error_drawable = 0;
+static Bool   _va_resource_x_error_matched = False;
+
+#define VA_EnterResourceError(drawable)                 \
+  do {                                                  \
+    _va_resource_x_error_drawable = (drawable);         \
+    _va_resource_x_error_matched = False;               \
+  } while (0)
+
+#define VA_LeaveResourceError()                 \
+  do {                                          \
+    _va_resource_x_error_drawable = 0;          \
+  } while (0)
+
+#define VA_ResourceErrorMatched()               \
+  (_va_resource_x_error_matched)
+
 static int
 VA_DRI2Error(Display *dpy, xError *err, XExtCodes *codes, int *ret_code)
 {
-    /*
-     * If the X drawable was destroyed before the VA drawable, the DRI2 drawable
-     * will be gone by the time we call VA_DRI2DestroyDrawable(). So, simply
-     * ignore BadDrawable errors in that case.
-     */
-    if (err->majorCode == codes->major_opcode &&
-        err->errorCode == BadDrawable &&
-        err->minorCode == X_DRI2DestroyDrawable)
-	return True;
+    if (_va_resource_x_error_drawable == err->resourceID) {
+      _va_resource_x_error_matched = True;
+      return True;
+    }
 
     return False;
 }
@@ -229,12 +249,34 @@ void VA_DRI2DestroyDrawable(Display *dpy, XID drawable)
 {
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2DestroyDrawableReq *req;
+    unsigned int attachement = 0; // FRONT_LEFT
+    VA_DRI2Buffer *buffers;
 
     XextSimpleCheckExtension (dpy, info, va_dri2ExtensionName);
 
     XSync(dpy, False);
 
     LockDisplay(dpy);
+    /*
+     * We have no way of catching DRI2DestroyDrawable errors because
+     * this message doesn't have a defined answer. So we test whether
+     * the drawable is still alive by sending DRIGetBuffers first and
+     * checking whether we get an error.
+     */
+    VA_EnterResourceError(drawable);
+
+    buffers = VA_DRI2GetBuffers_internal(info, dpy, drawable,
+                                         NULL, NULL,
+                                         &attachement, 1, NULL);
+    VA_LeaveResourceError();
+    if (buffers)
+      XFree(buffers);
+    if (VA_ResourceErrorMatched()) {
+      UnlockDisplay(dpy);
+      SyncHandle();
+      return;
+    }
+
     GetReq(DRI2DestroyDrawable, req);
     req->reqType = info->codes->major_opcode;
     req->dri2ReqType = X_DRI2DestroyDrawable;
@@ -243,12 +285,12 @@ void VA_DRI2DestroyDrawable(Display *dpy, XID drawable)
     SyncHandle();
 }
 
-VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
-			   int *width, int *height,
-			   unsigned int *attachments, int count,
-			   int *outCount)
+VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
+                                          Display *dpy, XID drawable,
+                                          int *width, int *height,
+                                          unsigned int *attachments, int count,
+                                          int *outCount)
 {
-    XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2GetBuffersReply rep;
     xDRI2GetBuffersReq *req;
     VA_DRI2Buffer *buffers;
@@ -256,9 +298,6 @@ VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
     CARD32 *p;
     int i;
 
-    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
-
-    LockDisplay(dpy);
     GetReqExtra(DRI2GetBuffers, count * 4, req);
     req->reqType = info->codes->major_opcode;
     req->dri2ReqType = X_DRI2GetBuffers;
@@ -269,20 +308,19 @@ VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
 	p[i] = attachments[i];
 
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	UnlockDisplay(dpy);
-	SyncHandle();
 	return NULL;
     }
 
-    *width = rep.width;
-    *height = rep.height;
-    *outCount = rep.count;
+    if (width)
+      *width = rep.width;
+    if (height)
+      *height = rep.height;
+    if (outCount)
+      *outCount = rep.count;
 
     buffers = Xmalloc(rep.count * sizeof buffers[0]);
     if (buffers == NULL) {
 	_XEatData(dpy, rep.count * sizeof repBuffer);
-	UnlockDisplay(dpy);
-	SyncHandle();
 	return NULL;
     }
 
@@ -294,6 +332,24 @@ VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
 	buffers[i].cpp = repBuffer.cpp;
 	buffers[i].flags = repBuffer.flags;
     }
+
+    return buffers;
+}
+
+VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
+			   int *width, int *height,
+			   unsigned int *attachments, int count,
+			   int *outCount)
+{
+    XExtDisplayInfo *info = DRI2FindDisplay(dpy);
+    VA_DRI2Buffer *buffers;
+
+    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
+
+    LockDisplay(dpy);
+
+    buffers = VA_DRI2GetBuffers_internal(info, dpy, drawable, width, height,
+                                         attachments, count, outCount);
 
     UnlockDisplay(dpy);
     SyncHandle();

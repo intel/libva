@@ -190,43 +190,9 @@ typedef struct  _VAPictureParameterBufferHEVC
      */
     uint32_t                st_rps_bits;
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_MEDIUM];
 } VAPictureParameterBufferHEVC;
-
-
-
-/**
- * \brief HEVC Slice Parameter Buffer Structure For Short Format
- *
- * VASliceParameterBufferBaseHEVC structure should be accompanied by a
- * slice data buffer, which holds the whole raw slice NAL unit bit streams
- * including start code prefix and emulation prevention bytes not removed.
- *
- * This structure conveys parameters related to slice segment header and should
- * be sent once per slice.
- *
- * For long format, this data structure is not sent by application.
- *
- */
-typedef struct  _VASliceParameterBufferBaseHEVC
-{
-    /** @name Codec-independent Slice Parameter Buffer base. */
-
-    /**@{*/
-
-    /** \brief Number of bytes in the slice data buffer for this slice
-     *  counting from and including NAL unit header.
-     */
-    uint32_t                slice_data_size;
-    /** \brief The offset to the NAL unit header for this slice */
-    uint32_t                slice_data_offset;
-    /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_XXX. */
-    uint16_t                slice_data_flag;
-    /**@}*/
-
-} VASliceParameterBufferBaseHEVC;
-
-
-
 
 /**
  * \brief HEVC Slice Parameter Buffer Structure For Long Format
@@ -254,7 +220,7 @@ typedef struct  _VASliceParameterBufferHEVC
     /** \brief The offset to the NAL unit header for this slice */
     uint32_t                slice_data_offset;
     /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_XXX. */
-    uint16_t                slice_data_flag;
+    uint32_t                slice_data_flag;
     /**
      * \brief Byte offset from NAL unit header to the begining of slice_data().
      *
@@ -315,12 +281,12 @@ typedef struct  _VASliceParameterBufferHEVC
     uint8_t                 collocated_ref_idx;
     /** HEVC syntax element.
      * if num_ref_idx_active_override_flag equals 0, host decoder should
-     * set its value to num_ref_idx_l0_default_minus1.
+     * set its value to num_ref_idx_l0_default_active_minus1.
      */
     uint8_t                 num_ref_idx_l0_active_minus1;
     /** HEVC syntax element.
      * if num_ref_idx_active_override_flag equals 0, host decoder should
-     * set its value to num_ref_idx_l1_default_minus1.
+     * set its value to num_ref_idx_l1_default_active_minus1.
      */
     uint8_t                 num_ref_idx_l1_active_minus1;
     /** HEVC syntax element. */
@@ -357,6 +323,8 @@ typedef struct  _VASliceParameterBufferHEVC
     uint8_t                 five_minus_max_num_merge_cand;
     /**@}*/
 
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferHEVC;
 
 
@@ -415,6 +383,9 @@ typedef struct _VAIQMatrixBufferHEVC
      * with sizeID = 3 and matrixID in the range of 0 to 1, inclusive.
      */
     uint8_t                 ScalingListDC32x32[2];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAIQMatrixBufferHEVC;
 
 

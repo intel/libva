@@ -95,8 +95,9 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     if (dri2_drawable->has_backbuffer) {
         if (gsDRI2SwapAvailable) {
             CARD64 ret;
-            VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable, 0, 0,
-                               0, &ret);
+            VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable,
+			       0, 1, 0,
+			       &ret);
         } else {
             xrect.x = 0;
             xrect.y = 0;
@@ -129,7 +130,6 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
     buffers = VA_DRI2GetBuffers(ctx->native_dpy, dri_drawable->x_drawable,
 			     &dri2_drawable->width, &dri2_drawable->height, 
                              attachments, i, &count);
-    assert(buffers);
     if (buffers == NULL)
         return NULL;
 
@@ -166,14 +166,14 @@ dri2Close(VADriverContextP ctx)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
-    free_drawable_hashtable(ctx);
+    va_dri_free_drawable_hashtable(ctx);
 
-    if (dri_state->base.fd >= 0);
+    if (dri_state->base.fd >= 0)
 	close(dri_state->base.fd);
 }
 
 Bool 
-isDRI2Connected(VADriverContextP ctx, char **driver_name)
+va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int major, minor;
@@ -192,11 +192,10 @@ isDRI2Connected(VADriverContextP ctx, char **driver_name)
 
 
     if (!VA_DRI2Connect(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                     driver_name, &device_name) || !device_name)
+                     driver_name, &device_name))
         goto err_out;
 
     dri_state->base.fd = open(device_name, O_RDWR);
-    assert(dri_state->base.fd >= 0);
 
     if (dri_state->base.fd < 0)
         goto err_out;

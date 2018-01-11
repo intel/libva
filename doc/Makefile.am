@@ -30,8 +30,19 @@ EXTRA_DIST = \
 VA_HEADER_DIR   = $(top_srcdir)/va
 VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va.h		\
-	$(VA_HEADER_DIR)/va_enc.h	\
 	$(VA_HEADER_DIR)/va_enc_h264.h	\
+	$(VA_HEADER_DIR)/va_enc_mpeg2.h	\
+	$(VA_HEADER_DIR)/va_enc_jpeg.h	\
+	$(VA_HEADER_DIR)/va_enc_hevc.h	\
+	$(VA_HEADER_DIR)/va_enc_vp8.h	\
+	$(VA_HEADER_DIR)/va_enc_vp9.h	\
+	$(VA_HEADER_DIR)/va_fei.h	\
+	$(VA_HEADER_DIR)/va_fei_h264.h	\
+	$(VA_HEADER_DIR)/va_fei_hevc.h	\
+	$(VA_HEADER_DIR)/va_dec_hevc.h	\
+	$(VA_HEADER_DIR)/va_dec_jpeg.h	\
+	$(VA_HEADER_DIR)/va_dec_vp8.h	\
+	$(VA_HEADER_DIR)/va_dec_vp9.h	\
 	$(VA_HEADER_DIR)/va_vpp.h	\
 	$(NULL)
 

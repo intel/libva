@@ -26,10 +26,10 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_x11.h"
-#include "va_dri.h"
 #include "va_dri2.h"
 #include "va_dricommon.h"
 #include "va_nvctrl.h"
@@ -81,20 +81,7 @@ static VAStatus va_DRI2GetDriverName (
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
 
-    if (!isDRI2Connected(ctx, driver_name))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_DRIGetDriverName (
-    VADisplayContextP pDisplayContext,
-    char **driver_name
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    if (!isDRI1Connected(ctx, driver_name))
+    if (!va_isDRI2Connected(ctx, driver_name))
         return VA_STATUS_ERROR_UNKNOWN;
 
     return VA_STATUS_SUCCESS;
@@ -155,8 +142,6 @@ static VAStatus va_DisplayContextGetDriverName (
     
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRIGetDriverName(pDisplayContext, driver_name);
-    if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name);
@@ -168,50 +153,43 @@ VADisplay vaGetDisplay (
     Display *native_dpy /* implementation specific */
 )
 {
-  VADisplay dpy = NULL;
-  VADisplayContextP pDisplayContext;
+    VADisplayContextP pDisplayContext;
+    VADriverContextP  pDriverContext;
+    struct dri_state *dri_state;
 
-  if (!native_dpy)
-      return NULL;
+    if (!native_dpy)
+        return NULL;
 
-  if (!dpy)
-  {
-      /* create new entry */
-      VADriverContextP pDriverContext;
-      struct dri_state *dri_state;
-      pDisplayContext = calloc(1, sizeof(*pDisplayContext));
-      pDriverContext  = calloc(1, sizeof(*pDriverContext));
-      dri_state       = calloc(1, sizeof(*dri_state));
-      if (pDisplayContext && pDriverContext && dri_state)
-      {
-	  pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
+    pDisplayContext = va_newDisplayContext();
+    if (!pDisplayContext)
+        return NULL;
 
-	  pDriverContext->native_dpy       = (void *)native_dpy;
-          pDriverContext->display_type     = VA_DISPLAY_X11;
-	  pDisplayContext->pDriverContext  = pDriverContext;
-	  pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
-	  pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-	  pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-          pDisplayContext->opaque          = NULL;
-	  pDriverContext->drm_state 	   = dri_state;
-	  dpy                              = (VADisplay)pDisplayContext;
-      }
-      else
-      {
-	  if (pDisplayContext)
-	      free(pDisplayContext);
-	  if (pDriverContext)
-	      free(pDriverContext);
-          if (dri_state)
-              free(dri_state);
-      }
-  }
-  
-  return dpy;
+    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+
+    pDriverContext = va_newDriverContext(pDisplayContext);
+    if (!pDriverContext) {
+        free(pDisplayContext);
+        return NULL;
+    }
+
+    pDriverContext->native_dpy   = (void *)native_dpy;
+    pDriverContext->x11_screen   = XDefaultScreen(native_dpy);
+    pDriverContext->display_type = VA_DISPLAY_X11;
+
+    dri_state = calloc(1, sizeof(*dri_state));
+    if (!dri_state) {
+        free(pDisplayContext);
+        free(pDriverContext);
+        return NULL;
+    }
+
+    pDriverContext->drm_state = dri_state;
+
+    return (VADisplay)pDisplayContext;
 }
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 void va_TracePutSurface (
     VADisplay dpy,
@@ -250,7 +228,7 @@ VAStatus vaPutSurface (
 {
   VADriverContextP ctx;
 
-  if (fool_postp)
+  if (va_fool_postp)
       return VA_STATUS_SUCCESS;
 
   CHECK_DISPLAY(dpy);

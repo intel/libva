@@ -20,8 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INCLUDES = \
-	-DLINUX			\
+AM_CPPFLAGS = \
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	-I$(top_srcdir)/va/x11	\

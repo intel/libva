@@ -20,8 +20,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-INCLUDES = \
-	-DLINUX			\
+AM_CPPFLAGS = \
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	$(DRM_CFLAGS)		\
@@ -45,7 +44,8 @@ source_h_priv = \
 
 if USE_X11
 source_c			+= va_drm_auth_x11.c
-INCLUDES			+= $(X11_CFLAGS)
+AM_CPPFLAGS			+= $(X11_CFLAGS)
+AM_CPPFLAGS			+= -DLIBVA_MAJOR_VERSION=$(LIBVA_MAJOR_VERSION)
 endif
 
 noinst_LTLIBRARIES		= libva_drm.la

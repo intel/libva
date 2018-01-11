@@ -62,6 +62,9 @@ struct VADriverVTableVPP {
         unsigned int        num_filters,
         VAProcPipelineCaps *pipeline_caps
     );
+
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long reserved[16];
 };
 
 #ifdef __cplusplus

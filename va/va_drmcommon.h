@@ -27,6 +27,9 @@
 #ifndef VA_DRM_COMMON_H
 #define VA_DRM_COMMON_H
 
+#include <stdint.h>
+
+
 /** \brief DRM authentication type. */
 enum {
     /** \brief Disconnected. */
@@ -66,11 +69,75 @@ struct drm_state {
     int         fd;
     /** \brief DRM authentication type. */
     int         auth_type;
+    /** \brief Reserved bytes for future use, must be zero */
+    int         va_reserved[8];
 };
 
 /** \brief Kernel DRM buffer memory type.  */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM		0x10000000
-/** \brief DRM PRIME memory type. */
+/** \brief DRM PRIME memory type (old version)
+ *
+ * This supports only single objects with restricted memory layout.
+ * Used with VASurfaceAttribExternalBuffers.
+ */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME		0x20000000
+/** \brief DRM PRIME memory type
+ *
+ * Used with VADRMPRIMESurfaceDescriptor.
+ */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2		0x40000000
+
+/**
+ * \brief External buffer descriptor for a DRM PRIME surface.
+ *
+ * This can currently only be used for export.
+ *
+ * For export, call vaAcquireSurfaceHandle() with mem_type set to
+ * VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 and pass a pointer to an
+ * instance of this structure to fill.
+ * If VA_EXPORT_SURFACE_SEPARATE_LAYERS is specified on export, each
+ * layer will contain exactly one plane.  For example, an NV12
+ * surface will be exported as two layers, one of DRM_FORMAT_R8 and
+ * one of DRM_FORMAT_GR88.
+ * If VA_EXPORT_SURFACE_COMPOSED_LAYERS is specified on export,
+ * there will be exactly one layer.
+ */
+typedef struct _VADRMPRIMESurfaceDescriptor {
+    /** Pixel format fourcc of the whole surface (VA_FOURCC_*). */
+    uint32_t fourcc;
+    /** Width of the surface. */
+    uint32_t width;
+    /** Height of the surface. */
+    uint32_t height;
+    /** Number of distinct DRM objects making up the surface. */
+    uint32_t num_objects;
+    /** Description of each object. */
+    struct {
+        /** DRM PRIME file descriptor for this object. */
+        int fd;
+        /** Total size of this object (may include regions which are
+         *  not part of the surface). */
+        uint32_t size;
+        /** Format modifier applied to this object. */
+        uint64_t drm_format_modifier;
+    } objects[4];
+    /** Number of layers making up the surface. */
+    uint32_t num_layers;
+    /** Description of each layer in the surface. */
+    struct {
+        /** DRM format fourcc of this layer (DRM_FOURCC_*). */
+        uint32_t drm_format;
+        /** Number of planes in this layer. */
+        uint32_t num_planes;
+        /** Index in the objects array of the object containing each
+         *  plane. */
+        uint32_t object_index[4];
+        /** Offset within the object of each plane. */
+        uint32_t offset[4];
+        /** Pitch of each plane. */
+        uint32_t pitch[4];
+    } layers[4];
+} VADRMPRIMESurfaceDescriptor;
+
 
 #endif /* VA_DRM_COMMON_H */

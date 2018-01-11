@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 
@@ -61,14 +62,14 @@
 
 
 /* global settings */
-int fool_codec = 0;
-int fool_postp  = 0;
+int va_fool_codec = 0;
+int va_fool_postp  = 0;
 
 #define FOOL_BUFID_MAGIC   0x12345600
 #define FOOL_BUFID_MASK    0xffffff00
 
 struct fool_context {
-    int enabled; /* fool_codec is global, and it is for concurent encode/decode */
+    int enabled; /* va_fool_codec is global, and it is for concurent encode/decode */
     char *fn_enc;/* file pattern with codedbuf content for encode */
     char *segbuf_enc; /* the segment buffer of coded buffer, load frome fn_enc */
     int file_count;
@@ -102,12 +103,6 @@ struct fool_context {
     if ((fool_ctx == NULL) || (fool_ctx->enabled == 0))  \
         return 0; /* no fool for the context */          \
 
-/* Prototype declarations (functions defined in va.c) */
-
-void va_errorMessage(const char *msg, ...);
-void va_infoMessage(const char *msg, ...);
-
-int  va_parseConfig(char *env, char *env_value);
 
 void va_FoolInit(VADisplay dpy)
 {
@@ -119,24 +114,24 @@ void va_FoolInit(VADisplay dpy)
         return;
     
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
-        fool_postp = 1;
-        va_infoMessage("LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
+        va_fool_postp = 1;
+        va_infoMessage(dpy, "LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
     
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_DECODE;
-        va_infoMessage("LIBVA_FOOL_DECODE is on, dummy decode\n");
+        va_fool_codec  |= VA_FOOL_FLAG_DECODE;
+        va_infoMessage(dpy, "LIBVA_FOOL_DECODE is on, dummy decode\n");
     }
     if (va_parseConfig("LIBVA_FOOL_ENCODE", &env_value[0]) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_ENCODE;
+        va_fool_codec  |= VA_FOOL_FLAG_ENCODE;
         fool_ctx->fn_enc = strdup(env_value);
-        va_infoMessage("LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
+        va_infoMessage(dpy, "LIBVA_FOOL_ENCODE is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_enc);
     }
     if (va_parseConfig("LIBVA_FOOL_JPEG", &env_value[0]) == 0) {
-        fool_codec  |= VA_FOOL_FLAG_JPEG;
+        va_fool_codec  |= VA_FOOL_FLAG_JPEG;
         fool_ctx->fn_jpg = strdup(env_value);
-        va_infoMessage("LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
+        va_infoMessage(dpy, "LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_jpg);
     }
     
@@ -182,18 +177,17 @@ int va_FoolCreateConfig(
     fool_ctx->entrypoint = entrypoint;
     
     /*
-     * check fool_codec to align with current context
-     * e.g. fool_codec = decode then for encode, the
+     * check va_fool_codec to align with current context
+     * e.g. va_fool_codec = decode then for encode, the
      * vaBegin/vaRender/vaEnd also run into fool path
      * which is not desired
      */
-    if (((fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
-        ((fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
+    if (((va_fool_codec & VA_FOOL_FLAG_DECODE) && (entrypoint == VAEntrypointVLD)) ||
+        ((va_fool_codec & VA_FOOL_FLAG_JPEG) && (entrypoint == VAEntrypointEncPicture)))
         fool_ctx->enabled = 1;
-    else if ((fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
+    else if ((va_fool_codec & VA_FOOL_FLAG_ENCODE) && (entrypoint == VAEntrypointEncSlice)) {
         /* H264 is desired */
-        if (((profile == VAProfileH264Baseline ||
-              profile == VAProfileH264Main ||
+        if (((profile == VAProfileH264Main ||
               profile == VAProfileH264High ||
               profile == VAProfileH264ConstrainedBaseline)) &&
             strstr(fool_ctx->fn_enc, "h264"))
@@ -205,9 +199,9 @@ int va_FoolCreateConfig(
             fool_ctx->enabled = 1;
     }
     if (fool_ctx->enabled)
-        va_infoMessage("FOOL is enabled for this context\n");
+        va_infoMessage(dpy, "FOOL is enabled for this context\n");
     else
-        va_infoMessage("FOOL is not enabled for this context\n");
+        va_infoMessage(dpy, "FOOL is not enabled for this context\n");
 
     
     return 0; /* continue */
@@ -268,14 +262,14 @@ VAStatus va_FoolBufferInfo(
     return 1; /* fool is valid */
 }
 
-static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
 {
     char file_name[1024];
-    struct stat file_stat;
+    struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
+    ssize_t ret;
 
-    memset(&file_stat, 0, sizeof(file_stat));
     /* try file_name.file_count, if fail, try file_name.file_count-- */
     for (i=0; i<=1; i++) {
         snprintf(file_name, 1024, "%s.%d",
@@ -283,18 +277,26 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
                  fool_ctx->file_count);
 
         if ((fd = open(file_name, O_RDONLY)) != -1) {
-            fstat(fd, &file_stat);
-            fool_ctx->file_count++; /* open next file */
-            break;
-        } else /* fall back to the first file file */
-            fool_ctx->file_count = 0;
+            if (fstat(fd, &file_stat) != -1) {
+                fool_ctx->file_count++; /* open next file */
+                break;
+            }
+            va_errorMessage(dpy, "Identify file %s failed:%s\n",
+                            file_name, strerror(errno));
+            close(fd);
+            fd = -1;
+        }
+        /* fall back to the first file file */
+        fool_ctx->file_count = 0;
     }
     if (fd != -1) {
         fool_ctx->segbuf_enc = realloc(fool_ctx->segbuf_enc, file_stat.st_size);
-        read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
+        ret = read(fd, fool_ctx->segbuf_enc, file_stat.st_size);
+        if (ret < file_stat.st_size)
+            va_errorMessage(dpy, "Reading file %s failed.\n", file_name);
         close(fd);
     } else
-        va_errorMessage("Open file %s failed:%s\n", file_name, strerror(errno));
+        va_errorMessage(dpy, "Open file %s failed:%s\n", file_name, strerror(errno));
 
     codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
@@ -307,20 +309,26 @@ static int va_FoolFillCodedBufEnc(struct fool_context *fool_ctx)
     return 0;
 }
 
-static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBufJPG(VADisplay dpy, struct fool_context *fool_ctx)
 {
-    struct stat file_stat;
+    struct stat file_stat = {0};
     VACodedBufferSegment *codedbuf;
     int fd = -1;
+    ssize_t ret;
 
-    memset(&file_stat, 0, sizeof(file_stat));
     if ((fd = open(fool_ctx->fn_jpg, O_RDONLY)) != -1) {
-        fstat(fd, &file_stat);
-        fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
-        read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
+        if (fstat(fd, &file_stat) != -1) {
+            fool_ctx->segbuf_jpg = realloc(fool_ctx->segbuf_jpg, file_stat.st_size);
+            ret = read(fd, fool_ctx->segbuf_jpg, file_stat.st_size);
+            if (ret < file_stat.st_size)
+                va_errorMessage(dpy, "Reading file %s failed.\n", fool_ctx->fn_jpg);
+        } else {
+            va_errorMessage(dpy, "Identify file %s failed:%s\n",
+                            fool_ctx->fn_jpg, strerror(errno));
+        }
         close(fd);
     } else
-        va_errorMessage("Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
+        va_errorMessage(dpy, "Open file %s failed:%s\n", fool_ctx->fn_jpg, strerror(errno));
 
     codedbuf = (VACodedBufferSegment *)fool_ctx->fool_buf[VAEncCodedBufferType];
     codedbuf->size = file_stat.st_size;
@@ -334,12 +342,12 @@ static int va_FoolFillCodedBufJPG(struct fool_context *fool_ctx)
 }
 
 
-static int va_FoolFillCodedBuf(struct fool_context *fool_ctx)
+static int va_FoolFillCodedBuf(VADisplay dpy, struct fool_context *fool_ctx)
 {
     if (fool_ctx->entrypoint == VAEntrypointEncSlice)
-        va_FoolFillCodedBufEnc(fool_ctx);
+        va_FoolFillCodedBufEnc(dpy, fool_ctx);
     else if (fool_ctx->entrypoint == VAEntrypointEncPicture)
-        va_FoolFillCodedBufJPG(fool_ctx);
+        va_FoolFillCodedBufJPG(dpy, fool_ctx);
         
     return 0;
 }
@@ -363,7 +371,7 @@ VAStatus va_FoolMapBuffer(
 
     /* it is coded buffer, fill coded segment from file */
     if (*pbuf && (buftype == VAEncCodedBufferType))
-        va_FoolFillCodedBuf(fool_ctx);
+        va_FoolFillCodedBuf(dpy, fool_ctx);
     
     return 1; /* fool is valid */
 }

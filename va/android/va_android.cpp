@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_internal.h"
 #include "va_trace.h"
 #include "va_fool.h"
 #include "va_android.h"
@@ -116,18 +117,7 @@ static VAStatus va_DisplayContextGetDriverName (
     }
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
 
-    if (driver_name == NULL)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    if (strncmp((char *)ctx->native_dpy, "libva_driver_name=", 18) == 0) {
-            *driver_name = strdup((char *)ctx->native_dpy + 18);
-        if (*driver_name == NULL)
-            return VA_STATUS_ERROR_ALLOCATION_FAILED;
-        else
-            return VA_STATUS_SUCCESS;
-    } else {
-        return VA_DRM_GetDriverName(ctx, driver_name);
-    }
+    return VA_DRM_GetDriverName(ctx, driver_name);
 }
 
 
@@ -135,107 +125,39 @@ VADisplay vaGetDisplay (
     void *native_dpy /* implementation specific */
 )
 {
-    VADisplay dpy = NULL;
     VADisplayContextP pDisplayContext;
+    VADriverContextP  pDriverContext;
+    struct drm_state *drm_state;
 
     if (!native_dpy)
         return NULL;
 
-    if (!dpy)
-    {
-        /* create new entry */
-        VADriverContextP pDriverContext = 0;
-        struct drm_state *drm_state = 0;
-        pDisplayContext = (VADisplayContextP)calloc(1, sizeof(*pDisplayContext));
-        pDriverContext  = (VADriverContextP)calloc(1, sizeof(*pDriverContext));
-        drm_state       = (struct drm_state*)calloc(1, sizeof(*drm_state));
-        if (pDisplayContext && pDriverContext && drm_state)
-        {
-            pDisplayContext->vadpy_magic = VA_DISPLAY_MAGIC;          
+    pDisplayContext = va_newDisplayContext();
+    if (!pDisplayContext)
+        return NULL;
 
-            pDriverContext->native_dpy       = (void *)native_dpy;
-            pDriverContext->display_type     = VA_DISPLAY_ANDROID;
-            pDisplayContext->pDriverContext  = pDriverContext;
-            pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
-            pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-            pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
-            pDriverContext->drm_state 	     = drm_state;
-            dpy                              = (VADisplay)pDisplayContext;
-        }
-        else
-        {
-            if (pDisplayContext)
-                free(pDisplayContext);
-            if (pDriverContext)
-                free(pDriverContext);
-            if (drm_state)
-                free(drm_state);
-        }
+    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+
+    pDriverContext = va_newDriverContext(pDisplayContext);
+    if (!pDriverContext) {
+        free(pDisplayContext);
+        return NULL;
     }
-  
-    return dpy;
-}
 
-#define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
+    pDriverContext->native_dpy   = (void *)native_dpy;
+    pDriverContext->display_type = VA_DISPLAY_ANDROID;
 
+    drm_state = (struct drm_state*)calloc(1, sizeof(*drm_state));
+    if (!drm_state) {
+        free(pDisplayContext);
+        free(pDriverContext);
+        return NULL;
+    }
 
-extern "C"  {
-    extern int fool_postp; /* do nothing for vaPutSurface if set */
-    extern int trace_flag; /* trace vaPutSurface parameters */
+    pDriverContext->drm_state = drm_state;
 
-    void va_TracePutSurface (
-        VADisplay dpy,
-        VASurfaceID surface,
-        void *draw, /* the target Drawable */
-        short srcx,
-        short srcy,
-        unsigned short srcw,
-        unsigned short srch,
-        short destx,
-        short desty,
-        unsigned short destw,
-        unsigned short desth,
-        VARectangle *cliprects, /* client supplied clip list */
-        unsigned int number_cliprects, /* number of clip rects in the clip list */
-        unsigned int flags /* de-interlacing flags */
-        );
-}
-
-VAStatus vaPutSurface (
-    VADisplay dpy,
-    VASurfaceID surface,
-    sp<ANativeWindow> draw, /* Android Native Window */
-    short srcx,
-    short srcy,
-    unsigned short srcw,
-    unsigned short srch,
-    short destx,
-    short desty,
-    unsigned short destw,
-    unsigned short desth,
-    VARectangle *cliprects, /* client supplied clip list */
-    unsigned int number_cliprects, /* number of clip rects in the clip list */
-    unsigned int flags /* de-interlacing flags */
-)
-{
-    VADriverContextP ctx;
-
-    if (fool_postp)
-        return VA_STATUS_SUCCESS;
-
-    if (draw == NULL)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    CHECK_DISPLAY(dpy);
-    ctx = CTX(dpy);
-
-    VA_TRACE_LOG(va_TracePutSurface, dpy, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch,
-                 destx, desty, destw, desth,
-                 cliprects, number_cliprects, flags );
-    
-    return ctx->vtable->vaPutSurface( ctx, surface, static_cast<void*>(&draw), srcx, srcy, srcw, srch, 
-                                     destx, desty, destw, desth,
-                                     cliprects, number_cliprects, flags );
+    return (VADisplay)pDisplayContext;
 }
 

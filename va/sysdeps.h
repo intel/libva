@@ -42,30 +42,10 @@
 # define False 0
 
 /* Macros generated from configure */
-# define LIBVA_VERSION_S "1.2.0.pre1"
+# define LIBVA_VERSION_S "1.1.0"
 
 /* Android logging utilities */
 # include <utils/Log.h>
-
-# ifdef ANDROID_ALOG
-#  define va_log_error(buffer)  do { ALOGE("%s", buffer); } while (0)
-#  define va_log_info(buffer)   do { ALOGI("%s", buffer); } while (0)
-# elif ANDROID_LOG
-#  define va_log_error(buffer)  do { LOGE("%s", buffer); } while (0)
-#  define va_log_info(buffer)   do { LOGI("%s", buffer); } while (0)
-# endif
-#endif
-
-#ifndef va_log_error
-#define va_log_error(buffer) do {                       \
-        fprintf(stderr, "libva error: %s", buffer);     \
-    } while (0)
-#endif
-
-#ifndef va_log_info
-#define va_log_info(buffer) do {                        \
-        fprintf(stderr, "libva info: %s", buffer);      \
-    } while (0)
 #endif
 
 #if defined __GNUC__ && defined HAVE_GNUC_VISIBILITY_ATTRIBUTE

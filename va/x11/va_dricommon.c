@@ -81,21 +81,22 @@ do_drawable_hash(VADriverContextP ctx, XID drawable)
 }
 
 void
-free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
+va_dri_free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int i = 0;
 
-    while (i++ < DRAWABLE_HASH_SZ) {
+    while (i < DRAWABLE_HASH_SZ) {
 	if (dri_drawable == dri_state->drawable_hash[i]) {
 	    dri_state->destroyDrawable(ctx, dri_drawable);
 	    dri_state->drawable_hash[i] = NULL;
 	}
+	i++;
     }
 }
 
 void
-free_drawable_hashtable(VADriverContextP ctx)
+va_dri_free_drawable_hashtable(VADriverContextP ctx)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     int i;
@@ -115,13 +116,13 @@ free_drawable_hashtable(VADriverContextP ctx)
 }
 
 struct dri_drawable *
-dri_get_drawable(VADriverContextP ctx, XID drawable)
+va_dri_get_drawable(VADriverContextP ctx, XID drawable)
 {
     return do_drawable_hash(ctx, drawable);
 }
 
 void 
-dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
+va_dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
 
@@ -129,7 +130,7 @@ dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 }
 
 union dri_buffer *
-dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
+va_dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
     

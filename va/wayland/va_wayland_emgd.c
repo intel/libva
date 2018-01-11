@@ -115,7 +115,6 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     VADisplayContextWaylandEMGD *wl_emgd_ctx;
     struct drm_state *drm_state;
-    uint32_t id;
 
     wl_emgd_ctx = malloc(sizeof(*wl_emgd_ctx));
     if (!wl_emgd_ctx)

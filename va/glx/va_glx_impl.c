@@ -152,12 +152,12 @@ static GLXGetProcAddressProc get_proc_address_func(void)
     dlerror();
     get_proc_func = (GLXGetProcAddressProc)
         dlsym(RTLD_DEFAULT, "glXGetProcAddress");
-    if (!dlerror() && get_proc_func)
+    if (!dlerror())
         return get_proc_func;
 
     get_proc_func = (GLXGetProcAddressProc)
         dlsym(RTLD_DEFAULT, "glXGetProcAddressARB");
-    if (!dlerror() && get_proc_func)
+    if (!dlerror())
         return get_proc_func;
 
     return get_proc_address_default;
@@ -191,18 +191,40 @@ static int check_extension(const char *name, const char *ext)
     return 0;
 }
 
+static int check_extension3(const char *name)
+{
+    int nbExtensions, i;
+    PFNGLGETSTRINGIPROC glGetStringi = 0;
+
+    glGetStringi = (PFNGLGETSTRINGIPROC) get_proc_address("glGetStringi");
+    if(!glGetStringi)
+        return 0;
+
+
+    glGetIntegerv(GL_NUM_EXTENSIONS, &nbExtensions);
+    for(i = 0; i < nbExtensions; i++)
+    {
+        const GLubyte *strExtension = glGetStringi(GL_EXTENSIONS, i);
+        if(strcmp((const char *) strExtension, name) == 0)
+            return 1;
+    }
+
+    return 0;
+}
+
 static int check_tfp_extensions(VADriverContextP ctx)
 {
     const char *gl_extensions;
     const char *glx_extensions;
 
     gl_extensions = (const char *)glGetString(GL_EXTENSIONS);
-    if (!check_extension("GL_ARB_texture_non_power_of_two", gl_extensions))
+    if (!check_extension("GL_ARB_texture_non_power_of_two", gl_extensions) && !check_extension3("GL_ARB_texture_non_power_of_two"))
         return 0;
 
     glx_extensions = glXQueryExtensionsString(ctx->native_dpy, ctx->x11_screen);
     if (!check_extension("GLX_EXT_texture_from_pixmap", glx_extensions))
         return 0;
+
     return 1;
 }
 
@@ -211,10 +233,11 @@ static int check_fbo_extensions(VADriverContextP ctx)
     const char *gl_extensions;
 
     gl_extensions = (const char *)glGetString(GL_EXTENSIONS);
-    if (check_extension("GL_ARB_framebuffer_object", gl_extensions))
+    if (check_extension("GL_ARB_framebuffer_object", gl_extensions) || check_extension3("GL_ARB_framebuffer_object"))
         return 1;
-    if (check_extension("GL_EXT_framebuffer_object", gl_extensions))
+    if (check_extension("GL_EXT_framebuffer_object", gl_extensions) || check_extension3("GL_EXT_framebuffer_object"))
         return 1;
+
     return 0;
 }
 
@@ -341,8 +364,14 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     if (!cs)
         goto error;
 
-    cs->display = ctx->native_dpy;
-    cs->window  = parent ? parent->window : None;
+    if (parent) {
+        cs->display = parent->display;
+        cs->window  = parent->window;
+    }
+    else {
+        cs->display = ctx->native_dpy;
+        cs->window  = None;
+    }
     cs->context = NULL;
 
     if (parent && parent->context) {
@@ -358,8 +387,8 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
             goto choose_fbconfig;
 
         fbconfigs = glXGetFBConfigs(
-            ctx->native_dpy,
-            ctx->x11_screen,
+            parent->display,
+            DefaultScreen(parent->display),
             &n_fbconfigs
         );
         if (!fbconfigs)
@@ -368,7 +397,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
         /* Find out a GLXFBConfig compatible with the parent context */
         for (n = 0; n < n_fbconfigs; n++) {
             status = glXGetFBConfigAttrib(
-                ctx->native_dpy,
+                cs->display,
                 fbconfigs[n],
                 GLX_FBCONFIG_ID, &val
             );
@@ -393,7 +422,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     }
 
     cs->context = glXCreateNewContext(
-        ctx->native_dpy,
+        cs->display,
         fbconfigs[n],
         GLX_RGBA_TYPE,
         parent ? parent->context : NULL,
@@ -495,11 +524,19 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
         GLX_RED_SIZE,           8,
         GLX_GREEN_SIZE,         8,
         GLX_BLUE_SIZE,          8,
+        /*
+         * depth test isn't enabled in the implementaion of VA GLX,
+         * so depth buffer is unnecessary. However to workaround a
+         * bug in older verson of xorg-server, always require a depth
+         * buffer.
+         *
+         * See https://bugs.freedesktop.org/show_bug.cgi?id=76755
+         */
+        GLX_DEPTH_SIZE,         1,
         GL_NONE,
     };
     for (attrib = fbconfig_attrs; *attrib != GL_NONE; attrib += 2)
         ;
-    *attrib++ = GLX_DEPTH_SIZE;                 *attrib++ = wattr.depth;
     if (wattr.depth == 32) {
     *attrib++ = GLX_ALPHA_SIZE;                 *attrib++ = 8;
     *attrib++ = GLX_BIND_TO_TEXTURE_RGBA_EXT;   *attrib++ = GL_TRUE;

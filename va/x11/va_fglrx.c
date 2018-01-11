@@ -154,27 +154,27 @@ Bool VA_FGLRXGetClientDriverName( Display *dpy, int screen,
     dlerror();
     ADL_Main_Control_Create = (ADL_MAIN_CONTROL_CREATE)
         dlsym(libadl_handle,"ADL_Main_Control_Create");
-    if (dlerror() || !ADL_Main_Control_Create)
+    if (dlerror())
         goto end;
 
     ADL_Main_Control_Destroy = (ADL_MAIN_CONTROL_DESTROY)
         dlsym(libadl_handle,"ADL_Main_Control_Destroy");
-    if (dlerror() || !ADL_Main_Control_Destroy)
+    if (dlerror())
         goto end;
 
     ADL_Adapter_NumberOfAdapters_Get = (ADL_ADAPTER_NUMBEROFADAPTERS_GET)
         dlsym(libadl_handle,"ADL_Adapter_NumberOfAdapters_Get");
-    if (dlerror() || !ADL_Adapter_NumberOfAdapters_Get)
+    if (dlerror())
         goto end;
 
     ADL_Adapter_AdapterInfo_Get = (ADL_ADAPTER_ADAPTERINFO_GET)
         dlsym(libadl_handle,"ADL_Adapter_AdapterInfo_Get");
-    if (dlerror() || !ADL_Adapter_AdapterInfo_Get)
+    if (dlerror())
         goto end;
 
     ADL_Adapter_XScreenInfo_Get = (ADL_ADAPTER_XSCREENINFO_GET)
         dlsym(libadl_handle,"ADL_Adapter_XScreenInfo_Get");
-    if (dlerror() || !ADL_Adapter_XScreenInfo_Get)
+    if (dlerror())
         goto end;
 
     if (ADL_Main_Control_Create(ADL_Main_Memory_Alloc, 1) != ADL_OK)

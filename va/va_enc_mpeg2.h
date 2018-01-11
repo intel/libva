@@ -36,15 +36,11 @@
 extern "C" {
 #endif
 
-#include <va/va_enc.h>
-
 /**
  * \defgroup api_enc_mpeg2 MPEG-2 encoding API
  *
  * @{
  */
-
-#define MPEG2_LAST_PICTURE_EOSTREAM  VA_ENC_LAST_PICTURE_EOSTREAM
 
 /**
  * \brief MPEG-2 Quantization Matrix Buffer
@@ -93,9 +89,9 @@ typedef enum {
  */
 typedef struct _VAEncSequenceParameterBufferMPEG2 {
     /** \brief Period between I frames. */
-    unsigned int intra_period;
+    uint32_t intra_period;
     /** \brief Period between I/P frames. */
-    unsigned int ip_period;
+    uint32_t ip_period;
     /** \brief Picture width.
      *
      * A 14bits unsigned inter, the lower 12bits 
@@ -103,7 +99,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
      * 2bits is \c horizontal_size_extension
      *
      */
-    unsigned short picture_width;
+    uint16_t picture_width;
     /** \brief Picture height.
      *
      * A 14bits unsigned inter, the lower 12bits
@@ -111,7 +107,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
      * vertical_size_size_extension
      *
      */
-    unsigned short picture_height;
+    uint16_t picture_height;
     /**
      * \brief Initial bitrate set for this sequence in CBR or VBR modes.
      *
@@ -123,7 +119,7 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
      * bits_per_second may be derived from bit_rate.
      *
      */
-    unsigned int bits_per_second;
+    uint32_t bits_per_second;
     /**
      * \brief Frame rate
      * 
@@ -133,42 +129,45 @@ typedef struct _VAEncSequenceParameterBufferMPEG2 {
      */
     float frame_rate;
     /** \brief Same as the element in sequence_header() */
-    unsigned short aspect_ratio_information;
+    uint16_t aspect_ratio_information;
     /** \brief Define the size of VBV */
-    unsigned int vbv_buffer_size;
+    uint32_t vbv_buffer_size;
 
     union {
         struct {
             /** \brief Same as the element in Sequence extension() */
-            unsigned int profile_and_level_indication   : 8;
+            uint32_t profile_and_level_indication   : 8;
             /** \brief Same as the element in Sequence extension() */
-            unsigned int progressive_sequence           : 1;
+            uint32_t progressive_sequence           : 1;
             /** \brief Same as the element in Sequence extension() */
-            unsigned int chroma_format                  : 2;
+            uint32_t chroma_format                  : 2;
             /** \brief Same as the element in Sequence extension() */
-            unsigned int low_delay                      : 1;
+            uint32_t low_delay                      : 1;
             /** \brief Same as the element in Sequence extension() */
-            unsigned int frame_rate_extension_n         : 2;
+            uint32_t frame_rate_extension_n         : 2;
             /** \brief Same as the element in Sequence extension() */
-            unsigned int frame_rate_extension_d         : 5;
+            uint32_t frame_rate_extension_d         : 5;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } sequence_extension;
 
     /** \brief Flag to indicate the following GOP header are being updated */
-    unsigned int new_gop_header;
+    uint32_t new_gop_header;
 
     union {
         struct {
             /** \brief Time code */
-            unsigned int time_code                      : 25;
+            uint32_t time_code                      : 25;
             /** \brief Same as the element in GOP header */
-            unsigned int closed_gop                     : 1;
+            uint32_t closed_gop                     : 1;
             /** \brief SAme as the element in GOP header */
-            unsigned int broken_link                    : 1;
+            uint32_t broken_link                    : 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } gop_header;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSequenceParameterBufferMPEG2;
 
 /**
@@ -209,41 +208,41 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
      * the last one in the stream. Otherwise, it 
      * is \ref MPEG2_LAST_PICTURE_EOSTREAM.
      */
-    unsigned char last_picture;
+    uint8_t last_picture;
     /** \brief Picture type */
     VAEncPictureType picture_type;
     /** \brief Same as the element in picture_header() */
-    unsigned int temporal_reference;
+    uint32_t temporal_reference;
     /** \brief Same as the element in picture_header() */
-    unsigned int vbv_delay;
+    uint32_t vbv_delay;
     /** \brief Same as the element in Picture coding extension */
-    unsigned char f_code[2][2];
+    uint8_t f_code[2][2];
     union {
         struct {
             /** \brief Same as the element in Picture coding extension */
-            unsigned int intra_dc_precision             : 2; 
+            uint32_t intra_dc_precision             : 2; 
             /** \brief Same as the element in Picture coding extension */
-            unsigned int picture_structure              : 2; 
+            uint32_t picture_structure              : 2; 
             /** \brief Same as the element in Picture coding extension */
-            unsigned int top_field_first                : 1; 
+            uint32_t top_field_first                : 1; 
             /** \brief Same as the element in Picture coding extension */
-            unsigned int frame_pred_frame_dct           : 1; 
+            uint32_t frame_pred_frame_dct           : 1; 
             /** \brief Same as the element in Picture coding extension */
-            unsigned int concealment_motion_vectors     : 1;
+            uint32_t concealment_motion_vectors     : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int q_scale_type                   : 1;
+            uint32_t q_scale_type                   : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int intra_vlc_format               : 1;
+            uint32_t intra_vlc_format               : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int alternate_scan                 : 1;
+            uint32_t alternate_scan                 : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int repeat_first_field             : 1;
+            uint32_t repeat_first_field             : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int progressive_frame              : 1;
+            uint32_t progressive_frame              : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int composite_display_flag         : 1;
+            uint32_t composite_display_flag         : 1;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } picture_coding_extension;
 
     /* \brief Parameters for composite display
@@ -253,18 +252,21 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
     union {
         struct {
             /** \brief Same as the element in Picture coding extension */            
-            unsigned int v_axis                         : 1;
+            uint32_t v_axis                         : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int field_sequence                 : 3;
+            uint32_t field_sequence                 : 3;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int sub_carrier                    : 1;
+            uint32_t sub_carrier                    : 1;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int burst_amplitude                : 7;
+            uint32_t burst_amplitude                : 7;
             /** \brief Same as the element in Picture coding extension */
-            unsigned int sub_carrier_phase              : 8;
+            uint32_t sub_carrier_phase              : 8;
         } bits;
-        unsigned int value;
+        uint32_t value;
     } composite_display;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncPictureParameterBufferMPEG2;
 
 /**
@@ -273,15 +275,31 @@ typedef struct _VAEncPictureParameterBufferMPEG2 {
  */
 typedef struct _VAEncSliceParameterBufferMPEG2 {
     /** \brief Starting MB address for this slice. */
-    unsigned int macroblock_address;
+    uint32_t macroblock_address;
     /** \brief Number of macroblocks in this slice. */
-    unsigned int num_macroblocks;
+    uint32_t num_macroblocks;
     /** \brief Same as the element in slice() */
-    int quantiser_scale_code;
+    int32_t quantiser_scale_code;
     /** \brief Flag to indicate intra slice */
-    int is_intra_slice;
+    int32_t is_intra_slice;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncSliceParameterBufferMPEG2;
 
+typedef struct _VAEncMiscParameterExtensionDataSeqDisplayMPEG2
+{
+    /** should always be 0x02 to identify it is Sequence Display Extension ISO-13818 */
+    uint8_t extension_start_code_identifier;
+    /** these field should follow ISO-13818 6.3.6 */
+    uint8_t video_format;
+    uint8_t colour_description;
+    uint8_t colour_primaries;
+    uint8_t transfer_characteristics;
+    uint8_t matrix_coefficients;
+    uint16_t display_horizontal_size;
+    uint16_t display_vertical_size;
+} VAEncMiscParameterExtensionDataSeqDisplayMPEG2;
 /**@}*/
 
 #ifdef __cplusplus
