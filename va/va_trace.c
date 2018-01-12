@@ -272,11 +272,11 @@ static int get_valid_config_idx(
 
     LOCK_RESOURCE(pva_trace);
 
-    pconfig_info = pva_trace->config_info;
-    idx = config_id & TRACE_CTX_ID_MASK;
-    if(!pconfig_info[idx].valid
-        || pconfig_info[idx].config_id != config_id)
-        idx = MAX_TRACE_CTX_NUM;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (pva_trace->config_info[idx].valid &&
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
 
     UNLOCK_RESOURCE(pva_trace);
 
@@ -295,10 +295,15 @@ static void add_trace_config_info(
 
     LOCK_RESOURCE(pva_trace);
 
-    idx = config_id & TRACE_CTX_ID_MASK;
-    pconfig_info = &pva_trace->config_info[idx];
-    if(!pconfig_info->valid ||
-        pconfig_info->config_id == config_id) {
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (!pva_trace->config_info[idx].valid ||
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
+
+    if (idx < MAX_TRACE_CTX_NUM) {
+        pconfig_info = &pva_trace->config_info[idx];
+
         pconfig_info->valid = 1;
         pconfig_info->config_id = config_id;
         pconfig_info->trace_profile = profile;
@@ -315,16 +320,20 @@ static void delete_trace_config_info(
 {
     struct trace_config_info *pconfig_info;
     int idx = 0;
-    pid_t thd_id = syscall(__NR_gettid);
 
     LOCK_RESOURCE(pva_trace);
 
-    idx = config_id & TRACE_CTX_ID_MASK;
-    pconfig_info = &pva_trace->config_info[idx];
-    if(pconfig_info->valid &&
-		pconfig_info->config_id == config_id &&
-		pconfig_info->created_thd_id == thd_id) {
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++) {
+        if (pva_trace->config_info[idx].valid &&
+            pva_trace->config_info[idx].config_id == config_id)
+            break;
+    }
+
+    if (idx < MAX_TRACE_CTX_NUM) {
+        pconfig_info = &pva_trace->config_info[idx];
+
         pconfig_info->valid = 0;
+        pconfig_info->config_id = -1;
     }
 
     UNLOCK_RESOURCE(pva_trace);
@@ -455,15 +464,14 @@ static int get_free_ctx_idx(
     struct va_trace *pva_trace,
     VAContextID context)
 {
-    int idx = MAX_TRACE_CTX_NUM;
-    int i = 0;
+    int idx;
 
     LOCK_RESOURCE(pva_trace);
 
-    i = context & TRACE_CTX_ID_MASK;
-    if(!pva_trace->ptra_ctx[i]
-        || pva_trace->ptra_ctx[i]->trace_context == context)
-        idx = i;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++)
+        if (!pva_trace->ptra_ctx[idx] ||
+            pva_trace->ptra_ctx[idx]->trace_context == context)
+            break;
 
     UNLOCK_RESOURCE(pva_trace);
 
@@ -474,15 +482,14 @@ static int get_valid_ctx_idx(
     struct va_trace *pva_trace,
     VAContextID context)
 {
-    int idx = MAX_TRACE_CTX_NUM;
-    int i = 0;
+    int idx;
 
     LOCK_RESOURCE(pva_trace);
 
-    i = context & TRACE_CTX_ID_MASK;
-    if(pva_trace->ptra_ctx[i]
-        && pva_trace->ptra_ctx[i]->trace_context == context)
-        idx = i;
+    for (idx = 0;idx < MAX_TRACE_CTX_NUM;idx++)
+        if (pva_trace->ptra_ctx[idx] &&
+            pva_trace->ptra_ctx[idx]->trace_context == context)
+            break;
 
     UNLOCK_RESOURCE(pva_trace);
 
@@ -743,6 +750,9 @@ void va_TraceInit(VADisplay dpy)
 
     pva_trace->dpy = dpy;
 
+    pthread_mutex_init(&pva_trace->resource_mutex, NULL);
+    pthread_mutex_init(&pva_trace->context_mutex, NULL);
+
     if (va_parseConfig("LIBVA_TRACE", &env_value[0]) == 0) {
         pva_trace->fn_log_env = strdup(env_value);
         trace_ctx->plog_file = start_tracing2log_file(pva_trace);
@@ -804,9 +814,6 @@ void va_TraceInit(VADisplay dpy)
                            trace_ctx->trace_surface_yoff);
         }
     }
-
-    pthread_mutex_init(&pva_trace->resource_mutex, NULL);
-    pthread_mutex_init(&pva_trace->context_mutex, NULL);
 
     trace_ctx->trace_context = VA_INVALID_ID;
     pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM] = trace_ctx;
@@ -1436,6 +1443,65 @@ void va_TraceDestroyContext (
     }
 
     UNLOCK_CONTEXT(pva_trace);
+}
+
+void va_TraceCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+)
+{
+    DPY2TRACECTX(dpy, VA_INVALID_ID, VA_INVALID_ID);
+    TRACE_FUNCNAME(idx);
+    if (mf_context) {
+        va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", *mf_context);
+        trace_ctx->trace_context = *mf_context;
+    } else
+        trace_ctx->trace_context = VA_INVALID_ID;
+}
+
+void va_TraceMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
+}
+
+void va_TraceMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+)
+{
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
+}
+
+void va_TraceMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID *contexts,
+    int num_contexts
+)
+{
+    int i;
+
+    DPY2TRACECTX(dpy, mf_context, VA_INVALID_ID);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(trace_ctx, "\tmf_context = 0x%08x\n", mf_context);
+
+    for(i = 0; i < num_contexts; i++){
+        va_TraceMsg(trace_ctx, "\t\tcontext[%d] = 0x%08x\n", i, contexts[i]);
+    }
 }
 
 void va_TraceCreateBuffer (

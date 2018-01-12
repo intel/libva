@@ -21,7 +21,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AM_CPPFLAGS = \
-	-DLINUX			\
 	-I$(top_srcdir)		\
 	-I$(top_srcdir)/va	\
 	$(WAYLAND_CFLAGS)	\
@@ -73,7 +72,7 @@ va_wayland_drm.c: $(protocol_source_h)
 %-client-protocol.c: %-client-protocol-export.c
 	$(AM_V_GEN)$(SED) -e '1i#include "sysdeps.h"' \
 	                   -e 's@WL_EXPORT@DLL_HIDDEN@g' < $< > $@
-	
+
 EXTRA_DIST = \
 	wayland-drm.xml         \
 	$(NULL)

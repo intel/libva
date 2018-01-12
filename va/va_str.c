@@ -52,6 +52,7 @@ const char *vaProfileStr(VAProfile profile)
     TOSTR(VAProfileVP9Profile1);
     TOSTR(VAProfileVP9Profile2);
     TOSTR(VAProfileVP9Profile3);
+    default: break;
     }
     return "<unknown profile>";
 }
@@ -70,6 +71,7 @@ const char *vaEntrypointStr(VAEntrypoint entrypoint)
     TOSTR(VAEntrypointEncSliceLP);
     TOSTR(VAEntrypointVideoProc);
     TOSTR(VAEntrypointFEI);
+    TOSTR(VAEntrypointStats);
     }
     return "<unknown entrypoint>";
 }
@@ -95,6 +97,24 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribEncSkipFrame);
     TOSTR(VAConfigAttribEncROI);
     TOSTR(VAConfigAttribEncRateControlExt);
+    TOSTR(VAConfigAttribFEIFunctionType);
+    TOSTR(VAConfigAttribFEIMVPredictors);
+    TOSTR(VAConfigAttribDecJPEG);
+    TOSTR(VAConfigAttribMaxPictureWidth);
+    TOSTR(VAConfigAttribMaxPictureHeight);
+    TOSTR(VAConfigAttribEncQuantization);
+    TOSTR(VAConfigAttribEncIntraRefresh);
+    TOSTR(VAConfigAttribProcessingRate);
+    TOSTR(VAConfigAttribEncDirtyRect);
+    TOSTR(VAConfigAttribEncParallelRateControl);
+    TOSTR(VAConfigAttribEncDynamicScaling);
+    TOSTR(VAConfigAttribDecProcessing);
+    TOSTR(VAConfigAttribFrameSizeToleranceSupport);
+    TOSTR(VAConfigAttribEncTileSupport);
+    TOSTR(VAConfigAttribCustomRoundingControl);
+    TOSTR(VAConfigAttribQPBlockSize);
+    TOSTR(VAConfigAttribStats);
+    case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
 }
@@ -127,6 +147,22 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncMacroblockMapBufferType);
     TOSTR(VAProcPipelineParameterBufferType);
     TOSTR(VAProcFilterParameterBufferType);
+    TOSTR(VAEncQPBufferType);
+    TOSTR(VAEncFEIMVBufferType);
+    TOSTR(VAEncFEIMBCodeBufferType);
+    TOSTR(VAEncFEIDistortionBufferType);
+    TOSTR(VAEncFEIMBControlBufferType);
+    TOSTR(VAEncFEIMVPredictorBufferType);
+    TOSTR(VAEncMacroblockDisableSkipMapBufferType);
+    TOSTR(VADecodeStreamoutBufferType);
+    TOSTR(VAStatsStatisticsParameterBufferType);
+    TOSTR(VAStatsStatisticsBufferType);
+    TOSTR(VAStatsStatisticsBottomFieldBufferType);
+    TOSTR(VAStatsMVBufferType);
+    TOSTR(VAStatsMVPredictorBufferType);
+    TOSTR(VAEncFEICTBCmdBufferType);
+    TOSTR(VAEncFEICURecordBufferType);
+    case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
 }

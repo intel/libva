@@ -112,9 +112,23 @@ extern "C" {
  *
  * VA-API is split into several modules:
  * - \ref api_core
- * - \ref api_enc_xxx (xxx = h264, hevc, jpec, mpeg2, vp8, vp9)
- * - \ref api_dec_xxx (xxx = hevc, jpec, vp8, vp9)
+ * - Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9)
+ * 	- \ref api_enc_h264
+ * 	- \ref api_enc_hevc
+ * 	- \ref api_enc_jpeg
+ * 	- \ref api_enc_mpeg2
+ * 	- \ref api_enc_vp8
+ * 	- \ref api_enc_vp9
+ * - Decoder (HEVC, JPEG, VP8, VP9)
+ *      - \ref api_dec_hevc
+ *      - \ref api_dec_jpeg
+ *      - \ref api_dec_vp8
+ *      - \ref api_dec_vp9
  * - \ref api_vpp
+ * - FEI (H264, HEVC)
+ * 	- \ref api_fei
+ * 	- \ref api_fei_h264
+ * 	- \ref api_fei_hevc
  */
 
 /**
@@ -401,6 +415,23 @@ typedef enum
      * (VAEncFEIMVBufferType, VAEncFEIMBModeBufferType) are needed for PAK input.
      **/
     VAEntrypointFEI         = 11,
+    /**
+     * \brief VAEntrypointStats
+     *
+     * A pre-processing function for getting some statistics and motion vectors is added,
+     * and some extra controls for Encode pipeline are provided. The application can
+     * optionally call the statistics function to get motion vectors and statistics like
+     * variances, distortions before calling Encode function via this entry point.
+     *
+     * Checking whether Statistics is supported can be performed with vaQueryConfigEntrypoints().
+     * If Statistics entry point is supported, then the list of returned entry-points will
+     * include #VAEntrypointStats. Supported pixel format, maximum resolution and statistics
+     * specific attributes can be obtained via normal attribute query. One input buffer
+     * (VAStatsStatisticsParameterBufferType) and one or two output buffers
+     * (VAStatsStatisticsBufferType, VAStatsStatisticsBottomFieldBufferType (for interlace only)
+     * and VAStatsMVBufferType) are needed for this entry point.
+     **/
+    VAEntrypointStats       = 12,
 } VAEntrypoint;
 
 /** Currently defined configuration attribute types */
@@ -427,7 +458,47 @@ typedef enum
      * See \c VA_DEC_SLICE_MODE_xxx for the list of slice decoding modes.
      */
     VAConfigAttribDecSliceMode		= 6,
-
+   /**
+     * \brief JPEG decoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * JPEG implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValDecJPEG union.
+     */
+    VAConfigAttribDecJPEG             = 7,
+    /**
+     * \brief Decode processing support. Read/write.
+     *
+     * This attribute determines if the driver supports video processing
+     * with decoding using the decoding context in a single call, through
+     * vaGetConfigAttributes(); and if the user may use this feature,
+     * through vaCreateConfig(), if the driver supports the user scenario.
+     * The user will essentially create a regular decode VAContext.  Therefore,
+     * the parameters of vaCreateContext() such as picture_width, picture_height
+     * and render_targets are in relation to the decode output parameters
+     * (not processing output parameters) as normal.
+     * If this attribute is not set by the user then it is assumed that no
+     * extra processing is done after decoding for this decode context.
+     *
+     * Since essentially the application is creating a decoder config and context,
+     * all function calls that take in the config (e.g. vaQuerySurfaceAttributes())
+     * or context are in relation to the decoder, except those video processing
+     * function specified in the next paragraph.
+     *
+     * Once the decode config and context are created, the user must further
+     * query the supported processing filters using vaQueryVideoProcFilters(),
+     * vaQueryVideoProcFilterCaps(), vaQueryVideoProcPipelineCaps() by specifying
+     * the created decode context.  The user must provide processing information
+     * and extra processing output surfaces as "additional_outputs" to the driver
+     * through VAProcPipelineParameterBufferType.  The render_target specified
+     * at vaBeginPicture() time refers to the decode output surface.  The
+     * target surface for the output of processing needs to be a different
+     * surface since the decode process requires the original reconstructed buffer.
+     * The “surface” member of VAProcPipelineParameterBuffer should be set to the
+     * same as “render_target” set in vaBeginPicture(), but the driver may choose
+     * to ignore this parameter.
+     */
+    VAConfigAttribDecProcessing		= 8,
     /** @name Attributes for encoding */
     /**@{*/
     /**
@@ -498,6 +569,20 @@ typedef enum
      */
     VAConfigAttribEncMacroblockInfo     = 16,
     /**
+     * \brief Maximum picture width. Read-only.
+     *
+     * This attribute determines the maximum picture width the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureWidth     = 18,
+    /**
+     * \brief Maximum picture height. Read-only.
+     *
+     * This attribute determines the maximum picture height the driver supports
+     * for a given configuration.
+     */
+    VAConfigAttribMaxPictureHeight    = 19,
+    /**
      * \brief JPEG encoding attribute. Read-only.
      *
      * This attribute exposes a number of capabilities of the underlying
@@ -514,6 +599,21 @@ typedef enum
      * that can be configured. e.g. a value of 2 means there are two distinct quality levels. 
      */
     VAConfigAttribEncQualityRange     = 21,
+    /**
+     * \brief Encoding quantization attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports certain types of quantization methods
+     * for encoding (e.g. trellis). See \c VA_ENC_QUANTIZATION_xxx for the list of quantization methods
+     */
+    VAConfigAttribEncQuantization     = 22,
+    /**
+     * \brief Encoding intra refresh attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports certain types of intra refresh methods
+     * for encoding (e.g. adaptive intra refresh or rolling intra refresh).
+     * See \c VA_ENC_INTRA_REFRESH_xxx for intra refresh methods
+     */
+    VAConfigAttribEncIntraRefresh     = 23,
     /**
      * \brief Encoding skip frame attribute. Read-only.
      *
@@ -541,8 +641,58 @@ typedef enum
      * VAConfigAttribValEncRateControlExt union.
      */
     VAConfigAttribEncRateControlExt   = 26,
-
     /**
+     * \brief Processing rate reporting attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports reporting of
+     * encode/decode processing rate based on certain set of parameters
+     * (i.e. levels, I frame internvals) for a given configuration.
+     * If this is supported, vaQueryProcessingRate() can be used to get
+     * encode or decode processing rate.
+     * See \c VA_PROCESSING_RATE_xxx for encode/decode processing rate
+     */
+    VAConfigAttribProcessingRate    = 27,
+    /**
+     * \brief Encoding dirty rectangle. Read-only.
+     *
+     * This attribute conveys whether the driver supports dirty rectangle.
+     * encoding, based on user provided ROI rectangles which indicate the rectangular areas
+     * where the content has changed as compared to the previous picture.  The regions of the
+     * picture that are not covered by dirty rect rectangles are assumed to have not changed
+     * compared to the previous picture.  The encoder may do some optimizations based on
+     * this information.  The attribute value returned indicates the number of regions that
+     * are supported.  e.g. A value of 0 means dirty rect encoding is not supported.  If dirty
+     * rect encoding is supported, the ROI information is passed to the driver using
+     * VAEncMiscParameterTypeDirtyRect.
+     */
+     VAConfigAttribEncDirtyRect       = 28,
+    /**
+     * \brief Parallel Rate Control (hierachical B) attribute. Read-only.
+     *
+     * This attribute conveys whether the encoder supports parallel rate control.
+     * It is a integer value 0 - unsupported, > 0 - maximum layer supported.
+     * This is the way when hireachical B frames are encoded, multiple independent B frames
+     * on the same layer may be processed at same time. If supported, app may enable it by
+     * setting enable_parallel_brc in VAEncMiscParameterRateControl,and the number of B frames
+     * per layer per GOP will be passed to driver through VAEncMiscParameterParallelRateControl
+     * structure.Currently three layers are defined.
+     */
+     VAConfigAttribEncParallelRateControl   = 29,
+     /**
+     * \brief Dynamic Scaling Attribute. Read-only.
+     *
+     * This attribute conveys whether encoder is capable to determine dynamic frame
+     * resolutions adaptive to bandwidth utilization and processing power, etc.
+     * It is a boolean value 0 - unsupported, 1 - supported.
+     * If it is supported,for VP9, suggested frame resolution can be retrieved from VACodedBufferVP9Status.
+     */
+     VAConfigAttribEncDynamicScaling        = 30,
+     /**
+     * \brief frame size tolerance support
+     * it indicates the tolerance of frame size
+     */
+     VAConfigAttribFrameSizeToleranceSupport = 31,
+     /**
      * \brief Encode function type for FEI.
      *
      * This attribute conveys whether the driver supports different function types for encode.
@@ -550,7 +700,7 @@ typedef enum
      * it is for FEI entry point only.
      * Default is VA_FEI_FUNCTION_ENC_PAK.
      */
-    VAConfigAttribFEIFunctionType     = 32,
+     VAConfigAttribFEIFunctionType     = 32,
     /**
      * \brief Maximum number of FEI MV predictors. Read-only.
      *
@@ -559,6 +709,34 @@ typedef enum
      * Currently it is for FEI entry point only.
      */
     VAConfigAttribFEIMVPredictors     = 33,
+    /**
+     * \brief Statistics attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the VAEntrypointStats entry
+     * point. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValStats union. Currently it is for VAEntrypointStats only.
+     */
+    VAConfigAttribStats               = 34,
+     /**
+     * \brief Tile Support Attribute. Read-only.
+     *
+     * This attribute conveys whether encoder is capable to support tiles.
+     * If not supported, the tile related parameters sent to encoder, such as
+     * tiling structure, should be ignored. 0 - unsupported, 1 - supported.
+     */
+     VAConfigAttribEncTileSupport        = 35,
+    /**
+     * \brief whether accept rouding setting from application. Read-only.
+     * This attribute is for encode quality, if it is report,
+     * application can change the rounding setting by VAEncMiscParameterTypeCustomRoundingControl
+     */
+    VAConfigAttribCustomRoundingControl = 36,
+    /**
+     * \brief Encoding QP info block size attribute. Read-only.
+     * This attribute conveys the block sizes that underlying driver
+     * support for QP info for buffer #VAEncQpBuffer.
+     */
+    VAConfigAttribQPBlockSize            = 37,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -587,6 +765,12 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_RGB32	0x00020000
 /* RGBP covers RGBP and BGRP fourcc */ 
 #define VA_RT_FORMAT_RGBP	0x00100000
+/**
+ * RGB 10-bit packed format with upper 2 bits as alpha channel.
+ * The existing pre-defined fourcc codes can be used to signal
+ * the position of each component for this RT format.
+ */
+#define VA_RT_FORMAT_RGB32_10BPP 0x00200000
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
 /** @name Attribute values for VAConfigAttribRateControl */
@@ -603,9 +787,25 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CQP                       0x00000010
 /** \brief Variable bitrate with peak rate higher than average bitrate. */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
+/** \brief Intelligent Constant Quality. Provided an initial ICQ_quality_factor,
+ *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
+#define VA_RC_ICQ			0x00000040
 /** \brief Macroblock based rate control.  Per MB control is decided
  *  internally in the encoder. It may be combined with other RC modes, except CQP. */
 #define VA_RC_MB                        0x00000080
+/** \brief Constant Frame Size, it is used for small tolerent  */
+#define VA_RC_CFS                       0x00000100
+/** \brief Parallel BRC, for hierachical B.
+ *
+ *  For hierachical B, B frames can be refered by other B frames.
+ *  Currently three layers of hierachy are defined:
+ *  B0 - regular B, no reference to other B frames.
+ *  B1 - reference to only I, P and regular B0 frames.
+ *  B2 - reference to any other frames, including B1.
+ *  In Hierachical B structure, B frames on the same layer can be processed
+ *  simultaneously. And BRC would adjust accordingly. This is so called
+ *  Parallel BRC. */
+#define VA_RC_PARALLEL                  0x00000200
 
 /**@}*/
 
@@ -615,6 +815,25 @@ typedef struct _VAConfigAttrib {
 #define VA_DEC_SLICE_MODE_NORMAL       0x00000001
 /** \brief Driver supports base mode for slice decoding */
 #define VA_DEC_SLICE_MODE_BASE         0x00000002
+
+/** @name Attribute values for VAConfigAttribDecJPEG */
+/**@{*/
+typedef union _VAConfigAttribValDecJPEG {
+    struct{
+    /** \brief Set to (1 << VA_ROTATION_xxx) for supported rotation angles. */
+    uint32_t rotation : 4;
+    /** \brief Reserved for future use. */
+    uint32_t reserved : 28;
+    }bits;
+    uint32_t value;
+    uint32_t va_reserved[VA_PADDING_LOW];
+} VAConfigAttribValDecJPEG;
+/** @name Attribute values for VAConfigAttribDecProcessing */
+/**@{*/
+/** \brief No decoding + processing in a single decoding call. */
+#define VA_DEC_PROCESSING_NONE     0x00000000
+/** \brief Decode + processing in a single decoding call. */
+#define VA_DEC_PROCESSING          0x00000001
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncPackedHeaders */
@@ -702,6 +921,35 @@ typedef union _VAConfigAttribValEncJPEG {
     uint32_t value;
 } VAConfigAttribValEncJPEG;
 
+/** @name Attribute values for VAConfigAttribEncQuantization */
+/**@{*/
+/** \brief Driver does not support special types of quantization */
+#define VA_ENC_QUANTIZATION_NONE                        0x00000000
+/** \brief Driver supports trellis quantization */
+#define VA_ENC_QUANTIZATION_TRELLIS_SUPPORTED           0x00000001
+/**@}*/
+
+/** @name Attribute values for VAConfigAttribEncIntraRefresh */
+/**@{*/
+/** \brief Driver does not support intra refresh */
+#define VA_ENC_INTRA_REFRESH_NONE                       0x00000000
+/** \brief Driver supports column based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_COLUMN             0x00000001
+/** \brief Driver supports row based rolling intra refresh */
+#define VA_ENC_INTRA_REFRESH_ROLLING_ROW                0x00000002
+/** \brief Driver supports adaptive intra refresh */
+#define VA_ENC_INTRA_REFRESH_ADAPTIVE                   0x00000010
+/** \brief Driver supports cyclic intra refresh */
+#define VA_ENC_INTRA_REFRESH_CYCLIC                     0x00000020
+/** \brief Driver supports intra refresh of P frame*/
+#define VA_ENC_INTRA_REFRESH_P_FRAME                    0x00010000
+/** \brief Driver supports intra refresh of B frame */
+#define VA_ENC_INTRA_REFRESH_B_FRAME                    0x00020000
+/** \brief Driver supports intra refresh of multiple reference encoder */
+#define VA_ENC_INTRA_REFRESH_MULTI_REF                  0x00040000
+
+/**@}*/
+
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
     struct {
@@ -777,6 +1025,15 @@ typedef union _VAConfigAttribValEncRateControlExt {
     uint32_t value;
 } VAConfigAttribValEncRateControlExt;
 
+/** @name Attribute values for VAConfigAttribProcessingRate. */
+/**@{*/
+/** \brief Driver does not support processing rate report */
+#define VA_PROCESSING_RATE_NONE                       0x00000000
+/** \brief Driver supports encode processing rate report  */
+#define VA_PROCESSING_RATE_ENCODE                     0x00000001
+/** \brief Driver supports decode processing rate report  */
+#define VA_PROCESSING_RATE_DECODE                     0x00000002
+/**@}*/
 /**
  * if an attribute is not applicable for a given
  * profile/entrypoint pair, then set the value to the following 
@@ -1177,6 +1434,86 @@ VAStatus vaDestroyContext (
     VAContextID context
 );
 
+//Multi-frame context
+typedef VAGenericID VAMFContextID;
+/**
+ * vaCreateMFContext - Create a multi-frame context
+ *  interface encapsulating common for all streams memory objects and structures
+ *  required for single GPU task submission from several VAContextID's.
+ *  Allocation: This call only creates an instance, doesn't allocate any additional memory.
+ *  Support identification: Application can identify multi-frame feature support by ability
+ *  to create multi-frame context. If driver supports multi-frame - call successful,
+ *  mf_context != NULL and VAStatus = VA_STATUS_SUCCESS, otherwise if multi-frame processing
+ *  not supported driver returns VA_STATUS_ERROR_UNIMPLEMENTED and mf_context = NULL.
+ *  return values:
+ *  VA_STATUS_SUCCESS - operation successful.
+ *  VA_STATUS_ERROR_UNIMPLEMENTED - no support for multi-frame.
+ *  dpy: display adapter.
+ *  mf_context: Multi-Frame context encapsulating all associated context
+ *  for multi-frame submission.
+ */
+VAStatus vaCreateMFContext (
+    VADisplay dpy,
+    VAMFContextID *mf_context    /* out */
+);
+
+/**
+ * vaMFAddContext - Provide ability to associate each context used for
+ *  Multi-Frame submission and common Multi-Frame context.
+ *  Try to add context to understand if it is supported.
+ *  Allocation: this call allocates and/or reallocates all memory objects
+ *  common for all contexts associated with particular Multi-Frame context.
+ *  All memory required for each context(pixel buffers, internal driver
+ *  buffers required for processing) allocated during standard vaCreateContext call for each context.
+ *  Runtime dependency - if current implementation doesn't allow to run different entry points/profile,
+ *  first context added will set entry point/profile for whole Multi-Frame context,
+ *  all other entry points and profiles can be rejected to be added.
+ *  Return values:
+ *  VA_STATUS_SUCCESS - operation successful, context was added.
+ *  VA_STATUS_ERROR_OPERATION_FAILED - something unexpected happened - application have to close
+ *  current mf_context and associated contexts and start working with new ones.
+ *  VA_STATUS_ERROR_INVALID_CONTEXT - ContextID is invalid, means:
+ *  1 - mf_context is not valid context or
+ *  2 - driver can't suport different VAEntrypoint or VAProfile simultaneosly
+ *  and current context contradicts with previously added, application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode or other mf_context.
+ *  VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT - particular context being added was created with with
+ *  unsupported VAEntrypoint. Application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode.
+ *  VA_STATUS_ERROR_UNSUPPORTED_PROFILE - Current context with Particular VAEntrypoint is supported
+ *  but VAProfile is not supported. Application can continue with current mf_context
+ *  and other contexts passed this call, rejected context can continue work in stand-alone
+ *  mode.
+ *  dpy: display adapter.
+ *  context: context being associated with Multi-Frame context.
+ *  mf_context: - multi-frame context used to associate contexts for multi-frame submission.
+ */
+VAStatus vaMFAddContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
+/**
+ * vaMFReleaseContext - Removes context from multi-frame and
+ *  association with multi-frame context.
+ *  After association removed vaEndPicture will submit tasks, but not vaMFSubmit.
+ *  Return values:
+ *  VA_STATUS_SUCCESS - operation successful, context was removed.
+ *  VA_STATUS_ERROR_OPERATION_FAILED - something unexpected happened.
+ *  application need to destroy this VAMFContextID and all assotiated VAContextID
+ *  dpy: display
+ *  mf_context: VAMFContextID where context is added
+ *  context: VAContextID to be added
+ */
+VAStatus vaMFReleaseContext (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID context
+);
+
 /**
  * Buffers 
  * Buffers are used to pass various types of data from the
@@ -1252,8 +1589,97 @@ typedef enum
     VAEncFEIDistortionBufferType        = 45,
     VAEncFEIMBControlBufferType         = 46,
     VAEncFEIMVPredictorBufferType       = 47,
+    VAStatsStatisticsParameterBufferType = 48,
+    /** \brief Statistics output for VAEntrypointStats progressive and top field of interlaced case*/
+    VAStatsStatisticsBufferType         = 49,
+    /** \brief Statistics output for VAEntrypointStats bottom field of interlaced case*/
+    VAStatsStatisticsBottomFieldBufferType = 50,
+    VAStatsMVBufferType                 = 51,
+    VAStatsMVPredictorBufferType        = 52,
+    /** Force MB's to be non skip for encode.it's per-mb control buffer, The width of the MB map
+     * Surface is (width of the Picture in MB unit) * 1 byte, multiple of 64 bytes.
+     * The height is (height of the picture in MB unit). The picture is either
+     * frame or non-interleaved top or bottom field.  If the application provides this
+     *surface, it will override the "skipCheckDisable" setting in VAEncMiscParameterEncQuality.
+     */
+    VAEncMacroblockDisableSkipMapBufferType = 53,
+    /**
+     * \brief HEVC FEI CTB level cmd buffer
+     * it is CTB level information for future usage.
+     */
+    VAEncFEICTBCmdBufferType            = 54,
+    /**
+     * \brief HEVC FEI CU level data buffer
+     * it's CTB level information for future usage
+     */
+    VAEncFEICURecordBufferType          = 55,
+    /** decode stream out buffer, intermedia data of decode, it may include MV, MB mode etc.
+      * it can be used to detect motion and analyze the frame contain  */
+    VADecodeStreamoutBufferType             = 56,
     VABufferTypeMax
 } VABufferType;
+
+/**
+ * Processing rate parameter for encode.
+ */
+typedef struct _VAProcessingRateParameterEnc {
+    /** \brief Profile level */
+    uint8_t         level_idc;
+    uint8_t         reserved[3];
+    /** \brief quality level. When set to 0, default quality
+     * level is used.
+     */
+    uint32_t        quality_level;
+    /** \brief Period between I frames. */
+    uint32_t        intra_period;
+    /** \brief Period between I/P frames. */
+    uint32_t        ip_period;
+} VAProcessingRateParameterEnc;
+
+/**
+ * Processing rate parameter for decode.
+ */
+typedef struct _VAProcessingRateParameterDec {
+    /** \brief Profile level */
+    uint8_t         level_idc;
+    uint8_t         reserved0[3];
+    uint32_t        reserved;
+} VAProcessingRateParameterDec;
+
+typedef struct _VAProcessingRateParameter {
+    union {
+        VAProcessingRateParameterEnc proc_buf_enc;
+        VAProcessingRateParameterDec proc_buf_dec;
+    };
+} VAProcessingRateParameter;
+
+/**
+ * \brief Queries processing rate for the supplied config.
+ *
+ * This function queries the processing rate based on parameters in
+ * \c proc_buf for the given \c config. Upon successful return, the processing
+ * rate value will be stored in \c processing_rate. Processing rate is
+ * specified as the number of macroblocks/CTU per second.
+ *
+ * If NULL is passed to the \c proc_buf, the default processing rate for the
+ * given configuration will be returned.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] config            the config identifying a codec or a video
+ *     processing pipeline
+ * @param[in] proc_buf       the buffer that contains the parameters for
+        either the encode or decode processing rate
+ * @param[out] processing_rate  processing rate in number of macroblocks per
+        second constrained by parameters specified in proc_buf
+ *
+ */
+VAStatus
+vaQueryProcessingRate(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VAProcessingRateParameter *proc_buf,
+    unsigned int       *processing_rate
+);
 
 typedef enum
 {
@@ -1266,6 +1692,10 @@ typedef enum
     /** \brief Buffer type used for HRD parameters. */
     VAEncMiscParameterTypeHRD           = 5,
     VAEncMiscParameterTypeQualityLevel  = 6,
+    /** \brief Buffer type used for Rolling intra refresh */
+    VAEncMiscParameterTypeRIR           = 7,
+    /** \brief Buffer type used for quantization parameters, it's per-sequence parameter*/
+    VAEncMiscParameterTypeQuantization  = 8,
     /** \brief Buffer type used for sending skip frame parameters to the encoder's
       * rate control, when the user has externally skipped frames. */
     VAEncMiscParameterTypeSkipFrame     = 9,
@@ -1273,8 +1703,20 @@ typedef enum
     VAEncMiscParameterTypeROI           = 10,
     /** \brief Buffer type used for temporal layer structure */
     VAEncMiscParameterTypeTemporalLayerStructure   = 12,
+    /** \brief Buffer type used for dirty region-of-interest (ROI) parameters. */
+    VAEncMiscParameterTypeDirtyRect      = 13,
+    /** \brief Buffer type used for parallel BRC parameters. */
+    VAEncMiscParameterTypeParallelBRC   = 14,
+    /** \brief Set MB partion mode mask and Half-pel/Quant-pel motion search */
+    VAEncMiscParameterTypeSubMbPartPel = 15,
+    /** \brief set encode quality tuning */
+    VAEncMiscParameterTypeEncQuality = 16,
+    /** \brief Buffer type used for encoder rounding offset parameters. */
+    VAEncMiscParameterTypeCustomRoundingControl = 17,
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
+    /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
+    VAEncMiscParameterTypeExtensionData = 19
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -1390,14 +1832,31 @@ typedef struct _VAEncMiscParameterRateControl
              * The temporal layer that the rate control parameters are specified for.
              */
             uint32_t temporal_id : 8;
-            /** \brief Reserved for future use, must be zero */
-            uint32_t reserved : 17;
+            uint32_t cfs_I_frames : 1; /* I frame also follows CFS */
+            uint32_t enable_parallel_brc    : 1;
+            uint32_t enable_dynamic_scaling : 1;
+             /**  \brief Frame Tolerance Mode
+             *  Indicates the tolerance the application has to variations in the frame size.
+             *  For example, wireless display scenarios may require very steady bit rate to
+             *  reduce buffering time. It affects the rate control algorithm used,
+             *  but may or may not have an effect based on the combination of other BRC
+             *  parameters.  Only valid when the driver reports support for
+             *  #VAConfigAttribFrameSizeToleranceSupport.
+             *
+             *  equals 0    -- normal mode;
+             *  equals 1    -- maps to sliding window;
+             *  equals 2    -- maps to low delay mode;
+             *  other       -- invalid.
+             */
+            uint32_t frame_tolerance_mode   : 2;
+            uint32_t reserved               : 12;
         } bits;
         uint32_t value;
     } rc_flags;
-
+    uint32_t ICQ_quality_factor; /* Initial ICQ quality factor: 1-51. */
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t max_qp;
+    uint32_t va_reserved[VA_PADDING_MEDIUM - 2];
 } VAEncMiscParameterRateControl;
 
 typedef struct _VAEncMiscParameterFrameRate
@@ -1461,6 +1920,48 @@ typedef struct _VAEncMiscParameterAIR
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterAIR;
 
+/*
+ * \brief Rolling intra refresh data structure for encoding.
+ */
+typedef struct _VAEncMiscParameterRIR
+{
+    union
+    {
+        struct
+	/**
+	 * \brief Indicate if intra refresh is enabled in column/row.
+	 *
+	 * App should query VAConfigAttribEncIntraRefresh to confirm RIR support
+	 * by the driver before sending this structure.
+         */
+        {
+	    /* \brief enable RIR in column */
+            uint32_t enable_rir_column : 1;
+	    /* \brief enable RIR in row */
+            uint32_t enable_rir_row : 1;
+	    uint32_t reserved : 30;
+        } bits;
+        uint32_t value;
+    } rir_flags;
+    /**
+     * \brief Indicates the column or row location in MB. It is ignored if
+     * rir_flags is 0.
+     */
+    uint16_t intra_insertion_location;
+    /**
+     * \brief Indicates the number of columns or rows in MB. It is ignored if
+     * rir_flags is 0.
+     */
+    uint16_t intra_insert_size;
+    /**
+     * \brief indicates the Qp difference for inserted intra columns or rows.
+     * App can use this to adjust intra Qp based on bitrate & max frame size.
+     */
+    uint8_t  qp_delta_for_inserted_intra;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
+} VAEncMiscParameterRIR;
+
 typedef struct _VAEncMiscParameterHRD
 {
     uint32_t initial_buffer_fullness;       /* in bits */
@@ -1509,6 +2010,33 @@ typedef struct _VAEncMiscParameterBufferQualityLevel {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferQualityLevel;
+
+/**
+ * \brief Quantization settings for encoding.
+ *
+ * Some encoders support special types of quantization such as trellis, and this structure
+ * can be used by the app to control these special types of quantization by the encoder.
+ */
+typedef struct _VAEncMiscParameterQuantization
+{
+    union
+    {
+    /* if no flags is set then quantization is determined by the driver */
+        struct
+        {
+	    /* \brief disable trellis for all frames/fields */
+            uint64_t disable_trellis : 1;
+	    /* \brief enable trellis for I frames/fields */
+            uint64_t enable_trellis_I : 1;
+	    /* \brief enable trellis for P frames/fields */
+            uint64_t enable_trellis_P : 1;
+	    /* \brief enable trellis for B frames/fields */
+            uint64_t enable_trellis_B : 1;
+            uint64_t reserved : 28;
+        } bits;
+        uint64_t value;
+    } quantization_flags;
+} VAEncMiscParameterQuantization;
 
 /**
  * \brief Encoding skip frame.
@@ -1609,7 +2137,148 @@ typedef struct _VAEncMiscParameterBufferROI {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferROI;
+/*
+ * \brief Dirty rectangle data structure for encoding.
+ *
+ * The encoding dirty rect can be set through VAEncMiscParameterBufferDirtyRect, if the
+ * implementation supports dirty rect input. The rect set through this structure is applicable
+ * only to the current frame or field, so must be sent every frame or field to be applied.
+ * The number of supported rects can be queried through the VAConfigAttribEncDirtyRect.  The
+ * encoder will use the rect information to know those rectangle areas have changed while the
+ * areas not covered by dirty rect rectangles are assumed to have not changed compared to the
+ * previous picture.  The encoder may do some internal optimizations.
+ */
+typedef struct _VAEncMiscParameterBufferDirtyRect
+{
+    /** \brief Number of Rectangle being sent.*/
+    uint32_t    num_roi_rectangle;
 
+    /** \brief Pointer to a VARectangle array with num_roi_rectangle elements.*/
+     VARectangle    *roi_rectangle;
+} VAEncMiscParameterBufferDirtyRect;
+
+/** \brief Attribute value for VAConfigAttribEncParallelRateControl */
+typedef struct _VAEncMiscParameterParallelRateControl {
+    /** brief Number of layers*/
+    uint32_t num_layers;
+    /** brief Number of B frames per layer per GOP.
+     *
+     * it should be allocated by application, and the is num_layers.
+     *  num_b_in_gop[0] is the number of regular B which refers to only I or P frames. */
+    uint32_t *num_b_in_gop;
+} VAEncMiscParameterParallelRateControl;
+
+/** per frame encoder quality controls, once set they will persist for all future frames
+  *till it is updated again. */
+typedef struct _VAEncMiscParameterEncQuality
+{
+    union
+    {
+        struct
+        {
+            /** Use raw frames for reference instead of reconstructed frames.
+              * it only impact motion estimation (ME)  stage, and will not impact MC stage
+              * so the reconstruct picture will can match with decode side */
+            uint32_t useRawPicForRef                    : 1;
+            /**  Disables skip check for ME stage, it will increase the bistream size
+              * but will improve the qulity */
+            uint32_t skipCheckDisable                   : 1;
+            /**  Indicates app will override default driver FTQ settings using FTQEnable.
+              *  FTQ is forward transform quantization */
+            uint32_t FTQOverride                        : 1;
+            /** Enables/disables FTQ. */
+            uint32_t FTQEnable                          : 1;
+            /** Indicates the app will provide the Skip Threshold LUT to use when FTQ is
+              * enabled (FTQSkipThresholdLUT), else default driver thresholds will be used. */
+            uint32_t FTQSkipThresholdLUTInput           : 1;
+            /** Indicates the app will provide the Skip Threshold LUT to use when FTQ is
+              * disabled (NonFTQSkipThresholdLUT), else default driver thresholds will be used. */
+            uint32_t NonFTQSkipThresholdLUTInput        : 1;
+            uint32_t ReservedBit                        : 1;
+            /** Control to enable the ME mode decision algorithm to bias to fewer B Direct/Skip types.
+              * Applies only to B frames, all other frames will ignore this setting.  */
+            uint32_t directBiasAdjustmentEnable         : 1;
+            /** Enables global motion bias. global motion also is called HME (Heirarchical Motion Estimation )
+              * HME is used to handle large motions and avoiding local minima in the video encoding process
+              * down scaled the input and reference picture, then do ME. the result will be a predictor to next level HME or ME
+              * current interface divide the HME to 3 level. UltraHME , SuperHME, and HME, result of UltraHME will be input of SurperHME,
+              * result of superHME will be a input for HME. HME result will be input of ME. it is a switch for HMEMVCostScalingFactor
+              * can change the HME bias inside RDO stage*/
+            uint32_t globalMotionBiasAdjustmentEnable   : 1;
+            /** MV cost scaling ratio for HME ( predictors.  It is used when
+              * globalMotionBiasAdjustmentEnable == 1, else it is ignored.  Values are:
+              *     0: set MV cost to be 0 for HME predictor.
+              *     1: scale MV cost to be 1/2 of the default value for HME predictor.
+              *     2: scale MV cost to be 1/4 of the default value for HME predictor.
+              *     3: scale MV cost to be 1/8 of the default value for HME predictor. */
+            uint32_t HMEMVCostScalingFactor             : 2;
+            /**disable HME, if it is disabled. Super*ultraHME should also be disabled  */
+            uint32_t HMEDisable                         : 1;
+            /**disable Super HME, if it is disabled, ultraHME should be disabled */
+            uint32_t SuperHMEDisable                    : 1;
+            /** disable Ultra HME */
+            uint32_t UltraHMEDisable                    : 1;
+            /** disable panic mode. Panic mode happened when there are extreme BRC (bit rate control) requirement
+              * frame size cant achieve the target of BRC.  when Panic mode is triggered, Coefficients will
+              *  be set to zero. disable panic mode will improve quality but will impact BRC */
+            uint32_t PanicModeDisable                   : 1;
+            /** Force RepartitionCheck
+             *  0: DEFAULT - follow driver default settings.
+             *  1: FORCE_ENABLE - enable this feature totally for all cases.
+             *  2: FORCE_DISABLE - disable this feature totally for all cases. */
+            uint32_t ForceRepartitionCheck              : 2;
+
+        };
+        uint32_t encControls;
+    };
+
+    /** Maps QP to skip thresholds when FTQ is enabled.  Valid range is 0-255. */
+    uint8_t FTQSkipThresholdLUT[52];
+    /** Maps QP to skip thresholds when FTQ is disabled.  Valid range is 0-65535. */
+    uint16_t NonFTQSkipThresholdLUT[52];
+
+    uint32_t reserved[VA_PADDING_HIGH];  // Reserved for future use.
+
+} VAEncMiscParameterEncQuality;
+
+/**
+ *  \brief Custom Encoder Rounding Offset Control.
+ *  Application may use this structure to set customized rounding
+ *  offset parameters for quantization.
+ *  Valid when \c VAConfigAttribCustomRoundingControl equals 1.
+ */
+typedef struct _VAEncMiscParameterCustomRoundingControl
+{
+    union {
+        struct {
+            /** \brief Enable customized rounding offset for intra blocks.
+             *  If 0, default value would be taken by driver for intra
+             *  rounding offset.
+             */
+            uint32_t    enable_custom_rouding_intra     : 1 ;
+
+            /** \brief Intra rounding offset
+             *  Ignored if \c enable_custom_rouding_intra equals 0.
+             */
+            uint32_t    rounding_offset_intra           : 7;
+
+            /** \brief Enable customized rounding offset for inter blocks.
+             *  If 0, default value would be taken by driver for inter
+             *  rounding offset.
+             */
+            uint32_t    enable_custom_rounding_inter    : 1 ;
+
+            /** \brief Inter rounding offset
+             *  Ignored if \c enable_custom_rouding_inter equals 0.
+             */
+            uint32_t    rounding_offset_inter           : 7;
+
+           /* Reserved */
+            uint32_t    reserved                        :16;
+        }  bits;
+        uint32_t    value;
+    }   rounding_offset_setting;
+} VAEncMiscParameterCustomRoundingControl;
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
  * the data for the entire slice, and the following flags will be used in the slice
@@ -2072,8 +2741,12 @@ typedef struct _VAPictureParameterBufferVC1
         uint32_t value;
     } transform_fields;
 
+    uint8_t luma_scale2;                  /* PICTURE_LAYER::LUMSCALE2 */
+    uint8_t luma_shift2;                  /* PICTURE_LAYER::LUMSHIFT2 */
+    uint8_t intensity_compensation_field; /* Index for PICTURE_LAYER::INTCOMPFIELD value in Table 109 (9.1.1.48) */
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 1];
 } VAPictureParameterBufferVC1;
 
 /** VC-1 Bitplane Buffer
@@ -2276,7 +2949,13 @@ typedef enum
     VAEncPictureTypeBidirectional	= 2,
 } VAEncPictureType;
 
-/* Encode Slice Parameter Buffer */
+/**
+ * \brief Encode Slice Parameter Buffer.
+ *
+ * @deprecated
+ * This is a deprecated encode slice parameter buffer, All applications
+ * \c can use VAEncSliceParameterBufferXXX (XXX = MPEG2, HEVC, H264, JPEG)
+ */
 typedef struct _VAEncSliceParameterBuffer
 {
     uint32_t start_row_number;	/* starting MB row number for this slice */
@@ -2392,6 +3071,28 @@ VAStatus vaCreateBuffer (
 );
 
 /**
+ * Create a buffer for given width & height get unit_size, pitch, buf_id for 2D buffer
+ * for permb qp buffer, it will return unit_size for one MB or LCU and the pitch for alignments
+ * can call vaMapBuffer with this Buffer ID to get virtual address.
+ * e.g. AVC 1080P encode, 1920x1088, the size in MB is 120x68,but inside driver,
+ * maybe it should align with 256, and one byte present one Qp.so, call the function.
+ * then get unit_size = 1, pitch = 256. call vaMapBuffer to get the virtual address (pBuf).
+ * then read write the memory like 2D. the size is 256x68, application can only use 120x68
+ * pBuf + 256 is the start of next line.
+ * different driver implementation maybe return different unit_size and pitch
+ */
+VAStatus vaCreateBuffer2(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferType type,
+    unsigned int width,
+    unsigned int height,
+    unsigned int *unit_size,
+    unsigned int *pitch,
+    VABufferID *buf_id
+);
+
+/**
  * Convey to the server how many valid elements are in the buffer. 
  * e.g. if multiple slice parameters are being held in a single buffer,
  * this will communicate to the server the number of slice parameters
@@ -2431,7 +3132,21 @@ VAStatus vaBufferSetNumElements (
  * #VAEncMiscParameterTypeMaxFrameSize.
  */
 #define VA_CODED_BUF_STATUS_FRAME_SIZE_OVERFLOW         0x1000
+/**
+ * \brief the bitstream is bad or corrupt.
+ */
+#define VA_CODED_BUF_STATUS_BAD_BITSTREAM               0x8000
 #define VA_CODED_BUF_STATUS_AIR_MB_OVER_THRESHOLD	0xff0000
+
+/**
+ * \brief The coded buffer segment status contains frame encoding passes number
+ *
+ * This is the mask to get the number of encoding passes from the coded
+ * buffer segment status. 
+ * NUMBER_PASS(bit24~bit27): the number for encoding passes executed for the coded frame.
+ * 
+ */
+#define VA_CODED_BUF_STATUS_NUMBER_PASSES_MASK          0xf000000
 
 /**
  * \brief The coded buffer segment contains a single NAL unit. 
@@ -2618,6 +3333,68 @@ vaAcquireBufferHandle(VADisplay dpy, VABufferID buf_id, VABufferInfo *buf_info);
 VAStatus
 vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id);
 
+/** @name vaExportSurfaceHandle() flags
+ *
+ * @{
+ */
+/** Export surface to be read by external API. */
+#define VA_EXPORT_SURFACE_READ_ONLY        0x0001
+/** Export surface to be written by external API. */
+#define VA_EXPORT_SURFACE_WRITE_ONLY       0x0002
+/** Export surface to be both read and written by external API. */
+#define VA_EXPORT_SURFACE_READ_WRITE       0x0003
+/** Export surface with separate layers.
+ *
+ * For example, NV12 surfaces should be exported as two separate
+ * planes for luma and chroma.
+ */
+#define VA_EXPORT_SURFACE_SEPARATE_LAYERS  0x0004
+/** Export surface with composed layers.
+ *
+ * For example, NV12 surfaces should be exported as a single NV12
+ * composed object.
+ */
+#define VA_EXPORT_SURFACE_COMPOSED_LAYERS  0x0008
+
+/** @} */
+
+/**
+ * \brief Export a handle to a surface for use with an external API
+ *
+ * The exported handles are owned by the caller, and the caller is
+ * responsible for freeing them when no longer needed (e.g. by closing
+ * DRM PRIME file descriptors).
+ *
+ * This does not perform any synchronisation.  If the contents of the
+ * surface will be read, vaSyncSurface() must be called before doing so.
+ * If the contents of the surface are written, then all operations must
+ * be completed externally before using the surface again by via VA-API
+ * functions.
+ *
+ * @param[in] dpy          VA display.
+ * @param[in] surface_id   Surface to export.
+ * @param[in] mem_type     Memory type to export to.
+ * @param[in] flags        Combination of flags to apply
+ *   (VA_EXPORT_SURFACE_*).
+ * @param[out] descriptor  Pointer to the descriptor structure to fill
+ *   with the handle details.  The type of this structure depends on
+ *   the value of mem_type.
+ *
+ * @return Status code:
+ * - VA_STATUS_SUCCESS:    Success.
+ * - VA_STATUS_ERROR_INVALID_DISPLAY:  The display is not valid.
+ * - VA_STATUS_ERROR_UNIMPLEMENTED:  The driver does not implement
+ *     this interface.
+ * - VA_STATUS_ERROR_INVALID_SURFACE:  The surface is not valid, or
+ *     the surface is not exportable in the specified way.
+ * - VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:  The driver does not
+ *     support exporting surfaces to the specified memory type.
+ */
+VAStatus vaExportSurfaceHandle(VADisplay dpy,
+                               VASurfaceID surface_id,
+                               uint32_t mem_type, uint32_t flags,
+                               void *descriptor);
+
 /**
  * Render (Video Decode/Encode/Processing) Pictures
  *
@@ -2654,10 +3431,38 @@ VAStatus vaRenderPicture (
  * The server should start processing all pending operations for this 
  * surface. This call is non-blocking. The client can start another 
  * Begin/Render/End sequence on a different render target.
+ * if VAContextID used in this function previously successfully passed
+ * vaMFAddContext call, real processing will be started during vaMFSubmit
  */
 VAStatus vaEndPicture (
     VADisplay dpy,
     VAContextID context
+);
+
+/**
+ * Make the end of rendering for a pictures in contexts passed with submission.
+ * The server should start processing all pending operations for contexts.
+ * All contexts passed should be associated through vaMFAddContext
+ * and call sequence Begin/Render/End performed.
+ * This call is non-blocking. The client can start another
+ * Begin/Render/End/vaMFSubmit sequence on a different render targets.
+ * Return values:
+ * VA_STATUS_SUCCESS - operation successful, context was removed.
+ * VA_STATUS_ERROR_INVALID_CONTEXT - mf_context or one of contexts are invalid
+ * due to mf_context not created or one of contexts not assotiated with mf_context
+ * through vaAddContext.
+ * VA_STATUS_ERROR_INVALID_PARAMETER - one of context has not submitted it's frame
+ * through vaBeginPicture vaRenderPicture vaEndPicture call sequence.
+ * dpy: display
+ * mf_context: Multi-Frame context
+ * contexts: list of contexts submitting their tasks for multi-frame operation.
+ * num_contexts: number of passed contexts.
+ */
+VAStatus vaMFSubmit (
+    VADisplay dpy,
+    VAMFContextID mf_context,
+    VAContextID * contexts,
+    int num_contexts
 );
 
 /*
@@ -2711,9 +3516,9 @@ typedef struct _VASurfaceDecodeMBErrors
     uint32_t start_mb; /* start mb address with errors */
     uint32_t end_mb;  /* end mb address with errors */
     VADecodeErrorType decode_error_type;
-
+    uint32_t num_mb;   /* number of mbs with errors */
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VASurfaceDecodeMBErrors;
 
 /**
@@ -2746,6 +3551,7 @@ VAStatus vaQuerySurfaceError(
  * Pre-defined fourcc codes
  */
 #define VA_FOURCC_NV12		0x3231564E
+#define VA_FOURCC_NV21		0x3132564E
 #define VA_FOURCC_AI44		0x34344149
 #define VA_FOURCC_RGBA		0x41424752
 #define VA_FOURCC_RGBX		0x58424752
@@ -3130,6 +3936,23 @@ typedef enum
 #define VA_ROTATION_90          0x00000001
 #define VA_ROTATION_180         0x00000002
 #define VA_ROTATION_270         0x00000003
+/**@}*/
+
+/**
+ * @name Mirroring directions
+ *
+ * Those values could be used for VADisplayAttribMirror attribute or
+ * VAProcPipelineParameterBuffer::mirror_state.
+
+ */
+/**@{*/
+/** \brief No Mirroring. */
+#define VA_MIRROR_NONE              0x00000000
+/** \brief Horizontal Mirroring. */
+#define VA_MIRROR_HORIZONTAL        0x00000001
+/** \brief Vertical Mirroring. */
+#define VA_MIRROR_VERTICAL          0x00000002
+/**@}*/
 
 /** attribute value for VADisplayAttribOutOfLoopDeblock */
 #define VA_OOL_DEBLOCKING_FALSE 0x00000000
@@ -3354,6 +4177,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
 #include <va/va_enc_hevc.h>
+#include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>
 #include <va/va_enc_jpeg.h>
 #include <va/va_enc_mpeg2.h>
