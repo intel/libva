@@ -267,7 +267,6 @@ static int get_valid_config_idx(
     struct va_trace *pva_trace,
     VAConfigID config_id)
 {
-    struct trace_config_info *pconfig_info;
     int idx = MAX_TRACE_CTX_NUM;
 
     LOCK_RESOURCE(pva_trace);
