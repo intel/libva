@@ -24,7 +24,7 @@ all: html
 install-data-local: install-html
 
 EXTRA_DIST = \
-	Doxyfile			\
+	Doxyfile.in			\
 	$(NULL)
 
 VA_HEADER_DIR   = $(top_srcdir)/va
@@ -47,13 +47,18 @@ VA_HEADER_FILES = \
 	$(NULL)
 
 VA_HTML_FOOTER		= va_footer.html
-VA_HTML_FRAGMENTS	= $(VA_HTML_FOOTER)
 
-export VA_HEADER_DIR
-export VA_HEADER_FILES
-export VA_HTML_FOOTER
-html-out/index.html: Doxyfile $(VA_HEADER_FILES) $(VA_HTML_FRAGMENTS)
-	$(DOXYGEN) $<
+Doxyfile: Doxyfile.in $(VA_HEADER_FILES) $(VA_HTML_FOOTER)
+	$(AM_V_GEN) $(SED) 					\
+           -e "s:\@PACKAGE_VERSION\@:$(PACKAGE_VERSION):"	\
+           -e "s:\@VA_HEADER_DIR\@:$(VA_HEADER_DIR):" 		\
+           -e "s:\@VA_HEADER_FILES\@:$(VA_HEADER_FILES):"	\
+           -e "s:\@VA_HTML_FOOTER\@:$(VA_HTML_FOOTER):"	\
+           -e "s:\@OUTDIR\@::" 				\
+           $< > $@
+
+html-out/index.html: Doxyfile
+	$(AM_V_GEN) $(DOXYGEN)
 
 if ENABLE_DOCS
 html: html-out/index.html
@@ -72,4 +77,4 @@ uninstall-local:
 endif
 
 # Extra clean files so that maintainer-clean removes *everything*
-MAINTAINERCLEANFILES = Makefile.in
+MAINTAINERCLEANFILES = Makefile.in Doxyfile
