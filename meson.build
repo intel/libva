@@ -113,3 +113,9 @@ endif
 
 subdir('va')
 subdir('pkgconfig')
+
+doxygen = find_program('doxygen', required: false)
+
+if get_option('enable_docs') and doxygen.found()
+  subdir('doc')
+endif
