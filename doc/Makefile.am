@@ -60,8 +60,8 @@ Doxyfile: Doxyfile.in $(VA_HEADER_FILES) $(VA_HTML_FOOTER)
 html-out/index.html: Doxyfile
 	$(AM_V_GEN) $(DOXYGEN)
 
-if ENABLE_DOCS
 html: html-out/index.html
+
 install-html-local:
 	install -d $(DESTDIR)$(docdir)/html
 	for file in `ls html-out/` ; do \
@@ -72,9 +72,9 @@ install-html-local:
 		install -m 0644 html-out/$$file/* $(DESTDIR)$(docdir)/html/$$file; \
 	    fi ; \
 	done
+
 uninstall-local:
 	rm -rf $(DESTDIR)$(docdir)/html
-endif
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in Doxyfile

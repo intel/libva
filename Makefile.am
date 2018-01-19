@@ -24,7 +24,11 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 AUTOMAKE_OPTIONS = foreign
 
-SUBDIRS = va pkgconfig doc
+SUBDIRS = va pkgconfig
+
+if ENABLE_DOCS
+SUBDIRS += doc
+endif
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \
