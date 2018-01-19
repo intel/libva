@@ -74,7 +74,10 @@ install-html-local:
 	done
 
 uninstall-local:
-	rm -rf $(DESTDIR)$(docdir)/html
+	$(RM) -rf $(DESTDIR)$(docdir)/html
+
+clean-local:
+	$(RM) -rf html-out latex
 
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = Makefile.in Doxyfile
