@@ -165,7 +165,10 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
     uint32_t      search_window             : 8;
     /** \brief number of internal MV predictors for IME searches */
     uint32_t      max_num_ime_search_center : 3;
-    /** \brief only use AVC VME to do intra prediction */
+    /** \brief specifies if only use AVC prediction mode to do intra prediction
+     *  0 : use all 33 prediction modes to do intra prediction, default value
+     *  1 : only use 9 AVC prediction modes to do intra prediction
+     **/
     uint32_t      use_avc_intra_mode_only   : 1;
     uint32_t      reserved2                 : 4;
 
