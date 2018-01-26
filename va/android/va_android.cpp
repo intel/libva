@@ -147,9 +147,9 @@ VADisplay vaGetDisplay (
     }
 
     pDriverContext->native_dpy   = (void *)native_dpy;
-    pDriverContext->display_type = VA_DISPLAY_ANDROID
+    pDriverContext->display_type = VA_DISPLAY_ANDROID;
 
-    drm_state = calloc(1, sizeof(*drm_state));
+    drm_state = (struct drm_state*)calloc(1, sizeof(*drm_state));
     if (!drm_state) {
         free(pDisplayContext);
         free(pDriverContext);

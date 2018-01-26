@@ -105,9 +105,9 @@ struct drm_state {
 typedef struct _VADRMPRIMESurfaceDescriptor {
     /** Pixel format fourcc of the whole surface (VA_FOURCC_*). */
     uint32_t fourcc;
-    /** Width of the surface. */
+    /** Width of the surface in pixels. */
     uint32_t width;
-    /** Height of the surface. */
+    /** Height of the surface in pixels. */
     uint32_t height;
     /** Number of distinct DRM objects making up the surface. */
     uint32_t num_objects;
