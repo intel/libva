@@ -139,6 +139,11 @@ AC_ARG_ENABLE(x11,
                     [build with VA/X11 API support @<:@default=auto@:>@])],
     [], [enable_x11="auto"])
 
+AC_ARG_ENABLE(dri3,
+    [AC_HELP_STRING([--enable-dri3],
+                    [build with VA/X11-DRI3 API support @<:@default=no@:>@])],
+    [], [enable_dri3="no"])
+
 AC_ARG_ENABLE(glx,
     [AC_HELP_STRING([--enable-glx],
                     [build with VA/GLX API support @<:@default=auto@:>@])],
@@ -236,6 +241,28 @@ if test "x$enable_x11" != "xno"; then
 fi
 AM_CONDITIONAL(USE_X11, test "$USE_X11" = "yes")
 
+# Check for DRI3
+USE_DRI3="no"
+
+if test "$USE_X11:$enable_dri3" = "no:yes"; then
+    AC_MSG_ERROR([VA/X11-DRI3 explicitly enabled, but VA/X11 isn't built])
+fi
+
+if test "$enable_dri3" != "no"; then
+    PKG_CHECK_MODULES([DRI3], [xcb x11-xcb xcb-dri3 xcb-sync xshmfence],
+[USE_DRI3="yes"], [:])
+
+    if test "x$USE_DRI3" = "xno" -a "x$enable_dri3" = "xyes"; then
+       AC_MSG_ERROR([VA/X11-dri3 explicitly enabled, however $DRI3_PKG_ERRORS])
+    fi
+
+    if test "$USE_DRI3" = "yes"; then
+       AC_DEFINE([HAVE_VA_DRI3], [1], [Defined to 1 if VA/X11-DRI3 API \
+	is built])
+    fi
+fi
+AM_CONDITIONAL(USE_DRI3, test "$USE_DRI3" = "yes")
+
 # Check for GLX
 USE_GLX="no"
 
@@ -322,6 +349,7 @@ AC_OUTPUT([
 BACKENDS=""
 AS_IF([test x$USE_DRM = xyes], [BACKENDS="$BACKENDS drm"])
 AS_IF([test x$USE_X11 = xyes], [BACKENDS="$BACKENDS x11"])
+AS_IF([test x$USE_DRI3 = xyes], [BACKENDS="$BACKENDS x11-dri3"])
 AS_IF([test x$USE_GLX = xyes], [BACKENDS="$BACKENDS glx"])
 AS_IF([test x$USE_WAYLAND = xyes], [BACKENDS="$BACKENDS wayland"])
 

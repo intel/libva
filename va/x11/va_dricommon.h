@@ -71,6 +71,11 @@ struct dri_drawable
     struct dri_drawable *next;
 };
 
+struct dri3_fence {
+    XID xid;
+    void *addr;
+};
+
 #define DRAWABLE_HASH_SZ 32
 struct dri_state 
 {
@@ -83,6 +88,16 @@ struct dri_state
     void (*swapBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     union dri_buffer *(*getRenderingBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     void (*close)(VADriverContextP ctx);
+    int (*createfd)(VADriverContextP ctx, Pixmap pixmap, int *stride);
+    Pixmap
+    (*createPixmap)(VADriverContextP ctx, Drawable draw,
+                    int width, int height, int depth,
+                    int fd, int bpp, int stride, int size);
+    int
+    (*create_fence)(VADriverContextP ctx, Pixmap pixmap,
+                         struct dri3_fence *fence);
+    void (*fence_sync)(VADriverContextP ctx, struct dri3_fence *fence);
+    void (*fence_free)(VADriverContextP ctx, struct dri3_fence *fence);
 #endif
     /** \brief Reserved bytes for future use, must be zero */
     unsigned long  va_reserved[16];
@@ -94,5 +109,20 @@ void va_dri_free_drawable_hashtable(VADriverContextP ctx);
 struct dri_drawable *va_dri_get_drawable(VADriverContextP ctx, XID drawable);
 void va_dri_swap_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
 union dri_buffer *va_dri_get_rendering_buffer(VADriverContextP ctx, struct dri_drawable *dri_drawable);
+
+#ifdef HAVE_VA_DRI3
+Bool va_isDRI3Connected(VADriverContextP ctx, char **driver_name);
+Pixmap
+va_dri3_createPixmap(VADriverContextP ctx, Drawable draw,
+                     int width, int height, int depth,
+                     int fd, int bpp, int stride, int size);
+int va_dri3_createfd(VADriverContextP ctx, Pixmap pixmap, int *stride);
+void va_dri3_close(VADriverContextP ctx);
+int
+va_dri3_create_fence(VADriverContextP ctx, Pixmap pixmap,
+                     struct dri3_fence *fence);
+void va_dri3_fence_sync(VADriverContextP ctx, struct dri3_fence *fence);
+void va_dri3_fence_free(VADriverContextP ctx, struct dri3_fence *fence);
+#endif
 
 #endif /* _VA_DRICOMMON_H_ */

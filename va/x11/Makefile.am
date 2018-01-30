@@ -48,6 +48,15 @@ source_h_priv = \
 	va_nvctrl.h		\
 	$(NULL)
 
+if USE_DRI3
+source_c += \
+	dri3_util.c		\
+	va_dri3.c		\
+	$(NULL)
+source_h += \
+	va_dri3.h
+endif
+
 noinst_LTLIBRARIES		= libva_x11.la	
 libva_x11includedir		= ${includedir}/va
 libva_x11include_HEADERS	= $(source_h)

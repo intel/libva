@@ -73,6 +73,20 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
+#ifdef HAVE_VA_DRI3
+static VAStatus va_DRI3GetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+
+    if (!va_isDRI3Connected(ctx, driver_name))
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    return VA_STATUS_SUCCESS;
+}
+#endif
 
 static VAStatus va_DRI2GetDriverName (
     VADisplayContextP pDisplayContext,
@@ -139,7 +153,11 @@ static VAStatus va_DisplayContextGetDriverName (
 	*driver_name = NULL;
     else
         return VA_STATUS_ERROR_UNKNOWN;
-    
+
+#ifdef HAVE_VA_DRI3
+    vaStatus = va_DRI3GetDriverName(pDisplayContext, driver_name);
+    if (vaStatus != VA_STATUS_SUCCESS)
+#endif
     vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);

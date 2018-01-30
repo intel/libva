@@ -103,6 +103,9 @@ libva_x11_la_LDFLAGS		= $(LDADD)
 libva_x11_la_DEPENDENCIES	= libva.la x11/libva_x11.la
 libva_x11_la_LIBADD		= libva.la x11/libva_x11.la \
 	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(XFIXES_LIBS) $(DRM_LIBS) -ldl
+if USE_DRI3
+libva_x11_la_LIBADD		+= $(DRI3_LIBS) -ldl
+endif
 endif
 
 if USE_GLX
