@@ -46,7 +46,7 @@ VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va_vpp.h	\
 	$(NULL)
 
-VA_HTML_FOOTER		= va_footer.html
+VA_HTML_FOOTER		= $(top_srcdir)/doc/va_footer.html
 
 Doxyfile: Doxyfile.in $(VA_HEADER_FILES) $(VA_HTML_FOOTER)
 	$(AM_V_GEN) $(SED) 					\
