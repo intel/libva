@@ -31,7 +31,7 @@ source_c = \
 	va_wayland.c		\
 	va_wayland_drm.c	\
 	va_wayland_emgd.c	\
-	$(top_srcdir)/va/drm/va_drm_utils.c \
+	../drm/va_drm_utils.c 	\
 	$(NULL)
 
 source_h = \
