@@ -57,9 +57,11 @@ libva_lt_current = 100 * va_api_minor_version + va_api_micro_version + libva_int
 libva_lt_revision = libva_interface_age
 libva_lt_age = libva_binary_age - libva_interface_age
 
+libva_lt_current = libva_lt_current - libva_lt_age
+
 libva_lt_version = '@0@.@1@.@2@'.format(libva_lt_current,
-					libva_lt_revision,
-					libva_lt_age)
+					libva_lt_age,
+					libva_lt_revision)
 
 driverdir = get_option('driverdir')
 if driverdir == ''
