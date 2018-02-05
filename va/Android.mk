@@ -94,4 +94,8 @@ LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libva libdrm
 
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 27; echo $$?), 0)
+LOCAL_SHARED_LIBRARIES += libnativewindow
+endif
+
 include $(BUILD_SHARED_LIBRARY)
