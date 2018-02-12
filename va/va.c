@@ -406,7 +406,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 { VA_MAJOR_VERSION, 2 },
                 { VA_MAJOR_VERSION, 1 },
                 { VA_MAJOR_VERSION, 0 },
-                { -1, }
+                { -1, -1}
             };
 
             for (i = 0; compatible_versions[i].major >= 0; i++) {
@@ -622,6 +622,26 @@ VAStatus vaSetDriverName(
         return vaStatus;
     }
 
+<<<<<<< HEAD
+=======
+    found = 0;
+    for (i = 0; i < (int)(sizeof(prefer_driver_list) / sizeof(char *)); i++) {
+        if (strlen(prefer_driver_list[i]) != strlen(driver_name))
+            continue;
+        if (!strncmp(prefer_driver_list[i], driver_name, strlen(driver_name))) {
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
+        va_errorMessage(dpy, "vaSetDriverName returns %s. Incorrect parameter\n",
+                         vaErrorStr(vaStatus));
+        return vaStatus;
+    }
+
+>>>>>>> e831a9c... Fix compilation warning (uninit and wrong type variables) for libva 2.0 master on Android O MR1
     override_driver_name = strdup(driver_name);
     if (!override_driver_name) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
@@ -943,7 +963,7 @@ va_impl_query_surface_attributes(
         { VASurfaceAttribMinHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMaxHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMemoryType,    VAGenericValueTypeInteger },
-        { VASurfaceAttribNone, }
+        { VASurfaceAttribNone,          VAGenericValueTypeInteger }
     };
 
     if (!out_attribs || !out_num_attribs_ptr)
