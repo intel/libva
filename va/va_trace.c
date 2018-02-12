@@ -185,7 +185,7 @@ struct va_trace {
 #define DPY2TRACECTX(dpy, context, buf_id)                                  \
     struct va_trace *pva_trace = NULL;                                      \
     struct trace_context *trace_ctx = NULL;                                 \
-    int ctx_id = context;                                                   \
+    VAContextID ctx_id = context;                                           \
                                                                             \
     pva_trace = (struct va_trace *)(((VADisplayContextP)dpy)->vatrace);     \
     if(!pva_trace)                                                          \
@@ -1135,7 +1135,7 @@ static void va_TraceSurfaceAttributes(
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
-                int j;
+                uint32_t j;
                 
                 va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
                 va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
@@ -4612,7 +4612,7 @@ va_TraceProcFilterParameterBuffer(
     unsigned int size;
     unsigned int num_elements;
     VAProcFilterParameterBufferBase *base_filter = NULL;
-    int i;
+    unsigned int i;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
@@ -4677,7 +4677,7 @@ va_TraceVAProcPipelineParameterBuffer(
 )
 {
     VAProcPipelineParameterBuffer *p = (VAProcPipelineParameterBuffer *)data;
-    int i;
+    uint32_t i;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 

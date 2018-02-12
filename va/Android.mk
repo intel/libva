@@ -47,7 +47,7 @@ LOCAL_CFLAGS_64 += \
 
 LOCAL_CFLAGS := \
 	$(if $(filter user,$(TARGET_BUILD_VARIANT)),,-DENABLE_VA_MESSAGING) \
-	-DLOG_TAG=\"libva\"
+	-DLOG_TAG=\"libva\" -Wno-unused-parameter
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
 LOCAL_COPY_HEADERS := \
