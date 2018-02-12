@@ -44,7 +44,7 @@ static const struct driver_name_map g_driver_name_map[] = {
     { "nouveau",    7, "nouveau"  }, // Mesa Gallium driver
     { "radeon",     6, "r600"     }, // Mesa Gallium driver
     { "amdgpu",     6, "radeonsi" }, // Mesa Gallium driver
-    { NULL, }
+    { NULL,         0, NULL }
 };
 
 /* Returns the VA driver name for the active display */
