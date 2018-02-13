@@ -210,6 +210,8 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_STATUS_ERROR_HW_BUSY	                0x00000022
 /** \brief An unsupported memory type was supplied. */
 #define VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE 0x00000024
+/** \brief Indicate allocated buffer size is not enough for input or output. */
+#define VA_STATUS_ERROR_NOT_ENOUGH_BUFFER       0x00000025
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /** De-interlacing flags for vaPutSurface() */
