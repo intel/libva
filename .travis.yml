@@ -16,6 +16,12 @@ env:
 before_install:
   - test "${TRAVIS_BRANCH}" != 'coverity_scan' -o "${TRAVIS_JOB_NUMBER##*.}" = '1' || exit 0
   - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - |
+     sudo systemctl stop apt-daily.service &&
+     sudo systemctl kill --kill-who=all apt-daily.service &&
+     while ! (systemctl list-units --all apt-daily.service | fgrep -q dead) ; do
+       sleep 1
+     done
   - pip install --user cpp-coveralls
   - sudo apt-get -qq update
   - sudo apt-get install -y build-essential
