@@ -1754,9 +1754,14 @@ typedef struct _VAEncPackedHeaderParameterBuffer {
     uint32_t                bit_length;
     /** \brief Flag: buffer contains start code emulation prevention bytes? */
     uint8_t               has_emulation_bytes;
+    /** \brief Minimum offset for emulation prevention bytes insertion,
+     * bytes before the offset will not include emulation prevention bytes.
+     * Taking effect when has_emulation_bytes is set to zero.
+     */
+    uint32_t                emulation_bytes_insertion_minimum_offset;
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VAEncPackedHeaderParameterBuffer;
 
 /**
