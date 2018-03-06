@@ -3917,6 +3917,25 @@ VAStatus vaQuerySurfaceError(
  */
 #define VA_FOURCC_IYUV          0x56555949
 
+/**variant mean each pixel value(for example P10 is 10bit) is divided
+ * to two parts, simply take the address of the MSB and add pitch/2 to
+ * current x to find the compliment LSB byte, can safe memory
+ * for example: P10Variant format is a variational P10 format。P10 foramt is
+ * bit 15 14 13 12 11 10 09 08 07 06 xx xx xx xx xx xx 15 14 13 12 11 ...
+ * P10 variant format will be
+ * bit 15 14 13 12 11 10 09 08 15 14 13 12 11 10 09 08 ... 07 06 07 06 07 06...
+ * it also be same as other variant format(YUV2 ,AYUV, Y210,Y410 format)
+*/
+/** P010 variant format*/
+#define VA_FOURCC_P10V          0x56303150
+/** YUY2 variant format*/
+#define VA_FOURCC_YY2V          0x56325959
+/** AYUV variant format*/
+#define VA_FOURCC_AUVV          0x56565541
+/** Y210 variant format */
+#define VA_FOURCC_Y10V          0x56303159
+/** Y410 variant format */
+#define VA_FOURCC_Y41V          0x56313459
 /* byte order */
 #define VA_LSB_FIRST		1
 #define VA_MSB_FIRST		2
