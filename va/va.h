@@ -375,7 +375,16 @@ typedef enum
     VAProfileVP9Profile0                = 19,
     VAProfileVP9Profile1                = 20,
     VAProfileVP9Profile2                = 21,
-    VAProfileVP9Profile3                = 22
+    VAProfileVP9Profile3                = 22,
+    VAProfileHEVCMain12                 = 23,
+    VAProfileHEVCMain422_10             = 24,
+    VAProfileHEVCMain422_12             = 25,
+    VAProfileHEVCMain444                = 26,
+    VAProfileHEVCMain444_10             = 27,
+    VAProfileHEVCMain444_12             = 28,
+    VAProfileHEVCSccMain                = 29,
+    VAProfileHEVCSccMain10              = 30,
+    VAProfileHEVCSccMain444             = 31
 } VAProfile;
 
 /**
