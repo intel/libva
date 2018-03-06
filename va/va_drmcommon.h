@@ -92,7 +92,7 @@ struct drm_state {
  *
  * This can currently only be used for export.
  *
- * For export, call vaAcquireSurfaceHandle() with mem_type set to
+ * For export, call vaExportSurfaceHandle() with mem_type set to
  * VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 and pass a pointer to an
  * instance of this structure to fill.
  * If VA_EXPORT_SURFACE_SEPARATE_LAYERS is specified on export, each
