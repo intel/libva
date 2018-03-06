@@ -195,6 +195,166 @@ typedef struct  _VAPictureParameterBufferHEVC
 } VAPictureParameterBufferHEVC;
 
 /**
+ * \brief HEVC Decoding Picture Parameter Buffer Structure for Range Extension
+ *
+ * This structure conveys picture level HEVC Range Extension parameters
+ * and should be sent once per frame. This data structure should be sent
+ * together with VAPictureParameterBufferHEVC in a single buffer of
+ * \ref VAPictureParameterBufferHEVCExtension since each frame
+ * of HEVC range extension contains both picture level parameters and picture
+ * level range extension parameters. They should be parsed together. The buffer
+ * type is same as \ref VAPictureParameterBufferHEVC.
+ *
+ */
+typedef struct  _VAPictureParameterBufferHEVCRext
+{
+    union
+    {
+        struct
+        {
+            /** \brief HEVC range extension flags
+             *  The following flags bears the same syntax and semantics as
+             *  those defined in HEVC bit stream spec.
+             */
+            uint32_t        transform_skip_rotation_enabled_flag        : 1;
+            uint32_t        transform_skip_context_enabled_flag         : 1;
+            uint32_t        implicit_rdpcm_enabled_flag                 : 1;
+            uint32_t        explicit_rdpcm_enabled_flag                 : 1;
+            uint32_t        extended_precision_processing_flag          : 1;
+            uint32_t        intra_smoothing_disabled_flag               : 1;
+            uint32_t        high_precision_offsets_enabled_flag         : 1;
+            uint32_t        persistent_rice_adaptation_enabled_flag     : 1;
+            uint32_t        cabac_bypass_alignment_enabled_flag         : 1;
+            uint32_t        cross_component_prediction_enabled_flag     : 1;
+            uint32_t        chroma_qp_offset_list_enabled_flag          : 1;
+
+            /** \brief Reserved bytes for future use, must be zero */
+            uint32_t        reserved                                    : 21;
+        } bits;
+        uint32_t            value;
+    } range_extension_pic_fields;
+
+    /** \brief HEVC range extension flags
+     *  The following flags bears the same syntax and semantics as
+     *  those defined in HEVC bit stream spec.
+     */
+    uint8_t                 diff_cu_chroma_qp_offset_depth;
+    uint8_t                 chroma_qp_offset_list_len_minus1;
+    uint8_t                 log2_sao_offset_scale_luma;
+    uint8_t                 log2_sao_offset_scale_chroma;
+    uint8_t                 log2_max_transform_skip_block_size_minus2;
+    int8_t                  cb_qp_offset_list[6];
+    int8_t                  cr_qp_offset_list[6];
+} VAPictureParameterBufferHEVCRext;
+
+/**
+ *\brief HEVC Decoding Picture Parameter Buffer Structure for
+ *Screen Content extension
+ *
+ *This structure conveys picture level HEVC Scc parameters
+ *and should be sent once per frame. This data structure should be sent
+ *together with VAPictureParameterBufferHEVC and VAPictureParameterBufferHEVCRext
+ *in a single buffer of \ref VAPictureParameterBufferHEVCExtension since each
+ *frame of HEVC SCC contains picture level parameters, picture level range
+ *extension parameters and picture level Scc parameters. They should be parsed
+ *together and the buffer type is same as \ref VAPictureParameterBufferHEVC.
+ *
+ */
+typedef struct  _VAPictureParameterBufferHEVCScc
+{
+    union
+    {
+        struct
+        {
+            /** \brief HEVC Scc extension flags
+             *  The following flags bears the same syntax and semantics as
+             *  those defined in HEVC bit stream spec.
+             */
+            /*  indicates if intra block copy (IBC) is enabled or not. */
+            uint32_t        pps_curr_pic_ref_enabled_flag                   : 1;
+            /*  indicates if Palette Mode is enabled or not. */
+            uint32_t        palette_mode_enabled_flag                       : 1;
+            /*  controls the presence and inference of the use_integer_mv_flag syntax
+             *  in slice segment header that specifies the resolution of motion
+             *  vectors for inter prediction.
+             */
+            uint32_t        motion_vector_resolution_control_idc            : 2;
+            /*  specifies that the intra boundary filtering process is
+             *  disabled or not for intra prediction.
+             */
+            uint32_t        intra_boundary_filtering_disabled_flag          : 1;
+            /*  specifies that an adaptive colour transform may be applied
+             *  to the residual in the decoding process.
+             */
+            uint32_t        residual_adaptive_colour_transform_enabled_flag : 1;
+
+            /* specifies that slice_act_y_qp_offset, slice_act_cb_qp_offset,
+             * slice_act_cr_qp_offset are present in the slice header
+             */
+            uint32_t        pps_slice_act_qp_offsets_present_flag           : 1;
+
+            /** \brief Reserved bytes for future use, must be zero */
+            uint32_t        reserved                                        : 25;
+        } bits;
+        uint32_t            value;
+    } screen_content_pic_fields;
+
+    /*  specifies the maximum allowed palette size. */
+    uint8_t                 palette_max_size;
+    /*  Correspond to HEVC syntax elements of the same names.
+     *  It specifies the difference between the maximum allowed palette
+     *  predictor size and the maximum allowed palette size.
+     *  App needs to enforce that the variable PaletteMaxPredictorSize,
+     *  which is derived as follows:
+     *  PaletteMaxPredictorSize = palette_max_size + delta_palette_max_predictor_size
+     *  should have a value range of [0..128].
+     */
+    uint8_t                 delta_palette_max_predictor_size;
+    /** \brief Size of initial palette predictor.
+     *  It is derived from pps_num_palette_predictor_initializer or
+     *  sps_num_palette_predictor_initializer_minus1.
+     *  Details in HEVC SCC spec section 9.3.2.3.
+     */
+    uint8_t                 predictor_palette_size;
+    /** \brief Palette predictor initializer.
+     *  It is derived from pps_palette_predictor_initializers[][]
+     *  or sps_palette_predictor_initializers[][].
+     *  Details in HEVC SCC spec section 9.3.2.3.
+     */
+    uint16_t                predictor_palette_entries[3][128];
+    /*  are used to determine the offsets that are applied to the
+     *  quantization parameter values for the luma, Cb and Cr
+     *  components, respectively.
+     */
+    int8_t                  pps_act_y_qp_offset_plus5;
+    int8_t                  pps_act_cb_qp_offset_plus5;
+    int8_t                  pps_act_cr_qp_offset_plus3;
+} VAPictureParameterBufferHEVCScc;
+
+/**
+ * \brief HEVC Decoding Picture Parameter Buffer Structure including Extensions
+ *
+ * This structure conveys picture level HEVC parameters including basic version 1
+ * and range extension and screen content extension.
+ * The data buffer should be sent once per frame.
+ *
+ */
+typedef struct  _VAPictureParameterBufferHEVCExtension
+{
+    /** \brief basic HEVC picture parameters data structure
+     */
+    VAPictureParameterBufferHEVC           base;
+
+    /** \brief HEVC range extension picture parameters data structure
+     */
+    VAPictureParameterBufferHEVCRext       rext;
+
+    /** \brief HEVC screen content picture parameters data structure
+     */
+    VAPictureParameterBufferHEVCScc        scc;
+} VAPictureParameterBufferHEVCExtension;
+
+/**
  * \brief HEVC Slice Parameter Buffer Structure For Long Format
  *
  * VASliceParameterBufferHEVC structure should be accompanied by a
@@ -327,7 +487,79 @@ typedef struct  _VASliceParameterBufferHEVC
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VASliceParameterBufferHEVC;
 
+/**
+ * \brief HEVC Extented Slice Parameter Buffer Structure For Long Format
+ *
+ * This data structure contains extension profiles (range extension and screen content).
+ *
+ * VASliceParameterBufferHEVCRext structure should be accompanied by a
+ * slice data buffer, which holds the whole raw slice NAL unit bit streams
+ * including start code prefix and emulation prevention bytes not removed.
+ *
+ * This structure conveys parameters related to slice segment header and should
+ * be sent once per slice with VASliceParameterBufferHEVC in a single buffer of
+ * \ref VASliceParameterBufferHEVCExtension and the buffer type is same as \ref
+ * VASliceParameterBufferHEVC.
+ *
+ * For short format, this data structure is not sent by application.
+ *
+ */
+typedef struct  _VASliceParameterBufferHEVCRext
+{
+    /* below four parameters are used to replace data types of the
+     * corresponding parameters of those in \# VASliceParameterBufferHEVC.
+     */
+    int16_t                 luma_offset_l0[15];
+    int16_t                 ChromaOffsetL0[15][2];
+    int16_t                 luma_offset_l1[15];
+    int16_t                 ChromaOffsetL1[15][2];
 
+    union
+    {
+        struct
+        {
+            uint32_t        cu_chroma_qp_offset_enabled_flag    : 1;
+            uint32_t        use_integer_mv_flag                 : 1;
+            /** \brief Reserved bytes for future use, must be zero */
+            uint32_t        reserved                            : 30;
+        } bits;
+        uint32_t            value;
+    } slice_ext_flags;
+
+    /** \brief Screen Content Extension parameters.
+     *  data range [-12..12]
+     */
+    int8_t                  slice_act_y_qp_offset;
+    int8_t                  slice_act_cb_qp_offset;
+    int8_t                  slice_act_cr_qp_offset;
+} VASliceParameterBufferHEVCRext;
+
+/**
+ * \brief HEVC Decoding Slice Parameter Buffer Structure For Long Format including Extensions
+ *
+ * This data structure contains both baseline HEVC profiles (main, main10)
+ * and extension profiles (range extension and screen content).
+ *
+ * VASliceParameterBufferHEVCExtension structure should be accompanied by a
+ * slice data buffer, which holds the whole raw slice NAL unit bit streams
+ * including start code prefix and emulation prevention bytes not removed.
+ *
+ * This structure conveys parameters related to slice segment header and should
+ * be sent once per slice. For HEVC range extension and HEVC Scc decoding,
+ * application should parse both basic slice parameters and extented slice
+ * parameters into this buffer structure and sent it. 
+ *
+ * For short format, this data structure is not sent by application.
+ *
+ */
+typedef struct  _VASliceParameterBufferHEVCExtension
+{
+    /** \brief baseline HEVC slice parameters data structure */
+    VASliceParameterBufferHEVC               base;
+
+    /** \brief extented HEVC slice parameters data structure */
+    VASliceParameterBufferHEVCRext           rext;
+} VASliceParameterBufferHEVCExtension;
 
 /**
  * \brief HEVC Inverse Quantization Matrix Buffer Structure
