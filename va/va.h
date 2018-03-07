@@ -1321,6 +1321,9 @@ typedef struct _VASurfaceAttribExternalBuffers {
 #define VA_SURFACE_ATTRIB_USAGE_HINT_VPP_WRITE 	0x00000008
 /** \brief Surface used for display. */
 #define VA_SURFACE_ATTRIB_USAGE_HINT_DISPLAY 	0x00000010
+/** \brief Surface used for export to third-party APIs, e.g. via
+ *  vaExportSurfaceHandle(). */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT 	0x00000020
 
 /**@}*/
 
