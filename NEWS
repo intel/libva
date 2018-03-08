@@ -1,5 +1,20 @@
-libva NEWS -- summary of user visible changes.  2017-10-21
-Copyright (C) 2009-2017 Intel Corporation
+libva NEWS -- summary of user visible changes.  2018-02-12
+Copyright (C) 2009-2018 Intel Corporation
+
+Version 2.1.0 - 12.Feb.2018
+* Bump VA-API version to 1.1.0 and libva to 2.1.0
+* Add API for multi-frame processing
+* Add entrypoint VAEntrypointStats for Statistics
+* Add data structures for HEVC FEI support
+* Add new attributes for decoding/encoding/video processing
+* Add new VPP filter for Total Color Correction
+* Add blending interface in VPP
+* Add rotation interface in VPP
+* Add mirroring interface in VPP
+* Add Chroma siting flags in VPP
+* Add new color standard definitions
+* Add new interface for exporting surface
+* Add message callbacks for drivers to use
 
 Version 2.0.0 - 21.Oct.2017
 * Bump VA-API version to 1.0.0 and libva to 2.0.0
