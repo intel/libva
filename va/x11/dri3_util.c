@@ -45,6 +45,32 @@ va_dri3_createPixmap(VADriverContextP ctx, Drawable draw,
                                  stride, size);
 }
 
+void
+va_dri3_presentPixmap(VADriverContextP ctx,
+                      Drawable draw,
+                      Pixmap pixmap,
+                      unsigned int serial,
+                      xcb_xfixes_region_t valid,
+                      xcb_xfixes_region_t update,
+                      unsigned short int x_off,
+                      unsigned short int y_off,
+                      xcb_randr_crtc_t target_crtc,
+                      xcb_sync_fence_t wait_fence,
+                      xcb_sync_fence_t idle_fence,
+                      unsigned int options,
+                      unsigned long int target_msc,
+                      unsigned long int divisor,
+                      unsigned long int  remainder,
+                      unsigned int notifies_len,
+                      const xcb_present_notify_t *notifies)
+{
+    VA_DRI3_present_pixmap(ctx->native_dpy, draw,
+                           pixmap, serial, valid, update,
+                           x_off, y_off, target_crtc, wait_fence,
+                           idle_fence, options, target_msc, divisor,
+                           remainder, notifies_len, notifies);
+}
+
 int
 va_dri3_create_fence(VADriverContextP ctx, Pixmap pixmap,
                      struct dri3_fence *fence)

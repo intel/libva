@@ -43,5 +43,22 @@ int
 VA_DRI3_create_fence(Display *dpy, Pixmap pixmap, struct dri3_fence *fence);
 void VA_DRI3_fence_sync(Display *dpy, struct dri3_fence *fence);
 void VA_DRI3_fence_free(Display *dpy, struct dri3_fence *fence);
-
+void
+VA_DRI3_present_pixmap(Display *dpy,
+                       xcb_window_t window,
+                       xcb_pixmap_t pixmap,
+                       unsigned int serial,
+                       xcb_xfixes_region_t valid,
+                       xcb_xfixes_region_t update,
+                       unsigned short int x_off,
+                       unsigned short int y_off,
+                       xcb_randr_crtc_t target_crtc,
+                       xcb_sync_fence_t wait_fence,
+                       xcb_sync_fence_t idle_fence,
+                       unsigned int options,
+                       unsigned long int target_msc,
+                       unsigned long int divisor,
+                       unsigned long int  remainder,
+                       unsigned int notifies_len,
+                       const xcb_present_notify_t *notifies);
 #endif /* VA_DRI3_H */

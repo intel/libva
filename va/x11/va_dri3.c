@@ -65,6 +65,31 @@ int VA_DRI3_create_fd(Display *dpy, Pixmap pixmap, int *stride)
     return xcb_dri3_buffer_from_pixmap_reply_fds(c, reply)[0];
 }
 
+void
+VA_DRI3_present_pixmap(Display *dpy,
+                       xcb_window_t window,
+                       xcb_pixmap_t pixmap,
+                       unsigned int serial,
+                       xcb_xfixes_region_t valid,
+                       xcb_xfixes_region_t update,
+                       unsigned short int x_off,
+                       unsigned short int y_off,
+                       xcb_randr_crtc_t target_crtc,
+                       xcb_sync_fence_t wait_fence,
+                       xcb_sync_fence_t idle_fence,
+                       unsigned int options,
+                       unsigned long int target_msc,
+                       unsigned long int divisor,
+                       unsigned long int  remainder,
+                       unsigned int notifies_len,
+                       const xcb_present_notify_t *notifies)
+{
+    xcb_connection_t *c = XGetXCBConnection(dpy);
+    xcb_present_pixmap(c, window, pixmap, serial, valid, update, x_off,
+                       y_off, target_crtc, wait_fence, idle_fence, options,
+                       target_msc, divisor, remainder, notifies_len, notifies);
+}
+
 static void VA_DRI3_query_version(xcb_connection_t *c, int *major, int *minor)
 {
     xcb_dri3_query_version_reply_t *reply;
@@ -134,10 +159,30 @@ static int VA_DRI3_exists(xcb_connection_t *c)
     major = minor = -1;
 
     ext = xcb_get_extension_data(c, &xcb_dri3_id);
-    if (ext != NULL)
+
+    if (ext != NULL && ext->present)
         VA_DRI3_query_version(c, &major, &minor);
 
     return major >= 0;
+}
+
+static Bool VA_DRI3_has_present(Display *dpy)
+{
+    xcb_connection_t *c = XGetXCBConnection(dpy);
+    xcb_generic_error_t *error = NULL;
+    void *reply;
+
+    reply = xcb_present_query_version_reply(c,
+                                            xcb_present_query_version(c,
+                                                  XCB_PRESENT_MAJOR_VERSION,
+                                                  XCB_PRESENT_MINOR_VERSION),
+                                            &error);
+    if (reply == NULL)
+        return 0;
+
+    free(reply);
+    free(error);
+    return 1;
 }
 
 int VA_DRI3_open(Display *dpy, Window root, unsigned provider)
@@ -149,6 +194,9 @@ int VA_DRI3_open(Display *dpy, Window root, unsigned provider)
     if (!VA_DRI3_exists(c)) {
         return -1;
     }
+
+    if (!VA_DRI3_has_present(dpy))
+        return -1;
 
     cookie = xcb_dri3_open(c, root, provider);
     reply = xcb_dri3_open_reply(c, cookie, NULL);
