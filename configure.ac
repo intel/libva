@@ -249,8 +249,8 @@ if test "$USE_X11:$enable_dri3" = "no:yes"; then
 fi
 
 if test "$enable_dri3" != "no"; then
-    PKG_CHECK_MODULES([DRI3], [xcb x11-xcb xcb-dri3 xcb-sync xshmfence],
-[USE_DRI3="yes"], [:])
+    PKG_CHECK_MODULES([DRI3], [xcb x11-xcb xcb-dri3 xcb-sync  \
+       xshmfence xcb-present], [USE_DRI3="yes"], [:])
 
     if test "x$USE_DRI3" = "xno" -a "x$enable_dri3" = "xyes"; then
        AC_MSG_ERROR([VA/X11-dri3 explicitly enabled, however $DRI3_PKG_ERRORS])
