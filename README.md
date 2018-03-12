@@ -1,6 +1,6 @@
-[![Stories in Ready](https://badge.waffle.io/01org/libva.png?label=ready&title=Ready)](http://waffle.io/01org/libva)
-[![Build Status](https://travis-ci.org/01org/libva.svg?branch=master)](https://travis-ci.org/01org/libva)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/11605/badge.svg)](https://scan.coverity.com/projects/01org-libva)
+[![Stories in Ready](https://badge.waffle.io/intel/libva.png?label=ready&title=Ready)](http://waffle.io/intel/libva)
+[![Build Status](https://travis-ci.org/intel/libva.svg?branch=master)](https://travis-ci.org/intel/libva)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/11605/badge.svg)](https://scan.coverity.com/projects/intel-libva)
 
 # Libva Project
 
@@ -13,10 +13,10 @@ driver-specific acceleration backends for each supported hardware
 vendor.
 
 If you would like to contribute to libva, check our [Contributing
-guide](https://github.com/01org/libva/blob/master/CONTRIBUTING.md).
+guide](https://github.com/intel/libva/blob/master/CONTRIBUTING.md).
 
 We also recommend taking a look at the ['janitorial'
-bugs](https://github.com/01org/libva/issues?q=is%3Aopen+is%3Aissue+label%3AJanitorial)
+bugs](https://github.com/intel/libva/issues?q=is%3Aopen+is%3Aissue+label%3AJanitorial)
 in our list of open issues as these bugs can be solved without an
 extensive knowledge of libva.
 
@@ -24,7 +24,7 @@ We would love to help you start contributing!
 
 Doxygen files are regularly updated through Github Pages and can
 be accessed directly through [github pages
-libva](http://01org.github.io/libva/)
+libva](http://intel.github.io/libva/)
 
 The libva development team can be reached via our [mailing
 list](https://lists.01.org/mailman/listinfo/intel-vaapi-media) and on IRC
