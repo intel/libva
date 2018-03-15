@@ -44,7 +44,7 @@ before_install:
 addons:
   coverity_scan:
     project:
-      name: "01org/libva"
+      name: "intel/libva"
       description: "Build submitted via Travis CI"
     notification_email: intel-media-security@lists.01.org
     build_command_prepend: "./autogen.sh; ./configure --prefix=/usr"
