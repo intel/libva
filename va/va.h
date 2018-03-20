@@ -3582,7 +3582,7 @@ VAStatus vaQuerySurfaceError(
 #define VA_FOURCC_444P          0x50343434
 #define VA_FOURCC_RGBP          0x50424752
 #define VA_FOURCC_BGRP          0x50524742
-#define VA_FOURCC_411R          0x52313134 /* rotated 411P */
+#define VA_FOURCC_411R          0x52313134 /* VA_FOURCC('4','1','1','R') */
 /**
  * Planar YUV 4:2:2.
  * 8-bit Y plane, followed by 8-bit 2x1 subsampled V and U planes
@@ -3598,6 +3598,11 @@ VAStatus vaQuerySurfaceError(
  * 10-bit Planar YUV 420 and occupy the lower 10-bit.
  */
 #define VA_FOURCC_I010          0x30313049
+
+/**
+ * 10-bit Pixel RGB formats.
+ */
+#define VA_FOURCC_A2R10G10B10   0x30335241 /* VA_FOURCC('A','R','3','0') */
 
 /* byte order */
 #define VA_LSB_FIRST		1
