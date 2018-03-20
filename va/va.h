@@ -86,7 +86,7 @@
 extern "C" {
 #endif
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__COVERITY__)
 #define va_deprecated __attribute__((deprecated))
 #if __GNUC__ >= 6
 #define va_deprecated_enum va_deprecated
