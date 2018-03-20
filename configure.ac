@@ -84,9 +84,9 @@ m4_define([wayland_api_version], [1.11.0])
 AC_PREREQ(2.57)
 AC_INIT([libva],
         [libva_version],
-        [https://github.com/01org/libva/issues/new],
+        [https://github.com/intel/libva/issues/new],
         [libva],
-        [https://github.com/01org/libva])
+        [https://github.com/intel/libva])
 
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_MACRO_DIR([m4])
