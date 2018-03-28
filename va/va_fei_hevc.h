@@ -165,7 +165,10 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
     uint32_t      search_window             : 8;
     /** \brief number of internal MV predictors for IME searches */
     uint32_t      max_num_ime_search_center : 3;
-    uint32_t      reserved2                 : 5;
+    /** \brief fast intra prediction enabling bit. It is used as a trade-off between speed and quality.
+     *  The flag will be ignored if it's unsupported in the driver*/
+    uint32_t      fast_intra_mode           : 1;
+    uint32_t      reserved2                 : 4;
 
     /** \brief specifies number of splits that encoder could be run concurrently
      * 1: level 1, default value
