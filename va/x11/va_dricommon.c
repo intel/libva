@@ -90,6 +90,7 @@ va_dri_free_drawable(VADriverContextP ctx, struct dri_drawable* dri_drawable)
 	if (dri_drawable == dri_state->drawable_hash[i]) {
 	    dri_state->destroyDrawable(ctx, dri_drawable);
 	    dri_state->drawable_hash[i] = NULL;
+	    return;
 	}
 	i++;
     }
