@@ -3564,63 +3564,223 @@ VAStatus vaQuerySurfaceError(
     ((unsigned long)(unsigned char) (ch0) | ((unsigned long)(unsigned char) (ch1) << 8) | \
     ((unsigned long)(unsigned char) (ch2) << 16) | ((unsigned long)(unsigned char) (ch3) << 24 ))
 
-/* 
- * Pre-defined fourcc codes
+/* Pre-defined fourcc codes. */
+
+/** NV12: two-plane 8-bit YUV 4:2:0.
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
  */
 #define VA_FOURCC_NV12		0x3231564E
+/** NV21: two-plane 8-bit YUV 4:2:0.
+ * Same as NV12, but with U and V swapped.
+ */
 #define VA_FOURCC_NV21		0x3132564E
-#define VA_FOURCC_AI44		0x34344149
-#define VA_FOURCC_RGBA		0x41424752
-#define VA_FOURCC_RGBX		0x58424752
-#define VA_FOURCC_BGRA		0x41524742
-#define VA_FOURCC_BGRX		0x58524742
-#define VA_FOURCC_ARGB		0x42475241
-#define VA_FOURCC_XRGB		0x42475258
-#define VA_FOURCC_ABGR          0x52474241
-#define VA_FOURCC_XBGR          0x52474258
-#define VA_FOURCC_UYVY          0x59565955
-#define VA_FOURCC_YUY2          0x32595559
-#define VA_FOURCC_AYUV          0x56555941
-#define VA_FOURCC_NV11          0x3131564e
-#define VA_FOURCC_YV12          0x32315659
-#define VA_FOURCC_P208          0x38303250
-/* IYUV same as I420, but most user perfer I420, will deprecate it */
-#define VA_FOURCC_IYUV          0x56555949
-#define VA_FOURCC_I420          0x30323449
-#define VA_FOURCC_YV24          0x34325659
-#define VA_FOURCC_YV32          0x32335659
-#define VA_FOURCC_Y800          0x30303859
-#define VA_FOURCC_IMC3          0x33434D49
-#define VA_FOURCC_411P          0x50313134
-#define VA_FOURCC_422H          0x48323234
-#define VA_FOURCC_422V          0x56323234
-#define VA_FOURCC_444P          0x50343434
-#define VA_FOURCC_RGBP          0x50424752
-#define VA_FOURCC_BGRP          0x50524742
-#define VA_FOURCC_411R          0x52313134 /* rotated 411P */
-#define VA_FOURCC_RGB565        0x36314752 /* VA_FOURCC('R','G','1','6') */
-#define VA_FOURCC_BGR565        0x36314742 /* VA_FOURCC('B','G','1','6') */
 
+/** AI44: packed 4-bit YA.
+ *
+ * The bottom half of each byte contains luma, the top half contains alpha.
+ */
+#define VA_FOURCC_AI44		0x34344149
+
+/** RGBA: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: red, green, blue, alpha.
+ */
+#define VA_FOURCC_RGBA		0x41424752
+/** RGBX: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: red, green, blue, unspecified.
+ */
+#define VA_FOURCC_RGBX		0x58424752
+/** BGRA: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: blue, green, red, alpha.
+ */
+#define VA_FOURCC_BGRA		0x41524742
+/** BGRX: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: blue, green, red, unspecified.
+ */
+#define VA_FOURCC_BGRX		0x58524742
+/** ARGB: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: alpha, red, green, blue.
+ */
+#define VA_FOURCC_ARGB		0x42475241
+/** XRGB: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: unspecified, red, green, blue.
+ */
+#define VA_FOURCC_XRGB		0x42475258
+/** ABGR: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: alpha, blue, green, red.
+ */
+#define VA_FOURCC_ABGR          0x52474241
+/** XBGR: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: unspecified, blue, green, red.
+ */
+#define VA_FOURCC_XBGR          0x52474258
+
+/** UYUV: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: U, Y, U, V.
+ */
+#define VA_FOURCC_UYVY          0x59565955
+/** YUY2: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: Y, U, Y, V.
+ */
+#define VA_FOURCC_YUY2          0x32595559
+/** AYUV: packed 8-bit YUVA 4:4:4.
+ *
+ * Four bytes per pixel: A, Y, U, V.
+ */
+#define VA_FOURCC_AYUV          0x56555941
+/** NV11: two-plane 8-bit YUV 4:1:1.
+ *
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
+ */
+#define VA_FOURCC_NV11          0x3131564e
+/** YV12: three-plane 8-bit YUV 4:2:0.
+ *
+ * The three planes contain Y, V and U respectively.
+ */
+#define VA_FOURCC_YV12          0x32315659
+/** P208: two-plane 8-bit YUV 4:2:2.
+ *
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
+ */
+#define VA_FOURCC_P208          0x38303250
+/** I420: three-plane 8-bit YUV 4:2:0.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_I420          0x30323449
+/** YV24: three-plane 8-bit YUV 4:4:4.
+ *
+ * The three planes contain Y, V and U respectively.
+ */
+#define VA_FOURCC_YV24          0x34325659
+/** YV32: four-plane 8-bit YUVA 4:4:4
+ *
+ * The four planes contain Y, V, U and A respectively.
+ */
+#define VA_FOURCC_YV32          0x32335659
+/** Y800: 8-bit greyscale.
+ */
+#define VA_FOURCC_Y800          0x30303859
+/** IMC3: three-plane 8-bit YUV 4:2:0.
+ *
+ * Equivalent to YV12, but with the additional constraint that the pitch of all three planes
+ * must be the same.
+ */
+#define VA_FOURCC_IMC3          0x33434D49
+/** 411P: three-plane 8-bit YUV 4:1:1.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_411P          0x50313134
+/** 411R: three-plane 8-bit YUV.
+ *
+ * The subsampling is the transpose of 4:1:1 - full chroma appears on every fourth line.
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_411R          0x52313134
+/** 422H: three-plane 8-bit YUV 4:2:2.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_422H          0x48323234
+/** 422V: three-plane 8-bit YUV 4:4:0.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_422V          0x56323234
+/** 444P: three-plane 8-bit YUV 4:4:4.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_444P          0x50343434
+
+/** RGBP: three-plane 8-bit RGB.
+ *
+ * The three planes contain red, green and blue respectively.
+ */
+#define VA_FOURCC_RGBP          0x50424752
+/** BGRP: three-plane 8-bit RGB.
+ *
+ * The three planes contain blue, green and red respectively.
+ */
+#define VA_FOURCC_BGRP          0x50524742
+/** RG16: packed 5/6-bit RGB.
+ *
+ * Each pixel is a two-byte little-endian value.
+ * Red, green and blue are found in bits 15:11, 10:5, 4:0 respectively.
+ */
+#define VA_FOURCC_RGB565        0x36314752
+/** BG16: packed 5/6-bit RGB.
+ *
+ * Each pixel is a two-byte little-endian value.
+ * Blue, green and red are found in bits 15:11, 10:5, 4:0 respectively.
+ */
+#define VA_FOURCC_BGR565        0x36314742
+
+/** Y210: packed 10-bit YUV 4:2:2.
+ *
+ * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value,
+ * with the bottom six bits ignored.  The samples are in the order Y, U, Y, V.
+ */
 #define VA_FOURCC_Y210          0x30313259
+/** Y216: packed 16-bit YUV 4:2:2.
+ *
+ * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value.
+ * The samples are in the order Y, U, Y, V.
+ */
 #define VA_FOURCC_Y216          0x36313259
+/** Y410: packed 10-bit YUVA 4:4:4.
+ *
+ * Each pixel is a four-byte little-endian value.
+ * A, V, Y, U are found in bits 31:30, 29:20, 19:10, 9:0 respectively.
+ */
 #define VA_FOURCC_Y410          0x30313459
+/** Y416: packed 16-bit YUVA 4:4:4.
+ *
+ * Each pixel is a set of four samples, each of which is a two-byte little-endian value.
+ * The samples are in the order A, V, Y, U.
+ */
 #define VA_FOURCC_Y416          0x36313459
 
-/**
- * Planar YUV 4:2:2.
- * 8-bit Y plane, followed by 8-bit 2x1 subsampled V and U planes
+/** YV16: three-plane 8-bit YUV 4:2:2.
+ *
+ * The three planes contain Y, V and U respectively.
  */
 #define VA_FOURCC_YV16          0x36315659
-/**
- * 10-bit and 16-bit Planar YUV 4:2:0. 
+/** P010: two-plane 10-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value with the bottom six bits ignored.
+ * The first plane contains Y, the second plane contains U and V in pairs of samples.
  */
 #define VA_FOURCC_P010          0x30313050
+/** P016: two-plane 16-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value.  The first plane contains Y, the second
+ * plane contains U and V in pairs of samples.
+ */
 #define VA_FOURCC_P016          0x36313050
 
-/**
- * 10-bit Planar YUV 420 and occupy the lower 10-bit.
+/** I010: three-plane 10-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value with the top six bits ignored.
+ * The three planes contain Y, V and U respectively.
  */
 #define VA_FOURCC_I010          0x30313049
+
+/** IYUV: three-plane 8-bit YUV 4:2:0.
+ *
+ * @deprecated Use I420 instead.
+ */
+#define VA_FOURCC_IYUV          0x56555949
 
 /* byte order */
 #define VA_LSB_FIRST		1
