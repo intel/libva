@@ -771,6 +771,11 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_YUV411	0x00000008	///< YUV 4:1:1 8-bit.
 #define VA_RT_FORMAT_YUV400	0x00000010	///< Greyscale 8-bit.
 #define VA_RT_FORMAT_YUV420_10	0x00000100	///< YUV 4:2:0 10-bit.
+#define VA_RT_FORMAT_YUV422_10	0x00000200	///< YUV 4:2:2 10-bit.
+#define VA_RT_FORMAT_YUV444_10	0x00000400	///< YUV 4:4:4 10-bit.
+#define VA_RT_FORMAT_YUV420_12	0x00001000	///< YUV 4:2:0 12-bit.
+#define VA_RT_FORMAT_YUV422_12	0x00002000	///< YUV 4:2:2 12-bit.
+#define VA_RT_FORMAT_YUV444_12	0x00004000	///< YUV 4:4:4 12-bit.
 
 #define VA_RT_FORMAT_RGB16	0x00010000	///< Packed RGB, 16 bits per pixel.
 #define VA_RT_FORMAT_RGB32	0x00020000	///< Packed RGB, 32 bits per pixel, 8 bits per colour sample.
