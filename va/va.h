@@ -2028,10 +2028,33 @@ typedef struct _VAEncMiscParameterRIR
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterRIR;
 
+/** HRD / VBV buffering parameters for encoding.
+ *
+ * This sets the HRD / VBV parameters which will be used by the rate
+ * controller for encoding.  It should be specified in modes using a bitrate
+ * target when the buffering of the output stream needs to be constrained.
+ *
+ * If not provided, the encoder may use arbitrary amounts of buffering.
+ */
 typedef struct _VAEncMiscParameterHRD
 {
-    uint32_t initial_buffer_fullness;       /* in bits */
-    uint32_t buffer_size;                   /* in bits */
+    /** The initial fullness of the HRD coded picture buffer, in bits.
+     *
+     * This sets how full the CPB is when encoding begins - that is, how much
+     * buffering will happen on the decoder side before the first frame.
+     * The CPB fullness will be reset to this value after any rate control
+     * reset (a change in parameters or an explicit reset).
+     *
+     * For H.264, it should match the value of initial_cpb_removal_delay in
+     * buffering_period SEI messages.
+     */
+    uint32_t initial_buffer_fullness;
+    /** The HRD coded picture buffer size, in bits.
+     *
+     * For H.264, it should match the value of cpb_size_value_minus1 in the VUI
+     * parameters.
+     */
+    uint32_t buffer_size;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
