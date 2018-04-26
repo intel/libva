@@ -1822,37 +1822,70 @@ typedef struct _VAEncMiscParameterTemporalLayerStructure
 /** \brief Rate control parameters */
 typedef struct _VAEncMiscParameterRateControl
 {
-    /* this is the maximum bit-rate to be constrained by the rate control implementation */
+    /** The maximum bit-rate which the the rate controller should generate. */
     uint32_t bits_per_second;
-    /* this is the bit-rate the rate control is targeting, as a percentage of the maximum
-     * bit-rate for example if target_percentage is 95 then the rate control will target
-     * a bit-rate that is 95% of the maximum bit-rate
+    /** The target bit-rate which the rate controller should generate, as a percentage of the
+     * maximum bit-rate.
+     *
+     * In CBR mode this value is ignored (treated as 100%).
      */
     uint32_t target_percentage;
-    /* windows size in milliseconds. For example if this is set to 500,
-     * then the rate control will guarantee the target bit-rate over a 500 ms window
+    /** Rate control window size in milliseconds.
+     *
+     * The rate controller will attempt to guarantee that the target and maximum bit-rates are
+     * correct over this window.
      */
     uint32_t window_size;
-    /* initial QP at I frames */
+    /** Initial quantiser value used at the start of the stream.
+     *
+     * Ignored if set to zero.
+     */
     uint32_t initial_qp;
+    /** Minimum quantiser value to use.
+     *
+     * The quantiser will not go below the value - if this limit is hit, the output bitrate may
+     * be lower than the target.  Ignored if set to zero.
+     */
     uint32_t min_qp;
+    /** Basic unit size.
+     *
+     * Only used by some drivers - see driver documentation for details.  Set to zero if unused.
+     */
     uint32_t basic_unit_size;
     union
     {
         struct
         {
-            uint32_t reset : 1;
-            uint32_t disable_frame_skip : 1; /* Disable frame skip in rate control mode */
-            uint32_t disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
-            uint32_t mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
-            /*
-             * The temporal layer that the rate control parameters are specified for.
+            /** Force rate controller reset.
+             *
+             * The next frame will be treated as the start of a new stream, with all rate
+             * controller state reset to its initial values.
              */
+            uint32_t reset : 1;
+            /** Disable frame skip in rate control mode. */
+            uint32_t disable_frame_skip : 1;
+            /** Disable bit stuffing in rate control mode. */
+            uint32_t disable_bit_stuffing : 1;
+            /** Macroblock-level rate control.
+             *
+             * 0: use default, 1: always enable, 2: always disable, other: reserved.
+             *
+             * This feature is only available if VAConfigAttribRateControl has the
+             * \ref VA_RC_MB bit set.
+             */
+            uint32_t mb_rate_control : 4;
+            /** The temporal layer that these rate control parameters apply to. */
             uint32_t temporal_id : 8;
-            uint32_t cfs_I_frames : 1; /* I frame also follows CFS */
+            /** Ensure that intra frames also conform to the constant frame size. */
+            uint32_t cfs_I_frames : 1;
+            /** Enable parallel rate control for hierarchical B frames.
+             *
+             * See \ref VA_RC_PARALLEL.
+             */
             uint32_t enable_parallel_brc    : 1;
             uint32_t enable_dynamic_scaling : 1;
-             /**  \brief Frame Tolerance Mode
+            /** Frame tolerance mode.
+             *
              *  Indicates the tolerance the application has to variations in the frame size.
              *  For example, wireless display scenarios may require very steady bit rate to
              *  reduce buffering time. It affects the rate control algorithm used,
@@ -1866,13 +1899,23 @@ typedef struct _VAEncMiscParameterRateControl
              *  other       -- invalid.
              */
             uint32_t frame_tolerance_mode   : 2;
+            /** Reserved for future use, must be zero. */
             uint32_t reserved               : 12;
         } bits;
         uint32_t value;
     } rc_flags;
-    uint32_t ICQ_quality_factor; /* Initial ICQ quality factor: 1-51. */
-    /** \brief Reserved bytes for future use, must be zero */
+    /** Initial quality factor used in ICQ mode.
+     *
+     * This value must be between 1 and 51.
+     */
+    uint32_t ICQ_quality_factor;
+    /** Maximum quantiser value to use.
+     *
+     * The quantiser will not go above this value - if this limit is hit, the output bitrate
+     * may exceed the target.  Ignored if set to zero.
+     */
     uint32_t max_qp;
+    /** Reserved bytes for future use, must be zero. */
     uint32_t va_reserved[VA_PADDING_MEDIUM - 2];
 } VAEncMiscParameterRateControl;
 
