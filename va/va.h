@@ -3600,7 +3600,6 @@ VAStatus vaQuerySurfaceError(
 
 #define VA_FOURCC_Y210          0x30313259
 #define VA_FOURCC_Y216          0x36313259
-#define VA_FOURCC_AYUV          0x56555941
 #define VA_FOURCC_Y410          0x30313459
 #define VA_FOURCC_Y416          0x36313459
 
