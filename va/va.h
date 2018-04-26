@@ -1919,9 +1919,16 @@ typedef struct _VAEncMiscParameterRateControl
     uint32_t va_reserved[VA_PADDING_MEDIUM - 2];
 } VAEncMiscParameterRateControl;
 
+/** Encode framerate parameters.
+ *
+ * Sets the encode framerate used by the rate controller.  This should be
+ * provided in all modes using a bitrate target (variable framerate is not
+ * supported).
+ */
 typedef struct _VAEncMiscParameterFrameRate
 {
-    /*
+    /** Encode framerate.
+     *
      * The framerate is specified as a number of frames per second, as a
      * fraction.  The denominator of the fraction is given in the top half
      * (the high two bytes) of the framerate field, and the numerator is
@@ -1944,10 +1951,9 @@ typedef struct _VAEncMiscParameterFrameRate
     {
         struct
         {
-            /*
-             * The temporal id the framerate parameters are specified for.
-             */
+            /** The temporal layer that these framerate parameters apply to. */
             uint32_t temporal_id : 8;
+            /** Reserved for future use, must be zero. */
             uint32_t reserved : 24;
          } bits;
          uint32_t value;
