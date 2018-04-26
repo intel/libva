@@ -763,26 +763,24 @@ typedef struct _VAConfigAttrib {
     uint32_t value; /* OR'd flags (bits) for this attribute */
 } VAConfigAttrib;
 
-/** attribute value for VAConfigAttribRTFormat */
-#define VA_RT_FORMAT_YUV420	0x00000001	
-#define VA_RT_FORMAT_YUV422	0x00000002
-#define VA_RT_FORMAT_YUV444	0x00000004
-#define VA_RT_FORMAT_YUV411	0x00000008
-#define VA_RT_FORMAT_YUV400	0x00000010
-/** YUV formats with more than 8 bpp */
-#define VA_RT_FORMAT_YUV420_10BPP	0x00000100
-/** RGB formats */
-#define VA_RT_FORMAT_RGB16	0x00010000
-#define VA_RT_FORMAT_RGB32	0x00020000
-/* RGBP covers RGBP and BGRP fourcc */ 
-#define VA_RT_FORMAT_RGBP	0x00100000
-/**
- * RGB 10-bit packed format with upper 2 bits as alpha channel.
- * The existing pre-defined fourcc codes can be used to signal
- * the position of each component for this RT format.
- */
-#define VA_RT_FORMAT_RGB32_10BPP 0x00200000
+/* Attribute values for VAConfigAttribRTFormat. */
+
+#define VA_RT_FORMAT_YUV420	0x00000001	///< YUV 4:2:0 8-bit.
+#define VA_RT_FORMAT_YUV422	0x00000002	///< YUV 4:2:2 8-bit.
+#define VA_RT_FORMAT_YUV444	0x00000004	///< YUV 4:4:4 8-bit.
+#define VA_RT_FORMAT_YUV411	0x00000008	///< YUV 4:1:1 8-bit.
+#define VA_RT_FORMAT_YUV400	0x00000010	///< Greyscale 8-bit.
+#define VA_RT_FORMAT_YUV420_10	0x00000100	///< YUV 4:2:0 10-bit.
+
+#define VA_RT_FORMAT_RGB16	0x00010000	///< Packed RGB, 16 bits per pixel.
+#define VA_RT_FORMAT_RGB32	0x00020000	///< Packed RGB, 32 bits per pixel, 8 bits per colour sample.
+#define VA_RT_FORMAT_RGBP	0x00100000	///< Planar RGB, 8 bits per sample.
+#define VA_RT_FORMAT_RGB32_10	0x00200000	///< Packed RGB, 32 bits per pixel, 10 bits per colour sample.
+
 #define VA_RT_FORMAT_PROTECTED	0x80000000
+
+#define VA_RT_FORMAT_RGB32_10BPP	VA_RT_FORMAT_RGB32_10	///< @deprecated use VA_RT_FORMAT_RGB32_10 instead.
+#define VA_RT_FORMAT_YUV420_10BPP	VA_RT_FORMAT_YUV420_10	///< @deprecated use VA_RT_FORMAT_YUV420_10 instead.
 
 /** @name Attribute values for VAConfigAttribRateControl */
 /**@{*/
