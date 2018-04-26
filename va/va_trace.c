@@ -3179,7 +3179,7 @@ static void va_TraceVAEncMiscParameterBuffer(
         VAEncMiscParameterFrameRate *p = (VAEncMiscParameterFrameRate *)tmp->data;
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterFrameRate\n");
         va_TraceMsg(trace_ctx, "\tframerate = %d\n", p->framerate);
-        
+        va_TraceMsg(trace_ctx, "\tframerate_flags.temporal_id = %d\n", p->framerate_flags.bits.temporal_id);
         break;
     }
     case VAEncMiscParameterTypeRateControl:
@@ -3198,6 +3198,12 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\trc_flags.disable_bit_stuffing = %d\n", p->rc_flags.bits.disable_bit_stuffing);
         va_TraceMsg(trace_ctx, "\trc_flags.mb_rate_control = %d\n", p->rc_flags.bits.mb_rate_control);
         va_TraceMsg(trace_ctx, "\trc_flags.temporal_id = %d\n", p->rc_flags.bits.temporal_id);
+        va_TraceMsg(trace_ctx, "\trc_flags.cfs_I_frames = %d\n", p->rc_flags.bits.cfs_I_frames);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_parallel_brc = %d\n", p->rc_flags.bits.enable_parallel_brc);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_dynamic_scaling = %d\n", p->rc_flags.bits.enable_dynamic_scaling);
+        va_TraceMsg(trace_ctx, "\trc_flags.frame_tolerance_mode = %d\n", p->rc_flags.bits.frame_tolerance_mode);
+        va_TraceMsg(trace_ctx, "\tICQ_quality_factor = %d\n", p->ICQ_quality_factor);
+        va_TraceMsg(trace_ctx, "\tmax_qp = %d\n", p->max_qp);
         break;
     }
     case VAEncMiscParameterTypeMaxSliceSize:
