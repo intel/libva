@@ -748,6 +748,17 @@ typedef enum
      * support for QP info for buffer #VAEncQpBuffer.
      */
     VAConfigAttribQPBlockSize            = 37,
+    /**
+    * \brief Histogram reporting attribute. Read-only.
+    *
+    * This attribute conveys whether the driver supports reporting of
+    * decoded frame histogram, /c VAConfigAttribHistogram is used to specify supported
+    * hisogram information, zero means no histogram support.
+    * If it is supported, use /c VAHistogramBufferType,
+    * to get the histogram, use /c VAEncMiscParameterTypeHistogram /c VAEncMiscParameterHistorgram
+    * to set histogram parameters.
+    */
+    VAConfigAttribHistogram             = 38,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -980,6 +991,31 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_ENC_INTRA_REFRESH_MULTI_REF                  0x00040000
 
 /**@}*/
+/** @name Attribute values for VAConfigAttribHistogram channel. */
+/**@{*/
+typedef enum{
+    VAHistogramChannelNone = 0,
+    VAHistogramChannelY,
+    VAHistogramChannelU,
+    VAHistogramChannelV,
+    VAHistogramChannelR,
+    VAHistogramChannelG,
+    VAHistogramChannelB,
+    VAHistogramChannelA
+}VAHistogramChannelType;
+
+/** \brief Attribute value for VAConfigAttribHistogram */
+typedef union _VAConfigAttribValHistogram{
+    struct {
+        /** \brief bin count for given channel. */
+        uint32_t bin_count : 16;
+        /** \brief driver support channel */
+        uint32_t channel   : 8;
+        /** \brief frequence value size */
+        uint32_t reserved  : 8;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValHistogram;
 
 /** \brief Attribute value for VAConfigAttribEncROI */
 typedef union _VAConfigAttribValEncROI {
@@ -1668,6 +1704,8 @@ typedef enum
      */
     VASubsetsParameterBufferType        = 57,
 
+    /** decode histogram buffer, should be uint32_t for each value*/
+    VAHistogramBufferType               = 58,
     VABufferTypeMax
 } VABufferType;
 
@@ -1770,7 +1808,9 @@ typedef enum
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
     /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
-    VAEncMiscParameterTypeExtensionData = 19
+    VAEncMiscParameterTypeExtensionData = 19,
+    /** \brief decode histogram parameter buffer */
+    VAEncMiscParameterTypeHistogram = 20
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -2028,6 +2068,24 @@ typedef struct _VAEncMiscParameterAIR
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterAIR;
+
+/** brief HistogramBuffer structure for /c VAEncMiscParameterTypeHistogram */
+typedef struct _VAEncMiscParameterHistorgram {
+    /** \brief Histogram channel selection.
+     *  Application sets the request based on ConfigAttrib
+     *  results that driver reports.
+     */
+    uint32_t        channels;
+    /** \brief number of bins per channel */
+    uint32_t        bin_count;
+    /** \brief type VAHistogramBufferType , with size in /c VAConfigAttribHistogramBin x bin_count x channel number */
+    VABufferID      buf_id;
+    /** \brief bin data offset of current chanel, can use 1 bufferID to support multiple channel */
+    uint32_t        offset;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t        va_reserved[VA_PADDING_LOW];
+} VAEncMiscParameterHistorgram;
+
 
 /*
  * \brief Rolling intra refresh data structure for encoding.
