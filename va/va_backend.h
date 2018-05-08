@@ -197,8 +197,8 @@ struct VADriverVTable
 	VAStatus (*vaQuerySurfaceError) (
 		VADriverContextP ctx,
 		VASurfaceID render_target,
-                VAStatus error_status,
-                void **error_info /*out*/
+		VAStatus error_status,
+		void **error_info /*out*/
 	);
 
 	VAStatus (*vaPutSurface) (
@@ -486,8 +486,19 @@ struct VADriverVTable
             void               *descriptor      /* out */
         );
 
+        VAStatus (*vaQueryCenc) (
+            VADriverContextP ctx,
+            VABufferID buffer,
+            VACencStatusBuf *info/* out */
+        );
+
+        VAStatus (*vaEndCenc) (
+            VADriverContextP ctx,
+            VAContextID context
+        );
+
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[57];
+        unsigned long reserved[55];
 };
 
 struct VADriverContext

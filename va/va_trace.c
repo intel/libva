@@ -1661,6 +1661,10 @@ void va_TraceMapBuffer (
         va_TraceMsg(trace_ctx, "\t   status = 0x%08x\n", buf_list->status);
         va_TraceMsg(trace_ctx, "\t   reserved = 0x%08x\n", buf_list->reserved);
         va_TraceMsg(trace_ctx, "\t   buf = 0x%08x\n", buf_list->buf);
+        va_TraceMsg(trace_ctx, "\t   encryption_iv[0] = 0x%08x\n", buf_list->encryption_iv[0]);
+        va_TraceMsg(trace_ctx, "\t   encryption_iv[1] = 0x%08x\n", buf_list->encryption_iv[1]);
+        va_TraceMsg(trace_ctx, "\t   encryption_iv[2] = 0x%08x\n", buf_list->encryption_iv[2]);
+        va_TraceMsg(trace_ctx, "\t   encryption_iv[3] = 0x%08x\n", buf_list->encryption_iv[3]);
 
         if (trace_ctx->trace_fp_codedbuf) {
             va_TraceMsg(trace_ctx, "\tDump the content to file\n");
@@ -5013,6 +5017,41 @@ void va_TraceQuerySurfaceError(
     va_TraceMsg(trace_ctx, NULL);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceQueryCenc(
+    VADisplay dpy,
+    VABufferID buffer,
+    VACencStatusBuf *info/*in,out*/
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+    va_TraceMsg(trace_ctx, "\tsurface = 0x%08x\n", buffer);
+    if (info) {
+       va_TraceMsg(trace_ctx, "\t\tstatus = %d\n", info->status);
+       va_TraceMsg(trace_ctx, "\t\tbuf_size = %d\n", info->buf_size);
+       va_TraceMsg(trace_ctx, "\t\tslice_buf_type = %d\n", info->slice_buf_type);
+       va_TraceMsg(trace_ctx, "\t\tslice_buf_size= %d\n", info->slice_buf_size);
+    }
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceEndCenc(
+    VADisplay dpy,
+    VAContextID context
+)
+{
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
+
+    va_TraceMsg(trace_ctx, NULL);
 }
 
 void va_TraceMaxNumDisplayAttributes (

@@ -38,7 +38,8 @@ libva_source_c = \
 	$(NULL)
 
 libva_source_h = \
-	va.h			\
+	va.h			    \
+	va_cp.h			    \
 	va_backend.h		\
 	va_backend_vpp.h	\
 	va_compat.h		\

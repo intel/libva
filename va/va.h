@@ -129,6 +129,7 @@ extern "C" {
  * 	- \ref api_fei
  * 	- \ref api_fei_h264
  * 	- \ref api_fei_hevc
+ * - \ref api_cp
  */
 
 /**
@@ -1630,6 +1631,10 @@ typedef enum
     /** decode stream out buffer, intermedia data of decode, it may include MV, MB mode etc.
       * it can be used to detect motion and analyze the frame contain  */
     VADecodeStreamoutBufferType             = 56,
+    /**\brief encryption parameters buffer for content protection usage*/
+    VAEncryptionParameterBufferType = 57,
+    /**\brief CENC status paramter*/
+    VACencStatusParameterBufferType = 58,
     VABufferTypeMax
 } VABufferType;
 
@@ -3172,6 +3177,22 @@ VAStatus vaBufferSetNumElements (
 #define VA_CODED_BUF_STATUS_SINGLE_NALU                 0x10000000	
 
 /**
+ * \brief The coded buffer segment contains valid IV. 
+ *
+ * This flag indicates that the coded buffer segment contains
+ * valid enryption_iv[]. 
+ */
+#define VA_CODED_BUF_STATUS_VALID_IV               0x20000000	
+
+/**
+ * \brief The coded buffer segment contains valid IV. 
+ *
+ * This flag indicates that the coded buffer segment contains
+ * valid enryption_iv[]. 
+ */
+#define VA_CODED_BUF_STATUS_TEAR_DOWN              0x40000000	
+
+/**
  * \brief Coded buffer segment.
  *
  * #VACodedBufferSegment is an element of a linked list describing
@@ -3193,15 +3214,17 @@ typedef  struct _VACodedBufferSegment  {
     /** \brief Reserved for future use. */
     uint32_t        reserved;
     /** \brief Pointer to the start of the data buffer. */
-    void               *buf;
+    void            *buf;
     /**
      * \brief Pointer to the next #VACodedBufferSegment element,
      * or \c NULL if there is none.
      */
-    void               *next;
-
-    /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    void            *next;
+    /** 
+      *\brief IV or Counter for encrytion filled by driver.
+      * Only available when status is set with \c VA_CODED_BUF_STATUS_VALID_IV.
+      */ 
+    uint32_t        encryption_iv[4];
 } VACodedBufferSegment;
      
 /**
@@ -4209,6 +4232,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_fei.h>
 #include <va/va_fei_h264.h>
 #include <va/va_vpp.h>
+#include <va/va_cp.h>
 
 /**@}*/
 

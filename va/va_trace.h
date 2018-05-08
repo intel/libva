@@ -224,6 +224,17 @@ void va_TraceQuerySurfaceError(
 	void **error_info /*out*/
 );
 
+DLL_HIDDEN
+void va_TraceQueryCenc(
+    VADisplay dpy,
+    VABufferID buffer,
+    VACencStatusBuf *info/*out*/
+);
+
+void va_TraceEndCenc(
+    VADisplay dpy,
+    VAContextID context
+);
 
 DLL_HIDDEN
 void va_TraceMaxNumDisplayAttributes (

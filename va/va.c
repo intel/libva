@@ -1597,6 +1597,44 @@ VAStatus vaQuerySurfaceError (
   return va_status;
 }
 
+VAStatus vaQueryCenc(
+	VADisplay dpy,
+	VABufferID buffer,
+	VACencStatusBuf *info
+)
+{
+  VAStatus va_status;
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  va_status = ctx->vtable->vaQueryCenc( ctx, buffer, info );
+
+  VA_TRACE_LOG(va_TraceQueryCenc, dpy, buffer, info);
+
+  return va_status;
+}
+
+VAStatus vaEndCenc (
+    VADisplay dpy,
+    VAContextID context
+)
+{
+  VAStatus va_status = VA_STATUS_SUCCESS;
+  VADriverContextP ctx;
+
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
+
+  va_status = ctx->vtable->vaEndCenc( ctx, context );
+
+  /* dump surface content */
+  VA_TRACE_ALL(va_TraceEndCenc, dpy, context);
+
+  return va_status;
+}
 /* Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy

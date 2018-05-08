@@ -19,6 +19,7 @@ libva_sources = [
 
 libva_headers = [
   'va.h',
+  'va_cp.h',
   'va_backend.h',
   'va_backend_vpp.h',
   'va_compat.h',

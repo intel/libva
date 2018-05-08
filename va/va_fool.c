@@ -305,6 +305,10 @@ static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
     codedbuf->reserved = 0;
     codedbuf->buf = fool_ctx->segbuf_enc;
     codedbuf->next = NULL;
+    codedbuf->encryption_iv[0]= 0;
+    codedbuf->encryption_iv[1]= 0;
+    codedbuf->encryption_iv[2]= 0;
+    codedbuf->encryption_iv[3]= 0;
 
     return 0;
 }
@@ -337,6 +341,10 @@ static int va_FoolFillCodedBufJPG(VADisplay dpy, struct fool_context *fool_ctx)
     codedbuf->reserved = 0;
     codedbuf->buf = fool_ctx->segbuf_jpg;
     codedbuf->next = NULL;
+    codedbuf->encryption_iv[0]= 0;
+    codedbuf->encryption_iv[1]= 0;
+    codedbuf->encryption_iv[2]= 0;
+    codedbuf->encryption_iv[3]= 0;
 
     return 0;
 }
