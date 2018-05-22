@@ -820,6 +820,13 @@ typedef struct _VAConfigAttrib {
  *  simultaneously. And BRC would adjust accordingly. This is so called
  *  Parallel BRC. */
 #define VA_RC_PARALLEL                  0x00000200
+/** \brief Quality defined VBR
+ * Use Quality factor to determine the good enough QP for each MB such that
+ * good enough quality can be obtained without waste of bits
+ * for this BRC mode, you must set all legacy VBR parameters
+ * and reuse quality_factor in \c VAEncMiscParameterRateControl
+ * */
+#define VA_RC_QVBR                      0x00000400
 
 /**@}*/
 
@@ -1907,6 +1914,7 @@ typedef struct _VAEncMiscParameterRateControl
     /** Initial quality factor used in ICQ mode.
      *
      * This value must be between 1 and 51.
+     * this value will be deprecated in future, to use quality_factor instead of it.
      */
     uint32_t ICQ_quality_factor;
     /** Maximum quantiser value to use.
@@ -1915,8 +1923,13 @@ typedef struct _VAEncMiscParameterRateControl
      * may exceed the target.  Ignored if set to zero.
      */
     uint32_t max_qp;
+    /** Quality factor
+     *
+     *  the range will be different for different codec
+     */
+    uint32_t quality_factor;
     /** Reserved bytes for future use, must be zero. */
-    uint32_t va_reserved[VA_PADDING_MEDIUM - 2];
+    uint32_t va_reserved[VA_PADDING_MEDIUM - 3];
 } VAEncMiscParameterRateControl;
 
 /** Encode framerate parameters.
