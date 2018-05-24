@@ -486,8 +486,15 @@ struct VADriverVTable
             void               *descriptor      /* out */
         );
 
+        VAStatus
+        (*vaQueryOutputValue)(
+            VADriverContextP    ctx,
+            VAContextID         context,          /* in */
+            VAOutputValueTypes  output_value_type,/* in */
+            void                *output_value     /* out */
+        );
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[57];
+        unsigned long reserved[56];
 };
 
 struct VADriverContext

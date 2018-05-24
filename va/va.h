@@ -3625,6 +3625,24 @@ VAStatus vaQuerySurfaceError(
     void **error_info
 );
 
+/**out put value types, used by \vaQueryOutputValue */
+typedef enum
+{
+    VAOutputDecodeCRC = 1
+}VAOutputValueTypes;
+
+/**
+ * this interface is to get some values from driver or HW
+ * after calling vaSyncSurface, the value type is defined with \c VAOutputValueTypes
+ * the output_value should be a pointer allocated by application.
+ * it can be a single value or a structure.
+ */
+VAStatus vaQueryOutputValue(
+    VADisplay dpy,
+    VAContextID context,
+    VAOutputValueTypes output_value_type,
+    void *output_value);
+
 /**
  * Images and Subpictures
  * VAImage is used to either get the surface data to client memory, or 

@@ -1597,6 +1597,22 @@ VAStatus vaQuerySurfaceError (
   return va_status;
 }
 
+VAStatus vaQueryOutputValue(
+    VADisplay dpy,
+    VAContextID context,
+    VAOutputValueTypes output_value_type,
+    void *output_value)
+{
+  VAStatus va_status;
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  va_status = ctx->vtable->vaQueryOutputValue( ctx,context,output_value_type, output_value );
+
+  return va_status;
+}
+
 /* Get maximum number of image formats supported by the implementation */
 int vaMaxNumImageFormats (
     VADisplay dpy
