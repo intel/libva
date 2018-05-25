@@ -1640,6 +1640,19 @@ typedef enum
     /** decode stream out buffer, intermedia data of decode, it may include MV, MB mode etc.
       * it can be used to detect motion and analyze the frame contain  */
     VADecodeStreamoutBufferType             = 56,
+
+    /** \brief HEVC Decoding Subset Parameter buffer type
+     *
+     * The subsets parameter buffer is concatenation with one or multiple
+     * subset entry point offsets. All the offset values are layed out one
+     * by one according to slice order with first slice segment first, second
+     * slice segment second, etc... The entry number is indicated by parameter
+     * \ref num_entry_point_offsets. And the first entry position of the entry
+     * point offsets for any slice segment is indicated by parameter
+     * entry_offset_to_subset_array in VAPictureParameterBufferHEVC data structure.
+     */
+    VASubsetsParameterBufferType        = 57,
+
     VABufferTypeMax
 } VABufferType;
 
