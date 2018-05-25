@@ -481,10 +481,14 @@ typedef struct  _VASliceParameterBufferHEVC
     int8_t                  ChromaOffsetL1[15][2];
     /** HEVC syntax element. */
     uint8_t                 five_minus_max_num_merge_cand;
+    /** HEVC syntax element. */
+    uint16_t                 num_entry_point_offsets;
+    /** HEVC syntax element. */
+    uint16_t                 entry_offset_to_subset_array;
     /**@}*/
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VASliceParameterBufferHEVC;
 
 /**
