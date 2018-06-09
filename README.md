@@ -36,3 +36,13 @@ address to our [Slack Team invite page](https://slack-join-intel-media.herokuapp
 
 Slack complements our other means of communication.  Pick the one that works
 best for you!
+
+# How to install Libva
+git clone https://github.com/intel/libva.git
+cd libva
+./autogen.sh
+make
+make install
+
+# How to add Libva package configuration to environment on CentOS
+export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
