@@ -43,9 +43,17 @@ git clone https://github.com/intel/libva.git
 cd libva
 ./autogen.sh
 make
-make install
+sudo make install
 ```
+
+libva also supports meson build system: http://mesonbuild.com
+# How to install libva with Meson
+```
+meson build
+ninja -C build
+```
+
 # How to add Libva package configuration to environment on CentOS
 ```
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
 ```
