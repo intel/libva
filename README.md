@@ -46,7 +46,7 @@ make
 sudo make install
 ```
 
-# How to install libva with Meson (http://mesonbuild.com)
+# How to install Libva with Meson (http://mesonbuild.com)
 ```
 meson build
 ninja -C build
