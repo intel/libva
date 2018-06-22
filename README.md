@@ -51,8 +51,3 @@ sudo make install
 meson build
 ninja -C build
 ```
-
-# How to add Libva package configuration to environment on CentOS
-```
-export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/usr/local/lib/pkgconfig
-```
