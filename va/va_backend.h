@@ -485,8 +485,18 @@ struct VADriverVTable
             void               *descriptor      /* out */
         );
 
+        VAStatus
+        (*vaQuerySurfaceAllocation)(
+            VADisplay           dpy,
+            uint32_t            format,         /* in */
+            uint32_t            width,          /* in */
+            uint32_t            height,         /* in */
+            VASurfaceAttrib     *attrib_list,   /* in */
+            unsigned int        num_attribs,    /* in */ 
+            VASurfaceAllocationInfo *surfaceinfo /* out */
+        );
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[57];
+        unsigned long reserved[56];
 };
 
 struct VADriverContext

@@ -2210,3 +2210,22 @@ vaQueryVideoProcPipelineCaps(
     VA_TRACE_RET(dpy, status);
     return status;
 }
+
+VAStatus vaQuerySurfaceAllocation(
+    VADisplay           dpy,
+    uint32_t            format,
+    uint32_t            width,
+    uint32_t            height,
+    VASurfaceAttrib     *attrib_list,
+    unsigned int        num_attribs,
+    VASurfaceAllocationInfo *surfaceinfo
+)
+{
+    VADriverContextP ctx;
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (!ctx->vtable->vaQuerySurfaceAllocation)
+        return VA_STATUS_ERROR_UNIMPLEMENTED;
+    return ctx->vtable->vaQuerySurfaceAllocation(ctx, format, width, height, attrib_list, num_attribs, surfaceinfo);
+}

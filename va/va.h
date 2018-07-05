@@ -4225,6 +4225,64 @@ VAStatus vaDeriveImage (
     VAImage *image	/* out */
 );
 
+typedef struct _VASurfaceAllocationInfo{
+    /** \brief pixel format in fourcc. */
+    uint32_t    pixel_format;
+    /* picture width x height */
+    uint32_t	width; 
+    uint32_t	height;
+    /* suggest data_size, it alwsys is minimum requirement*/ 
+    uint32_t	data_size;
+    /* number of planes , can not be greater than 3 */
+    uint32_t	num_planes;
+    /* 
+     * An array indicating the scanline pitch in bytes for each plane.
+     * Each plane may have a different pitch. Maximum 3 planes for planar formats
+     */
+    uint32_t	pitches[4];
+    /* 
+     * An array indicating the byte offset from the beginning of the image data 
+     * to the start of each plane.
+     */
+    uint32_t	offsets[4];
+    /*
+     * An array of ascii characters describing the order of the components within the bytes.
+     * Only entry_bytes characters of the string are used.by default , the order is from pixel format
+     * if there are different layout, can use this value to describe it.
+     */
+    int8_t component_order[4];
+    /* base address alignment, the value should be 0x0, 0x1, 0x2, 0x4, 0x8... only one bit is 1 , other bit is zero*/
+    uint32_t    base_address_align;
+    /* memory size alignment */
+    uint32_t    size_align;
+    /* suggest memory flags, it should be VA_SURFACE_EXTBUF_DESC_XXX */
+    uint32_t    flags;
+    /** \brief Reserved bytes for future use, must be zero */   
+    uint32_t    va_reserved[VA_PADDING_MEDIUM];
+
+}VASurfaceAllocationInfo;
+
+/** brief Queries surface allocation requirements for the userptr/dma buffer import.
+  *
+  * it can be a reference when call vaCreateSurface
+  * with system memory.such as user ptr 
+  *
+  * @param[in] dpy               the VA display
+  * @param[in] width             surface width
+  * @param[in] height            surface height
+  * @param[in] attrib_list       surface attrib list
+  * @param[in] num_attribs       surface attrib number
+  * @param[out] surfaceinfo      surface allocation information */
+VAStatus vaQuerySurfaceAllocation(
+    VADisplay           dpy,
+    uint32_t            format,
+    uint32_t            width,
+    uint32_t            height,
+    VASurfaceAttrib     *attrib_list,
+    unsigned int        num_attribs,
+    VASurfaceAllocationInfo *surfaceinfo
+);
+
 /**
  * Subpictures 
  * Subpicture is a special type of image that can be blended 
