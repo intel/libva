@@ -804,6 +804,8 @@ typedef struct _VAConfigAttrib {
 /** \brief Intelligent Constant Quality. Provided an initial ICQ_quality_factor,
  *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
 #define VA_RC_ICQ			0x00000040
+/** \brief Quality-based variable bitrate. */
+#define VA_RC_QVBR                      0x00000060
 /** \brief Macroblock based rate control.  Per MB control is decided
  *  internally in the encoder. It may be combined with other RC modes, except CQP. */
 #define VA_RC_MB                        0x00000080
