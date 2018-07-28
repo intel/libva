@@ -77,8 +77,11 @@ libva_ldflags = \
 
 libva_cflags = \
 	-Wall			\
-	-fstack-protector	\
 	$(NULL)
+
+if USE_SSP
+libva_cflags += -fstack-protector
+endif
 
 lib_LTLIBRARIES			= libva.la
 libvaincludedir			= ${includedir}/va
