@@ -249,6 +249,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterSkinToneEnhancement,
     /** \brief Total Color Correction. */
     VAProcFilterTotalColorCorrection,
+    /** \brief Human Vision System(HVS) Noise reduction filter. */
+    VAProcFilterHVSNoiseReduction,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -1039,6 +1041,26 @@ typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
     /** \brief Color correction value. */
     float                             value;
 } VAProcFilterParameterBufferTotalColorCorrection;
+
+/** \brief Human Vision System(HVS) Noise reduction filter parametrization. */
+typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
+    /** \brief Filter type. Shall be set to #VAProcFilterHVSNoiseReduction. */
+    VAProcFilterType    type;
+    /** \brief QP for encoding, used for HVS Denoise */
+    uint16_t            qp;
+    /**
+     *  \brief QP to Noise Reduction Strength Mode, used for Human Vision System Based Noise Reduction.
+     *  Controls Noise Reduction strength of conservative and aggressive mode.
+     *  It is an integer from [0-16].
+     *  Value 0 means completely turn off Noise Reduction;
+     *  Value 16 means the most aggressive mode of Noise Reduction;
+     *  Value 10 is the default value.
+     */
+    uint16_t            strength;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBufferHVSNoiseReduction;
+
 /**
  * \brief Default filter cap specification (single range value).
  *
