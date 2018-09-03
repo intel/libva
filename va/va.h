@@ -827,6 +827,16 @@ typedef struct _VAConfigAttrib {
  * and reuse quality_factor in \c VAEncMiscParameterRateControl
  * */
 #define VA_RC_QVBR                      0x00000400
+/** \brief Average VBR
+ *  Average variable bitrate control algorithm focuses on overall encoding
+ *  quality while meeting the specified target bitrate, within the accuracy
+ *  range, after a convergence period.
+ *  bits_per_second in VAEncMiscParameterRateControl is target bitrate for AVBR.
+ *  Convergence is specified in the unit of frame.
+ *  window_size in VAEncMiscParameterRateControl is equal to convergence for AVBR.
+ *  Accuracy is in the range of [1,100], 1 means one percent, and so on. 
+ *  target_percentage in VAEncMiscParameterRateControl is equal to accuracy for AVBR. */
+#define VA_RC_AVBR                      0x00000800
 
 /**@}*/
 
