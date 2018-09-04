@@ -3241,6 +3241,18 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
         break;
     }
+    case VAEncMiscParameterTypeMultiPassFrameSize:
+    {
+        int i;
+        VAEncMiscParameterBufferMultiPassFrameSize *p = (VAEncMiscParameterBufferMultiPassFrameSize *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMultiPassFrameSize\n");
+        va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
+        va_TraceMsg(trace_ctx, "\tnum_passes = %d\n", p->num_passes);
+        for(i = 0; i<p->num_passes; ++i)
+            va_TraceMsg(trace_ctx, "\tdelta_qp[%d] = %d\n", i, p->delta_qp[i]);
+        break;
+    }
     case VAEncMiscParameterTypeQualityLevel:
     {
         VAEncMiscParameterBufferQualityLevel *p = (VAEncMiscParameterBufferQualityLevel *)tmp->data;
