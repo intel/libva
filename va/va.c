@@ -39,7 +39,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #ifdef ANDROID
-#include <cutils/log.h>
+#include <log/log.h>
 /* support versions < JellyBean */
 #ifndef ALOGE
 #define ALOGE LOGE
