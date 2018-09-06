@@ -185,7 +185,7 @@ struct va_trace {
 #define DPY2TRACECTX(dpy, context, buf_id)                                  \
     struct va_trace *pva_trace = NULL;                                      \
     struct trace_context *trace_ctx = NULL;                                 \
-    int ctx_id = context;                                                   \
+    VAContextID ctx_id = context;                                           \
                                                                             \
     pva_trace = (struct va_trace *)(((VADisplayContextP)dpy)->vatrace);     \
     if(!pva_trace)                                                          \
