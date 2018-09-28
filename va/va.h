@@ -4889,6 +4889,47 @@ typedef struct _VAPictureHEVC
  */
 #define VA_PICTURE_HEVC_RPS_LT_CURR             0x00000040
 
+typedef enum{
+    VACopyObjectSurface = 0,
+    VACopyObjectBuffer  = 1,
+} VACopyObjectType;
+
+typedef struct _VACopyObject {
+    VACopyObjectType  obj_type;    // type of object.
+    union
+    {
+        VASurfaceID surface_id;
+        VABufferID  buffer_id;
+    } object;
+
+    uint32_t    va_reserved[VA_PADDING_MEDIUM];
+} VACopyObject;
+
+typedef union _VACopyOption{
+    struct {
+        /** \brief va copy synchronization, the value should be /c VA_EXEC_SYNC or /c VA_EXEC_ASYNC */
+        uint32_t va_copy_sync : 2;
+        /** \brief va copy mode, the value should be VA_EXEC_MODE_XXX */
+        uint32_t va_copy_mode : 4;
+        uint32_t reserved     :26;
+    }bits;
+    uint32_t value;
+}VACopyOption;
+
+/** \brief Copies an object.
+ *
+ * Copies specified object (surface or buffer). If non-blocking copy
+ * is requested (VA_COPY_NONBLOCK), then need vaSyncBuffer or vaSyncSurface/vaSyncSurface2
+ * to sync the destination object.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] dst               Destination object to copy to
+ * @param[in] src               Source object to copy from
+ * @param[in] option            VA copy option
+ * @return VA_STATUS_SUCCESS if successful
+ */
+VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOption option);
+
 #include <va/va_dec_hevc.h>
 #include <va/va_dec_jpeg.h>
 #include <va/va_dec_vp8.h>

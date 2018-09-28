@@ -2286,3 +2286,23 @@ vaQueryVideoProcPipelineCaps(
     VA_TRACE_RET(dpy, status);
     return status;
 }
+
+VAStatus
+vaCopy(
+    VADisplay         dpy,
+    VACopyObject      *dst,
+    VACopyObject      *src,
+    VACopyOption      option
+)
+{
+  VAStatus va_status;
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  if(ctx->vtable->vaCopy  == NULL)
+      va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
+  else
+      va_status = ctx->vtable->vaCopy( ctx, dst, src, option);
+  return va_status;
+}
