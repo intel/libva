@@ -249,6 +249,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterSkinToneEnhancement,
     /** \brief Total Color Correction. */
     VAProcFilterTotalColorCorrection,
+    /** \brief Human Vision System(HVS) Noise reduction filter. */
+    VAProcFilterHVSNoiseReduction,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -289,33 +291,118 @@ typedef enum _VAProcColorBalanceType {
     VAProcColorBalanceCount
 } VAProcColorBalanceType;
 
-/** \brief Color standard types. */
+/** \brief Color standard types.
+ *
+ * These define a set of color properties corresponding to particular
+ * video standards.
+ *
+ * Where matrix_coefficients is specified, it applies only to YUV data -
+ * RGB data always use the identity matrix (matrix_coefficients = 0).
+ */
 typedef enum _VAProcColorStandardType {
     VAProcColorStandardNone = 0,
-    /** \brief ITU-R BT.601. */
+    /** \brief ITU-R BT.601.
+     *
+     * It is unspecified whether this will use 525-line or 625-line values;
+     * specify the colour primaries and matrix coefficients explicitly if
+     * it is known which one is required.
+     *
+     * Equivalent to:
+     *   colour_primaries = 5 or 6
+     *   transfer_characteristics = 6
+     *   matrix_coefficients = 5 or 6
+     */
     VAProcColorStandardBT601,
-    /** \brief ITU-R BT.709. */
+    /** \brief ITU-R BT.709.
+     *
+     * Equivalent to:
+     *   colour_primaries = 1
+     *   transfer_characteristics = 1
+     *   matrix_coefficients = 1
+     */
     VAProcColorStandardBT709,
-    /** \brief ITU-R BT.470-2 System M. */
+    /** \brief ITU-R BT.470-2 System M.
+     *
+     * Equivalent to:
+     *   colour_primaries = 4
+     *   transfer_characteristics = 4
+     *   matrix_coefficients = 4
+     */
     VAProcColorStandardBT470M,
-    /** \brief ITU-R BT.470-2 System B, G. */
+    /** \brief ITU-R BT.470-2 System B, G.
+     *
+     * Equivalent to:
+     *   colour_primaries = 5
+     *   transfer_characteristics = 5
+     *   matrix_coefficients = 5
+     */
     VAProcColorStandardBT470BG,
-    /** \brief SMPTE-170M. */
+    /** \brief SMPTE-170M.
+     *
+     * Equivalent to:
+     *   colour_primaries = 6
+     *   transfer_characteristics = 6
+     *   matrix_coefficients = 6
+     */
     VAProcColorStandardSMPTE170M,
-    /** \brief SMPTE-240M. */
+    /** \brief SMPTE-240M.
+     *
+     * Equivalent to:
+     *   colour_primaries = 7
+     *   transfer_characteristics = 7
+     *   matrix_coefficients = 7
+     */
     VAProcColorStandardSMPTE240M,
-    /** \brief Generic film. */
+    /** \brief Generic film.
+     *
+     * Equivalent to:
+     *   colour_primaries = 8
+     *   transfer_characteristics = 1
+     *   matrix_coefficients = 1
+     */
     VAProcColorStandardGenericFilm,
-    /** \brief sRGB. */
+    /** \brief sRGB.
+     *
+     * Equivalent to:
+     *   colour_primaries = 1
+     *   transfer_characteristics = 13
+     *   matrix_coefficients = 0
+     */
     VAProcColorStandardSRGB,
-    /** \brief stRGB. */
+    /** \brief stRGB.
+     *
+     * ???
+     */
     VAProcColorStandardSTRGB,
-    /** \brief xvYCC601. */
+    /** \brief xvYCC601.
+     *
+     * Equivalent to:
+     *   colour_primaries = 1
+     *   transfer_characteristics = 11
+     *   matrix_coefficients = 5
+     */
     VAProcColorStandardXVYCC601,
-    /** \brief xvYCC709. */
+    /** \brief xvYCC709.
+     *
+     * Equivalent to:
+     *   colour_primaries = 1
+     *   transfer_characteristics = 11
+     *   matrix_coefficients = 1
+     */
     VAProcColorStandardXVYCC709,
-    /** \brief ITU-R BT.2020. */
+    /** \brief ITU-R BT.2020.
+     *
+     * Equivalent to:
+     *   colour_primaries = 9
+     *   transfer_characteristics = 14
+     *   matrix_coefficients = 9
+     */
     VAProcColorStandardBT2020,
+    /** \brief Explicitly specified color properties.
+     *
+     * Use corresponding color properties section.
+     */
+    VAProcColorStandardExplicit,
     /** \brief Number of color standards. */
     VAProcColorStandardCount
 } VAProcColorStandardType;
@@ -548,7 +635,26 @@ typedef struct _VAProcColorProperties {
     uint8_t chroma_sample_location;
     /** Chroma sample location. \c VA_SOURCE_RANGE_XXX*/
     uint8_t color_range;
-    uint8_t reserved[6];
+    /** Colour primaries.
+     *
+     * See ISO/IEC 23001-8 or ITU H.273, section 8.1 and table 2.
+     * Only used if the color standard in use is \c VAColorStandardExplicit.
+     */
+    uint8_t colour_primaries;
+    /** Transfer characteristics.
+     *
+     * See ISO/IEC 23001-8 or ITU H.273, section 8.2 and table 3.
+     * Only used if the color standard in use is \c VAColorStandardExplicit.
+     */
+    uint8_t transfer_characteristics;
+    /** Matrix coefficients.
+     *
+     * See ISO/IEC 23001-8 or ITU H.273, section 8.3 and table 4.
+     * Only used if the color standard in use is \c VAColorStandardExplicit.
+     */
+    uint8_t matrix_coefficients;
+    /** Reserved bytes for future use, must be zero. */
+    uint8_t reserved[3];
 } VAProcColorProperties;
 
 /**
@@ -597,12 +703,15 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     const VARectangle  *surface_region;
     /**
-     * \brief Requested input color primaries.
+     * \brief Requested input color standard.
      *
-     * Color primaries are implicitly converted throughout the processing
+     * Color properties are implicitly converted throughout the processing
      * pipeline. The video processor chooses the best moment to apply
-     * this conversion. The set of supported color primaries primaries
-     * for input shall be queried with vaQueryVideoProcPipelineCaps().
+     * this conversion. The set of supported color standards for input shall
+     * be queried with vaQueryVideoProcPipelineCaps().
+     *
+     * If this is set to VAProcColorStandardExplicit, the color properties
+     * are specified explicitly in surface_color_properties instead.
      */
     VAProcColorStandardType surface_color_standard;
     /**
@@ -633,7 +742,10 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     uint32_t        output_background_color;
     /**
-     * \brief Requested output color primaries.
+     * \brief Requested output color standard.
+     *
+     * If this is set to VAProcColorStandardExplicit, the color properties
+     * are specified explicitly in output_color_properties instead.
      */
     VAProcColorStandardType output_color_standard;
     /**
@@ -929,6 +1041,26 @@ typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
     /** \brief Color correction value. */
     float                             value;
 } VAProcFilterParameterBufferTotalColorCorrection;
+
+/** \brief Human Vision System(HVS) Noise reduction filter parametrization. */
+typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
+    /** \brief Filter type. Shall be set to #VAProcFilterHVSNoiseReduction. */
+    VAProcFilterType    type;
+    /** \brief QP for encoding, used for HVS Denoise */
+    uint16_t            qp;
+    /**
+     *  \brief QP to Noise Reduction Strength Mode, used for Human Vision System Based Noise Reduction.
+     *  Controls Noise Reduction strength of conservative and aggressive mode.
+     *  It is an integer from [0-16].
+     *  Value 0 means completely turn off Noise Reduction;
+     *  Value 16 means the most aggressive mode of Noise Reduction;
+     *  Value 10 is the default value.
+     */
+    uint16_t            strength;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBufferHVSNoiseReduction;
+
 /**
  * \brief Default filter cap specification (single range value).
  *

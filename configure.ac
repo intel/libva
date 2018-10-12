@@ -27,7 +27,7 @@
 # - reset micro version to zero when minor version is incremented
 # - reset minor version to zero when major version is incremented
 m4_define([va_api_major_version], [1])
-m4_define([va_api_minor_version], [1])
+m4_define([va_api_minor_version], [2])
 m4_define([va_api_micro_version], [0])
 
 m4_define([va_api_version],
@@ -208,6 +208,22 @@ if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
     AC_DEFINE([HAVE_GNUC_VISIBILITY_ATTRIBUTE], [1],
               [Defined to 1 if GCC visibility attribute is supported])
 fi
+
+# Check for -fstack-protector
+ssp_cc=yes
+if test "X$CC-cc" != "X"; then
+    AC_MSG_CHECKING([whether ${CC-cc} accepts -fstack-protector])
+    ssp_old_cflags="$CFLAGS"
+    CFLAGS="$CFLAGS -fstack-protector"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[alloca(100);]])], [], [ssp_cc=no])
+    AC_MSG_RESULT([$ssp_cc])
+    if test "X$ssp_cc" = "Xno"; then
+        CFLAGS="$ssp_old_cflags"
+    else
+        AC_DEFINE([ENABLE_SSP_CC], 1, [Define if SSP C support is enabled.])
+    fi
+fi
+AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
 
 # Check for DRM (mandatory)
 LIBDRM_VERSION=libdrm_version
