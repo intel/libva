@@ -436,7 +436,9 @@ typedef enum _VAProcTotalColorCorrectionType {
 typedef enum _VAProcHighDynamicRangeMetadataType {
     VAProcHighDynamicRangeMetadataNone = 0,
     /** \brief Metadata type for HDR10. */
-    VAProcHighDynamicRangeMetadataHDR10
+    VAProcHighDynamicRangeMetadataHDR10,
+    /** \brief Number of Metadata type. */
+    VAProcHighDynamicRangeMetadataTypeCount
 } VAProcHighDynamicRangeMetadataType;
 
 /** \brief Video Processing Mode. */
@@ -703,7 +705,20 @@ typedef struct _VAProcColorProperties {
     uint8_t reserved[3];
 } VAProcColorProperties;
 
-/** \berief Describes High Dynamic Range Meta Data for HDR10. */
+/** \berief Describes High Dynamic Range MetaData for HDR10.
+ *
+ *  Specifies the colour volume(the colour primaries, white point and luminance range) of
+ *  a display considered to be the mastering display for the associated video content -e.g.,
+ *  the colour volume of a display that was used for viewing while authoring the video content.
+ *  See ITU-T H.265 D.3.27 Mastering display colour volume SEI message semantics.
+ *
+ *  Specifies upper bounds for the nominal light level of the content. See ITU-T H.265 D.3.35
+ *  Content light level information SEI message semantics.
+ *
+ *  This structure can be used to indicate the HDR10 metadata for 1) the content which was authored;
+ *  2) the display on which the content will be presented. If it is for display, max_content_light_level
+ *  and max_pic_average_light_level are ignored.
+ */
 typedef struct _VAHdrMetaDataHDR10
 {
     /**
@@ -779,25 +794,6 @@ typedef struct _VAProcFilterCapHighDynamicRange {
     /** \brief Reserved bytes for future use, must be zero */
     uint16_t                               va_reserved[VA_PADDING_HIGH];
 } VAProcFilterCapHighDynamicRange;
-
-/** \brief High Dynamic Range Meta Data. */
-typedef struct _VAHdrMetaData
-{
-    /** \brief high dynamic range metadata type, HDR10 etc. */
-    VAProcHighDynamicRangeMetadataType       metadata_type;
-    /**
-     *  \brief Pointer to high dynamic range metadata.
-     *
-     *  The pointer could point to VAHdrMetaDataHDR10 or other HDR meta data.
-     */
-    void*                                    metadata;
-    /**
-     *  \brief Size of high dynamic range metadata.
-     */
-    uint32_t                                 metadata_size;
-    /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                                 reserved[VA_PADDING_LOW];
-} VAHdrMetaData;
 
 /**
  * \brief Video processing pipeline configuration.
@@ -1020,18 +1016,12 @@ typedef struct _VAProcPipelineParameterBuffer {
      * \brief Processing mode. See "VAProcMode".
      */
     VAProcMode             processing_mode;
-    /**
-     * \brief Output High Dynamic Metadata.
-     *
-     * If output_metadata is NULL, then output default to SDR.
-     */
-    VAHdrMetaData          *output_hdr_metadata;
 
     /** \brief Reserved bytes for future use, must be zero */
     #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__)|| defined(__LP64__)
-    uint32_t                va_reserved[VA_PADDING_LARGE - 16];
+    uint32_t                va_reserved[VA_PADDING_LARGE - 14];
     #else
-    uint32_t                va_reserved[VA_PADDING_LARGE - 13];
+    uint32_t                va_reserved[VA_PADDING_LARGE - 12];
     #endif
 } VAProcPipelineParameterBuffer;
 
@@ -1216,6 +1206,44 @@ typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
     /** \brief Reserved bytes for future use, must be zero */
     uint16_t            va_reserved[VA_PADDING_HIGH];
 } VAProcFilterParameterBufferHVSNoiseReduction;
+
+/** \brief High Dynamic Range(HDR) Tone Mapping filter parametrization. */
+typedef struct _VAProcFilterParameterBufferHDRToneMapping {
+    /**
+     *  \brief Filter type. Shall be set to #VAProcFilterHighDynamicRangeToneMapping.
+     */
+    VAProcFilterType                         filter_type;
+    /**
+     *  \brief high dynamic range metadata type for the input, HDR10 etc.
+     */
+    VAProcHighDynamicRangeMetadataType       in_metadata_type;
+    /**
+     *  \brief Pointer to high dynamic range metadata for the input.
+     *
+     *  The pointer could point to VAHdrMetaDataHDR10 or other HDR meta data.
+     */
+    void*                                    in_metadata;
+    /**
+     *  \brief Size of high dynamic range metadata for the input.
+     */
+    uint32_t                                 in_metadata_size;
+    /**
+     *  \brief high dynamic range metadata type for the output, HDR10 etc.
+     */
+    VAProcHighDynamicRangeMetadataType       out_metadata_type;
+    /**
+     *  \brief Pointer to high dynamic range metadata for the output.
+     *
+     *  The pointer could point to VAHdrMetaDataHDR10 or other HDR meta data.
+     */
+    void*                                    out_metadata;
+    /**
+     *  \brief Size of high dynamic range metadata for the output.
+     */
+    uint32_t                                 out_metadata_size;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                                 reserved[VA_PADDING_LOW];
+} VAProcFilterParameterBufferHDRToneMapping;
 
 /**
  * \brief Default filter cap specification (single range value).
