@@ -51,69 +51,69 @@
 typedef struct {
     CARD8 reqType;
     CARD8 nvReqType;
-    CARD16 length B16;
+    CARD16 length;
 } xnvCtrlQueryExtensionReq;
 #define sz_xnvCtrlQueryExtensionReq 4
 
 typedef struct {
     BYTE type;   /* X_Reply */
     CARD8 padb1;
-    CARD16 sequenceNumber B16;
-    CARD32 length B32;
-    CARD16 major B16;
-    CARD16 minor B16;
-    CARD32 padl4 B32;
-    CARD32 padl5 B32;
-    CARD32 padl6 B32;
-    CARD32 padl7 B32;
-    CARD32 padl8 B32;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD16 major;
+    CARD16 minor;
+    CARD32 padl4;
+    CARD32 padl5;
+    CARD32 padl6;
+    CARD32 padl7;
+    CARD32 padl8;
 } xnvCtrlQueryExtensionReply;
 #define sz_xnvCtrlQueryExtensionReply 32
 
 typedef struct {
     CARD8 reqType;
     CARD8 nvReqType;
-    CARD16 length B16;
-    CARD32 screen B32;
+    CARD16 length;
+    CARD32 screen;
 } xnvCtrlIsNvReq;
 #define sz_xnvCtrlIsNvReq 8
 
 typedef struct {
     BYTE type;   /* X_Reply */
     CARD8 padb1;
-    CARD16 sequenceNumber B16;
-    CARD32 length B32;
-    CARD32 isnv B32;
-    CARD32 padl4 B32;
-    CARD32 padl5 B32;
-    CARD32 padl6 B32;
-    CARD32 padl7 B32;
-    CARD32 padl8 B32;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD32 isnv;
+    CARD32 padl4;
+    CARD32 padl5;
+    CARD32 padl6;
+    CARD32 padl7;
+    CARD32 padl8;
 } xnvCtrlIsNvReply;
 #define sz_xnvCtrlIsNvReply 32
 
 typedef struct {
     CARD8 reqType;
     CARD8 nvReqType;
-    CARD16 length B16;
-    CARD16 target_id B16;    /* X screen number or GPU number */
-    CARD16 target_type B16;  /* X screen or GPU */
-    CARD32 display_mask B32;
-    CARD32 attribute B32;
+    CARD16 length;
+    CARD16 target_id;    /* X screen number or GPU number */
+    CARD16 target_type;  /* X screen or GPU */
+    CARD32 display_mask;
+    CARD32 attribute;
 } xnvCtrlQueryStringAttributeReq;
 #define sz_xnvCtrlQueryStringAttributeReq 16
 
 typedef struct {
     BYTE type;
     BYTE pad0;
-    CARD16 sequenceNumber B16;
-    CARD32 length B32;
-    CARD32 flags B32;
-    CARD32 n B32;    /* Length of string */
-    CARD32 pad4 B32;
-    CARD32 pad5 B32;
-    CARD32 pad6 B32;
-    CARD32 pad7 B32;
+    CARD16 sequenceNumber;
+    CARD32 length;
+    CARD32 flags;
+    CARD32 n;    /* Length of string */
+    CARD32 pad4;
+    CARD32 pad5;
+    CARD32 pad6;
+    CARD32 pad7;
 } xnvCtrlQueryStringAttributeReply;
 #define sz_xnvCtrlQueryStringAttributeReply 32
 
