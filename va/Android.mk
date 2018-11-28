@@ -31,7 +31,7 @@ LIBVA_DRIVERS_PATH_64 := /vendor/lib64/:/system/lib64
 include $(CLEAR_VARS)
 
 #LIBVA_MINOR_VERSION := 31
-#LIBVA_MAJOR_VERSION := 0 
+#LIBVA_MAJOR_VERSION := 0
 
 LOCAL_SRC_FILES := \
 	va.c \
@@ -79,7 +79,7 @@ LOCAL_COPY_HEADERS := \
      va_tpi.h \
      va_trace.h \
 
-LOCAL_COPY_HEADERS_TO := libva/va
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva
@@ -123,7 +123,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_COPY_HEADERS_TO := libva/va
 
-LOCAL_COPY_HEADERS := va_android.h		
+LOCAL_COPY_HEADERS := va_android.h
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
@@ -135,6 +135,5 @@ ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 27; echo $$?), 0)
 LOCAL_STATIC_LIBRARIES += libarect
 LOCAL_HEADER_LIBRARIES += libnativebase_headers libutils_headers
 endif
-
 
 include $(BUILD_SHARED_LIBRARY)

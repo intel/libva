@@ -89,7 +89,6 @@ VA_DRM_IsRenderNodeFd(int fd)
 {
     struct stat st;
     char *name;
-
     /* Check by device node */
     if (fstat(fd, &st) == 0)
         return S_ISCHR(st.st_mode) && (st.st_rdev & 0x80);
@@ -101,7 +100,6 @@ VA_DRM_IsRenderNodeFd(int fd)
 		drmFree(name);
 		return ret;
 	}
-
     /* Unrecoverable error */
     return -1;
 }

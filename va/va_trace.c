@@ -1135,7 +1135,7 @@ static void va_TraceSurfaceAttributes(
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
                 uint32_t j;
-                
+
                 va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
                 va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
                 va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
@@ -3241,6 +3241,18 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
         break;
     }
+    case VAEncMiscParameterTypeMultiPassFrameSize:
+    {
+        int i;
+        VAEncMiscParameterBufferMultiPassFrameSize *p = (VAEncMiscParameterBufferMultiPassFrameSize *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMultiPassFrameSize\n");
+        va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
+        va_TraceMsg(trace_ctx, "\tnum_passes = %d\n", p->num_passes);
+        for(i = 0; i<p->num_passes; ++i)
+            va_TraceMsg(trace_ctx, "\tdelta_qp[%d] = %d\n", i, p->delta_qp[i]);
+        break;
+    }
     case VAEncMiscParameterTypeQualityLevel:
     {
         VAEncMiscParameterBufferQualityLevel *p = (VAEncMiscParameterBufferQualityLevel *)tmp->data;
@@ -3272,13 +3284,10 @@ static void va_TraceVAPictureParameterBufferVC1(
 {
     VAPictureParameterBufferVC1* p = (VAPictureParameterBufferVC1*)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
     va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferVC1\n");
-    
     va_TraceMsg(trace_ctx, "\tforward_reference_picture = 0x%08x\n", p->forward_reference_picture);
     va_TraceMsg(trace_ctx, "\tbackward_reference_picture = 0x%08x\n", p->backward_reference_picture);
     va_TraceMsg(trace_ctx, "\tinloop_decoded_picture = 0x%08x\n", p->inloop_decoded_picture);
-    
     va_TraceMsg(trace_ctx, "\tpulldown = %d\n", p->sequence_fields.bits.pulldown);
     va_TraceMsg(trace_ctx, "\tinterlace = %d\n", p->sequence_fields.bits.interlace);
     va_TraceMsg(trace_ctx, "\ttfcntrflag = %d\n", p->sequence_fields.bits.tfcntrflag);

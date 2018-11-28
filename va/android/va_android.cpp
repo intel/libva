@@ -160,4 +160,3 @@ VADisplay vaGetDisplay (
 
     return (VADisplay)pDisplayContext;
 }
-
