@@ -214,10 +214,18 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_STATUS_ERROR_NOT_ENOUGH_BUFFER       0x00000025
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
-/** De-interlacing flags for vaPutSurface() */
+/** 
+ * 1. De-interlacing flags for vaPutSurface() 
+ * 2. Surface sample type for input/output surface flag
+ *    - Progressive: VA_FRAME_PICTURE
+ *    - Interleaved: VA_TOP_FIELD_FIRST, VA_BOTTOM_FIELD_FIRST
+ *    - Field: VA_TOP_FIELD, VA_BOTTOM_FIELD
+*/
 #define VA_FRAME_PICTURE        0x00000000 
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
+#define VA_TOP_FIELD_FIRST      0x00000004
+#define VA_BOTTOM_FIELD_FIRST   0x00000008
 
 /**
  * Enabled the positioning/cropping/blending feature:
