@@ -1260,7 +1260,12 @@ typedef enum {
     VASurfaceAttribMaxHeight,
     /** \brief Surface memory type expressed in bit fields (int, read/write). */
     VASurfaceAttribMemoryType,
-    /** \brief External buffer descriptor (pointer, write). */
+    /** \brief External buffer descriptor (pointer, write).
+     *
+     * Refer to the documentation for the memory type being created to
+     * determine what descriptor structure to pass here.  If not otherwise
+     * stated, the common VASurfaceAttribExternalBuffers should be used.
+     */
     VASurfaceAttribExternalBufferDescriptor,
     /** \brief Surface usage hint, gives the driver a hint of intended usage 
      *  to optimize allocation (e.g. tiling) (int, read/write). */

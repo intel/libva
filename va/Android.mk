@@ -31,7 +31,12 @@ LIBVA_DRIVERS_PATH_64 := /vendor/lib64/dri
 include $(CLEAR_VARS)
 
 #LIBVA_MINOR_VERSION := 31
-#LIBVA_MAJOR_VERSION := 0 
+#LIBVA_MAJOR_VERSION := 0
+
+IGNORED_WARNNING = \
+	-Wno-sign-compare \
+	-Wno-missing-field-initializers \
+	-Wno-unused-parameter \
 
 LOCAL_SRC_FILES := \
 	va.c \
@@ -46,6 +51,7 @@ LOCAL_CFLAGS_64 += \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH_64)\"" \
 
 LOCAL_CFLAGS := \
+	$(IGNORED_WARNNING) \
 	$(if $(filter user,$(TARGET_BUILD_VARIANT)),,-DENABLE_VA_MESSAGING) \
 	-DLOG_TAG=\"libva\"
 
@@ -83,7 +89,8 @@ LOCAL_SRC_FILES := \
 	drm/va_drm_utils.c
 
 LOCAL_CFLAGS += \
-	-DLOG_TAG=\"libva-android\"
+	-DLOG_TAG=\"libva-android\" \
+	$(IGNORED_WARNNING)
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/drm
@@ -92,6 +99,6 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
 LOCAL_PROPRIETARY_MODULE := true
 
-LOCAL_SHARED_LIBRARIES := libva libdrm
+LOCAL_SHARED_LIBRARIES := libva libdrm liblog
 
 include $(BUILD_SHARED_LIBRARY)

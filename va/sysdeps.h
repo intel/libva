@@ -45,7 +45,7 @@
 # define LIBVA_VERSION_S "1.1.0"
 
 /* Android logging utilities */
-# include <utils/Log.h>
+# include <log/log.h>
 #endif
 
 #if defined __GNUC__ && defined HAVE_GNUC_VISIBILITY_ATTRIBUTE
