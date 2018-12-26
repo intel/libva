@@ -90,8 +90,6 @@ struct drm_state {
 /**
  * \brief External buffer descriptor for a DRM PRIME surface.
  *
- * This can currently only be used for export.
- *
  * For export, call vaExportSurfaceHandle() with mem_type set to
  * VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 and pass a pointer to an
  * instance of this structure to fill.
@@ -101,6 +99,23 @@ struct drm_state {
  * one of DRM_FORMAT_GR88.
  * If VA_EXPORT_SURFACE_COMPOSED_LAYERS is specified on export,
  * there will be exactly one layer.
+ *
+ * For import, call vaCreateSurfaces() with the MemoryType attribute
+ * set to VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 and the
+ * ExternalBufferDescriptor attribute set to point to an array of
+ * num_surfaces instances of this structure.
+ * The number of planes which need to be provided for a given layer
+ * is dependent on both the format and the format modifier used for
+ * the objects containing it.  For example, the format DRM_FORMAT_RGBA
+ * normally requires one plane, but with the format modifier
+ * I915_FORMAT_MOD_Y_TILED_CCS it requires two planes - the first
+ * being the main data plane and the second containing the color
+ * control surface.
+ * Note that a given driver may only support a subset of possible
+ * representations of a particular format.  For example, it may only
+ * support NV12 surfaces when they are contained within a single DRM
+ * object, and therefore fail to create such surfaces if the two
+ * planes are in different DRM objects.
  */
 typedef struct _VADRMPRIMESurfaceDescriptor {
     /** Pixel format fourcc of the whole surface (VA_FOURCC_*). */
