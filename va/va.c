@@ -349,21 +349,51 @@ static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
     return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
 }
 
+static char *va_asprintf(const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    int n = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+
+    if (n < 0)
+        return NULL;
+
+    char *ret = (char*)malloc(n + 1);
+    if (!ret)
+        return NULL;
+
+    va_start(args, fmt);
+    n = vsnprintf(ret, n + 1, fmt, args);
+    va_end(args);
+
+    if (n < 0) {
+        free(ret);
+        return NULL;
+    }
+
+    return ret;
+}
+
 static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
 {
-  int n = snprintf(0, 0, "%s/%s%s", driver_dir, driver_name, DRIVER_EXTENSION);
-  if (n < 0)
-      return NULL;
-  char *driver_path = (char *) malloc(n + 1);
-  if (!driver_path)
-      return NULL;
-  n = snprintf(driver_path, n + 1, "%s/%s%s",
-               driver_dir, driver_name, DRIVER_EXTENSION);
-  if (n < 0) {
-    free(driver_path);
-    return NULL;
-  }
-  return driver_path;
+    if (!strncmp(driver_dir, "$ORIGIN/", sizeof("$ORIGIN/") - 1)) {
+        // Get the path to this library or executable
+        Dl_info info;
+        if (!dladdr(&va_getDriverPath, &info) || !info.dli_fname || info.dli_fname[0] != '/')
+            return NULL;
+
+        // Get the length up to the last /
+        int dirlen = strlen(info.dli_fname);
+        while (dirlen > 0 && info.dli_fname[dirlen] != '/')
+            dirlen--;
+
+        // Format path relative to the dir we're loaded from
+        return va_asprintf("%.*s%s/%s" DRIVER_EXTENSION, dirlen, info.dli_fname, driver_dir + sizeof("$ORIGIN") - 1, driver_name);
+    }
+
+    // Simply format an absolute path
+    return va_asprintf("%s/%s" DRIVER_EXTENSION, driver_dir, driver_name);
 }
 
 static VAStatus va_openDriver(VADisplay dpy, char *driver_name)

@@ -23,8 +23,7 @@
 SUBDIRS =
 
 AM_CPPFLAGS = \
-	-I$(top_srcdir) \
-	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
+	-I$(top_srcdir)
 
 LDADD = \
 	$(LIBVA_LT_LDFLAGS)

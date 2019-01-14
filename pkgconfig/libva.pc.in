@@ -2,7 +2,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
-driverdir=@LIBVA_DRIVERS_PATH@
+driverdir=@LIBVA_DRIVERS_PATH_ABSOLUTE@
 libva_version=@LIBVA_VERSION@
 
 Name: libva

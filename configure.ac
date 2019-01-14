@@ -157,10 +157,14 @@ AC_ARG_ENABLE([va-messaging],
 AC_ARG_WITH(drivers-path,
     [AC_HELP_STRING([--with-drivers-path=[[path]]],
                     [drivers path])],
-    [], [with_drivers_path="$libdir/dri"])
+    [], [with_drivers_path="\$ORIGIN/dri"])
 
 LIBVA_DRIVERS_PATH="$with_drivers_path"
-AC_SUBST(LIBVA_DRIVERS_PATH)
+LIBVA_DRIVERS_PATH_ABSOLUTE="${with_drivers_path/\$ORIGIN/$libdir}"
+
+AC_DEFINE_UNQUOTED([VA_DRIVERS_PATH], ["$LIBVA_DRIVERS_PATH"], [Driver file path (potentially relative)])
+AC_SUBST(LIBVA_DRIVERS_PATH_ABSOLUTE)
+
 
 AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
@@ -346,6 +350,7 @@ echo "libva - ${LIBVA_VERSION} (VA-API ${VA_API_VERSION})"
 echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
+echo Default driver install path ...... : $LIBVA_DRIVERS_PATH_ABSOLUTE
 echo Extra window systems ............. : $BACKENDS
 echo Build documentation .............. : $enable_docs
 echo Build with messaging ............. : $enable_va_messaging

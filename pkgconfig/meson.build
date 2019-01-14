@@ -6,7 +6,7 @@ pkgconf.set('libdir', '${prefix}/@0@'.format(get_option('libdir')))
 pkgconf.set('includedir', '${prefix}/@0@'.format(get_option('includedir')))
 pkgconf.set('LIBVA_VERSION', libva_version)
 pkgconf.set('VA_API_VERSION', va_api_version)
-pkgconf.set('LIBVA_DRIVERS_PATH', driverdir)
+pkgconf.set('LIBVA_DRIVERS_PATH_ABSOLUTE', '@0@/@1@'.format(get_option('prefix'), get_option('libdir')).join(driverdir.split('$ORIGIN')))
 
 pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
 
