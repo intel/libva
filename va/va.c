@@ -381,6 +381,11 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         search_path = VA_DRIVERS_PATH;
 
     search_path = strdup((const char *)search_path);
+    if (!search_path) {
+         va_errorMessage(dpy, "%s L%d Out of memory\n",
+                            __FUNCTION__, __LINE__);
+         return VA_STATUS_ERROR_ALLOCATION_FAILED;
+    }
     driver_dir = strtok_r(search_path, ":", &saveptr);
     while (driver_dir) {
         void *handle = NULL;
