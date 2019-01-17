@@ -2038,6 +2038,29 @@ static void va_TraceVAIQMatrixBufferMPEG4(
     return;
 }
 
+static void va_TraceVAEncSequenceParameterBufferMPEG2(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncSequenceParameterBufferMPEG2 *p = (VAEncSequenceParameterBufferMPEG2 *)data;
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferMPEG2\n");
+
+    va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
+    va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
+    va_TraceMsg(trace_ctx, "\tframe_rate = %d\n", p->frame_rate);
+    va_TraceMsg(trace_ctx, "\tvbv_buffer_size = %d\n", p->vbv_buffer_size);
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
 static void va_TraceVAEncSequenceParameterBufferMPEG4(
     VADisplay dpy,
     VAContextID context,
@@ -4037,10 +4060,14 @@ static void va_TraceMPEG2Buf(
     case VAEncCodedBufferType:
         break;
     case VAEncSequenceParameterBufferType:
+        va_TraceVAEncSequenceParameterBufferMPEG2(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAEncPictureParameterBufferType:
         break;
     case VAEncSliceParameterBufferType:
+        break;
+    case VAEncMiscParameterBufferType:
+        va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
         break;
