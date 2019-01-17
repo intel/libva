@@ -3269,6 +3269,24 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tquality_level = %d\n", p->quality_level);
         break;
     }
+    case VAEncMiscParameterTypeROI:
+    {
+        VAEncMiscParameterBufferROI *p = (VAEncMiscParameterBufferROI *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferROI\n");
+        va_TraceMsg(trace_ctx, "\tnum_roi = %d\n", p->num_roi);
+        va_TraceMsg(trace_ctx, "\tmax_delta_qp = %d\n", p->max_delta_qp);
+        va_TraceMsg(trace_ctx, "\tmin_delta_qp = %d\n", p->min_delta_qp);
+        va_TraceMsg(trace_ctx, "\troi_flags.bits.roi_value_is_qp_delta = %d\n", p->roi_flags.bits.roi_value_is_qp_delta);
+        for (int i = 0; i < p->num_roi; i++) {
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.x      = %d\n", i, p->roi[i].roi_rectangle.x);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.y      = %d\n", i, p->roi[i].roi_rectangle.y);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.width  = %d\n", i, p->roi[i].roi_rectangle.width);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_rectangle.height = %d\n", i, p->roi[i].roi_rectangle.height);
+            va_TraceMsg(trace_ctx, "\troi[%d].roi_value            = %d\n", i, p->roi[i].roi_value);
+        }
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
