@@ -2214,17 +2214,18 @@ typedef struct _VAEncMiscParameterQuantization
         struct
         {
 	    /* \brief disable trellis for all frames/fields */
-            uint64_t disable_trellis : 1;
+            uint32_t disable_trellis : 1;
 	    /* \brief enable trellis for I frames/fields */
-            uint64_t enable_trellis_I : 1;
+            uint32_t enable_trellis_I : 1;
 	    /* \brief enable trellis for P frames/fields */
-            uint64_t enable_trellis_P : 1;
+            uint32_t enable_trellis_P : 1;
 	    /* \brief enable trellis for B frames/fields */
-            uint64_t enable_trellis_B : 1;
-            uint64_t reserved : 28;
+            uint32_t enable_trellis_B : 1;
+            uint32_t reserved : 28;
         } bits;
-        uint64_t value;
+        uint32_t value;
     } quantization_flags;
+    uint32_t va_reserved;
 } VAEncMiscParameterQuantization;
 
 /**
