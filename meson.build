@@ -108,6 +108,15 @@ if get_option('with_wayland') != 'no'
   WITH_WAYLAND = wayland_dep.found()
 endif
 
+va_c_args = []
+if get_option('enable_va_messaging')
+  va_c_args += ['-DENABLE_VA_MESSAGING=1']
+endif
+
+# Symbol visibility
+if cc.has_argument('-fvisibility=hidden')
+  va_c_args += ['-DHAVE_GNUC_VISIBILITY_ATTRIBUTE']
+endif
 
 if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND)
   error('Please install at least one backend dev files (DRM, X11, Wayland)')
