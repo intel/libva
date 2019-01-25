@@ -62,7 +62,7 @@ libva = shared_library(
             libva_headers_priv,
   soversion : libva_lt_current,
   version : libva_lt_version,
-  c_args : '-DVA_DRIVERS_PATH="' + driverdir + '"',
+  c_args : ['-DVA_DRIVERS_PATH="' + driverdir + '"'] + va_c_args,
   include_directories : configinc,
   link_args : '-Wl,-version-script,' + libva_sym_path,
   link_depends : libva_sym,

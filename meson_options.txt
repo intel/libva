@@ -4,3 +4,4 @@ option('with_x11', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'aut
 option('with_glx', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
 option('with_wayland', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
 option('enable_docs', type : 'boolean', value : false)
+option('enable_va_messaging', type : 'boolean', value : true)
