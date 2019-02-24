@@ -3911,6 +3911,37 @@ VAStatus vaQuerySurfaceError(
  */
 #define VA_FOURCC_I010          0x30313049
 
+/** ARGB2101010: packed 2/10-bit ARGB.
+ *
+ * Each pixel is a four-byte value, contains A, R, G, B four channels, A:R:G:B 2:10:10:10 little endian.
+ */
+#define VA_FOURCC_ARGB2101010   0x30335241 /* VA_FOURCC('A','R','3','0') */
+
+/** ABGR2101010: packed 2/10-bit ABGR.
+ *
+ * Each pixel is a four-byte value, contains A, B, G, R four channels, A:B:G:R 2:10:10:10 little endian.
+ */
+#define VA_FOURCC_ABGR2101010   0x30334241 /* VA_FOURCC('A','B','3','0') */
+
+/** BGRA1010102: packed 2/10-bit BGRA.
+ *
+ * Each pixel is a four-byte value, contains B, G, R, A four channels, B:G:R:A 10:10:10:2 little endian.
+ */
+#define VA_FOURCC_BGRA1010102   0x30334142 /* VA_FOURCC('B','A','3','0') */
+
+/** RGBA1010102: packed 2/10-bit RGBA.
+ *
+ * Each pixel is a four-byte value, contains R, G, B, A four channels, R:G:B:A 10:10:10:2 little endian.
+ */
+#define VA_FOURCC_RGBA1010102   0x30334252  /* VA_FOURCC('R','A','3','0') */
+
+/** ARGB16161616F: packed 16-bit half float ARGB.
+ *
+ * Each sample is a two-byte little-endian value. A four-component, 64-bit floating-point format that supports
+ * 16 bits per channel including alpha. Each channel(a,r,g,b) is coded as an IEEE 754-2008 16 bit half-float.
+ */
+#define VA_FOURCC_ARGB16161616F 0x46485241 /* VA_FOURCC('A','R','H','F') */
+
 /** IYUV: three-plane 8-bit YUV 4:2:0.
  *
  * @deprecated Use I420 instead.
