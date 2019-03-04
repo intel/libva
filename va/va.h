@@ -3925,6 +3925,36 @@ VAStatus vaQuerySurfaceError(
  * 10-bit Pixel RGB formats.
  */
 #define VA_FOURCC_A2R10G10B10   0x30335241 /* VA_FOURCC('A','R','3','0') */
+/** Y8: 8-bit greyscale.
+ *
+ * Only a single sample, 8 bit Y plane for monochrome images
+ */
+#define VA_FOURCC_Y8            0x20203859
+/** Y16: 16-bit greyscale.
+ *
+ * Only a single sample, 16 bit Y plane for monochrome images
+ */
+#define VA_FOURCC_Y16           0x20363159
+/** VYUV: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: V, Y, U, V.
+ */
+#define VA_FOURCC_VYUY          0x59555956
+/** YVYU: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: Y, V, Y, U.
+ */
+#define VA_FOURCC_YVYU          0x55595659
+/** AGRB64: three-plane 16-bit ARGB 16:16:16:16
+ *
+ * The four planes contain: alpha, red, green, blue respectively.
+ */
+#define VA_FOURCC_ARGB64        0x34475241
+/** ABGR64: three-plane 16-bit ABGR 16:16:16:16
+ *
+ * The four planes contain: alpha, blue, green, red respectively.
+ */
+#define VA_FOURCC_ABGR64        0x34474241
 
 /* byte order */
 #define VA_LSB_FIRST		1
