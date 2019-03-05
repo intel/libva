@@ -3287,6 +3287,18 @@ static void va_TraceVAEncMiscParameterBuffer(
         }
         break;
     }
+    case VAEncMiscParameterTypeRIR:
+    {
+        VAEncMiscParameterRIR *p = (VAEncMiscParameterRIR *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterRIR\n");
+        va_TraceMsg(trace_ctx, "\trir_flags.bits.enable_rir_column = %d\n", p->rir_flags.bits.enable_rir_column);
+        va_TraceMsg(trace_ctx, "\trir_flags.bits.enable_rir_row = %d\n", p->rir_flags.bits.enable_rir_row);
+        va_TraceMsg(trace_ctx, "\tintra_insertion_location = %d\n", p->intra_insertion_location);
+        va_TraceMsg(trace_ctx, "\tintra_insert_size = %d\n", p->intra_insert_size);
+        va_TraceMsg(trace_ctx, "\tqp_delta_for_inserted_intra = %d\n", p->qp_delta_for_inserted_intra);
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
