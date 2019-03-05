@@ -1,5 +1,39 @@
-libva NEWS -- summary of user visible changes.  2018-02-12
-Copyright (C) 2009-2018 Intel Corporation
+libva NEWS -- summary of user visible changes.  2019-01-25
+Copyright (C) 2009-2019 Intel Corporation
+
+version 2.4.0 - 25.Jan.2019
+* va_TraceSurface support for VA_FOURCC_P010
+* Add pointer to struct wl_interface for driver to use
+* (integrate) va: fix new line symbol in error message
+* av: avoid driver path truncation
+* Fix compilation warning (uninit and wrong variable types) for Android O MR1
+* Allow import of the DRM PRIME 2 memory type
+* android: ignore unimportant compile warnnings
+* compile: fix sign/unsign compare in va_trace.c
+* android: replace utils/Log.h with log/log.h
+* High Dynamic Range Tone Mapping: Add a new filter for input metadata and some comments.
+* Remove restrictions on vaSetDriverName()
+
+version 2.3.0 - 30.Sep.2018
+* Bump VA-API version to 1.3.0 and libva to 2.3.0
+* Add max frame size parameters for multiple pass case in legacy mode
+* Add new BRC mode AVBR
+* Add new interface for High Dynamic Range tone mapping
+* Add missing enum to string conversions
+* Add hevc subsets parameters structure
+* Add Customized Noise Reduction (HVS) interfaces
+* Add new BRC mode definition QVBR
+* Add more complete colour properties for use in VPP
+
+Version 2.2.0 - 12.July.2018
+* Bump VA-API version to 1.2.0 and libva to 2.2.0
+* Add support for hevc range extension decoding
+* Add support for fast intra prediction in HEVC FEI
+* Add 10/12-bit YUV render target formats
+* Add fourcc code for Y210/Y216/Y410/Y416/RGB565/BGR565
+* Add VA_STATUS_ERROR_NOT_ENOUGH_BUFFER
+* Add VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT
+* Improve documentation
 
 Version 2.1.0 - 12.Feb.2018
 * Bump VA-API version to 1.1.0 and libva to 2.1.0

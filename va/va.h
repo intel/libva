@@ -375,7 +375,16 @@ typedef enum
     VAProfileVP9Profile0                = 19,
     VAProfileVP9Profile1                = 20,
     VAProfileVP9Profile2                = 21,
-    VAProfileVP9Profile3                = 22
+    VAProfileVP9Profile3                = 22,
+    VAProfileHEVCMain12                 = 23,
+    VAProfileHEVCMain422_10             = 24,
+    VAProfileHEVCMain422_12             = 25,
+    VAProfileHEVCMain444                = 26,
+    VAProfileHEVCMain444_10             = 27,
+    VAProfileHEVCMain444_12             = 28,
+    VAProfileHEVCSccMain                = 29,
+    VAProfileHEVCSccMain10              = 30,
+    VAProfileHEVCSccMain444             = 31
 } VAProfile;
 
 /**
@@ -754,26 +763,29 @@ typedef struct _VAConfigAttrib {
     uint32_t value; /* OR'd flags (bits) for this attribute */
 } VAConfigAttrib;
 
-/** attribute value for VAConfigAttribRTFormat */
-#define VA_RT_FORMAT_YUV420	0x00000001	
-#define VA_RT_FORMAT_YUV422	0x00000002
-#define VA_RT_FORMAT_YUV444	0x00000004
-#define VA_RT_FORMAT_YUV411	0x00000008
-#define VA_RT_FORMAT_YUV400	0x00000010
-/** YUV formats with more than 8 bpp */
-#define VA_RT_FORMAT_YUV420_10BPP	0x00000100
-/** RGB formats */
-#define VA_RT_FORMAT_RGB16	0x00010000
-#define VA_RT_FORMAT_RGB32	0x00020000
-/* RGBP covers RGBP and BGRP fourcc */ 
-#define VA_RT_FORMAT_RGBP	0x00100000
-/**
- * RGB 10-bit packed format with upper 2 bits as alpha channel.
- * The existing pre-defined fourcc codes can be used to signal
- * the position of each component for this RT format.
- */
-#define VA_RT_FORMAT_RGB32_10BPP 0x00200000
+/* Attribute values for VAConfigAttribRTFormat. */
+
+#define VA_RT_FORMAT_YUV420	0x00000001	///< YUV 4:2:0 8-bit.
+#define VA_RT_FORMAT_YUV422	0x00000002	///< YUV 4:2:2 8-bit.
+#define VA_RT_FORMAT_YUV444	0x00000004	///< YUV 4:4:4 8-bit.
+#define VA_RT_FORMAT_YUV411	0x00000008	///< YUV 4:1:1 8-bit.
+#define VA_RT_FORMAT_YUV400	0x00000010	///< Greyscale 8-bit.
+#define VA_RT_FORMAT_YUV420_10	0x00000100	///< YUV 4:2:0 10-bit.
+#define VA_RT_FORMAT_YUV422_10	0x00000200	///< YUV 4:2:2 10-bit.
+#define VA_RT_FORMAT_YUV444_10	0x00000400	///< YUV 4:4:4 10-bit.
+#define VA_RT_FORMAT_YUV420_12	0x00001000	///< YUV 4:2:0 12-bit.
+#define VA_RT_FORMAT_YUV422_12	0x00002000	///< YUV 4:2:2 12-bit.
+#define VA_RT_FORMAT_YUV444_12	0x00004000	///< YUV 4:4:4 12-bit.
+
+#define VA_RT_FORMAT_RGB16	0x00010000	///< Packed RGB, 16 bits per pixel.
+#define VA_RT_FORMAT_RGB32	0x00020000	///< Packed RGB, 32 bits per pixel, 8 bits per colour sample.
+#define VA_RT_FORMAT_RGBP	0x00100000	///< Planar RGB, 8 bits per sample.
+#define VA_RT_FORMAT_RGB32_10	0x00200000	///< Packed RGB, 32 bits per pixel, 10 bits per colour sample.
+
 #define VA_RT_FORMAT_PROTECTED	0x80000000
+
+#define VA_RT_FORMAT_RGB32_10BPP	VA_RT_FORMAT_RGB32_10	///< @deprecated use VA_RT_FORMAT_RGB32_10 instead.
+#define VA_RT_FORMAT_YUV420_10BPP	VA_RT_FORMAT_YUV420_10	///< @deprecated use VA_RT_FORMAT_YUV420_10 instead.
 
 /** @name Attribute values for VAConfigAttribRateControl */
 /**@{*/
@@ -808,6 +820,23 @@ typedef struct _VAConfigAttrib {
  *  simultaneously. And BRC would adjust accordingly. This is so called
  *  Parallel BRC. */
 #define VA_RC_PARALLEL                  0x00000200
+/** \brief Quality defined VBR
+ * Use Quality factor to determine the good enough QP for each MB such that
+ * good enough quality can be obtained without waste of bits
+ * for this BRC mode, you must set all legacy VBR parameters
+ * and reuse quality_factor in \c VAEncMiscParameterRateControl
+ * */
+#define VA_RC_QVBR                      0x00000400
+/** \brief Average VBR
+ *  Average variable bitrate control algorithm focuses on overall encoding
+ *  quality while meeting the specified target bitrate, within the accuracy
+ *  range, after a convergence period.
+ *  bits_per_second in VAEncMiscParameterRateControl is target bitrate for AVBR.
+ *  Convergence is specified in the unit of frame.
+ *  window_size in VAEncMiscParameterRateControl is equal to convergence for AVBR.
+ *  Accuracy is in the range of [1,100], 1 means one percent, and so on. 
+ *  target_percentage in VAEncMiscParameterRateControl is equal to accuracy for AVBR. */
+#define VA_RC_AVBR                      0x00000800
 
 /**@}*/
 
@@ -1231,7 +1260,12 @@ typedef enum {
     VASurfaceAttribMaxHeight,
     /** \brief Surface memory type expressed in bit fields (int, read/write). */
     VASurfaceAttribMemoryType,
-    /** \brief External buffer descriptor (pointer, write). */
+    /** \brief External buffer descriptor (pointer, write).
+     *
+     * Refer to the documentation for the memory type being created to
+     * determine what descriptor structure to pass here.  If not otherwise
+     * stated, the common VASurfaceAttribExternalBuffers should be used.
+     */
     VASurfaceAttribExternalBufferDescriptor,
     /** \brief Surface usage hint, gives the driver a hint of intended usage 
      *  to optimize allocation (e.g. tiling) (int, read/write). */
@@ -1321,6 +1355,9 @@ typedef struct _VASurfaceAttribExternalBuffers {
 #define VA_SURFACE_ATTRIB_USAGE_HINT_VPP_WRITE 	0x00000008
 /** \brief Surface used for display. */
 #define VA_SURFACE_ATTRIB_USAGE_HINT_DISPLAY 	0x00000010
+/** \brief Surface used for export to third-party APIs, e.g. via
+ *  vaExportSurfaceHandle(). */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT 	0x00000020
 
 /**@}*/
 
@@ -1618,6 +1655,19 @@ typedef enum
     /** decode stream out buffer, intermedia data of decode, it may include MV, MB mode etc.
       * it can be used to detect motion and analyze the frame contain  */
     VADecodeStreamoutBufferType             = 56,
+
+    /** \brief HEVC Decoding Subset Parameter buffer type
+     *
+     * The subsets parameter buffer is concatenation with one or multiple
+     * subset entry point offsets. All the offset values are layed out one
+     * by one according to slice order with first slice segment first, second
+     * slice segment second, etc... The entry number is indicated by parameter
+     * \ref num_entry_point_offsets. And the first entry position of the entry
+     * point offsets for any slice segment is indicated by parameter
+     * entry_offset_to_subset_array in VAPictureParameterBufferHEVC data structure.
+     */
+    VASubsetsParameterBufferType        = 57,
+
     VABufferTypeMax
 } VABufferType;
 
@@ -1703,6 +1753,8 @@ typedef enum
     VAEncMiscParameterTypeSkipFrame     = 9,
     /** \brief Buffer type used for region-of-interest (ROI) parameters. */
     VAEncMiscParameterTypeROI           = 10,
+    /** \brief Buffer type used to express a maximum frame size (in bytes) settings for multiple pass. */
+    VAEncMiscParameterTypeMultiPassFrameSize       = 11,
     /** \brief Buffer type used for temporal layer structure */
     VAEncMiscParameterTypeTemporalLayerStructure   = 12,
     /** \brief Buffer type used for dirty region-of-interest (ROI) parameters. */
@@ -1807,37 +1859,70 @@ typedef struct _VAEncMiscParameterTemporalLayerStructure
 /** \brief Rate control parameters */
 typedef struct _VAEncMiscParameterRateControl
 {
-    /* this is the maximum bit-rate to be constrained by the rate control implementation */
+    /** The maximum bit-rate which the the rate controller should generate. */
     uint32_t bits_per_second;
-    /* this is the bit-rate the rate control is targeting, as a percentage of the maximum
-     * bit-rate for example if target_percentage is 95 then the rate control will target
-     * a bit-rate that is 95% of the maximum bit-rate
+    /** The target bit-rate which the rate controller should generate, as a percentage of the
+     * maximum bit-rate.
+     *
+     * In CBR mode this value is ignored (treated as 100%).
      */
     uint32_t target_percentage;
-    /* windows size in milliseconds. For example if this is set to 500,
-     * then the rate control will guarantee the target bit-rate over a 500 ms window
+    /** Rate control window size in milliseconds.
+     *
+     * The rate controller will attempt to guarantee that the target and maximum bit-rates are
+     * correct over this window.
      */
     uint32_t window_size;
-    /* initial QP at I frames */
+    /** Initial quantiser value used at the start of the stream.
+     *
+     * Ignored if set to zero.
+     */
     uint32_t initial_qp;
+    /** Minimum quantiser value to use.
+     *
+     * The quantiser will not go below the value - if this limit is hit, the output bitrate may
+     * be lower than the target.  Ignored if set to zero.
+     */
     uint32_t min_qp;
+    /** Basic unit size.
+     *
+     * Only used by some drivers - see driver documentation for details.  Set to zero if unused.
+     */
     uint32_t basic_unit_size;
     union
     {
         struct
         {
-            uint32_t reset : 1;
-            uint32_t disable_frame_skip : 1; /* Disable frame skip in rate control mode */
-            uint32_t disable_bit_stuffing : 1; /* Disable bit stuffing in rate control mode */
-            uint32_t mb_rate_control : 4; /* Control VA_RC_MB 0: default, 1: enable, 2: disable, other: reserved*/
-            /*
-             * The temporal layer that the rate control parameters are specified for.
+            /** Force rate controller reset.
+             *
+             * The next frame will be treated as the start of a new stream, with all rate
+             * controller state reset to its initial values.
              */
+            uint32_t reset : 1;
+            /** Disable frame skip in rate control mode. */
+            uint32_t disable_frame_skip : 1;
+            /** Disable bit stuffing in rate control mode. */
+            uint32_t disable_bit_stuffing : 1;
+            /** Macroblock-level rate control.
+             *
+             * 0: use default, 1: always enable, 2: always disable, other: reserved.
+             *
+             * This feature is only available if VAConfigAttribRateControl has the
+             * \ref VA_RC_MB bit set.
+             */
+            uint32_t mb_rate_control : 4;
+            /** The temporal layer that these rate control parameters apply to. */
             uint32_t temporal_id : 8;
-            uint32_t cfs_I_frames : 1; /* I frame also follows CFS */
+            /** Ensure that intra frames also conform to the constant frame size. */
+            uint32_t cfs_I_frames : 1;
+            /** Enable parallel rate control for hierarchical B frames.
+             *
+             * See \ref VA_RC_PARALLEL.
+             */
             uint32_t enable_parallel_brc    : 1;
             uint32_t enable_dynamic_scaling : 1;
-             /**  \brief Frame Tolerance Mode
+            /** Frame tolerance mode.
+             *
              *  Indicates the tolerance the application has to variations in the frame size.
              *  For example, wireless display scenarios may require very steady bit rate to
              *  reduce buffering time. It affects the rate control algorithm used,
@@ -1851,19 +1936,42 @@ typedef struct _VAEncMiscParameterRateControl
              *  other       -- invalid.
              */
             uint32_t frame_tolerance_mode   : 2;
+            /** Reserved for future use, must be zero. */
             uint32_t reserved               : 12;
         } bits;
         uint32_t value;
     } rc_flags;
-    uint32_t ICQ_quality_factor; /* Initial ICQ quality factor: 1-51. */
-    /** \brief Reserved bytes for future use, must be zero */
+    /** Initial quality factor used in ICQ mode.
+     *
+     * This value must be between 1 and 51.
+     * this value will be deprecated in future, to use quality_factor instead of it.
+     */
+    uint32_t ICQ_quality_factor;
+    /** Maximum quantiser value to use.
+     *
+     * The quantiser will not go above this value - if this limit is hit, the output bitrate
+     * may exceed the target.  Ignored if set to zero.
+     */
     uint32_t max_qp;
-    uint32_t va_reserved[VA_PADDING_MEDIUM - 2];
+    /** Quality factor
+     *
+     *  the range will be different for different codec
+     */
+    uint32_t quality_factor;
+    /** Reserved bytes for future use, must be zero. */
+    uint32_t va_reserved[VA_PADDING_MEDIUM - 3];
 } VAEncMiscParameterRateControl;
 
+/** Encode framerate parameters.
+ *
+ * Sets the encode framerate used by the rate controller.  This should be
+ * provided in all modes using a bitrate target (variable framerate is not
+ * supported).
+ */
 typedef struct _VAEncMiscParameterFrameRate
 {
-    /*
+    /** Encode framerate.
+     *
      * The framerate is specified as a number of frames per second, as a
      * fraction.  The denominator of the fraction is given in the top half
      * (the high two bytes) of the framerate field, and the numerator is
@@ -1886,10 +1994,9 @@ typedef struct _VAEncMiscParameterFrameRate
     {
         struct
         {
-            /*
-             * The temporal id the framerate parameters are specified for.
-             */
+            /** The temporal layer that these framerate parameters apply to. */
             uint32_t temporal_id : 8;
+            /** Reserved for future use, must be zero. */
             uint32_t reserved : 24;
          } bits;
          uint32_t value;
@@ -1964,10 +2071,33 @@ typedef struct _VAEncMiscParameterRIR
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterRIR;
 
+/** HRD / VBV buffering parameters for encoding.
+ *
+ * This sets the HRD / VBV parameters which will be used by the rate
+ * controller for encoding.  It should be specified in modes using a bitrate
+ * target when the buffering of the output stream needs to be constrained.
+ *
+ * If not provided, the encoder may use arbitrary amounts of buffering.
+ */
 typedef struct _VAEncMiscParameterHRD
 {
-    uint32_t initial_buffer_fullness;       /* in bits */
-    uint32_t buffer_size;                   /* in bits */
+    /** The initial fullness of the HRD coded picture buffer, in bits.
+     *
+     * This sets how full the CPB is when encoding begins - that is, how much
+     * buffering will happen on the decoder side before the first frame.
+     * The CPB fullness will be reset to this value after any rate control
+     * reset (a change in parameters or an explicit reset).
+     *
+     * For H.264, it should match the value of initial_cpb_removal_delay in
+     * buffering_period SEI messages.
+     */
+    uint32_t initial_buffer_fullness;
+    /** The HRD coded picture buffer size, in bits.
+     *
+     * For H.264, it should match the value of cpb_size_value_minus1 in the VUI
+     * parameters.
+     */
+    uint32_t buffer_size;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
@@ -1991,6 +2121,31 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferMaxFrameSize;
+
+/**
+ * \brief Maximum frame size (in bytes) settings for multiple pass.
+ *
+ * This misc parameter buffer defines the maximum size of a frame (in
+ * bytes) settings for multiple pass. currently only AVC encoder can
+ * support this settings in multiple pass case. If the frame size exceeds
+ * this size, the encoder will do more pak passes to adjust the QP value
+ * to control the frame size.
+ */
+typedef struct _VAEncMiscParameterBufferMultiPassFrameSize {
+    /** \brief Type. Shall be set to #VAEncMiscParameterTypeMultiPassMaxFrameSize. */
+    VAEncMiscParameterType      type;
+    /** \brief Maximum size of a frame (in byte) */
+    uint32_t                max_frame_size;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                reserved;
+    /** \brief number of passes, every pass has different QP, currently AVC encoder can support up to 4 passes */
+    uint8_t                 num_passes;
+    /** \brief delta QP list for every pass */
+    uint8_t                *delta_qp;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    unsigned long           va_reserved[VA_PADDING_LOW];
+} VAEncMiscParameterBufferMultiPassFrameSize;
 
 /**
  * \brief Encoding quality level.
@@ -3549,53 +3704,216 @@ VAStatus vaQuerySurfaceError(
     ((unsigned long)(unsigned char) (ch0) | ((unsigned long)(unsigned char) (ch1) << 8) | \
     ((unsigned long)(unsigned char) (ch2) << 16) | ((unsigned long)(unsigned char) (ch3) << 24 ))
 
-/* 
- * Pre-defined fourcc codes
+/* Pre-defined fourcc codes. */
+
+/** NV12: two-plane 8-bit YUV 4:2:0.
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
  */
 #define VA_FOURCC_NV12		0x3231564E
+/** NV21: two-plane 8-bit YUV 4:2:0.
+ * Same as NV12, but with U and V swapped.
+ */
 #define VA_FOURCC_NV21		0x3132564E
+
+/** AI44: packed 4-bit YA.
+ *
+ * The bottom half of each byte contains luma, the top half contains alpha.
+ */
 #define VA_FOURCC_AI44		0x34344149
+
+/** RGBA: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: red, green, blue, alpha.
+ */
 #define VA_FOURCC_RGBA		0x41424752
+/** RGBX: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: red, green, blue, unspecified.
+ */
 #define VA_FOURCC_RGBX		0x58424752
+/** BGRA: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: blue, green, red, alpha.
+ */
 #define VA_FOURCC_BGRA		0x41524742
+/** BGRX: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: blue, green, red, unspecified.
+ */
 #define VA_FOURCC_BGRX		0x58524742
+/** ARGB: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: alpha, red, green, blue.
+ */
 #define VA_FOURCC_ARGB		0x42475241
+/** XRGB: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: unspecified, red, green, blue.
+ */
 #define VA_FOURCC_XRGB		0x42475258
+/** ABGR: packed 8-bit RGBA.
+ *
+ * Four bytes per pixel: alpha, blue, green, red.
+ */
 #define VA_FOURCC_ABGR          0x52474241
+/** XBGR: packed 8-bit RGB.
+ *
+ * Four bytes per pixel: unspecified, blue, green, red.
+ */
 #define VA_FOURCC_XBGR          0x52474258
+
+/** UYUV: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: U, Y, U, V.
+ */
 #define VA_FOURCC_UYVY          0x59565955
+/** YUY2: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: Y, U, Y, V.
+ */
 #define VA_FOURCC_YUY2          0x32595559
+/** AYUV: packed 8-bit YUVA 4:4:4.
+ *
+ * Four bytes per pixel: A, Y, U, V.
+ */
 #define VA_FOURCC_AYUV          0x56555941
+/** NV11: two-plane 8-bit YUV 4:1:1.
+ *
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
+ */
 #define VA_FOURCC_NV11          0x3131564e
+/** YV12: three-plane 8-bit YUV 4:2:0.
+ *
+ * The three planes contain Y, V and U respectively.
+ */
 #define VA_FOURCC_YV12          0x32315659
+/** P208: two-plane 8-bit YUV 4:2:2.
+ *
+ * The first plane contains Y, the second plane contains U and V in pairs of bytes.
+ */
 #define VA_FOURCC_P208          0x38303250
-/* IYUV same as I420, but most user perfer I420, will deprecate it */
-#define VA_FOURCC_IYUV          0x56555949
+/** I420: three-plane 8-bit YUV 4:2:0.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
 #define VA_FOURCC_I420          0x30323449
+/** YV24: three-plane 8-bit YUV 4:4:4.
+ *
+ * The three planes contain Y, V and U respectively.
+ */
 #define VA_FOURCC_YV24          0x34325659
+/** YV32: four-plane 8-bit YUVA 4:4:4
+ *
+ * The four planes contain Y, V, U and A respectively.
+ */
 #define VA_FOURCC_YV32          0x32335659
+/** Y800: 8-bit greyscale.
+ */
 #define VA_FOURCC_Y800          0x30303859
+/** IMC3: three-plane 8-bit YUV 4:2:0.
+ *
+ * Equivalent to YV12, but with the additional constraint that the pitch of all three planes
+ * must be the same.
+ */
 #define VA_FOURCC_IMC3          0x33434D49
+/** 411P: three-plane 8-bit YUV 4:1:1.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
 #define VA_FOURCC_411P          0x50313134
+/** 411R: three-plane 8-bit YUV.
+ *
+ * The subsampling is the transpose of 4:1:1 - full chroma appears on every fourth line.
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_411R          0x52313134
+/** 422H: three-plane 8-bit YUV 4:2:2.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
 #define VA_FOURCC_422H          0x48323234
+/** 422V: three-plane 8-bit YUV 4:4:0.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
 #define VA_FOURCC_422V          0x56323234
+/** 444P: three-plane 8-bit YUV 4:4:4.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
 #define VA_FOURCC_444P          0x50343434
+
+/** RGBP: three-plane 8-bit RGB.
+ *
+ * The three planes contain red, green and blue respectively.
+ */
 #define VA_FOURCC_RGBP          0x50424752
+/** BGRP: three-plane 8-bit RGB.
+ *
+ * The three planes contain blue, green and red respectively.
+ */
 #define VA_FOURCC_BGRP          0x50524742
-#define VA_FOURCC_411R          0x52313134 /* VA_FOURCC('4','1','1','R') */
-/**
- * Planar YUV 4:2:2.
- * 8-bit Y plane, followed by 8-bit 2x1 subsampled V and U planes
+
+/** RG16: packed 5/6-bit RGB.
+ *
+ * Each pixel is a two-byte little-endian value.
+ * Red, green and blue are found in bits 15:11, 10:5, 4:0 respectively.
+ */
+#define VA_FOURCC_RGB565        0x36314752
+/** BG16: packed 5/6-bit RGB.
+ *
+ * Each pixel is a two-byte little-endian value.
+ * Blue, green and red are found in bits 15:11, 10:5, 4:0 respectively.
+ */
+#define VA_FOURCC_BGR565        0x36314742
+
+/** Y210: packed 10-bit YUV 4:2:2.
+ *
+ * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value,
+ * with the bottom six bits ignored.  The samples are in the order Y, U, Y, V.
+ */
+#define VA_FOURCC_Y210          0x30313259
+/** Y216: packed 16-bit YUV 4:2:2.
+ *
+ * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value.
+ * The samples are in the order Y, U, Y, V.
+ */
+#define VA_FOURCC_Y216          0x36313259
+/** Y410: packed 10-bit YUVA 4:4:4.
+ *
+ * Each pixel is a four-byte little-endian value.
+ * A, V, Y, U are found in bits 31:30, 29:20, 19:10, 9:0 respectively.
+ */
+#define VA_FOURCC_Y410          0x30313459
+/** Y416: packed 16-bit YUVA 4:4:4.
+ *
+ * Each pixel is a set of four samples, each of which is a two-byte little-endian value.
+ * The samples are in the order A, V, Y, U.
+ */
+#define VA_FOURCC_Y416          0x36313459
+
+/** YV16: three-plane 8-bit YUV 4:2:2.
+ *
+ * The three planes contain Y, V and U respectively.
  */
 #define VA_FOURCC_YV16          0x36315659
-/**
- * 10-bit and 16-bit Planar YUV 4:2:0. 
+/** P010: two-plane 10-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value with the bottom six bits ignored.
+ * The first plane contains Y, the second plane contains U and V in pairs of samples.
  */
 #define VA_FOURCC_P010          0x30313050
+/** P016: two-plane 16-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value.  The first plane contains Y, the second
+ * plane contains U and V in pairs of samples.
+ */
 #define VA_FOURCC_P016          0x36313050
 
-/**
- * 10-bit Planar YUV 420 and occupy the lower 10-bit.
+/** I010: three-plane 10-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value with the top six bits ignored.
+ * The three planes contain Y, V and U respectively.
  */
 #define VA_FOURCC_I010          0x30313049
 
@@ -3603,6 +3921,11 @@ VAStatus vaQuerySurfaceError(
  * 10-bit Pixel RGB formats.
  */
 #define VA_FOURCC_A2R10G10B10   0x30335241 /* VA_FOURCC('A','R','3','0') */
+/** IYUV: three-plane 8-bit YUV 4:2:0.
+ *
+ * @deprecated Use I420 instead.
+ */
+#define VA_FOURCC_IYUV          0x56555949
 
 /* byte order */
 #define VA_LSB_FIRST		1

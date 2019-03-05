@@ -136,6 +136,7 @@ va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
     struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
 
     vtable->has_prime_sharing = 0;
+    vtable->wl_interface = NULL;
 
     wl_drm_ctx->is_authenticated = 0;
 
@@ -222,6 +223,8 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     struct VADriverVTableWayland *vtable = ctx->vtable_wayland;
     struct wl_display *wrapped_display = NULL;
 
+    vtable->wl_interface = NULL;
+
     wl_drm_ctx = malloc(sizeof(*wl_drm_ctx));
     if (!wl_drm_ctx) {
         va_wayland_error("could not allocate wl_drm_ctx");
@@ -300,6 +303,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
         goto end;
     }
 
+    vtable->wl_interface = &wl_drm_interface;
     result = true;
 
 end:

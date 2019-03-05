@@ -185,7 +185,7 @@ struct va_trace {
 #define DPY2TRACECTX(dpy, context, buf_id)                                  \
     struct va_trace *pva_trace = NULL;                                      \
     struct trace_context *trace_ctx = NULL;                                 \
-    int ctx_id = context;                                                   \
+    VAContextID ctx_id = context;                                           \
                                                                             \
     pva_trace = (struct va_trace *)(((VADisplayContextP)dpy)->vatrace);     \
     if(!pva_trace)                                                          \
@@ -955,6 +955,7 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     unsigned int buffer_name;
     void *buffer = NULL;
     unsigned char *Y_data, *UV_data, *tmp;
+    unsigned int pixel_byte;
     VAStatus va_status;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
@@ -1001,20 +1002,27 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     Y_data = (unsigned char*)buffer;
     UV_data = (unsigned char*)buffer + chroma_u_offset;
 
+    if (fourcc == VA_FOURCC_P010)
+        pixel_byte = 2;
+    else
+        pixel_byte = 1;
+
     tmp = Y_data + luma_stride * trace_ctx->trace_surface_yoff;
+
     for (i=0; i<trace_ctx->trace_surface_height; i++) {
         fwrite(tmp + trace_ctx->trace_surface_xoff,
                trace_ctx->trace_surface_width,
-               1, trace_ctx->trace_fp_surface);
+               pixel_byte, trace_ctx->trace_fp_surface);
         
         tmp += luma_stride;
     }
+
     tmp = UV_data + chroma_u_stride * trace_ctx->trace_surface_yoff / 2;
-    if (fourcc == VA_FOURCC_NV12) {
+    if (fourcc == VA_FOURCC_NV12 || fourcc == VA_FOURCC_P010) {
         for (i=0; i<trace_ctx->trace_surface_height/2; i++) {
             fwrite(tmp + trace_ctx->trace_surface_xoff,
                    trace_ctx->trace_surface_width,
-                   1, trace_ctx->trace_fp_surface);
+                   pixel_byte, trace_ctx->trace_fp_surface);
             
             tmp += chroma_u_stride;
         }
@@ -1134,7 +1142,7 @@ static void va_TraceSurfaceAttributes(
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
-                int j;
+                uint32_t j;
                 
                 va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
                 va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
@@ -3179,7 +3187,7 @@ static void va_TraceVAEncMiscParameterBuffer(
         VAEncMiscParameterFrameRate *p = (VAEncMiscParameterFrameRate *)tmp->data;
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterFrameRate\n");
         va_TraceMsg(trace_ctx, "\tframerate = %d\n", p->framerate);
-        
+        va_TraceMsg(trace_ctx, "\tframerate_flags.temporal_id = %d\n", p->framerate_flags.bits.temporal_id);
         break;
     }
     case VAEncMiscParameterTypeRateControl:
@@ -3198,6 +3206,12 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\trc_flags.disable_bit_stuffing = %d\n", p->rc_flags.bits.disable_bit_stuffing);
         va_TraceMsg(trace_ctx, "\trc_flags.mb_rate_control = %d\n", p->rc_flags.bits.mb_rate_control);
         va_TraceMsg(trace_ctx, "\trc_flags.temporal_id = %d\n", p->rc_flags.bits.temporal_id);
+        va_TraceMsg(trace_ctx, "\trc_flags.cfs_I_frames = %d\n", p->rc_flags.bits.cfs_I_frames);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_parallel_brc = %d\n", p->rc_flags.bits.enable_parallel_brc);
+        va_TraceMsg(trace_ctx, "\trc_flags.enable_dynamic_scaling = %d\n", p->rc_flags.bits.enable_dynamic_scaling);
+        va_TraceMsg(trace_ctx, "\trc_flags.frame_tolerance_mode = %d\n", p->rc_flags.bits.frame_tolerance_mode);
+        va_TraceMsg(trace_ctx, "\tICQ_quality_factor = %d\n", p->ICQ_quality_factor);
+        va_TraceMsg(trace_ctx, "\tmax_qp = %d\n", p->max_qp);
         break;
     }
     case VAEncMiscParameterTypeMaxSliceSize:
@@ -3233,6 +3247,18 @@ static void va_TraceVAEncMiscParameterBuffer(
 
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMaxFrameSize\n");
         va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
+        break;
+    }
+    case VAEncMiscParameterTypeMultiPassFrameSize:
+    {
+        int i;
+        VAEncMiscParameterBufferMultiPassFrameSize *p = (VAEncMiscParameterBufferMultiPassFrameSize *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMultiPassFrameSize\n");
+        va_TraceMsg(trace_ctx, "\tmax_frame_size = %d\n", p->max_frame_size);
+        va_TraceMsg(trace_ctx, "\tnum_passes = %d\n", p->num_passes);
+        for(i = 0; i<p->num_passes; ++i)
+            va_TraceMsg(trace_ctx, "\tdelta_qp[%d] = %d\n", i, p->delta_qp[i]);
         break;
     }
     case VAEncMiscParameterTypeQualityLevel:
@@ -4611,7 +4637,7 @@ va_TraceProcFilterParameterBuffer(
     unsigned int size;
     unsigned int num_elements;
     VAProcFilterParameterBufferBase *base_filter = NULL;
-    int i;
+    unsigned int i;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
@@ -4676,7 +4702,7 @@ va_TraceVAProcPipelineParameterBuffer(
 )
 {
     VAProcPipelineParameterBuffer *p = (VAProcPipelineParameterBuffer *)data;
-    int i;
+    uint32_t i;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 

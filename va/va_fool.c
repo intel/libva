@@ -265,7 +265,7 @@ VAStatus va_FoolBufferInfo(
 static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
 {
     char file_name[1024];
-    struct stat file_stat = {0};
+    struct stat file_stat = {};
     VACodedBufferSegment *codedbuf;
     int i, fd = -1;
     ssize_t ret;
@@ -311,7 +311,7 @@ static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
 
 static int va_FoolFillCodedBufJPG(VADisplay dpy, struct fool_context *fool_ctx)
 {
-    struct stat file_stat = {0};
+    struct stat file_stat = {};
     VACodedBufferSegment *codedbuf;
     int fd = -1;
     ssize_t ret;

@@ -39,7 +39,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #ifdef ANDROID
-#include <cutils/log.h>
+#include <log/log.h>
 /* support versions < JellyBean */
 #ifndef ALOGE
 #define ALOGE LOGE
@@ -349,6 +349,23 @@ static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
     return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
 }
 
+static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
+{
+  int n = snprintf(0, 0, "%s/%s%s", driver_dir, driver_name, DRIVER_EXTENSION);
+  if (n < 0)
+      return NULL;
+  char *driver_path = (char *) malloc(n + 1);
+  if (!driver_path)
+      return NULL;
+  n = snprintf(driver_path, n + 1, "%s/%s%s",
+               driver_dir, driver_name, DRIVER_EXTENSION);
+  if (n < 0) {
+    free(driver_path);
+    return NULL;
+  }
+  return driver_path;
+}
+
 static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
 {
     VADriverContextP ctx = CTX(dpy);
@@ -367,21 +384,14 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     driver_dir = strtok_r(search_path, ":", &saveptr);
     while (driver_dir) {
         void *handle = NULL;
-        char *driver_path = (char *) malloc( strlen(driver_dir) +
-                                             strlen(driver_name) +
-                                             strlen(DRIVER_EXTENSION) + 2 );
+        char *driver_path = va_getDriverPath(driver_dir, driver_name);
         if (!driver_path) {
-            va_errorMessage(dpy, "%s L%d Out of memory!n",
+            va_errorMessage(dpy, "%s L%d Out of memory\n",
                             __FUNCTION__, __LINE__);
             free(search_path);
             return VA_STATUS_ERROR_ALLOCATION_FAILED;
         }
 
-        strncpy( driver_path, driver_dir, strlen(driver_dir) + 1);
-        strncat( driver_path, "/", strlen("/") );
-        strncat( driver_path, driver_name, strlen(driver_name) );
-        strncat( driver_path, DRIVER_EXTENSION, strlen(DRIVER_EXTENSION) );
-        
         va_infoMessage(dpy, "Trying to open %s\n", driver_path);
 #ifndef ANDROID
         handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
@@ -402,8 +412,12 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                 int minor;
             } compatible_versions[] = {
                 { VA_MAJOR_VERSION, VA_MINOR_VERSION },
+                { VA_MAJOR_VERSION, 4 },
+                { VA_MAJOR_VERSION, 3 },
+                { VA_MAJOR_VERSION, 2 },
+                { VA_MAJOR_VERSION, 1 },
                 { VA_MAJOR_VERSION, 0 },
-                { -1, }
+                { -1, -1}
             };
 
             for (i = 0; compatible_versions[i].major >= 0; i++) {
@@ -602,13 +616,6 @@ const char *vaErrorStr(VAStatus error_status)
     return "unknown libva error / description missing";
 }
 
-const static char *prefer_driver_list[4] = {
-    "i965",
-    "hybrid",
-    "pvr",
-    "iHD",
-};
-
 VAStatus vaSetDriverName(
     VADisplay dpy,
     char *driver_name
@@ -617,14 +624,7 @@ VAStatus vaSetDriverName(
     VADriverContextP ctx;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     char *override_driver_name = NULL;
-    int i, found;
     ctx = CTX(dpy);
-
-    if (geteuid() != getuid()) {
-        vaStatus = VA_STATUS_ERROR_OPERATION_FAILED;
-        va_errorMessage(dpy, "no permission to vaSetDriverName\n");
-        return vaStatus;
-    }
 
     if (strlen(driver_name) == 0 || strlen(driver_name) >=256) {
         vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
@@ -633,25 +633,7 @@ VAStatus vaSetDriverName(
         return vaStatus;
     }
 
-    found = 0;
-    for (i = 0; i < sizeof(prefer_driver_list) / sizeof(char *); i++) {
-        if (strlen(prefer_driver_list[i]) != strlen(driver_name))
-            continue;
-        if (!strncmp(prefer_driver_list[i], driver_name, strlen(driver_name))) {
-            found = 1;
-            break;
-        }
-    }
-
-    if (!found) {
-        vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
-        va_errorMessage(dpy, "vaSetDriverName returns %s. Incorrect parameter\n",
-                         vaErrorStr(vaStatus));
-        return vaStatus;
-    }
-
     override_driver_name = strdup(driver_name);
-
     if (!override_driver_name) {
         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
         va_errorMessage(dpy, "vaSetDriverName returns %s. Out of Memory\n",
@@ -972,7 +954,7 @@ va_impl_query_surface_attributes(
         { VASurfaceAttribMinHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMaxHeight,     VAGenericValueTypeInteger },
         { VASurfaceAttribMemoryType,    VAGenericValueTypeInteger },
-        { VASurfaceAttribNone, }
+        { VASurfaceAttribNone,          VAGenericValueTypeInteger }
     };
 
     if (!out_attribs || !out_num_attribs_ptr)
