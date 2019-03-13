@@ -154,18 +154,17 @@ typedef struct  _VAEncPictureParameterBufferVP9
     /** VP9 encoder may support dynamic scaling function.
      *  If enabled (enable_dynamic_scaling is set), application may request
      *  GPU encodes picture with a different resolution from the raw source.
-     *  GPU should handle the scaling process of source and
-     *  all reference frames.
+     *  GPU should handle the scaling process of all reference frames.
      */
     /* raw source frame width in pixels */
     uint32_t    frame_width_src;
     /* raw source frame height in pixels */
     uint32_t    frame_height_src;
 
-    /* to be encoded frame width in pixels */
-    uint32_t    frame_width_dst;
-    /* to be encoded frame height in pixels */
-    uint32_t    frame_height_dst;
+    /* allow application to insert extra bytes in front of uncompressed header */
+    uint32_t    uncompressed_header_byte_offset;
+
+    uint32_t    reserved;
 
     /* surface to store reconstructed frame, not used for enc only case */
     VASurfaceID reconstructed_frame;
