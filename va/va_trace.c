@@ -3300,6 +3300,47 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tqp_delta_for_inserted_intra = %d\n", p->qp_delta_for_inserted_intra);
         break;
     }
+    case VAEncMiscParameterTypeEncQuality:
+    {
+        int i;
+        VAEncMiscParameterEncQuality *p = (VAEncMiscParameterEncQuality *)tmp->data;
+
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterEncQuality\n");
+        va_TraceMsg(trace_ctx, "\tuseRawPicForRef = %d\n",p->useRawPicForRef);
+        va_TraceMsg(trace_ctx, "\tskipCheckDisable = %d\n",p->skipCheckDisable);
+        va_TraceMsg(trace_ctx, "\tFTQOverride = %d\n",p->FTQOverride);
+        va_TraceMsg(trace_ctx, "\tFTQEnable = %d\n",p->FTQEnable);
+        va_TraceMsg(trace_ctx, "\tFTQSkipThresholdLUTInput = %d\n",p->FTQSkipThresholdLUTInput);
+        va_TraceMsg(trace_ctx, "\tNonFTQSkipThresholdLUTInput = %d\n",p->NonFTQSkipThresholdLUTInput);
+        va_TraceMsg(trace_ctx, "\tReservedBit = %d\n",p->ReservedBit);
+        va_TraceMsg(trace_ctx, "\tdirectBiasAdjustmentEnable = %d\n",p->directBiasAdjustmentEnable);
+        va_TraceMsg(trace_ctx, "\tglobalMotionBiasAdjustmentEnable = %d\n",p->globalMotionBiasAdjustmentEnable);
+        va_TraceMsg(trace_ctx, "\tHMEMVCostScalingFactor = %d\n",p->HMEMVCostScalingFactor);
+        va_TraceMsg(trace_ctx, "\tHMEDisable = %d\n",p->HMEDisable);
+        va_TraceMsg(trace_ctx, "\tSuperHMEDisable = %d\n",p->SuperHMEDisable);
+        va_TraceMsg(trace_ctx, "\tUltraHMEDisable = %d\n",p->UltraHMEDisable);
+        va_TraceMsg(trace_ctx, "\tPanicModeDisable = %d\n",p->PanicModeDisable);
+        va_TraceMsg(trace_ctx, "\tForceRepartitionCheck = %d\n",p->ForceRepartitionCheck);
+        if (p->FTQSkipThresholdLUTInput) {
+            va_TraceMsg(trace_ctx, "\tFTQSkipThresholdLUT[52]=\n");
+            for (i = 0; i < 52; i++) {
+                va_TraceMsg(trace_ctx, "\t%d", p->FTQSkipThresholdLUT[i]);
+                if ((i + 1) % 8 == 0)
+                    TRACE_NEWLINE();
+            }
+            va_TracePrint(trace_ctx, "\n");
+        }
+        if (p->NonFTQSkipThresholdLUTInput) {
+            va_TraceMsg(trace_ctx, "\tNonFTQSkipThresholdLUT[52]=\n");
+            for (i = 0; i < 52; i++) {
+                va_TraceMsg(trace_ctx, "\t%d", p->NonFTQSkipThresholdLUT[i]);
+                if ((i + 1) % 8 == 0)
+                    TRACE_NEWLINE();
+            }
+            va_TracePrint(trace_ctx, "\n");
+        }
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
