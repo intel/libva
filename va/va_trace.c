@@ -3364,6 +3364,15 @@ static void va_TraceVAEncMiscParameterBuffer(
         }
         break;
     }
+    case VAEncMiscParameterTypeSkipFrame:
+    {
+        VAEncMiscParameterSkipFrame *p = (VAEncMiscParameterSkipFrame *)tmp->data;
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterSkipFrame\n");
+        va_TraceMsg(trace_ctx, "\tskip_frame_flag = %d\n", p->skip_frame_flag);
+        va_TraceMsg(trace_ctx, "\tnum_skip_frames = %d\n", p->num_skip_frames);
+        va_TraceMsg(trace_ctx, "\tsize_skip_frames = %d\n", p->size_skip_frames);
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
