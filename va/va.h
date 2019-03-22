@@ -2114,7 +2114,8 @@ typedef struct _VAEncMiscParameterHRD
  */
 typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     /** \brief Type. Shall be set to #VAEncMiscParameterTypeMaxFrameSize. */
-    VAEncMiscParameterType      type;
+    /** duplicated with VAEncMiscParameterBuffer, should be deprecated*/
+    va_deprecated VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in bits). */
     uint32_t                max_frame_size;
 
@@ -2133,7 +2134,8 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
  */
 typedef struct _VAEncMiscParameterBufferMultiPassFrameSize {
     /** \brief Type. Shall be set to #VAEncMiscParameterTypeMultiPassMaxFrameSize. */
-    VAEncMiscParameterType      type;
+    /** duplicated with VAEncMiscParameterBuffer, should be deprecated*/
+    va_deprecated VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in byte) */
     uint32_t                max_frame_size;
     /** \brief Reserved bytes for future use, must be zero */
