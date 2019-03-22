@@ -5252,3 +5252,14 @@ void va_TracePutSurface (
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
+
+void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status)
+{
+    if(status == VA_STATUS_SUCCESS)
+        return;
+
+    DPY2TRACE_VIRCTX(dpy);
+
+    va_TraceMsg(trace_ctx, "=========%s ret = %s, %s \n",funcName, vaStatusStr(status), vaErrorStr(status));
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}

@@ -40,6 +40,8 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType);
 
 const char *vaBufferTypeStr(VABufferType bufferType);
 
+const char *vaStatusStr(VAStatus status);
+
 #ifdef __cplusplus
 }
 #endif

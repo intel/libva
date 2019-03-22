@@ -49,6 +49,10 @@ extern int va_trace_flag;
     if (va_trace_flag) {                        \
         trace_func(__VA_ARGS__);                \
     }
+#define VA_TRACE_RET(dpy,ret)                   \
+    if (va_trace_flag){                         \
+        va_TraceStatus(dpy, __func__, ret);     \
+    }
 
 DLL_HIDDEN
 void va_TraceInit(VADisplay dpy);
@@ -269,6 +273,8 @@ void va_TracePutSurface (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* de-interlacing flags */
 );
+
+void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 
 #ifdef __cplusplus
 }
