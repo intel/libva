@@ -95,7 +95,7 @@ VA_DRM_IsRenderNodeFd(int fd)
         return S_ISCHR(st.st_mode) && (st.st_rdev & 0x80);
 
     /* Check by device name */
-    name = drmGetDeviceNameFromFd(fd);
+    name = drmGetDeviceNameFromFd2(fd);
     if (name)
         return strncmp(name, "/dev/dri/renderD", 16) == 0;
 
