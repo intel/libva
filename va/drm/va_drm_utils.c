@@ -26,7 +26,6 @@
 
 #include "sysdeps.h"
 #include <xf86drm.h>
-#include <sys/stat.h>
 #include "va_drm_utils.h"
 #include "va_drmcommon.h"
 
@@ -87,12 +86,11 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr)
 int
 VA_DRM_IsRenderNodeFd(int fd)
 {
-    struct stat st;
     const char *name;
 
     /* Check by device node */
-    if (fstat(fd, &st) == 0)
-        return S_ISCHR(st.st_mode) && (st.st_rdev & 0x80);
+    if (drmGetNodeTypeFromFd(fd) == DRM_NODE_RENDER)
+        return 1;
 
     /* Check by device name */
     name = drmGetDeviceNameFromFd2(fd);
