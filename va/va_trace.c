@@ -51,7 +51,7 @@
 #include <sys/syscall.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <time.h>
+#include <sys/time.h>
 #include <errno.h>
 
 /*
