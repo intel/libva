@@ -30,7 +30,6 @@
 #define _VA_BACKEND_H_
 
 #include <va/va.h>
-#include <linux/videodev2.h>
 
 typedef struct VADriverContext *VADriverContextP;
 typedef struct VADisplayContext *VADisplayContextP;
