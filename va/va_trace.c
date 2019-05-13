@@ -5011,6 +5011,12 @@ void va_TraceRenderPicture(
             }
             break;
 
+        case VAProfileHEVCMain12:
+        case VAProfileHEVCMain422_10:
+        case VAProfileHEVCMain422_12:
+        case VAProfileHEVCMain444:
+        case VAProfileHEVCMain444_10:
+        case VAProfileHEVCMain444_12:
         case VAProfileHEVCMain:
         case VAProfileHEVCMain10:
             for (j=0; j<num_elements; j++) {
