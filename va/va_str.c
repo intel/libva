@@ -123,6 +123,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribCustomRoundingControl);
     TOSTR(VAConfigAttribQPBlockSize);
     TOSTR(VAConfigAttribStats);
+    TOSTR(VAConfigAttribHistogram);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
@@ -172,6 +173,7 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncFEICTBCmdBufferType);
     TOSTR(VAEncFEICURecordBufferType);
     TOSTR(VASubsetsParameterBufferType);
+    TOSTR(VAHistogramBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
