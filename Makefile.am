@@ -36,3 +36,25 @@ MAINTAINERCLEANFILES = \
 	aclocal.m4 compile config.guess config.sub \
 	configure depcomp install-sh ltmain.sh     \
 	Makefile.in missing
+
+if HAVE_RPMBUILD
+rpm: build/$(PACKAGE).spec
+	rm -rf ./va/.rpmbuild
+	mkdir -p ./va/.rpmbuild/BUILD \
+	./va/.rpmbuild/SPECS \
+	./va/.rpmbuild/SOURCES \
+	./va/.rpmbuild/SRPMS \
+	./va/.rpmbuild/RPMS/noarch \
+	./va/.rpmbuild/tmp
+	git archive --format=tar.gz --prefix=$(PACKAGE)-$(VERSION)/ -o ./$(PACKAGE)-$(VERSION).tar.gz HEAD
+	cp -f $(PACKAGE)-$(VERSION).tar.gz ./va/.rpmbuild/SOURCES
+	rpmbuild --define "_topdir $$PWD/va/.rpmbuild" \
+	 --define "_tmppath $$PWD/va/.rpmbuild/tmp" \
+	 --define "_sourcefile $(PACKAGE)-$(VERSION).tar.gz" \
+	 --define "_version $(VERSION)" \
+	 --define "_sourcefile $(PACKAGE)-$(VERSION).tar.gz" \
+	 -ba $(top_srcdir)/build/$(PACKAGE).spec
+	@echo "============================================================"
+	@echo "RPMs located in ./va/.rpmbuild/RPMS and ./va/.rpmbuild/SRPMS"
+endif
+
