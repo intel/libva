@@ -46,7 +46,7 @@ rpm: build/$(PACKAGE).spec
 	./va/.rpmbuild/SRPMS \
 	./va/.rpmbuild/RPMS/noarch \
 	./va/.rpmbuild/tmp
-	make dist-gzip
+	tar cf $(PACKAGE)-$(VERSION).tar.gz . --transform 's,^,$(PACKAGE)-$(VERSION)/,'
 	mv $(PACKAGE)-$(VERSION).tar.gz ./va/.rpmbuild/SOURCES
 	rpmbuild --define "_topdir $$PWD/va/.rpmbuild" \
 	 --define "_tmppath $$PWD/va/.rpmbuild/tmp" \
