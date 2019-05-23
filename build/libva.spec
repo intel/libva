@@ -23,17 +23,15 @@ Intel libva
 %setup
 
 %build
-./autogen.sh 
+./configure --prefix %{_prefix} --libdir %{_libdir}
 make -j12
 
 %install
 make install DESTDIR=%{buildroot}
-#mkdir -p %{buildroot}/usr/bin/
-#install -m 755 hello-world.sh %{buildroot}/usr/bin/hello-world.sh
 
 %files
-/usr/local/lib/*.so*
+%{_libdir}/*.so*
 %files devel
-/usr/local/include/va/*.h
-/usr/local/lib/pkgconfig/*.pc
-/usr/local/lib/*.la
+%{_includedir}/va/*.h
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/*.la
