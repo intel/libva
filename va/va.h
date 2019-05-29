@@ -756,6 +756,11 @@ typedef enum
      * support for QP info for buffer #VAEncQpBuffer.
      */
     VAConfigAttribQPBlockSize            = 37,
+    /**
+     * \brief encode max frame size attribute. Read-only
+     * attribute value \c VAConfigAttribValMaxFrameSize represent max frame size support   
+     */
+    VAConfigAttribMaxFrameSize           = 38,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -940,6 +945,23 @@ typedef union _VAConfigAttribValDecJPEG {
 /** \brief Driver supports an arbitrary number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000010
 /**@}*/
+
+/** \brief Attribute value for VAConfigAttribMaxFrameSize */
+typedef union _VAConfigAttribValMaxFrameSize {
+    struct {
+        /** \brief support max frame size 
+          * if max_frame_size == 1, VAEncMiscParameterTypeMaxFrameSize/VAEncMiscParameterBufferMaxFrameSize
+          * could be used to set the frame size, if multiple_pass also equal 1, VAEncMiscParameterTypeMultiPassFrameSize
+          * VAEncMiscParameterBufferMultiPassFrameSize could be used to set frame size and pass information 
+          */ 
+        uint32_t max_frame_size : 1;
+        /** \brief multiple_pass support */
+        uint32_t multiple_pass  : 1;
+        /** \brief reserved bits for future, must be zero*/
+        uint32_t reserved       :30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValMaxFrameSize;
 
 /** \brief Attribute value for VAConfigAttribEncJPEG */
 typedef union _VAConfigAttribValEncJPEG {
