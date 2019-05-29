@@ -24,7 +24,7 @@ Intel libva
 
 %build
 ./configure --prefix %{_prefix} --libdir %{_libdir}
-make -j12
+make -j$(nproc)
 
 %install
 make install DESTDIR=%{buildroot}
