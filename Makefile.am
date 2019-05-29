@@ -30,6 +30,7 @@ if ENABLE_DOCS
 SUBDIRS += doc
 endif
 
+EXTRA_DIST=doc/va_footer.html
 # Extra clean files so that maintainer-clean removes *everything*
 MAINTAINERCLEANFILES = \
 	aclocal.m4 compile config.guess config.sub \
