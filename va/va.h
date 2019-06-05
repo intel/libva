@@ -879,14 +879,13 @@ typedef struct _VAConfigAttrib {
 /** @name Attribute values for VAConfigAttribDecJPEG */
 /**@{*/
 typedef union _VAConfigAttribValDecJPEG {
-    struct{
+    struct {
     /** \brief Set to (1 << VA_ROTATION_xxx) for supported rotation angles. */
     uint32_t rotation : 4;
     /** \brief Reserved for future use. */
     uint32_t reserved : 28;
-    }bits;
+    } bits;
     uint32_t value;
-    uint32_t va_reserved[VA_PADDING_LOW];
 } VAConfigAttribValDecJPEG;
 /** @name Attribute values for VAConfigAttribDecProcessing */
 /**@{*/
