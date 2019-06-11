@@ -681,7 +681,7 @@ typedef struct _VAProcFilterValueRange {
 typedef struct _VAProcColorProperties {
     /** Chroma sample location.\c VA_CHROMA_SITING_VERTICAL_XXX | VA_CHROMA_SITING_HORIZONTAL_XXX */
     uint8_t chroma_sample_location;
-    /** Chroma sample location. \c VA_SOURCE_RANGE_XXX*/
+    /** Color range. \c VA_SOURCE_RANGE_XXX*/
     uint8_t color_range;
     /** Colour primaries.
      *
