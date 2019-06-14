@@ -309,9 +309,6 @@ fi
 
 AM_CONDITIONAL(USE_WAYLAND, test "$USE_WAYLAND" = "yes")
 
-AC_CHECK_PROG(HAVE_RPMBUILD, rpmbuild, true, false)
-AM_CONDITIONAL(HAVE_RPMBUILD,$HAVE_RPMBUILD)
-
 pkgconfigdir=${libdir}/pkgconfig
 AC_SUBST(pkgconfigdir)
 
