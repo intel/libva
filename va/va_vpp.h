@@ -687,12 +687,53 @@ typedef struct _VAProcColorProperties {
      *
      * See ISO/IEC 23001-8 or ITU H.273, section 8.1 and table 2.
      * Only used if the color standard in use is \c VAColorStandardExplicit.
+     * Below list the typical colour primaries for the reference.
+     * ---------------------------------------------------------------------------------
+     * | Value | Primaries                  | Informative Remark                       |
+     * --------------------------------------------------------------------------------
+     * | 1     |primary  x        y         |Rec.ITU-R BT.709-5                        |
+     * |       |green    0.300    0.600     |IEC 61966-2-1(sRGB or sYCC)               |
+     * |       |blue     0.150    0.060     |                                          |
+     * |       |red      0.640    0.330     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
+     * | 6     |primary  x        y         |Rec.ITU-R BT.601-6 525                    |
+     * |       |green    0.310    0.595     |                                          |
+     * |       |blue     0.155    0.070     |                                          |
+     * |       |red      0.630    0.340     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
+     * | 9     |primary  x        y         |Rec.ITU-R BT.2020                         |
+     * |       |green    0.170    0.797     |                                          |
+     * |       |blue     0.131    0.046     |                                          |
+     * |       |red      0.708    0.292     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
      */
     uint8_t colour_primaries;
     /** Transfer characteristics.
      *
      * See ISO/IEC 23001-8 or ITU H.273, section 8.2 and table 3.
      * Only used if the color standard in use is \c VAColorStandardExplicit.
+     * Below list the typical transfer characteristics for the reference.
+     * -----------------------------------------------------------
+     * | Value | Informative Remark                              |
+     * -----------------------------------------------------------
+     * | 1     |Rec.ITU-R BT.709-5                               |
+     * |       |colour gamut system                              |
+     * -----------------------------------------------------------
+     * | 4     |Assumed display gamma 2.2                        |
+     * -----------------------------------------------------------
+     * | 6     |Rec.ITU-R BT.601-6 525 or 625                    |
+     * -----------------------------------------------------------
+     * | 8     |Linear transfer characteristics                  |
+     * -----------------------------------------------------------
+     * | 13    |IEC 61966-2-1(sRGB or sYCC)                      |
+     * -----------------------------------------------------------
+     * | 14,15 |Rec.ITU-R BT.2020                                |
+     * -----------------------------------------------------------
+     * | 16    |SMPTE ST 2084 for 10,12,14 and 16bit system      |
+     * -----------------------------------------------------------
      */
     uint8_t transfer_characteristics;
     /** Matrix coefficients.
