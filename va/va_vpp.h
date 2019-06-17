@@ -705,7 +705,7 @@ typedef struct _VAProcColorProperties {
     uint8_t reserved[3];
 } VAProcColorProperties;
 
-/** \berief Describes High Dynamic Range Meta Data for HDR10.
+/** \brief Describes High Dynamic Range Meta Data for HDR10.
  *
  *  Specifies the colour volume(the colour primaries, white point and luminance range) of
  *  a display considered to be the mastering display for the associated video content -e.g.,
