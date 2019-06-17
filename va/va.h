@@ -119,11 +119,12 @@ extern "C" {
  * 	- \ref api_enc_mpeg2
  * 	- \ref api_enc_vp8
  * 	- \ref api_enc_vp9
- * - Decoder (HEVC, JPEG, VP8, VP9)
+ * - Decoder (HEVC, JPEG, VP8, VP9, AV1)
  *      - \ref api_dec_hevc
  *      - \ref api_dec_jpeg
  *      - \ref api_dec_vp8
  *      - \ref api_dec_vp9
+ *      - \ref api_dec_av1
  * - \ref api_vpp
  * - FEI (H264, HEVC)
  * 	- \ref api_fei
@@ -392,7 +393,9 @@ typedef enum
     VAProfileHEVCMain444_12             = 28,
     VAProfileHEVCSccMain                = 29,
     VAProfileHEVCSccMain10              = 30,
-    VAProfileHEVCSccMain444             = 31
+    VAProfileHEVCSccMain444             = 31,
+    VAProfileAV1Profile0                = 32,
+    VAProfileAV1Profile1                = 33
 } VAProfile;
 
 /**
@@ -4624,6 +4627,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_jpeg.h>
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
+#include <va/va_dec_av1.h>
 #include <va/va_enc_hevc.h>
 #include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>
