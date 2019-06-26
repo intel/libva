@@ -1,5 +1,29 @@
-libva NEWS -- summary of user visible changes.  2019-01-25
+libva NEWS -- summary of user visible changes.  2019-06-xx
 Copyright (C) 2009-2019 Intel Corporation
+
+version 2.5.0 - xx.Jun.2019
+* Correct the comment of color_range.
+* Add VA_FOURCC_A2B10G10R10 for format a2b10g10r10.
+* Adjust VAEncMiscParameterQuantization structure to be align with VAEncMiscParameterBuffer(possible to impact BC)
+* Add attribute for max frame size
+* Add va_footer.html into distribution build
+* va_trace: hevc profiles added
+* Add new definition for input/output surface flag
+* va/va_trace: add trace support for VAEncMiscParameterTypeSkipFrame structure.
+* va/va_trace: add MPEG2 trace support for MiscParam and SequenceParam
+* va_openDriver: check strdup return value
+* Mark some duplicated field as deprecated
+* Add return value into logs
+* va/va_trace: add trace support for VAEncMiscParameterEncQuality structure.
+* Add newformat foucc defination
+* va_backend: remove unneeded linux/videodev2.h include
+* va_trace: add missing <sys/time.h> include
+* configure: don't build glx if VA/X11 isn't built
+* va/va_trace: unbreak with C89 after b3694671c784
+* [common] Add A2RGB10 fourcc definition
+* build: meson: enables va messaging and visibility
+* va/va_trace: add trace support for RIR(rolling intra refresh).
+* va/va_trace: add trace support for ROI(region of interest).
 
 version 2.4.0 - 25.Jan.2019
 * va_TraceSurface support for VA_FOURCC_P010
