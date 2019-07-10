@@ -773,6 +773,10 @@ typedef enum
      *  previous frame (PoC < current).
      */
     VAConfigAttribPredictionDirection   = 39,
+    /** \brief combined submission of multiple frames from different streams, it is optimization for different HW
+     * implementation, multiple frames encode/decode can improve HW concurrency
+     */
+    VAConfigAttribMultipleFrame         = 40,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1110,6 +1114,21 @@ typedef union _VAConfigAttribValEncRateControlExt {
     } bits;
     uint32_t value;
 } VAConfigAttribValEncRateControlExt;
+
+/** \brief Attribute value for VAConfigAttribMultipleFrame*/
+typedef union _VAConfigAttribValMultipleFrame {
+    struct {
+        /** \brief max num of concurrent frames from different stream */
+        uint32_t max_num_concurrent_frames      : 8;
+        /** \brief indicate whether all stream must support same quality level
+         *  if mixed_quality_level == 0, same quality level setting for multple streams is required
+         *  if mixed_quality_level == 1, different stream can have different quality level*/
+        uint32_t mixed_quality_level            : 1;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                       : 23;
+    } bits;
+    uint32_t value;
+}VAConfigAttribValMultipleFrame;
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
