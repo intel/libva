@@ -5019,6 +5019,9 @@ void va_TraceRenderPicture(
             }
             break;
         case VAProfileVP9Profile0:
+        case VAProfileVP9Profile1:
+        case VAProfileVP9Profile2:
+        case VAProfileVP9Profile3:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
 
