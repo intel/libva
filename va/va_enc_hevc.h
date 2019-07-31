@@ -222,8 +222,19 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
             uint32_t    pcm_loop_filter_disabled_flag                  : 1;
             /** \brief Same as the HEVC bitstream syntax element. */
             uint32_t    sps_temporal_mvp_enabled_flag                  : 1;
-
-            uint32_t    reserved_bits                                  : 16;
+            /** \brief Indicates whether or not the encoding is in low delay mode.
+              * 0 normal sequence
+              * 1 no random access B will be coded . and the coding type could be only I, P or LDB
+              * this flag only indicates the frame coding type of the sequence.
+              */
+            uint32_t    low_delay_seq                                  : 1;
+            /** \brief Indicates whether or not the encoding is in dyadic hierarchical GOP structure
+              * the default value 0, BRC would treat is as flat structure. if HierachicalFlag == 1,
+              * application would enable Qp Modulation
+              */
+            uint32_t    hierachical_flag                               : 1;
+            /** \brief keep for future , should be set to 0 */
+            uint32_t    reserved_bits                                  : 14;
         } bits;
         uint32_t value;
     } seq_fields;
@@ -316,7 +327,6 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
     uint8_t     max_bytes_per_pic_denom;
     /** \brief Same as the HEVC bitstream syntax element. */
     uint8_t     max_bits_per_min_cu_denom;
-
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_MEDIUM];
     /**@}*/
@@ -521,8 +531,16 @@ typedef struct _VAEncPictureParameterBufferHEVC {
         uint32_t        value;
     } pic_fields;
 
+    /** \brief When hierachical_level_plus1 > 0, hierachical_level_plus1-1 indicates
+     *the current frame's level.when it > 0. B1, B2 setting in CodingType can be treated as B,
+     *hirachical level is determined by this variable.When hierachical_level_plus1  == 0,
+     *hierarchical level information still comes from coding_type.
+     */
+    uint8_t     hierarchical_level_plus1;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_HIGH];
+    uint8_t     va_byte_reserved[3];
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_HIGH - 1];
 } VAEncPictureParameterBufferHEVC;
 
 /**
