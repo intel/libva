@@ -99,8 +99,6 @@ struct trace_log_file {
 };
 
 struct trace_log_files_manager {
-    int num;
-
     struct trace_log_file log_file[MAX_TRACE_THREAD_NUM];
 };
 
@@ -848,9 +846,6 @@ void va_TraceEnd(VADisplay dpy)
     for(i = 0;i < MAX_TRACE_THREAD_NUM;i++) {
         struct trace_log_file *plog_file = NULL;
 
-        if(pva_trace->log_files_manager.num <= 0)
-            break;
-
         plog_file = &pva_trace->log_files_manager.log_file[i];
         if(plog_file) {
             if(plog_file->fn_log)
@@ -858,8 +853,6 @@ void va_TraceEnd(VADisplay dpy)
 
             if(plog_file->fp_log)
                 fclose(plog_file->fp_log);
-
-            pva_trace->log_files_manager.num--;
         }
     }
 
