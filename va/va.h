@@ -777,6 +777,10 @@ typedef enum
      * implementation, multiple frames encode/decode can improve HW concurrency
      */
     VAConfigAttribMultipleFrame         = 40,
+    /** \brief this attribute is used to check addtional surface requirement
+     * the default value is 0, other value need to check /c VAConfigAttribValSurfaceReq
+     */
+    VAConfigAttribSurfaceReq            = 41,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -875,6 +879,20 @@ typedef struct _VAConfigAttrib {
 #define VA_DEC_SLICE_MODE_NORMAL       0x00000001
 /** \brief Driver supports base mode for slice decoding */
 #define VA_DEC_SLICE_MODE_BASE         0x00000002
+
+/** @name Attribute values for VAConfigAttribValSurfaceReq */
+/**@{*/
+typedef union _VAConfigAttribValSurfaceReq{
+    struct {
+    /** \brief encode raw input surface and recon surface is with different layout inside backend driver
+     *  default value is zero, when it is 1, application need to set surface usage hint
+     *  /c VA_SURFACE_ATTRIB_USAGE_HINT_RECON & VA_SURFACE_ATTRIB_USAGE_HINT_RAW when call vaCreateSurfaces to create surfaces */
+    uint32_t input_recon_diff :1;
+    /** \brief Reserved for future use. must be zero */
+    uint32_t reserved:31;
+    }bits;
+    uint32_t value;
+}VAConfigAttribValSurfaceReq;
 
 /** @name Attribute values for VAConfigAttribDecJPEG */
 /**@{*/
@@ -1431,7 +1449,10 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /** \brief Surface used for export to third-party APIs, e.g. via
  *  vaExportSurfaceHandle(). */
 #define VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT 	0x00000020
-
+/** \brief Surface used as reconstruct/reference */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_RECON      0x00000100
+/** \brief Surface used for raw input */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_RAW        0X00000200
 /**@}*/
 
 /**
