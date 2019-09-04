@@ -3153,9 +3153,16 @@ typedef struct _VASliceParameterBufferH264
     int16_t chroma_offset_l1[32][2];
     /** \brief Size in bits of the dec_ref_pic_marking() syntax element. */
     uint32_t dec_ref_pic_marking_bit_size;
+    /**
+     * \brief Size in bits of the pic_order_cnt related syntax elements.
+     *
+     * Size in bits of the pic_order_cnt_lsb, delta_pic_order_cnt_bottom,
+     * delta_pic_order_cnt[0], and delta_pic_order_cnt[1] syntax elements.
+     */
+    uint32_t pic_order_cnt_bit_size;
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[3];
+    uint32_t                va_reserved[2];
 } VASliceParameterBufferH264;
 
 /****************************
