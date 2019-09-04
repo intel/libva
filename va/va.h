@@ -3133,6 +3133,8 @@ typedef struct _VASliceParameterBufferH264
     uint8_t disable_deblocking_filter_idc;
     int8_t slice_alpha_c0_offset_div2;
     int8_t slice_beta_offset_div2;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint16_t  idr_pic_id;
     VAPictureH264 RefPicList0[32];	/* See 8.2.4.2 */
     VAPictureH264 RefPicList1[32];	/* See 8.2.4.2 */
     uint8_t luma_log2_weight_denom;
