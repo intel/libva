@@ -3076,6 +3076,10 @@ typedef struct _VAPictureParameterBufferH264
         uint32_t value;
     } pic_fields;
     uint16_t frame_num;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint8_t num_ref_idx_l0_default_active_minus1;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint8_t num_ref_idx_l1_default_active_minus1;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_MEDIUM];
