@@ -20,7 +20,7 @@ project(
 # - reset minor version to zero when major version is incremented
 va_api_major_version = 1
 va_api_minor_version = 6
-va_api_micro_version = 0
+va_api_micro_version = 1
 
 va_api_version = '@0@.@1@.@2@'.format(va_api_major_version,
 				      va_api_minor_version,
