@@ -25,6 +25,7 @@ install-data-local: install-html
 
 EXTRA_DIST = \
 	Doxyfile.in			\
+	meson.build			\
 	$(NULL)
 
 VA_HEADER_DIR   = $(top_srcdir)/va
