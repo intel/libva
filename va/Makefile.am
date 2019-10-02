@@ -147,4 +147,5 @@ DISTCLEANFILES = \
 EXTRA_DIST = \
 	libva.syms		\
 	va_version.h.in		\
+	meson.build		\
 	$(NULL)
