@@ -259,7 +259,7 @@ if test "$USE_X11:$enable_glx" = "no:yes"; then
    AC_MSG_ERROR([VA/GLX explicitly enabled, but VA/X11 isn't built])
 fi
 
-if test "$USE_X11" == "yes" -a "$enable_glx" != "no"; then
+if test "$USE_X11" = "yes" -a "$enable_glx" != "no"; then
     PKG_CHECK_MODULES([GLX], [gl x11], [USE_GLX="yes"], [:])
     saved_CPPFLAGS="$CPPFLAGS"
     saved_LIBS="$LIBS"
