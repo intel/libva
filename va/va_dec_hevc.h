@@ -381,8 +381,6 @@ typedef struct  _VASliceParameterBufferHEVC
     uint32_t                slice_data_offset;
     /** \brief Slice data buffer flags. See \c VA_SLICE_DATA_FLAG_XXX. */
     uint32_t                slice_data_flag;
-    /** \brief Number of emulation prevention bytes in slice head. */
-    uint16_t                slice_data_num_emu_prevn_bytes;
     /**
      * \brief Byte offset from NAL unit header to the begining of slice_data().
      *
@@ -490,7 +488,7 @@ typedef struct  _VASliceParameterBufferHEVC
     /**@}*/
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW - 2];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VASliceParameterBufferHEVC;
 
 /**
