@@ -485,10 +485,12 @@ typedef struct  _VASliceParameterBufferHEVC
     uint16_t                 num_entry_point_offsets;
     /** HEVC syntax element. */
     uint16_t                 entry_offset_to_subset_array;
+    /** \brief Number of emulation prevention bytes in slice header. */
+    uint16_t                slice_data_num_emu_prevn_bytes;
     /**@}*/
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW - 1];
+    uint32_t                va_reserved[VA_PADDING_LOW - 2];
 } VASliceParameterBufferHEVC;
 
 /**
