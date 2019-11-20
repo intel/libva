@@ -130,6 +130,93 @@ extern "C" {
  * 	- \ref api_fei
  * 	- \ref api_fei_h264
  * 	- \ref api_fei_hevc
+ * 
+ * \section threading Multithreading Guide
+ * All VAAPI functions implemented in libva are thread-safe. For any VAAPI
+ * function that requires the implementation of a backend (e.g. hardware driver),
+ * the backend must ensure that its implementation is also thread-safe. If the
+ * backend implementation of a VAAPI function is not thread-safe then this should
+ * be considered as a bug against the backend implementation. 
+ *
+ * It is assumed that none of the VAAPI functions will be called from signal 
+ * handlers.
+ *
+ * Thread-safety in this context means that when VAAPI is being called by multiple
+ * concurrent threads, it will not crash or hang the OS, and VAAPI internal
+ * data structures will not be corrupted. When multiple threads are operating on
+ * the same VAAPI objects, it is the application's responsibility to synchronize
+ * these operations in order to generate the expected results. For example, using
+ * a single VAContext from multiple threads may generate unexpected results.
+ *
+ * Following pseudo code illustrates a multithreaded transcoding scenario, where
+ * one thread is handling the decoding operation and another thread is handling 
+ * the encoding operation, while synchronizing the use of a common pool of
+ * surfaces.
+ *
+ * // Initialization
+ * dpy = vaGetDisplayDRM(fd);
+ * vaInitialize(dpy, ...); 
+ *
+ * // Create surfaces required for decoding and subsequence encoding
+ * vaCreateSurfaces(dpy, VA_RT_FORMAT_YUV420, width, height, &surfaces[0], ...);
+ *
+ * // Set up a queue for the surfaces shared between decode and encode threads
+ * surface_queue = queue_create();
+ *
+ * // Create decode_thread
+ * pthread_create(&decode_thread, NULL, decode, ...);
+ *
+ * // Create encode_thread
+ * pthread_create(&encode_thread, NULL, encode, ...);
+ *
+ * // Decode thread function
+ * decode() {
+ *   // Find the decode entrypoint for H.264 
+ *   vaQueryConfigEntrypoints(dpy, h264_profile, entrypoints, ...);
+ *
+ *   // Create a config for H.264 decode
+ *   vaCreateConfig(dpy, h264_profile, VAEntrypointVLD, ...);
+ *
+ *   // Create a context for decode
+ *   vaCreateContext(dpy, config, width, height, VA_PROGRESSIVE, surfaces, 
+ *     num_surfaces, &decode_context); 
+ *
+ *   // Decode frames in the bitstream
+ *   for (;;) {
+ *     // Parse one frame and decode 
+ *     vaBeginPicture(dpy, decode_context, surfaces[surface_index]); 
+ *     vaRenderPicture(dpy, decode_context, buf, ...);
+ *     vaEndPicture(dpy, decode_context);
+ *     // Poll the decoding status and enqueue the surface in display order after 
+ *     // decoding is complete
+ *     vaQuerySurfaceStatus();
+ *     enqueue(surface_queue, surface_index);
+ *   }
+ * }
+ *
+ * // Encode thread function
+ * encode() {
+ *   // Find the encode entrypoint for HEVC
+ *   vaQueryConfigEntrypoints(dpy, hevc_profile, entrypoints, ...);
+ *
+ *   // Create a config for HEVC encode
+ *   vaCreateConfig(dpy, hevc_profile, VAEntrypointEncSlice, ...);
+ *
+ *   // Create a context for encode
+ *   vaCreateContext(dpy, config, width, height, VA_PROGRESSIVE, surfaces,
+ *     num_surfaces, &encode_context); 
+ *
+ *   // Encode frames produced by the decoder
+ *   for (;;) {
+ *     // Dequeue the surface enqueued by the decoder    
+ *     surface_index = dequeue(surface_queue);
+ *     // Encode using this surface as the source
+ *     vaBeginPicture(dpy, encode_context, surfaces[surface_index]);
+ *     vaRenderPicture(dpy, encode_context, buf, ...);
+ *     vaEndPicture(dpy, encode_context);
+ *   }
+ * }
+ *
  */
 
 /**
