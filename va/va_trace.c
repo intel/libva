@@ -989,7 +989,7 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
         vaUnlockSurface(dpy, trace_ctx->trace_rendertarget);
         return;
     }
-    va_TraceMsg(trace_ctx, "\tbuffer location = 0x%08x\n", buffer);
+    va_TraceMsg(trace_ctx, "\tbuffer location = 0x%p\n", buffer);
     va_TraceMsg(trace_ctx, NULL);
 
     Y_data = (unsigned char*)buffer;
@@ -1661,7 +1661,7 @@ void va_TraceMapBuffer (
         va_TraceMsg(trace_ctx, "\t   bit_offset = %u\n", buf_list->bit_offset);
         va_TraceMsg(trace_ctx, "\t   status = 0x%08x\n", buf_list->status);
         va_TraceMsg(trace_ctx, "\t   reserved = 0x%08x\n", buf_list->reserved);
-        va_TraceMsg(trace_ctx, "\t   buf = 0x%08x\n", buf_list->buf);
+        va_TraceMsg(trace_ctx, "\t   buf = 0x%p\n", buf_list->buf);
 
         if (trace_ctx->trace_fp_codedbuf) {
             va_TraceMsg(trace_ctx, "\tDump the content to file\n");
@@ -1773,10 +1773,10 @@ static void va_TraceVAIQMatrixBufferMPEG2(
     va_TraceMsg(trace_ctx,"\tload_non_intra_quantiser_matrix = %d\n", p->load_non_intra_quantiser_matrix);
     va_TraceMsg(trace_ctx,"\tload_chroma_intra_quantiser_matrix = %d\n", p->load_chroma_intra_quantiser_matrix);
     va_TraceMsg(trace_ctx,"\tload_chroma_non_intra_quantiser_matrix = %d\n", p->load_chroma_non_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tintra_quantiser_matrix = %d\n", p->intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tnon_intra_quantiser_matrix = %d\n", p->non_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tchroma_intra_quantiser_matrix = %d\n", p->chroma_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tchroma_non_intra_quantiser_matrix = %d\n", p->chroma_non_intra_quantiser_matrix);
+    va_TraceMsg(trace_ctx,"\tintra_quantiser_matrix = %p\n", p->intra_quantiser_matrix);
+    va_TraceMsg(trace_ctx,"\tnon_intra_quantiser_matrix = %p\n", p->non_intra_quantiser_matrix);
+    va_TraceMsg(trace_ctx,"\tchroma_intra_quantiser_matrix = %p\n", p->chroma_intra_quantiser_matrix);
+    va_TraceMsg(trace_ctx,"\tchroma_non_intra_quantiser_matrix = %p\n", p->chroma_non_intra_quantiser_matrix);
     va_TraceMsg(trace_ctx, NULL);
 
     return;
@@ -2047,7 +2047,7 @@ static void va_TraceVAEncSequenceParameterBufferMPEG2(
 
     va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
     va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
-    va_TraceMsg(trace_ctx, "\tframe_rate = %d\n", p->frame_rate);
+    va_TraceMsg(trace_ctx, "\tframe_rate = %f\n", p->frame_rate);
     va_TraceMsg(trace_ctx, "\tvbv_buffer_size = %d\n", p->vbv_buffer_size);
     va_TraceMsg(trace_ctx, NULL);
 
@@ -5632,7 +5632,7 @@ void va_TracePutSurface (
     TRACE_FUNCNAME(idx);
     
     va_TraceMsg(trace_ctx, "\tsurface = 0x%08x\n", surface);
-    va_TraceMsg(trace_ctx, "\tdraw = 0x%08x\n", draw);
+    va_TraceMsg(trace_ctx, "\tdraw = 0x%p\n", draw);
     va_TraceMsg(trace_ctx, "\tsrcx = %d\n", srcx);
     va_TraceMsg(trace_ctx, "\tsrcy = %d\n", srcy);
     va_TraceMsg(trace_ctx, "\tsrcw = %d\n", srcw);
@@ -5641,7 +5641,7 @@ void va_TracePutSurface (
     va_TraceMsg(trace_ctx, "\tdesty = %d\n", desty);
     va_TraceMsg(trace_ctx, "\tdestw = %d\n", destw);
     va_TraceMsg(trace_ctx, "\tdesth = %d\n", desth);
-    va_TraceMsg(trace_ctx, "\tcliprects = 0x%08x\n", cliprects);
+    va_TraceMsg(trace_ctx, "\tcliprects = 0x%p\n", cliprects);
     va_TraceMsg(trace_ctx, "\tnumber_cliprects = %d\n", number_cliprects);
     va_TraceMsg(trace_ctx, "\tflags = 0x%08x\n", flags);
     va_TraceMsg(trace_ctx, NULL);
