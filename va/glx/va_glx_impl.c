@@ -939,7 +939,7 @@ static VAStatus
 vaDestroySurfaceGLX_impl_libva(VADriverContextP ctx, void *gl_surface)
 {
     VASurfaceGLXP pSurfaceGLX;
-    struct OpenGLContextState old_cs, *new_cs;
+    struct OpenGLContextState old_cs = {0}, *new_cs;
 
     INIT_SURFACE(pSurfaceGLX, gl_surface);
 
@@ -1072,7 +1072,7 @@ vaCopySurfaceGLX_impl_libva(
 {
     VASurfaceGLXP pSurfaceGLX;
     VAStatus status;
-    struct OpenGLContextState old_cs;
+    struct OpenGLContextState old_cs = {0};
 
     INIT_SURFACE(pSurfaceGLX, gl_surface);
 
