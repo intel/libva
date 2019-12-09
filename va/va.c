@@ -398,10 +398,10 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         }
 
         va_infoMessage(dpy, "Trying to open %s\n", driver_path);
-#ifndef ANDROID
-        handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
-#else
+#if (!defined(RTLD_NODELETE) || defined(ANDROID))
         handle = dlopen( driver_path, RTLD_NOW| RTLD_GLOBAL);
+#else
+        handle = dlopen( driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE );
 #endif
         if (!handle) {
             /* Don't give errors for non-existing files */

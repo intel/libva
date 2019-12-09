@@ -24,6 +24,11 @@
  */
 
 #define _GNU_SOURCE 1
+
+#ifdef __OpenBSD__
+#include <tib.h>
+#endif
+
 #include "sysdeps.h"
 #include "va.h"
 #include "va_enc_h264.h"
@@ -261,6 +266,14 @@ VAStatus vaUnlockSurface(VADisplay dpy,
                          VASurfaceID surface
                          );
 
+pid_t get_pid_t()
+{
+#ifdef __OpenBSD__
+  return TIB_GET()->tib_tid;
+#else
+  return syscall(__NR_gettid);
+#endif
+}
 static int get_valid_config_idx(
     struct va_trace *pva_trace,
     VAConfigID config_id)
@@ -288,7 +301,7 @@ static void add_trace_config_info(
 {
     struct trace_config_info *pconfig_info;
     int idx = 0;
-    pid_t thd_id = syscall(__NR_gettid);
+    pid_t thd_id = get_pid_t();
 
     LOCK_RESOURCE(pva_trace);
 
@@ -666,7 +679,7 @@ static struct trace_log_file *start_tracing2log_file(
 {
     struct trace_log_files_manager *plog_files_mgr = NULL;
     struct trace_log_file *plog_file = NULL;
-    pid_t thd_id = syscall(__NR_gettid);
+    pid_t thd_id = get_pid_t();
     int i = 0;
 
     LOCK_RESOURCE(pva_trace);
@@ -705,7 +718,7 @@ static void refresh_log_file(
     struct trace_context *ptra_ctx)
 {
     struct trace_log_file *plog_file = NULL;
-    pid_t thd_id = syscall(__NR_gettid);
+    pid_t thd_id = get_pid_t();
     int i = 0;
 
     plog_file = ptra_ctx->plog_file;
@@ -1231,7 +1244,7 @@ static void internal_TraceUpdateContext (
 {
     struct trace_context *trace_ctx = NULL;
     int i = 0, delete = 1;
-    pid_t thd_id = syscall(__NR_gettid);
+    pid_t thd_id = get_pid_t();
 
     if(tra_ctx_idx >= MAX_TRACE_CTX_NUM)
         return;
