@@ -41,7 +41,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+DLL_HIDDEN
+VAStatus
+VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates);
 /**
  * \brief Returns the VA driver name for the active display.
  *
@@ -62,7 +64,7 @@ extern "C" {
  */
 DLL_HIDDEN
 VAStatus
-VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr);
+VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate_index);
 
 /**
  * \brief Checks whether the file descriptor is a DRM Render-Nodes one

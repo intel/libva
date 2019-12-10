@@ -117,6 +117,29 @@ static const struct wl_drm_listener drm_listener = {
 };
 
 static VAStatus
+va_DisplayContextGetNumCandidates(
+    VADisplayContextP pDisplayContext,
+    int *candidate_index
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+
+    return VA_DRM_GetNumCandidates(ctx, candidate_index);
+}
+
+static VAStatus
+va_DisplayContextGetDriverNameByIndex(
+    VADisplayContextP pDisplayContext,
+    char            **driver_name_ptr,
+    int             candidate_index
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+
+    return VA_DRM_GetDriverName(ctx, driver_name_ptr, candidate_index);
+}
+
+static VAStatus
 va_DisplayContextGetDriverName(
     VADisplayContextP pDisplayContext,
     char            **driver_name_ptr
@@ -124,7 +147,7 @@ va_DisplayContextGetDriverName(
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
 
-    return VA_DRM_GetDriverName(ctx, driver_name_ptr);
+    return VA_DRM_GetDriverName(ctx, driver_name_ptr, 0);
 }
 
 void
@@ -237,6 +260,8 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     wl_drm_ctx->is_authenticated        = 0;
     pDisplayContext->opaque             = wl_drm_ctx;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetNumCandidates  = va_DisplayContextGetNumCandidates;
+    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
 
     drm_state = calloc(1, sizeof(struct drm_state));
     if (!drm_state) {
