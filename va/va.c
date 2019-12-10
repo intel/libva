@@ -342,11 +342,53 @@ va_getDriverInitName(char *name, int namelen, int major, int minor)
     return ret > 0 && ret < namelen;
 }
 
-static VAStatus va_getDriverName(VADisplay dpy, char **driver_name)
+static VAStatus va_getDriverNumCandidates(VADisplay dpy, int *num_candidates)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    *num_candidates = 1;
+    const char *driver_name_env = NULL;
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
+    VADriverContextP ctx;
 
-    return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
+    ctx = CTX(dpy);
+    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+
+    if (pDisplayContext->vaGetNumCandidates)
+        vaStatus = pDisplayContext->vaGetNumCandidates(pDisplayContext, num_candidates);
+    if ((ctx->override_driver_name) || (driver_name_env && (geteuid() == getuid())))
+        *num_candidates = 1;
+    return vaStatus;
+}
+
+static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int candidate_index)
+{
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    const char *driver_name_env = NULL;
+    VADriverContextP ctx;
+
+    ctx = CTX(dpy);
+    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+
+    if (ctx->override_driver_name){
+        *driver_name = strdup(ctx->override_driver_name);
+        if (!(*driver_name)) {
+              va_errorMessage(dpy, "va_getDriverNameByIndex  failed with %s, out of memory\n",vaErrorStr(VA_STATUS_ERROR_ALLOCATION_FAILED));
+            return VA_STATUS_ERROR_ALLOCATION_FAILED;
+        }
+        va_infoMessage(dpy, "User requested driver '%s'\n", *driver_name);
+        return VA_STATUS_SUCCESS;
+    } else if (driver_name_env && (geteuid() == getuid())) {
+        *driver_name = strdup(driver_name_env);
+        va_infoMessage(dpy, "User environment variable requested driver '%s'\n", *driver_name);
+        return VA_STATUS_SUCCESS;
+    } else if (pDisplayContext->vaGetDriverNameByIndex) {
+        return pDisplayContext->vaGetDriverNameByIndex(pDisplayContext, driver_name, candidate_index);
+    } else {
+        if (candidate_index == 0)
+            return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
+        else
+            return VA_STATUS_ERROR_INVALID_PARAMETER;
+    }
 }
 
 static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
@@ -674,10 +716,10 @@ VAStatus vaInitialize (
 
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
 
-    vaStatus = va_getDriverName(dpy, &driver_name);
+    vaStatus = va_getDriverNameByIndex(dpy, &driver_name, 0);
 
     if (!ctx->override_driver_name) {
-        va_infoMessage(dpy, "va_getDriverName() returns %d\n", vaStatus);
+        va_infoMessage(dpy, "va_getDriverNameByIndex() returns %d\n", vaStatus);
 
         driver_name_env = getenv("LIBVA_DRIVER_NAME");
     } else if (vaStatus == VA_STATUS_SUCCESS) {
@@ -696,7 +738,7 @@ VAStatus vaInitialize (
 
     if (driver_name_env && (geteuid() == getuid())) {
         /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        if (driver_name) /* memory is allocated in va_getDriverName */
+        if (driver_name) /* memory is allocated in va_getDriverNameByIndex */
             free(driver_name);
         
         driver_name = strdup(driver_name_env);
@@ -711,7 +753,7 @@ VAStatus vaInitialize (
         *major_version = VA_MAJOR_VERSION;
         *minor_version = VA_MINOR_VERSION;
     } else
-        va_errorMessage(dpy, "va_getDriverName() failed with %s,driver_name=%s\n",
+        va_errorMessage(dpy, "va_getDriverNameByIndex() failed with %s,driver_name=%s\n",
                         vaErrorStr(vaStatus), driver_name);
 
     if (driver_name)
