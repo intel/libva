@@ -699,14 +699,12 @@ VAStatus vaInitialize (
     int *minor_version 	 /* out */
 )
 {
-    const char *driver_name_env = NULL;
     char *driver_name = NULL;
+    int  num_candidates = 1;
+    int  candidate_index = 0;
     VAStatus vaStatus;
-    VADriverContextP ctx;
 
     CHECK_DISPLAY(dpy);
-
-    ctx = CTX(dpy);
 
     va_TraceInit(dpy);
 
@@ -716,45 +714,27 @@ VAStatus vaInitialize (
 
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
 
-    vaStatus = va_getDriverNameByIndex(dpy, &driver_name, 0);
-
-    if (!ctx->override_driver_name) {
-        va_infoMessage(dpy, "va_getDriverNameByIndex() returns %d\n", vaStatus);
-
-        driver_name_env = getenv("LIBVA_DRIVER_NAME");
-    } else if (vaStatus == VA_STATUS_SUCCESS) {
-        if (driver_name)
-            free(driver_name);
-
-        driver_name = strdup(ctx->override_driver_name);
-        if (!driver_name) {
-            vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-            va_errorMessage(dpy, "vaInitialize() failed with %s, out of memory\n",
-                        vaErrorStr(vaStatus));
-            return vaStatus;
+    vaStatus = va_getDriverNumCandidates(dpy, &num_candidates);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        num_candidates = 1;
+    }
+    for (candidate_index = 0; candidate_index < num_candidates; candidate_index ++) {
+        vaStatus = va_getDriverNameByIndex(dpy, &driver_name, candidate_index);
+        if(vaStatus != VA_STATUS_SUCCESS) {
+            va_errorMessage(dpy, "vaGetDriverNameByIndex() failed with %s, driver_name = %s\n", vaErrorStr(vaStatus), driver_name);
+            break;
         }
-        va_infoMessage(dpy, "User requested driver '%s'\n", driver_name);
-    }
-
-    if (driver_name_env && (geteuid() == getuid())) {
-        /* Don't allow setuid apps to use LIBVA_DRIVER_NAME */
-        if (driver_name) /* memory is allocated in va_getDriverNameByIndex */
-            free(driver_name);
-        
-        driver_name = strdup(driver_name_env);
-        vaStatus = VA_STATUS_SUCCESS;
-        va_infoMessage(dpy, "User requested driver '%s'\n", driver_name);
-    }
-
-    if ((VA_STATUS_SUCCESS == vaStatus) && (driver_name != NULL)) {
         vaStatus = va_openDriver(dpy, driver_name);
         va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
 
-        *major_version = VA_MAJOR_VERSION;
-        *minor_version = VA_MINOR_VERSION;
-    } else
-        va_errorMessage(dpy, "va_getDriverNameByIndex() failed with %s,driver_name=%s\n",
-                        vaErrorStr(vaStatus), driver_name);
+        if (vaStatus == VA_STATUS_SUCCESS) {
+            break;
+        }
+        
+    }
+
+    *major_version = VA_MAJOR_VERSION;
+    *minor_version = VA_MINOR_VERSION;
 
     if (driver_name)
         free(driver_name);
