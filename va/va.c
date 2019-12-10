@@ -341,7 +341,9 @@ va_getDriverInitName(char *name, int namelen, int major, int minor)
     int ret = snprintf(name, namelen, "__vaDriverInit_%d_%d", major, minor);
     return ret > 0 && ret < namelen;
 }
-
+/** retrieve the back end driver candidate num , by default it should be 1
+  * if there are no vaGetNumCandidates implementation in the display context
+  * it should be 1 to avoid backward compatible issue */
 static VAStatus va_getDriverNumCandidates(VADisplay dpy, int *num_candidates)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
@@ -368,7 +370,7 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
 
     ctx = CTX(dpy);
     driver_name_env = getenv("LIBVA_DRIVER_NAME");
-
+    /*if user set driver name by vaSetDriverName */
     if (ctx->override_driver_name){
         *driver_name = strdup(ctx->override_driver_name);
         if (!(*driver_name)) {
@@ -378,10 +380,12 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
         va_infoMessage(dpy, "User requested driver '%s'\n", *driver_name);
         return VA_STATUS_SUCCESS;
     } else if (driver_name_env && (geteuid() == getuid())) {
+        /*if user set driver name by environment variable*/
         *driver_name = strdup(driver_name_env);
         va_infoMessage(dpy, "User environment variable requested driver '%s'\n", *driver_name);
         return VA_STATUS_SUCCESS;
     } else if (pDisplayContext->vaGetDriverNameByIndex) {
+        /*if vaGetDriverNameByIndex is implemented*/
         return pDisplayContext->vaGetDriverNameByIndex(pDisplayContext, driver_name, candidate_index);
     } else {
         if (candidate_index == 0)
@@ -713,12 +717,15 @@ VAStatus vaInitialize (
     va_MessagingInit();
 
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
-
+    /*get backend driver candidate number, by default the value should be 1*/
     vaStatus = va_getDriverNumCandidates(dpy, &num_candidates);
     if (vaStatus != VA_STATUS_SUCCESS) {
         num_candidates = 1;
     }
+    /*load driver one by one, until load success */
     for (candidate_index = 0; candidate_index < num_candidates; candidate_index ++) {
+        if(driver_name)
+            free(driver_name);
         vaStatus = va_getDriverNameByIndex(dpy, &driver_name, candidate_index);
         if(vaStatus != VA_STATUS_SUCCESS) {
             va_errorMessage(dpy, "vaGetDriverNameByIndex() failed with %s, driver_name = %s\n", vaErrorStr(vaStatus), driver_name);
@@ -729,7 +736,7 @@ VAStatus vaInitialize (
 
         if (vaStatus == VA_STATUS_SUCCESS) {
             break;
-        }
+       }
         
     }
 
