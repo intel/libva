@@ -3957,6 +3957,11 @@ VAStatus vaSyncBuffer(
  * Four bytes per pixel: A, Y, U, V.
  */
 #define VA_FOURCC_AYUV          0x56555941
+/** XYUV packed 8-bit YUV 4:4:4
+ *
+ * Four bytes per pixel: unspecified, Y, U, V.
+ */
+#define VA_FOURCC_XYUV          0x56555958
 /** NV11: two-plane 8-bit YUV 4:1:1.
  *
  * The first plane contains Y, the second plane contains U and V in pairs of bytes.
@@ -4076,13 +4081,25 @@ VAStatus vaSyncBuffer(
  * The samples are in the order A, V, Y, U.
  */
 #define VA_FOURCC_Y412          0x32313459
+/** XV30: packed 10-bit YUV 4:4:4.
+ *
+ * Each pixel is a four-byte little-endian value.
+ * V, Y, U are found in bits 29:20, 19:10, 9:0 respectively.
+ * Bits 31 and 30 are unspecified.
+ */
+#define VA_FOURCC_XV30          0x30335658
 /** Y416: packed 16-bit YUVA 4:4:4.
  *
  * Each pixel is a set of four samples, each of which is a two-byte little-endian value.
  * The samples are in the order A, V, Y, U.
  */
 #define VA_FOURCC_Y416          0x36313459
-
+/** XV48: packed 16-bit YUV 4:4:4.
+ *
+ * Each pixel is a set of four samples, each of which is a two-byte little-endian value.
+ * The first sample is unspecified, the other three are in the order V, Y, U.
+ */
+#define VA_FOURCC_XV48          0x38345658
 /** YV16: three-plane 8-bit YUV 4:2:2.
  *
  * The three planes contain Y, V and U respectively.
