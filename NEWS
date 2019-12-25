@@ -1,5 +1,20 @@
-libva NEWS -- summary of user visible changes.  2019-07-05
+libva NEWS -- summary of user visible changes.  2019-12-25
 Copyright (C) 2009-2019 Intel Corporation
+
+version 2.6.0 - 15.Dec.2019
+* enable the mutiple driver selection logic and enable it for DRM.
+* drm: Add iHD to driver_name_map
+* Add missed slice parameter 'slice_data_num_emu_prevn_bytes'
+* ensure that all meson files are part of the release tarball
+* configure: use correct comparison operator
+* trace: support VAConfigAttribMultipleFrame in trace
+* remove incorrect field of VAConfigAttribValDecJPEG
+* va/va_trace: Dump VP9 parameters for profile 1~3
+* add multiple frame capability report
+* add variable to indicate layer infromation
+* trace: fix memory leak on closing the trace
+* add prediction direction caps report
+* Add comments for colour primaries and transfer characteristics in VAProcColorProperties
 
 version 2.5.0 - 05.Jul.2019
 * Correct the comment of color_range.
