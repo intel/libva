@@ -367,11 +367,23 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
     const char *driver_name_env = NULL;
     VADriverContextP ctx;
+    VAStatus status = VA_STATUS_SUCCESS;
 
     ctx = CTX(dpy);
+    if (pDisplayContext->vaGetDriverNameByIndex) {
+        /*if vaGetDriverNameByIndex is implemented*/
+        status = pDisplayContext->vaGetDriverNameByIndex(pDisplayContext, driver_name, candidate_index);
+    } else {
+        if (candidate_index == 0)
+            status = pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
+        else
+            status = VA_STATUS_ERROR_INVALID_PARAMETER;
+    }    
     driver_name_env = getenv("LIBVA_DRIVER_NAME");
     /*if user set driver name by vaSetDriverName */
     if (ctx->override_driver_name){
+        if(*driver_name)
+            free(*driver_name);
         *driver_name = strdup(ctx->override_driver_name);
         if (!(*driver_name)) {
               va_errorMessage(dpy, "va_getDriverNameByIndex  failed with %s, out of memory\n",vaErrorStr(VA_STATUS_ERROR_ALLOCATION_FAILED));
@@ -380,19 +392,14 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
         va_infoMessage(dpy, "User requested driver '%s'\n", *driver_name);
         return VA_STATUS_SUCCESS;
     } else if (driver_name_env && (geteuid() == getuid())) {
+        if(*driver_name)
+            free(*driver_name);
         /*if user set driver name by environment variable*/
         *driver_name = strdup(driver_name_env);
         va_infoMessage(dpy, "User environment variable requested driver '%s'\n", *driver_name);
         return VA_STATUS_SUCCESS;
-    } else if (pDisplayContext->vaGetDriverNameByIndex) {
-        /*if vaGetDriverNameByIndex is implemented*/
-        return pDisplayContext->vaGetDriverNameByIndex(pDisplayContext, driver_name, candidate_index);
-    } else {
-        if (candidate_index == 0)
-            return pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
-        else
-            return VA_STATUS_ERROR_INVALID_PARAMETER;
-    }
+    } 
+    return status;
 }
 
 static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
