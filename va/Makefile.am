@@ -93,7 +93,7 @@ libva_la_SOURCES		= $(libva_source_c)
 libva_la_CFLAGS			= $(libva_cflags)
 libva_la_LDFLAGS		= $(libva_ldflags)
 libva_la_DEPENDENCIES		= libva.syms
-libva_la_LIBADD			= $(LIBVA_LIBS) -ldl
+libva_la_LIBADD			= $(LIBVA_LIBS)
 
 if USE_DRM
 SUBDIRS				+= drm
@@ -103,7 +103,7 @@ libva_drm_la_CFLAGS		= $(libva_cflags)
 libva_drm_la_LDFLAGS		= $(LDADD)
 libva_drm_la_DEPENDENCIES	= libva.la drm/libva_drm.la
 libva_drm_la_LIBADD		= libva.la drm/libva_drm.la \
-	$(LIBVA_LIBS) $(DRM_LIBS) -ldl
+	$(LIBVA_LIBS) $(DRM_LIBS)
 endif
 
 if USE_X11
@@ -115,7 +115,7 @@ libva_x11_la_CFLAGS		= $(libva_cflags)
 libva_x11_la_LDFLAGS		= $(LDADD)
 libva_x11_la_DEPENDENCIES	= libva.la x11/libva_x11.la
 libva_x11_la_LIBADD		= libva.la x11/libva_x11.la \
-	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(XFIXES_LIBS) $(DRM_LIBS) -ldl
+	$(LIBVA_LIBS) $(X11_LIBS) $(XEXT_LIBS) $(XFIXES_LIBS) $(DRM_LIBS)
 endif
 
 if USE_GLX
@@ -126,7 +126,7 @@ libva_glx_la_CFLAGS		= $(libva_cflags)
 libva_glx_la_LDFLAGS		= $(LDADD)
 libva_glx_la_DEPENDENCIES	= libva.la glx/libva_glx.la libva-x11.la
 libva_glx_la_LIBADD		= libva.la glx/libva_glx.la libva-x11.la \
-	$(GLX_LIBS) -ldl
+	$(GLX_LIBS)
 endif
 
 if USE_WAYLAND
@@ -137,7 +137,7 @@ libva_wayland_la_CFLAGS		= $(libva_cflags)
 libva_wayland_la_LDFLAGS	= $(LDADD)
 libva_wayland_la_DEPENDENCIES	= libva.la wayland/libva_wayland.la
 libva_wayland_la_LIBADD		= libva.la wayland/libva_wayland.la \
-	$(WAYLAND_LIBS) $(DRM_LIBS) -ldl
+	$(WAYLAND_LIBS) $(DRM_LIBS)
 endif
 
 DIST_SUBDIRS = x11 glx drm wayland
