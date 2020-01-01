@@ -209,6 +209,11 @@ if test "$ac_cv_have_gnuc_visibility_attribute" = "yes"; then
               [Defined to 1 if GCC visibility attribute is supported])
 fi
 
+# Check for -ldl (often not required)
+AC_SEARCH_LIBS([dlopen], [dl], [], [
+  AC_MSG_ERROR([unable to find the dlopen() function])
+])
+
 # Check for -fstack-protector
 ssp_cc=yes
 if test "X$CC-cc" != "X"; then
