@@ -4005,6 +4005,14 @@ VAStatus vaQuerySurfaceError(
  * 10-bit Pixel BGR formats.
  */
 #define VA_FOURCC_A2B10G10R10   0x30334241 /* VA_FOURCC('A','B','3','0') */
+/**
+ * 10-bit Pixel RGB formats without alpha.
+ */
+#define VA_FOURCC_X2R10G10B10   0x30335258 /* VA_FOURCC('X','R','3','0') */
+/**
+ * 10-bit Pixel BGR formats without alpha.
+ */
+#define VA_FOURCC_X2B10G10R10   0x30334258 /* VA_FOURCC('X','B','3','0') */
 
 /** Y8: 8-bit greyscale.
  *
