@@ -70,7 +70,7 @@ va_wayland_drm.c: $(protocol_source_h)
 %-client-protocol-export.c : %.xml
 	$(AM_V_GEN)$(WAYLAND_SCANNER) code < $< > $@
 %-client-protocol.c: %-client-protocol-export.c
-	$(AM_V_GEN)$(SED) -e '1i#include "sysdeps.h"' \
+	$(AM_V_GEN)$(SED) -e $$'1i\\\n#include "sysdeps.h"\n' \
 	                   -e 's@WL_EXPORT@DLL_HIDDEN@g' < $< > $@
 
 EXTRA_DIST = \
