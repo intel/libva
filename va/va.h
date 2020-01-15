@@ -3988,6 +3988,12 @@ VAStatus vaQuerySurfaceError(
  * The first plane contains Y, the second plane contains U and V in pairs of samples.
  */
 #define VA_FOURCC_P010          0x30313050
+/** P012: two-plane 12-bit YUV 4:2:0.
+ *
+ * Each sample is a two-byte little-endian value with the bottom four bits ignored.
+ * The first plane contains Y, the second plane contains U and V in pairs of samples.
+ */
+#define VA_FOURCC_P012          0x32313050
 /** P016: two-plane 16-bit YUV 4:2:0.
  *
  * Each sample is a two-byte little-endian value.  The first plane contains Y, the second
