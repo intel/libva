@@ -63,6 +63,8 @@ libva_lt_version = '@0@.@1@.@2@'.format(libva_lt_current,
 					libva_lt_age,
 					libva_lt_revision)
 
+sysconfdir = join_paths(get_option('prefix'), get_option('sysconfdir'))
+
 driverdir = get_option('driverdir')
 if driverdir == ''
   driverdir = join_paths(get_option('prefix'), get_option('libdir'), 'dri')
@@ -101,9 +103,9 @@ if get_option('with_wayland') != 'no'
   wayland_dep = dependency('wayland-client', version : '>= 1.11.0',
 			   required : get_option('with_wayland') == 'yes')
   if wayland_dep.found()
-    prefix = wayland_dep.get_pkgconfig_variable('prefix')
+    wl_prefix = wayland_dep.get_pkgconfig_variable('prefix')
     wl_scanner = find_program('wayland-scanner',
-			      prefix + '/bin/wayland-scanner')
+			      wl_prefix + '/bin/wayland-scanner')
   endif
   WITH_WAYLAND = wayland_dep.found()
 endif

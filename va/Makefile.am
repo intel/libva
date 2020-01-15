@@ -24,6 +24,7 @@ SUBDIRS =
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
+	-DSYSCONFDIR='"$(sysconfdir)"' \
 	-DVA_DRIVERS_PATH="\"$(LIBVA_DRIVERS_PATH)\""
 
 LDADD = \
