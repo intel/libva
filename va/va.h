@@ -1024,6 +1024,8 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_PREDICTION_DIRECTION_PREVIOUS                0x00000001
 /** \brief Driver support backward prediction frame/slice */
 #define VA_PREDICTION_DIRECTION_FUTURE                  0x00000002
+/** \brief Dirver require both reference list must be not empty for inter frame */
+#define VA_PREDICTION_DIRECTION_BI_NOT_EMPTY            0x00000004
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncIntraRefresh */
