@@ -154,8 +154,11 @@ typedef struct  _VAEncPictureParameterBufferVP9
     /** VP9 encoder may support dynamic scaling function.
      *  If enabled (enable_dynamic_scaling is set), application may request
      *  GPU encodes picture with a different resolution from the raw source.
-     *  GPU should handle the scaling process of source and
-     *  all reference frames.
+     *  Applications are expected to handle the scaling explicitly:
+     *  application should scale the raw source and send to driver what
+     *  would be encoded via frame_width_src/frame_height_src. Backend driver
+     *  would handle the scaling process of reference frames. In this case
+     *  frame_width_dst/frame_height_dst should be set to VA_INVALID_SURFACE.
      */
     /* raw source frame width in pixels */
     uint32_t    frame_width_src;
@@ -183,7 +186,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
      */
     VASurfaceID reference_frames[8];
 
-	  /* buffer to store coded data */
+    /* buffer to store coded data */
     VABufferID  coded_buf;
 
     union {
@@ -202,7 +205,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
             uint32_t    ref_frame_ctrl_l1              : 3;
 
             /** \brief Last Reference Frame index
-             *  Specifies the index to RefFrameList[] which points to the LAST
+             *  Specifies the index to reference_frames[] which points to the LAST
              *  reference frame. It corresponds to active_ref_idx[0] in VP9 code.
              */
             uint32_t    ref_last_idx                   : 3;
@@ -213,7 +216,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
             uint32_t    ref_last_sign_bias             : 1;
 
             /** \brief GOLDEN Reference Frame index
-             *  Specifies the index to RefFrameList[] which points to the Golden
+             *  Specifies the index to reference_frames[] which points to the Golden
              *  reference frame. It corresponds to active_ref_idx[1] in VP9 code.
              */
             uint32_t    ref_gf_idx                     : 3;
@@ -224,7 +227,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
             uint32_t    ref_gf_sign_bias               : 1;
 
             /** \brief Alternate Reference Frame index
-             *  Specifies the index to RefFrameList[] which points to the Alternate
+             *  Specifies the index to reference_frames[] which points to the Alternate
              *  reference frame. It corresponds to active_ref_idx[2] in VP9 code.
              */
             uint32_t    ref_arf_idx                    : 3;
@@ -245,14 +248,14 @@ typedef struct  _VAEncPictureParameterBufferVP9
     union {
         struct {
             /**
-             * Indicates if the current frame is a key frame or not.
+             * Indicates if the current frame is a key frame ("0") or not ("1").
              * Corresponds to the same VP9 syntax element in frame tag.
              */
             uint32_t    frame_type                     : 1;
 
             /** \brief show_frame
              *  0: current frame is not for display
-	           *  1: current frame is for display
+             *  1: current frame is for display
              */
             uint32_t    show_frame                     : 1;
 
@@ -353,7 +356,20 @@ typedef struct  _VAEncPictureParameterBufferVP9
              */
             uint32_t    super_frame_flag               : 1;
 
-            uint32_t    reserved                       : 10;
+            /** \brief Indicate the block size represented by each segmentation id
+             * in Segment Map when segmentation_enabled flag is on.
+             * 0: 16x16 block size, default value;
+             * 1: 32x32 block size;
+             * 2: 64x64 block size;
+             * 3: 8x8 block size.
+             */
+            uint32_t    seg_id_block_size              : 2;
+
+            /** \brief Indicate that per segment parameters are changed.
+             */
+            uint32_t    segmentation_update_data       : 1;
+
+            uint32_t    reserved                       : 7;
         } bits;
         uint32_t    value;
     } pic_flags;
@@ -365,21 +381,25 @@ typedef struct  _VAEncPictureParameterBufferVP9
 
     /** \brief Base Q index in the VP9 term.
      *  Added with per segment delta Q index to get Q index of Luma AC.
+     *  Value range [1..255].
      */
     uint8_t     luma_ac_qindex;
 
     /**
      *  Q index delta from base Q index in the VP9 term for Luma DC.
+     *  Value range [-15..15]
      */
     int8_t      luma_dc_qindex_delta;
 
     /**
      *  Q index delta from base Q index in the VP9 term for Chroma AC.
+     *  Value range [-15..15]
      */
     int8_t      chroma_ac_qindex_delta;
 
     /**
      *  Q index delta from base Q index in the VP9 term for Chroma DC.
+     *  Value range [-15..15]
      */
     int8_t      chroma_dc_qindex_delta;
 
@@ -403,7 +423,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
     int8_t      ref_lf_delta[4];
 
     /** \brief Loop filter level mode delta values.
-     *  Contains a list of 4 delta values for coding mode based MB-level loop
+     *  Contains a list of 2 delta values for coding mode based MB-level loop
      *  filter adjustment.
      *  If no update, set to 0.
      *  value range [-63..63]
@@ -510,8 +530,17 @@ typedef struct  _VAEncPictureParameterBufferVP9
      */
     uint32_t    skip_frames_size;
 
+    /** \brief This parameter specifies the uncompressed header starting byte offset.
+     *  VP9 uncompressed header is generated by application. Application may also
+     *  inserts extra bytes in front of the uncompressed header for example IVF
+     *  container header. This parameter specifies the uncompressed header starting
+     *  byte offset in the compressed buffer that app prepares for driver to insert
+     *  into final bit stream.
+     */
+    uint32_t    uncompressed_header_byte_offset;
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t    va_reserved[VA_PADDING_MEDIUM];
+    uint32_t    va_reserved[VA_PADDING_MEDIUM - 1];
 } VAEncPictureParameterBufferVP9;
 
 

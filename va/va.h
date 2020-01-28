@@ -794,6 +794,19 @@ typedef enum
      *  attribute value is \c VAConfigAttribValContextPriority
      */
     VAConfigAttribContextPriority       = 41,
+
+    /** \brief indicates the maximum supported number of tile columns minus 1.
+     * When app sets the tile column number equaling to OptMaxTileColumnsMinus1 +1, the performance could be
+     * optimized due to parallel processing. But app may also choose other tile column numbers which are not
+     * subject to this restriction. There is no such restriction for tile rows.
+     */
+    VAConfigAttribOptMaxTileColumnsMinus1 = 42,
+    /** \brief VP9 encoding features attribute.  Read-only.
+     *
+     * This attribute describes the supported block sizes and features of
+     * an VP9 encoder config.
+     */
+    VAConfigAttribEncVP9Features        = 43,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1178,6 +1191,38 @@ typedef union _VAConfigAttribValContextPriority{
  * profile/entrypoint pair, then set the value to the following 
  */
 #define VA_ATTRIB_NOT_SUPPORTED 0x80000000
+
+/** \brief Attribute value for VAConfigAttribEncVP9Features.*/
+typedef union _VAConfigAttribValEncVP9Features {
+    struct {
+        /** \brief indicates if encoder supports application forced segmentation.
+         * If so, application should provide segmentation map and segmentation parameters.
+         * Encoder will honor it without altering.max num of concurrent frames from different stream
+         */
+        uint32_t forced_segmentation_support    : 1;
+        /** \brief indicates if encoder will internally determine the segmentation map when
+         * segmentation_enabled in VAEncPictureParameterBufferVP9 is enabled and segment map surface
+         * is not provided by app.
+         */
+        uint32_t auto_segmentation_support      : 1;
+        /** \brief indicates supported segmentation features:
+         * 0b0001:  Seg QP index delta is supported;
+         * 0b0010:  Seg loop filter level delta is supported;
+         * 0b0100:  reference is supported;
+         * 0b1000:  skip is supported;
+         * Values can be combined.
+         */
+        uint32_t segment_feature_support        : 4;
+        /** \brief indicates supported encode acceleration functions:
+         * 0b0001:  Enc+Pak;
+         * 0b0010:  Hybrid Pak function;
+         * 0b0100:  Enc only function;
+        uint32_t coding_function_type           : 3;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                       : 23;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValEncVP9Features;
 
 /** Get maximum number of profiles supported by the implementation */
 int vaMaxNumProfiles (
