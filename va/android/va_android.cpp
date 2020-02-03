@@ -100,7 +100,6 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-}
 static VAStatus va_DisplayContextGetNumCandidates(
     VADisplayContextP pDisplayContext,
     int *num_candidates
