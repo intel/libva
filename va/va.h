@@ -754,6 +754,8 @@ typedef enum
      * \brief Encoding QP info block size attribute. Read-only.
      * This attribute conveys the block sizes that underlying driver
      * support for QP info for buffer #VAEncQpBuffer.
+     * the value should present side length of square(8, 16, ... 2^n),
+     * reserved high 16 bit for future
      */
     VAConfigAttribQPBlockSize            = 37,
     /**
