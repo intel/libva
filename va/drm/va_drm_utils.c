@@ -54,7 +54,7 @@ VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates)
 {
     struct drm_state * const drm_state = ctx->drm_state;
     drmVersionPtr drm_version;
-    int num_of_candidate = 0;
+    int count = 0;
     const struct driver_name_map *m = NULL;
     if (!drm_state || drm_state->fd < 0)
         return VA_STATUS_ERROR_INVALID_DISPLAY;
@@ -64,12 +64,12 @@ VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates)
     for (m = g_driver_name_map; m->key != NULL; m++) {
         if (drm_version->name_len >= m->key_len &&
             strncmp(drm_version->name, m->key, m->key_len) == 0) {
-            num_of_candidate ++;
+            count ++;
         }
     }
     drmFreeVersion(drm_version);
-    *num_candidates = num_of_candidate;
-    return VA_STATUS_SUCCESS;
+    *num_candidates = count;
+    return count ? VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNKNOWN;
 }
 
 /* Returns the VA driver name for the active display */
