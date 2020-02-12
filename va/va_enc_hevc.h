@@ -327,8 +327,19 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
     uint8_t     max_bytes_per_pic_denom;
     /** \brief Same as the HEVC bitstream syntax element. */
     uint8_t     max_bits_per_min_cu_denom;
+
+    /** \brief SCC flags to enable/disable features, including IBC and palette mode at present.*/
+    union {
+        struct {
+            /** \brief Same as the HEVC bitstream syntax element. */
+            uint32_t    palette_mode_enabled_flag                      : 1;
+            /** \brief Reserved bits for future use, must be zero */
+            uint32_t    reserved                                       : 31;
+        } bits;
+        uint32_t value;
+    } scc_fields;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t   va_reserved[VA_PADDING_MEDIUM - 1];
     /**@}*/
 } VAEncSequenceParameterBufferHEVC;
 
@@ -538,7 +549,17 @@ typedef struct _VAEncPictureParameterBufferHEVC {
      */
     uint8_t     hierarchical_level_plus1;
     /** \brief Reserved bytes for future use, must be zero */
-    uint8_t     va_byte_reserved[3];
+    uint8_t     va_byte_reserved;
+    /** \brief SCC flags to enable/disable feature, only IBC at present.*/
+    union {
+        struct {
+            /** \brief Same as the HEVC bitstream syntax element. */
+            uint16_t    pps_curr_pic_ref_enabled_flag                  : 1;
+            /** \brief Reserved bits for future use, must be zero */
+            uint16_t    reserved                                       : 15;
+        } bits;
+        uint16_t value;
+    } scc_fields;
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_HIGH - 1];
 } VAEncPictureParameterBufferHEVC;
