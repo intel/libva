@@ -3094,6 +3094,10 @@ typedef struct _VAPictureParameterBufferH264
         uint32_t value;
     } pic_fields;
     uint16_t frame_num;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint8_t num_ref_idx_l0_default_active_minus1;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint8_t num_ref_idx_l1_default_active_minus1;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_MEDIUM];
@@ -3151,6 +3155,8 @@ typedef struct _VASliceParameterBufferH264
     uint8_t disable_deblocking_filter_idc;
     int8_t slice_alpha_c0_offset_div2;
     int8_t slice_beta_offset_div2;
+    /** \brief Same as the H.264 bitstream syntax element. */
+    uint16_t  idr_pic_id;
     VAPictureH264 RefPicList0[32];	/* See 8.2.4.2 */
     VAPictureH264 RefPicList1[32];	/* See 8.2.4.2 */
     uint8_t luma_log2_weight_denom;
@@ -3167,9 +3173,18 @@ typedef struct _VASliceParameterBufferH264
     uint8_t chroma_weight_l1_flag;
     int16_t chroma_weight_l1[32][2];
     int16_t chroma_offset_l1[32][2];
+    /** \brief Size in bits of the dec_ref_pic_marking() syntax element. */
+    uint32_t dec_ref_pic_marking_bit_size;
+    /**
+     * \brief Size in bits of the pic_order_cnt related syntax elements.
+     *
+     * Size in bits of the pic_order_cnt_lsb, delta_pic_order_cnt_bottom,
+     * delta_pic_order_cnt[0], and delta_pic_order_cnt[1] syntax elements.
+     */
+    uint32_t pic_order_cnt_bit_size;
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[2];
 } VASliceParameterBufferH264;
 
 /****************************
