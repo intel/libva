@@ -2153,6 +2153,41 @@ static inline void va_TraceFlagIfNotZero(
     }
 }
 
+static inline void va_TraceIsRextProfile(
+    VADisplay dpy,
+    VAContextID context,
+    bool *isRext /* out */
+)
+{
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    *isRext = (\
+               trace_ctx->trace_profile == VAProfileHEVCMain12     || \
+               trace_ctx->trace_profile == VAProfileHEVCMain422_10 || \
+               trace_ctx->trace_profile == VAProfileHEVCMain422_12 || \
+               trace_ctx->trace_profile == VAProfileHEVCMain444    || \
+               trace_ctx->trace_profile == VAProfileHEVCMain444_10 || \
+               trace_ctx->trace_profile == VAProfileHEVCMain444_12 || \
+               trace_ctx->trace_profile == VAProfileHEVCSccMain    || \
+               trace_ctx->trace_profile == VAProfileHEVCSccMain10  || \
+               trace_ctx->trace_profile == VAProfileHEVCSccMain444    \
+              );
+}
+
+static inline void va_TraceIsSccProfile(
+    VADisplay dpy,
+    VAContextID context,
+    bool *isScc /* out */
+)
+{
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    *isScc = (\
+              trace_ctx->trace_profile == VAProfileHEVCSccMain    || \
+              trace_ctx->trace_profile == VAProfileHEVCSccMain10  || \
+              trace_ctx->trace_profile == VAProfileHEVCSccMain444    \
+             );
+}
 
 static void va_TraceVAPictureParameterBufferHEVC(
     VADisplay dpy,
@@ -2163,8 +2198,24 @@ static void va_TraceVAPictureParameterBufferHEVC(
     unsigned int num_elements,
     void *data)
 {
-    int i;
-    VAPictureParameterBufferHEVC *p = (VAPictureParameterBufferHEVC*)data;
+    int i, j;
+    bool isRext = false;
+    bool isScc = false;
+    VAPictureParameterBufferHEVC *p = NULL;
+    VAPictureParameterBufferHEVCRext *pRext = NULL;
+    VAPictureParameterBufferHEVCScc *pScc = NULL;
+
+    va_TraceIsRextProfile(dpy, context, &isRext);
+    va_TraceIsSccProfile(dpy, context, &isScc);
+
+    if (isRext) {
+        p = &((VAPictureParameterBufferHEVCExtension*)data)->base;
+        pRext = &((VAPictureParameterBufferHEVCExtension*)data)->rext;
+
+        if (isScc)
+            pScc = &((VAPictureParameterBufferHEVCExtension*)data)->scc;
+    } else
+        p = (VAPictureParameterBufferHEVC*)data;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
@@ -2279,6 +2330,71 @@ static void va_TraceVAPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tnum_extra_slice_header_bits = %d\n", p->num_extra_slice_header_bits);
     va_TraceMsg(trace_ctx, "\tst_rps_bits = %d\n", p->st_rps_bits);
 
+    if (isRext && pRext) {
+        va_TraceMsg(trace_ctx, "\trange_extension_pic_fields = %d\n", pRext->range_extension_pic_fields.value);
+        va_TraceMsg(trace_ctx, "\ttransform_skip_rotation_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.transform_skip_rotation_enabled_flag);
+        va_TraceMsg(trace_ctx, "\ttransform_skip_context_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.transform_skip_context_enabled_flag);
+        va_TraceMsg(trace_ctx, "\timplicit_rdpcm_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.implicit_rdpcm_enabled_flag);
+        va_TraceMsg(trace_ctx, "\texplicit_rdpcm_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.explicit_rdpcm_enabled_flag);
+        va_TraceMsg(trace_ctx, "\textended_precision_processing_flag = %d\n", pRext->range_extension_pic_fields.bits.extended_precision_processing_flag);
+        va_TraceMsg(trace_ctx, "\tintra_smoothing_disabled_flag = %d\n", pRext->range_extension_pic_fields.bits.intra_smoothing_disabled_flag);
+        va_TraceMsg(trace_ctx, "\thigh_precision_offsets_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.high_precision_offsets_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tpersistent_rice_adaptation_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.persistent_rice_adaptation_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tcabac_bypass_alignment_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.cabac_bypass_alignment_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tcross_component_prediction_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.cross_component_prediction_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tchroma_qp_offset_list_enabled_flag = %d\n", pRext->range_extension_pic_fields.bits.chroma_qp_offset_list_enabled_flag);
+        va_TraceMsg(trace_ctx, "\treserved = %d\n", pRext->range_extension_pic_fields.bits.reserved);
+
+        va_TraceMsg(trace_ctx, "\tdiff_cu_chroma_qp_offset_depth = %d\n", pRext->diff_cu_chroma_qp_offset_depth);
+        va_TraceMsg(trace_ctx, "\tchroma_qp_offset_list_len_minus1 = %d\n", pRext->chroma_qp_offset_list_len_minus1);
+        va_TraceMsg(trace_ctx, "\tlog2_sao_offset_scale_luma = %d\n", pRext->log2_sao_offset_scale_luma);
+        va_TraceMsg(trace_ctx, "\tlog2_sao_offset_scale_chroma = %d\n", pRext->log2_sao_offset_scale_chroma);
+        va_TraceMsg(trace_ctx, "\tlog2_max_transform_skip_block_size_minus2 = %d\n", pRext->log2_max_transform_skip_block_size_minus2);
+
+        va_TraceMsg(trace_ctx, "\tcb_qp_offset_list[6] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 6; i++)
+            va_TracePrint(trace_ctx, "\t%d", pRext->cb_qp_offset_list[i]);
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tcr_qp_offset_list[] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 6; i++)
+            va_TracePrint(trace_ctx, "\t%d", pRext->cr_qp_offset_list[i]);
+        va_TracePrint(trace_ctx, "\n");
+    }
+
+    if (isScc && pScc) {
+        va_TraceMsg(trace_ctx, "\tscreen_content_pic_fields = %d\n", pScc->screen_content_pic_fields.value);
+        va_TraceMsg(trace_ctx, "\tpps_curr_pic_ref_enabled_flag = %d\n", pScc->screen_content_pic_fields.bits.pps_curr_pic_ref_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tpalette_mode_enabled_flag = %d\n", pScc->screen_content_pic_fields.bits.palette_mode_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tmotion_vector_resolution_control_idc = %d\n", pScc->screen_content_pic_fields.bits.motion_vector_resolution_control_idc);
+        va_TraceMsg(trace_ctx, "\tintra_boundary_filtering_disabled_flag = %d\n", pScc->screen_content_pic_fields.bits.intra_boundary_filtering_disabled_flag);
+        va_TraceMsg(trace_ctx, "\tresidual_adaptive_colour_transform_enabled_flag = %d\n", pScc->screen_content_pic_fields.bits.residual_adaptive_colour_transform_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tpps_slice_act_qp_offsets_present_flag = %d\n", pScc->screen_content_pic_fields.bits.pps_slice_act_qp_offsets_present_flag);
+        va_TraceMsg(trace_ctx, "\treserved = %d\n", pScc->screen_content_pic_fields.bits.reserved);
+
+        va_TraceMsg(trace_ctx, "\tpalette_max_size = %d\n", pScc->palette_max_size);
+        va_TraceMsg(trace_ctx, "\tdelta_palette_max_predictor_size = %d\n", pScc->delta_palette_max_predictor_size);
+        va_TraceMsg(trace_ctx, "\tpredictor_palette_size = %d\n", pScc->predictor_palette_size);
+
+        va_TraceMsg(trace_ctx, "\tpredictor_palette_entries[3][128] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 128; j++) {
+                va_TracePrint(trace_ctx, "\t%d", pScc->predictor_palette_entries[i][j]);
+                if ((j + 1) % 8 == 0)
+                    TRACE_NEWLINE();
+            }
+            TRACE_NEWLINE();
+        }
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tpps_act_y_qp_offset_plus5 = %d\n", pScc->pps_act_y_qp_offset_plus5);
+        va_TraceMsg(trace_ctx, "\tpps_act_cb_qp_offset_plus5 = %d\n", pScc->pps_act_cb_qp_offset_plus5);
+        va_TraceMsg(trace_ctx, "\tpps_act_cr_qp_offset_plus3 = %d\n", pScc->pps_act_cr_qp_offset_plus3);
+    }
+
     return;
 }
 
@@ -2292,7 +2408,16 @@ static void va_TraceVASliceParameterBufferHEVC(
     void *data)
 {
     int i,j;
-    VASliceParameterBufferHEVC* p = (VASliceParameterBufferHEVC*)data;
+    bool isRext = false;
+    VASliceParameterBufferHEVC* p = NULL;
+    VASliceParameterBufferHEVCRext *pRext = NULL;
+
+    va_TraceIsRextProfile(dpy, context, &isRext);
+    if (isRext) {
+        p = &((VASliceParameterBufferHEVCExtension*)data)->base;
+        pRext = &((VASliceParameterBufferHEVCExtension*)data)->rext;
+    } else
+        p = (VASliceParameterBufferHEVC*)data;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
@@ -2365,6 +2490,59 @@ static void va_TraceVASliceParameterBufferHEVC(
     }
 
     va_TraceMsg(trace_ctx, "\tfive_minus_max_num_merge_cand = %d\n", p->five_minus_max_num_merge_cand);
+
+    va_TraceMsg(trace_ctx, "\tnum_entry_point_offsets = %d\n", p->num_entry_point_offsets);
+    va_TraceMsg(trace_ctx, "\tentry_offset_to_subset_array = %d\n", p->entry_offset_to_subset_array);
+    va_TraceMsg(trace_ctx, "\tslice_data_num_emu_prevn_bytes = %d\n", p->slice_data_num_emu_prevn_bytes);
+
+    if (isRext && pRext) {
+        va_TraceMsg(trace_ctx, "\tluma_offset_l0[15] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 15; i++) {
+            va_TracePrint(trace_ctx, "\t%d", pRext->luma_offset_l0[i]);
+            if ((i + 1) % 8 == 0)
+                TRACE_NEWLINE();
+        }
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tChromaOffsetL0[15][2] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 15; i++) {
+            for (j = 0; j < 2; j++) {
+                va_TracePrint(trace_ctx, "\t%d", pRext->ChromaOffsetL0[i][j]);
+            }
+            TRACE_NEWLINE();
+        }
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tluma_offset_l1[15] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 15; i++) {
+            va_TracePrint(trace_ctx, "\t%d", pRext->luma_offset_l1[i]);
+            if ((i + 1) % 8 == 0)
+                TRACE_NEWLINE();
+        }
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tChromaOffsetL1[15][2] = \n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 15; i++) {
+            for (j = 0; j < 2; j++) {
+                va_TracePrint(trace_ctx, "\t%d", pRext->ChromaOffsetL1[i][j]);
+            }
+            TRACE_NEWLINE();
+        }
+        va_TracePrint(trace_ctx, "\n");
+
+        va_TraceMsg(trace_ctx, "\tslice_ext_flags = %d\n", pRext->slice_ext_flags.value);
+        va_TraceMsg(trace_ctx, "\tcu_chroma_qp_offset_enabled_flag = %d\n", pRext->slice_ext_flags.bits.cu_chroma_qp_offset_enabled_flag);
+        va_TraceMsg(trace_ctx, "\tuse_integer_mv_flag = %d\n", pRext->slice_ext_flags.bits.use_integer_mv_flag);
+        va_TraceMsg(trace_ctx, "\treserved = %d\n", pRext->slice_ext_flags.bits.reserved);
+
+        va_TraceMsg(trace_ctx, "\tslice_act_y_qp_offset = %d\n", pRext->slice_act_y_qp_offset);
+        va_TraceMsg(trace_ctx, "\tslice_act_cb_qp_offset = %d\n", pRext->slice_act_cb_qp_offset);
+        va_TraceMsg(trace_ctx, "\tslice_act_cr_qp_offset = %d\n", pRext->slice_act_cr_qp_offset);
+    }
 
     va_TraceMsg(trace_ctx, NULL);
 }
@@ -5012,6 +5190,9 @@ void va_TraceRenderPicture(
         case VAProfileHEVCMain444_12:
         case VAProfileHEVCMain:
         case VAProfileHEVCMain10:
+        case VAProfileHEVCSccMain:
+        case VAProfileHEVCSccMain10:
+        case VAProfileHEVCSccMain444:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
 
