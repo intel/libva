@@ -1430,14 +1430,43 @@ VAStatus vaMapBuffer(
 )
 {
     VADriverContextP ctx;
-    VAStatus va_status;
+    VAStatus va_status = VA_STATUS_SUCCESS;
 
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
+    if (ctx->vtable->vaMapBuffer2) {
+        va_status = ctx->vtable->vaMapBuffer2(ctx, buf_id, pbuf, VA_MAPBUFFER_FLAG_DEFAULT);
+    } else if (ctx->vtable->vaMapBuffer) {
+        va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
+    }
 
-    VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf);
+    VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf, VA_MAPBUFFER_FLAG_DEFAULT);
+    VA_TRACE_RET(dpy, va_status);
+
+    return va_status;
+}
+
+VAStatus vaMapBuffer2(
+    VADisplay dpy,
+    VABufferID buf_id,  /* in */
+    void **pbuf,    /* out */
+    uint32_t flags      /*in */
+)
+{
+    VADriverContextP ctx;
+    VAStatus va_status = VA_STATUS_SUCCESS;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    if (ctx->vtable->vaMapBuffer2) {
+        va_status = ctx->vtable->vaMapBuffer2(ctx, buf_id, pbuf, flags);
+    } else if (ctx->vtable->vaMapBuffer) {
+        va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
+    }
+
+    VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf, flags);
     VA_TRACE_RET(dpy, va_status);
 
     return va_status;

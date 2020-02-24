@@ -504,8 +504,16 @@ struct VADriverVTable {
         VACopyObject        *src,           /* in */
         VACopyOption        option          /* in */
     );
+
+    VAStatus(*vaMapBuffer2)(
+        VADriverContextP ctx,
+        VABufferID buf_id,                  /* in */
+        void **pbuf,                        /* out */
+        uint32_t flags                      /* in */
+    );
     /** \brief Reserved bytes for future use, must be zero */
-    unsigned long reserved[54];
+    unsigned long reserved[53];
+
 };
 
 struct VADriverContext {

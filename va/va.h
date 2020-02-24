@@ -3895,6 +3895,28 @@ VAStatus vaMapBuffer(
 );
 
 /**
+ * Map data store of the buffer into the client's address space
+ * this interface could be used to convey the operation hint
+ * backend driver could use these hint to optimize the implementations
+ */
+
+/** \brief VA_MAPBUFFER_FLAG_DEFAULT is used when there are no flag specified
+ * same as VA_MAPBUFFER_FLAG_READ | VA_MAPBUFFER_FLAG_WRITE.
+ */
+#define VA_MAPBUFFER_FLAG_DEFAULT 0
+/** \brief application will read the surface after map */
+#define VA_MAPBUFFER_FLAG_READ    1
+/** \brief application will write the surface after map */
+#define VA_MAPBUFFER_FLAG_WRITE   2
+
+VAStatus vaMapBuffer2(
+    VADisplay dpy,
+    VABufferID buf_id,  /* in */
+    void **pbuf,        /* out */
+    uint32_t flags      /* in */
+);
+
+/**
  * After client making changes to a mapped data store, it needs to
  * "Unmap" it to let the server know that the data is ready to be
  * consumed by the server

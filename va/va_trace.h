@@ -353,7 +353,8 @@ DLL_HIDDEN
 void va_TraceMapBuffer(
     VADisplay dpy,
     VABufferID buf_id,  /* in */
-    void **pbuf     /* out */
+    void **pbuf,     /* out */
+    uint32_t flags  /* in */
 );
 
 
