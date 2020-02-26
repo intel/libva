@@ -777,6 +777,12 @@ typedef enum
      * implementation, multiple frames encode/decode can improve HW concurrency
      */
     VAConfigAttribMultipleFrame         = 40,
+    /** \brief attribute for codec specific feature, each codec should have different attribute layout
+     *  application should check the values with specific profile and entrypoint
+     *  for example: HEVC encode use /c VAConfigAttribValTrivialFeatureExtHEVCEnc
+     *  if the value is VA_ATTRIB_NOT_SUPPORTED or Zero, the features should follow profile and spec.
+     */
+     VAConfigAttribEncTrivialFeatureExt = 41,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;

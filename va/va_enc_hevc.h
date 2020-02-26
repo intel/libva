@@ -727,6 +727,24 @@ typedef struct _VAQMatrixBufferHEVC
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAQMatrixBufferHEVC;
 
+typedef union _VAConfigAttribValTrivialFeatureExtHEVCEnc{
+    struct{
+        /** \brief max_ctu_size, 2^max_ctu_size is real LTU size */
+        uint32_t max_ctu_size : 4;
+        /** \brief max_transform_hierarchy_depth_intra same as the HEVC bitstream syntax element */
+        uint32_t max_transform_hierarchy_depth_intra : 2;
+        /** \brief max_transform_hierarchy_depth_inter same as the HEVC bitstream syntax element */
+        uint32_t max_transform_hierarchy_depth_inter : 2;
+        /** \brief indicate whether support temporal MVP */
+        uint32_t temporal_mv_prediction_support  : 1;
+        /** \brief indicate whether support SAO filter */
+        uint32_t sao_support                     : 1;
+        /** \brief reserved bits for future use, must be zero */
+        uint32_t reserved: 22;
+    }bits;
+    uint32_t value;
+}VAConfigAttribValTrivialFeatureExtHEVCEnc;
+
 /**@}*/
 
 #ifdef __cplusplus
