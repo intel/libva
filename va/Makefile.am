@@ -42,6 +42,7 @@ libva_source_h = \
 	va_backend.h		\
 	va_backend_vpp.h	\
 	va_compat.h		\
+	va_dec_av1.h		\
 	va_dec_hevc.h		\
 	va_dec_jpeg.h		\
 	va_dec_vp8.h		\
