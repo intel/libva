@@ -174,14 +174,15 @@ typedef struct _VAFilmGrainStructAV1 {
 
 typedef enum {
     /** identity transformation, 0-parameter */
-    VAAV1Identity           = 0,
+    VAAV1TransformationIdentity           = 0,
     /** translational motion, 2-parameter */
-    VAAV1Translation        = 1,
+    VAAV1TransformationTranslation        = 1,
     /** simplified affine with rotation + zoom only, 4-parameter */
-    VAAV1Rotzoom            = 2,
+    VAAV1TransformationRotzoom            = 2,
     /** affine, 6-parameter */
-    VAAV1Affine             = 3,
-    VAAV1Trans_Types,
+    VAAV1TransformationAffine             = 3,
+    /** transformation count */
+    VAAV1TransformationCount
 } VAAV1TransformationType;
 
 typedef struct _VAWarpedMotionParamsAV1{
@@ -613,15 +614,15 @@ typedef struct _VASliceParameterBufferAV1
      *  It uses the name slice_data_size to be consistent with other codec,
      *  but actually means tile_data_size.
      */
-    uint32_t                Slice_data_size;
+    uint32_t                slice_data_size;
     /**
      * offset to the first byte of the data buffer.
      */
-    uint32_t                Slice_data_offset;
+    uint32_t                slice_data_offset;
     /**
      * see VA_SLICE_DATA_FLAG_XXX definitions
      */
-    uint32_t                Slice_data_flag;
+    uint32_t                slice_data_flag;
 
     uint16_t                tile_row;
     uint16_t                tile_column;
