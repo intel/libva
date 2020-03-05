@@ -52,33 +52,33 @@ extern "C" {
 typedef struct _VASegmentationStructAV1 {
     union {
         struct {
-             /** Indicates whether segmentation map related syntax elements 
-             *  are present or not for current frame. If equal to 0, 
-             *  the segmentation map related syntax elements are 
-             *  not present for the current frame and the control flags of 
-             *  segmentation map related tables feature_data[][], and 
+             /** Indicates whether segmentation map related syntax elements
+             *  are present or not for current frame. If equal to 0,
+             *  the segmentation map related syntax elements are
+             *  not present for the current frame and the control flags of
+             *  segmentation map related tables feature_data[][], and
              *  feature_mask[] are not valid and shall be ignored by accelerator.
              */
             uint32_t         enabled                                     : 1;
-            /** Value 1 indicates that the segmentation map are updated 
-             *  during the decoding of this frame. 
-             *  Value 0 means that the segmentation map from the previous 
+            /** Value 1 indicates that the segmentation map are updated
+             *  during the decoding of this frame.
+             *  Value 0 means that the segmentation map from the previous
              *  frame is used.
              */
             uint32_t         update_map                                  : 1;
-            /** Value 1 indicates that the updates to the segmentation map 
-             *  are coded relative to the existing segmentation map. 
-             *  Value 0 indicates that the new segmentation map is coded 
+            /** Value 1 indicates that the updates to the segmentation map
+             *  are coded relative to the existing segmentation map.
+             *  Value 0 indicates that the new segmentation map is coded
              *  without reference to the existing segmentation map.
              */
             uint32_t         temporal_update                             : 1;
-            /** Value 1 indicates that new parameters are about to be 
+            /** Value 1 indicates that new parameters are about to be
              *  specified for each segment.
-             *  Value 0 indicates that the segmentation parameters 
+             *  Value 0 indicates that the segmentation parameters
              *  should keep their existing values.
              */
             uint32_t         update_data                                 : 1;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint32_t         reserved                                    : 28;
         } bits;
@@ -86,7 +86,7 @@ typedef struct _VASegmentationStructAV1 {
     } segment_info_fields;
 
     /** \brief Segmentation parameters for current frame.
-     *  feature_data[segment_id][feature_id] 
+     *  feature_data[segment_id][feature_id]
      *  where segment_id has value range [0..7] indicating the segment id.
      *  and feature_id is defined as
         typedef enum {
@@ -100,17 +100,17 @@ typedef struct _VASegmentationStructAV1 {
             SEG_LVL_GLOBALMV,
             SEG_LVL_MAX
         } SEG_LVL_FEATURES;
-     *  feature_data[][] is equivalent to variable FeatureData[][] in spec, 
-     *  which is after clip3() operation. 
+     *  feature_data[][] is equivalent to variable FeatureData[][] in spec,
+     *  which is after clip3() operation.
      *  Clip3(x, y, z) = (z < x)? x : ((z > y)? y : z);
      *  The limit is defined in Segmentation_Feature_Max[ SEG_LVL_MAX ] = {
      *  255, MAX_LOOP_FILTER, MAX_LOOP_FILTER, MAX_LOOP_FILTER, MAX_LOOP_FILTER, 7, 0, 0 }
      */
     int16_t                 feature_data[8][8];
 
-    /** \brief indicates if a feature is enabled or not. 
+    /** \brief indicates if a feature is enabled or not.
      *  Each bit field itself is the feature_id. Index is segment_id.
-     *  feature_mask[segment_id] & (1 << feature_id) equal to 1 specify that the feature of  
+     *  feature_mask[segment_id] & (1 << feature_id) equal to 1 specify that the feature of
      *  feature_id for segment of segment_id is enabled, otherwise disabled.
      */
     uint8_t                 feature_mask[8];
@@ -186,11 +186,11 @@ typedef enum {
 
 typedef struct _VAWarpedMotionParamsAV1{
 
-    /** \brief Specify the type of warped motion */ 
+    /** \brief Specify the type of warped motion */
     VAAV1TransformationType  wmtype;
 
     /** \brief Specify warp motion parameters
-     *  wm.wmmat[] corresponds to gm_params[][] in spec. 
+     *  wm.wmmat[] corresponds to gm_params[][] in spec.
      *  Details in AV1 spec section 5.9.24 or refer to libaom code
      *  https://aomedia.googlesource.com/aom/+/refs/heads/master/av1/decoder/decodeframe.c
      */
@@ -272,27 +272,27 @@ typedef struct  _VADecPictureParameterBufferAV1
      */
     VASurfaceID             current_display_picture;
 
-    /** \brief number of anchor frames for large scale tile 
+    /** \brief number of anchor frames for large scale tile
      *  This parameter gives the number of entries of anchor_frames_list[].
      *  Value range [0..128].
      */
     uint8_t                anchor_frames_num;
 
-    /** \brief anchor frame list for large scale tile 
+    /** \brief anchor frame list for large scale tile
      *  For large scale tile applications, the anchor frames could come from
-     *  previously decoded frames in current sequence (aka. internal), or 
+     *  previously decoded frames in current sequence (aka. internal), or
      *  from external sources.
      *  For external anchor frames, application should call API
-     *  vaCreateBuffer() to generate frame buffers and populate them with 
-     *  pixel frames. And this process may happen multiple times. 
+     *  vaCreateBuffer() to generate frame buffers and populate them with
+     *  pixel frames. And this process may happen multiple times.
      *  The array anchor_frames_list[] is used to register all the available
-     *  anchor frames from both external and internal, up to the current 
-     *  frame instance. If a previously registerred anchor frame is no longer 
+     *  anchor frames from both external and internal, up to the current
+     *  frame instance. If a previously registerred anchor frame is no longer
      *  needed, it should be removed from the list. But it does not prevent
      *  applications from relacing the frame buffer with new anchor frames.
      *  Please note that the internal anchor frames may not still be present
-     *  in the current DPB buffer. But if it is in the anchor_frames_list[], 
-     *  it should not be replaced with other frames or removed from memory 
+     *  in the current DPB buffer. But if it is in the anchor_frames_list[],
+     *  it should not be replaced with other frames or removed from memory
      *  until it is not shown in the list.
      *  This number of entries of the list is given by parameter anchor_frames_num.
      */
@@ -300,8 +300,8 @@ typedef struct  _VADecPictureParameterBufferAV1
 
     /** \brief Picture resolution minus 1
      *  Picture original resolution. If SuperRes is enabled,
-     *  this is the upscaled resolution. 
-     *  The value may not be multiple of 8. 
+     *  this is the upscaled resolution.
+     *  The value may not be multiple of 8.
      *  value range [0..65535]
      */
     uint16_t                frame_width_minus1;
@@ -408,7 +408,7 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint32_t        allow_warped_motion                         : 1;
             /** \brief indicate if current frame in large scale tile mode */
             uint32_t        large_scale_tile                            : 1;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint32_t        reserved                                    : 15;
         } bits;
@@ -446,7 +446,7 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint8_t         sharpness_level                             : 3;
             uint8_t         mode_ref_delta_enabled                      : 1;
             uint8_t         mode_ref_delta_update                       : 1;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint8_t         reserved                                    : 3;
         } bits;
@@ -506,7 +506,7 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint16_t        qm_y                                        : 4;
             uint16_t        qm_u                                        : 4;
             uint16_t        qm_v                                        : 4;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint16_t        reserved                                    : 3;
         } bits;
@@ -535,14 +535,14 @@ typedef struct  _VADecPictureParameterBufferAV1
              *  value range [0..2]
              */
             uint32_t        tx_mode                                     : 2;
-            
+
             /* AV1 frame reference mode semantic */
             uint32_t        reference_select                            : 1;
 
             uint32_t        reduced_tx_set_used                         : 1;
 
             uint32_t        skip_mode_present                           : 1;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint32_t        reserved                                    : 20;
         } bits;
@@ -571,14 +571,14 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint16_t        crframe_restoration_type                    : 2;
             uint16_t        lr_unit_shift                               : 2;
             uint16_t        lr_uv_shift                                 : 1;
-            
+
             /** \brief Reserved bytes for future use, must be zero */
             uint16_t        reserved                                    : 7;
         } bits;
         uint16_t            value;
     } loop_restoration_fields;
 
-    /** \brief global motion 
+    /** \brief global motion
      */
     VAWarpedMotionParamsAV1 wm[7];
 
@@ -622,7 +622,7 @@ typedef struct _VASliceParameterBufferAV1
      * see VA_SLICE_DATA_FLAG_XXX definitions
      */
     uint32_t                Slice_data_flag;
-    
+
     uint16_t                tile_row;
     uint16_t                tile_column;
     uint16_t                tg_start;
@@ -635,7 +635,7 @@ typedef struct _VASliceParameterBufferAV1
     uint8_t                 anchor_frame_idx;
 
     /** \brief tile index in the tile list.
-     *  Valid only when large_scale_tile is enabled. 
+     *  Valid only when large_scale_tile is enabled.
      *  Driver uses this field to decide the tile output location.
      */
     uint16_t                tile_idx_in_tile_list;
