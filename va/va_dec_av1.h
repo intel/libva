@@ -233,6 +233,9 @@ typedef struct  _VADecPictureParameterBufferAV1
      */
     uint8_t                 bit_depth_idx;
 
+    /** \brief corresponds to AV1 spec variable of the same name. */
+    uint8_t                 matrix_coefficients;
+
     union {
         struct {
             uint32_t        still_picture                               : 1;
