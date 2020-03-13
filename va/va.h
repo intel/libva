@@ -395,7 +395,8 @@ typedef enum
     VAProfileHEVCSccMain10              = 30,
     VAProfileHEVCSccMain444             = 31,
     VAProfileAV1Profile0                = 32,
-    VAProfileAV1Profile1                = 33
+    VAProfileAV1Profile1                = 33,
+    VAProfileHEVCSccMain444_10          = 34
 } VAProfile;
 
 /**

@@ -63,6 +63,7 @@ const char *vaProfileStr(VAProfile profile)
     TOSTR(VAProfileHEVCSccMain444);
     TOSTR(VAProfileAV1Profile0);
     TOSTR(VAProfileAV1Profile1);
+    TOSTR(VAProfileHEVCSccMain444_10);
     default: break;
     }
     return "<unknown profile>";
