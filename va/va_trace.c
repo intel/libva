@@ -2225,7 +2225,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.pic_order_cnt);
     va_TraceMsg(trace_ctx, "\tCurrPic.flags = %d\n", p->CurrPic.flags);
 
-    va_TraceMsg(trace_ctx, "\tReferenceFrames (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags:\n");
+    va_TraceMsg(trace_ctx, "\tReferenceFrames (picture_id-pic_order_cnt-flags:\n");
     for (i = 0; i < 15; i++)
     {
         if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
