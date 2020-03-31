@@ -957,12 +957,16 @@ typedef union _VAConfigAttribValDecJPEG {
 #define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
 /** \brief Driver supports an arbitrary number of macroblocks per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
-/** \brief Dirver support 1 rows  per slice */
+/** \brief Driver support 1 row per slice */
 #define VA_ENC_SLICE_STRUCTURE_EQUAL_ROWS               0x00000004
-/** \brief Dirver support max encoded slice size per slice */
+/** \brief Driver support max encoded slice size per slice */
 #define VA_ENC_SLICE_STRUCTURE_MAX_SLICE_SIZE           0x00000008
 /** \brief Driver supports an arbitrary number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000010
+/** \brief Driver supports any number of rows per slice but they must be the same
+*       for all slices except for the last one, which must be equal or smaller
+*       to the previous slices. */
+#define VA_ENC_SLICE_STRUCTURE_EQUAL_MULTI_ROWS         0x00000020
 /**@}*/
 
 /** \brief Attribute value for VAConfigAttribMaxFrameSize */
