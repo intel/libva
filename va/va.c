@@ -465,20 +465,16 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
             char init_func_s[256];
             int i;
 
-            static const struct {
+            struct {
                 int major;
                 int minor;
-            } compatible_versions[] = {
-                { VA_MAJOR_VERSION, VA_MINOR_VERSION },
-                { VA_MAJOR_VERSION, 6 },
-                { VA_MAJOR_VERSION, 5 },
-                { VA_MAJOR_VERSION, 4 },
-                { VA_MAJOR_VERSION, 3 },
-                { VA_MAJOR_VERSION, 2 },
-                { VA_MAJOR_VERSION, 1 },
-                { VA_MAJOR_VERSION, 0 },
-                { -1, -1}
-            };
+            } compatible_versions[VA_MINOR_VERSION + 2];
+            for (i = 0; i <= VA_MINOR_VERSION; i ++) {
+                compatible_versions[i].major = VA_MAJOR_VERSION;
+                compatible_versions[i].minor = VA_MINOR_VERSION - i;
+            }
+            compatible_versions[i].major = -1;
+            compatible_versions[i].minor = -1;
 
             for (i = 0; compatible_versions[i].major >= 0; i++) {
                 if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
