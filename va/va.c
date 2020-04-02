@@ -544,7 +544,6 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                     CHECK_VTABLE(vaStatus, ctx, EndPicture);
                     CHECK_VTABLE(vaStatus, ctx, SyncSurface);
                     CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
-                    CHECK_VTABLE(vaStatus, ctx, PutSurface);
                     CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
                     CHECK_VTABLE(vaStatus, ctx, CreateImage);
                     CHECK_VTABLE(vaStatus, ctx, DeriveImage);
