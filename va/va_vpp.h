@@ -805,15 +805,15 @@ typedef struct _VAHdrMetaDataHDR10
      */
     uint32_t    min_display_mastering_luminance;
     /**
-     * \brief The maximum content light level.
+     * \brief The maximum content light level (MaxCLL).
      *
-     * The value is in units of 0.0001 candelas per square metre.
+     * The value is in units of 1 candelas per square metre.
      */
     uint16_t    max_content_light_level;
     /**
-     * \brief The maximum picture average light level.
+     * \brief The maximum picture average light level (MaxFALL).
      *
-     * The value is in units of 0.0001 candelas per square metre.
+     * The value is in units of 1 candelas per square metre.
      */
     uint16_t    max_pic_average_light_level;
     /** Resevered */
