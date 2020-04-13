@@ -4555,6 +4555,11 @@ VAStatus vaSyncBuffer(
  * The four planes contain: alpha, blue, green, red respectively.
  */
 #define VA_FOURCC_ABGR64        0x34474241
+/** XYUV: packed 8-bit YUVX 4:4:4.
+ *
+ * Four bytes per pixel: X, Y, U, V.
+ */
+#define VA_FOURCC_XYUV          0x56555958
 
 /* byte order */
 #define VA_LSB_FIRST		1
