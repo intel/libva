@@ -53,6 +53,8 @@ struct driver_name_map {
 static const struct driver_name_map g_dri2_driver_name_map[] = {
     { "i965",       4, "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
     { "i965",       4, "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
+    { "iris",       4, "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
+    { "iris",       4, "i965"   }, // Intel i965 VAAPI driver with iris DRI driver
     { NULL,         0, NULL }
 };
 
