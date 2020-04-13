@@ -44,6 +44,18 @@
 #include <fcntl.h>
 #include <errno.h>
 
+struct driver_name_map {
+    const char *key;
+    int         key_len;
+    const char *name;
+};
+
+static const struct driver_name_map g_dri2_driver_name_map[] = {
+    { "i965",       4, "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
+    { "i965",       4, "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
+    { NULL,         0, NULL }
+};
+
 static int va_DisplayContextIsValid (
     VADisplayContextP pDisplayContext
 )
@@ -73,28 +85,92 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-
-static VAStatus va_DRI2GetDriverName (
+static VAStatus va_DRI2_GetNumCandidates (
     VADisplayContextP pDisplayContext,
-    char **driver_name
+    int *num_candidates
 )
 {
+    char *driver_name = NULL;
+    const struct driver_name_map *m = NULL;
     VADriverContextP ctx = pDisplayContext->pDriverContext;
 
-    if (!va_isDRI2Connected(ctx, driver_name))
+    *num_candidates = 0;
+
+    if (!(va_isDRI2Connected(ctx, &driver_name) && driver_name))
         return VA_STATUS_ERROR_UNKNOWN;
+
+    for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
+        if (strlen(driver_name) >= m->key_len &&
+            strncmp(driver_name, m->key, m->key_len) == 0) {
+            (*num_candidates)++;
+        }
+    }
+
+    free(driver_name);
+
+    /*
+     * If the dri2 driver name does not have a mapped vaapi driver name, then
+     * assume they have the same name.
+     */
+    if (*num_candidates == 0)
+        *num_candidates = 1;
+
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus va_DRI2_GetDriverName (
+    VADisplayContextP pDisplayContext,
+    char **driver_name_ptr,
+    int candidate_index
+)
+{
+    const struct driver_name_map *m = NULL;
+    int current_index = 0;
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+
+    *driver_name_ptr = NULL;
+
+    if (!(va_isDRI2Connected(ctx, driver_name_ptr) && *driver_name_ptr))
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
+        if (strlen(*driver_name_ptr) >= m->key_len &&
+            strncmp(*driver_name_ptr, m->key, m->key_len) == 0) {
+            if (current_index == candidate_index) {
+                break;
+            }
+            current_index++;
+        }
+    }
+
+    /*
+     * If the dri2 driver name does not have a mapped vaapi driver name, then
+     * assume they have the same name.
+     */
+    if (!m->name)
+        return VA_STATUS_SUCCESS;
+
+    /* Use the mapped vaapi driver name */
+    free(*driver_name_ptr);
+    *driver_name_ptr = strdup(m->name);
+    if (!*driver_name_ptr)
+        return VA_STATUS_ERROR_ALLOCATION_FAILED;
 
     return VA_STATUS_SUCCESS;
 }
 
 static VAStatus va_NVCTRL_GetDriverName (
     VADisplayContextP pDisplayContext,
-    char **driver_name
+    char **driver_name,
+    int candidate_index
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
     int direct_capable, driver_major, driver_minor, driver_patch;
     Bool result;
+
+    if (candidate_index != 0)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
 
     result = VA_NVCTRLQueryDirectRenderingCapable(ctx->native_dpy, ctx->x11_screen,
                                                   &direct_capable);
@@ -112,12 +188,16 @@ static VAStatus va_NVCTRL_GetDriverName (
 
 static VAStatus va_FGLRX_GetDriverName (
     VADisplayContextP pDisplayContext,
-    char **driver_name
+    char **driver_name,
+    int candidate_index
 )
 {
     VADriverContextP ctx = pDisplayContext->pDriverContext;
     int driver_major, driver_minor, driver_patch;
     Bool result;
+
+    if (candidate_index != 0)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
 
     result = VA_FGLRXGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
                                          &driver_major, &driver_minor,
@@ -130,24 +210,43 @@ static VAStatus va_FGLRX_GetDriverName (
 
 static VAStatus va_DisplayContextGetDriverName (
     VADisplayContextP pDisplayContext,
-    char **driver_name
+    char **driver_name, int candidate_index
 )
 {
     VAStatus vaStatus;
 
     if (driver_name)
-	*driver_name = NULL;
+        *driver_name = NULL;
     else
         return VA_STATUS_ERROR_UNKNOWN;
-    
-    vaStatus = va_DRI2GetDriverName(pDisplayContext, driver_name);
+
+    vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name);
+        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name);
+        vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name, candidate_index);
+
     return vaStatus;
 }
 
+static VAStatus va_DisplayContextGetNumCandidates (
+    VADisplayContextP pDisplayContext,
+    int *num_candidates
+)
+{
+    VAStatus vaStatus;
+
+    vaStatus = va_DRI2_GetNumCandidates(pDisplayContext, num_candidates);
+
+    /* A call to va_DisplayContextGetDriverName will fallback to other
+     * methods (i.e. NVCTRL, FGLRX) when DRI2 is unsuccessful.  All of those
+     * fallbacks only have 1 candidate driver.
+     */
+    if (vaStatus != VA_STATUS_SUCCESS)
+      *num_candidates = 1;
+
+    return VA_STATUS_SUCCESS;
+}
 
 VADisplay vaGetDisplay (
     Display *native_dpy /* implementation specific */
@@ -166,7 +265,8 @@ VADisplay vaGetDisplay (
 
     pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
+    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverName;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext) {
@@ -190,7 +290,6 @@ VADisplay vaGetDisplay (
     return (VADisplay)pDisplayContext;
 }
 
-
 void va_TracePutSurface (
     VADisplay dpy,
     VASurfaceID surface,
@@ -207,7 +306,6 @@ void va_TracePutSurface (
     unsigned int number_cliprects, /* number of clip rects in the clip list */
     unsigned int flags /* de-interlacing flags */
 );
-
 
 VAStatus vaPutSurface (
     VADisplay dpy,
