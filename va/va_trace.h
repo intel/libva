@@ -213,6 +213,13 @@ void va_TraceSyncSurface(
 );
 
 DLL_HIDDEN
+void va_TraceSyncSurface2(
+    VADisplay dpy,
+    VASurfaceID surface,
+    uint64_t timeout_ns
+);
+
+DLL_HIDDEN
 void va_TraceQuerySurfaceAttributes(
     VADisplay           dpy,
     VAConfigID          config,

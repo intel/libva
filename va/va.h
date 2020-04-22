@@ -213,6 +213,8 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE 0x00000024
 /** \brief Indicate allocated buffer size is not enough for input or output. */
 #define VA_STATUS_ERROR_NOT_ENOUGH_BUFFER       0x00000025
+/** \brief Indicate an operation isn't completed because time-out interval elapsed. */
+#define VA_STATUS_ERROR_TIMEDOUT                0x00000026
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
 /** 
@@ -3722,6 +3724,35 @@ Synchronization
 VAStatus vaSyncSurface (
     VADisplay dpy,
     VASurfaceID render_target
+);
+
+/** \brief Indicates an infinite timeout. */
+#define VA_TIMEOUT_INFINITE 0xFFFFFFFFFFFFFFFF
+
+/**
+ * \brief Synchronizes pending operations associated with the supplied surface.
+ *
+ * This function blocks during specified timeout (in nanoseconds) until
+ * all pending operations on the render target have been completed.
+ * If timeout is zero, the function returns immediately.
+ *
+ * Possible errors:
+ * - \ref VA_STATUS_ERROR_UNIMPLEMENTED: the VA driver implementation
+ *   does not support this interface
+ * - \ref VA_STATUS_ERROR_INVALID_DISPLAY: an invalid display was supplied
+ * - \ref VA_STATUS_ERROR_INVALID_SURFACE: an invalid surface was supplied
+ * - \ref VA_STATUS_ERROR_TIMEDOUT: synchronization is still in progress,
+ *   client should call the function again to complete synchronization
+ *
+ * @param[in] dpy         the VA display
+ * @param[in] surface     the surface for which synchronization is performed
+ * @param[in] timeout_ns  the timeout in nanoseconds
+ *
+ */
+VAStatus vaSyncSurface2 (
+    VADisplay dpy,
+    VASurfaceID surface,
+    uint64_t timeout_ns
 );
 
 typedef enum
