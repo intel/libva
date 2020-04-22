@@ -5455,6 +5455,23 @@ void va_TraceSyncSurface(
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
 
+void va_TraceSyncSurface2(
+    VADisplay dpy,
+    VASurfaceID surface,
+    uint64_t timeout_ns
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tsurface = 0x%08x\n", surface);
+    va_TraceMsg(trace_ctx, "\ttimeout_ns = %d\n", timeout_ns);
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
 void va_TraceQuerySurfaceAttributes(
     VADisplay           dpy,
     VAConfigID          config,
