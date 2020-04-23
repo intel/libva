@@ -242,6 +242,12 @@ void va_TraceQuerySurfaceError(
 	void **error_info /*out*/
 );
 
+DLL_HIDDEN
+void va_TraceSyncBuffer(
+    VADisplay dpy,
+    VABufferID buf_id,
+    uint64_t timeout_ns
+);
 
 DLL_HIDDEN
 void va_TraceMaxNumDisplayAttributes (

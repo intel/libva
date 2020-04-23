@@ -491,8 +491,14 @@ struct VADriverVTable
             uint64_t timeout_ns
         );
 
+        VAStatus (*vaSyncBuffer) (
+            VADriverContextP ctx,
+            VABufferID buf_id,
+            uint64_t timeout_ns
+        );
+
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[56];
+        unsigned long reserved[55];
 };
 
 struct VADriverContext

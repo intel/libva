@@ -3811,6 +3811,46 @@ VAStatus vaQuerySurfaceError(
 );
 
 /**
+ * \brief Synchronizes pending operations associated with the supplied buffer.
+ *
+ * This function blocks during specified timeout (in nanoseconds) until
+ * all pending operations on the supplied buffer have been completed.
+ * If timeout is zero, the function returns immediately.
+ *
+ * Possible errors:
+ * - \ref VA_STATUS_ERROR_UNIMPLEMENTED: the VA driver implementation
+ *   does not support this interface
+ * - \ref VA_STATUS_ERROR_INVALID_DISPLAY: an invalid display was supplied
+ * - \ref VA_STATUS_ERROR_INVALID_BUFFER: an invalid buffer was supplied
+ * - \ref VA_STATUS_ERROR_TIMEDOUT: synchronization is still in progress,
+ *   client should call the function again to complete synchronization
+ *
+ * @param[in] dpy         the VA display
+ * @param[in] buf_id      the buffer for which synchronization is performed
+ * @param[in] timeout_ns  the timeout in nanoseconds
+ *
+ */
+VAStatus vaSyncBuffer(
+    VADisplay dpy,
+    VABufferID buf_id,
+    uint64_t timeout_ns
+);
+
+/**
+ * Notes about synchronization interfaces:
+ * vaSyncSurface:
+ * 1. Allows to synchronize output surface (i.e. from decoding or VP)
+ * 2. Allows to synchronize all bitstreams being encoded from the given input surface (1->N pipelines).
+ *
+ * vaSyncSurface2:
+ * 1. The same as vaSyncSurface but allows to specify a timeout
+ *
+ * vaSyncBuffer:
+ * 1. Allows to synchronize output buffer (e.g. bitstream from encoding).
+ *    Comparing to vaSyncSurface this function synchronizes given bitstream only.
+ */
+
+/**
  * Images and Subpictures
  * VAImage is used to either get the surface data to client memory, or 
  * to copy image data in client memory to a surface. 
