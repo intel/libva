@@ -5536,6 +5536,23 @@ void va_TraceQuerySurfaceError(
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
 
+void va_TraceSyncBuffer(
+    VADisplay dpy,
+    VABufferID buf_id,
+    uint64_t timeout_ns
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tbuf_id = 0x%08x\n", buf_id);
+    va_TraceMsg(trace_ctx, "\ttimeout_ns = %d\n", timeout_ns);
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
 void va_TraceMaxNumDisplayAttributes (
     VADisplay dpy,
     int number
