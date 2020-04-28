@@ -51,24 +51,19 @@ va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
-
-static VAStatus
-va_DisplayContextGetDriverName(
+static VAStatus va_DisplayContextGetNumCandidates(
     VADisplayContextP pDisplayContext,
-    char            **driver_name_ptr
+    int *num_candidates
 )
 {
-
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct drm_state * const drm_state = ctx->drm_state;
+    VAStatus status = VA_STATUS_SUCCESS;
     drm_magic_t magic;
-    VAStatus status;
     int ret;
-
-    status = VA_DRM_GetDriverName(ctx, driver_name_ptr);
+    status = VA_DRM_GetNumCandidates(ctx, num_candidates);
     if (status != VA_STATUS_SUCCESS)
         return status;
-
     /* Authentication is only needed for a legacy DRM device */
     if (ctx->display_type != VA_DISPLAY_DRM_RENDERNODES) {
         ret = drmGetMagic(drm_state->fd, &magic);
@@ -80,8 +75,20 @@ va_DisplayContextGetDriverName(
     }
 
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
-
     return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+va_DisplayContextGetDriverNameByIndex(
+    VADisplayContextP pDisplayContext,
+    char            **driver_name_ptr,
+    int               candidate_index
+)
+{
+
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+
+    return VA_DRM_GetDriverName(ctx, driver_name_ptr, candidate_index);
 }
 
 VADisplay
@@ -108,7 +115,8 @@ vaGetDisplayDRM(int fd)
 
     pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
+    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext)

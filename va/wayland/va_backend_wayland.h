@@ -64,8 +64,16 @@ struct VADriverVTableWayland {
     /** \brief Indicate whether buffer sharing with prime fd is supported. */
     unsigned int has_prime_sharing;
 
+    /**
+     * Pointer to an implementation of struct wl_interface
+     *
+     * It is set by libva-wayland when a context is created, then the backend
+     * driver may reuse it.
+     */
+    const void *wl_interface;
+
     /** \brief Reserved bytes for future use, must be zero */
-    unsigned long reserved[8];
+    unsigned long reserved[7];
 };
 
 #endif /* VA_BACKEND_WAYLAND_H */

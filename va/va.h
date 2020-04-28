@@ -119,11 +119,12 @@ extern "C" {
  * 	- \ref api_enc_mpeg2
  * 	- \ref api_enc_vp8
  * 	- \ref api_enc_vp9
- * - Decoder (HEVC, JPEG, VP8, VP9)
+ * - Decoder (HEVC, JPEG, VP8, VP9, AV1)
  *      - \ref api_dec_hevc
  *      - \ref api_dec_jpeg
  *      - \ref api_dec_vp8
  *      - \ref api_dec_vp9
+ *      - \ref api_dec_av1
  * - \ref api_vpp
  * - FEI (H264, HEVC)
  * 	- \ref api_fei
@@ -214,10 +215,18 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_STATUS_ERROR_NOT_ENOUGH_BUFFER       0x00000025
 #define VA_STATUS_ERROR_UNKNOWN			0xFFFFFFFF
 
-/** De-interlacing flags for vaPutSurface() */
+/** 
+ * 1. De-interlacing flags for vaPutSurface() 
+ * 2. Surface sample type for input/output surface flag
+ *    - Progressive: VA_FRAME_PICTURE
+ *    - Interleaved: VA_TOP_FIELD_FIRST, VA_BOTTOM_FIELD_FIRST
+ *    - Field: VA_TOP_FIELD, VA_BOTTOM_FIELD
+*/
 #define VA_FRAME_PICTURE        0x00000000 
 #define VA_TOP_FIELD            0x00000001
 #define VA_BOTTOM_FIELD         0x00000002
+#define VA_TOP_FIELD_FIRST      0x00000004
+#define VA_BOTTOM_FIELD_FIRST   0x00000008
 
 /**
  * Enabled the positioning/cropping/blending feature:
@@ -384,7 +393,10 @@ typedef enum
     VAProfileHEVCMain444_12             = 28,
     VAProfileHEVCSccMain                = 29,
     VAProfileHEVCSccMain10              = 30,
-    VAProfileHEVCSccMain444             = 31
+    VAProfileHEVCSccMain444             = 31,
+    VAProfileAV1Profile0                = 32,
+    VAProfileAV1Profile1                = 33,
+    VAProfileHEVCSccMain444_10          = 34
 } VAProfile;
 
 /**
@@ -748,6 +760,27 @@ typedef enum
      * support for QP info for buffer #VAEncQpBuffer.
      */
     VAConfigAttribQPBlockSize            = 37,
+    /**
+     * \brief encode max frame size attribute. Read-only
+     * attribute value \c VAConfigAttribValMaxFrameSize represent max frame size support   
+     */
+    VAConfigAttribMaxFrameSize           = 38,
+    /** \brief inter frame prediction directrion attribute. Read-only.
+     * this attribute conveys the prediction direction (backward or forword) for specific config
+     * the value could be  VA_PREDICTION_DIRECTION_XXXX. it can be combined with VAConfigAttribEncMaxRefFrames
+     * to describe reference list , and the prediction direction. if this attrib is not present,both direction
+     * should be supported, no restriction.
+     * for example: normal HEVC encoding , maximum reference frame number in reflist 0 and reflist 1 is deduced
+     * by  VAConfigAttribEncMaxRefFrames. so there are typical P frame, B frame,
+     * if VAConfigAttribPredictionDirection is also present. it will stipulate prediction direction in both
+     * reference list. if only one prediction direction present(such as PREVIOUS),all reference frame should be
+     *  previous frame (PoC < current).
+     */
+    VAConfigAttribPredictionDirection   = 39,
+    /** \brief combined submission of multiple frames from different streams, it is optimization for different HW
+     * implementation, multiple frames encode/decode can improve HW concurrency
+     */
+    VAConfigAttribMultipleFrame         = 40,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -850,14 +883,13 @@ typedef struct _VAConfigAttrib {
 /** @name Attribute values for VAConfigAttribDecJPEG */
 /**@{*/
 typedef union _VAConfigAttribValDecJPEG {
-    struct{
+    struct {
     /** \brief Set to (1 << VA_ROTATION_xxx) for supported rotation angles. */
     uint32_t rotation : 4;
     /** \brief Reserved for future use. */
     uint32_t reserved : 28;
-    }bits;
+    } bits;
     uint32_t value;
-    uint32_t va_reserved[VA_PADDING_LOW];
 } VAConfigAttribValDecJPEG;
 /** @name Attribute values for VAConfigAttribDecProcessing */
 /**@{*/
@@ -925,13 +957,34 @@ typedef union _VAConfigAttribValDecJPEG {
 #define VA_ENC_SLICE_STRUCTURE_POWER_OF_TWO_ROWS        0x00000001
 /** \brief Driver supports an arbitrary number of macroblocks per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_MACROBLOCKS    0x00000002
-/** \brief Dirver support 1 rows  per slice */
+/** \brief Driver support 1 row per slice */
 #define VA_ENC_SLICE_STRUCTURE_EQUAL_ROWS               0x00000004
-/** \brief Dirver support max encoded slice size per slice */
+/** \brief Driver support max encoded slice size per slice */
 #define VA_ENC_SLICE_STRUCTURE_MAX_SLICE_SIZE           0x00000008
 /** \brief Driver supports an arbitrary number of rows per slice. */
 #define VA_ENC_SLICE_STRUCTURE_ARBITRARY_ROWS           0x00000010
+/** \brief Driver supports any number of rows per slice but they must be the same
+*       for all slices except for the last one, which must be equal or smaller
+*       to the previous slices. */
+#define VA_ENC_SLICE_STRUCTURE_EQUAL_MULTI_ROWS         0x00000020
 /**@}*/
+
+/** \brief Attribute value for VAConfigAttribMaxFrameSize */
+typedef union _VAConfigAttribValMaxFrameSize {
+    struct {
+        /** \brief support max frame size 
+          * if max_frame_size == 1, VAEncMiscParameterTypeMaxFrameSize/VAEncMiscParameterBufferMaxFrameSize
+          * could be used to set the frame size, if multiple_pass also equal 1, VAEncMiscParameterTypeMultiPassFrameSize
+          * VAEncMiscParameterBufferMultiPassFrameSize could be used to set frame size and pass information 
+          */ 
+        uint32_t max_frame_size : 1;
+        /** \brief multiple_pass support */
+        uint32_t multiple_pass  : 1;
+        /** \brief reserved bits for future, must be zero*/
+        uint32_t reserved       :30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValMaxFrameSize;
 
 /** \brief Attribute value for VAConfigAttribEncJPEG */
 typedef union _VAConfigAttribValEncJPEG {
@@ -958,6 +1011,19 @@ typedef union _VAConfigAttribValEncJPEG {
 #define VA_ENC_QUANTIZATION_NONE                        0x00000000
 /** \brief Driver supports trellis quantization */
 #define VA_ENC_QUANTIZATION_TRELLIS_SUPPORTED           0x00000001
+/**@}*/
+
+/** @name Attribute values for VAConfigAttribPredictionDirection */
+/**@{*/
+/** \brief Driver support forward reference frame (inter frame for vpx, P frame for H26x MPEG)
+ * can work with the VAConfigAttribEncMaxRefFrames. for example: low delay B frame of HEVC.
+ * these value can be OR'd together. typical value should be VA_PREDICTION_DIRECTION_PREVIOUS
+ * or VA_PREDICTION_DIRECTION_PREVIOUS | VA_PREDICTION_DIRECTION_FUTURE, theoretically, there
+ * are no stream only include future reference frame.
+ */
+#define VA_PREDICTION_DIRECTION_PREVIOUS                0x00000001
+/** \brief Driver support backward prediction frame/slice */
+#define VA_PREDICTION_DIRECTION_FUTURE                  0x00000002
 /**@}*/
 
 /** @name Attribute values for VAConfigAttribEncIntraRefresh */
@@ -1055,6 +1121,21 @@ typedef union _VAConfigAttribValEncRateControlExt {
     } bits;
     uint32_t value;
 } VAConfigAttribValEncRateControlExt;
+
+/** \brief Attribute value for VAConfigAttribMultipleFrame*/
+typedef union _VAConfigAttribValMultipleFrame {
+    struct {
+        /** \brief max num of concurrent frames from different stream */
+        uint32_t max_num_concurrent_frames      : 8;
+        /** \brief indicate whether all stream must support same quality level
+         *  if mixed_quality_level == 0, same quality level setting for multple streams is required
+         *  if mixed_quality_level == 1, different stream can have different quality level*/
+        uint32_t mixed_quality_level            : 1;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                       : 23;
+    } bits;
+    uint32_t value;
+}VAConfigAttribValMultipleFrame;
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
@@ -1260,7 +1341,12 @@ typedef enum {
     VASurfaceAttribMaxHeight,
     /** \brief Surface memory type expressed in bit fields (int, read/write). */
     VASurfaceAttribMemoryType,
-    /** \brief External buffer descriptor (pointer, write). */
+    /** \brief External buffer descriptor (pointer, write).
+     *
+     * Refer to the documentation for the memory type being created to
+     * determine what descriptor structure to pass here.  If not otherwise
+     * stated, the common VASurfaceAttribExternalBuffers should be used.
+     */
     VASurfaceAttribExternalBufferDescriptor,
     /** \brief Surface usage hint, gives the driver a hint of intended usage 
      *  to optimize allocation (e.g. tiling) (int, read/write). */
@@ -2109,7 +2195,8 @@ typedef struct _VAEncMiscParameterHRD
  */
 typedef struct _VAEncMiscParameterBufferMaxFrameSize {
     /** \brief Type. Shall be set to #VAEncMiscParameterTypeMaxFrameSize. */
-    VAEncMiscParameterType      type;
+    /** duplicated with VAEncMiscParameterBuffer, should be deprecated*/
+    va_deprecated VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in bits). */
     uint32_t                max_frame_size;
 
@@ -2128,7 +2215,8 @@ typedef struct _VAEncMiscParameterBufferMaxFrameSize {
  */
 typedef struct _VAEncMiscParameterBufferMultiPassFrameSize {
     /** \brief Type. Shall be set to #VAEncMiscParameterTypeMultiPassMaxFrameSize. */
-    VAEncMiscParameterType      type;
+    /** duplicated with VAEncMiscParameterBuffer, should be deprecated*/
+    va_deprecated VAEncMiscParameterType      type;
     /** \brief Maximum size of a frame (in byte) */
     uint32_t                max_frame_size;
     /** \brief Reserved bytes for future use, must be zero */
@@ -2177,17 +2265,18 @@ typedef struct _VAEncMiscParameterQuantization
         struct
         {
 	    /* \brief disable trellis for all frames/fields */
-            uint64_t disable_trellis : 1;
+            uint32_t disable_trellis : 1;
 	    /* \brief enable trellis for I frames/fields */
-            uint64_t enable_trellis_I : 1;
+            uint32_t enable_trellis_I : 1;
 	    /* \brief enable trellis for P frames/fields */
-            uint64_t enable_trellis_P : 1;
+            uint32_t enable_trellis_P : 1;
 	    /* \brief enable trellis for B frames/fields */
-            uint64_t enable_trellis_B : 1;
-            uint64_t reserved : 28;
+            uint32_t enable_trellis_B : 1;
+            uint32_t reserved : 28;
         } bits;
-        uint64_t value;
+        uint32_t value;
     } quantization_flags;
+    uint32_t va_reserved;
 } VAEncMiscParameterQuantization;
 
 /**
@@ -3947,6 +4036,53 @@ VAStatus vaQuerySurfaceError(
  * @deprecated Use I420 instead.
  */
 #define VA_FOURCC_IYUV          0x56555949
+/**
+ * 10-bit Pixel RGB formats.
+ */
+#define VA_FOURCC_A2R10G10B10   0x30335241 /* VA_FOURCC('A','R','3','0') */
+/**
+ * 10-bit Pixel BGR formats.
+ */
+#define VA_FOURCC_A2B10G10R10   0x30334241 /* VA_FOURCC('A','B','3','0') */
+/**
+ * 10-bit Pixel RGB formats without alpha.
+ */
+#define VA_FOURCC_X2R10G10B10   0x30335258 /* VA_FOURCC('X','R','3','0') */
+/**
+ * 10-bit Pixel BGR formats without alpha.
+ */
+#define VA_FOURCC_X2B10G10R10   0x30334258 /* VA_FOURCC('X','B','3','0') */
+
+/** Y8: 8-bit greyscale.
+ *
+ * Only a single sample, 8 bit Y plane for monochrome images
+ */
+#define VA_FOURCC_Y8            0x20203859
+/** Y16: 16-bit greyscale.
+ *
+ * Only a single sample, 16 bit Y plane for monochrome images
+ */
+#define VA_FOURCC_Y16           0x20363159
+/** VYUV: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: V, Y, U, V.
+ */
+#define VA_FOURCC_VYUY          0x59555956
+/** YVYU: packed 8-bit YUV 4:2:2.
+ *
+ * Four bytes per pair of pixels: Y, V, Y, U.
+ */
+#define VA_FOURCC_YVYU          0x55595659
+/** AGRB64: three-plane 16-bit ARGB 16:16:16:16
+ *
+ * The four planes contain: alpha, red, green, blue respectively.
+ */
+#define VA_FOURCC_ARGB64        0x34475241
+/** ABGR64: three-plane 16-bit ABGR 16:16:16:16
+ *
+ * The four planes contain: alpha, blue, green, red respectively.
+ */
+#define VA_FOURCC_ABGR64        0x34474241
 
 /* byte order */
 #define VA_LSB_FIRST		1
@@ -4527,6 +4663,7 @@ typedef struct _VAPictureHEVC
 #include <va/va_dec_jpeg.h>
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
+#include <va/va_dec_av1.h>
 #include <va/va_enc_hevc.h>
 #include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>

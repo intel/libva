@@ -43,7 +43,7 @@ all_pcfiles_in	+= libva-wayland.pc.in
 pkgconfigdir = @pkgconfigdir@
 pkgconfig_DATA = $(pcfiles)
 
-EXTRA_DIST = $(all_pcfiles_in)
+EXTRA_DIST = $(all_pcfiles_in) meson.build
 
 DISTCLEANFILES = $(pcfiles)
 

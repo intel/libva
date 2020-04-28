@@ -37,6 +37,7 @@ struct driver_name_map {
 };
 
 static const struct driver_name_map g_driver_name_map[] = {
+    { "i915",       4, "iHD"    }, // Intel Media driver
     { "i915",       4, "i965"   }, // Intel OTC GenX driver
     { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
     { "emgd",       4, "emgd"   }, // Intel ECG PVR driver
@@ -44,17 +45,42 @@ static const struct driver_name_map g_driver_name_map[] = {
     { "nouveau",    7, "nouveau"  }, // Mesa Gallium driver
     { "radeon",     6, "r600"     }, // Mesa Gallium driver
     { "amdgpu",     6, "radeonsi" }, // Mesa Gallium driver
-    { NULL, }
+    { NULL,         0, NULL }
 };
+
+/* Returns the VA driver candidate num for the active display*/
+VAStatus
+VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates)
+{
+    struct drm_state * const drm_state = ctx->drm_state;
+    drmVersionPtr drm_version;
+    int count = 0;
+    const struct driver_name_map *m = NULL;
+    if (!drm_state || drm_state->fd < 0)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
+    drm_version = drmGetVersion(drm_state->fd);
+    if (!drm_version)
+        return VA_STATUS_ERROR_UNKNOWN;
+    for (m = g_driver_name_map; m->key != NULL; m++) {
+        if (drm_version->name_len >= m->key_len &&
+            strncmp(drm_version->name, m->key, m->key_len) == 0) {
+            count ++;
+        }
+    }
+    drmFreeVersion(drm_version);
+    *num_candidates = count;
+    return count ? VA_STATUS_SUCCESS : VA_STATUS_ERROR_UNKNOWN;
+}
 
 /* Returns the VA driver name for the active display */
 VAStatus
-VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr)
+VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate_index)
 {
     struct drm_state * const drm_state = ctx->drm_state;
     drmVersionPtr drm_version;
     char *driver_name = NULL;
     const struct driver_name_map *m;
+    int current_index = 0;
 
     *driver_name_ptr = NULL;
 
@@ -67,8 +93,12 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr)
 
     for (m = g_driver_name_map; m->key != NULL; m++) {
         if (drm_version->name_len >= m->key_len &&
-            strncmp(drm_version->name, m->key, m->key_len) == 0)
-            break;
+            strncmp(drm_version->name, m->key, m->key_len) == 0) {
+            if (current_index == candidate_index) {
+                break;
+            }
+            current_index ++;
+        }
     }
     drmFreeVersion(drm_version);
 

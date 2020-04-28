@@ -100,9 +100,9 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-static VAStatus va_DisplayContextGetDriverName (
+static VAStatus va_DisplayContextGetNumCandidates(
     VADisplayContextP pDisplayContext,
-    char **driver_name
+    int *num_candidates
 )
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
@@ -116,8 +116,18 @@ static VAStatus va_DisplayContextGetDriverName (
         return VA_STATUS_ERROR_UNKNOWN;
     }
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
+    return VA_DRM_GetNumCandidates(ctx, num_candidates);
+}
 
-    return VA_DRM_GetDriverName(ctx, driver_name);
+static VAStatus va_DisplayContextGetDriverNameByIndex (
+    VADisplayContextP pDisplayContext,
+    char **driver_name,
+    int candidate_index
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+
+    return VA_DRM_GetDriverName(ctx, driver_name, candidate_index);
 }
 
 
@@ -138,7 +148,8 @@ VADisplay vaGetDisplay (
 
     pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverName = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
+    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext) {

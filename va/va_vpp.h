@@ -436,7 +436,9 @@ typedef enum _VAProcTotalColorCorrectionType {
 typedef enum _VAProcHighDynamicRangeMetadataType {
     VAProcHighDynamicRangeMetadataNone = 0,
     /** \brief Metadata type for HDR10. */
-    VAProcHighDynamicRangeMetadataHDR10
+    VAProcHighDynamicRangeMetadataHDR10,
+    /** \brief Number of Metadata type. */
+    VAProcHighDynamicRangeMetadataTypeCount
 } VAProcHighDynamicRangeMetadataType;
 
 /** \brief Video Processing Mode. */
@@ -679,18 +681,59 @@ typedef struct _VAProcFilterValueRange {
 typedef struct _VAProcColorProperties {
     /** Chroma sample location.\c VA_CHROMA_SITING_VERTICAL_XXX | VA_CHROMA_SITING_HORIZONTAL_XXX */
     uint8_t chroma_sample_location;
-    /** Chroma sample location. \c VA_SOURCE_RANGE_XXX*/
+    /** Color range. \c VA_SOURCE_RANGE_XXX*/
     uint8_t color_range;
     /** Colour primaries.
      *
      * See ISO/IEC 23001-8 or ITU H.273, section 8.1 and table 2.
      * Only used if the color standard in use is \c VAColorStandardExplicit.
+     * Below list the typical colour primaries for the reference.
+     * ---------------------------------------------------------------------------------
+     * | Value | Primaries                  | Informative Remark                       |
+     * --------------------------------------------------------------------------------
+     * | 1     |primary  x        y         |Rec.ITU-R BT.709-5                        |
+     * |       |green    0.300    0.600     |IEC 61966-2-1(sRGB or sYCC)               |
+     * |       |blue     0.150    0.060     |                                          |
+     * |       |red      0.640    0.330     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
+     * | 6     |primary  x        y         |Rec.ITU-R BT.601-6 525                    |
+     * |       |green    0.310    0.595     |                                          |
+     * |       |blue     0.155    0.070     |                                          |
+     * |       |red      0.630    0.340     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
+     * | 9     |primary  x        y         |Rec.ITU-R BT.2020                         |
+     * |       |green    0.170    0.797     |                                          |
+     * |       |blue     0.131    0.046     |                                          |
+     * |       |red      0.708    0.292     |                                          |
+     * |       |whiteD65 0.3127   0.3290    |                                          |
+     * ---------------------------------------------------------------------------------
      */
     uint8_t colour_primaries;
     /** Transfer characteristics.
      *
      * See ISO/IEC 23001-8 or ITU H.273, section 8.2 and table 3.
      * Only used if the color standard in use is \c VAColorStandardExplicit.
+     * Below list the typical transfer characteristics for the reference.
+     * -----------------------------------------------------------
+     * | Value | Informative Remark                              |
+     * -----------------------------------------------------------
+     * | 1     |Rec.ITU-R BT.709-5                               |
+     * |       |colour gamut system                              |
+     * -----------------------------------------------------------
+     * | 4     |Assumed display gamma 2.2                        |
+     * -----------------------------------------------------------
+     * | 6     |Rec.ITU-R BT.601-6 525 or 625                    |
+     * -----------------------------------------------------------
+     * | 8     |Linear transfer characteristics                  |
+     * -----------------------------------------------------------
+     * | 13    |IEC 61966-2-1(sRGB or sYCC)                      |
+     * -----------------------------------------------------------
+     * | 14,15 |Rec.ITU-R BT.2020                                |
+     * -----------------------------------------------------------
+     * | 16    |SMPTE ST 2084 for 10,12,14 and 16bit system      |
+     * -----------------------------------------------------------
      */
     uint8_t transfer_characteristics;
     /** Matrix coefficients.
@@ -703,7 +746,20 @@ typedef struct _VAProcColorProperties {
     uint8_t reserved[3];
 } VAProcColorProperties;
 
-/** \berief Describes High Dynamic Range Meta Data for HDR10. */
+/** \brief Describes High Dynamic Range Meta Data for HDR10.
+ *
+ *  Specifies the colour volume(the colour primaries, white point and luminance range) of
+ *  a display considered to be the mastering display for the associated video content -e.g.,
+ *  the colour volume of a display that was used for viewing while authoring the video content.
+ *  See ITU-T H.265 D.3.27 Mastering display colour volume SEI message semantics.
+ *
+ *  Specifies upper bounds for the nominal light level of the content. See ITU-T H.265 D.3.35
+ *  Content light level information SEI message semantics.
+ *
+ *  This structure can be used to indicate the HDR10 metadata for 1) the content which was authored;
+ *  2) the display on which the content will be presented. If it is for display, max_content_light_level
+ *  and max_pic_average_light_level are ignored.
+ */
 typedef struct _VAHdrMetaDataHDR10
 {
     /**
@@ -749,15 +805,15 @@ typedef struct _VAHdrMetaDataHDR10
      */
     uint32_t    min_display_mastering_luminance;
     /**
-     * \brief The maximum content light level.
+     * \brief The maximum content light level (MaxCLL).
      *
-     * The value is in units of 0.0001 candelas per square metre.
+     * The value is in units of 1 candelas per square metre.
      */
     uint16_t    max_content_light_level;
     /**
-     * \brief The maximum picture average light level.
+     * \brief The maximum picture average light level (MaxFALL).
      *
-     * The value is in units of 0.0001 candelas per square metre.
+     * The value is in units of 1 candelas per square metre.
      */
     uint16_t    max_pic_average_light_level;
     /** Resevered */
@@ -997,15 +1053,56 @@ typedef struct _VAProcPipelineParameterBuffer {
     /**
      * \brief Flag to indicate the input surface flag
      *
-     * bit0: 0 non-protected 1: protected
-     * bit 1~31 for future
+     * bit0~3: Surface sample type
+     * - 0000: Progressive --> VA_FRAME_PICTURE
+     * - 0001: Single Top Field --> VA_TOP_FIELD
+     * - 0010: Single Bottom Field --> VA_BOTTOM_FIELD  
+     * - 0100: Interleaved Top Field First --> VA_TOP_FIELD_FIRST
+     * - 1000: Interleaved Bottom Field First --> VA_BOTTOM_FIELD_FIRST
+     *
+     * For interlaced scaling, examples as follow:
+     * - 1. Interleaved to Interleaved (Suppose input is top field first)
+     *   -- set input_surface_flag as VA_TOP_FIELD_FIRST
+     *   -- set output_surface_flag as VA_TOP_FIELD_FIRST
+     * - 2. Interleaved to Field (Suppose input is top field first)
+     *   An interleaved frame need to be passed twice.
+     *   First cycle to get the first field:
+     *   -- set input_surface_flag as VA_TOP_FIELD_FIRST
+     *   -- set output_surface_flag as VA_TOP_FIELD
+     *   Second cycle to get the second field:
+     *   -- set input_surface_flag as VA_TOP_FIELD_FIRST
+     *   -- set output_surface_flag as VA_BOTTOM_FIELD
+     * - 3. Field to Interleaved (Suppose first field is top field)
+     *   -- create two surfaces, one for top field, the other for bottom field
+     *   -- set surface with the first field surface id
+     *   -- set backward_reference with the second field surface id
+     *   -- set input_surface_flag as VA_TOP_FIELD
+     *   -- set output_surface_flag as VA_TOP_FIELD_FIRST
+     * - 4. Field to Field: 
+     *   -- set flag according to each frame.
+     *
+     * bit31: Surface encryption
+     * - 0: non-protected  
+     * - 1: protected
+     *
+     * bit4~30 for future
      */
     uint32_t        input_surface_flag;
     /**
      * \brief Flag to indicate the output surface flag
      *
-     * bit0: 0 non-protected  1: protected
-     * bit 1~31 for future
+     * bit0~3: Surface sample type
+     * - 0000: Progressive --> VA_FRAME_PICTURE
+     * - 0001: Top Field --> VA_TOP_FIELD
+     * - 0010: Bottom Field --> VA_BOTTOM_FIELD  
+     * - 0100: Top Field First --> VA_TOP_FIELD_FIRST
+     * - 1000: Bottom Field First --> VA_BOTTOM_FIELD_FIRST
+     *
+     * bit31: Surface encryption
+     * - 0: non-protected  
+     * - 1: protected
+     *
+     * bit4~30 for future
      */
     uint32_t        output_surface_flag;
     /**
@@ -1216,6 +1313,22 @@ typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
     /** \brief Reserved bytes for future use, must be zero */
     uint16_t            va_reserved[VA_PADDING_HIGH];
 } VAProcFilterParameterBufferHVSNoiseReduction;
+
+/** \brief High Dynamic Range(HDR) Tone Mapping filter parametrization. */
+typedef struct _VAProcFilterParameterBufferHDRToneMapping {
+    /** \brief Filter type. Shall be set to #VAProcFilterHighDynamicRangeToneMapping.*/
+    VAProcFilterType    type;
+    /**
+     *  \brief High Dynamic Range metadata, could be HDR10 etc.
+     *
+     *  This metadata is mainly for the input surface. Given that dynamic metadata is changing
+     *  on frame-by-frame or scene-by-scene basis for HDR10 plus, differentiate the metadata
+     *  for the input and output.
+     */
+    VAHdrMetaData       data;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBufferHDRToneMapping;
 
 /**
  * \brief Default filter cap specification (single range value).
