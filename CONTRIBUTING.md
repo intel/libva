@@ -53,7 +53,7 @@ Please mail to secure-opensource@intel.com directly for security issue
 
 If you have a problem, please let us know.  IRC is a perfectly fine place
 to quickly informally bring something up, if you get a response.  The
-[mailing list](https://lists.01.org/mailman/listinfo/intel-vaapi-media)
+[mailing list](https://lists.01.org/postorius/lists/intel-vaapi-media.lists.01.org)
 is a more durable communication channel.
 
 If it's a bug not already documented, by all means please [open an
