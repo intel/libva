@@ -969,6 +969,9 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   \c VA_SRC_SMPTE_240.
      * - Scaling: \c VA_FILTER_SCALING_DEFAULT, \c VA_FILTER_SCALING_FAST,
      *   \c VA_FILTER_SCALING_HQ, \c VA_FILTER_SCALING_NL_ANAMORPHIC.
+     * - Interpolation Method: \c VA_FILTER_INTERPOLATION_DEFAULT,
+     *   \c VA_FILTER_INTERPOLATION_NEAREST_NEIGHBOR,
+     *   \c VA_FILTER_INTERPOLATION_BILINEAR, \c VA_FILTER_INTERPOLATION_ADVANCED.
      */
     uint32_t        filter_flags;
     /**
