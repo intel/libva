@@ -256,6 +256,15 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
+/** Interpolation method for scaling */
+#define VA_FILTER_INTER_DEFAULT                    0x00000000
+#define VA_FILTER_INTER_NEAREST                    0x00001000
+#define VA_FILTER_INTER_BILINEAR                   0x00002000
+#define VA_FILTER_INTER_BICUBIC                    0x00003000
+#define VA_FILTER_INTER_LANCZOS                    0x00004000
+#define VA_FILTER_INTER_SUPERRESOLUTION            0x00005000
+#define VA_FILTER_INTER_MASK                       0x0000f000
+
 /** Padding size in 4-bytes */
 #define VA_PADDING_LOW          4
 #define VA_PADDING_MEDIUM       8
@@ -3999,37 +4008,6 @@ VAStatus vaQuerySurfaceError(
  * The three planes contain Y, V and U respectively.
  */
 #define VA_FOURCC_I010          0x30313049
-
-/** ARGB2101010: packed 2/10-bit ARGB.
- *
- * Each pixel is a four-byte value, contains A, R, G, B four channels, A:R:G:B 2:10:10:10 little endian.
- */
-#define VA_FOURCC_ARGB2101010   0x30335241 /* VA_FOURCC('A','R','3','0') */
-
-/** ABGR2101010: packed 2/10-bit ABGR.
- *
- * Each pixel is a four-byte value, contains A, B, G, R four channels, A:B:G:R 2:10:10:10 little endian.
- */
-#define VA_FOURCC_ABGR2101010   0x30334241 /* VA_FOURCC('A','B','3','0') */
-
-/** BGRA1010102: packed 2/10-bit BGRA.
- *
- * Each pixel is a four-byte value, contains B, G, R, A four channels, B:G:R:A 10:10:10:2 little endian.
- */
-#define VA_FOURCC_BGRA1010102   0x30334142 /* VA_FOURCC('B','A','3','0') */
-
-/** RGBA1010102: packed 2/10-bit RGBA.
- *
- * Each pixel is a four-byte value, contains R, G, B, A four channels, R:G:B:A 10:10:10:2 little endian.
- */
-#define VA_FOURCC_RGBA1010102   0x30334252  /* VA_FOURCC('R','A','3','0') */
-
-/** ARGB16161616F: packed 16-bit half float ARGB.
- *
- * Each sample is a two-byte little-endian value. A four-component, 64-bit floating-point format that supports
- * 16 bits per channel including alpha. Each channel(a,r,g,b) is coded as an IEEE 754-2008 16 bit half-float.
- */
-#define VA_FOURCC_ARGB16161616F 0x46485241 /* VA_FOURCC('A','R','H','F') */
 
 /** IYUV: three-plane 8-bit YUV 4:2:0.
  *
