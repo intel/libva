@@ -258,6 +258,13 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
+/** Interpolation method for scaling */
+#define VA_FILTER_INTERPOLATION_DEFAULT                    0x00000000
+#define VA_FILTER_INTERPOLATION_NEAREST_NEIGHBOR           0x00001000
+#define VA_FILTER_INTERPOLATION_BILINEAR                   0x00002000
+#define VA_FILTER_INTERPOLATION_ADVANCED                   0x00003000
+#define VA_FILTER_INTERPOLATION_MASK                       0x0000f000
+
 /** Padding size in 4-bytes */
 #define VA_PADDING_LOW          4
 #define VA_PADDING_MEDIUM       8
