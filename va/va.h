@@ -783,6 +783,10 @@ typedef enum
      * implementation, multiple frames encode/decode can improve HW concurrency
      */
     VAConfigAttribMultipleFrame         = 40,
+    /** \brief priority setting for the context. Read-Write
+     *  attribute value is \c VAConfigAttribValContextPriority
+     */
+    VAConfigAttribContextPriority       = 41,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1140,6 +1144,18 @@ typedef union _VAConfigAttribValMultipleFrame {
     } bits;
     uint32_t value;
 }VAConfigAttribValMultipleFrame;
+
+/** brief Attribute value VAConfigAttribValContestPriority */
+typedef union _VAConfigAttribValContextPriority{
+    struct{
+        /** \brief the priority , for the Query operation (read) it represents highest priority
+         * for the set operation (write), value should be [0~highest priority] , 0 is lowest priority*/
+        uint32_t priority     :16;
+        /** \brief reserved bits for future, must be zero*/
+        uint32_t reserved     :16;
+    }bits;
+    uint32_t value;
+}VAConfigAttribValContextPriority;
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
