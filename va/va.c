@@ -1612,7 +1612,8 @@ VAStatus vaEndPicture (
   ctx = CTX(dpy);
 
   VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
-
+  
+  VA_TRACE_ENT(dpy);
   va_status = ctx->vtable->vaEndPicture( ctx, context );
 
   /* dump surface content */
