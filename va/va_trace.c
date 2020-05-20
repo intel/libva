@@ -5661,9 +5661,6 @@ void va_TracePutSurface (
 
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status)
 {
-    if(status == VA_STATUS_SUCCESS)
-        return;
-
     DPY2TRACE_VIRCTX(dpy);
 
     va_TraceMsg(trace_ctx, "=========%s ret = %s, %s \n",funcName, vaStatusStr(status), vaErrorStr(status));
