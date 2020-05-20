@@ -53,6 +53,10 @@ extern int va_trace_flag;
     if (va_trace_flag){                         \
         va_TraceStatus(dpy, __func__, ret);     \
     }
+#define VA_TRACE_ENT(dpy)                       \
+    if (va_trace_flag) {                        \
+        va_TraceFuncEnt(dpy, __func__);         \
+    }
 
 DLL_HIDDEN
 void va_TraceInit(VADisplay dpy);
@@ -276,6 +280,7 @@ void va_TracePutSurface (
 
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 
+void va_TraceFuncEnt(VADisplay dpy, const char * funcName);
 #ifdef __cplusplus
 }
 #endif

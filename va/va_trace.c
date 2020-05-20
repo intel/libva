@@ -5659,3 +5659,11 @@ void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status)
     va_TraceMsg(trace_ctx, "=========%s ret = %s, %s \n",funcName, vaStatusStr(status), vaErrorStr(status));
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
+
+void va_TraceFuncEnt(VADisplay dpy, const char * funcName)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    va_TraceMsg(trace_ctx, "==========enter function %s \n",funcName);
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
