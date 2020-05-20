@@ -287,6 +287,9 @@ VADisplay vaGetDisplay (
         return NULL;
     }
 
+    dri_state->base.fd = -1;
+    dri_state->base.auth_type = VA_NONE;
+
     pDriverContext->drm_state = dri_state;
 
     return (VADisplay)pDisplayContext;

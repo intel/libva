@@ -182,8 +182,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
     char *device_name = NULL;
     drm_magic_t magic;        
     *driver_name = NULL;
-    dri_state->base.fd = -1;
-    dri_state->base.auth_type = VA_NONE;
+
     if (!VA_DRI2QueryExtension(ctx->native_dpy, &event_base, &error_base))
         goto err_out;
 
@@ -194,6 +193,9 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
     if (!VA_DRI2Connect(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
                      driver_name, &device_name))
         goto err_out;
+
+    if ((dri_state->base.fd != -1) && (dri_state->base.auth_type != VA_NONE))
+        goto success_out;
 
     dri_state->base.fd = open(device_name, O_RDWR);
 
@@ -215,6 +217,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
     dri_state->close = dri2Close;
     gsDRI2SwapAvailable = (minor >= 2);
 
+success_out:
     Xfree(device_name);
 
     return True;
