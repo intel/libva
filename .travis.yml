@@ -68,6 +68,19 @@ script:
   - make -j4 ; sudo make install
   - make check
 
+jobs:
+  include:
+    - os: linux
+    - os: freebsd
+      compiler: clang
+      before_install:
+        - sudo pkg install -y meson pkgconf libdrm libXext libXfixes wayland
+        - sudo pkg install -y -x '^mesa($|-libs)'
+      script:
+        - meson _build
+        - meson compile -C _build
+      after_success: skip
+
 after_success:
         - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
 
