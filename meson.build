@@ -65,7 +65,7 @@ libva_lt_version = '@0@.@1@.@2@'.format(libva_lt_current,
 
 driverdir = get_option('driverdir')
 if driverdir == ''
-  driverdir = '@0@/@1@/@2@'.format(get_option('prefix'), get_option('libdir'), 'dri')
+  driverdir = join_paths(get_option('prefix'), get_option('libdir'), 'dri')
 endif
 
 configinc = include_directories('.')
