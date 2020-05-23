@@ -28,7 +28,7 @@ before_install:
   - sudo apt-get install -y autoconf
   - sudo apt-get install -y automake
   - sudo apt-get install -y libtool
-  - sudo apt-get install -y m4 
+  - sudo apt-get install -y m4
   - sudo apt-get install -y lcov
   - sudo apt-get install -y perl
   - sudo apt-get install -y pkg-config
@@ -56,6 +56,12 @@ script:
       then
         echo "Don't build on coverty_scan branch.";
         exit 0;
+    fi
+  - if [[ -n "$(find -name '*.[ch]' -executable)" ]];
+      then
+        echo "Error, a source code file(s) has the execute bit set:" >&2;
+        find -name '*.[ch]' -executable;
+        exit 1;
     fi
   - ./autogen.sh
   - ./configure --prefix=/usr
