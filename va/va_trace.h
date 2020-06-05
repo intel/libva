@@ -200,6 +200,13 @@ void va_TraceEndPicture(
 );
 
 DLL_HIDDEN
+void va_TraceEndPictureExt(
+    VADisplay dpy,
+    VAContextID context,
+    int endpic_done
+);
+
+DLL_HIDDEN
 void va_TraceSyncSurface(
     VADisplay dpy,
     VASurfaceID render_target

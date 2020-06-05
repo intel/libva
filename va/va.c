@@ -1612,12 +1612,11 @@ VAStatus vaEndPicture (
   ctx = CTX(dpy);
 
   VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
-
+  VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 0);
   va_status = ctx->vtable->vaEndPicture( ctx, context );
-
-  /* dump surface content */
-  VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 1);
   VA_TRACE_RET(dpy, va_status);
+  /* dump surface content */
+  VA_TRACE_ALL(va_TraceEndPictureExt, dpy, context, 1);
 
   return va_status;
 }
