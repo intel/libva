@@ -2170,7 +2170,8 @@ static inline void va_TraceIsRextProfile(
                trace_ctx->trace_profile == VAProfileHEVCMain444_12 || \
                trace_ctx->trace_profile == VAProfileHEVCSccMain    || \
                trace_ctx->trace_profile == VAProfileHEVCSccMain10  || \
-               trace_ctx->trace_profile == VAProfileHEVCSccMain444    \
+               trace_ctx->trace_profile == VAProfileHEVCSccMain444 || \
+               trace_ctx->trace_profile == VAProfileHEVCSccMain444_10 \
               );
 }
 
@@ -2185,7 +2186,8 @@ static inline void va_TraceIsSccProfile(
     *isScc = (\
               trace_ctx->trace_profile == VAProfileHEVCSccMain    || \
               trace_ctx->trace_profile == VAProfileHEVCSccMain10  || \
-              trace_ctx->trace_profile == VAProfileHEVCSccMain444    \
+              trace_ctx->trace_profile == VAProfileHEVCSccMain444 || \
+              trace_ctx->trace_profile == VAProfileHEVCSccMain444_10 \
              );
 }
 
@@ -5362,6 +5364,7 @@ void va_TraceRenderPicture(
         case VAProfileHEVCSccMain:
         case VAProfileHEVCSccMain10:
         case VAProfileHEVCSccMain444:
+        case VAProfileHEVCSccMain444_10:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
 
