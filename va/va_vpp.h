@@ -989,11 +989,11 @@ typedef struct _VAProcPipelineParameterBuffer {
     VABufferID         *filters;
     /** \brief Actual number of filters. */
     uint32_t           num_filters;
-    /** \brief Array of forward reference frames. */
+    /** \brief Array of forward reference frames (past frames). */
     VASurfaceID        *forward_references;
     /** \brief Number of forward reference frames that were supplied. */
     uint32_t           num_forward_references;
-    /** \brief Array of backward reference frames. */
+    /** \brief Array of backward reference frames (future frames). */
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
     uint32_t           num_backward_references;
