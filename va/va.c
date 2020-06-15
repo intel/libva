@@ -982,6 +982,23 @@ VAStatus vaQueryProcessingRate (
   return vaStatus;
 }
 
+VAStatus vaGetDeviceInfo(
+    VADisplay           dpy,
+    VADeviceInfo       *device_info /* out */
+)
+{
+  VADriverContextP ctx;
+  VAStatus vaStatus = VA_STATUS_SUCCESS;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(!ctx->vtable->vaGetDeviceInfo)
+      vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+  else
+      vaStatus = ctx->vtable->vaGetDeviceInfo( ctx, device_info);
+  VA_TRACE_RET(dpy, vaStatus);
+  return vaStatus;
+}
+
 /* XXX: this is a slow implementation that will be removed */
 static VAStatus
 va_impl_query_surface_attributes(

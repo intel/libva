@@ -1816,6 +1816,45 @@ vaQueryProcessingRate(
     unsigned int       *processing_rate
 );
 
+/**
+ * \brief Device info structure
+ */
+typedef struct _VADeviceInfo {
+    /** \brief Vendor id */
+    int32_t vendor_id;
+    /** \brief Device id */
+    int32_t device_id;
+    union
+    {
+        struct
+        {
+            /** availability of the device local memory. */
+            uint32_t has_local_memory : 1;
+            /** Reserved for future use, must be zero. */
+            uint32_t reserved : 31;
+         } bits;
+         uint32_t value;
+     } deviceinfo_flags;
+    /** \brief Reserved bytes for future use, must be zero. */
+    uint32_t reserved[VA_PADDING_LOW];
+} VADeviceInfo;
+
+/**
+ * \brief Gets device info from backend driver.
+ *
+ * This function gets device information. Upon successful return, the device information
+ * will be stored in \c device_info.
+ *
+ * @param[in] dpy             the VA display
+ * @param[out] device_info    the device info structure
+ *
+ */
+VAStatus
+vaGetDeviceInfo(
+    VADisplay           dpy,
+    VADeviceInfo       *device_info
+);
+
 typedef enum
 {
     VAEncMiscParameterTypeFrameRate 	= 0,

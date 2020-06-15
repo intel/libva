@@ -485,8 +485,14 @@ struct VADriverVTable
             void               *descriptor      /* out */
         );
 
+        VAStatus
+        (*vaGetDeviceInfo)(
+            VADriverContextP    ctx,
+            VADeviceInfo       *device_info      /* out */
+        );
+
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[57];
+        unsigned long reserved[56];
 };
 
 struct VADriverContext
