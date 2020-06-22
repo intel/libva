@@ -229,10 +229,10 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
               */
             uint32_t    low_delay_seq                                  : 1;
             /** \brief Indicates whether or not the encoding is in dyadic hierarchical GOP structure
-              * the default value 0, BRC would treat is as flat structure. if HierachicalFlag == 1,
+              * the default value 0, BRC would treat is as flat structure. if HierarchicalFlag == 1,
               * application would enable Qp Modulation
               */
-            uint32_t    hierachical_flag                               : 1;
+            uint32_t    hierarchical_flag                              : 1;
             /** \brief keep for future , should be set to 0 */
             uint32_t    reserved_bits                                  : 14;
         } bits;
