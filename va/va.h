@@ -783,6 +783,9 @@ typedef enum
      * implementation, multiple frames encode/decode can improve HW concurrency
      */
     VAConfigAttribMultipleFrame         = 40,
+    /** \brief look ahead support, see VAConfigAttribValLookAhead for supported capabilities
+     */
+    VAConfigAttribLookAhead             = 41,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1140,6 +1143,21 @@ typedef union _VAConfigAttribValMultipleFrame {
     } bits;
     uint32_t value;
 }VAConfigAttribValMultipleFrame;
+
+/** \brief Attribute value for VAConfigAttribLookAhead */
+typedef union _VAConfigAttribValLookAhead {
+    struct {
+        /** \brief look ahead is supported and is capable of returning CQM hint */
+        uint32_t cqm_hint         : 1;
+        /** \brief look ahead is supported and is capable of returning INTRA frame hint */
+        uint32_t intra_frame_hint : 1;
+        /** \brief look ahead is supported and is capable of returning BRC buffer hint */
+        uint32_t brc_buffer_hint  : 1;
+        /** \brief reserved for future extension, must be zero */
+        uint32_t reserved         : 29;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValLookAhead;
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
@@ -1855,7 +1873,9 @@ typedef enum
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
     /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
-    VAEncMiscParameterTypeExtensionData = 19
+    VAEncMiscParameterTypeExtensionData = 19,
+    /** \brief buffer type to return look ahead hints from encoder */
+    VAEncMiscParameterTypeLookAheadHints = 20
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -2524,6 +2544,46 @@ typedef struct _VAEncMiscParameterCustomRoundingControl
         uint32_t    value;
     }   rounding_offset_setting;
 } VAEncMiscParameterCustomRoundingControl;
+/**
+ *  \brief Buffer for look ahead hints. Buffer is filled in by encoder and read by host.
+ *  Note that hints are delayed by VAEncSequenceParameterBufferHEVC::lookahead_depth.
+ *  Host should submit lookahead_depth frames, before encoder will return hints for the first
+ *  submitted frames. Then each call of encoder will produce hints for another frame.
+ */
+typedef struct _VAEncMiscParameterLookAheadHints
+{
+    /** \brief POC of the frame for which hints are provided. It is equal to one of the previous
+     *  VAEncPictureParameterBufferHEVC::decoded_curr_pic.pic_order_cnt values.
+     */
+    uint32_t    status_report_feedback_number;
+    union {
+        struct {
+            /** \brief 0 if hints are not ready yet, 1 - hints are ready
+             */
+            uint32_t  valid_info : 1;
+            /** \brief quantiuzation matrix
+             * 0x00 flat matrix
+             * 0x01 reduce high frequencies  
+             * 0xff hint not available
+             */
+            uint32_t  cqm_hint : 8;
+            /** \brief 1 if frame should be encoded as intra, 0 as inter
+             */
+            uint32_t  intra_hint : 1;
+            /** \brief reserved, must be zero
+             */
+            uint32_t  reserved : 22;
+        };
+        uint32_t encode_hints;
+    };
+    /** \brief suggested target frame size
+     */
+    uint32_t  target_frame_size;
+    /** \brief suggested target buffer fullness in bit
+     */
+    uint32_t  target_buffer_fullness_in_bit;
+    uint32_t  reserved32b[12];
+} VAEncMiscParameterLookAheadHints;
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
  * the data for the entire slice, and the following flags will be used in the slice
