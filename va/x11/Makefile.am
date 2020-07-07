@@ -37,8 +37,8 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_dri2.h		\
-	va_dricommon.h		\
+	$(top_srcdir)/va/va_dri2.h	\
+	$(top_srcdir)/va/va_dricommon.h	\
 	$(NULL)
 
 source_h_priv = \

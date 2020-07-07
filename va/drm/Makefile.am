@@ -33,7 +33,7 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_drm.h		\
+	$(top_srcdir)/va/va_drm.h	\
 	$(NULL)
 
 source_h_priv = \

@@ -34,8 +34,8 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_backend_glx.h	\
-	va_glx.h		\
+	$(top_srcdir)/va/va_backend_glx.h	\
+	$(top_srcdir)/va/va_glx.h		\
 	$(NULL)
 
 source_h_priv = \

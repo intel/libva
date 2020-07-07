@@ -83,7 +83,7 @@ if WITH_DRM
   ]
 
   libva_drm_headers = [
-    'drm/va_drm.h',
+    'va_drm.h',
   ]
 
   libva_drm_headers_priv = [
@@ -134,8 +134,8 @@ if WITH_X11
 
   libva_x11_headers = [
     'va_x11.h',
-    'x11/va_dri2.h',
-    'x11/va_dricommon.h',
+    'va_dri2.h',
+    'va_dricommon.h',
   ]
 
   libva_x11_headers_priv = [
@@ -172,8 +172,8 @@ if WITH_GLX
   ]
 
   libva_glx_headers = [
-    'glx/va_backend_glx.h',
-    'glx/va_glx.h',
+    'va_backend_glx.h',
+    'va_glx.h',
   ]
 
   libva_glx_headers_priv = [
@@ -210,8 +210,8 @@ if WITH_WAYLAND
   ]
 
   libva_wayland_headers = [
-    'wayland/va_backend_wayland.h',
-    'wayland/va_wayland.h',
+    'va_backend_wayland.h',
+    'va_wayland.h',
   ]
 
   libva_wayland_headers_priv = [

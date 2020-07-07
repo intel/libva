@@ -35,8 +35,8 @@ source_c = \
 	$(NULL)
 
 source_h = \
-	va_backend_wayland.h	\
-	va_wayland.h		\
+	$(top_srcdir)/va/va_backend_wayland.h	\
+	$(top_srcdir)/va/va_wayland.h		\
 	$(NULL)
 
 source_h_priv = \
