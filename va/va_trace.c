@@ -2690,6 +2690,8 @@ static void va_TraceVAEncSequenceParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tmin_spatial_segmentation_idc = %d\n", p->min_spatial_segmentation_idc);
     va_TraceMsg(trace_ctx, "\tmax_bytes_per_pic_denom = %d\n", p->max_bytes_per_pic_denom);
     va_TraceMsg(trace_ctx, "\tmax_bits_per_min_cu_denom = %d\n", p->max_bits_per_min_cu_denom);
+    va_TraceMsg(trace_ctx, "\tpalette_mode_enabled_flag = %d\n", p->scc_fields.bits.palette_mode_enabled_flag);
+    va_TraceMsg(trace_ctx, "\treserved = %d\n", p->scc_fields.bits.reserved);
 
     return;
 }
@@ -2770,6 +2772,10 @@ static void va_TraceVAEncPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tenable_gpu_weighted_prediction = %d\n", p->pic_fields.bits.enable_gpu_weighted_prediction);
     va_TraceMsg(trace_ctx, "\tno_output_of_prior_pics_flag = %d\n", p->pic_fields.bits.no_output_of_prior_pics_flag);
     va_TraceMsg(trace_ctx, "\treserved = %d\n", p->pic_fields.bits.reserved);
+    va_TraceMsg(trace_ctx, "\thierarchical_level_plus1 = %d\n", p->hierarchical_level_plus1);
+    va_TraceMsg(trace_ctx, "\tva_byte_reserved = %d\n", p->va_byte_reserved);
+    va_TraceMsg(trace_ctx, "\tpps_curr_pic_ref_enabled_flag = %d\n", p->scc_fields.bits.pps_curr_pic_ref_enabled_flag);
+    va_TraceMsg(trace_ctx, "\treserved = %d\n", p->scc_fields.bits.reserved);
 
     return;
 }
