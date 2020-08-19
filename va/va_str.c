@@ -179,6 +179,7 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncFEICTBCmdBufferType);
     TOSTR(VAEncFEICURecordBufferType);
     TOSTR(VASubsetsParameterBufferType);
+    TOSTR(VAContextParameterUpdateBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";
