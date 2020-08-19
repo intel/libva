@@ -792,6 +792,7 @@ typedef enum
     VAConfigAttribMultipleFrame         = 40,
     /** \brief priority setting for the context. Read-Write
      *  attribute value is \c VAConfigAttribValContextPriority
+     *  this setting also could be update by \c VAContextParameterUpdateBuffer
      */
     VAConfigAttribContextPriority       = 41,
     /**@}*/
@@ -1152,7 +1153,7 @@ typedef union _VAConfigAttribValMultipleFrame {
     uint32_t value;
 }VAConfigAttribValMultipleFrame;
 
-/** brief Attribute value VAConfigAttribValContestPriority */
+/** brief Attribute value VAConfigAttribValContextPriority */
 typedef union _VAConfigAttribValContextPriority{
     struct{
         /** \brief the priority , for the Query operation (read) it represents highest priority
@@ -1775,9 +1776,37 @@ typedef enum
      * entry_offset_to_subset_array in VAPictureParameterBufferHEVC data structure.
      */
     VASubsetsParameterBufferType        = 57,
+    /** \brief adjust context parameters dynamically
+     *
+     * this parameter is used to update context parameters, detail parameter is in
+     *  \c VAContextParameterUpdateBuffer
+     */
+    VAContextParameterUpdateBufferType  = 58,
 
     VABufferTypeMax
 } VABufferType;
+
+/** \brief update the context parameter
+ * this structure is used to update context parameters, such as priority of the context
+ * backend driver should keep the parameter unchanged if there no new
+ * parameter updated.
+ */
+typedef struct _VAContextParameterUpdateBuffer
+{
+    union{
+        struct {
+            /** \brief indicate whether context priority changed */
+            uint32_t context_priority_update :1;
+            /** \brief Reserved bits for future use, must be zero */
+            uint32_t reserved                :31;
+        } bits;
+        uint32_t value;
+    }flags;
+    /** \brief task/context priority */
+    VAConfigAttribValContextPriority context_priority;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t reserved[VA_PADDING_MEDIUM];
+} VAContextParameterUpdateBuffer;
 
 /**
  * Processing rate parameter for encode.
@@ -2547,6 +2576,7 @@ typedef struct _VAEncMiscParameterCustomRoundingControl
         uint32_t    value;
     }   rounding_offset_setting;
 } VAEncMiscParameterCustomRoundingControl;
+
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold
  * the data for the entire slice, and the following flags will be used in the slice
