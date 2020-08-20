@@ -364,7 +364,11 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 tile_cols;
     uint8_t                 tile_rows;
 
-    /* specifes the width/height of a tile minus 1 in units of superblocks */
+    /* The width/height of a tile minus 1 in units of superblocks. Though the
+     * maximum number of tiles is 64, since ones of the last tile are computed
+     * from ones of the other tiles and frame_width/height, they are not
+     * necessarily specified.
+     */
     uint16_t                width_in_sbs_minus_1[63];
     uint16_t                height_in_sbs_minus_1[63];
 
@@ -425,7 +429,7 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 superres_scale_denominator;
 
     /** \brief Interpolation filter.
-     *  value range [0..9]
+     *  value range [0..4]
      */
     uint8_t                 interp_filter;
 
@@ -629,8 +633,9 @@ typedef struct _VASliceParameterBufferAV1
 
     uint16_t                tile_row;
     uint16_t                tile_column;
-    uint16_t                tg_start;
-    uint16_t                tg_end;
+
+    uint16_t                tg_start; // Deprecated
+    uint16_t                tg_end;   // Deprecated
     /** \brief anchor frame index for large scale tile.
      *  index into an array AnchorFrames of the frames that the tile uses
      *  for prediction.

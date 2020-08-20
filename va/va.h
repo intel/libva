@@ -4052,6 +4052,12 @@ VAStatus vaSyncBuffer(
  * with the bottom six bits ignored.  The samples are in the order Y, U, Y, V.
  */
 #define VA_FOURCC_Y210          0x30313259
+/** Y212: packed 12-bit YUV 4:2:2.
+ *
+ * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value.
+ * The samples are in the order Y, U, Y, V.
+ */
+#define VA_FOURCC_Y212          0x32313259
 /** Y216: packed 16-bit YUV 4:2:2.
  *
  * Eight bytes represent a pair of pixels.  Each sample is a two-byte little-endian value.
@@ -4064,6 +4070,12 @@ VAStatus vaSyncBuffer(
  * A, V, Y, U are found in bits 31:30, 29:20, 19:10, 9:0 respectively.
  */
 #define VA_FOURCC_Y410          0x30313459
+/** Y412 packed 12-bit YUVA 4:4:4.
+ *
+ * Each pixel is a set of four samples, each of which is a two-byte little-endian value.
+ * The samples are in the order A, V, Y, U.
+ */
+#define VA_FOURCC_Y412          0x32313459
 /** Y416: packed 16-bit YUVA 4:4:4.
  *
  * Each pixel is a set of four samples, each of which is a two-byte little-endian value.

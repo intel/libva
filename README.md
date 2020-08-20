@@ -27,7 +27,7 @@ be accessed directly through [github pages
 libva](http://intel.github.io/libva/)
 
 The libva development team can be reached via our [mailing
-list](https://lists.01.org/mailman/listinfo/intel-vaapi-media) and on IRC
+list](https://lists.01.org/postorius/lists/intel-vaapi-media.lists.01.org) and on IRC
 in channel ##intel-media on [Freenode](https://freenode.net/kb/answer/chat).
 
 We also use [#Slack](https://slack.com) and host [VAAPI Media Slack
