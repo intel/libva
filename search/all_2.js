@@ -3,6 +3,8 @@ var searchData=
   ['core_20api',['Core API',['../group__api__core.html',1,'']]],
   ['cabac_5finit_5fflag',['cabac_init_flag',['../structVAEncSliceParameterBufferHEVC.html#ada14595ba9b628a45379707d908fcec6',1,'VAEncSliceParameterBufferHEVC::cabac_init_flag()'],['../structVASliceParameterBufferHEVC.html#a755a061e69ca74a226c44ddffd3db571',1,'VASliceParameterBufferHEVC::cabac_init_flag()']]],
   ['cabac_5finit_5fidc',['cabac_init_idc',['../structVAEncSliceParameterBufferH264.html#a8e090ce886a34b4cabfc437813bb493d',1,'VAEncSliceParameterBufferH264']]],
+  ['caps_5fflag',['caps_flag',['../structVAProcFilterCapHighDynamicRange.html#aa92624b6f9f2f89f970c54f4921072ce',1,'VAProcFilterCapHighDynamicRange']]],
+  ['cfs_5fi_5fframes',['cfs_I_frames',['../structVAEncMiscParameterRateControl.html#a77e70fbf9591951cc319759171da0fe7',1,'VAEncMiscParameterRateControl']]],
   ['chroma_5fac_5fqindex_5fdelta',['chroma_ac_qindex_delta',['../structVAEncPictureParameterBufferVP9.html#afd5e676254bb7d74143bbda84d753a8f',1,'VAEncPictureParameterBufferVP9']]],
   ['chroma_5fac_5fquant_5fscale',['chroma_ac_quant_scale',['../structVASegmentParameterVP9.html#acd8a3b6f518e713afd38f26249cbca08',1,'VASegmentParameterVP9']]],
   ['chroma_5fdc_5fqindex_5fdelta',['chroma_dc_qindex_delta',['../structVAEncPictureParameterBufferVP9.html#a913dd7e9c4b63677c4f32881cd20773a',1,'VAEncPictureParameterBufferVP9']]],

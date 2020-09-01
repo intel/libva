@@ -16,6 +16,8 @@ var searchData=
   ['vaproccolorstandardtype',['VAProcColorStandardType',['../group__api__vpp.html#ga7aa895516a4020fb9eb3fcb672429c6f',1,'va_vpp.h']]],
   ['vaprocdeinterlacingtype',['VAProcDeinterlacingType',['../group__api__vpp.html#ga26d39907f38d00352223908836f78046',1,'va_vpp.h']]],
   ['vaprocfiltertype',['VAProcFilterType',['../group__api__vpp.html#ga3614dbee76b8ac89dd5a3dc8b1a12bb7',1,'va_vpp.h']]],
+  ['vaprochighdynamicrangemetadatatype',['VAProcHighDynamicRangeMetadataType',['../group__api__vpp.html#ga29a61d8d10ec2bd632e0ab27d2bf95ae',1,'va_vpp.h']]],
+  ['vaprocmode',['VAProcMode',['../group__api__vpp.html#ga5dba125b9bd3de5a29a87fbdc8925fa6',1,'va_vpp.h']]],
   ['vaproctotalcolorcorrectiontype',['VAProcTotalColorCorrectionType',['../group__api__vpp.html#gac99de9d4b95824035d8236594f72d5b4',1,'va_vpp.h']]],
   ['vaprofile',['VAProfile',['../group__api__core.html#gaa4851f694a48c22af8877f5cfbb11bde',1,'va.h']]],
   ['vasurfaceattribtype',['VASurfaceAttribType',['../group__api__core.html#ga4b89190eeab82e047c06e31edaf0b9b7',1,'va.h']]]

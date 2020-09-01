@@ -13,8 +13,10 @@ var searchData=
   ['height',['height',['../structVASurfaceAttribExternalBuffers.html#a420abf8d1e1382204c1f22eb6b7055c5',1,'VASurfaceAttribExternalBuffers']]],
   ['hevc_5flast_5fpicture_5feoseq',['HEVC_LAST_PICTURE_EOSEQ',['../group__api__enc__hevc.html#gaade88d61138c828ffecc07074abab0c9',1,'va_enc_hevc.h']]],
   ['hevc_5flast_5fpicture_5feostream',['HEVC_LAST_PICTURE_EOSTREAM',['../group__api__enc__hevc.html#ga46667f93d28ca50593a3a9defa0d6f5f',1,'va_enc_hevc.h']]],
+  ['hierachical_5fflag',['hierachical_flag',['../structVAEncSequenceParameterBufferHEVC.html#aa1ff1cb38566d3188dac4ae6b7561c08',1,'VAEncSequenceParameterBufferHEVC']]],
+  ['hierarchical_5flevel_5fplus1',['hierarchical_level_plus1',['../structVAEncPictureParameterBufferHEVC.html#ab3de6765bffd3077adda8f5225734314',1,'VAEncPictureParameterBufferHEVC']]],
   ['hmedisable',['HMEDisable',['../structVAEncMiscParameterEncQuality.html#a589437585d2d9de89a04a3914782a468',1,'VAEncMiscParameterEncQuality']]],
   ['hmemvcostscalingfactor',['HMEMVCostScalingFactor',['../structVAEncMiscParameterEncQuality.html#a6f286bf2f535b730b20230fb8e9a24d3',1,'VAEncMiscParameterEncQuality']]],
   ['huffman',['huffman',['../structVAEncPictureParameterBufferJPEG.html#a83504679e9d52ce36926d2bdc033eac3',1,'VAEncPictureParameterBufferJPEG']]],
-  ['huffman_5ftable',['huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#abf157f5dc5cc4b6235ca782a20d6fd9d',1,'VAHuffmanTableBufferJPEGBaseline']]]
+  ['huffman_5ftable',['huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#aeabc040bd55bca6455195aaaccb3a822',1,'VAHuffmanTableBufferJPEGBaseline']]]
 ];
