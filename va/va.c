@@ -2286,3 +2286,23 @@ vaQueryVideoProcPipelineCaps(
     VA_TRACE_RET(dpy, status);
     return status;
 }
+
+VAStatus
+vaQueryDeviceAttributes(
+     VADisplay dpy,
+     VADeviceAttrib *attrib_list,
+     uint32_t       *num_attribs
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(ctx->vtable->vaQueryDeviceAttributes)
+  {
+      return ctx->vtable->vaQueryDeviceAttributes(ctx, attrib_list, num_attribs);
+  }
+  else
+  {
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+  }
+}

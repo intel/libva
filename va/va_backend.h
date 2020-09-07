@@ -497,8 +497,13 @@ struct VADriverVTable
             uint64_t timeout_ns
         );
 
+        VAStatus (*vaQueryDeviceAttributes)(
+            VADriverContextP ctx,
+            VADeviceAttrib *attrib_list,
+            uint32_t       *num_attribs
+        );
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[55];
+        unsigned long reserved[54];
 };
 
 struct VADriverContext
