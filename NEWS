@@ -1,5 +1,17 @@
-libva NEWS -- summary of user visible changes.  2020-06-18
+libva NEWS -- summary of user visible changes.  2020-09-11
 Copyright (C) 2009-2020 Intel Corporation
+
+version 2.9.0 - 11.Sep.2020
+* trace: Refine the va_TraceVAPictureParameterBufferAV1.
+* doc: Add comments for backward/forward reference to avoid confusion
+* doc: Modify comments in av1 decoder interfaces
+* doc: Update mailing list
+* Add SCC fields trace for HEVC SCC encoding.
+* Add FOURCC code for Y212 and Y412 format.
+* Add interpolation method for scaling.
+* add attributes for context priority setting
+* Add vaSyncBuffer for output buffers synchronization
+* Add vaSyncSurface2 with timeout
 
 version 2.8.0 - 18.Jun.2020
 * trace: enable return value trace for successful function call
