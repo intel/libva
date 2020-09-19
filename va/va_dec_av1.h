@@ -255,6 +255,7 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint32_t        color_range                                 : 1;
             uint32_t        subsampling_x                               : 1;
             uint32_t        subsampling_y                               : 1;
+            /** chroma_sampling_position is deprecated */
             uint32_t        chroma_sample_position                      : 1;
             uint32_t        film_grain_params_present                   : 1;
             /** \brief Reserved bytes for future use, must be zero */
