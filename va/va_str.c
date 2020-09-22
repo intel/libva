@@ -130,6 +130,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribPredictionDirection);
     TOSTR(VAConfigAttribMultipleFrame);
     TOSTR(VAConfigAttribContextPriority);
+    TOSTR(VAConfigAttribDecAV1Features);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
