@@ -893,6 +893,13 @@ typedef enum
      *  this setting also could be update by \c VAContextParameterUpdateBuffer
      */
     VAConfigAttribContextPriority       = 41,
+    /** \brief AV1 decoding features.  Read-only.
+     *
+     * This attribute describes the supported features of an
+     * AV1 decoder configuration.  The value returned uses the
+     * VAConfigAttribValDecAV1Features type.
+     */
+    VAConfigAttribDecAV1Features    = 42,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;

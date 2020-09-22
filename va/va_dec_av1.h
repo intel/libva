@@ -38,6 +38,26 @@
 extern "C" {
 #endif
 
+/** Attribute value for VAConfigAttribDecAV1Features.
+ *
+ * This attribute decribes the supported features of a AV1
+ * decoder configuration.
+ *
+ */
+typedef union VAConfigAttribValDecAV1Features {
+    struct {
+        /** large scale tile
+         *
+         * This conveys whether AV1 large scale tile is supported by HW.
+         * 0 - unsupported, 1 - supported.
+         */
+        uint32_t lst_support     : 2;
+        /* Reserved for future use. */
+        uint32_t reserved        : 30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValDecAV1Features;
+
 /**
  * \brief AV1 Decoding Picture Parameter Buffer Structure
  *
