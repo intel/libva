@@ -255,8 +255,7 @@ typedef struct  _VADecPictureParameterBufferAV1
             uint32_t        color_range                                 : 1;
             uint32_t        subsampling_x                               : 1;
             uint32_t        subsampling_y                               : 1;
-            /** chroma_sampling_position is deprecated */
-            uint32_t        chroma_sample_position                      : 1;
+            va_deprecated uint32_t        chroma_sample_position        : 1;
             uint32_t        film_grain_params_present                   : 1;
             /** \brief Reserved bytes for future use, must be zero */
             uint32_t        reserved                                    : 16;
@@ -635,8 +634,8 @@ typedef struct _VASliceParameterBufferAV1
     uint16_t                tile_row;
     uint16_t                tile_column;
 
-    uint16_t                tg_start; // Deprecated
-    uint16_t                tg_end;   // Deprecated
+    va_deprecated uint16_t  tg_start;
+    va_deprecated uint16_t  tg_end;
     /** \brief anchor frame index for large scale tile.
      *  index into an array AnchorFrames of the frames that the tile uses
      *  for prediction.
