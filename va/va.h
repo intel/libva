@@ -882,8 +882,18 @@ typedef struct _VAConfigAttrib {
  *  Convergence is specified in the unit of frame.
  *  window_size in VAEncMiscParameterRateControl is equal to convergence for AVBR.
  *  Accuracy is in the range of [1,100], 1 means one percent, and so on. 
- *  target_percentage in VAEncMiscParameterRateControl is equal to accuracy for AVBR. */
+ *  target_percentage in VAEncMiscParameterRateControl is equal to accuracy for AVBR.
+ * */
 #define VA_RC_AVBR                      0x00000800
+/** \brief Transport Controlled BRC
+ *  Specific bitrate control for real time streaming.
+ *  TCBRC can instantly react to channel change to remove or significantly reduce the delay.
+ *  Application (transport) provides channel feedback to driver through TargetFrameSize.
+ *  When channel condition is very good (almost no constraint on instant frame size),
+ *  the app should set target frame size as zero. Otherwise, channel capacity divided by fps
+ *  should be used.
+ * */
+#define VA_RC_TCBRC                     0x00001000
 
 /**@}*/
 
@@ -2095,8 +2105,17 @@ typedef struct _VAEncMiscParameterRateControl
      *  the range will be different for different codec
      */
     uint32_t quality_factor;
+    /** Target frame size
+     *
+     *  Desired frame size in bytes.
+     *  This parameter can be used in some RC modes (like Transport Controlled BRC)
+     *  where feedback from the app is required.
+     *  Zero value means no limits.
+     *
+     */
+    uint32_t target_frame_size;
     /** Reserved bytes for future use, must be zero. */
-    uint32_t va_reserved[VA_PADDING_MEDIUM - 3];
+    uint32_t va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterRateControl;
 
 /** Encode framerate parameters.
