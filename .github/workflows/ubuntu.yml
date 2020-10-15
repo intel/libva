@@ -1,0 +1,70 @@
+name: ubuntu
+
+on: [ push, pull_request ]
+
+jobs:
+  ubuntu-latest:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: install prerequisites
+      run: sudo apt-get install -y
+        libdrm-dev
+        libegl1-mesa-dev
+        libgl1-mesa-dev
+        libx11-dev
+        libxext-dev
+        libxfixes-dev
+        libwayland-dev
+    - name: configure
+      run: ./autogen.sh --prefix=/usr
+    - name: build
+      run: make
+    - name: check
+      run: make check
+    - name: install
+      run: sudo make install
+
+  ubuntu-20-04:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: install prerequisites
+      run: sudo apt-get install -y
+        libdrm-dev
+        libegl1-mesa-dev
+        libgl1-mesa-dev
+        libx11-dev
+        libxext-dev
+        libxfixes-dev
+        libwayland-dev
+    - name: configure
+      run: ./autogen.sh --prefix=/usr
+    - name: build
+      run: make
+    - name: check
+      run: make check
+    - name: install
+      run: sudo make install
+
+  ubuntu-18-04:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: install prerequisites
+      run: sudo apt-get install -y
+        libdrm-dev
+        libegl1-mesa-dev
+        libgl1-mesa-dev
+        libx11-dev
+        libxext-dev
+        libxfixes-dev
+        libwayland-dev
+    - name: configure
+      run: ./autogen.sh --prefix=/usr
+    - name: build
+      run: make
+    - name: check
+      run: make check
+    - name: install
+      run: sudo make install
