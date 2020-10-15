@@ -1,0 +1,18 @@
+name: freebsd
+
+on: [ push, pull_request ]
+
+jobs:
+  freebsd:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: test
+      uses: vmactions/freebsd-vm@v0.0.7
+      with:
+        prepare: |
+          pkg install -y meson pkgconf libdrm libXext libXfixes wayland
+          pkg install -y -x '^mesa($|-libs)'
+        run: |
+          meson _build
+          meson compile -C _build
