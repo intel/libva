@@ -63,8 +63,8 @@
 #include <thread.h>
 #endif
 
-#if !defined(__BIONIC__)
-static pid_t gettid()
+/* bionic, glibc >= 2.30, musl >= 1.3 have gettid(), so add va_ prefix */
+static pid_t va_gettid()
 {
 #if defined(__linux__)
   return syscall(__NR_gettid);
@@ -81,7 +81,6 @@ static pid_t gettid()
   return (intptr_t)pthread_self();
 #endif
 }
-#endif
 
 /*
  * Env. to debug some issue, e.g. the decode/encode issue in a video conference scenerio:
@@ -317,7 +316,7 @@ static void add_trace_config_info(
 {
     struct trace_config_info *pconfig_info;
     int idx = 0;
-    pid_t thd_id = gettid();
+    pid_t thd_id = va_gettid();
 
     LOCK_RESOURCE(pva_trace);
 
@@ -695,7 +694,7 @@ static struct trace_log_file *start_tracing2log_file(
 {
     struct trace_log_files_manager *plog_files_mgr = NULL;
     struct trace_log_file *plog_file = NULL;
-    pid_t thd_id = gettid();
+    pid_t thd_id = va_gettid();
     int i = 0;
 
     LOCK_RESOURCE(pva_trace);
@@ -734,7 +733,7 @@ static void refresh_log_file(
     struct trace_context *ptra_ctx)
 {
     struct trace_log_file *plog_file = NULL;
-    pid_t thd_id = gettid();
+    pid_t thd_id = va_gettid();
     int i = 0;
 
     plog_file = ptra_ctx->plog_file;
@@ -1260,7 +1259,7 @@ static void internal_TraceUpdateContext (
 {
     struct trace_context *trace_ctx = NULL;
     int i = 0, delete = 1;
-    pid_t thd_id = gettid();
+    pid_t thd_id = va_gettid();
 
     if(tra_ctx_idx >= MAX_TRACE_CTX_NUM)
         return;
