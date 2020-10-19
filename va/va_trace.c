@@ -4045,7 +4045,6 @@ static void va_TraceVAPictureParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\t\tseq_info_fields.color_range = %d\n", p->seq_info_fields.fields.color_range);
     va_TraceMsg(trace_ctx, "\t\tseq_info_fields.subsampling_x = %d\n", p->seq_info_fields.fields.subsampling_x);
     va_TraceMsg(trace_ctx, "\t\tseq_info_fields.subsampling_y = %d\n", p->seq_info_fields.fields.subsampling_y);
-    va_TraceMsg(trace_ctx, "\t\tseq_info_fields.chroma_sample_position = %d\n", p->seq_info_fields.fields.chroma_sample_position);
     va_TraceMsg(trace_ctx, "\t\tseq_info_fields.film_grain_params_present = %d\n", p->seq_info_fields.fields.film_grain_params_present);
 
     va_TraceMsg(trace_ctx, "\tcurrent_frame = %X\n", p->current_frame);
@@ -4434,9 +4433,6 @@ static void va_TraceVASliceParameterBufferAV1(
 
     va_TraceMsg(trace_ctx, "\ttile_row = %d\n", p->tile_row);
     va_TraceMsg(trace_ctx, "\ttile_column = %d\n", p->tile_column);
-
-    va_TraceMsg(trace_ctx, "\ttg_start = %d\n", p->tg_start);
-    va_TraceMsg(trace_ctx, "\ttg_end = %d\n", p->tg_end);
 
     va_TraceMsg(trace_ctx, "\tanchor_frame_idx = %d\n", p->anchor_frame_idx);
     va_TraceMsg(trace_ctx, "\ttile_idx_in_tile_list = %d\n", p->tile_idx_in_tile_list);
