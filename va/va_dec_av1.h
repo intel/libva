@@ -563,6 +563,21 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 cdef_damping_minus_3;
     /*  value range [0..3]  */
     uint8_t                 cdef_bits;
+
+    /** Encode cdef strength:
+     *
+     * The cdef_y_strengths[] and cdef_uv_strengths[] are expected to be packed
+     * with both primary and secondary strength. The secondary strength is
+     * given in the lower two bits and the primary strength is given in the next
+     * four bits.
+     *
+     * cdef_y_strengths[] & cdef_uv_strengths[] should be derived as:
+     * (cdef_y_strengths[]) = (cdef_y_pri_strength[] << 2) | (cdef_y_sec_strength[] & 0x03)
+     * (cdef_uv_strengths[]) = (cdef_uv_pri_strength[] << 2) | (cdef_uv_sec_strength[] & 0x03)
+     * In which, cdef_y_pri_strength[]/cdef_y_sec_strength[]/cdef_uv_pri_strength[]/cdef_uv_sec_strength[]
+     * are variables defined in AV1 Spec 5.9.19. The cdef_y_strengths[] & cdef_uv_strengths[]
+     * are corresponding to LIBAOM variables cm->cdef_strengths[] & cm->cdef_uv_strengths[] respectively.
+     */
     /*  value range [0..63]  */
     uint8_t                 cdef_y_strengths[8];
     /*  value range [0..63]  */
