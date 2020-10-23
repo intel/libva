@@ -189,8 +189,22 @@ typedef struct  _VADecPictureParameterBufferVP9
      */
     uint8_t                 bit_depth;
 
+    /** \brief loop filter scemantics
+     */
+    uint8_t                 mode_ref_delta_enabled;
+    uint8_t                 mode_ref_delta_update;
+
+    /** \brief Quantization params
+     */
+    uint8_t                 base_qindex;
+    int8_t                  y_dc_delta_q;
+    int8_t                  uv_ac_delta_q;
+    int8_t                  uv_dc_delta_q;
+
+    /* padding variable*/
+    uint8_t                 va_padding[2];
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 2];
 
 } VADecPictureParameterBufferVP9;
 
