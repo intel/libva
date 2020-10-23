@@ -1,8 +1,9 @@
 # libva package version number, (as distinct from shared library version)
 # XXX: we want the package version to remain at 1.0.x for VA-API 0.32.y
 #
-# - major version is automatically generated from VA-API major version
-# - minor version is automatically generated from VA-API minor version
+# libva package version and VA-API version number are related:
+# - package major version is automatically generated from VA-API major version (w/ +1)
+# - package minor version is automatically generated from VA-API minor version (as =)
 # - increment micro for any library release
 # - reset micro version to zero when VA-API major or minor version is changed
 project(
@@ -11,20 +12,6 @@ project(
   meson_version : '>= 0.37.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized' ])
-
-# VA-API version
-# - increment major for any ABI change
-# - increment minor for any interface change (e.g. new/modified function)
-# - increment micro for any other change (new flag, new codec definition, etc.)
-# - reset micro version to zero when minor version is incremented
-# - reset minor version to zero when major version is incremented
-va_api_major_version = 1
-va_api_minor_version = 9
-va_api_micro_version = 0
-
-va_api_version = '@0@.@1@.@2@'.format(va_api_major_version,
-				      va_api_minor_version,
-				      va_api_micro_version)
 
 version_arr = meson.project_version().split('.')
 libva_major_version = version_arr[0]
@@ -37,6 +24,19 @@ if version_arr.length() == 4
   libva_version = '@0@.pre@1@'.format(libva_version, version_arr[3])
 endif
 
+# VA-API version
+# - increment major for any ABI change
+# - increment minor for any interface change (e.g. new/modified function)
+# - increment micro for any other change (new flag, new codec definition, etc.)
+# - reset micro version to zero when minor version is incremented
+# - reset minor version to zero when major version is incremented
+va_api_major_version = version_arr[0].to_int()-1
+va_api_minor_version = version_arr[1].to_int()
+va_api_micro_version = 0
+
+va_api_version = '@0@.@1@.@2@'.format(va_api_major_version,
+				      va_api_minor_version,
+				      va_api_micro_version)
 
 # libva library version number (generated, do not change)
 # XXX: we want the SONAME to remain at libva.so.1 for VA-API major == 0
