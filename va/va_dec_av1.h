@@ -563,9 +563,11 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 cdef_damping_minus_3;
     /*  value range [0..3]  */
     uint8_t                 cdef_bits;
-    /*  value range [0..63]  */
+    /* value range [0..63]
+     * The primary and secondary strengths are packed in the lowest 6 bits as
+     * upper 4 bits for the primary one and lower 2 bits for the secondary one.
+     */
     uint8_t                 cdef_y_strengths[8];
-    /*  value range [0..63]  */
     uint8_t                 cdef_uv_strengths[8];
 
     /** \brief loop restoration parameters
