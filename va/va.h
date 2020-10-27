@@ -795,6 +795,12 @@ typedef enum
      *  this setting also could be update by \c VAContextParameterUpdateBuffer
      */
     VAConfigAttribContextPriority       = 41,
+    /** \brief Look ahead encoding is to add another encoding pass to look ahead several frames before normal encode pass.
+     *  Lookahead pass collect encoding statistics and encode pass analyze the statistics to optimize encoding parameters.
+     *  If capability reports this feature can be supported, application can query capability for max frames to look ahead,
+     *  then set look ahead depth no more than that max value to enable look ahead encoding.
+     */
+    VAConfigAttribEncLookAhead          = 42,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1164,6 +1170,26 @@ typedef union _VAConfigAttribValContextPriority{
     }bits;
     uint32_t value;
 }VAConfigAttribValContextPriority;
+
+/** \brief Attribute value for VAConfigAttribLookAhead*/
+typedef union _VAConfigAttribValEncLookAhead {
+    struct {
+        /** \brief num of frames to look ahead. 0 means lookahead disabled */
+        uint32_t look_ahead_depth               : 8;
+        /** \brief max num of frames to look ahead before actual encoding pass,
+         *  application can set look_ahead_depth as (0, max_num_look_ahead_frames] */
+        uint32_t max_num_look_ahead_frames      : 8;
+        /** \brief indicate whether the current encoding is in the Look Ahead pass,
+         *  if look_ahead_phase == 0, the current encoding is in the actual encoding pass
+         *  if look_ahead_phase == 1, the current encoding is in the look ahead pass. */
+        uint32_t look_ahead_phase               : 1;
+        /** \brief A flag indicates whether look ahead is supported */
+        uint32_t look_ahead_support             : 1;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                       : 14;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValEncLookAhead;
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
