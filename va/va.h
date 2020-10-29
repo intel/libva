@@ -4006,6 +4006,11 @@ VAStatus vaSyncBuffer(
  * Four bytes per pixel: A, Y, U, V.
  */
 #define VA_FOURCC_AYUV          0x56555941
+/** VUYA: packed 8-bit YUVA 4:4:4.
+ *
+ * Four bytes per pixel: V, U, Y, A.
+ */
+#define VA_FOURCC_VUYA          0x41595556
 /** NV11: two-plane 8-bit YUV 4:1:1.
  *
  * The first plane contains Y, the second plane contains U and V in pairs of bytes.
