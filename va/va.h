@@ -371,6 +371,30 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_EXEC_MODE_POWER_SAVING 0x1
 #define VA_EXEC_MODE_PERFORMANCE  0x2
 
+/* Values used to describe device features. */
+/** The feature is not supported by the device.
+ *
+ * Any corresponding feature flag must not be set.
+ */
+#define VA_FEATURE_NOT_SUPPORTED  0
+/** The feature is supported by the device.
+ *
+ * The user may decide whether or not to use this feature.
+ *
+ * Note that support for a feature only indicates that the hardware
+ * is able to use it; whether it is actually a positive change to
+ * enable it in a given situation will depend on other factors
+ * including the input provided by the user.
+ */
+#define VA_FEATURE_SUPPORTED      1
+/** The feature is required by the device.
+ *
+ * The device does not support not enabling this feature, so any
+ * corresponding feature flag must be set and any additional
+ * configuration needed by the feature must be supplied.
+ */
+#define VA_FEATURE_REQUIRED       2
+
 /**
  * Returns a short english description of error_status
  */
@@ -956,6 +980,26 @@ typedef enum
      */
     VAConfigAttribProtectedContentUsage = 49,
 
+    /** \brief HEVC/H.265 encoding features.  Read-only.
+     *
+     * This attribute describes the supported features of an
+     * HEVC/H.265 encoder configuration.  The value returned uses the
+     * VAConfigAttribValEncHEVCFeatures type.
+     *
+     * If this attribute is supported by a driver then it must also
+     * support the VAConfigAttribEncHEVCBlockSizes attribute.
+     */
+    VAConfigAttribEncHEVCFeatures       = 50,
+    /** \brief HEVC/H.265 encoding block sizes.  Read-only.
+     *
+     * This attribute describes the supported coding tree and transform
+     * block sizes of an HEVC/H.265 encoder configuration.  The value
+     * returned uses the VAConfigAttribValEncHEVCBlockSizes type.
+     *
+     * If this attribute is supported by a driver then it must also
+     * support the VAConfigAttribEncHEVCFeatures attribute.
+     */
+    VAConfigAttribEncHEVCBlockSizes     = 51,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
