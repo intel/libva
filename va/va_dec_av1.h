@@ -463,13 +463,13 @@ typedef struct  _VADecPictureParameterBufferAV1
 
     /** \brief The adjustment needed for the filter level based on
      *  the chosen reference frame.
-     *  value range [-63..63].
+     *  value range [-64..63].
      */
     int8_t                  ref_deltas[8];
 
     /** \brief The adjustment needed for the filter level based on
      *  the chosen mode.
-     *  value range [-63..63].
+     *  value range [-64..63].
      */
     int8_t                  mode_deltas[2];
 
@@ -480,23 +480,23 @@ typedef struct  _VADecPictureParameterBufferAV1
      */
     uint8_t                base_qindex;
     /** \brief Y DC delta from Y AC
-     *  value range [-63..63]
+     *  value range [-64..63]
      */
     int8_t                  y_dc_delta_q;
     /** \brief U DC delta from Y AC
-     *  value range [-63..63]
+     *  value range [-64..63]
      */
     int8_t                  u_dc_delta_q;
     /** \brief U AC delta from Y AC
-     *  value range [-63..63]
+     *  value range [-64..63]
      */
     int8_t                  u_ac_delta_q;
     /** \brief V DC delta from Y AC
-     *  value range [-63..63]
+     *  value range [-64..63]
      */
     int8_t                  v_dc_delta_q;
     /** \brief V AC delta from Y AC
-     *  value range [-63..63]
+     *  value range [-64..63]
      */
     int8_t                  v_ac_delta_q;
 
