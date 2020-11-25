@@ -358,6 +358,17 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_PADDING_HIGH         16
 #define VA_PADDING_LARGE        32
 
+/** operation options */
+/** synchronization, block call, output should be ready after execution function return*/ 
+#define VA_EXEC_SYNC              0x0
+/** asynchronization,application should call additonal sync operation to access output */
+#define VA_EXEC_ASYNC             0x1
+
+/** operation mode */
+#define VA_EXEC_MODE_DEFAULT      0x0
+#define VA_EXEC_MODE_POWER_SAVING 0x1
+#define VA_EXEC_MODE_PERFORMANCE  0x2
+
 /**
  * Returns a short english description of error_status
  */
