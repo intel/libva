@@ -78,8 +78,15 @@ drm_handle_device(void *data, struct wl_drm *drm, const char *device)
     }
 
     drm_state->fd = fd;
-    drmGetMagic(drm_state->fd, &magic);
-    wl_drm_authenticate(wl_drm_ctx->drm, magic);
+
+    int type = drmGetNodeTypeFromFd(fd);
+    if (type != DRM_NODE_RENDER) {
+        drmGetMagic(drm_state->fd, &magic);
+        wl_drm_authenticate(wl_drm_ctx->drm, magic);
+    } else {
+        wl_drm_ctx->is_authenticated = 1;
+        drm_state->auth_type         = VA_DRM_AUTH_CUSTOM;
+    }
 }
 
 static void
