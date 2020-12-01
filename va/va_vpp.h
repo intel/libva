@@ -1298,6 +1298,30 @@ typedef struct _VAProcFilterParameterBufferTotalColorCorrection {
     float                             value;
 } VAProcFilterParameterBufferTotalColorCorrection;
 
+/** @name Video Processing Human Vision System (HVS) Denoise Mode.*/
+/**@{*/
+/**
+ *  \brief Default Mode.
+ *  This mode is decided in driver to the appropriate mode.
+ */
+#define VA_PROC_HVS_DENOISE_DEFAULT               0x0000
+/**
+ *  \brief Auto BDRate Mode.
+ *  Indicates auto BD rate improvement in pre-processing (such as before video encoding), ignore Strength.
+ */
+#define VA_PROC_HVS_DENOISE_AUTO_BDRATE           0x0001
+/**
+ *  \brief Auto Subjective Mode.
+ *  Indicates auto subjective quality improvement in pre-processing (such as before video encoding), ignore Strength.
+ */
+#define VA_PROC_HVS_DENOISE_AUTO_SUBJECTIVE       0x0002
+/**
+ *  \brief Manual Mode.
+ *  Indicates manual mode, allow to adjust the denoise strength manually (need to set Strength explicitly).
+ */
+#define VA_PROC_HVS_DENOISE_MANUAL                0x0003
+/**@}*/
+
 /** \brief Human Vision System(HVS) Noise reduction filter parametrization. */
 typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
     /** \brief Filter type. Shall be set to #VAProcFilterHVSNoiseReduction. */
@@ -1313,8 +1337,14 @@ typedef struct _VAProcFilterParameterBufferHVSNoiseReduction {
      *  Value 10 is the default value.
      */
     uint16_t            strength;
+    /**
+     *  \brief HVS Denoise Mode which controls denoise method.
+     *  It is a value of VA_PROC_HVS_DENOISE_xxx.
+     *  Please see the definition of VA_PROC_HVS_DENOISE_xxx.
+     */
+    uint16_t            mode;
     /** \brief Reserved bytes for future use, must be zero */
-    uint16_t            va_reserved[VA_PADDING_HIGH];
+    uint16_t            va_reserved[VA_PADDING_HIGH - 1];
 } VAProcFilterParameterBufferHVSNoiseReduction;
 
 /** \brief High Dynamic Range(HDR) Tone Mapping filter parametrization. */
