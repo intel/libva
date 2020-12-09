@@ -358,6 +358,17 @@ typedef int VAStatus;	/** Return status type from functions */
 #define VA_PADDING_HIGH         16
 #define VA_PADDING_LARGE        32
 
+/** operation options */
+/** synchronization, block call, output should be ready after execution function return*/ 
+#define VA_EXEC_SYNC              0x0
+/** asynchronization,application should call additonal sync operation to access output */
+#define VA_EXEC_ASYNC             0x1
+
+/** operation mode */
+#define VA_EXEC_MODE_DEFAULT      0x0
+#define VA_EXEC_MODE_POWER_SAVING 0x1
+#define VA_EXEC_MODE_PERFORMANCE  0x2
+
 /**
  * Returns a short english description of error_status
  */
@@ -4877,6 +4888,47 @@ typedef struct _VAPictureHEVC
  * NumPocLtCurr.
  */
 #define VA_PICTURE_HEVC_RPS_LT_CURR             0x00000040
+
+typedef enum{
+    VACopyObjectSurface = 0,
+    VACopyObjectBuffer  = 1,
+} VACopyObjectType;
+
+typedef struct _VACopyObject {
+    VACopyObjectType  obj_type;    // type of object.
+    union
+    {
+        VASurfaceID surface_id;
+        VABufferID  buffer_id;
+    } object;
+
+    uint32_t    va_reserved[VA_PADDING_MEDIUM];
+} VACopyObject;
+
+typedef union _VACopyOption{
+    struct {
+        /** \brief va copy synchronization, the value should be /c VA_EXEC_SYNC or /c VA_EXEC_ASYNC */
+        uint32_t va_copy_sync : 2;
+        /** \brief va copy mode, the value should be VA_EXEC_MODE_XXX */
+        uint32_t va_copy_mode : 4;
+        uint32_t reserved     :26;
+    }bits;
+    uint32_t value;
+}VACopyOption;
+
+/** \brief Copies an object.
+ *
+ * Copies specified object (surface or buffer). If non-blocking copy
+ * is requested (VA_COPY_NONBLOCK), then need vaSyncBuffer or vaSyncSurface/vaSyncSurface2
+ * to sync the destination object.
+ *
+ * @param[in] dpy               the VA display
+ * @param[in] dst               Destination object to copy to
+ * @param[in] src               Source object to copy from
+ * @param[in] option            VA copy option
+ * @return VA_STATUS_SUCCESS if successful
+ */
+VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOption option);
 
 #include <va/va_dec_hevc.h>
 #include <va/va_dec_jpeg.h>
