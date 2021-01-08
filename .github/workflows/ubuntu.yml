@@ -1,6 +1,14 @@
 name: ubuntu
 
-on: [ push, pull_request ]
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/ubuntu.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/ubuntu.yml'
 
 jobs:
   ubuntu-latest:
