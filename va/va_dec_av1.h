@@ -325,7 +325,6 @@ typedef struct  _VADecPictureParameterBufferAV1
     /** \brief Picture resolution minus 1
      *  Picture original resolution. If SuperRes is enabled,
      *  this is the upscaled resolution.
-     *  The value may not be multiple of 8.
      *  value range [0..65535]
      */
     uint16_t                frame_width_minus1;
