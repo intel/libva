@@ -126,6 +126,7 @@ extern "C" {
  *      - \ref api_dec_vp9
  *      - \ref api_dec_av1
  * - \ref api_vpp
+ * - \ref api_prot
  * - FEI (H264, HEVC)
  * 	- \ref api_fei
  * 	- \ref api_fei_h264
@@ -503,7 +504,9 @@ typedef enum
     VAProfileHEVCSccMain444             = 31,
     VAProfileAV1Profile0                = 32,
     VAProfileAV1Profile1                = 33,
-    VAProfileHEVCSccMain444_10          = 34
+    VAProfileHEVCSccMain444_10          = 34,
+    /** \brief Profile ID used for protected video playback. */
+    VAProfileProtected                  = 35
 } VAProfile;
 
 /**
@@ -562,6 +565,18 @@ typedef enum
      * and VAStatsMVBufferType) are needed for this entry point.
      **/
     VAEntrypointStats       = 12,
+    /**
+     * \brief VAEntrypointProtectedTEEComm
+     *
+     * A function for communicating with TEE (Trusted Execution Environment).
+     **/
+    VAEntrypointProtectedTEEComm       = 13,
+    /**
+     * \brief VAEntrypointProtectedContent
+     *
+     * A function for protected content to decrypt encrypted content.
+     **/
+    VAEntrypointProtectedContent       = 14,
 } VAEntrypoint;
 
 /** Currently defined configuration attribute types */
@@ -900,6 +915,46 @@ typedef enum
      * VAConfigAttribValDecAV1Features type.
      */
     VAConfigAttribDecAV1Features    = 42,
+    /** \brief TEE could be any HW secure device. Read-only */
+    VAConfigAttribTEEType               = 43,
+    /** \brief TEE type client is a specific module supporting specific functions in TEE. Read-only*/
+    VAConfigAttribTEETypeClient         = 44,
+    /**
+     * \brief Cipher algorithm of the protected content session.
+     *
+     * This attribute specifies the cipher algorithm of the protected content session. It
+     * could be \c VA_PC_CIPHER_AES, etc....
+     */
+    VAConfigAttribProtectedContentCipherAlgorithm = 45,
+    /**
+     * \brief Cipher block size of the protected content session.
+     *
+     * This attribute specifies the block size of the protected content session. It could be
+     * \c VA_PC_BLOCK_SIZE_128, \c VA_PC_BLOCK_SIZE_192, or \c VA_PC_BLOCK_SIZE_256, etc....
+     */
+    VAConfigAttribProtectedContentCipherBlockSize = 46,
+    /**
+     * \brief Cipher mode of the protected content session.
+     *
+     * This attribute specifies the cipher mode of the protected content session. It could
+     * be \c VA_PC_CIPHER_MODE_ECB, \c VA_PC_CIPHER_MODE_CBC, \c VA_PC_CIPHER_MODE_CTR, etc...
+     */
+    VAConfigAttribProtectedContentCipherMode = 47,
+    /**
+     * \brief Decryption sample type of the protected content session.
+     *
+     * This attribute specifies the decryption sample type of the protected content session.
+     * It could be \c VA_PC_SAMPLE_TYPE_FULLSAMPLE or \c VA_PC_SAMPLE_TYPE_SUBSAMPLE.
+     */
+    VAConfigAttribProtectedContentCipherSampleType = 48,
+    /**
+     * \brief Special usage attribute of the protected session.
+     *
+     * The attribute specifies the flow for the protected session could be used. For
+     * example, it could be \c VA_PC_USAGE_DEFAULT, \c VA_PC_USAGE_WIDEVINE, etc....
+     */
+    VAConfigAttribProtectedContentUsage = 49,
+
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1279,6 +1334,38 @@ typedef union _VAConfigAttribValContextPriority{
     }bits;
     uint32_t value;
 }VAConfigAttribValContextPriority;
+
+/** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
+/** \brief AES cipher */
+#define VA_PC_CIPHER_AES                    0x00000001
+
+/** @name Attribute values for VAConfigAttribProtectedContentCipherBlockSize */
+/** \brief 128 bits block size */
+#define VA_PC_BLOCK_SIZE_128                0x00000001
+/** \brief 192 bits block size */
+#define VA_PC_BLOCK_SIZE_192                0x00000002
+/** \brief 256 bits block size */
+#define VA_PC_BLOCK_SIZE_256                0x00000004
+
+/** @name Attribute values for VAConfigAttribProtectedContentCipherMode */
+/** \brief AES ECB */
+#define VA_PC_CIPHER_MODE_ECB               0x00000001
+/** \brief AES CBC */
+#define VA_PC_CIPHER_MODE_CBC               0x00000002
+/** \brief AES CTR */
+#define VA_PC_CIPHER_MODE_CTR               0x00000004
+
+/** @name Attribute values for VAConfigAttribProtectedContentCipherSampleType */
+/** \brief Full sample */
+#define VA_PC_SAMPLE_TYPE_FULLSAMPLE        0x00000001
+/** \brief Sub sample */
+#define VA_PC_SAMPLE_TYPE_SUBSAMPLE         0x00000002
+
+/** @name Attribute values for VAConfigAttribProtectedContentUsage */
+/** \brief Default usage */
+#define VA_PC_USAGE_DEFAULT                 0x00000000
+/** \brief Widevine */
+#define VA_PC_USAGE_WIDEVINE                0x00000001
 
 /** @name Attribute values for VAConfigAttribProcessingRate. */
 /**@{*/
@@ -1897,6 +1984,19 @@ typedef enum
      *  \c VAContextParameterUpdateBuffer
      */
     VAContextParameterUpdateBufferType  = 58,
+    /**
+     * \brief Protected session execution buffer type
+     *
+     * It's for TEE execution usage (vaProtectedSessionExecute()). The buffer structure is in
+     * \c VAProtectedSessionExecuteBuffer
+     */
+    VAProtectedSessionExecuteBufferType = 59,
+
+    /** \brief Encryption parameters buffer for protected content session.
+     *
+     * Refer to \c VAEncryptionParameters
+    */
+    VAEncryptionParameterBufferType = 60,
 
     VABufferTypeMax
 } VABufferType;
@@ -1922,6 +2022,90 @@ typedef struct _VAContextParameterUpdateBuffer
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t reserved[VA_PADDING_MEDIUM];
 } VAContextParameterUpdateBuffer;
+
+/**
+ * These ENCRYPTION_TYPEs are used for the attribute values for
+ * \c VAConfigAttribEncryption and for encryption_type in
+ * VAEncryptionParameters.
+ *
+ * When used for \c VAConfigAttribEncryption, it be used via
+ * vaQueryConfigEntrypoints to check which type are supported for specific
+ * profile or not.
+ *
+ * When used for encryption_type in VAEncryptionParameters, it tells driver
+ * the parameters in VAEncryptionParameters are used for which encryption type.
+ */
+#define VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR       0x00000001  /* AES CTR fullsample */
+#define VA_ENCRYPTION_TYPE_FULLSAMPLE_CBC       0x00000002  /* AES CBC fullsample */
+#define VA_ENCRYPTION_TYPE_SUBSAMPLE_CTR        0x00000004  /* AES CTR fullsample */
+#define VA_ENCRYPTION_TYPE_SUBSAMPLE_CBC        0x00000008  /* AES CBC fullsample */
+
+/** \brief structure for encrypted segment info. */
+typedef struct _VAEncryptionSegmentInfo {
+  /** \brief  The offset relative to the start of the bitstream input in
+   *  bytes of the start of the segment */
+  uint32_t segment_start_offset;
+  /** \brief  The length of the segments in bytes */
+  uint32_t segment_length;
+  /** \brief  The length in bytes of the remainder of an incomplete block
+   *  from a previous segment*/
+  uint32_t partial_aes_block_size;
+  /** \brief  The length in bytes of the initial clear data */
+  uint32_t init_byte_length;
+  /** \brief  This will be AES counter for secure decode and secure encode
+   *  when numSegments equals 1, valid size is specified by
+   * \c key_blob_size */
+  uint8_t aes_cbc_iv_or_ctr[64];
+  /** \brief Reserved bytes for future use, must be zero */
+  uint32_t va_reserved[VA_PADDING_MEDIUM];
+} VAEncryptionSegmentInfo;
+
+/** \brief Encryption parameters buffer for VAEncryptionParameterBufferType */
+typedef struct _VAEncryptionParameters {
+  /** \brief Encryption type, refer to \c VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR,
+   * \c VA_ENCRYPTION_TYPE_FULLSAMPLE_CBC, \c VA_ENCRYPTION_TYPE_SUBSAMPLE_CTR,
+   * or \c VA_ENCRYPTION_TYPE_SUBSAMPLE_CBC */
+  uint32_t encryption_type;
+  /** \brief The number of sengments */
+  uint32_t num_segments;
+  /** \brief Pointer of segments */
+  VAEncryptionSegmentInfo *segment_info;
+  /** \brief The status report index reserved for CENC fullsample workload.
+   * The related structures and definitions are vendor specific.
+  */
+  uint32_t status_report_index;
+  /** \brief CENC counter length */
+  uint32_t size_of_length;
+  /** \brief Wrapped decrypt blob (Snd)kb, valid size is specified by
+   * \c key_blob_size */
+  uint8_t wrapped_decrypt_blob[64];
+  /** \brief Wrapped Key blob info (Sne)kb, valid size is specified by
+   * \c key_blob_size */
+  uint8_t wrapped_encrypt_blob[64];
+  /** \brief key blob size
+   * It could be \c VA_PC_BLOCK_SIZE_128, \c VA_PC_BLOCK_SIZE_192, or
+   * \c VA_PC_BLOCK_SIZE_256
+   */
+  uint32_t key_blob_size;
+  /** \brief Indicates the number of 16-byte BLOCKS that are encrypted in any
+   *  given encrypted region of segments.
+   *  If this value is zero:
+   *    1. All bytes in encrypted region of segments are encrypted, i.e. the
+   *       CENC or CBC1 scheme is being used
+   *    2. blocks_stripe_clear must also be zero.
+   *  If this value is non-zero, blocks_stripe_clear must also be non-zero.
+   */
+  uint32_t blocks_stripe_encrypted;
+  /** \brief Indicates the number of 16-byte BLOCKS that are clear in any given
+   *  encrypted region of segments, as defined by the CENS and CBCS schemes in
+   *  the common encryption spec.
+   *  If this value is zero, all bytes in encrypted region of segments are
+   *  encrypted, i.e. the CENC or CBC1 scheme is being used.
+   */
+  uint32_t blocks_stripe_clear;
+  /** \brief Reserved bytes for future use, must be zero */
+  uint32_t va_reserved[VA_PADDING_MEDIUM];
+} VAEncryptionParameters;
 
 /**
  * Processing rate parameter for encode.
@@ -4952,6 +5136,7 @@ VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOpt
 #include <va/va_fei.h>
 #include <va/va_fei_h264.h>
 #include <va/va_vpp.h>
+#include <va/va_prot.h>
 
 /**@}*/
 
