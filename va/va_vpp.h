@@ -253,6 +253,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterHVSNoiseReduction,
     /** \brief High Dynamic Range Tone Mapping. */
     VAProcFilterHighDynamicRangeToneMapping,
+    /** \brief Three-Dimensional Look Up Table (3DLUT). */
+    VAProcFilter3DLUT,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -1332,6 +1334,90 @@ typedef struct _VAProcFilterParameterBufferHDRToneMapping {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t            va_reserved[VA_PADDING_HIGH];
 } VAProcFilterParameterBufferHDRToneMapping;
+
+/** @name 3DLUT Channel Layout and Mapping */
+/**@{*/
+/** \brief 3DLUT Channel Layout is unknown. */
+#define VA_3DLUT_CHANNEL_UNKNOWN              0x00000000
+/** \brief 3DLUT Channel Layout is R, G, B, the default layout. Map RGB to RGB. */
+#define VA_3DLUT_CHANNEL_RGB_RGB              0x00000001
+/** \brief 3DLUT Channel Layout is Y, U, V. Map YUV to RGB. */
+#define VA_3DLUT_CHANNEL_YUV_RGB              0x00000002
+/** \brief 3DLUT Channel Layout is V, U, Y. Map VUY to RGB. */
+#define VA_3DLUT_CHANNEL_VUY_RGB              0x00000004
+/**@}*/
+
+/**
+  *  \brief 3DLUT filter parametrization.
+  *
+  *  3DLUT (Three Dimensional Look Up Table) is often used when converting an image or a video frame
+  *  from one color representation to another, for example, when converting log and gamma encodings,
+  *  changing the color space, applying a color correction, changing the dynamic range, gamut mapping etc.
+  *
+  *  This buffer defines 3DLUT attributes and memory layout. The typical 3DLUT has fixed number(lut_size)
+  *  per dimension and memory layout is 3 dimensional array as 3dlut[stride_0][stride_1][stride_2] (lut_size
+  *  shall be smaller than stride_0/1/2).
+  *
+  *  API user should query hardware capability by using the VAProcFilterCap3DLUT to get the 3DLUT attributes
+  *  which hardware supports, and use these attributes. For example, if the user queries hardware, the API user
+  *  could get caps with 3dlut[33][33][64] (lut_size = 33, lut_stride[0/1/2] = 33/33/64). API user shall not
+  *  use the attributes which hardware can not support.
+  *
+  *  3DLUT is usually used to transform input RGB/YUV values in one color space to output RGB values in another
+  *  color space. Based on 1) the format and color space of VPP input and output and 2) 3DLUT memory layout and
+  *  channel mapping, driver will enable some color space conversion implicitly if needed. For example, the input of
+  *  VPP is P010 format in BT2020 color space, the output of VPP is NV12 in BT709 color space and the 3DLUT channel
+  *  mapping is VA_3DLUT_CHANNEL_RGB_RGB, driver could build the data pipeline as P010(BT2020)->RGB(BT2020)
+  *  ->3DULT(BT709)->NV12(BT709). Please note, the limitation of 3DLUT filter color space is that the color space of
+  *  3DLUT filter input data needs to be same as the input data of VPP; the color space of 3DLUT filter output data
+  *  needs to be same as the output data of VPP; format does not have such limitation.
+  */
+typedef struct _VAProcFilterParameterBuffer3DLUT {
+    /** \brief Filter type. Shall be set to #VAProcFilter3DLUT.*/
+    VAProcFilterType    type;
+
+    /** \brief lut_surface contains 3DLUT data in the 3DLUT memory layout, must be linear */
+    VASurfaceID         lut_surface;
+    /**
+      * \brief lut_size is the number of valid points on every dimension of the three dimensional look up table.
+      * The size of LUT (lut_size) shall be same among every dimension of the three dimensional look up table.
+      * The size of LUT (lut_size) shall be smaller than lut_stride[0/1/2].
+      */
+    uint16_t            lut_size;
+    /**
+      *  \brief lut_stride are the number of points on every dimension of the three dimensional look up table.
+      *  Three dimension can has 3 different stride, lut3d[lut_stride[0]][lut_stride[1]][lut_stride[2]].
+      *  But the valid point shall start from 0, the range of valid point is [0, lut_size-1] for every dimension.
+      */
+    uint16_t            lut_stride[3];
+    /** \brief bit_depth is the number of bits for every channel R, G or B (or Y, U, V) */
+    uint16_t            bit_depth;
+    /** \brief num_channel is the number of channels */
+    uint16_t            num_channel;
+
+    /** \brief channel_mapping defines the mapping of input and output channels, could be one of VA_3DLUT_CHANNEL_XXX*/
+    uint32_t            channel_mapping;
+
+    /** \brief reserved bytes for future use, must be zero */
+    uint32_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBuffer3DLUT;
+
+/** \brief Capabilities specification for the 3DLUT filter. */
+typedef struct _VAProcFilterCap3DLUT {
+    /** \brief lut_size is the number of valid points on every dimension of the three dimensional look up table. */
+    uint16_t            lut_size;
+    /**  \brief lut_stride are the number of points on every dimension of the three dimensional look up table. lut3d[lut_stride[0]][lut_stride[1]][lut_stride[2]]*/
+    uint16_t            lut_stride[3];
+    /** \brief bit_depth is the number of bits for every channel R, G or B (or Y, U, V) */
+    uint16_t            bit_depth;
+    /** \brief num_channel is the number of channels */
+    uint16_t            num_channel;
+    /** \brief channel_mapping defines the mapping of channels, could be some combination of VA_3DLUT_CHANNEL_XXX*/
+    uint32_t            channel_mapping;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterCap3DLUT;
 
 /**
  * \brief Default filter cap specification (single range value).
