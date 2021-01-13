@@ -16,6 +16,7 @@ libva_headers_doc = [
   'va_dec_jpeg.h',
   'va_dec_vp8.h',
   'va_dec_vp9.h',
+  'va_prot.h',
   'va_vpp.h'
 ]
 

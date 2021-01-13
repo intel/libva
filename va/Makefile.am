@@ -41,6 +41,7 @@ libva_source_c = \
 libva_source_h = \
 	va.h			\
 	va_backend.h		\
+	va_backend_prot.h	\
 	va_backend_vpp.h	\
 	va_compat.h		\
 	va_dec_av1.h		\
@@ -62,6 +63,7 @@ libva_source_h = \
 	va_str.h		\
 	va_tpi.h		\
 	va_version.h		\
+	va_prot.h		\
 	va_vpp.h		\
 	$(NULL)
 
