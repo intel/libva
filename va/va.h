@@ -154,6 +154,7 @@ extern "C" {
  * the encoding operation, while synchronizing the use of a common pool of
  * surfaces.
  *
+ * \code
  * // Initialization
  * dpy = vaGetDisplayDRM(fd);
  * vaInitialize(dpy, ...); 
@@ -217,7 +218,7 @@ extern "C" {
  *     vaEndPicture(dpy, encode_context);
  *   }
  * }
- *
+ * \endcode
  */
 
 /**
