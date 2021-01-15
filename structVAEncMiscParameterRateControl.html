@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -92,8 +92,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a8642ca314a3d69711f3422bd03638d20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af211be2637e0e557d7030b8294b92600"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#af211be2637e0e557d7030b8294b92600">quality_factor</a></td></tr>
 <tr class="separator:af211be2637e0e557d7030b8294b92600"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae135c4c0c28ec6dca0b107bf0aa43da9"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#ae135c4c0c28ec6dca0b107bf0aa43da9">va_reserved</a> [VA_PADDING_MEDIUM - 3]</td></tr>
-<tr class="separator:ae135c4c0c28ec6dca0b107bf0aa43da9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad88d570c4aa38886953a5a5c64b1f840"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#ad88d570c4aa38886953a5a5c64b1f840">target_frame_size</a></td></tr>
+<tr class="separator:ad88d570c4aa38886953a5a5c64b1f840"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5c9486a2fdddeb0ca85642272402601"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#ae5c9486a2fdddeb0ca85642272402601">va_reserved</a> [<a class="el" href="group__api__core.html#gaaa4fb20d1c2606379cccfa562c2ebb3b">VA_PADDING_LOW</a>]</td></tr>
+<tr class="separator:ae5c9486a2fdddeb0ca85642272402601"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3a3193d9e905e2ed79e2c1795032693"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#ad3a3193d9e905e2ed79e2c1795032693">reset</a>: 1</td></tr>
 <tr class="separator:ad3a3193d9e905e2ed79e2c1795032693"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc7ac4fc5bbf55e2f128a5f6cc639fa4"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterRateControl.html#acc7ac4fc5bbf55e2f128a5f6cc639fa4">disable_frame_skip</a>: 1</td></tr>
@@ -353,6 +355,22 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ad88d570c4aa38886953a5a5c64b1f840"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad88d570c4aa38886953a5a5c64b1f840">&#9670;&nbsp;</a></span>target_frame_size</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterRateControl::target_frame_size</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Target frame size</p>
+<p>Desired frame size in bytes. This parameter can be used in some RC modes (like Transport Controlled BRC) where feedback from the app is required. Zero value means no limits. </p>
+
+</div>
+</div>
 <a id="aeed63f4859686c5578f5e0a05b721c21"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aeed63f4859686c5578f5e0a05b721c21">&#9670;&nbsp;</a></span>target_percentage</h2>
 
@@ -384,14 +402,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ae135c4c0c28ec6dca0b107bf0aa43da9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae135c4c0c28ec6dca0b107bf0aa43da9">&#9670;&nbsp;</a></span>va_reserved</h2>
+<a id="ae5c9486a2fdddeb0ca85642272402601"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5c9486a2fdddeb0ca85642272402601">&#9670;&nbsp;</a></span>va_reserved</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint32_t VAEncMiscParameterRateControl::va_reserved[VA_PADDING_MEDIUM - 3]</td>
+          <td class="memname">uint32_t VAEncMiscParameterRateControl::va_reserved[<a class="el" href="group__api__core.html#gaaa4fb20d1c2606379cccfa562c2ebb3b">VA_PADDING_LOW</a>]</td>
         </tr>
       </table>
 </div><div class="memdoc">

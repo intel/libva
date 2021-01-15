@@ -44,6 +44,8 @@ var searchData=
   ['composite_5fdisplay_5fflag',['composite_display_flag',['../structVAEncPictureParameterBufferMPEG2.html#a9c3bcb70e6fe2c04e9942b606828cccb',1,'VAEncPictureParameterBufferMPEG2']]],
   ['concealment_5fmotion_5fvectors',['concealment_motion_vectors',['../structVAEncPictureParameterBufferMPEG2.html#a4ef7c180ec4ca9dfd74281f520bccacf',1,'VAEncPictureParameterBufferMPEG2']]],
   ['constrained_5fintra_5fpred_5fflag',['constrained_intra_pred_flag',['../structVAEncPictureParameterBufferH264.html#a860858a6692cc8282507ff0c95834047',1,'VAEncPictureParameterBufferH264::constrained_intra_pred_flag()'],['../structVAEncPictureParameterBufferHEVC.html#ac0976228f39a24b3fab955030b4bd85b',1,'VAEncPictureParameterBufferHEVC::constrained_intra_pred_flag()']]],
+  ['context_5fpriority',['context_priority',['../structVAContextParameterUpdateBuffer.html#ad110dd2efcaf18d1b822e5e6b3e40aa7',1,'VAContextParameterUpdateBuffer']]],
+  ['context_5fpriority_5fupdate',['context_priority_update',['../structVAContextParameterUpdateBuffer.html#a9f0eed4cac9fb8c3c7af30758018207c',1,'VAContextParameterUpdateBuffer']]],
   ['copy_5fbuffer_5fto_5falternate',['copy_buffer_to_alternate',['../structVAEncPictureParameterBufferVP8.html#ad09a48a6028722b8c2b8bbd68b5590cf',1,'VAEncPictureParameterBufferVP8']]],
   ['copy_5fbuffer_5fto_5fgolden',['copy_buffer_to_golden',['../structVAEncPictureParameterBufferVP8.html#ab907fbaf5c9b8d013cf7cb73b20fae75',1,'VAEncPictureParameterBufferVP8']]],
   ['ctb_5fcmd',['ctb_cmd',['../group__api__fei__hevc.html#gaaace111902cfa4c99c5100b804bcd0a2',1,'VAEncMiscParameterFEIFrameControlHEVC']]],

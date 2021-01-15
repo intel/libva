@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -107,7 +107,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="separator:a2dfcb4209d6dadcd6fec2cc7c4acc69f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03619fd8a3eadc30bf824a0796805507"><td class="memItemLeft" align="right" valign="top"><a id="a03619fd8a3eadc30bf824a0796805507"></a>
 VASurfaceID *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a03619fd8a3eadc30bf824a0796805507">forward_references</a></td></tr>
-<tr class="memdesc:a03619fd8a3eadc30bf824a0796805507"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of forward reference frames. <br /></td></tr>
+<tr class="memdesc:a03619fd8a3eadc30bf824a0796805507"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of forward reference frames (past frames). <br /></td></tr>
 <tr class="separator:a03619fd8a3eadc30bf824a0796805507"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45c7c171928a33681db79288dc13be5d"><td class="memItemLeft" align="right" valign="top"><a id="a45c7c171928a33681db79288dc13be5d"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a45c7c171928a33681db79288dc13be5d">num_forward_references</a></td></tr>
@@ -115,7 +115,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="separator:a45c7c171928a33681db79288dc13be5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f0e379b748e72adeed6d30e8057f934"><td class="memItemLeft" align="right" valign="top"><a id="a2f0e379b748e72adeed6d30e8057f934"></a>
 VASurfaceID *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a2f0e379b748e72adeed6d30e8057f934">backward_references</a></td></tr>
-<tr class="memdesc:a2f0e379b748e72adeed6d30e8057f934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of backward reference frames. <br /></td></tr>
+<tr class="memdesc:a2f0e379b748e72adeed6d30e8057f934"><td class="mdescLeft">&#160;</td><td class="mdescRight">Array of backward reference frames (future frames). <br /></td></tr>
 <tr class="separator:a2f0e379b748e72adeed6d30e8057f934"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adac7a536c5e058f9e87ec70a52ffe437"><td class="memItemLeft" align="right" valign="top"><a id="adac7a536c5e058f9e87ec70a52ffe437"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#adac7a536c5e058f9e87ec70a52ffe437">num_backward_references</a></td></tr>
@@ -213,7 +213,8 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <p>Allowed filter flags API-wise. Use <a class="el" href="group__api__vpp.html#gafcf3b8c6f75cfa2850ff9b9e3f0f339e" title="Queries video processing pipeline capabilities. ">vaQueryVideoProcPipelineCaps()</a> to check for implementation details:</p><ul>
 <li>Bob-deinterlacing: <code>VA_FRAME_PICTURE</code>, <code>VA_TOP_FIELD</code>, <code>VA_BOTTOM_FIELD</code>. Note that any deinterlacing filter (<a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7ab7e7c1dd6966eda8c9fee5bb6e7fc88f" title="Deinterlacing filter. ">VAProcFilterDeinterlacing</a>) will override those flags.</li>
 <li>Color space conversion: <code>VA_SRC_BT601</code>, <code>VA_SRC_BT709</code>, <code>VA_SRC_SMPTE_240</code>.</li>
-<li>Scaling: <code>VA_FILTER_SCALING_DEFAULT</code>, <code>VA_FILTER_SCALING_FAST</code>, <code>VA_FILTER_SCALING_HQ</code>, <code>VA_FILTER_SCALING_NL_ANAMORPHIC</code>. </li>
+<li>Scaling: <code>VA_FILTER_SCALING_DEFAULT</code>, <code>VA_FILTER_SCALING_FAST</code>, <code>VA_FILTER_SCALING_HQ</code>, <code>VA_FILTER_SCALING_NL_ANAMORPHIC</code>.</li>
+<li>Interpolation Method: <code>VA_FILTER_INTERPOLATION_DEFAULT</code>, <code>VA_FILTER_INTERPOLATION_NEAREST_NEIGHBOR</code>, <code>VA_FILTER_INTERPOLATION_BILINEAR</code>, <code>VA_FILTER_INTERPOLATION_ADVANCED</code>. </li>
 </ul>
 
 </div>

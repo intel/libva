@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -124,8 +124,8 @@ $(function() {
 : <a class="el" href="structVAPictureParameterBufferHEVCExtension.html#a38ccc13553ee4a05e75d0d8784c79dda">VAPictureParameterBufferHEVCExtension</a>
 </li>
 <li>scc_fields
-: <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a94b714c9a1271586f0d27741189f8281">VAEncPictureParameterBufferHEVC</a>
-, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a65b7172f7fb4693726f4dbc6a34cb47e">VAEncSequenceParameterBufferHEVC</a>
+: <a class="el" href="structVAEncPictureParameterBufferHEVC.html#aa34d55c083273b8d419d960061a84e6d">VAEncPictureParameterBufferHEVC</a>
+, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a07cf365cf4fb7e24bf86a85b0055d760">VAEncSequenceParameterBufferHEVC</a>
 </li>
 <li>screen_content_flag
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a63bc143a5df14d26d97a49400361741d">VAEncPictureParameterBufferHEVC</a>
@@ -149,6 +149,12 @@ $(function() {
 <li>seg_param
 : <a class="el" href="structVASliceParameterBufferVP9.html#a64f51ef6e65d60e9bae8c9b26b1c85be">VASliceParameterBufferVP9</a>
 </li>
+<li>segment_info
+: <a class="el" href="structVAEncryptionParameters.html#aac98df9c278ac27199fad22e600f55ca">VAEncryptionParameters</a>
+</li>
+<li>segment_length
+: <a class="el" href="structVAEncryptionSegmentInfo.html#a10d73ebf7d60e76a1fe5e90b9eae9df3">VAEncryptionSegmentInfo</a>
+</li>
 <li>segment_lf_level_delta
 : <a class="el" href="structVAEncSegParamVP9.html#a4fe415cbf9b3cc05162d97781788b513">VAEncSegParamVP9</a>
 </li>
@@ -166,6 +172,9 @@ $(function() {
 <li>segment_reference_skipped
 : <a class="el" href="structVAEncSegParamVP9.html#a2356cf630f4bc184bcc6075b738a7a3e">VAEncSegParamVP9</a>
 , <a class="el" href="structVASegmentParameterVP9.html#a068ff674ce4b0012b79e044026da0a83">VASegmentParameterVP9</a>
+</li>
+<li>segment_start_offset
+: <a class="el" href="structVAEncryptionSegmentInfo.html#abfece18c420e4eaed9034eff1c013e46">VAEncryptionSegmentInfo</a>
 </li>
 <li>segmentation_temporal_update
 : <a class="el" href="structVADecPictureParameterBufferVP9.html#a7d9a0225993deb8c0b0718e990302dd4">VADecPictureParameterBufferVP9</a>
@@ -201,6 +210,9 @@ $(function() {
 </li>
 <li>size
 : <a class="el" href="structVACodedBufferSegment.html#a5a148f4def74fe86fc0a81beff9fcf71">VACodedBufferSegment</a>
+</li>
+<li>size_of_length
+: <a class="el" href="structVAEncryptionParameters.html#aa85edbcb535fb89fcf25ba267f178037">VAEncryptionParameters</a>
 </li>
 <li>size_skip_frames
 : <a class="el" href="structVAEncMiscParameterSkipFrame.html#a2fa7d7285d412ec342b3dee73f871831">VAEncMiscParameterSkipFrame</a>
@@ -271,7 +283,7 @@ $(function() {
 , <a class="el" href="structVASliceParameterBufferHEVC.html#a56d4c531f2de83fdb7df72f5042886df">VASliceParameterBufferHEVC</a>
 </li>
 <li>slice_parsing_fields
-: <a class="el" href="structVAPictureParameterBufferHEVC.html#a27c130962ebfb481495f0872bf3987c1">VAPictureParameterBufferHEVC</a>
+: <a class="el" href="structVAPictureParameterBufferHEVC.html#a14721410a66c591c9f411ee2e7f0b911">VAPictureParameterBufferHEVC</a>
 </li>
 <li>slice_pic_parameter_set_id
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a4d7d52f0a30299e68bd9f9c2e448196d">VAEncPictureParameterBufferHEVC</a>
@@ -321,6 +333,10 @@ $(function() {
 </li>
 <li>status
 : <a class="el" href="structVACodedBufferSegment.html#a3088172d4d3034cac872992a5024b862">VACodedBufferSegment</a>
+, <a class="el" href="structVAProtectedSessionExecuteBuffer.html#a10be3812880471f88b711eafc590d7c0">VAProtectedSessionExecuteBuffer</a>
+</li>
+<li>status_report_index
+: <a class="el" href="structVAEncryptionParameters.html#aad80c28d749c6878834463c545ed011c">VAEncryptionParameters</a>
 </li>
 <li>step
 : <a class="el" href="structVAProcFilterValueRange.html#ab0bbc4a0b263a8602c4731fcdccc34f3">VAProcFilterValueRange</a>

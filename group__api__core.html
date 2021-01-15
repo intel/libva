@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -92,6 +92,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValMultipleFrame.html">VAConfigAttribValMultipleFrame</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attribute value for VAConfigAttribMultipleFrame.  <a href="unionVAConfigAttribValMultipleFrame.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValContextPriority.html">VAConfigAttribValContextPriority</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAGenericValue.html">VAGenericValue</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic value.  <a href="structVAGenericValue.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -100,6 +102,15 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVASurfaceAttribExternalBuffers.html">VASurfaceAttribExternalBuffers</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structVASurfaceAttribExternalBuffers.html" title="VASurfaceAttribExternalBuffers structure for the VASurfaceAttribExternalBufferDescriptor attribute...">VASurfaceAttribExternalBuffers</a> structure for the VASurfaceAttribExternalBufferDescriptor attribute.  <a href="structVASurfaceAttribExternalBuffers.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAContextParameterUpdateBuffer.html">VAContextParameterUpdateBuffer</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">update the context parameter this structure is used to update context parameters, such as priority of the context backend driver should keep the parameter unchanged if there no new parameter updated.  <a href="structVAContextParameterUpdateBuffer.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncryptionSegmentInfo.html">VAEncryptionSegmentInfo</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">structure for encrypted segment info.  <a href="structVAEncryptionSegmentInfo.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncryptionParameters.html">VAEncryptionParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encryption parameters buffer for VAEncryptionParameterBufferType.  <a href="structVAEncryptionParameters.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcessingRateParameterEnc.html">VAProcessingRateParameterEnc</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,6 +223,10 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa57e27884cad7b54a64395ff76b546d9">VA_STATUS_ERROR_NOT_ENOUGH_BUFFER</a>&#160;&#160;&#160;0x00000025</td></tr>
 <tr class="memdesc:gaa57e27884cad7b54a64395ff76b546d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicate allocated buffer size is not enough for input or output. <br /></td></tr>
 <tr class="separator:gaa57e27884cad7b54a64395ff76b546d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3909e6bd8d85b54238f4083751f3dbbf"><td class="memItemLeft" align="right" valign="top"><a id="ga3909e6bd8d85b54238f4083751f3dbbf"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3909e6bd8d85b54238f4083751f3dbbf">VA_STATUS_ERROR_TIMEDOUT</a>&#160;&#160;&#160;0x00000026</td></tr>
+<tr class="memdesc:ga3909e6bd8d85b54238f4083751f3dbbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicate an operation isn't completed because time-out interval elapsed. <br /></td></tr>
+<tr class="separator:ga3909e6bd8d85b54238f4083751f3dbbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab5ad65ad225291300cb5bd59e7528858"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gab5ad65ad225291300cb5bd59e7528858">VA_FRAME_PICTURE</a>&#160;&#160;&#160;0x00000000</td></tr>
 <tr class="separator:gab5ad65ad225291300cb5bd59e7528858"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6fa356c030c9d8b8507a20cda3e71a4a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga6fa356c030c9d8b8507a20cda3e71a4a">VA_ENABLE_BLEND</a>&#160;&#160;&#160;0x00000004 /* video area blend with the constant color */</td></tr>
@@ -222,8 +237,16 @@ Macros</h2></td></tr>
 <tr class="separator:ga6f807dfeeb70b935d83d16fbaf5f2e92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaee1ba68046de52cfbd207d3cc8214201"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaee1ba68046de52cfbd207d3cc8214201">VA_FILTER_SCALING_DEFAULT</a>&#160;&#160;&#160;0x00000000</td></tr>
 <tr class="separator:gaee1ba68046de52cfbd207d3cc8214201"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga76b44bf3d5b003e149f84a4953bf430e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga76b44bf3d5b003e149f84a4953bf430e">VA_FILTER_INTERPOLATION_DEFAULT</a>&#160;&#160;&#160;0x00000000</td></tr>
+<tr class="separator:ga76b44bf3d5b003e149f84a4953bf430e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaa4fb20d1c2606379cccfa562c2ebb3b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaaa4fb20d1c2606379cccfa562c2ebb3b">VA_PADDING_LOW</a>&#160;&#160;&#160;4</td></tr>
 <tr class="separator:gaaa4fb20d1c2606379cccfa562c2ebb3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9f1d4f1f14aaf5dc289cf4d11c746c59"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga9f1d4f1f14aaf5dc289cf4d11c746c59">VA_EXEC_SYNC</a>&#160;&#160;&#160;0x0</td></tr>
+<tr class="separator:ga9f1d4f1f14aaf5dc289cf4d11c746c59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafcb3bbf17dd0467c6919d6dacea2cb58"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gafcb3bbf17dd0467c6919d6dacea2cb58">VA_EXEC_ASYNC</a>&#160;&#160;&#160;0x1</td></tr>
+<tr class="separator:gafcb3bbf17dd0467c6919d6dacea2cb58"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga156a739d58e21452b0ffafa4c0a40333"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga156a739d58e21452b0ffafa4c0a40333">VA_EXEC_MODE_DEFAULT</a>&#160;&#160;&#160;0x0</td></tr>
+<tr class="separator:ga156a739d58e21452b0ffafa4c0a40333"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="memItemLeft" align="right" valign="top"><a id="gaff38bc6c01b65c6e9d473e40bdde9df6"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaff38bc6c01b65c6e9d473e40bdde9df6">VA_RT_FORMAT_YUV420</a>&#160;&#160;&#160;0x00000001</td></tr>
 <tr class="memdesc:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="mdescLeft">&#160;</td><td class="mdescRight">YUV 4:2:0 8-bit. <br /></td></tr>
@@ -290,6 +313,8 @@ Macros</h2></td></tr>
 <tr class="separator:gaf0a40b7ab606d8e855c7a8934d7bf48a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga13a541a66a4585335e74a2e2c9f1a5da"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga13a541a66a4585335e74a2e2c9f1a5da">VA_ATTRIB_NOT_SUPPORTED</a>&#160;&#160;&#160;0x80000000</td></tr>
 <tr class="separator:ga13a541a66a4585335e74a2e2c9f1a5da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga6836ddbf3178e7cbf49599a820fe17a9">VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR</a>&#160;&#160;&#160;0x00000001  /* AES CTR fullsample */</td></tr>
+<tr class="separator:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3fd349cafd4b89440b25e690f4bbba25">VA_SLICE_DATA_FLAG_ALL</a>&#160;&#160;&#160;0x00	/* whole slice is in the buffer */</td></tr>
 <tr class="separator:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7437a12fa7c585fa7a51313c640652c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga7437a12fa7c585fa7a51313c640652c0">VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK</a>&#160;&#160;&#160;0xff</td></tr>
@@ -307,6 +332,10 @@ Macros</h2></td></tr>
 <tr class="memitem:ga9d8677743988fe043f524e3477f25099"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga9d8677743988fe043f524e3477f25099">VA_CODED_BUF_STATUS_SINGLE_NALU</a>&#160;&#160;&#160;0x10000000</td></tr>
 <tr class="memdesc:ga9d8677743988fe043f524e3477f25099"><td class="mdescLeft">&#160;</td><td class="mdescRight">The coded buffer segment contains a single NAL unit.  <a href="#ga9d8677743988fe043f524e3477f25099">More...</a><br /></td></tr>
 <tr class="separator:ga9d8677743988fe043f524e3477f25099"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac0e360011669d9189528618e5d585d99"><td class="memItemLeft" align="right" valign="top"><a id="gac0e360011669d9189528618e5d585d99"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gac0e360011669d9189528618e5d585d99">VA_TIMEOUT_INFINITE</a>&#160;&#160;&#160;0xFFFFFFFFFFFFFFFF</td></tr>
+<tr class="memdesc:gac0e360011669d9189528618e5d585d99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates an infinite timeout. <br /></td></tr>
+<tr class="separator:gac0e360011669d9189528618e5d585d99"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad955482c2432c19c3db3d05ffa1bb1e3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gad955482c2432c19c3db3d05ffa1bb1e3">VA_FOURCC</a>(ch0,  ch1,  ch2,  ch3)</td></tr>
 <tr class="separator:gad955482c2432c19c3db3d05ffa1bb1e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad017021aea788f8b8a2165719605c627"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gad017021aea788f8b8a2165719605c627">VA_FOURCC_NV12</a>&#160;&#160;&#160;0x3231564E</td></tr>
@@ -373,10 +402,14 @@ Macros</h2></td></tr>
 <tr class="separator:gaf26ac95b4a001189552a890bd8ba9b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga730635180d1dd50463b264a53fed8dde"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga730635180d1dd50463b264a53fed8dde">VA_FOURCC_Y210</a>&#160;&#160;&#160;0x30313259</td></tr>
 <tr class="separator:ga730635180d1dd50463b264a53fed8dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa75ff7c6ed66afae2b0dff1b891ce0db"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa75ff7c6ed66afae2b0dff1b891ce0db">VA_FOURCC_Y212</a>&#160;&#160;&#160;0x32313259</td></tr>
+<tr class="separator:gaa75ff7c6ed66afae2b0dff1b891ce0db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga414b3d49d1e9b19699bf29d72b2afeb5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga414b3d49d1e9b19699bf29d72b2afeb5">VA_FOURCC_Y216</a>&#160;&#160;&#160;0x36313259</td></tr>
 <tr class="separator:ga414b3d49d1e9b19699bf29d72b2afeb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gac16f27a9610065a3c5031c2552cbf220"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gac16f27a9610065a3c5031c2552cbf220">VA_FOURCC_Y410</a>&#160;&#160;&#160;0x30313459</td></tr>
 <tr class="separator:gac16f27a9610065a3c5031c2552cbf220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae494c1e515d472b0f62b47abfde3b8e2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gae494c1e515d472b0f62b47abfde3b8e2">VA_FOURCC_Y412</a>&#160;&#160;&#160;0x32313459</td></tr>
+<tr class="separator:gae494c1e515d472b0f62b47abfde3b8e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga33f92599d153a9e36ff65b66c2f61ed9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga33f92599d153a9e36ff65b66c2f61ed9">VA_FOURCC_Y416</a>&#160;&#160;&#160;0x36313459</td></tr>
 <tr class="separator:ga33f92599d153a9e36ff65b66c2f61ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga25a7cdd0745dbd007b3b65fb8b55777d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga25a7cdd0745dbd007b3b65fb8b55777d">VA_FOURCC_YV16</a>&#160;&#160;&#160;0x36315659</td></tr>
@@ -441,11 +474,17 @@ typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 Enumerations</h2></td></tr>
 <tr class="memitem:gaa4851f694a48c22af8877f5cfbb11bde"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa4851f694a48c22af8877f5cfbb11bde">VAProfile</a> { <a class="el" href="group__api__core.html#ggaa4851f694a48c22af8877f5cfbb11bdea7bf6725096e5927f03deb20205e1adbc">VAProfileNone</a> = -1
 , <a class="el" href="group__api__core.html#gga8ed0af9059a2d06bca1a54e774e679eaa86d498fbfde9d7a847864d6b6c67e2aa">va_deprecated_enum</a> = 5
+, <a class="el" href="group__api__core.html#ggaa4851f694a48c22af8877f5cfbb11bdea5edf00635e9f778c2e64ecc2e8b98b34">VAProfileProtected</a> = 35
  }</td></tr>
 <tr class="separator:gaa4851f694a48c22af8877f5cfbb11bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5f3bcbb940e51be2e84097463557321e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5f3bcbb940e51be2e84097463557321e">VAEntrypoint</a> { , <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead8ac61c5e6d11ed2a34a332655b774ab">VAEntrypointVideoProc</a> = 10, 
+<tr class="memitem:ga5f3bcbb940e51be2e84097463557321e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5f3bcbb940e51be2e84097463557321e">VAEntrypoint</a> { , <br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead8ac61c5e6d11ed2a34a332655b774ab">VAEntrypointVideoProc</a> = 10, 
 <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ea64b89833bc0c5106ad3edcfd62348e1b">VAEntrypointFEI</a> = 11, 
-<a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead9de31161ebcd23b348d1be0f7da37c0">VAEntrypointStats</a> = 12
+<a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead9de31161ebcd23b348d1be0f7da37c0">VAEntrypointStats</a> = 12, 
+<a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ea694df146749b5d6b70ec9908e7161ba4">VAEntrypointProtectedTEEComm</a> = 13, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321eafbd8339b9116b5edad5274a141c8dfd3">VAEntrypointProtectedContent</a> = 14
+<br />
  }</td></tr>
 <tr class="separator:ga5f3bcbb940e51be2e84097463557321e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2c3be94ce142fb92a4bf93e9b1b4fa01"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga2c3be94ce142fb92a4bf93e9b1b4fa01">VAConfigAttribType</a> { , <br />
@@ -489,7 +528,18 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01abf3c5a944baa8338d7f1d4d26188f0bf">VAConfigAttribPredictionDirection</a> = 39, 
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01adf7e59a2ba81583888eace99181e14c2">VAConfigAttribMultipleFrame</a> = 40, 
 <br />
-&#160;&#160;<b>VAConfigAttribTypeMax</b>
+&#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3337f5f60820fcbb4109d9ae2b1f5cb8">VAConfigAttribContextPriority</a> = 41, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ac780378cd29ea67801726e82fc07ef03">VAConfigAttribDecAV1Features</a> = 42, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ac047584673c8940601fe11205848a18e">VAConfigAttribTEEType</a> = 43, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a565218180e548af439b4bd921ad329e1">VAConfigAttribTEETypeClient</a> = 44, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01afb39c2e76fab3b7a3a84131497ec95f7">VAConfigAttribProtectedContentCipherAlgorithm</a> = 45, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ad408edc12ad2edeabc02be43a3710145">VAConfigAttribProtectedContentCipherBlockSize</a> = 46, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a0d94a6ba968b758d7b53c05e1070cc7a">VAConfigAttribProtectedContentCipherMode</a> = 47, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d3947eb7d70bb6ade7001eca036f863">VAConfigAttribProtectedContentCipherSampleType</a> = 48, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">VAConfigAttribProtectedContentUsage</a> = 49, 
+<b>VAConfigAttribTypeMax</b>
 <br />
  }</td></tr>
 <tr class="separator:ga2c3be94ce142fb92a4bf93e9b1b4fa01"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -529,7 +579,11 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbad7face34fb46abf8fcddb9812628f9a7">VAEncFEICURecordBufferType</a> = 55, 
 <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbae1261056098eebd8fddb896bf7edbb2e">VADecodeStreamoutBufferType</a> = 56, 
-<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba2dbecadf914e502be2d9bcda52b8ed67">VASubsetsParameterBufferType</a> = 57
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba2dbecadf914e502be2d9bcda52b8ed67">VASubsetsParameterBufferType</a> = 57, 
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba376b3a8e2e04babb89984fc9779e616e">VAContextParameterUpdateBufferType</a> = 58, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba7a2ea7b1732bc899a151543e7bd79ddd">VAProtectedSessionExecuteBufferType</a> = 59, 
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">VAEncryptionParameterBufferType</a> = 60
 <br />
  }</td></tr>
 <tr class="separator:ga24da9776c5d3a5ce29cb592cf22c00db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -659,10 +713,16 @@ Functions</h2></td></tr>
 <tr class="separator:gadf2b7bb47c9a69b1a1a5554a0b9d049a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa2b9b82de6eb2985574a6eca35445b3f"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa2b9b82de6eb2985574a6eca35445b3f">vaSyncSurface</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, VASurfaceID render_target)</td></tr>
 <tr class="separator:gaa2b9b82de6eb2985574a6eca35445b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8fe118269188636d4f61bc9cf73ffaef"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga8fe118269188636d4f61bc9cf73ffaef">vaSyncSurface2</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, VASurfaceID surface, uint64_t timeout_ns)</td></tr>
+<tr class="memdesc:ga8fe118269188636d4f61bc9cf73ffaef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronizes pending operations associated with the supplied surface.  <a href="#ga8fe118269188636d4f61bc9cf73ffaef">More...</a><br /></td></tr>
+<tr class="separator:ga8fe118269188636d4f61bc9cf73ffaef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59e5c937c8554f1bab043f80427c2fa8"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga59e5c937c8554f1bab043f80427c2fa8">vaQuerySurfaceStatus</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, VASurfaceID render_target, VASurfaceStatus *status)</td></tr>
 <tr class="separator:ga59e5c937c8554f1bab043f80427c2fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3f8de8dbd54db159368a1e768d065342"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3f8de8dbd54db159368a1e768d065342">vaQuerySurfaceError</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, VASurfaceID surface, VAStatus error_status, void **error_info)</td></tr>
 <tr class="separator:ga3f8de8dbd54db159368a1e768d065342"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaca1b16e84bf974ce45f708f36b32bc3a"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaca1b16e84bf974ce45f708f36b32bc3a">vaSyncBuffer</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, <a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a> buf_id, uint64_t timeout_ns)</td></tr>
+<tr class="memdesc:gaca1b16e84bf974ce45f708f36b32bc3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Synchronizes pending operations associated with the supplied buffer.  <a href="#gaca1b16e84bf974ce45f708f36b32bc3a">More...</a><br /></td></tr>
+<tr class="separator:gaca1b16e84bf974ce45f708f36b32bc3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad2c42a695feaf1a0913604368d344155"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gad2c42a695feaf1a0913604368d344155">vaMaxNumImageFormats</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy)</td></tr>
 <tr class="separator:gad2c42a695feaf1a0913604368d344155"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacaafd538e7a9c79fdd9753c4243be3b8"><td class="memItemLeft" align="right" valign="top">VAStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gacaafd538e7a9c79fdd9753c4243be3b8">vaQueryImageFormats</a> (<a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a> dpy, VAImageFormat *format_list, int *num_formats)</td></tr>
@@ -745,6 +805,10 @@ Attribute values for VAConfigAttribRateControl</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga4256f3e1e60811f59e5ef6c2cd4927f1">VA_RC_AVBR</a>&#160;&#160;&#160;0x00000800</td></tr>
 <tr class="memdesc:ga4256f3e1e60811f59e5ef6c2cd4927f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average VBR Average variable bitrate control algorithm focuses on overall encoding quality while meeting the specified target bitrate, within the accuracy range, after a convergence period. bits_per_second in <a class="el" href="structVAEncMiscParameterRateControl.html" title="Rate control parameters. ">VAEncMiscParameterRateControl</a> is target bitrate for AVBR. Convergence is specified in the unit of frame. window_size in <a class="el" href="structVAEncMiscParameterRateControl.html" title="Rate control parameters. ">VAEncMiscParameterRateControl</a> is equal to convergence for AVBR. Accuracy is in the range of [1,100], 1 means one percent, and so on. target_percentage in <a class="el" href="structVAEncMiscParameterRateControl.html" title="Rate control parameters. ">VAEncMiscParameterRateControl</a> is equal to accuracy for AVBR. <br /></td></tr>
 <tr class="separator:ga4256f3e1e60811f59e5ef6c2cd4927f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf7c031977fdb02515fc8d6752d0e9aa4"><td class="memItemLeft" align="right" valign="top"><a id="gaf7c031977fdb02515fc8d6752d0e9aa4"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaf7c031977fdb02515fc8d6752d0e9aa4">VA_RC_TCBRC</a>&#160;&#160;&#160;0x00001000</td></tr>
+<tr class="memdesc:gaf7c031977fdb02515fc8d6752d0e9aa4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transport Controlled BRC Specific bitrate control for real time streaming. TCBRC can instantly react to channel change to remove or significantly reduce the delay. Application (transport) provides channel feedback to driver through TargetFrameSize. When channel condition is very good (almost no constraint on instant frame size), the app should set target frame size as zero. Otherwise, channel capacity divided by fps should be used. <br /></td></tr>
+<tr class="separator:gaf7c031977fdb02515fc8d6752d0e9aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Attribute values for VAConfigAttribDecSliceMode</h2></td></tr>
@@ -901,6 +965,65 @@ Attribute values for VAConfigAttribEncIntraRefresh</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gac1a0d424cc0bc557d07b61e40ec40bb7">VA_ENC_INTRA_REFRESH_MULTI_REF</a>&#160;&#160;&#160;0x00040000</td></tr>
 <tr class="memdesc:gac1a0d424cc0bc557d07b61e40ec40bb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver supports intra refresh of multiple reference encoder. <br /></td></tr>
 <tr class="separator:gac1a0d424cc0bc557d07b61e40ec40bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Attribute values for VAConfigAttribProtectedContentCipherAlgorithm</h2></td></tr>
+<tr class="memitem:gab57437d522d8e236ebbe3c2d4e35f2c3"><td class="memItemLeft" align="right" valign="top"><a id="gab57437d522d8e236ebbe3c2d4e35f2c3"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gab57437d522d8e236ebbe3c2d4e35f2c3">VA_PC_CIPHER_AES</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:gab57437d522d8e236ebbe3c2d4e35f2c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES cipher. <br /></td></tr>
+<tr class="separator:gab57437d522d8e236ebbe3c2d4e35f2c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Attribute values for VAConfigAttribProtectedContentCipherBlockSize</h2></td></tr>
+<tr class="memitem:ga6b105bf49d4c7bfec05f7299e4e6cba0"><td class="memItemLeft" align="right" valign="top"><a id="ga6b105bf49d4c7bfec05f7299e4e6cba0"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga6b105bf49d4c7bfec05f7299e4e6cba0">VA_PC_BLOCK_SIZE_128</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:ga6b105bf49d4c7bfec05f7299e4e6cba0"><td class="mdescLeft">&#160;</td><td class="mdescRight">128 bits block size <br /></td></tr>
+<tr class="separator:ga6b105bf49d4c7bfec05f7299e4e6cba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaebb14681fb3b38c1fc65e27e0432ee23"><td class="memItemLeft" align="right" valign="top"><a id="gaebb14681fb3b38c1fc65e27e0432ee23"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaebb14681fb3b38c1fc65e27e0432ee23">VA_PC_BLOCK_SIZE_192</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memdesc:gaebb14681fb3b38c1fc65e27e0432ee23"><td class="mdescLeft">&#160;</td><td class="mdescRight">192 bits block size <br /></td></tr>
+<tr class="separator:gaebb14681fb3b38c1fc65e27e0432ee23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9def9c533152ef02560aacbfa9ae5978"><td class="memItemLeft" align="right" valign="top"><a id="ga9def9c533152ef02560aacbfa9ae5978"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga9def9c533152ef02560aacbfa9ae5978">VA_PC_BLOCK_SIZE_256</a>&#160;&#160;&#160;0x00000004</td></tr>
+<tr class="memdesc:ga9def9c533152ef02560aacbfa9ae5978"><td class="mdescLeft">&#160;</td><td class="mdescRight">256 bits block size <br /></td></tr>
+<tr class="separator:ga9def9c533152ef02560aacbfa9ae5978"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Attribute values for VAConfigAttribProtectedContentCipherMode</h2></td></tr>
+<tr class="memitem:gaa39452d87348316482feaf965498e4a8"><td class="memItemLeft" align="right" valign="top"><a id="gaa39452d87348316482feaf965498e4a8"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa39452d87348316482feaf965498e4a8">VA_PC_CIPHER_MODE_ECB</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:gaa39452d87348316482feaf965498e4a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES ECB. <br /></td></tr>
+<tr class="separator:gaa39452d87348316482feaf965498e4a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga38fe461d9f931d1b5dd407824bf0de6d"><td class="memItemLeft" align="right" valign="top"><a id="ga38fe461d9f931d1b5dd407824bf0de6d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga38fe461d9f931d1b5dd407824bf0de6d">VA_PC_CIPHER_MODE_CBC</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memdesc:ga38fe461d9f931d1b5dd407824bf0de6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES CBC. <br /></td></tr>
+<tr class="separator:ga38fe461d9f931d1b5dd407824bf0de6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa677db83d1a0d66293f750604db321a8"><td class="memItemLeft" align="right" valign="top"><a id="gaa677db83d1a0d66293f750604db321a8"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaa677db83d1a0d66293f750604db321a8">VA_PC_CIPHER_MODE_CTR</a>&#160;&#160;&#160;0x00000004</td></tr>
+<tr class="memdesc:gaa677db83d1a0d66293f750604db321a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">AES CTR. <br /></td></tr>
+<tr class="separator:gaa677db83d1a0d66293f750604db321a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Attribute values for VAConfigAttribProtectedContentCipherSampleType</h2></td></tr>
+<tr class="memitem:gabe0a8089679372f94ceb8b3bfeadc89a"><td class="memItemLeft" align="right" valign="top"><a id="gabe0a8089679372f94ceb8b3bfeadc89a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gabe0a8089679372f94ceb8b3bfeadc89a">VA_PC_SAMPLE_TYPE_FULLSAMPLE</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:gabe0a8089679372f94ceb8b3bfeadc89a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full sample. <br /></td></tr>
+<tr class="separator:gabe0a8089679372f94ceb8b3bfeadc89a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5e868b40098071600d60ce58e33aa245"><td class="memItemLeft" align="right" valign="top"><a id="ga5e868b40098071600d60ce58e33aa245"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5e868b40098071600d60ce58e33aa245">VA_PC_SAMPLE_TYPE_SUBSAMPLE</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memdesc:ga5e868b40098071600d60ce58e33aa245"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sub sample. <br /></td></tr>
+<tr class="separator:ga5e868b40098071600d60ce58e33aa245"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Attribute values for VAConfigAttribProtectedContentUsage</h2></td></tr>
+<tr class="memitem:gafb12b27dbc2e6ed384f9c5a3dde37fbf"><td class="memItemLeft" align="right" valign="top"><a id="gafb12b27dbc2e6ed384f9c5a3dde37fbf"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gafb12b27dbc2e6ed384f9c5a3dde37fbf">VA_PC_USAGE_DEFAULT</a>&#160;&#160;&#160;0x00000000</td></tr>
+<tr class="memdesc:gafb12b27dbc2e6ed384f9c5a3dde37fbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default usage. <br /></td></tr>
+<tr class="separator:gafb12b27dbc2e6ed384f9c5a3dde37fbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga179b50cf144c068643dd558ef0de34cd"><td class="memItemLeft" align="right" valign="top"><a id="ga179b50cf144c068643dd558ef0de34cd"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga179b50cf144c068643dd558ef0de34cd">VA_PC_USAGE_WIDEVINE</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:ga179b50cf144c068643dd558ef0de34cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Widevine. <br /></td></tr>
+<tr class="separator:ga179b50cf144c068643dd558ef0de34cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Attribute values for VAConfigAttribProcessingRate.</h2></td></tr>
@@ -1197,6 +1320,68 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 </div>
 </div>
+<a id="ga6836ddbf3178e7cbf49599a820fe17a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6836ddbf3178e7cbf49599a820fe17a9">&#9670;&nbsp;</a></span>VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR&#160;&#160;&#160;0x00000001  /* AES CTR fullsample */</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>These ENCRYPTION_TYPEs are used for the attribute values for <code>VAConfigAttribEncryption</code> and for encryption_type in <a class="el" href="structVAEncryptionParameters.html" title="Encryption parameters buffer for VAEncryptionParameterBufferType. ">VAEncryptionParameters</a>.</p>
+<p>When used for <code>VAConfigAttribEncryption</code>, it be used via vaQueryConfigEntrypoints to check which type are supported for specific profile or not.</p>
+<p>When used for encryption_type in <a class="el" href="structVAEncryptionParameters.html" title="Encryption parameters buffer for VAEncryptionParameterBufferType. ">VAEncryptionParameters</a>, it tells driver the parameters in <a class="el" href="structVAEncryptionParameters.html" title="Encryption parameters buffer for VAEncryptionParameterBufferType. ">VAEncryptionParameters</a> are used for which encryption type. </p>
+
+</div>
+</div>
+<a id="gafcb3bbf17dd0467c6919d6dacea2cb58"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafcb3bbf17dd0467c6919d6dacea2cb58">&#9670;&nbsp;</a></span>VA_EXEC_ASYNC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_EXEC_ASYNC&#160;&#160;&#160;0x1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>asynchronization,application should call additonal sync operation to access output </p>
+
+</div>
+</div>
+<a id="ga156a739d58e21452b0ffafa4c0a40333"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga156a739d58e21452b0ffafa4c0a40333">&#9670;&nbsp;</a></span>VA_EXEC_MODE_DEFAULT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_EXEC_MODE_DEFAULT&#160;&#160;&#160;0x0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>operation mode </p>
+
+</div>
+</div>
+<a id="ga9f1d4f1f14aaf5dc289cf4d11c746c59"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9f1d4f1f14aaf5dc289cf4d11c746c59">&#9670;&nbsp;</a></span>VA_EXEC_SYNC</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_EXEC_SYNC&#160;&#160;&#160;0x0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>operation options synchronization, block call, output should be ready after execution function return </p>
+
+</div>
+</div>
 <a id="gae3ff9dcf480ccbe181f847d89216059c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gae3ff9dcf480ccbe181f847d89216059c">&#9670;&nbsp;</a></span>VA_EXPORT_SURFACE_COMPOSED_LAYERS</h2>
 
@@ -1274,6 +1459,21 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 </div>
 </div>
+<a id="ga76b44bf3d5b003e149f84a4953bf430e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga76b44bf3d5b003e149f84a4953bf430e">&#9670;&nbsp;</a></span>VA_FILTER_INTERPOLATION_DEFAULT</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FILTER_INTERPOLATION_DEFAULT&#160;&#160;&#160;0x00000000</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Interpolation method for scaling </p>
+
+</div>
+</div>
 <a id="gaee1ba68046de52cfbd207d3cc8214201"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaee1ba68046de52cfbd207d3cc8214201">&#9670;&nbsp;</a></span>VA_FILTER_SCALING_DEFAULT</h2>
 
@@ -1326,7 +1526,16 @@ vaExportSurfaceHandle() flags</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">((<span class="keywordtype">unsigned</span> long)(<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>) (ch0) | ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch1) &lt;&lt; 8) | \</div><div class="line">    ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch2) &lt;&lt; 16) | ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch3) &lt;&lt; 24 ))</div></div><!-- fragment --><p>Images and Subpictures VAImage is used to either get the surface data to client memory, or to copy image data in client memory to a surface. Both images, subpictures and surfaces follow the same 2D coordinate system where origin is at the upper left corner with positive X to the right and positive Y down </p>
+<b>Value:</b><div class="fragment"><div class="line">((<span class="keywordtype">unsigned</span> long)(<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span>) (ch0) | ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch1) &lt;&lt; 8) | \</div><div class="line">    ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch2) &lt;&lt; 16) | ((<span class="keywordtype">unsigned</span> <span class="keywordtype">long</span>)(<span class="keywordtype">unsigned</span> char) (ch3) &lt;&lt; 24 ))</div></div><!-- fragment --><p>Notes about synchronization interfaces: vaSyncSurface:</p><ol type="1">
+<li>Allows to synchronize output surface (i.e. from decoding or VP)</li>
+<li>Allows to synchronize all bitstreams being encoded from the given input surface (1-&gt;N pipelines).</li>
+</ol>
+<p>vaSyncSurface2:</p><ol type="1">
+<li>The same as vaSyncSurface but allows to specify a timeout</li>
+</ol>
+<p>vaSyncBuffer:</p><ol type="1">
+<li>Allows to synchronize output buffer (e.g. bitstream from encoding). Comparing to vaSyncSurface this function synchronizes given bitstream only. Images and Subpictures VAImage is used to either get the surface data to client memory, or to copy image data in client memory to a surface. Both images, subpictures and surfaces follow the same 2D coordinate system where origin is at the upper left corner with positive X to the right and positive Y down </li>
+</ol>
 
 </div>
 </div>
@@ -1964,6 +2173,22 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 </div>
 </div>
+<a id="gaa75ff7c6ed66afae2b0dff1b891ce0db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa75ff7c6ed66afae2b0dff1b891ce0db">&#9670;&nbsp;</a></span>VA_FOURCC_Y212</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FOURCC_Y212&#160;&#160;&#160;0x32313259</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Y212: packed 12-bit YUV 4:2:2.</p>
+<p>Eight bytes represent a pair of pixels. Each sample is a two-byte little-endian value. The samples are in the order Y, U, Y, V. </p>
+
+</div>
+</div>
 <a id="ga414b3d49d1e9b19699bf29d72b2afeb5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga414b3d49d1e9b19699bf29d72b2afeb5">&#9670;&nbsp;</a></span>VA_FOURCC_Y216</h2>
 
@@ -1993,6 +2218,22 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 </div><div class="memdoc">
 <p>Y410: packed 10-bit YUVA 4:4:4.</p>
 <p>Each pixel is a four-byte little-endian value. A, V, Y, U are found in bits 31:30, 29:20, 19:10, 9:0 respectively. </p>
+
+</div>
+</div>
+<a id="gae494c1e515d472b0f62b47abfde3b8e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae494c1e515d472b0f62b47abfde3b8e2">&#9670;&nbsp;</a></span>VA_FOURCC_Y412</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FOURCC_Y412&#160;&#160;&#160;0x32313459</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Y412 packed 12-bit YUVA 4:4:4.</p>
+<p>Each pixel is a set of four samples, each of which is a two-byte little-endian value. The samples are in the order A, V, Y, U. </p>
 
 </div>
 </div>
@@ -2480,6 +2721,15 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dba2dbecadf914e502be2d9bcda52b8ed67"></a>VASubsetsParameterBufferType&#160;</td><td class="fielddoc"><p>HEVC Decoding Subset Parameter buffer type. </p>
 <p>The subsets parameter buffer is concatenation with one or multiple subset entry point offsets. All the offset values are layed out one by one according to slice order with first slice segment first, second slice segment second, etc... The entry number is indicated by parameter num_entry_point_offsets. And the first entry position of the entry point offsets for any slice segment is indicated by parameter entry_offset_to_subset_array in <a class="el" href="structVAPictureParameterBufferHEVC.html" title="HEVC Decoding Picture Parameter Buffer Structure. ">VAPictureParameterBufferHEVC</a> data structure. </p>
 </td></tr>
+<tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dba376b3a8e2e04babb89984fc9779e616e"></a>VAContextParameterUpdateBufferType&#160;</td><td class="fielddoc"><p>adjust context parameters dynamically </p>
+<p>this parameter is used to update context parameters, detail parameter is in <code><a class="el" href="structVAContextParameterUpdateBuffer.html" title="update the context parameter this structure is used to update context parameters, such as priority of...">VAContextParameterUpdateBuffer</a></code> </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dba7a2ea7b1732bc899a151543e7bd79ddd"></a>VAProtectedSessionExecuteBufferType&#160;</td><td class="fielddoc"><p>Protected session execution buffer type. </p>
+<p>It's for TEE execution usage (<a class="el" href="group__api__prot.html#ga3aa87ed9c82cf09a4c90c6285af6357b" title="Execute provides a general mechanism for TEE client tasks execution. ">vaProtectedSessionExecute()</a>). The buffer structure is in <code><a class="el" href="structVAProtectedSessionExecuteBuffer.html" title="Buffer for vaProtectedSessionExecute() ">VAProtectedSessionExecuteBuffer</a></code> </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5"></a>VAEncryptionParameterBufferType&#160;</td><td class="fielddoc"><p>Encryption parameters buffer for protected content session. </p>
+<p>Refer to <code><a class="el" href="structVAEncryptionParameters.html" title="Encryption parameters buffer for VAEncryptionParameterBufferType. ">VAEncryptionParameters</a></code> </p>
+</td></tr>
 </table>
 
 </div>
@@ -2596,6 +2846,30 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01abf3c5a944baa8338d7f1d4d26188f0bf"></a>VAConfigAttribPredictionDirection&#160;</td><td class="fielddoc"><p>inter frame prediction directrion attribute. Read-only. this attribute conveys the prediction direction (backward or forword) for specific config the value could be VA_PREDICTION_DIRECTION_XXXX. it can be combined with VAConfigAttribEncMaxRefFrames to describe reference list , and the prediction direction. if this attrib is not present,both direction should be supported, no restriction. for example: normal HEVC encoding , maximum reference frame number in reflist 0 and reflist 1 is deduced by VAConfigAttribEncMaxRefFrames. so there are typical P frame, B frame, if VAConfigAttribPredictionDirection is also present. it will stipulate prediction direction in both reference list. if only one prediction direction present(such as PREVIOUS),all reference frame should be previous frame (PoC &lt; current). </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01adf7e59a2ba81583888eace99181e14c2"></a>VAConfigAttribMultipleFrame&#160;</td><td class="fielddoc"><p>combined submission of multiple frames from different streams, it is optimization for different HW implementation, multiple frames encode/decode can improve HW concurrency </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a3337f5f60820fcbb4109d9ae2b1f5cb8"></a>VAConfigAttribContextPriority&#160;</td><td class="fielddoc"><p>priority setting for the context. Read-Write attribute value is <code><a class="el" href="unionVAConfigAttribValContextPriority.html">VAConfigAttribValContextPriority</a></code> this setting also could be update by <code><a class="el" href="structVAContextParameterUpdateBuffer.html" title="update the context parameter this structure is used to update context parameters, such as priority of...">VAContextParameterUpdateBuffer</a></code> </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01ac780378cd29ea67801726e82fc07ef03"></a>VAConfigAttribDecAV1Features&#160;</td><td class="fielddoc"><p>AV1 decoding features. Read-only. </p>
+<p>This attribute describes the supported features of an AV1 decoder configuration. The value returned uses the VAConfigAttribValDecAV1Features type. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01ac047584673c8940601fe11205848a18e"></a>VAConfigAttribTEEType&#160;</td><td class="fielddoc"><p>TEE could be any HW secure device. Read-only. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a565218180e548af439b4bd921ad329e1"></a>VAConfigAttribTEETypeClient&#160;</td><td class="fielddoc"><p>TEE type client is a specific module supporting specific functions in TEE. Read-only. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01afb39c2e76fab3b7a3a84131497ec95f7"></a>VAConfigAttribProtectedContentCipherAlgorithm&#160;</td><td class="fielddoc"><p>Cipher algorithm of the protected content session. </p>
+<p>This attribute specifies the cipher algorithm of the protected content session. It could be <code>VA_PC_CIPHER_AES</code>, etc.... </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01ad408edc12ad2edeabc02be43a3710145"></a>VAConfigAttribProtectedContentCipherBlockSize&#160;</td><td class="fielddoc"><p>Cipher block size of the protected content session. </p>
+<p>This attribute specifies the block size of the protected content session. It could be <code>VA_PC_BLOCK_SIZE_128</code>, <code>VA_PC_BLOCK_SIZE_192</code>, or <code>VA_PC_BLOCK_SIZE_256</code>, etc.... </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a0d94a6ba968b758d7b53c05e1070cc7a"></a>VAConfigAttribProtectedContentCipherMode&#160;</td><td class="fielddoc"><p>Cipher mode of the protected content session. </p>
+<p>This attribute specifies the cipher mode of the protected content session. It could be <code>VA_PC_CIPHER_MODE_ECB</code>, <code>VA_PC_CIPHER_MODE_CBC</code>, <code>VA_PC_CIPHER_MODE_CTR</code>, etc... </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d3947eb7d70bb6ade7001eca036f863"></a>VAConfigAttribProtectedContentCipherSampleType&#160;</td><td class="fielddoc"><p>Decryption sample type of the protected content session. </p>
+<p>This attribute specifies the decryption sample type of the protected content session. It could be <code>VA_PC_SAMPLE_TYPE_FULLSAMPLE</code> or <code>VA_PC_SAMPLE_TYPE_SUBSAMPLE</code>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9"></a>VAConfigAttribProtectedContentUsage&#160;</td><td class="fielddoc"><p>Special usage attribute of the protected session. </p>
+<p>The attribute specifies the flow for the protected session could be used. For example, it could be <code>VA_PC_USAGE_DEFAULT</code>, <code>VA_PC_USAGE_WIDEVINE</code>, etc.... </p>
 </td></tr>
 </table>
 
@@ -2715,6 +2989,12 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <p>A pre-processing function for getting some statistics and motion vectors is added, and some extra controls for Encode pipeline are provided. The application can optionally call the statistics function to get motion vectors and statistics like variances, distortions before calling Encode function via this entry point.</p>
 <p>Checking whether Statistics is supported can be performed with <a class="el" href="group__api__core.html#ga7c6ec979697dafc172123c5d3ad80d8e">vaQueryConfigEntrypoints()</a>. If Statistics entry point is supported, then the list of returned entry-points will include <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead9de31161ebcd23b348d1be0f7da37c0" title="VAEntrypointStats. ">VAEntrypointStats</a>. Supported pixel format, maximum resolution and statistics specific attributes can be obtained via normal attribute query. One input buffer (VAStatsStatisticsParameterBufferType) and one or two output buffers (VAStatsStatisticsBufferType, VAStatsStatisticsBottomFieldBufferType (for interlace only) and VAStatsMVBufferType) are needed for this entry point. </p>
 </td></tr>
+<tr><td class="fieldname"><a id="gga5f3bcbb940e51be2e84097463557321ea694df146749b5d6b70ec9908e7161ba4"></a>VAEntrypointProtectedTEEComm&#160;</td><td class="fielddoc"><p>VAEntrypointProtectedTEEComm. </p>
+<p>A function for communicating with TEE (Trusted Execution Environment). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga5f3bcbb940e51be2e84097463557321eafbd8339b9116b5edad5274a141c8dfd3"></a>VAEntrypointProtectedContent&#160;</td><td class="fielddoc"><p>VAEntrypointProtectedContent. </p>
+<p>A function for protected content to decrypt encrypted content. </p>
+</td></tr>
 </table>
 
 </div>
@@ -2777,6 +3057,8 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gga8ed0af9059a2d06bca1a54e774e679eaa86d498fbfde9d7a847864d6b6c67e2aa"></a>va_deprecated_enum&#160;</td><td class="fielddoc"><p>Misc packed header. See codec-specific definitions. </p>
 <dl class="deprecated"><dt><b><a class="el" href="deprecated.html#_deprecated000006">Deprecated:</a></b></dt><dd>This is a deprecated packed header type. All applications can use <code>VAEncPackedHeaderRawData</code> to insert a codec-specific packed header </dd></dl>
+</td></tr>
+<tr><td class="fieldname"><a id="ggaa4851f694a48c22af8877f5cfbb11bdea5edf00635e9f778c2e64ecc2e8b98b34"></a>VAProfileProtected&#160;</td><td class="fielddoc"><p>Profile ID used for protected video playback. </p>
 </td></tr>
 </table>
 
@@ -5067,6 +5349,57 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 </div>
 </div>
+<a id="gaca1b16e84bf974ce45f708f36b32bc3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaca1b16e84bf974ce45f708f36b32bc3a">&#9670;&nbsp;</a></span>vaSyncBuffer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">VAStatus vaSyncBuffer </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a>&#160;</td>
+          <td class="paramname"><em>dpy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td>
+          <td class="paramname"><em>buf_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>timeout_ns</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Synchronizes pending operations associated with the supplied buffer. </p>
+<p>This function blocks during specified timeout (in nanoseconds) until all pending operations on the supplied buffer have been completed. If timeout is zero, the function returns immediately.</p>
+<p>Possible errors:</p><ul>
+<li>VA_STATUS_ERROR_UNIMPLEMENTED: the VA driver implementation does not support this interface</li>
+<li>VA_STATUS_ERROR_INVALID_DISPLAY: an invalid display was supplied</li>
+<li>VA_STATUS_ERROR_INVALID_BUFFER: an invalid buffer was supplied</li>
+<li>VA_STATUS_ERROR_TIMEDOUT: synchronization is still in progress, client should call the function again to complete synchronization</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dpy</td><td>the VA display </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">buf_id</td><td>the buffer for which synchronization is performed </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timeout_ns</td><td>the timeout in nanoseconds </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gaa2b9b82de6eb2985574a6eca35445b3f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaa2b9b82de6eb2985574a6eca35445b3f">&#9670;&nbsp;</a></span>vaSyncSurface()</h2>
 
@@ -5093,6 +5426,57 @@ vaExportSurfaceHandle() flags</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>This function blocks until all pending operations on the render target have been completed. Upon return it is safe to use the render target for a different picture. </p>
+
+</div>
+</div>
+<a id="ga8fe118269188636d4f61bc9cf73ffaef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8fe118269188636d4f61bc9cf73ffaef">&#9670;&nbsp;</a></span>vaSyncSurface2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">VAStatus vaSyncSurface2 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__api__core.html#gad534cae750fddc9ad30d0dc267deffa3">VADisplay</a>&#160;</td>
+          <td class="paramname"><em>dpy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VASurfaceID&#160;</td>
+          <td class="paramname"><em>surface</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>timeout_ns</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Synchronizes pending operations associated with the supplied surface. </p>
+<p>This function blocks during specified timeout (in nanoseconds) until all pending operations on the render target have been completed. If timeout is zero, the function returns immediately.</p>
+<p>Possible errors:</p><ul>
+<li>VA_STATUS_ERROR_UNIMPLEMENTED: the VA driver implementation does not support this interface</li>
+<li>VA_STATUS_ERROR_INVALID_DISPLAY: an invalid display was supplied</li>
+<li>VA_STATUS_ERROR_INVALID_SURFACE: an invalid surface was supplied</li>
+<li>VA_STATUS_ERROR_TIMEDOUT: synchronization is still in progress, client should call the function again to complete synchronization</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dpy</td><td>the VA display </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">surface</td><td>the surface for which synchronization is performed </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timeout_ns</td><td>the timeout in nanoseconds </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

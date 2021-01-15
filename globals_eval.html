@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -67,8 +67,14 @@ $(function() {
 , <a class="el" href="group__api__enc__h264.html#gga9cf3cb8a709849fd74f1993382dbc4a0a86d498fbfde9d7a847864d6b6c67e2aa">va_enc_h264.h</a>
 , <a class="el" href="group__api__enc__hevc.html#ggaa9508bfe0814259f5d2f16cae912e63fa86d498fbfde9d7a847864d6b6c67e2aa">va_enc_hevc.h</a>
 </li>
+<li>VAConfigAttribContextPriority
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3337f5f60820fcbb4109d9ae2b1f5cb8">va.h</a>
+</li>
 <li>VAConfigAttribCustomRoundingControl
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a601dc0ce6a43bfb71e40f34e44c10c04">va.h</a>
+</li>
+<li>VAConfigAttribDecAV1Features
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ac780378cd29ea67801726e82fc07ef03">va.h</a>
 </li>
 <li>VAConfigAttribDecJPEG
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a5b746c21e32b666d1ecb80a7cf181bcc">va.h</a>
@@ -157,11 +163,35 @@ $(function() {
 <li>VAConfigAttribProcessingRate
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a06a0d8fe970dd8314e385d5746f7adf6">va.h</a>
 </li>
+<li>VAConfigAttribProtectedContentCipherAlgorithm
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01afb39c2e76fab3b7a3a84131497ec95f7">va.h</a>
+</li>
+<li>VAConfigAttribProtectedContentCipherBlockSize
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ad408edc12ad2edeabc02be43a3710145">va.h</a>
+</li>
+<li>VAConfigAttribProtectedContentCipherMode
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a0d94a6ba968b758d7b53c05e1070cc7a">va.h</a>
+</li>
+<li>VAConfigAttribProtectedContentCipherSampleType
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d3947eb7d70bb6ade7001eca036f863">va.h</a>
+</li>
+<li>VAConfigAttribProtectedContentUsage
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">va.h</a>
+</li>
 <li>VAConfigAttribQPBlockSize
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a9f7962b0a2179de360ea4508e82bf705">va.h</a>
 </li>
 <li>VAConfigAttribStats
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a93703f2e1193333663732445e2f2e9b8">va.h</a>
+</li>
+<li>VAConfigAttribTEEType
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ac047584673c8940601fe11205848a18e">va.h</a>
+</li>
+<li>VAConfigAttribTEETypeClient
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a565218180e548af439b4bd921ad329e1">va.h</a>
+</li>
+<li>VAContextParameterUpdateBufferType
+: <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba376b3a8e2e04babb89984fc9779e616e">va.h</a>
 </li>
 <li>VADecodeStreamoutBufferType
 : <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbae1261056098eebd8fddb896bf7edbb2e">va.h</a>
@@ -268,8 +298,17 @@ $(function() {
 <li>VAEncQPBufferType
 : <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba54c423290b67035d11937a4b85ab9b95">va.h</a>
 </li>
+<li>VAEncryptionParameterBufferType
+: <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">va.h</a>
+</li>
 <li>VAEntrypointFEI
 : <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ea64b89833bc0c5106ad3edcfd62348e1b">va.h</a>
+</li>
+<li>VAEntrypointProtectedContent
+: <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321eafbd8339b9116b5edad5274a141c8dfd3">va.h</a>
+</li>
+<li>VAEntrypointProtectedTEEComm
+: <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ea694df146749b5d6b70ec9908e7161ba4">va.h</a>
 </li>
 <li>VAEntrypointStats
 : <a class="el" href="group__api__core.html#gga5f3bcbb940e51be2e84097463557321ead9de31161ebcd23b348d1be0f7da37c0">va.h</a>
@@ -441,6 +480,12 @@ $(function() {
 </li>
 <li>VAProfileNone
 : <a class="el" href="group__api__core.html#ggaa4851f694a48c22af8877f5cfbb11bdea7bf6725096e5927f03deb20205e1adbc">va.h</a>
+</li>
+<li>VAProfileProtected
+: <a class="el" href="group__api__core.html#ggaa4851f694a48c22af8877f5cfbb11bdea5edf00635e9f778c2e64ecc2e8b98b34">va.h</a>
+</li>
+<li>VAProtectedSessionExecuteBufferType
+: <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba7a2ea7b1732bc899a151543e7bd79ddd">va.h</a>
 </li>
 <li>VAStatsStatisticsBottomFieldBufferType
 : <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbad64569bae4d2eba946cbf6f683fa00be">va.h</a>

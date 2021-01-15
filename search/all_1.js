@@ -25,6 +25,8 @@ var searchData=
   ['blend_5fflags',['blend_flags',['../structVAProcPipelineCaps.html#a02011bdeb380d359d36ecede6cdfe2ac',1,'VAProcPipelineCaps']]],
   ['blend_5fstate',['blend_state',['../structVAProcPipelineParameterBuffer.html#ae58f2a373e1638afc1673a55de28a04c',1,'VAProcPipelineParameterBuffer']]],
   ['block_5fsize',['block_size',['../group__api__fei__hevc.html#ga5cb4c16a0c4817913d495e0f004884c8',1,'VAEncFEIMVPredictorHEVC']]],
+  ['blocks_5fstripe_5fclear',['blocks_stripe_clear',['../structVAEncryptionParameters.html#a74e13c367e537dc2d1e9bac11bf7f389',1,'VAEncryptionParameters']]],
+  ['blocks_5fstripe_5fencrypted',['blocks_stripe_encrypted',['../structVAEncryptionParameters.html#ac5618d5fa95b4a44449d238602d1b885',1,'VAEncryptionParameters']]],
   ['broken_5flink',['broken_link',['../structVAEncSequenceParameterBufferMPEG2.html#a6bd1da57da43e6174b4beb4f9ee03c86',1,'VAEncSequenceParameterBufferMPEG2']]],
   ['buf',['buf',['../structVACodedBufferSegment.html#af6c0e6905111189fc4bf30c96264cf6d',1,'VACodedBufferSegment']]],
   ['buffer_5fsize',['buffer_size',['../structVAEncMiscParameterHRD.html#a5117536ea42f1b3d69fa0a36971f0c91',1,'VAEncMiscParameterHRD']]],

@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.8.0</span>
+   &#160;<span id="projectnumber">2.11.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -130,10 +130,18 @@ int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 int8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#a33d8ffc4337d88b9d07bb5dcaad6e156">slice_tc_offset_div2</a></td></tr>
 <tr class="memdesc:a33d8ffc4337d88b9d07bb5dcaad6e156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same as the HEVC bitstream syntax element. <br /></td></tr>
 <tr class="separator:a33d8ffc4337d88b9d07bb5dcaad6e156"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae123b168eaa0fafa7192f022e001d07b"><td class="memItemLeft" align="right" valign="top"><a id="ae123b168eaa0fafa7192f022e001d07b"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#ae123b168eaa0fafa7192f022e001d07b">va_reserved</a> [VA_PADDING_MEDIUM]</td></tr>
-<tr class="memdesc:ae123b168eaa0fafa7192f022e001d07b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved bytes for future use, must be zero. <br /></td></tr>
-<tr class="separator:ae123b168eaa0fafa7192f022e001d07b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7796b8f9e9e7d4e0e047217760c3ec3b"><td class="memItemLeft" align="right" valign="top"><a id="a7796b8f9e9e7d4e0e047217760c3ec3b"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#a7796b8f9e9e7d4e0e047217760c3ec3b">pred_weight_table_bit_offset</a></td></tr>
+<tr class="memdesc:a7796b8f9e9e7d4e0e047217760c3ec3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">bit offset of syntax element pred_weight_table() in slice segment header. It aligns with the starting position of the current packed slice header. It is used when encoder prefers to override the weighted prediction parameters passed in from application. Please refer to enable_gpu_weighted_prediction in <a class="el" href="structVAEncPictureParameterBufferHEVC.html" title="Picture parameter for HEVC encoding in main &amp; main 10 profiles. ">VAEncPictureParameterBufferHEVC</a>. <br /></td></tr>
+<tr class="separator:a7796b8f9e9e7d4e0e047217760c3ec3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bd37698794c436286056124528c2102"><td class="memItemLeft" align="right" valign="top"><a id="a9bd37698794c436286056124528c2102"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#a9bd37698794c436286056124528c2102">pred_weight_table_bit_length</a></td></tr>
+<tr class="memdesc:a9bd37698794c436286056124528c2102"><td class="mdescLeft">&#160;</td><td class="mdescRight">bit length of syntax element pred_weight_table() in slice segment header. It is used when encoder prefers to override the weighted prediction parameters passed in from application. Please refer to enable_gpu_weighted_prediction in <a class="el" href="structVAEncPictureParameterBufferHEVC.html" title="Picture parameter for HEVC encoding in main &amp; main 10 profiles. ">VAEncPictureParameterBufferHEVC</a>. <br /></td></tr>
+<tr class="separator:a9bd37698794c436286056124528c2102"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5a496ddbad2015e2b63f795333ec67e"><td class="memItemLeft" align="right" valign="top"><a id="aa5a496ddbad2015e2b63f795333ec67e"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#aa5a496ddbad2015e2b63f795333ec67e">va_reserved</a> [VA_PADDING_MEDIUM-2]</td></tr>
+<tr class="memdesc:aa5a496ddbad2015e2b63f795333ec67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved bytes for future use, must be zero. <br /></td></tr>
+<tr class="separator:aa5a496ddbad2015e2b63f795333ec67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5ad8a456d5d199630e1f4785d2541bd"><td class="memItemLeft" align="right" valign="top"><a id="af5ad8a456d5d199630e1f4785d2541bd"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncSliceParameterBufferHEVC.html#af5ad8a456d5d199630e1f4785d2541bd">last_slice_of_pic_flag</a>: 1</td></tr>
 <tr class="memdesc:af5ad8a456d5d199630e1f4785d2541bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates if current slice is the last one in picture. <br /></td></tr>

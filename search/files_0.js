@@ -13,5 +13,6 @@ var searchData=
   ['va_5ffei_2eh',['va_fei.h',['../va__fei_8h.html',1,'']]],
   ['va_5ffei_5fh264_2eh',['va_fei_h264.h',['../va__fei__h264_8h.html',1,'']]],
   ['va_5ffei_5fhevc_2eh',['va_fei_hevc.h',['../va__fei__hevc_8h.html',1,'']]],
+  ['va_5fprot_2eh',['va_prot.h',['../va__prot_8h.html',1,'']]],
   ['va_5fvpp_2eh',['va_vpp.h',['../va__vpp_8h.html',1,'']]]
 ];

@@ -7,6 +7,7 @@ var searchData=
   ['vagenericid',['VAGenericID',['../group__api__core.html#gab3ee763380573fdd05464ca16cf46d1d',1,'va.h']]],
   ['vamessagecallback',['VAMessageCallback',['../group__api__core.html#ga26fd64e5d522004ce30dc8159a57f240',1,'va.h']]],
   ['vanativedisplay',['VANativeDisplay',['../group__api__core.html#ga832b992b8a244ddedf180915e1b19f94',1,'va.h']]],
+  ['vaprotectedsessionid',['VAProtectedSessionID',['../group__api__prot.html#ga092a2c03eb3f5be8262590aca3b049cf',1,'va_prot.h']]],
   ['vaqmatrixbuffermpeg2',['VAQMatrixBufferMPEG2',['../group__api__enc__mpeg2.html#ga19a3685563f5a40235e156f872ec27d5',1,'va_enc_mpeg2.h']]],
   ['vasubpictureid',['VASubpictureID',['../group__api__core.html#ga13b0f287a77772b1f8b07dd555230cce',1,'va.h']]]
 ];

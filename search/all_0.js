@@ -4,6 +4,7 @@ var searchData=
   ['ac_5fvalues',['ac_values',['../structVAHuffmanTableBufferJPEGBaseline.html#ae39764646cd5b413730a3b63ab26db6e',1,'VAHuffmanTableBufferJPEGBaseline']]],
   ['adaptive_5fsearch',['adaptive_search',['../group__api__fei__h264.html#gaab108529bcf4801c8346a46cc58a70e2',1,'VAEncMiscParameterFEIFrameControlH264']]],
   ['additional_5foutputs',['additional_outputs',['../structVAProcPipelineParameterBuffer.html#af4d4141fba176fe2eb61bc22fb9dc215',1,'VAProcPipelineParameterBuffer']]],
+  ['aes_5fcbc_5fiv_5for_5fctr',['aes_cbc_iv_or_ctr',['../structVAEncryptionSegmentInfo.html#a22d6c5b3821cc4bbeae3631635c25ea3',1,'VAEncryptionSegmentInfo']]],
   ['algorithm',['algorithm',['../structVAProcFilterParameterBufferDeinterlacing.html#a3185061a0c07e7dcb319a5eb0893e968',1,'VAProcFilterParameterBufferDeinterlacing']]],
   ['allow_5fhigh_5fprecision_5fmv',['allow_high_precision_mv',['../structVAEncPictureParameterBufferVP9.html#a769768244194a83a7e337b820aac532d',1,'VAEncPictureParameterBufferVP9']]],
   ['alt_5fref_5fframe',['alt_ref_frame',['../structVADecPictureParameterBufferVP9.html#a2684abd3fa5c52b792024119c19002df',1,'VADecPictureParameterBufferVP9']]],
