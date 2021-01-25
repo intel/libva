@@ -341,7 +341,7 @@ typedef struct  _VADecPictureParameterBufferAV1
      *
      *  Contains a list of uncompressed frame buffer surface indices as references.
      *  Application needs to make sure all the entries point to valid frames
-     *  except for the key frame by checking ref_frame_id[]. If missing frame
+     *  except for intra frames by checking ref_frame_id[]. If missing frame
      *  is identified, application may choose to perform error recovery by
      *  pointing problematic index to an alternative frame buffer.
      *  Driver is not responsible to validate reference frames' id.
@@ -353,10 +353,10 @@ typedef struct  _VADecPictureParameterBufferAV1
      *  Contains a list of indices into ref_frame_map[8].
      *  It specifies the reference frame correspondence.
      *  The indices of the array are defined as [LAST_FRAME – LAST_FRAME,
-     *  LAST2_FRAME – LAST_FRAME, …, ALTREF2_FRAME – LAST_FRAME], where each
+     *  LAST2_FRAME – LAST_FRAME, …, ALTREF_FRAME – LAST_FRAME], where each
      *  symbol is defined as:
      *  enum{INTRA_FRAME = 0, LAST_FRAME, LAST2_FRAME, LAST3_FRAME, GOLDEN_FRAME,
-     *  BWDREF_FRAME, ALTREF_FRAME};
+     *  BWDREF_FRAME, ALTREF2_FRAME, ALTREF_FRAME};
      */
     uint8_t                 ref_frame_idx[7];
 
