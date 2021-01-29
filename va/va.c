@@ -26,6 +26,7 @@
 #include "sysdeps.h"
 #include "va.h"
 #include "va_backend.h"
+#include "va_backend_prot.h"
 #include "va_backend_vpp.h"
 #include "va_internal.h"
 #include "va_trace.h"
@@ -495,6 +496,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
             } else {
                 struct VADriverVTable *vtable = ctx->vtable;
                 struct VADriverVTableVPP *vtable_vpp = ctx->vtable_vpp;
+                struct VADriverVTableProt *vtable_prot = ctx->vtable_prot;
 
                 vaStatus = VA_STATUS_SUCCESS;
                 if (!vtable) {
@@ -512,6 +514,15 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                         vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
                 }
                 ctx->vtable_vpp = vtable_vpp;
+
+                if (!vtable_prot) {
+                    vtable_prot = calloc(1, sizeof(*vtable_prot));
+                    if (vtable_prot)
+                        vtable_prot->version = VA_DRIVER_VTABLE_PROT_VERSION;
+                    else
+                        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+                }
+                ctx->vtable_prot = vtable_prot;
 
                 if (init_func && VA_STATUS_SUCCESS == vaStatus)
                     vaStatus = (*init_func)(ctx);
@@ -778,6 +789,8 @@ VAStatus vaTerminate (
   old_ctx->vtable = NULL;
   free(old_ctx->vtable_vpp);
   old_ctx->vtable_vpp = NULL;
+  free(old_ctx->vtable_prot);
+  old_ctx->vtable_prot = NULL;
 
   if (old_ctx->override_driver_name) {
       free(old_ctx->override_driver_name);
@@ -2306,3 +2319,116 @@ vaCopy(
       va_status = ctx->vtable->vaCopy( ctx, dst, src, option);
   return va_status;
 }
+
+/* Protected content */
+#define VA_PROT_INIT_CONTEXT(ctx, dpy) do {              \
+        CHECK_DISPLAY(dpy);                             \
+        ctx = CTX(dpy);                                 \
+        if (!ctx)                                       \
+            return VA_STATUS_ERROR_INVALID_DISPLAY;     \
+    } while (0)
+
+#define VA_PROT_INVOKE(dpy, func, args) do {             \
+        if (!ctx->vtable_prot->va##func)                 \
+            return VA_STATUS_ERROR_UNIMPLEMENTED;       \
+        status = ctx->vtable_prot->va##func args;        \
+    } while (0)
+
+VAStatus vaCreateProtectedSession(
+    VADisplay dpy,
+    VAConfigID config_id,
+    VAProtectedSessionID *protected_session
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_PROT_INIT_CONTEXT(ctx, dpy);
+    VA_PROT_INVOKE(
+        ctx,
+        CreateProtectedSession,
+        (ctx, config_id, protected_session)
+    );
+    VA_TRACE_RET(dpy, status);
+
+    return status;
+}
+
+VAStatus vaDestroyProtectedSession(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_PROT_INIT_CONTEXT(ctx, dpy);
+    VA_PROT_INVOKE(
+        ctx,
+        DestroyProtectedSession,
+        (ctx, protected_session)
+    );
+    VA_TRACE_RET(dpy, status);
+
+    return status;
+}
+
+VAStatus vaAttachProtectedSession(
+    VADisplay dpy,
+    VAContextID context,
+    VAProtectedSessionID protected_session
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_PROT_INIT_CONTEXT(ctx, dpy);
+    VA_PROT_INVOKE(
+        ctx,
+        AttachProtectedSession,
+        (ctx, context, protected_session)
+    );
+    VA_TRACE_RET(dpy, status);
+
+    return status;
+}
+
+VAStatus vaDetachProtectedSession(
+    VADisplay dpy,
+    VAContextID context
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_PROT_INIT_CONTEXT(ctx, dpy);
+    VA_PROT_INVOKE(
+        ctx,
+        DetachProtectedSession,
+        (ctx, context)
+    );
+    VA_TRACE_RET(dpy, status);
+
+    return status;
+}
+
+VAStatus vaProtectedSessionExecute(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session,
+    VABufferID data
+)
+{
+    VADriverContextP ctx;
+    VAStatus status;
+
+    VA_PROT_INIT_CONTEXT(ctx, dpy);
+    VA_PROT_INVOKE(
+        ctx,
+        ProtectedSessionExecute,
+        (ctx, protected_session, data)
+    );
+    VA_TRACE_RET(dpy, status);
+
+    return status;
+}
+

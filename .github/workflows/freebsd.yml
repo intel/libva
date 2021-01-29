@@ -1,6 +1,14 @@
 name: freebsd
 
-on: [ push, pull_request ]
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/freebsd.yml'
 
 jobs:
   freebsd:

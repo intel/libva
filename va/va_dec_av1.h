@@ -325,7 +325,6 @@ typedef struct  _VADecPictureParameterBufferAV1
     /** \brief Picture resolution minus 1
      *  Picture original resolution. If SuperRes is enabled,
      *  this is the upscaled resolution.
-     *  The value may not be multiple of 8.
      *  value range [0..65535]
      */
     uint16_t                frame_width_minus1;
@@ -376,8 +375,7 @@ typedef struct  _VADecPictureParameterBufferAV1
     VAFilmGrainStructAV1    film_grain_info;
 
     /** \brief tile structure
-     *  When uniform_tile_spacing_flag == 1, the value of tile_cols and
-     *  tile_rows need to be power of 2, and width_in_sbs_minus_1[] and
+     *  When uniform_tile_spacing_flag == 1, width_in_sbs_minus_1[] and
      *  height_in_sbs_minus_1[] should be ignored, which will be generated
      *  by driver based on tile_cols and tile_rows.
      */
@@ -444,7 +442,8 @@ typedef struct  _VADecPictureParameterBufferAV1
     } pic_info_fields;
 
     /** \brief Supper resolution scale denominator.
-     *  value range [9..16]
+     *  When use_superres=1, superres_scale_denominator must be in the range [9..16].
+     *  When use_superres=0, superres_scale_denominator must be 8.
      */
     uint8_t                 superres_scale_denominator;
 

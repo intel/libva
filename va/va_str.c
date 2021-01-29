@@ -64,6 +64,7 @@ const char *vaProfileStr(VAProfile profile)
     TOSTR(VAProfileAV1Profile0);
     TOSTR(VAProfileAV1Profile1);
     TOSTR(VAProfileHEVCSccMain444_10);
+    TOSTR(VAProfileProtected);
     default: break;
     }
     return "<unknown profile>";
@@ -84,6 +85,8 @@ const char *vaEntrypointStr(VAEntrypoint entrypoint)
     TOSTR(VAEntrypointVideoProc);
     TOSTR(VAEntrypointFEI);
     TOSTR(VAEntrypointStats);
+    TOSTR(VAEntrypointProtectedTEEComm);
+    TOSTR(VAEntrypointProtectedContent);
     }
     return "<unknown entrypoint>";
 }
@@ -131,6 +134,13 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
     TOSTR(VAConfigAttribMultipleFrame);
     TOSTR(VAConfigAttribContextPriority);
     TOSTR(VAConfigAttribDecAV1Features);
+    TOSTR(VAConfigAttribTEEType);
+    TOSTR(VAConfigAttribTEETypeClient);
+    TOSTR(VAConfigAttribProtectedContentCipherAlgorithm);
+    TOSTR(VAConfigAttribProtectedContentCipherBlockSize);
+    TOSTR(VAConfigAttribProtectedContentCipherMode);
+    TOSTR(VAConfigAttribProtectedContentCipherSampleType);
+    TOSTR(VAConfigAttribProtectedContentUsage);
     case VAConfigAttribTypeMax: break;
     }
     return "<unknown config attribute type>";
@@ -181,6 +191,8 @@ const char *vaBufferTypeStr(VABufferType bufferType)
     TOSTR(VAEncFEICURecordBufferType);
     TOSTR(VASubsetsParameterBufferType);
     TOSTR(VAContextParameterUpdateBufferType);
+    TOSTR(VAProtectedSessionExecuteBufferType);
+    TOSTR(VAEncryptionParameterBufferType);
     case VABufferTypeMax: break;
     }
     return "<unknown buffer type>";

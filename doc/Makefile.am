@@ -44,6 +44,7 @@ VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va_dec_jpeg.h	\
 	$(VA_HEADER_DIR)/va_dec_vp8.h	\
 	$(VA_HEADER_DIR)/va_dec_vp9.h	\
+	$(VA_HEADER_DIR)/va_prot.h	\
 	$(VA_HEADER_DIR)/va_vpp.h	\
 	$(NULL)
 
