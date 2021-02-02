@@ -16,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: test
-      uses: vmactions/freebsd-vm@v0.0.7
+      uses: vmactions/freebsd-vm@v0.1.2
       with:
         prepare: |
           pkg install -y meson pkgconf libdrm libXext libXfixes wayland
