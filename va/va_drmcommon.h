@@ -87,6 +87,11 @@ struct drm_state {
  */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2		0x40000000
 
+/** \brief DRM PRIME memory type (enhanced version)
+ *
+ * Used with VADRMPRIMESurfaceDescriptorExt.
+ */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3		0x80000000
 /**
  * \brief External buffer descriptor for a DRM PRIME surface.
  *
@@ -154,5 +159,24 @@ typedef struct _VADRMPRIMESurfaceDescriptor {
     } layers[4];
 } VADRMPRIMESurfaceDescriptor;
 
+
+typedef struct _VADRMPRIMESurfaceDescriptorExt {
+    VADRMPRIMESurfaceDescriptor surface_desc;
+    /* memory location , local memory or system memory */
+    union{
+        struct{
+            /* whether the memory is allocated on local memory */
+            uint32_t local_memory :1;
+            /* whether the memory region is enabled */
+            uint32_t memory_region_enable: 1;
+            /* memory region index */
+            uint32_t memory_region_index: 8;
+            /* reserved bits for future, must be zero */
+            uint32_t reserved: 22;
+        }bits;
+        uint32_t value;
+    } memory_location;
+    uint32_t                    va_reserved[5];
+}VADRMPRIMESurfaceDescriptorExt;
 
 #endif /* VA_DRM_COMMON_H */
