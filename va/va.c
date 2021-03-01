@@ -2432,3 +2432,44 @@ VAStatus vaProtectedSessionExecute(
     return status;
 }
 
+VAStatus vaQueryDeviceAttributes(
+     VADisplay dpy,
+     VADeviceAttrib *attrib_list,
+     uint32_t       *num_attribs
+)
+{
+  VAStatus vaStatus = VA_STATUS_SUCCESS;
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+
+  if(ctx->vtable->vaQueryDeviceAttributes)
+  {
+    vaStatus = ctx->vtable->vaQueryDeviceAttributes(ctx, attrib_list, num_attribs);
+  }
+  else
+  {
+    vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+  }
+
+  return vaStatus;
+}
+
+VAStatus vaSetDeviceAttributes(
+     VADisplay dpy,
+     VADeviceAttrib *attrib_list,
+     uint32_t       num_attribs
+)
+{
+  VADriverContextP ctx;
+  CHECK_DISPLAY(dpy);
+  ctx = CTX(dpy);
+  if(ctx->vtable->vaSetDeviceAttributes)
+  {
+      return ctx->vtable->vaSetDeviceAttributes(ctx, attrib_list, num_attribs);
+  }
+  else
+  {
+      return VA_STATUS_ERROR_UNIMPLEMENTED;
+  }
+}

@@ -4695,6 +4695,110 @@ VAStatus vaDeriveImage (
 );
 
 /**
+ * Device Infomation *
+ */
+
+ /** @name device attribute flags */
+/**@{*/
+/** \brief device attribute is not supported. */
+#define VA_DEVICE_ATTRIB_NOT_SUPPORTED 0x00000000
+/** \brief device attribute can be got through vaQueryDeviceAttributes(). */
+#define VA_DEVICE_ATTRIB_GETTABLE      0x00000001
+/** \brief device attribute can be set through vaSetDeviceAttributes(). */
+#define VA_DEVICE_ATTRIB_SETTABLE      0x00000002
+/**@}*/
+
+typedef enum {
+    /** \brief memory type support , on chip memory etc. read-only*/
+    VADeviceAttribMemoryInfo       = 1,
+    /** \brief memory region support. read - write*/
+    VADeviceAttribMemoryRegion     = 2,
+
+    VADeviceAttribCount
+}VADeviceAttribType;
+
+/** \brief Surface attribute. */
+typedef struct _VADeviceAttrib {
+    /** \brief Type. */
+    VADeviceAttribType  type;
+    /** \brief Flags. See "Device attribute flags". */
+    uint32_t            flags;
+    /** \brief Value. See "Device attribute types" for the expected types. */
+    VAGenericValue      value;
+} VADeviceAttrib;
+
+typedef union _VADeviceAttribValMemoryInfo{
+    struct{
+       /** \brief whether local memory (on device memory) is present */
+       uint32_t local_memory  :1;
+       uint32_t reserved      :31;
+    }bits;
+    uint32_t value;
+}VADeviceAttribValMemoryInfo;
+
+typedef union _VADeviceAttribValMemoryRegion{
+    struct{
+        /** \brief memory region count, read - only */
+        uint32_t local_memory_regions      : 4;
+        /** \brief current region index read - write
+         * vaQueryDeviceAttibutes , it will return pre-assigned memory region.
+         * vaSetDeviceAttributes,  it is used indicate which memory region is selected*/
+        uint32_t current_memory_region     : 4;
+        /** \brief reserved bits for future, must be zero*/
+        uint32_t reserved  :8;
+        /** \brief bit mask to indicate which memory_region is available, read only
+         * \code
+         * VADeviceAttribValMemoryRegion reg;
+         * VADeviceAttrib reg_attr[2] ;
+         * vaQueryDeviceAttributes(dpy, &reg_attr, 2);
+         * for(int i = 0; i < 2; i ++){
+         *    if(reg_attr[i].type == VADeviceAttribMemoryRegion){
+         *       reg.value = reg_attr[i].value.i;
+         *       break;
+         *   }
+         *}
+         * for(int i = 0; i < reg.bits.local_memory_regions; i ++ ){
+         *    if((1<<i) & reg.bits.memory_region){
+         *        printf("memory region %d can be selected", i);
+         *    }
+         *}
+         * \endcode
+         */
+        uint32_t memroy_region_masks : 16;
+    }bits;
+    uint32_t value;
+}VADeviceAttribValMemoryRegion;
+
+/**
+ * Query all attributes for a display handle
+ * The caller must provide an "attrib_list" array, the num_attibs should be set.
+ * If the The actual number of attributes < *num_attibs, the actual number of
+ * attributes will be returned in *num_attibs. If the *num_attibs < actual number
+ * of attributes, only part of the attibutes is set in attib_list. other should be treated as
+ * unsupported.
+ */
+
+VAStatus vaQueryDeviceAttributes(
+     VADisplay dpy,
+     VADeviceAttrib *attrib_list,
+     uint32_t       *num_attribs
+);
+
+/**
+ * Set Device configuration by this function, only when the device attribues is writable.
+ * If APP want to use this function to set device configuration,  this function must be
+ * called after vaInitialize and before any other VAAPI function. If this function is called
+ * after other VAAPI function, it will cause unexpected issues
+ */
+
+VAStatus vaSetDeviceAttributes(
+     VADisplay dpy,
+     VADeviceAttrib *attrib_list,
+     uint32_t       num_attribs
+);
+
+
+/**
  * Subpictures 
  * Subpicture is a special type of image that can be blended 
  * with a surface during vaPutSurface(). Subpicture can be used to render
