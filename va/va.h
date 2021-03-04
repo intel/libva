@@ -1552,14 +1552,13 @@ typedef struct _VAGenericValue {
 typedef enum {
     VASurfaceAttribNone = 0,
     /**
-     * \brief Pixel format (fourcc).
+     * \brief Pixel format as a FOURCC (int, read/write).
      *
-     * The value is meaningful as input to vaQuerySurfaceAttributes().
-     * If zero, the driver returns the optimal pixel format for the
-     * specified config. Otherwise, if non-zero, the value represents
-     * a pixel format (FOURCC) that is kept as is on output, if the
-     * driver supports it. Otherwise, the driver sets the value to
-     * zero and drops the \c VA_SURFACE_ATTRIB_SETTABLE flag.
+     * When vaQuerySurfaceAttributes() is called, the driver will return one
+     * PixelFormat attribute per supported pixel format.
+     *
+     * When provided as an input to vaCreateSurfaces(), the driver will
+     * allocate a surface with the provided pixel format.
      */
     VASurfaceAttribPixelFormat,
     /** \brief Minimal width in pixels (int, read-only). */
