@@ -154,5 +154,22 @@ typedef struct _VADRMPRIMESurfaceDescriptor {
     } layers[4];
 } VADRMPRIMESurfaceDescriptor;
 
+/**
+ * \brief List of DRM format modifiers.
+ *
+ * To allocate surfaces with one of the modifiers specified in the array, call
+ * vaCreateSurfaces() with the VASurfaceAttribDRMFormatModifiers attribute set
+ * to point to an array of num_surfaces instances of this structure. The driver
+ * will select the optimal modifier in the list.
+ *
+ * DRM format modifiers are defined in drm_fourcc.h in the Linux kernel.
+ */
+typedef struct _VADRMFormatModifierList {
+	/** Number of modifiers. */
+	uint32_t num_modifiers;
+	/** Array of modifiers. */
+	uint64_t *modifiers;
+} VADRMFormatModifierList;
+
 
 #endif /* VA_DRM_COMMON_H */
