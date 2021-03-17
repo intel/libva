@@ -2494,7 +2494,9 @@ typedef struct _VAEncMiscParameterRIR
             uint32_t enable_rir_column : 1;
 	    /* \brief enable RIR in row */
             uint32_t enable_rir_row : 1;
-	    uint32_t reserved : 30;
+	    /* \brief disable RIR overlapping */
+            uint32_t disable_rir_overlap : 1;
+	    uint32_t reserved : 29;
         } bits;
         uint32_t value;
     } rir_flags;
