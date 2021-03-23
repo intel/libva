@@ -1,5 +1,23 @@
-libva NEWS -- summary of user visible changes.  2020-12-03
+libva NEWS -- summary of user visible changes.  2021-03-23
 Copyright (C) 2009-2020 Intel Corporation
+
+version 2.11.0 - 23.Mar.2021
+* add: LibVA Protected Content API
+* add: Add a configuration attribute to advertise AV1d LST feature
+* fix: wayland: don't try to authenticate with render nodes
+* autotools: use shell grouping instead of sed to prepend a line
+* trace: Add details data dump for mpeg2 IQ matrix.
+* doc: update docs for VASurfaceAttribPixelFormat
+* doc: Libva documentation edit for AV1 reference frames
+* doc: Modify AV1 frame_width_minus1 and frame_height_minus1 comment
+* doc: Remove tile_rows and tile_cols restriction to match AV1 spec
+* doc: Format code for doxygen output
+* doc: AV1 decode documentation edit for superres_scale_denominator
+* ci: upgrade FreeBSD to 12.2
+* ci: disable travis build
+* ci: update cache before attempting to install packages
+* ci: avoid running workloads on other workloads changes
+* ci: enable github actions
 
 version 2.10.0 - 04.Dec.2020
 * add: Pass offset and size of pred_weight_table
