@@ -4879,7 +4879,17 @@ VAStatus vaDeassociateSubpicture (
  * brightness etc. in the rendering process.  The application can query what
  * attributes are supported by the driver, and then set the appropriate attributes
  * before calling vaPutSurface()
+ *
+ * Display attributes can also be used to query/set platform or display adaptor (vaDisplay)
+ * related information. These attributes do not depend on vaConfig, and could not be used
+ * for vaPutSurface. Application can use vaQueryDisplayAttributes/vaGetDisplayAttributes
+ * at anytime after vaInitialize, but (for settable attributes) vaSetDisplayAttributes should be
+ * called after vaInitialize and before any other function call.
+ *
+ * To distinguish these two types of display attributes, display adaptor related attributes
+ * should be marked as "HW attribute" in the description.
  */
+
 /* PowerVR IEP Lite attributes */
 typedef enum
 {
@@ -4928,6 +4938,47 @@ typedef enum
 #define VA_RENDER_DEVICE_UNDEFINED  0
 #define VA_RENDER_DEVICE_LOCAL      1
 #define VA_RENDER_DEVICE_EXTERNAL   2
+
+/**\brief sub device info
+ * Sub-device is the concept basing on the "device" behind "vaDisplay".
+ * If a device could be divided to several sub devices, the task of
+ * decode/encode/vpp could be assigned on one sub-device. So, application
+ * could choose the sub device before any other operations. After that,
+ * all of the task execution/resource allocation will be dispatched to
+ * the sub device. If application does not choose the sub device, driver
+ * will assign one as default.
+ *
+ * If the value == VA_ATTRIB_NOT_SUPPORTED, it mean that the attribute
+ * is unsupport or UNKNOWN.
+ */
+
+typedef union _VADisplayAttribValSubDevice{
+    struct{
+        /** \brief current sub device index, read - write */
+        uint32_t current_sub_device     : 4;
+        /** \brief sub devices count, read - only */
+        uint32_t sub_device_count       : 4;
+        /** \brief reserved bits for future, must be zero*/
+        uint32_t reserved               : 8;
+        /** \brief bit mask to indicate which sub_device is available, read only
+         * \code
+         * VADisplayAttribValSubDevice reg;
+         * VADisplayAttribute reg_attr;
+         * reg_attr.type = VADisplayAttribSubDevice;
+         * vaGetDisplayAttributes(dpy, &reg_attr, 1);
+         * reg.value = reg_attr.value;
+         *
+         * for(int i = 0; i < reg.bits.sub_device_count; i ++ ){
+         *    if((1<<i) & reg.bits.sub_device_mask){
+         *        printf("sub device  %d can be selected", i);
+         *    }
+         *}
+         * \endcode
+         */
+        uint32_t sub_device_mask       : 16;
+    }bits;
+    uint32_t value;
+}VADisplayAttribValSubDevice;
 
 /** Currently defined display attribute types */
 typedef enum
@@ -5001,6 +5052,10 @@ typedef enum
      * specify vaPutSurface render area if there is no drawable on the monitor
      */
     VADisplayAttribRenderRect          = 18,
+    /*
+     * HW attribute, read/write, specify the sub device configure
+     */
+    VADisplayAttribSubDevice           = 19,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
