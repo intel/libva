@@ -5056,6 +5056,12 @@ typedef enum
      * HW attribute, read/write, specify the sub device configure
      */
     VADisplayAttribSubDevice           = 19,
+    /*
+     * HW attribute. read only. specify whether vaCopy support on current HW
+     * The value of each bit should equal to 1 << VA_EXEC_MODE_XXX to represent
+     * modes of vaCopy
+     */
+    VADisplayAttribCopy                 = 20,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
