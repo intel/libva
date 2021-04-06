@@ -472,7 +472,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
 
     /** \brief log2 of number of tile columns
      *  Corresponds to the same VP9 syntax element in frame header.
-     *  value range [0..5]
+     *  value range [0..6]
      */
     uint8_t     log2_tile_columns;
 
