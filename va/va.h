@@ -4827,7 +4827,16 @@ VAStatus vaDeassociateSubpicture (
  * Display attributes are used to control things such as contrast, hue, saturation,
  * brightness etc. in the rendering process.  The application can query what
  * attributes are supported by the driver, and then set the appropriate attributes
- * before calling vaPutSurface()
+ * before calling vaPutSurface().
+ *
+ * Display attributes also are used to query/set display adaptor (vaDisplay)
+ * related information. These attributes do not depend on vaConfig. They can't
+ * be used with vaPutSurface. Apps can call vaQueryDisplayAttributes/
+ * vaGetDisplayAttributes to query these attributes after vaInitialize, but can
+ * only call vaSetDisplayAttributes for these attributes after vaInitialize and
+ * before any other function call if the attributes is settable. To distinguish
+ * these two types of display attributes, this display adaptor related
+ * attributes should be marked as "HW attribute" in the description.
  */
 /* PowerVR IEP Lite attributes */
 typedef enum
@@ -4950,6 +4959,12 @@ typedef enum
      * specify vaPutSurface render area if there is no drawable on the monitor
      */
     VADisplayAttribRenderRect          = 18,
+    /*
+     * Bitfield of supported VASurfaceAttribType (read-only, HW attribute). A
+     * surface attribute is supported if the bit 1 << VASurfaceAttribXXX is
+     * set.
+     */
+    VADisplayAttribSurfaceAttribs      = 19,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
