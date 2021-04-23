@@ -420,8 +420,15 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
               * application would enable Qp Modulation
               */
             uint32_t    hierachical_flag                               : 1;
+            /** \brief Indicates whether or not the encoding is in the Look Ahead pass.
+             *  if lookahead_analysis_support in \ref VAConfigAttribValLookAhead is on and lookahead_depth > 0,
+             *  this flag on indicates the current encoding is in the Look Ahead pass, and CQP should
+             *  be applied. This flag off indicates that the current encoding is in the actual encoding
+             *  pass, and one of the BRC modes (CBR, VBR, etc.) should be selected.
+             */
+            uint32_t    lookahead_phase                                : 1;
             /** \brief keep for future , should be set to 0 */
-            uint32_t    reserved_bits                                  : 14;
+            uint32_t    reserved_bits                                  : 13;
         } bits;
         uint32_t value;
     } seq_fields;
@@ -525,8 +532,34 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
         } bits;
         uint32_t value;
     } scc_fields;
-    /** \brief Reserved bytes for future use, must be zero */
-    uint32_t   va_reserved[VA_PADDING_MEDIUM - 1];
+
+    /** \brief Number of frames to lookahead.
+     *  value range: [0..100].
+     */
+    uint8_t     lookahead_depth;
+    /** \brief Minimal IDR distances used for adaptive GOP decision.
+     *  Applicable for LookAhead phase (valid only when lookahead_phase == 1).
+     */
+    uint8_t     min_adaptive_gop_pic_size;
+    /** \brief Maximal IDR distances used for adaptive GOP decision.
+     *  Applicable for LookAhead phase (valid only when lookahead_phase == 1).
+     */
+    uint16_t    max_adaptive_gop_pic_size;
+
+    /** \brief Value conveyed to the look ahead pass about the encoding structure
+     *  setting of the full pass (valid only when lookahead_phase == 1).
+     */
+    union {
+        struct {
+            uint8_t    closed_gop   : 1;
+            uint8_t    strict_gop   : 1;
+            uint8_t    adaptive_gop : 1;
+            uint8_t    reserved     : 5;
+        } bits;
+        uint8_t value;
+    } gop_fields;
+
+    uint32_t   va_reserved[VA_PADDING_MEDIUM - 3];
     /**@}*/
 } VAEncSequenceParameterBufferHEVC;
 
@@ -747,8 +780,25 @@ typedef struct _VAEncPictureParameterBufferHEVC {
         } bits;
         uint16_t value;
     } scc_fields;
+
+    /** \brief This Value indicates the source down scaling ratio for look
+     *  ahead pass (valid only when lookahead_phase == 1).
+     */
+    union
+    {
+        struct
+        {
+            /** \brief horizontal scaling ratio = (x16_minus1_x + 1) / 16 */
+            uint8_t    x16_minus1_x : 4;
+            /** \brief vertical scaling ratio = (x16_minus1_y + 1) / 16 */
+            uint8_t    x16_minus1_y : 4;
+        } bits;
+        uint8_t    value;
+    } downscale_ratio;
+
+    uint8_t qp_modulation_strength;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_HIGH - 1];
+    uint32_t                va_reserved[VA_PADDING_HIGH - 2];
 } VAEncPictureParameterBufferHEVC;
 
 /**
