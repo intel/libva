@@ -955,7 +955,9 @@ typedef enum
      * example, it could be \c VA_PC_USAGE_DEFAULT, \c VA_PC_USAGE_WIDEVINE, etc....
      */
     VAConfigAttribProtectedContentUsage = 49,
-
+    /** \brief look ahead support, see VAConfigAttribValLookAhead for supported capabilities
+     */
+    VAConfigAttribLookAhead             = 50,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1335,6 +1337,19 @@ typedef union _VAConfigAttribValContextPriority{
     }bits;
     uint32_t value;
 }VAConfigAttribValContextPriority;
+
+/** \brief Attribute value for VAConfigAttribLookAhead */
+typedef union _VAConfigAttribValLookAhead {
+    struct {
+        /** \brief look ahead is supported and is capable of returning CQM hint */
+        uint32_t lookahead_analysis_support         : 1;
+        /** \brief look ahead is supported and is capable of returning INTRA frame hint */
+        uint32_t lookahead_brc_support : 1;
+        /** \brief reserved for future extension, must be zero */
+        uint32_t reserved         : 30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValLookAhead;
 
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
@@ -3770,6 +3785,26 @@ VAStatus vaBufferSetNumElements (
  */
 #define VA_CODED_BUF_STATUS_SINGLE_NALU                 0x10000000	
 
+typedef struct _VALookAheadInfo
+{
+    union
+    {
+        struct
+        {
+            uint32_t valid_info   : 1;
+            uint32_t cqm_hint     : 8;        // Custom quantization matrix hint. 0x00 - flat matrix; 0x01 - CQM; 0xFF - invalid hint; other values are reserved.
+            uint32_t intra_hint   : 1;
+            uint32_t min_gop_size : 8;        // [0, 1, 2, 4, 8,16]
+            uint32_t reserved     : 12;
+        } bits;
+        uint32_t value;
+    } encode_hints;
+    uint32_t target_frame_size;
+    uint32_t target_buffer_fulness;
+
+    uint32_t qp_modulation_strength;       // [0..maxQP(bit depth)]
+} VALookAheadInfo;
+
 /**
  * \brief Coded buffer segment.
  *
@@ -3799,8 +3834,10 @@ typedef  struct _VACodedBufferSegment  {
      */
     void               *next;
 
+    VALookAheadInfo   lpla_info;
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    //uint32_t                va_reserved[VA_PADDING_LOW];
 } VACodedBufferSegment;
      
 /**

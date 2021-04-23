@@ -233,8 +233,9 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
               * application would enable Qp Modulation
               */
             uint32_t    hierachical_flag                               : 1;
+            uint32_t    lookahead_phase                               : 1;
             /** \brief keep for future , should be set to 0 */
-            uint32_t    reserved_bits                                  : 14;
+            uint32_t    reserved_bits                                  : 13;
         } bits;
         uint32_t value;
     } seq_fields;
@@ -338,8 +339,26 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
         } bits;
         uint32_t value;
     } scc_fields;
-    /** \brief Reserved bytes for future use, must be zero */
-    uint32_t   va_reserved[VA_PADDING_MEDIUM - 1];
+
+    /** \brief Lookahead depth in frames. */
+    uint8_t     lookahead_depth;
+
+    uint8_t     min_adaptive_gop_pic_size;
+
+    uint16_t    max_adaptive_gop_pic_size;
+
+    union {
+        struct {
+            uint32_t    closed_gop                      : 1;
+            uint32_t    strict_gop                      : 1;
+            uint32_t    adaptive_gop                    : 1;
+            uint32_t    reserved                        : 29;
+        } bits;
+        uint32_t value;
+    } gop_fields;
+
+
+    uint32_t   va_reserved[VA_PADDING_MEDIUM - 3];
     /**@}*/
 } VAEncSequenceParameterBufferHEVC;
 
@@ -560,8 +579,20 @@ typedef struct _VAEncPictureParameterBufferHEVC {
         } bits;
         uint16_t value;
     } scc_fields;
+
+    union
+    {
+        struct
+        {
+            uint8_t    x16_minus1_x : 4; // scaling ratio = (X16Minus1_X + 1) / 16
+            uint8_t    x16_minus1_y : 4;
+        } bits;
+        uint8_t    value;
+    } downscale_ratio;
+
+    uint8_t qp_modulation_strength;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_HIGH - 1];
+    uint32_t                va_reserved[VA_PADDING_HIGH - 2];
 } VAEncPictureParameterBufferHEVC;
 
 /**
