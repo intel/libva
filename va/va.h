@@ -989,6 +989,7 @@ typedef struct _VAConfigAttrib {
 #define VA_RT_FORMAT_RGB32	0x00020000	///< Packed RGB, 32 bits per pixel, 8 bits per colour sample.
 #define VA_RT_FORMAT_RGBP	0x00100000	///< Planar RGB, 8 bits per sample.
 #define VA_RT_FORMAT_RGB32_10	0x00200000	///< Packed RGB, 32 bits per pixel, 10 bits per colour sample.
+#define VA_RT_FORMAT_BGRP	0x00400000	///< Planar RGB, 8 bits per sample.
 
 #define VA_RT_FORMAT_PROTECTED	0x80000000
 
