@@ -484,7 +484,6 @@ struct VADriverVTable
             uint32_t            flags,          /* in */
             void               *descriptor      /* out */
         );
-
         VAStatus (*vaSyncSurface2) (
             VADriverContextP ctx,
             VASurfaceID surface,
@@ -497,8 +496,15 @@ struct VADriverVTable
             uint64_t timeout_ns
         );
 
+        VAStatus
+        (*vaCopy)(
+            VADriverContextP    ctx,            /* in */
+            VACopyObject        *dst,           /* in */
+            VACopyObject        *src,           /* in */
+            VACopyOption        option          /* in */
+        );
         /** \brief Reserved bytes for future use, must be zero */
-        unsigned long reserved[55];
+        unsigned long reserved[54];
 };
 
 struct VADriverContext
@@ -631,7 +637,14 @@ struct VADriverContext
     void (*info_callback)(VADriverContextP pDriverContext,
                           const char *message);
 
-    unsigned long reserved[38];         /* reserve for future add-ins, decrease the subscript accordingly */
+    /**
+     * \brief The VA/Protected implementation hooks.
+     *
+     * This structure is allocated from libva with calloc().
+     */
+    struct VADriverVTableProt *vtable_prot;
+
+    unsigned long reserved[37];         /* reserve for future add-ins, decrease the subscript accordingly */
 };
 
 #define VA_DISPLAY_MAGIC 0x56414430 /* VAD0 */

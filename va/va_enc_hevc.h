@@ -686,8 +686,24 @@ typedef struct _VAEncSliceParameterBufferHEVC {
         uint32_t        value;
     } slice_fields;
 
+
+    /**
+     * \brief bit offset of syntax element pred_weight_table() in slice segment header.
+     * It aligns with the starting position of the current packed slice header.
+     * It is used when encoder prefers to override the weighted prediction parameters passed in
+     * from application.
+     * Please refer to enable_gpu_weighted_prediction in VAEncPictureParameterBufferHEVC.
+     */
+    uint32_t                pred_weight_table_bit_offset;
+    /**
+     * \brief bit length of syntax element pred_weight_table() in slice segment header.
+     * It is used when encoder prefers to override the weighted prediction parameters passed in
+     * from application.
+     * Please refer to enable_gpu_weighted_prediction in VAEncPictureParameterBufferHEVC.
+    */
+    uint32_t                pred_weight_table_bit_length;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM-2];
     /**@}*/
 } VAEncSliceParameterBufferHEVC;
 

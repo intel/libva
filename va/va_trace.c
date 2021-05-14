@@ -1794,6 +1794,7 @@ static void va_TraceVAIQMatrixBufferMPEG2(
 {
     VAIQMatrixBufferMPEG2 *p=(VAIQMatrixBufferMPEG2 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+    int i;
 
     va_TraceMsg(trace_ctx,"VAIQMatrixBufferMPEG2\n");
 
@@ -1801,11 +1802,55 @@ static void va_TraceVAIQMatrixBufferMPEG2(
     va_TraceMsg(trace_ctx,"\tload_non_intra_quantiser_matrix = %d\n", p->load_non_intra_quantiser_matrix);
     va_TraceMsg(trace_ctx,"\tload_chroma_intra_quantiser_matrix = %d\n", p->load_chroma_intra_quantiser_matrix);
     va_TraceMsg(trace_ctx,"\tload_chroma_non_intra_quantiser_matrix = %d\n", p->load_chroma_non_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tintra_quantiser_matrix = %p\n", p->intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tnon_intra_quantiser_matrix = %p\n", p->non_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tchroma_intra_quantiser_matrix = %p\n", p->chroma_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx,"\tchroma_non_intra_quantiser_matrix = %p\n", p->chroma_non_intra_quantiser_matrix);
-    va_TraceMsg(trace_ctx, NULL);
+    va_TraceMsg (trace_ctx, "\tintra_quantiser_matrix[] = {\n");
+    for (i = 0; i < 64; i++) {
+      if (i % 8 == 0) {
+        if (i)
+          va_TracePrint (trace_ctx, "\n");
+        va_TraceMsg (trace_ctx, "\t %3d", p->intra_quantiser_matrix[i]);
+      } else {
+        va_TracePrint (trace_ctx, " %3d", p->intra_quantiser_matrix[i]);
+      }
+    }
+    va_TracePrint (trace_ctx, "}\n");
+
+    va_TraceMsg (trace_ctx, "\tnon_intra_quantiser_matrix[] = {\n");
+    for (i = 0; i < 64; i++) {
+      if (i % 8 == 0) {
+        if (i)
+          va_TracePrint (trace_ctx, "\n");
+        va_TraceMsg (trace_ctx, "\t %3d", p->non_intra_quantiser_matrix[i]);
+      } else {
+        va_TracePrint (trace_ctx, " %3d", p->non_intra_quantiser_matrix[i]);
+      }
+    }
+    va_TracePrint (trace_ctx, "}\n");
+
+    va_TraceMsg (trace_ctx, "\tchroma_intra_quantiser_matrix[] = {\n");
+    for (i = 0; i < 64; i++) {
+      if (i % 8 == 0) {
+        if (i)
+          va_TracePrint (trace_ctx, "\n");
+        va_TraceMsg (trace_ctx, "\t %3d", p->chroma_intra_quantiser_matrix[i]);
+      } else {
+        va_TracePrint (trace_ctx, " %3d", p->chroma_intra_quantiser_matrix[i]);
+      }
+    }
+    va_TracePrint (trace_ctx, "}\n");
+
+    va_TraceMsg (trace_ctx, "\tchroma_non_intra_quantiser_matrix[] = {\n");
+    for (i = 0; i < 64; i++) {
+      if (i % 8 == 0) {
+        if (i)
+          va_TracePrint (trace_ctx, "\n");
+        va_TraceMsg (
+            trace_ctx, "\t %3d", p->chroma_non_intra_quantiser_matrix[i]);
+      } else {
+        va_TracePrint (
+            trace_ctx, " %3d", p->chroma_non_intra_quantiser_matrix[i]);
+      }
+    }
+    va_TracePrint (trace_ctx, "}\n");
 
     return;
 }

@@ -27,7 +27,7 @@
 # - reset micro version to zero when minor version is incremented
 # - reset minor version to zero when major version is incremented
 m4_define([va_api_major_version], [1])
-m4_define([va_api_minor_version], [10])
+m4_define([va_api_minor_version], [12])
 m4_define([va_api_micro_version], [0])
 
 m4_define([va_api_version],
@@ -75,7 +75,7 @@ m4_define([libva_lt_age],
           [m4_eval(libva_binary_age - libva_interface_age)])
 
 # libdrm minimun version requirement
-m4_define([libdrm_version], [2.4])
+m4_define([libdrm_version], [2.4.60])
 
 # Wayland minimum version number
 # 1.11.0 for wl_proxy_create_wrapper

@@ -38,6 +38,26 @@
 extern "C" {
 #endif
 
+/** Attribute value for VAConfigAttribDecAV1Features.
+ *
+ * This attribute decribes the supported features of a AV1
+ * decoder configuration.
+ *
+ */
+typedef union VAConfigAttribValDecAV1Features {
+    struct {
+        /** large scale tile
+         *
+         * This conveys whether AV1 large scale tile is supported by HW.
+         * 0 - unsupported, 1 - supported.
+         */
+        uint32_t lst_support     : 2;
+        /* Reserved for future use. */
+        uint32_t reserved        : 30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValDecAV1Features;
+
 /**
  * \brief AV1 Decoding Picture Parameter Buffer Structure
  *
@@ -305,7 +325,6 @@ typedef struct  _VADecPictureParameterBufferAV1
     /** \brief Picture resolution minus 1
      *  Picture original resolution. If SuperRes is enabled,
      *  this is the upscaled resolution.
-     *  The value may not be multiple of 8.
      *  value range [0..65535]
      */
     uint16_t                frame_width_minus1;
@@ -322,7 +341,7 @@ typedef struct  _VADecPictureParameterBufferAV1
      *
      *  Contains a list of uncompressed frame buffer surface indices as references.
      *  Application needs to make sure all the entries point to valid frames
-     *  except for the key frame by checking ref_frame_id[]. If missing frame
+     *  except for intra frames by checking ref_frame_id[]. If missing frame
      *  is identified, application may choose to perform error recovery by
      *  pointing problematic index to an alternative frame buffer.
      *  Driver is not responsible to validate reference frames' id.
@@ -334,10 +353,10 @@ typedef struct  _VADecPictureParameterBufferAV1
      *  Contains a list of indices into ref_frame_map[8].
      *  It specifies the reference frame correspondence.
      *  The indices of the array are defined as [LAST_FRAME – LAST_FRAME,
-     *  LAST2_FRAME – LAST_FRAME, …, ALTREF2_FRAME – LAST_FRAME], where each
+     *  LAST2_FRAME – LAST_FRAME, …, ALTREF_FRAME – LAST_FRAME], where each
      *  symbol is defined as:
      *  enum{INTRA_FRAME = 0, LAST_FRAME, LAST2_FRAME, LAST3_FRAME, GOLDEN_FRAME,
-     *  BWDREF_FRAME, ALTREF_FRAME};
+     *  BWDREF_FRAME, ALTREF2_FRAME, ALTREF_FRAME};
      */
     uint8_t                 ref_frame_idx[7];
 
@@ -356,8 +375,7 @@ typedef struct  _VADecPictureParameterBufferAV1
     VAFilmGrainStructAV1    film_grain_info;
 
     /** \brief tile structure
-     *  When uniform_tile_spacing_flag == 1, the value of tile_cols and
-     *  tile_rows need to be power of 2, and width_in_sbs_minus_1[] and
+     *  When uniform_tile_spacing_flag == 1, width_in_sbs_minus_1[] and
      *  height_in_sbs_minus_1[] should be ignored, which will be generated
      *  by driver based on tile_cols and tile_rows.
      */
@@ -424,7 +442,8 @@ typedef struct  _VADecPictureParameterBufferAV1
     } pic_info_fields;
 
     /** \brief Supper resolution scale denominator.
-     *  value range [9..16]
+     *  When use_superres=1, superres_scale_denominator must be in the range [9..16].
+     *  When use_superres=0, superres_scale_denominator must be 8.
      */
     uint8_t                 superres_scale_denominator;
 
@@ -563,6 +582,21 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 cdef_damping_minus_3;
     /*  value range [0..3]  */
     uint8_t                 cdef_bits;
+
+    /** Encode cdef strength:
+     *
+     * The cdef_y_strengths[] and cdef_uv_strengths[] are expected to be packed
+     * with both primary and secondary strength. The secondary strength is
+     * given in the lower two bits and the primary strength is given in the next
+     * four bits.
+     *
+     * cdef_y_strengths[] & cdef_uv_strengths[] should be derived as:
+     * (cdef_y_strengths[]) = (cdef_y_pri_strength[] << 2) | (cdef_y_sec_strength[] & 0x03)
+     * (cdef_uv_strengths[]) = (cdef_uv_pri_strength[] << 2) | (cdef_uv_sec_strength[] & 0x03)
+     * In which, cdef_y_pri_strength[]/cdef_y_sec_strength[]/cdef_uv_pri_strength[]/cdef_uv_sec_strength[]
+     * are variables defined in AV1 Spec 5.9.19. The cdef_y_strengths[] & cdef_uv_strengths[]
+     * are corresponding to LIBAOM variables cm->cdef_strengths[] & cm->cdef_uv_strengths[] respectively.
+     */
     /*  value range [0..63]  */
     uint8_t                 cdef_y_strengths[8];
     /*  value range [0..63]  */
