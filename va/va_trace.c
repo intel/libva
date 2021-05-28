@@ -9,11 +9,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -144,11 +144,11 @@ struct trace_context {
     char *trace_surface_fn; /* file name */
 
     VAContextID  trace_context; /* current context */
-    
+
     VASurfaceID  trace_rendertarget; /* current render target */
     VAProfile trace_profile; /* current profile for buffers */
     VAEntrypoint trace_entrypoint; /* current entrypoint */
-    
+
     unsigned int trace_frame_no; /* current frame NO */
     unsigned int trace_slice_no; /* current slice NO */
     unsigned int trace_slice_size; /* current slice buffer size */
@@ -255,7 +255,7 @@ struct va_trace {
 #define DPY2TRACE_VIRCTX_EXIT(pva_trace)                                \
     UNLOCK_CONTEXT(pva_trace)
 
-#define TRACE_FUNCNAME(idx)    va_TraceMsg(trace_ctx, "==========%s\n", __func__); 
+#define TRACE_FUNCNAME(idx)    va_TraceMsg(trace_ctx, "==========%s\n", __func__);
 
 #define TRACE_NEWLINE() do { \
     va_TracePrint(trace_ctx, "\n"); \
@@ -282,7 +282,7 @@ VAStatus vaLockSurface(VADisplay dpy,
                        unsigned int *chroma_u_offset,
                        unsigned int *chroma_v_offset,
                        unsigned int *buffer_name,
-                       void **buffer 
+                       void **buffer
                        );
 
 VAStatus vaUnlockSurface(VADisplay dpy,
@@ -1034,7 +1034,7 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
         fwrite(tmp + trace_ctx->trace_surface_xoff,
                trace_ctx->trace_surface_width,
                pixel_byte, trace_ctx->trace_fp_surface);
-        
+
         tmp += luma_stride;
     }
 
@@ -1044,7 +1044,7 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
             fwrite(tmp + trace_ctx->trace_surface_xoff,
                    trace_ctx->trace_surface_width,
                    pixel_byte, trace_ctx->trace_fp_surface);
-            
+
             tmp += chroma_u_stride;
         }
     }
@@ -1081,8 +1081,8 @@ void va_TraceTerminate (
 
 void va_TraceCreateConfig(
     VADisplay dpy,
-    VAProfile profile, 
-    VAEntrypoint entrypoint, 
+    VAProfile profile,
+    VAEntrypoint entrypoint,
     VAConfigAttrib *attrib_list,
     int num_attribs,
     VAConfigID *config_id /* out */
@@ -1093,7 +1093,7 @@ void va_TraceCreateConfig(
     DPY2TRACE_VIRCTX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(trace_ctx, "\tprofile = %d\n", profile);
     va_TraceMsg(trace_ctx, "\tentrypoint = %d\n", entrypoint);
     va_TraceMsg(trace_ctx, "\tnum_attribs = %d\n", num_attribs);
@@ -1135,10 +1135,10 @@ static void va_TraceSurfaceAttributes(
 {
     int i, num;
     VASurfaceAttrib *p;
-    
+
     if (!attrib_list || !num_attribs)
         return;
-    
+
     p = attrib_list;
     num = *num_attribs;
     if (num > VASurfaceAttribCount)
@@ -1146,9 +1146,9 @@ static void va_TraceSurfaceAttributes(
 
     for (i=0; i<num; i++) {
         int type = p->value.type;
-        
+
         va_TraceMsg(trace_ctx, "\tattrib_list[%i] =\n", i);
-        
+
         va_TraceMsg(trace_ctx, "\t\ttype = %d\n", p->type);
         va_TraceMsg(trace_ctx, "\t\tflags = %d\n", p->flags);
         va_TraceMsg(trace_ctx, "\t\tvalue.type = %d\n", type);
@@ -1164,7 +1164,7 @@ static void va_TraceSurfaceAttributes(
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
                 uint32_t j;
-                
+
                 va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
                 va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
                 va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
@@ -1209,7 +1209,7 @@ void va_TraceCreateSurfaces(
     DPY2TRACE_VIRCTX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(trace_ctx, "\twidth = %d\n", width);
     va_TraceMsg(trace_ctx, "\theight = %d\n", height);
     va_TraceMsg(trace_ctx, "\tformat = %d\n", format);
@@ -1219,7 +1219,7 @@ void va_TraceCreateSurfaces(
         for (i = 0; i < num_surfaces; i++)
             va_TraceMsg(trace_ctx, "\t\tsurfaces[%d] = 0x%08x\n", i, surfaces[i]);
     }
-    
+
     va_TraceSurfaceAttributes(trace_ctx, attrib_list, &num_attribs);
 
     va_TraceMsg(trace_ctx, NULL);
@@ -1242,7 +1242,7 @@ void va_TraceDestroySurfaces(
         for (i = 0; i < num_surfaces; i++)
             va_TraceMsg(trace_ctx, "\t\tsurfaces[%d] = 0x%08x\n", i, surface_list[i]);
     }
-    
+
     va_TraceMsg(trace_ctx, NULL);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
@@ -1342,7 +1342,7 @@ void va_TraceCreateContext(
     if(tra_ctx_id >= MAX_TRACE_CTX_NUM) {
         va_errorMessage(dpy, "Can't get trace context for ctx 0x%08x\n",
                 *context);
-        
+
         goto FAIL;
     }
 
@@ -1350,7 +1350,7 @@ void va_TraceCreateContext(
     if(trace_ctx == NULL) {
         va_errorMessage(dpy, "Allocate trace context failed for ctx 0x%08x\n",
                 *context);
-        
+
         goto FAIL;
     }
 
@@ -1559,7 +1559,7 @@ void va_TraceCreateBuffer (
         va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", *buf_id);
     va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
     va_TraceMsg(trace_ctx, "\tnum_elements=%u\n", num_elements);
-    
+
     va_TraceMsg(trace_ctx, NULL);
 }
 
@@ -1577,7 +1577,7 @@ void va_TraceDestroyBuffer (
 
     DPY2TRACECTX(dpy, VA_INVALID_ID, buf_id);
 
-    vaBufferInfo(dpy, trace_ctx->trace_context, buf_id, &type, &size, &num_elements);    
+    vaBufferInfo(dpy, trace_ctx->trace_context, buf_id, &type, &size, &num_elements);
 
     delete_trace_buf_info(pva_trace, buf_id);
 
@@ -1590,7 +1590,7 @@ void va_TraceDestroyBuffer (
     va_TraceMsg(trace_ctx, "\tbuf_id=0x%x\n", buf_id);
     va_TraceMsg(trace_ctx, "\tsize=%u\n", size);
     va_TraceMsg(trace_ctx, "\tnum_elements=%u\n", num_elements);
-    
+
     va_TraceMsg(trace_ctx, NULL);
 }
 
@@ -1658,13 +1658,13 @@ void va_TraceMapBuffer (
     VABufferType type;
     unsigned int size;
     unsigned int num_elements;
-    
+
     VACodedBufferSegment *buf_list;
     int i = 0;
 
     DPY2TRACECTX(dpy, VA_INVALID_ID, buf_id);
 
-    vaBufferInfo(dpy, trace_ctx->trace_context, buf_id, &type, &size, &num_elements);    
+    vaBufferInfo(dpy, trace_ctx->trace_context, buf_id, &type, &size, &num_elements);
 
     /* only trace CodedBuffer */
     if (type != VAEncCodedBufferType)
@@ -1684,7 +1684,7 @@ void va_TraceMapBuffer (
     buf_list = (VACodedBufferSegment *)(*pbuf);
     while (buf_list != NULL) {
         va_TraceMsg(trace_ctx, "\tCodedbuf[%d] =\n", i++);
-        
+
         va_TraceMsg(trace_ctx, "\t   size = %u\n", buf_list->size);
         va_TraceMsg(trace_ctx, "\t   bit_offset = %u\n", buf_list->bit_offset);
         va_TraceMsg(trace_ctx, "\t   status = 0x%08x\n", buf_list->status);
@@ -1697,7 +1697,7 @@ void va_TraceMapBuffer (
 
             fflush(trace_ctx->trace_fp_codedbuf);
         }
-        
+
         buf_list = buf_list->next;
     }
     va_TraceMsg(trace_ctx, NULL);
@@ -1718,7 +1718,7 @@ static void va_TraceVABuffers(
     FILE *fp = NULL;
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TracePrint(trace_ctx, "--%s\n", vaBufferTypeStr(type));
 
     if(trace_ctx->plog_file)
@@ -1737,7 +1737,7 @@ static void va_TraceVABuffers(
         }
         fprintf(fp, "\n");
     }
-    
+
     va_TraceMsg(trace_ctx, NULL);
 
     return;
@@ -1870,7 +1870,7 @@ static void va_TraceVASliceParameterBufferMPEG2(
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     trace_ctx->trace_slice_no++;
-    
+
     trace_ctx->trace_slice_size = p->slice_data_size;
 
     va_TraceMsg(trace_ctx,"VASliceParameterBufferMPEG2\n");
@@ -2026,7 +2026,7 @@ static void va_TraceVAPictureParameterBufferMPEG4(
 {
     int i;
     VAPictureParameterBufferMPEG4 *p=(VAPictureParameterBufferMPEG4 *)data;
-    
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     va_TraceMsg(trace_ctx,"*VAPictureParameterBufferMPEG4\n");
@@ -2138,9 +2138,9 @@ static void va_TraceVAEncSequenceParameterBufferMPEG4(
 {
     VAEncSequenceParameterBufferMPEG4 *p = (VAEncSequenceParameterBufferMPEG4 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferMPEG4\n");
-    
+
     va_TraceMsg(trace_ctx, "\tprofile_and_level_indication = %d\n", p->profile_and_level_indication);
     va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
     va_TraceMsg(trace_ctx, "\tvideo_object_layer_width = %d\n", p->video_object_layer_width);
@@ -2168,7 +2168,7 @@ static void va_TraceVAEncPictureParameterBufferMPEG4(
 {
     VAEncPictureParameterBufferMPEG4 *p = (VAEncPictureParameterBufferMPEG4 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferMPEG4\n");
     va_TraceMsg(trace_ctx, "\treference_picture = 0x%08x\n", p->reference_picture);
     va_TraceMsg(trace_ctx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
@@ -2194,7 +2194,7 @@ static void va_TraceVASliceParameterBufferMPEG4(
     void *data)
 {
     VASliceParameterBufferMPEG4 *p=(VASliceParameterBufferMPEG4 *)data;
-    
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     trace_ctx->trace_slice_no++;
@@ -2953,7 +2953,7 @@ static void va_TraceVAPictureParameterBufferH264(
 {
     int i;
     VAPictureParameterBufferH264 *p = (VAPictureParameterBufferH264*)data;
-    
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferH264\n");
@@ -3317,7 +3317,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
 
     if (!p)
         return;
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferH264\n");
     va_TraceMsg(trace_ctx, "\tmacroblock_address = %u\n", p->macroblock_address);
     va_TraceMsg(trace_ctx, "\tnum_macroblocks = %u\n", p->num_macroblocks);
@@ -3336,8 +3336,8 @@ static void va_TraceVAEncSliceParameterBufferH264(
 
     va_TraceMsg(trace_ctx, "\tRefPicList0 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
 
-    
-    
+
+
     for (i = 0; i < 32; i++) {
         if ((p->RefPicList0[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->RefPicList0[i].flags & VA_PICTURE_H264_INVALID) == 0))
@@ -3350,7 +3350,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
         else
             break;
     }
-    
+
     va_TraceMsg(trace_ctx, "\tRefPicList1 (TopFieldOrderCnt-BottomFieldOrderCnt-picture_id-frame_idx-flags):\n");
     for (i = 0; i < 32; i++) {
         if ((p->RefPicList1[i].picture_id != VA_INVALID_SURFACE) &&
@@ -3365,7 +3365,7 @@ static void va_TraceVAEncSliceParameterBufferH264(
         else
             break;
     }
-    
+
     va_TraceMsg(trace_ctx, "\tluma_log2_weight_denom = %d\n", p->luma_log2_weight_denom);
     va_TraceMsg(trace_ctx, "\tchroma_log2_weight_denom = %d\n", p->chroma_log2_weight_denom);
     va_TraceMsg(trace_ctx, "\tluma_weight_l0_flag = %d\n", p->luma_weight_l0_flag);
@@ -3454,7 +3454,7 @@ static void va_TraceVAEncMiscParameterBuffer(
 {
     VAEncMiscParameterBuffer* tmp = (VAEncMiscParameterBuffer*)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     switch (tmp->type) {
     case VAEncMiscParameterTypeFrameRate:
     {
@@ -3491,7 +3491,7 @@ static void va_TraceVAEncMiscParameterBuffer(
     case VAEncMiscParameterTypeMaxSliceSize:
     {
         VAEncMiscParameterMaxSliceSize *p = (VAEncMiscParameterMaxSliceSize *)tmp->data;
-        
+
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTypeMaxSliceSize\n");
         va_TraceMsg(trace_ctx, "\tmax_slice_size = %d\n", p->max_slice_size);
         break;
@@ -3499,7 +3499,7 @@ static void va_TraceVAEncMiscParameterBuffer(
     case VAEncMiscParameterTypeAIR:
     {
         VAEncMiscParameterAIR *p = (VAEncMiscParameterAIR *)tmp->data;
-        
+
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterAIR\n");
         va_TraceMsg(trace_ctx, "\tair_num_mbs = %d\n", p->air_num_mbs);
         va_TraceMsg(trace_ctx, "\tair_threshold = %d\n", p->air_threshold);
@@ -3647,13 +3647,13 @@ static void va_TraceVAPictureParameterBufferVC1(
 {
     VAPictureParameterBufferVC1* p = (VAPictureParameterBufferVC1*)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferVC1\n");
-    
+
     va_TraceMsg(trace_ctx, "\tforward_reference_picture = 0x%08x\n", p->forward_reference_picture);
     va_TraceMsg(trace_ctx, "\tbackward_reference_picture = 0x%08x\n", p->backward_reference_picture);
     va_TraceMsg(trace_ctx, "\tinloop_decoded_picture = 0x%08x\n", p->inloop_decoded_picture);
-    
+
     va_TraceMsg(trace_ctx, "\tpulldown = %d\n", p->sequence_fields.bits.pulldown);
     va_TraceMsg(trace_ctx, "\tinterlace = %d\n", p->sequence_fields.bits.interlace);
     va_TraceMsg(trace_ctx, "\ttfcntrflag = %d\n", p->sequence_fields.bits.tfcntrflag);
@@ -4284,7 +4284,7 @@ static void va_TraceVAEncPictureParameterBufferVP8(
     va_TraceMsg(trace_ctx, "\tref_flags.bits.no_ref_gf = %d\n", p->ref_flags.bits.no_ref_gf);
     va_TraceMsg(trace_ctx, "\tref_flags.bits.no_ref_arf = %d\n", p->ref_flags.bits.no_ref_arf);
     va_TraceMsg(trace_ctx, "\tref_flags.bits.no_ref_arf = 0x%08x\n", p->ref_flags.bits.reserved);
-    
+
     va_TraceMsg(trace_ctx, "\tpic_flags.bits.frame_type = %d\n", p->pic_flags.bits.frame_type);
     va_TraceMsg(trace_ctx, "\tpic_flags.bits.version = %d\n", p->pic_flags.bits.version);
     va_TraceMsg(trace_ctx, "\tpic_flags.bits.show_frame = %d\n", p->pic_flags.bits.show_frame);
@@ -4579,9 +4579,9 @@ static void va_TraceVAEncSequenceParameterBufferH263(
 {
     VAEncSequenceParameterBufferH263 *p = (VAEncSequenceParameterBufferH263 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferH263\n");
-    
+
     va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
     va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
     va_TraceMsg(trace_ctx, "\tframe_rate = %d\n", p->frame_rate);
@@ -4604,7 +4604,7 @@ static void va_TraceVAEncPictureParameterBufferH263(
 {
     VAEncPictureParameterBufferH263 *p = (VAEncPictureParameterBufferH263 *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferH263\n");
     va_TraceMsg(trace_ctx, "\treference_picture = 0x%08x\n", p->reference_picture);
     va_TraceMsg(trace_ctx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
@@ -4628,9 +4628,9 @@ static void va_TraceVAEncPictureParameterBufferJPEG(
 {
     VAEncPictureParameterBufferJPEG *p = (VAEncPictureParameterBufferJPEG *)data;
     int i;
-    
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferJPEG\n");
     va_TraceMsg(trace_ctx, "\treconstructed_picture = 0x%08x\n", p->reconstructed_picture);
     va_TraceMsg(trace_ctx, "\tcoded_buf = %08x\n", p->coded_buf);
@@ -4672,7 +4672,7 @@ static void va_TraceVAEncQMatrixBufferJPEG(
 {
     VAQMatrixBufferJPEG *p = (VAQMatrixBufferJPEG *)data;
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAQMatrixBufferJPEG\n");
     va_TraceMsg(trace_ctx, "\tload_lum_quantiser_matrix = %d", p->load_lum_quantiser_matrix);
     if (p->load_lum_quantiser_matrix) {
@@ -4694,9 +4694,9 @@ static void va_TraceVAEncQMatrixBufferJPEG(
         }
         va_TraceMsg(trace_ctx, "\n");
     }
-    
+
     va_TraceMsg(trace_ctx, NULL);
-    
+
     return;
 }
 
@@ -4712,9 +4712,9 @@ static void va_TraceVAEncSliceParameterBufferJPEG(
 {
     VAEncSliceParameterBufferJPEG *p = (VAEncSliceParameterBufferJPEG *)data;
     int i;
-    
+
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferJPEG\n");
     va_TraceMsg(trace_ctx, "\trestart_interval = 0x%04x\n", p->restart_interval);
     va_TraceMsg(trace_ctx, "\tnum_components = 0x%08x\n", p->num_components);
@@ -4724,9 +4724,9 @@ static void va_TraceVAEncSliceParameterBufferJPEG(
         va_TraceMsg(trace_ctx, "\t\tdc_table_selector = %d\n", p->components[i].dc_table_selector);
         va_TraceMsg(trace_ctx, "\t\tac_table_selector = %d\n", p->components[i].ac_table_selector);
     }
-    
+
     va_TraceMsg(trace_ctx, NULL);
-    
+
     return;
 }
 
@@ -4954,7 +4954,7 @@ static void va_TraceH264Buf(
 )
 {
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
-    
+
     switch (type) {
     case VAPictureParameterBufferType:
         va_TraceVAPictureParameterBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -4963,7 +4963,7 @@ static void va_TraceH264Buf(
         va_TraceVAIQMatrixBufferH264(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VABitPlaneBufferType:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);        
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VASliceGroupMapBufferType:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -4975,10 +4975,10 @@ static void va_TraceH264Buf(
         va_TraceVABuffers(dpy, context, buffer, type, trace_ctx->trace_slice_size, num_elements, pbuf);
         break;
     case VAMacroblockParameterBufferType:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);        
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAResidualDataBufferType:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);        
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VADeblockingParameterBufferType:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
@@ -5005,7 +5005,7 @@ static void va_TraceH264Buf(
     case VAEncPackedHeaderParameterBufferType:
         va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
-        
+
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -5432,16 +5432,16 @@ void va_TraceRenderPicture(
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(trace_ctx, "\tnum_buffers = %d\n", num_buffers);
     if (buffers == NULL)
         return;
-    
+
     for (i = 0; i < num_buffers; i++) {
         unsigned char *pbuf = NULL;
         unsigned int j;
-        
+
         /* get buffer type information */
         vaBufferInfo(dpy, context, buffers[i], &type, &size, &num_elements);
 
@@ -5454,7 +5454,7 @@ void va_TraceRenderPicture(
         vaMapBuffer(dpy, buffers[i], (void **)&pbuf);
         if (pbuf == NULL)
             continue;
-        
+
         switch (trace_ctx->trace_profile) {
         case VAProfileMPEG2Simple:
         case VAProfileMPEG2Main:
@@ -5476,7 +5476,7 @@ void va_TraceRenderPicture(
         case VAProfileH264ConstrainedBaseline:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
-                
+
                 va_TraceH264Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
@@ -5485,21 +5485,21 @@ void va_TraceRenderPicture(
         case VAProfileVC1Advanced:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
-                
+
                 va_TraceVC1Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         case VAProfileH263Baseline:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
-                
+
                 va_TraceH263Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
         case VAProfileJPEGBaseline:
             for (j=0; j<num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] =\n", j);
-                
+
                 va_TraceJPEGBuf (dpy, context, buffers[i], type, size, num_elements, pbuf + size*j);
             }
             break;
@@ -5598,7 +5598,7 @@ void va_TraceEndPictureExt(
     if ((encode && (va_trace_flag & VA_TRACE_FLAG_SURFACE_ENCODE))||
         (jpeg && (va_trace_flag & VA_TRACE_FLAG_SURFACE_JPEG)))
         va_TraceSurface(dpy, context);
-    
+
     /* trace decoded surface, do it after HW completes rendering */
     if (decode && ((va_trace_flag & VA_TRACE_FLAG_SURFACE_DECODE))) {
         vaSyncSurface(dpy, trace_ctx->trace_rendertarget);
@@ -5651,7 +5651,7 @@ void va_TraceQuerySurfaceAttributes(
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tconfig = 0x%08x\n", config);
     va_TraceSurfaceAttributes(trace_ctx, attrib_list, num_attribs);
-    
+
     va_TraceMsg(trace_ctx, NULL);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
@@ -5728,7 +5728,7 @@ void va_TraceMaxNumDisplayAttributes (
     DPY2TRACE_VIRCTX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(trace_ctx, "\tmax_display_attributes = %d\n", number);
     va_TraceMsg(trace_ctx, NULL);
 
@@ -5750,7 +5750,7 @@ void va_TraceQueryDisplayAttributes (
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tnum_attributes = %d\n", *num_attributes);
-    
+
     for (i=0; i<*num_attributes; i++) {
         va_TraceMsg(trace_ctx, "\tattr_list[%d] =\n", i);
         va_TraceMsg(trace_ctx, "\t  type = 0x%08x\n", attr_list[i].type);
@@ -5841,7 +5841,7 @@ void va_TracePutSurface (
     DPY2TRACE_VIRCTX(dpy);
 
     TRACE_FUNCNAME(idx);
-    
+
     va_TraceMsg(trace_ctx, "\tsurface = 0x%08x\n", surface);
     va_TraceMsg(trace_ctx, "\tdraw = 0x%p\n", draw);
     va_TraceMsg(trace_ctx, "\tsrcx = %d\n", srcx);
