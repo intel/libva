@@ -2305,7 +2305,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
     {
         if ((p->ReferenceFrames[i].picture_id != VA_INVALID_SURFACE) &&
             ((p->ReferenceFrames[i].flags & VA_PICTURE_HEVC_INVALID) == 0)) {
-            va_TraceMsg(trace_ctx, "\t\t%08d-%08d-0x%08x\n",
+            va_TraceMsg(trace_ctx, "\t\t0x%08x-%08d-0x%08x\n",
                         p->ReferenceFrames[i].picture_id,
                         p->ReferenceFrames[i].pic_order_cnt,
                         p->ReferenceFrames[i].flags);
@@ -2788,13 +2788,13 @@ static void va_TraceVAEncPictureParameterBufferHEVC(
 
     va_TracePrint(trace_ctx, "\t--VAEncPictureParameterBufferHEVC\n");
 
-    va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.picture_id = %d\n", p->decoded_curr_pic.picture_id);
+    va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.picture_id = 0x%08x\n", p->decoded_curr_pic.picture_id);
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.pic_order_cnt = %d\n", p->decoded_curr_pic.pic_order_cnt);
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.flags = %d\n", p->decoded_curr_pic.flags);
 
     for(i = 0; i < 15; i ++)
     {
-        va_TraceMsg(trace_ctx, "\treference_frames[%d].picture_id = %d\n", i, p->reference_frames[i].picture_id);
+        va_TraceMsg(trace_ctx, "\treference_frames[%d].picture_id = 0x%08x\n", i, p->reference_frames[i].picture_id);
         va_TraceMsg(trace_ctx, "\treference_frames[%d].pic_order_cnt = %d\n", i, p->reference_frames[i].pic_order_cnt);
         va_TraceMsg(trace_ctx, "\treference_frames[%d].flags = %d\n", i, p->reference_frames[i].flags);
     }
@@ -2881,10 +2881,10 @@ static void va_TraceVAEncSliceParameterBufferHEVC(
 
     for(i = 0; i < 15; i ++)
     {
-        va_TraceMsg(trace_ctx, "\tref_pic_list0[%d].picture_id = %d\n", i, p->ref_pic_list0[i].picture_id);
+        va_TraceMsg(trace_ctx, "\tref_pic_list0[%d].picture_id = 0x%08x\n", i, p->ref_pic_list0[i].picture_id);
         va_TraceMsg(trace_ctx, "\tref_pic_list0[%d].pic_order_cnt = %d\n", i, p->ref_pic_list0[i].pic_order_cnt);
         va_TraceMsg(trace_ctx, "\tref_pic_list0[%d].flags = %d\n", i, p->ref_pic_list0[i].flags);
-        va_TraceMsg(trace_ctx, "\tref_pic_list1[%d].picture_id = %d\n", i, p->ref_pic_list1[i].picture_id);
+        va_TraceMsg(trace_ctx, "\tref_pic_list1[%d].picture_id = 0x%08x\n", i, p->ref_pic_list1[i].picture_id);
         va_TraceMsg(trace_ctx, "\tref_pic_list1[%d].pic_order_cnt = %d\n", i, p->ref_pic_list1[i].pic_order_cnt);
         va_TraceMsg(trace_ctx, "\tref_pic_list1[%d].flags = %d\n", i, p->ref_pic_list1[i].flags);
     }
