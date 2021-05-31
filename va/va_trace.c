@@ -4156,12 +4156,12 @@ static void va_TraceVAPictureParameterBufferAV1(
       va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.ar_coeffs_cb[%d] = %d\n", i, p->film_grain_info.ar_coeffs_cb[i]);
     for (i=0;i<25;i++)
       va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.ar_coeffs_cr[%d] = %d\n", i, p->film_grain_info.ar_coeffs_cr[i]);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_mult = %d\n", i, p->film_grain_info.cb_mult);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_luma_mult = %d\n", i, p->film_grain_info.cb_luma_mult);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_offset = %d\n", i, p->film_grain_info.cb_offset);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_mult = %d\n", i, p->film_grain_info.cr_mult);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_luma_mult = %d\n", i, p->film_grain_info.cr_luma_mult);
-    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_offset = %d\n", i, p->film_grain_info.cr_offset);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_mult = %d\n", p->film_grain_info.cb_mult);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_luma_mult = %d\n", p->film_grain_info.cb_luma_mult);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cb_offset = %d\n", p->film_grain_info.cb_offset);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_mult = %d\n", p->film_grain_info.cr_mult);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_luma_mult = %d\n", p->film_grain_info.cr_luma_mult);
+    va_TraceMsg(trace_ctx, "\t\tfilm_grain_info.cr_offset = %d\n", p->film_grain_info.cr_offset);
 
     va_TraceMsg(trace_ctx, "\ttile_cols = %d\n", p->tile_cols);
     va_TraceMsg(trace_ctx, "\ttile_rows = %d\n", p->tile_rows);
