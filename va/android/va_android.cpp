@@ -44,7 +44,7 @@
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/dri/renderD128"
 
-static int open_device (char *dev_name)
+static int open_device (char const *dev_name)
 {
     struct stat st;
     int fd;
@@ -106,16 +106,7 @@ static VAStatus va_DisplayContextGetNumCandidates(
 )
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
 
-    memset(drm_state, 0, sizeof(*drm_state));
-    drm_state->fd = open_device((char *)DEVICE_NAME);
-
-    if (drm_state->fd < 0) {
-        fprintf(stderr,"can't open DRM devices\n");
-        return VA_STATUS_ERROR_UNKNOWN;
-    }
-    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
     return VA_DRM_GetNumCandidates(ctx, num_candidates);
 }
 
@@ -166,6 +157,68 @@ VADisplay vaGetDisplay (
         free(pDriverContext);
         return NULL;
     }
+
+    memset(drm_state, 0, sizeof(*drm_state));
+
+    drm_state->fd = open_device((char *)DEVICE_NAME);
+    if (drm_state->fd < 0) {
+        fprintf(stderr,"can't open DRM devices\n");
+        return NULL;
+    }
+
+    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
+
+    pDriverContext->drm_state = drm_state;
+
+    return (VADisplay)pDisplayContext;
+}
+
+VADisplay vaGetDisplay2 (
+    void *native_dpy, /* implementation specific */
+    char const *dev_name
+)
+{
+    VADisplayContextP pDisplayContext;
+    VADriverContextP  pDriverContext;
+    struct drm_state *drm_state;
+
+    if (!native_dpy || !dev_name)
+        return NULL;
+
+    pDisplayContext = va_newDisplayContext();
+    if (!pDisplayContext)
+        return NULL;
+
+    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
+    pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
+    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
+    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
+
+    pDriverContext = va_newDriverContext(pDisplayContext);
+    if (!pDriverContext) {
+        free(pDisplayContext);
+        return NULL;
+    }
+
+    pDriverContext->native_dpy   = (void *)native_dpy;
+    pDriverContext->display_type = VA_DISPLAY_ANDROID;
+
+    drm_state = (struct drm_state*)calloc(1, sizeof(*drm_state));
+    if (!drm_state) {
+        free(pDisplayContext);
+        free(pDriverContext);
+        return NULL;
+    }
+
+    memset(drm_state, 0, sizeof(*drm_state));
+
+    drm_state->fd = open_device(dev_name);
+    if (drm_state->fd < 0) {
+        fprintf(stderr,"can't open DRM devices\n");
+        return NULL;
+    }
+
+    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
 
     pDriverContext->drm_state = drm_state;
 

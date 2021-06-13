@@ -42,6 +42,11 @@ VADisplay vaGetDisplay (
     void *android_dpy
 );
 
+VADisplay vaGetDisplay2 (
+    void *android_dpy,
+    char const *dev_name
+);
+
 #ifdef __cplusplus
 }
 #endif
