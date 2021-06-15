@@ -419,8 +419,16 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
               * application would enable Qp Modulation
               */
             uint32_t    hierachical_flag                               : 1;
+            /** \brief Indicates whether or not the encoding is in the Look Ahead pass.
+             *  if \c lookahead_analysis_support in #VAConfigAttribValLookAhead is on
+             *  and \c lookahead_depth > 0, this flag on indicates the current encoding is
+             *  in the Look Ahead analysis phase, and CQP is suggested for this phase.
+             *  this flag off indicates that the current encoding is in the actual full
+             *  encoding phase, and one of the BRC modes (CBR, VBR, etc.) should be selected.
+             */
+            uint32_t    lookahead_phase                                : 1;
             /** \brief keep for future , should be set to 0 */
-            uint32_t    reserved_bits                                  : 14;
+            uint32_t    reserved_bits                                  : 13;
         } bits;
         uint32_t value;
     } seq_fields;
@@ -524,8 +532,73 @@ typedef struct _VAEncSequenceParameterBufferHEVC {
         } bits;
         uint32_t value;
     } scc_fields;
-    /** \brief Reserved bytes for future use, must be zero */
-    uint32_t   va_reserved[VA_PADDING_MEDIUM - 1];
+
+    /**
+     * \brief Number of frames to lookahead.
+     *
+     * Default is 0 which means lookahead disabled, Applicable for LookAhead analysis phase.
+     * Valid only when \c lookahead_analysis_support == 1.
+     * value range: [0..100].
+     */
+    uint8_t     lookahead_depth;
+
+    /** \brief Allowed minimal IDR distance used for adaptive GOP decision.
+     *  Applicable for LookAhead analysis phase, valid only when \c lookahead_phase == 1.
+     *  The \c encode_hints.bits.intra_hint in VALookAheadInfo will be set in driver and reported
+     *  for LookAhead encoding phase according to this value and \c max_intra_period.
+     */
+    uint8_t     min_intra_period;
+
+    /** \brief Allowed maximal IDR distance used for adaptive GOP decision.
+     *  Applicable for LookAhead analysis phase, valid only when \c lookahead_phase == 1.
+     *  The \c encode_hints.bits.intra_hint in VALookAheadInfo will be set in driver and reported
+     *  for LookAhead encoding phase according to this value and \c min_intra_period.
+     */
+    uint16_t    max_intra_period;
+
+    /** \brief Allowed Maximal mini GOP distance used for adaptive GOP decision.
+     *  Applicable for LookAhead analysis phase, valid only when \c lookahead_phase == 1.
+     *  The \c encode_hints.bits.mini_gop_size in VALookAheadInfo will be set in driver and reported
+     *  for LookAhead encoding phase according to this value.
+     *
+     *  Default value 0 indicates no limit of mini GOP size is set.
+     *  Value range: [0, 1, 2, 4, 8, 16].
+     */
+    uint8_t     max_mini_gop;
+
+    /**
+     * \brief Value conveyed to the look ahead analysis phase about the encoding structure
+     *  setting of the full encoding pass. Valid only when lookahead_phase == 1, Otherwise
+     *  its value should be set to 0 and ignored by driver.
+     */
+    union {
+        struct {
+            /**
+             * \brief Equal 1 indicates the GOP structure is a closed GOP. Equal 0 indicates
+             * it is an open GOP. Default value is 0.
+             * Closed GOP means frame in one GOP has no refs to other GOP. on the contrary,
+             * Open GOP means some frames in one GOP have refs to other GOP.
+             */
+            uint8_t    closed_gop   : 1;
+            /**
+             * \brief Equal 1 indicates the encoder must strictly follow the given GOP structure
+             * as defined by parameter \c intra_period, \c ip_period etc. Otherwise, the encoder can
+             * adapt the GOP structure for better efficiency, whose range is constrained by
+             * parameter \c intra_period and \c ip_period etc.
+             */
+            uint8_t    strict_gop   : 1;
+            /**
+             * \brief Equal 1 indicates the GOP/mini GOP structures are subjected to change
+             * in the sequence. Equal 0 indicates that the the GOP/mini GOP structures are fixed
+             * in the sequence. Default value is 0.
+             */
+            uint8_t    adaptive_gop : 1;
+            uint8_t    reserved     : 5;
+        } bits;
+        uint8_t value;
+    } gop_fields;
+
+    uint32_t   va_reserved[VA_PADDING_MEDIUM - 3];
     /**@}*/
 } VAEncSequenceParameterBufferHEVC;
 
@@ -746,8 +819,39 @@ typedef struct _VAEncPictureParameterBufferHEVC {
         } bits;
         uint16_t value;
     } scc_fields;
+
+    /**
+     * \brief This Value indicates the source downscaling ratio for look
+     * ahead analysis phase. valid only when \c lookahead_phase == 1, Otherwise,
+     * the parameter should be ignored.
+     * x and y scaling ratio should be the same.
+     */
+    union {
+        struct {
+            /**
+             * \brief Horizontal scaling ratio = (x16_minus1_x + 1) / 16
+             */
+            uint8_t    x16_minus1_x : 4;
+            /**
+             * \brief vertical scaling ratio = (x16_minus1_y + 1) / 16
+             */
+            uint8_t    x16_minus1_y : 4;
+        } bits;
+        uint8_t    value;
+    } downscale_ratio;
+
+    /**
+     * \brief Suggestion of the strength of applying Qp delta for the frame
+     * specified when Qp modulation is enabled (\c hierachical_flag == 1). This
+     * is a relative number. BRC could use it to infer final delta Qp values
+     * for hierarchical frames in mini Gop structure.
+     *
+     * Default value 0 means no suggestion for Qp modulation. 7 is the highest strength.
+     * Value range: [0..7]
+     */
+    uint8_t qp_modulation_strength;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_HIGH - 1];
+    uint32_t                va_reserved[VA_PADDING_HIGH - 2];
 } VAEncPictureParameterBufferHEVC;
 
 /**

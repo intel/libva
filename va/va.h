@@ -1028,6 +1028,11 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /** \brief lookahead feature.  Read-only.
+     * This attribute describes the supported feature of lookahead.
+     * The vaule returned uses the VAConfigAttribValLookAhead type.
+     */
+    VAConfigAttribLookAhead             = 56,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1422,6 +1427,46 @@ typedef union _VAConfigAttribValEncPerBlockControl {
     } bits;
     uint32_t value;
 } VAConfigAttribValEncPerBlockControl;
+
+/**
+ * \brief Attribute value for VAConfigAttribLookAhead
+ *  This attrib is for Look ahead BRC which consists of two phases: analysis phase, and full encoding phase.
+ *  The analysis phase is indicated by \c lookahead_analysis_support.
+ *  The full encoding phase is indicated by \c lookahead_brc_support.
+ *  More details can be found in \c LookAheadInfo.
+ */
+typedef union _VAConfigAttribValLookAhead {
+    struct {
+        /** \brief Analysis phase for look ahead is supported. In lookahead analysis phase, driver outputs
+         *  lookahead analysis results to \c VACodedBufferSegment.lpla_info_hint, and application
+         *  should ignore encoded bitstream.
+         */
+        uint32_t lookahead_analysis_support    : 1;
+        /** \brief Full encoding phase for look ahead is supported. */
+        uint32_t lookahead_brc_support         : 1;
+        /**
+         * \brief Allowed horizontal downscaling ratio setting( \c x16_minus1_x ) in PPS for LookAhead analysis phase.
+         * (x_ratio_supported & 0x01) == 1: 1x downscaling ratio is supported, 0: not.
+         * (y_ratio_supported & 0x02) == 1: 2x downscaling ratio is supported, 0: not.
+         * (x_ratio_supported & 0x04) == 1: 4x downscaling ratio is supported, 0: not.
+         * (x_ratio_supported & 0x08) == 1: 8x downscaling ratio is supported, 0: not.
+         * (x_ratio_supported & 0x10) == 1: 16x downscaling ratio is supported, 0: not.
+         */
+        uint32_t x_ratio_supported             : 8;
+        /**
+         * \brief Allowed vertical downscaling ratio setting( \c x16_minus1_y ) in PPS for LookAhead analysis phase.
+         * (y_ratio_supported & 0x01) == 1: 1x downscaling ratio is supported, 0: not.
+         * (y_ratio_supported & 0x02) == 1: 2x downscaling ratio is supported, 0: not.
+         * (y_ratio_supported & 0x04) == 1: 4x downscaling ratio is supported, 0: not.
+         * (y_ratio_supported & 0x08) == 1: 8x downscaling ratio is supported, 0: not.
+         * (y_ratio_supported & 0x10) == 1: 16x downscaling ratio is supported, 0: not.
+         */
+        uint32_t y_ratio_supported             : 8;
+        /** \brief reserved for future extension, must be zero */
+        uint32_t reserved                      : 14;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValLookAhead;
 
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
@@ -3824,6 +3869,128 @@ VAStatus vaBufferSetNumElements(
 #define VA_CODED_BUF_STATUS_SINGLE_NALU                 0x10000000
 
 /**
+ * \brief Look Ahead Info.
+ * 
+ * When lookahead_phase equals 1, the information in this data structure
+ * describes the suggestions of encoding parameters for full encode pass
+ * about a frame already encoded in the look ahead pass.
+ * 
+ * Look ahead BRC consists of two phases: analysis phase, and full encoding phase.
+ * The relationship between the look ahead pass and full encode pass is illustrated
+ * by an example below:
+ *                 |-lookahead_depth-|
+ * Look ahead pass : 0    1    2    3    4    5 
+ *                    \___ \___ \___ \___ \___ \___
+ *                        \    \    \    \    \    \
+ *                         \___ \___ \___ \___ \___ \___
+ *                             \    \    \    \    \    \
+ *                              \__  \__  \__  \__  \__  \__
+ *                                 \    \    \    \    \    \
+ * Full encode pass:                 0    1    2    3    4    5
+ * 
+ * The sequence contains 6 frames and lookahead_depth set to 4.
+ * In look ahead pass, the returned \ref VALookAheadInfo.encode_hints.valid_info are all
+ * 0 for frames 0, 1, 2, and frame 3 reports VALookAheadInfo.encode_hints.valid_info = 1.
+ * In full encode pass, it will start to encode frame 0 according to the suggestions of
+ * encoding parameters(VALookAheadInfo) returned from look ahead pass at frame 3, encode
+ * frame 1 according to the suggestions of encoding parameters(VALookAheadInfo) returned
+ * from look ahead pass at frame 4, and so on for later frames.
+ *
+ */
+typedef struct _VALookAheadInfo
+{
+    union {
+        struct {
+            /**
+             * \brief This flag indicates Look Ahead suggestions are valid for full encode pass.
+             *
+             * 1 if valid, Otherwise, all other info should be set to 0 and ignored by app.
+             */
+            uint32_t valid_info   : 1;
+            /**
+             * \brief Value indicates suggestion whether or not to apply Custom Quantization Matrix.
+             *
+             * 0x00 - invalid hint
+             * 0x01 - flat matrix
+             * 0x02 - weak customized matrix
+             * 0x03 - medium customized matrix
+             * 0x04 - strong customized matrix
+             * 0x05 - extrem customized matrix
+             * other values are reserved.
+             * 
+             * flat/weak/medium/strong/extreme mean different step size level for custom quantization matrix.
+             * Flat matrix means all coefficients use the same scaling value.
+             * Extreme customized matrix indicates matrix with smallest step size for low freq coefficients.
+             * App may decide how to set quantization matrix based on this suggestion.
+             * Examples for different level customized matrix listed below:
+             *      Weak Customized Matrix                         Medium Customized Matrix
+             *     {                                              {
+             *      16,16,26,31,36,41,46,52,                       19,19,26,31,36,41,46,52,
+             *      16,26,31,36,41,46,52,57,                       19,26,31,36,41,46,52,57,
+             *      26,31,36,41,46,52,57,63,                       26,31,36,41,46,52,57,63,
+             *      31,36,41,46,52,57,63,68,                       31,36,41,46,52,57,63,68,
+             *      36,41,46,52,57,63,68,74,                       36,41,46,52,57,63,68,74,
+             *      41,46,52,57,63,68,74,80,                       41,46,52,57,63,68,74,80,
+             *      46,52,57,63,68,74,80,86,                       46,52,57,63,68,74,80,86,
+             *      52,57,63,68,74,80,86,91                        52,57,63,68,74,80,86,91
+             *     }                                              }
+             *
+             *      Strong Customized Matrix                       Extrem Customized Matrix
+             *     {                                              {
+             *      25,25,26,31,36,41,46,52,                       40,40,41,42,43,45,48,52,
+             *      25,26,31,36,41,46,52,57,                       40,41,42,43,45,48,52,57,
+             *      26,31,36,41,46,52,57,63,                       41,42,43,45,48,52,57,63,
+             *      31,36,41,46,52,57,63,68,                       42,43,45,48,52,57,63,70,
+             *      36,41,46,52,57,63,68,74,                       43,45,48,52,57,63,70,78,
+             *      41,46,52,57,63,68,74,80,                       45,48,52,57,63,70,78,87,
+             *      46,52,57,63,68,74,80,86,                       48,52,57,63,70,78,87,97,
+             *      52,57,63,68,74,80,86,91                        52,57,63,70,78,87,97,108
+             *     }                                              }
+             */
+            uint32_t cqm_hint     : 8;
+            /**
+             * \brief A flag indicates suggestion whether the frame should be coded as Intra.
+             *
+             * 0 - invalid hint
+             * 1 - frame suggested to be coded as intra.
+             * 2 - frame suggested to be coded as inter.
+             */
+            uint32_t intra_hint   : 2;
+            /**
+             * \brief Value indicates suggestion of mini GOP.
+             *
+             * Set \c ip_period in SPS when this suggested value is used by app.
+             * Value 0 indicates no suggestion of mini GOP size is available.
+             */
+            uint32_t mini_gop_size : 8;
+            /** \brief Reserved bytes for future use, must be zero. */
+            uint32_t reserved      : 13;
+        } bits;
+        uint32_t value;
+    } encode_hints;
+
+    /**
+     * \brief Value indicates suggestion of target frame size for the full encode process.
+     * 
+     * Set \c target_frame_size in PPS when this suggested value is used by app.
+     * Value 0 means no suggestion for target_frame_size.
+     */
+    uint32_t target_frame_size;
+
+    /**
+     * \brief Value indicates suggestion of the strength of Qp Modulation for the frame specified.
+     * 
+     * Suggestion of the strength of Qp Modulation for the frame specified. This is a relative number.
+     * BRC could use it to infer final delta Qp values for hierarchical frames in mini Gop structure.
+     * Value 0 means no suggestion for Qp modulation.
+     * 
+     * Set \c qp_modulation_strength in PPS when this suggested value is used by app.
+     * Value 0 means no suggestion for Qp modulation.
+     */
+    uint32_t qp_modulation_strength;
+} VALookAheadInfo;
+
+/**
  * \brief Coded buffer segment.
  *
  * #VACodedBufferSegment is an element of a linked list describing
@@ -3852,8 +4019,21 @@ typedef  struct _VACodedBufferSegment  {
      */
     void               *next;
 
+    /**
+     * \brief lookahead info.
+     *
+     * When \c lookahead_phase equals 1, the information in this data structure
+     * describes the suggestion of encoding parameters for full encode pass
+     * about a frame already encoded in the look ahead pass.
+     **/
+    VALookAheadInfo    *lpla_info_hint;
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+#if defined(AMD64) || defined(x86_64) || defined(amd64) || defined(LP64)
+    uint32_t                va_reserved[VA_PADDING_LOW - 2];
+#else
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
+#endif
 } VACodedBufferSegment;
 
 /**
