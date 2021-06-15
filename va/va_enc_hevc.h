@@ -120,8 +120,7 @@ typedef union VAConfigAttribValEncHEVCFeatures {
         uint32_t transform_skip             : 2;
         /** QP delta within coding units.
          *
-         * Allows setting cu_qp_delta_enabled_flag in the PPS.  When
-         * enabled, diff_cu_qp_delta_depth must be set to zero.
+         * Allows setting cu_qp_delta_enabled_flag in the PPS.
          */
         uint32_t cu_qp_delta                : 2;
         /** Weighted prediction.
@@ -141,7 +140,7 @@ typedef union VAConfigAttribValEncHEVCFeatures {
          * Allows setting slice_deblocking_filter_disabled_flag.
          */
         uint32_t deblocking_filter_disable  : 2;
-        /* Reserved for future use. */
+        /* Reserved,should not be used, avoid conflict with VA_ATTRIB_NOT_SUPPORTED. */
         uint32_t reserved                   : 2;
     } bits;
     uint32_t value;
