@@ -4030,6 +4030,213 @@ static void va_TraceVAPictureParameterBufferVP9(
     return;
 }
 
+static void va_TraceVAEncSequenceParameterBufferAV1(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncSequenceParameterBufferAV1 *p = (VAEncSequenceParameterBufferAV1 *)data;
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferAV1\n");
+
+    va_TraceMsg(trace_ctx, "\tseq_profile = %d\n", p->seq_profile);
+    va_TraceMsg(trace_ctx, "\tseq_level_idx = %d\n", p->seq_level_idx);
+    va_TraceMsg(trace_ctx, "\tseq_tier = %d\n", p->seq_tier);
+    va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
+    va_TraceMsg(trace_ctx, "\tip_period = %d\n", p->ip_period);
+    va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
+
+    va_TraceMsg(trace_ctx, "\tseq_fields.still_picture = %d\n", p->seq_fields.bits.still_picture);
+    va_TraceMsg(trace_ctx, "\tseq_fields.use_128x128_superblock = %d\n", p->seq_fields.bits.use_128x128_superblock);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_filter_intra = %d\n", p->seq_fields.bits.enable_filter_intra);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_intra_edge_filter = %d\n", p->seq_fields.bits.enable_intra_edge_filter);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_interintra_compound = %d\n", p->seq_fields.bits.enable_interintra_compound);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_masked_compound = %d\n", p->seq_fields.bits.enable_masked_compound);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_warped_motion = %d\n", p->seq_fields.bits.enable_warped_motion);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_dual_filter = %d\n", p->seq_fields.bits.enable_dual_filter);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_order_hint = %d\n", p->seq_fields.bits.enable_order_hint);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_jnt_comp = %d\n", p->seq_fields.bits.enable_jnt_comp);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_ref_frame_mvs = %d\n", p->seq_fields.bits.enable_ref_frame_mvs);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_superres = %d\n", p->seq_fields.bits.enable_superres);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_cdef = %d\n", p->seq_fields.bits.enable_cdef);
+    va_TraceMsg(trace_ctx, "\tseq_fields.enable_restoration = %d\n", p->seq_fields.bits.enable_restoration);
+
+    va_TraceMsg(trace_ctx, "\torder_hint_bits_minus_1 = %d\n", p->order_hint_bits_minus_1);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
+static void va_TraceVAEncPictureParameterBufferAV1(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncPictureParameterBufferAV1 *p = (VAEncPictureParameterBufferAV1 *)data;
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+    int i, j;
+
+    va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferAV1\n");
+
+    va_TraceMsg(trace_ctx, "\tframe_width_minus_1 = %d\n", p->frame_width_minus_1);
+    va_TraceMsg(trace_ctx, "\tframe_height_minus_1 = %d\n", p->frame_height_minus_1);
+    va_TraceMsg(trace_ctx, "\treconstructed_frame = 0x%08x\n", p->reconstructed_frame);
+    va_TraceMsg(trace_ctx, "\tcoded_buf = 0x%08x\n", p->coded_buf);
+
+    for (i = 0; i < 8; i++)
+        va_TraceMsg(trace_ctx, "\treference_frames[%d] = 0x%08x\n", i, p->reference_frames[i]);
+    for (i = 0; i < 7; i++)
+        va_TraceMsg(trace_ctx, "\tref_frame_idx[%d] = %d\n", i, p->ref_frame_idx[i]);
+
+    va_TraceMsg(trace_ctx, "\tprimary_ref_frame = %d\n", p->primary_ref_frame);
+    va_TraceMsg(trace_ctx, "\torder_hint = %d\n", p->order_hint);
+
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx0 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx0);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx1 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx1);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx2 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx2);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx3 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx3);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx4 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx4);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx5 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx5);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx6 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx6);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx0 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx0);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx1 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx1);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx2 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx2);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx3 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx3);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx4 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx4);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx5 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx5);
+    va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l1.fields.search_idx6 = %d\n", p->ref_frame_ctrl_l1.fields.search_idx6);
+
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.frame_type = %d\n", p->picture_flags.bits.frame_type);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.error_resilient_mode = %d\n", p->picture_flags.bits.error_resilient_mode);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.disable_cdf_update = %d\n", p->picture_flags.bits.disable_cdf_update);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.use_superres = %d\n", p->picture_flags.bits.use_superres);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.allow_high_precision_mv = %d\n", p->picture_flags.bits.allow_high_precision_mv);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.use_ref_frame_mvs = %d\n", p->picture_flags.bits.use_ref_frame_mvs);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.disable_frame_end_update_cdf = %d\n", p->picture_flags.bits.disable_frame_end_update_cdf);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.reduced_tx_set = %d\n", p->picture_flags.bits.reduced_tx_set);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.enable_frame_obu = %d\n", p->picture_flags.bits.enable_frame_obu);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.long_term_reference = %d\n", p->picture_flags.bits.long_term_reference);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.disable_frame_recon = %d\n", p->picture_flags.bits.disable_frame_recon);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.allow_intrabc = %d\n", p->picture_flags.bits.allow_intrabc);
+    va_TraceMsg(trace_ctx, "\tpicture_flags.bits.palette_mode_enable = %d\n", p->picture_flags.bits.palette_mode_enable);
+
+    va_TraceMsg(trace_ctx, "\tseg_id_block_size = %d\n", p->seg_id_block_size);
+    va_TraceMsg(trace_ctx, "\tnum_tile_groups_minus1 = %d\n", p->num_tile_groups_minus1);
+    va_TraceMsg(trace_ctx, "\ttemporal_id = %d\n", p->temporal_id);
+
+    for (i = 0; i < 2; i++)
+        va_TraceMsg(trace_ctx, "\filter_level[%d] = %d\n", i, p->filter_level[i]);
+
+    va_TraceMsg(trace_ctx, "\tfilter_level_u = %d\n", p->filter_level_u);
+    va_TraceMsg(trace_ctx, "\tfilter_level_v = %d\n", p->filter_level_v);
+
+    va_TraceMsg(trace_ctx, "\tloop_filter_flags.bits.sharpness_level = %d\n", p->loop_filter_flags.bits.sharpness_level);
+    va_TraceMsg(trace_ctx, "\tloop_filter_flags.bits.mode_ref_delta_enabled = %d\n", p->loop_filter_flags.bits.mode_ref_delta_enabled);
+    va_TraceMsg(trace_ctx, "\tloop_filter_flags.bits.mode_ref_delta_update = %d\n", p->loop_filter_flags.bits.mode_ref_delta_update);
+
+    va_TraceMsg(trace_ctx, "\tsuperres_scale_denominator = %d\n", p->superres_scale_denominator);
+    va_TraceMsg(trace_ctx, "\tinterpolation_filter = %d\n", p->interpolation_filter);
+
+    for (i = 0; i < 8; i++)
+        va_TraceMsg(trace_ctx, "\tref_deltas[%d] = %d\n", i, p->ref_deltas[i]);
+    for (i = 0; i < 2; i++)
+        va_TraceMsg(trace_ctx, "\tmode_deltas[%d] = %d\n", i, p->mode_deltas[i]);
+
+    va_TraceMsg(trace_ctx, "\tbase_qindex = %d\n", p->base_qindex);
+    va_TraceMsg(trace_ctx, "\ty_dc_delta_q = %d\n", p->y_dc_delta_q);
+    va_TraceMsg(trace_ctx, "\tu_dc_delta_q = %d\n", p->u_dc_delta_q);
+    va_TraceMsg(trace_ctx, "\tu_ac_delta_q = %d\n", p->u_ac_delta_q);
+    va_TraceMsg(trace_ctx, "\tv_dc_delta_q = %d\n", p->v_dc_delta_q);
+    va_TraceMsg(trace_ctx, "\tv_ac_delta_q = %d\n", p->v_ac_delta_q);
+    va_TraceMsg(trace_ctx, "\tmin_base_qindex = %d\n", p->min_base_qindex);
+    va_TraceMsg(trace_ctx, "\tmax_base_qindex = %d\n", p->max_base_qindex);
+
+    va_TraceMsg(trace_ctx, "\tqmatrix_flags.bits.using_qmatrix = %d\n", p->qmatrix_flags.bits.using_qmatrix);
+    va_TraceMsg(trace_ctx, "\tqmatrix_flags.bits.qm_y = %d\n", p->qmatrix_flags.bits.qm_y);
+    va_TraceMsg(trace_ctx, "\tqmatrix_flags.bits.qm_u = %d\n", p->qmatrix_flags.bits.qm_u);
+    va_TraceMsg(trace_ctx, "\tqmatrix_flags.bits.qm_v = %d\n", p->qmatrix_flags.bits.qm_v);
+
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.delta_q_present = %d\n", p->mode_control_flags.bits.delta_q_present);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.delta_q_res = %d\n", p->mode_control_flags.bits.delta_q_res);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.delta_lf_present = %d\n", p->mode_control_flags.bits.delta_lf_present);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.delta_lf_res = %d\n", p->mode_control_flags.bits.delta_lf_res);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.delta_lf_multi = %d\n", p->mode_control_flags.bits.delta_lf_multi);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.tx_mode = %d\n", p->mode_control_flags.bits.tx_mode);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.reference_mode = %d\n", p->mode_control_flags.bits.reference_mode);
+    va_TraceMsg(trace_ctx, "\tmode_control_flags.bits.skip_mode_present = %d\n", p->mode_control_flags.bits.skip_mode_present);
+
+    va_TraceMsg(trace_ctx, "\tsegments.seg_flags.bits.segmentation_enabled = %d\n", p->segments.seg_flags.bits.segmentation_enabled);
+    va_TraceMsg(trace_ctx, "\tsegments.seg_flags.bits.segmentation_update_map = %d\n", p->segments.seg_flags.bits.segmentation_update_map);
+    va_TraceMsg(trace_ctx, "\tsegments.seg_flags.bits.segmentation_temporal_update = %d\n", p->segments.seg_flags.bits.segmentation_temporal_update);
+    va_TraceMsg(trace_ctx, "\tsegments.segment_number = %d\n", p->segments.segment_number);
+
+    for (i = 0; i < 8; i++){
+        for (j = 0; j < 8; j++)
+            va_TraceMsg(trace_ctx, "\tsegments.feature_data[%d][%d] = %d\n", i, j, p->segments.feature_data[i][j]);
+    }
+    for (i = 0; i < 8; i++)
+        va_TraceMsg(trace_ctx, "\tsegments.feature_mask[%d] = %d\n", i, p->segments.feature_mask[i]);
+
+    va_TraceMsg(trace_ctx, "\ttile_cols = %d\n", p->tile_cols);
+    va_TraceMsg(trace_ctx, "\ttile_rows = %d\n", p->tile_rows);
+
+    for (i = 0; i < 63; i++)
+        va_TraceMsg(trace_ctx, "\twidth_in_sbs_minus_1[%d] = %d\n", i, p->width_in_sbs_minus_1[i]);
+    for (i = 0; i < 63; i++)
+        va_TraceMsg(trace_ctx, "\theight_in_sbs_minus_1[%d] = %d\n", i, p->height_in_sbs_minus_1[i]);
+
+    va_TraceMsg(trace_ctx, "\tcontext_update_tile_id = %d\n", p->context_update_tile_id);
+    va_TraceMsg(trace_ctx, "\tcdef_damping_minus_3 = %d\n", p->cdef_damping_minus_3);
+    va_TraceMsg(trace_ctx, "\tcdef_bits= %d\n", p->cdef_bits);
+
+    for (i = 0; i < 8; i++)
+        va_TraceMsg(trace_ctx, "\tcdef_y_strengths[%d] = %d\n", i, p->cdef_y_strengths[i]);
+    for (i = 0; i < 8; i++)
+        va_TraceMsg(trace_ctx, "\tcdef_uv_strengths[%d] = %d\n", i, p->cdef_uv_strengths[i]);
+
+    va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.yframe_restoration_type = %d\n", p->loop_restoration_flags.bits.yframe_restoration_type);
+    va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.cbframe_restoration_type = %d\n", p->loop_restoration_flags.bits.cbframe_restoration_type);
+    va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.crframe_restoration_type = %d\n", p->loop_restoration_flags.bits.crframe_restoration_type);
+    va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.lr_unit_shift = %d\n", p->loop_restoration_flags.bits.lr_unit_shift);
+    va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.lr_uv_shift = %d\n", p->loop_restoration_flags.bits.lr_uv_shift);
+
+    for (i = 0; i < 7; i++){
+        va_TraceMsg(trace_ctx, "\twm[%d].wmtype= %d\n", i, p->wm[i].wmtype);
+        for (j = 0; j < 8; j++)
+            va_TraceMsg(trace_ctx, "\twm[%d].wmmat[%d]= %d\n", i, j, p->wm[i].wmmat[j]);
+        va_TraceMsg(trace_ctx, "\twm[%d].invalid= %d\n", i, p->wm[i].invalid);
+    }
+
+    va_TraceMsg(trace_ctx, "\tbit_offset_qindex = %d\n", p->bit_offset_qindex);
+    va_TraceMsg(trace_ctx, "\tbit_offset_segmentation = %d\n", p->bit_offset_segmentation);
+    va_TraceMsg(trace_ctx, "\tbit_offset_loopfilter_params = %d\n", p->bit_offset_loopfilter_params);
+    va_TraceMsg(trace_ctx, "\tbit_offset_cdef_params = %d\n", p->bit_offset_cdef_params);
+    va_TraceMsg(trace_ctx, "\tsize_in_bits_cdef_params = %d\n", p->size_in_bits_cdef_params);
+    va_TraceMsg(trace_ctx, "\tbyte_offset_frame_hdr_obu_size = %d\n", p->byte_offset_frame_hdr_obu_size);
+    va_TraceMsg(trace_ctx, "\tsize_in_bits_frame_hdr_obu = %d\n", p->size_in_bits_frame_hdr_obu);
+
+    va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.obu_extension_flag = %d\n", p->tile_group_obu_hdr_info.bits.obu_extension_flag);
+    va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.obu_has_size_field = %d\n", p->tile_group_obu_hdr_info.bits.obu_has_size_field);
+    va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.spatial_id = %d\n", p->tile_group_obu_hdr_info.bits.spatial_id);
+
+    va_TraceMsg(trace_ctx, "\tnumber_skip_frames = %d\n", p->number_skip_frames);
+    va_TraceMsg(trace_ctx, "\tskip_frames_reduced_size = %d\n", p->skip_frames_reduced_size);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
 static void va_TraceVAPictureParameterBufferAV1(
     VADisplay dpy,
     VAContextID context,
@@ -5106,6 +5313,12 @@ static void va_TraceAV1Buf(
         break;
     case VASliceParameterBufferType:
         va_TraceVASliceParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncSequenceParameterBufferType:
+        va_TraceVAEncSequenceParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncPictureParameterBufferType:
+        va_TraceVAEncPictureParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
