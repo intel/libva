@@ -119,6 +119,7 @@ extern "C" {
  *  - \ref api_enc_mpeg2
  *  - \ref api_enc_vp8
  *  - \ref api_enc_vp9
+ *  - \ref api_enc_av1
  * - Decoder (HEVC, JPEG, VP8, VP9, AV1)
  *      - \ref api_dec_hevc
  *      - \ref api_dec_jpeg
@@ -996,6 +997,30 @@ typedef enum {
      * support the VAConfigAttribEncHEVCFeatures attribute.
      */
     VAConfigAttribEncHEVCBlockSizes     = 51,
+    /**
+     * \brief AV1 encoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * AV1 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncAV1 union.
+     */
+    VAConfigAttribEncAV1                = 52,
+    /**
+     * \brief AV1 encoding attribute extend1. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * AV1 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncAV1Ext1 union.
+     */
+    VAConfigAttribEncAV1Ext1            = 53,
+    /**
+     * \brief AV1 encoding attribute extend2. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * AV1 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncAV1Ext2 union.
+     */
+    VAConfigAttribEncAV1Ext2            = 54,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -5191,6 +5216,7 @@ VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOpt
 #include <va/va_enc_mpeg2.h>
 #include <va/va_enc_vp8.h>
 #include <va/va_enc_vp9.h>
+#include <va/va_enc_av1.h>
 #include <va/va_fei.h>
 #include <va/va_fei_h264.h>
 #include <va/va_vpp.h>
