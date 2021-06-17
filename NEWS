@@ -1,5 +1,16 @@
-libva NEWS -- summary of user visible changes.  2021-03-23
+libva NEWS -- summary of user visible changes.  2021-06-17
 Copyright (C) 2009-2020 Intel Corporation
+
+version 2.12.0 - 17.Jun.2021
+* add: Report the capability of vaCopy support
+* add: Report the capability of sub device
+* add: Add config attributes to advertise HEVC/H.265 encoder features
+* add: Video processing HVS Denoise: Added 4 modes
+* add: Introduce VASurfaceAttribDRMFormatModifiers
+* add: Add 3DLUT Filter in Video Processing.
+* doc: Update log2_tile_column description for vp9enc
+* trace: Correct av1 film grain trace information
+* ci: Fix freebsd build by switching to vmactions/freebsd-vm@v0.1.3
 
 version 2.11.0 - 23.Mar.2021
 * add: LibVA Protected Content API
