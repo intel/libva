@@ -1700,6 +1700,8 @@ typedef struct _VASurfaceAttribExternalBuffers {
 #define VA_SURFACE_EXTBUF_DESC_UNCACHED		0x00000004
 /** \brief Memory is write-combined */
 #define VA_SURFACE_EXTBUF_DESC_WC		0x00000008
+/** \brief Enable memory linear */
++ #define VA_SURFACE_EXTBUF_DESC_ENABLE_LINEAR    0x00000010
 /** \brief Memory is protected */
 #define VA_SURFACE_EXTBUF_DESC_PROTECTED        0x80000000
 
