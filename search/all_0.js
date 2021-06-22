@@ -10,6 +10,7 @@ var searchData=
   ['alt_5fref_5fframe',['alt_ref_frame',['../structVADecPictureParameterBufferVP9.html#a2684abd3fa5c52b792024119c19002df',1,'VADecPictureParameterBufferVP9']]],
   ['alt_5fref_5fframe_5fsign_5fbias',['alt_ref_frame_sign_bias',['../structVADecPictureParameterBufferVP9.html#ab8dd6db6b084339c85a169583793da06',1,'VADecPictureParameterBufferVP9']]],
   ['alternate_5fscan',['alternate_scan',['../structVAEncPictureParameterBufferMPEG2.html#a24c13ef9b936a68946c463dd9bb15824',1,'VAEncPictureParameterBufferMPEG2']]],
+  ['amp',['amp',['../unionVAConfigAttribValEncHEVCFeatures.html#a4a9100d1598ead5537751158392b1ff9',1,'VAConfigAttribValEncHEVCFeatures']]],
   ['amp_5fenabled_5fflag',['amp_enabled_flag',['../structVAEncSequenceParameterBufferHEVC.html#aac6f749c4fd14ea450e0c3005827f63d',1,'VAEncSequenceParameterBufferHEVC']]],
   ['arithmatic_5fcoding_5fmode',['arithmatic_coding_mode',['../unionVAConfigAttribValEncJPEG.html#af94ca6e18f1a4c9eea84e90c55976bfe',1,'VAConfigAttribValEncJPEG']]],
   ['aspect_5fratio_5fidc',['aspect_ratio_idc',['../structVAEncSequenceParameterBufferH264.html#a3dec8379c364bf947da93b35587971a0',1,'VAEncSequenceParameterBufferH264::aspect_ratio_idc()'],['../structVAEncSequenceParameterBufferHEVC.html#ae408c74ad1118c0dba743825ab32f072',1,'VAEncSequenceParameterBufferHEVC::aspect_ratio_idc()']]],

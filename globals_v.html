@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -62,6 +62,18 @@ $(function() {
 <div class="textblock">Here is a list of all documented file members with links to the documentation:</div>
 
 <h3><a id="index_v"></a>- v -</h3><ul>
+<li>VA_3DLUT_CHANNEL_RGB_RGB
+: <a class="el" href="group__api__vpp.html#ga19afbded3b4c92cfbbbf21c33afa37e5">va_vpp.h</a>
+</li>
+<li>VA_3DLUT_CHANNEL_UNKNOWN
+: <a class="el" href="group__api__vpp.html#gaf008422f93cbc67d67550e5fa122bd77">va_vpp.h</a>
+</li>
+<li>VA_3DLUT_CHANNEL_VUY_RGB
+: <a class="el" href="group__api__vpp.html#gaa4f68a9bba0db8a3529c5174490ad855">va_vpp.h</a>
+</li>
+<li>VA_3DLUT_CHANNEL_YUV_RGB
+: <a class="el" href="group__api__vpp.html#ga4f5f8fe5b4b50a6f8d3e2ba972984887">va_vpp.h</a>
+</li>
 <li>VA_ATTRIB_NOT_SUPPORTED
 : <a class="el" href="group__api__core.html#ga13a541a66a4585335e74a2e2c9f1a5da">va.h</a>
 </li>
@@ -135,9 +147,9 @@ $(function() {
 : <a class="el" href="group__api__vpp.html#gaa5141c382dc2968532ea8d2739a81ac5">va_vpp.h</a>
 </li>
 <li>va_deprecated_enum
-: <a class="el" href="va_8h.html#ae6c33aeb72b39c6719a6f48d455d7fdc">va.h</a>
+: <a class="el" href="group__api__enc__hevc.html#ggaa9508bfe0814259f5d2f16cae912e63fa86d498fbfde9d7a847864d6b6c67e2aa">va_enc_hevc.h</a>
+, <a class="el" href="va_8h.html#ae6c33aeb72b39c6719a6f48d455d7fdc">va.h</a>
 , <a class="el" href="group__api__enc__h264.html#gga9cf3cb8a709849fd74f1993382dbc4a0a86d498fbfde9d7a847864d6b6c67e2aa">va_enc_h264.h</a>
-, <a class="el" href="group__api__enc__hevc.html#ggaa9508bfe0814259f5d2f16cae912e63fa86d498fbfde9d7a847864d6b6c67e2aa">va_enc_hevc.h</a>
 </li>
 <li>VA_ENABLE_BLEND
 : <a class="el" href="group__api__core.html#ga6fa356c030c9d8b8507a20cda3e71a4a">va.h</a>
@@ -249,6 +261,15 @@ $(function() {
 </li>
 <li>VA_EXPORT_SURFACE_WRITE_ONLY
 : <a class="el" href="group__api__core.html#ga93a462fd2178ff9d803275a715309ad2">va.h</a>
+</li>
+<li>VA_FEATURE_NOT_SUPPORTED
+: <a class="el" href="group__api__core.html#ga552bdf90e54e30a5a29a29f02f756e34">va.h</a>
+</li>
+<li>VA_FEATURE_REQUIRED
+: <a class="el" href="group__api__core.html#ga986974c9d57736c66314932140edfba5">va.h</a>
+</li>
+<li>VA_FEATURE_SUPPORTED
+: <a class="el" href="group__api__core.html#ga5917cb64fd2f69489751c856ad710609">va.h</a>
 </li>
 <li>VA_FEI_FUNCTION_ENC
 : <a class="el" href="group__api__fei.html#ga77b92bb30be6834d1414ef53065d397d">va_fei.h</a>
@@ -526,6 +547,18 @@ $(function() {
 <li>VA_PROC_FILTER_MANDATORY
 : <a class="el" href="group__api__vpp.html#gad011b27982c909d68a2fb495a0978d19">va_vpp.h</a>
 </li>
+<li>VA_PROC_HVS_DENOISE_AUTO_BDRATE
+: <a class="el" href="group__api__vpp.html#gad9313757aaf189cbc158948ea495698a">va_vpp.h</a>
+</li>
+<li>VA_PROC_HVS_DENOISE_AUTO_SUBJECTIVE
+: <a class="el" href="group__api__vpp.html#ga4f3b24eb55b67560d1294b00e1c2d40d">va_vpp.h</a>
+</li>
+<li>VA_PROC_HVS_DENOISE_DEFAULT
+: <a class="el" href="group__api__vpp.html#gab284e0bd36751bcc28b9fc930c9bcc6b">va_vpp.h</a>
+</li>
+<li>VA_PROC_HVS_DENOISE_MANUAL
+: <a class="el" href="group__api__vpp.html#gaa057e6871ec0bcfc5217df2e6670b1c2">va_vpp.h</a>
+</li>
 <li>VA_PROC_PIPELINE_FAST
 : <a class="el" href="group__api__vpp.html#gaf603b3020d17088313d0e3dab3abff8c">va_vpp.h</a>
 </li>
@@ -792,6 +825,12 @@ $(function() {
 </li>
 <li>VAConfigAttribEncDynamicScaling
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a769dfd34309929f3d6236db59e77bb05">va.h</a>
+</li>
+<li>VAConfigAttribEncHEVCBlockSizes
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340">va.h</a>
+</li>
+<li>VAConfigAttribEncHEVCFeatures
+: <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27">va.h</a>
 </li>
 <li>VAConfigAttribEncInterlaced
 : <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ace3bc7b87026cb9d0c06c8fd87288a93">va.h</a>
@@ -1288,6 +1327,9 @@ $(function() {
 <li>VAProcDeinterlacingWeave
 : <a class="el" href="group__api__vpp.html#gga26d39907f38d00352223908836f78046ad6f94815b6727d5ba59a0a859fcaa1ec">va_vpp.h</a>
 </li>
+<li>VAProcFilter3DLUT
+: <a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7af106b377f5ec5d36a609507f6ceefa21">va_vpp.h</a>
+</li>
 <li>VAProcFilterColorBalance
 : <a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7aa8a5584d687edd09882fc002e3ab8df3">va_vpp.h</a>
 </li>
@@ -1473,6 +1515,9 @@ $(function() {
 </li>
 <li>VASurfaceAttribCount
 : <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308">va.h</a>
+</li>
+<li>VASurfaceAttribDRMFormatModifiers
+: <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ace6541c469406786363a6fcd9ed7e227">va.h</a>
 </li>
 <li>VASurfaceAttribExternalBufferDescriptor
 : <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7adc8741cdd7e0daf805085ffceec5d180">va.h</a>

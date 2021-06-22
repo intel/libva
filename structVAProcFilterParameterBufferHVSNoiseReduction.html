@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -86,10 +86,14 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBufferHVSNoiseReduction.html#a59689b084867b1fabe7d47c1770b0ed2">strength</a></td></tr>
 <tr class="memdesc:a59689b084867b1fabe7d47c1770b0ed2"><td class="mdescLeft">&#160;</td><td class="mdescRight">QP to Noise Reduction Strength Mode, used for Human Vision System Based Noise Reduction. Controls Noise Reduction strength of conservative and aggressive mode. It is an integer from [0-16]. Value 0 means completely turn off Noise Reduction; Value 16 means the most aggressive mode of Noise Reduction; Value 10 is the default value. <br /></td></tr>
 <tr class="separator:a59689b084867b1fabe7d47c1770b0ed2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a918b960c381ea886478995d831bb2394"><td class="memItemLeft" align="right" valign="top"><a id="a918b960c381ea886478995d831bb2394"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBufferHVSNoiseReduction.html#a918b960c381ea886478995d831bb2394">va_reserved</a> [VA_PADDING_HIGH]</td></tr>
-<tr class="memdesc:a918b960c381ea886478995d831bb2394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved bytes for future use, must be zero. <br /></td></tr>
-<tr class="separator:a918b960c381ea886478995d831bb2394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace814613cff97b062868b7746b2c8f44"><td class="memItemLeft" align="right" valign="top"><a id="ace814613cff97b062868b7746b2c8f44"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBufferHVSNoiseReduction.html#ace814613cff97b062868b7746b2c8f44">mode</a></td></tr>
+<tr class="memdesc:ace814613cff97b062868b7746b2c8f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">HVS Denoise Mode which controls denoise method. It is a value of VA_PROC_HVS_DENOISE_xxx. Please see the definition of VA_PROC_HVS_DENOISE_xxx. <br /></td></tr>
+<tr class="separator:ace814613cff97b062868b7746b2c8f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b414d89f77eb19a0ca1f92e36ba2138"><td class="memItemLeft" align="right" valign="top"><a id="a1b414d89f77eb19a0ca1f92e36ba2138"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBufferHVSNoiseReduction.html#a1b414d89f77eb19a0ca1f92e36ba2138">va_reserved</a> [VA_PADDING_HIGH - 1]</td></tr>
+<tr class="memdesc:a1b414d89f77eb19a0ca1f92e36ba2138"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reserved bytes for future use, must be zero. <br /></td></tr>
+<tr class="separator:a1b414d89f77eb19a0ca1f92e36ba2138"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Human Vision System(HVS) Noise reduction filter parametrization. </p>

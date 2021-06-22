@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -219,6 +219,9 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVASurfaceDecodeMBErrors.html">VASurfaceDecodeMBErrors</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVADisplayAttribValSubDevice.html">VADisplayAttribValSubDevice</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">sub device info Sub-device is the concept basing on the "device" behind "vaDisplay". If a device could be divided to several sub devices, the task of decode/encode/vpp could be assigned on one sub-device. So, application could choose the sub device before any other operations. After that, all of the task execution/resource allocation will be dispatched to the sub device. If application does not choose the sub device, driver will assign one as default.  <a href="unionVADisplayAttribValSubDevice.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAPictureHEVC.html">VAPictureHEVC</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Description of picture properties of those in DPB surfaces.  <a href="structVAPictureHEVC.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,6 +280,12 @@ Macros</h2></td></tr>
 <tr class="separator:gafcb3bbf17dd0467c6919d6dacea2cb58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga156a739d58e21452b0ffafa4c0a40333"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga156a739d58e21452b0ffafa4c0a40333">VA_EXEC_MODE_DEFAULT</a>&#160;&#160;&#160;0x0</td></tr>
 <tr class="separator:ga156a739d58e21452b0ffafa4c0a40333"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga552bdf90e54e30a5a29a29f02f756e34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga552bdf90e54e30a5a29a29f02f756e34">VA_FEATURE_NOT_SUPPORTED</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:ga552bdf90e54e30a5a29a29f02f756e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5917cb64fd2f69489751c856ad710609"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5917cb64fd2f69489751c856ad710609">VA_FEATURE_SUPPORTED</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:ga5917cb64fd2f69489751c856ad710609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga986974c9d57736c66314932140edfba5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga986974c9d57736c66314932140edfba5">VA_FEATURE_REQUIRED</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:ga986974c9d57736c66314932140edfba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaff38bc6c01b65c6e9d473e40bdde9df6">VA_RT_FORMAT_YUV420</a>&#160;&#160;&#160;0x00000001</td></tr>
 <tr class="memdesc:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="mdescLeft">&#160;</td><td class="mdescRight">YUV 4:2:0 8-bit. <br /></td></tr>
@@ -956,6 +965,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d3947eb7d70bb6ade7001eca036f863">VAConfigAttribProtectedContentCipherSampleType</a> = 48, 
 <br />
 &#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">VAConfigAttribProtectedContentUsage</a> = 49, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27">VAConfigAttribEncHEVCFeatures</a> = 50, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340">VAConfigAttribEncHEVCBlockSizes</a> = 51, 
 <b>VAConfigAttribTypeMax</b>
 <br />
  }</td></tr>
@@ -978,7 +989,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7adc8741cdd7e0daf805085ffceec5d180">VASurfaceAttribExternalBufferDescriptor</a>, 
 <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7a0a04ea3d5e15b28d41a2853f9b795fd7">VASurfaceAttribUsageHint</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308">VASurfaceAttribCount</a>
+&#160;&#160;<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ace6541c469406786363a6fcd9ed7e227">VASurfaceAttribDRMFormatModifiers</a>, 
+<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308">VASurfaceAttribCount</a>
 <br />
  }<tr class="memdesc:ga4b89190eeab82e047c06e31edaf0b9b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface attribute types.  <a href="group__api__core.html#ga4b89190eeab82e047c06e31edaf0b9b7">More...</a><br /></td></tr>
 </td></tr>

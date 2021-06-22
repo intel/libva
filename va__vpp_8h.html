@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -117,6 +117,12 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBufferHDRToneMapping.html">VAProcFilterParameterBufferHDRToneMapping</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">High Dynamic Range(HDR) Tone Mapping filter parametrization.  <a href="structVAProcFilterParameterBufferHDRToneMapping.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterParameterBuffer3DLUT.html">VAProcFilterParameterBuffer3DLUT</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">3DLUT filter parametrization.  <a href="structVAProcFilterParameterBuffer3DLUT.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterCap3DLUT.html">VAProcFilterCap3DLUT</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capabilities specification for the 3DLUT filter.  <a href="structVAProcFilterCap3DLUT.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcFilterCap.html">VAProcFilterCap</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default filter cap specification (single range value).  <a href="structVAProcFilterCap.html#details">More...</a><br /></td></tr>
@@ -226,6 +232,40 @@ Macros</h2></td></tr>
 <tr class="memitem:ga851d016a50a507c44a6849adde21231a"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>VA_DEINTERLACING_SCD_ENABLE</b>&#160;&#160;&#160;0x0010</td></tr>
 <tr class="separator:ga851d016a50a507c44a6849adde21231a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Video Processing Human Vision System (HVS) Denoise Mode.</div></td></tr>
+<tr class="memitem:gab284e0bd36751bcc28b9fc930c9bcc6b"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#gab284e0bd36751bcc28b9fc930c9bcc6b">VA_PROC_HVS_DENOISE_DEFAULT</a>&#160;&#160;&#160;0x0000</td></tr>
+<tr class="memdesc:gab284e0bd36751bcc28b9fc930c9bcc6b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Mode. This mode is decided in driver to the appropriate mode. <br /></td></tr>
+<tr class="separator:gab284e0bd36751bcc28b9fc930c9bcc6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad9313757aaf189cbc158948ea495698a"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#gad9313757aaf189cbc158948ea495698a">VA_PROC_HVS_DENOISE_AUTO_BDRATE</a>&#160;&#160;&#160;0x0001</td></tr>
+<tr class="memdesc:gad9313757aaf189cbc158948ea495698a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto BDRate Mode. Indicates auto BD rate improvement in pre-processing (such as before video encoding), ignore Strength. <br /></td></tr>
+<tr class="separator:gad9313757aaf189cbc158948ea495698a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4f3b24eb55b67560d1294b00e1c2d40d"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#ga4f3b24eb55b67560d1294b00e1c2d40d">VA_PROC_HVS_DENOISE_AUTO_SUBJECTIVE</a>&#160;&#160;&#160;0x0002</td></tr>
+<tr class="memdesc:ga4f3b24eb55b67560d1294b00e1c2d40d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Auto Subjective Mode. Indicates auto subjective quality improvement in pre-processing (such as before video encoding), ignore Strength. <br /></td></tr>
+<tr class="separator:ga4f3b24eb55b67560d1294b00e1c2d40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa057e6871ec0bcfc5217df2e6670b1c2"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#gaa057e6871ec0bcfc5217df2e6670b1c2">VA_PROC_HVS_DENOISE_MANUAL</a>&#160;&#160;&#160;0x0003</td></tr>
+<tr class="memdesc:gaa057e6871ec0bcfc5217df2e6670b1c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manual Mode. Indicates manual mode, allow to adjust the denoise strength manually (need to set Strength explicitly). <br /></td></tr>
+<tr class="separator:gaa057e6871ec0bcfc5217df2e6670b1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">3DLUT Channel Layout and Mapping</div></td></tr>
+<tr class="memitem:gaf008422f93cbc67d67550e5fa122bd77"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#gaf008422f93cbc67d67550e5fa122bd77">VA_3DLUT_CHANNEL_UNKNOWN</a>&#160;&#160;&#160;0x00000000</td></tr>
+<tr class="memdesc:gaf008422f93cbc67d67550e5fa122bd77"><td class="mdescLeft">&#160;</td><td class="mdescRight">3DLUT Channel Layout is unknown. <br /></td></tr>
+<tr class="separator:gaf008422f93cbc67d67550e5fa122bd77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga19afbded3b4c92cfbbbf21c33afa37e5"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#ga19afbded3b4c92cfbbbf21c33afa37e5">VA_3DLUT_CHANNEL_RGB_RGB</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:ga19afbded3b4c92cfbbbf21c33afa37e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">3DLUT Channel Layout is R, G, B, the default layout. Map RGB to RGB. <br /></td></tr>
+<tr class="separator:ga19afbded3b4c92cfbbbf21c33afa37e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4f5f8fe5b4b50a6f8d3e2ba972984887"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#ga4f5f8fe5b4b50a6f8d3e2ba972984887">VA_3DLUT_CHANNEL_YUV_RGB</a>&#160;&#160;&#160;0x00000002</td></tr>
+<tr class="memdesc:ga4f5f8fe5b4b50a6f8d3e2ba972984887"><td class="mdescLeft">&#160;</td><td class="mdescRight">3DLUT Channel Layout is Y, U, V. Map YUV to RGB. <br /></td></tr>
+<tr class="separator:ga4f5f8fe5b4b50a6f8d3e2ba972984887"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa4f68a9bba0db8a3529c5174490ad855"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__vpp.html#gaa4f68a9bba0db8a3529c5174490ad855">VA_3DLUT_CHANNEL_VUY_RGB</a>&#160;&#160;&#160;0x00000004</td></tr>
+<tr class="memdesc:gaa4f68a9bba0db8a3529c5174490ad855"><td class="mdescLeft">&#160;</td><td class="mdescRight">3DLUT Channel Layout is V, U, Y. Map VUY to RGB. <br /></td></tr>
+<tr class="separator:gaa4f68a9bba0db8a3529c5174490ad855"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -240,7 +280,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7a4689e887e924724b88a2e3bb24ea4a75">VAProcFilterHVSNoiseReduction</a>, 
 <a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7aadc8862a62ebd6bf7971316ac778d7f2">VAProcFilterHighDynamicRangeToneMapping</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7a63b595eefb2105263470cd3e0af0903f">VAProcFilterCount</a>
+&#160;&#160;<a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7af106b377f5ec5d36a609507f6ceefa21">VAProcFilter3DLUT</a>, 
+<a class="el" href="group__api__vpp.html#gga3614dbee76b8ac89dd5a3dc8b1a12bb7a63b595eefb2105263470cd3e0af0903f">VAProcFilterCount</a>
 <br />
  }<tr class="memdesc:ga3614dbee76b8ac89dd5a3dc8b1a12bb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Video filter types.  <a href="group__api__vpp.html#ga3614dbee76b8ac89dd5a3dc8b1a12bb7">More...</a><br /></td></tr>
 </td></tr>

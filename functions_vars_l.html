@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -130,8 +130,14 @@ $(function() {
 <li>log2_diff_max_min_transform_block_size
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#aadced376a22e935f868ecc2d56059eab">VAEncSequenceParameterBufferHEVC</a>
 </li>
+<li>log2_max_coding_tree_block_size_minus3
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a133d9dbb9ba8720e67f002a3d745bbff">VAConfigAttribValEncHEVCBlockSizes</a>
+</li>
 <li>log2_max_frame_num_minus4
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#ae75b2b5a15dce5096830c28c760fc98d">VAEncSequenceParameterBufferH264</a>
+</li>
+<li>log2_max_luma_transform_block_size_minus2
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#ad018c198831e4d443aeb76dedf76b494">VAConfigAttribValEncHEVCBlockSizes</a>
 </li>
 <li>log2_max_mv_length_horizontal
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#adb3ef241e929d29feff04961a77ab529">VAEncSequenceParameterBufferH264</a>
@@ -141,6 +147,9 @@ $(function() {
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#ac56fb9ccdc7898390925c5a9bf4ca8bd">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a76f5c562391da0d961caab8fb09338c0">VAEncSequenceParameterBufferHEVC</a>
 </li>
+<li>log2_max_pcm_coding_block_size_minus3
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a7284627f22560adde7581c44da174d21">VAConfigAttribValEncHEVCBlockSizes</a>
+</li>
 <li>log2_max_pcm_luma_coding_block_size_minus3
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#ab09f5ce521894cfd5e0b5d4b11622de3">VAEncSequenceParameterBufferHEVC</a>
 </li>
@@ -148,8 +157,18 @@ $(function() {
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#af11f6b42486e8f7488ce4330ecc7d4af">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAPictureParameterBufferHEVC.html#a8d85cbfcfcf25e09179f6a78464127c6">VAPictureParameterBufferHEVC</a>
 </li>
+<li>log2_min_coding_tree_block_size_minus3
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a6b801042c84929caf5338eaee64f0a2f">VAConfigAttribValEncHEVCBlockSizes</a>
+</li>
 <li>log2_min_luma_coding_block_size_minus3
-: <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a5e1285a7b2f84042ea6f20a2804b5925">VAEncSequenceParameterBufferHEVC</a>
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a2af5ff252ea3819a0008ce1fb00a4ccc">VAConfigAttribValEncHEVCBlockSizes</a>
+, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a5e1285a7b2f84042ea6f20a2804b5925">VAEncSequenceParameterBufferHEVC</a>
+</li>
+<li>log2_min_luma_transform_block_size_minus2
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a8a43db7c0d6d4f84096793e0e301a63c">VAConfigAttribValEncHEVCBlockSizes</a>
+</li>
+<li>log2_min_pcm_coding_block_size_minus3
+: <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#ac596dff23696603b4a67dc7f504411e4">VAConfigAttribValEncHEVCBlockSizes</a>
 </li>
 <li>log2_min_pcm_luma_coding_block_size_minus3
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a216f94d528db10ac809cf04aa3b2d7d0">VAEncSequenceParameterBufferHEVC</a>
@@ -237,6 +256,17 @@ $(function() {
 </li>
 <li>luma_weight_l1_flag
 : <a class="el" href="structVAEncSliceParameterBufferH264.html#a9bb3cb70a539170e8db29de77696a4fb">VAEncSliceParameterBufferH264</a>
+</li>
+<li>lut_size
+: <a class="el" href="structVAProcFilterCap3DLUT.html#acd9ea1b4796d50ceefc3bd2a39353c2e">VAProcFilterCap3DLUT</a>
+, <a class="el" href="structVAProcFilterParameterBuffer3DLUT.html#a52691377c6783c81853f0927404bda2f">VAProcFilterParameterBuffer3DLUT</a>
+</li>
+<li>lut_stride
+: <a class="el" href="structVAProcFilterCap3DLUT.html#a042523e77ef5ec6ab3919918f477c18e">VAProcFilterCap3DLUT</a>
+, <a class="el" href="structVAProcFilterParameterBuffer3DLUT.html#a9933f829bc5c3fcb977baf2a155c5d69">VAProcFilterParameterBuffer3DLUT</a>
+</li>
+<li>lut_surface
+: <a class="el" href="structVAProcFilterParameterBuffer3DLUT.html#a8d8ddd7d9c661f81ee45746e13b32693">VAProcFilterParameterBuffer3DLUT</a>
 </li>
 </ul>
 </div><!-- contents -->

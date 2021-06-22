@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -68,6 +68,9 @@ $(function() {
 <li>sample_bit_depth
 : <a class="el" href="structVAEncPictureParameterBufferJPEG.html#a09d70c284e1a615f556e60aaf0d2327e">VAEncPictureParameterBufferJPEG</a>
 </li>
+<li>sao
+: <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html#a27cac29bf6a29069cf80cd39682462e5">VAConfigAttribValEncHEVCFeatures</a>
+</li>
 <li>sar_height
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#a8e76498b9c447e36569219e4add998c1">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a8339d27671421f7e7456891465c017ce">VAEncSequenceParameterBufferHEVC</a>
@@ -87,6 +90,9 @@ $(function() {
 </li>
 <li>scaling_list_enabled_flag
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a64fec38f281205e7147541e0a18edbf0">VAEncSequenceParameterBufferHEVC</a>
+</li>
+<li>scaling_lists
+: <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html#a985ee36ed16761bb2013a2f098807073">VAConfigAttribValEncHEVCFeatures</a>
 </li>
 <li>scaling_lists_16x16
 : <a class="el" href="structVAQMatrixBufferHEVC.html#aef031ec09d791cb61622055cf4ddaa30">VAQMatrixBufferHEVC</a>
@@ -124,8 +130,8 @@ $(function() {
 : <a class="el" href="structVAPictureParameterBufferHEVCExtension.html#a38ccc13553ee4a05e75d0d8784c79dda">VAPictureParameterBufferHEVCExtension</a>
 </li>
 <li>scc_fields
-: <a class="el" href="structVAEncPictureParameterBufferHEVC.html#aa34d55c083273b8d419d960061a84e6d">VAEncPictureParameterBufferHEVC</a>
-, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a07cf365cf4fb7e24bf86a85b0055d760">VAEncSequenceParameterBufferHEVC</a>
+: <a class="el" href="structVAEncPictureParameterBufferHEVC.html#ae3915e4efc8089956b8dd1da87538b86">VAEncPictureParameterBufferHEVC</a>
+, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#ab17c61864d8d7f2740763a17aca59237">VAEncSequenceParameterBufferHEVC</a>
 </li>
 <li>screen_content_flag
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a63bc143a5df14d26d97a49400361741d">VAEncPictureParameterBufferHEVC</a>
@@ -185,6 +191,9 @@ $(function() {
 <li>separate_colour_plane_flag
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a78c7e8036f0aa657dfba49f72addf8dc">VAEncSequenceParameterBufferHEVC</a>
 </li>
+<li>separate_colour_planes
+: <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html#ab247b2e4f796c937b28781928f51b704">VAConfigAttribValEncHEVCFeatures</a>
+</li>
 <li>seq_parameter_set_id
 : <a class="el" href="structVAEncPictureParameterBufferH264.html#adfc298a98bae041a3801b96672654b3c">VAEncPictureParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferH264.html#ae328dc5b5aca2a16977c2bb6de15edf7">VAEncSequenceParameterBufferH264</a>
@@ -204,6 +213,9 @@ $(function() {
 </li>
 <li>sign_bias_golden
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#a7f02577df478c66997795e66fc3b996d">VAEncPictureParameterBufferVP8</a>
+</li>
+<li>sign_data_hiding
+: <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html#a24339f66173ce1b5546f66549c8ed9c8">VAConfigAttribValEncHEVCFeatures</a>
 </li>
 <li>sign_data_hiding_enabled_flag
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#afd140f22f2e8e44e7481c9b08d887da7">VAEncPictureParameterBufferHEVC</a>
@@ -283,7 +295,7 @@ $(function() {
 , <a class="el" href="structVASliceParameterBufferHEVC.html#a56d4c531f2de83fdb7df72f5042886df">VASliceParameterBufferHEVC</a>
 </li>
 <li>slice_parsing_fields
-: <a class="el" href="structVAPictureParameterBufferHEVC.html#a14721410a66c591c9f411ee2e7f0b911">VAPictureParameterBufferHEVC</a>
+: <a class="el" href="structVAPictureParameterBufferHEVC.html#aeec8dd35edc6d03236b9cd0cb9640248">VAPictureParameterBufferHEVC</a>
 </li>
 <li>slice_pic_parameter_set_id
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a4d7d52f0a30299e68bd9f9c2e448196d">VAEncPictureParameterBufferHEVC</a>
@@ -344,6 +356,9 @@ $(function() {
 <li>strength
 : <a class="el" href="structVAProcFilterParameterBufferHVSNoiseReduction.html#a59689b084867b1fabe7d47c1770b0ed2">VAProcFilterParameterBufferHVSNoiseReduction</a>
 </li>
+<li>strong_intra_smoothing
+: <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html#a8ca3e5ad1adecd288f8e9ed7c8660798">VAConfigAttribValEncHEVCFeatures</a>
+</li>
 <li>strong_intra_smoothing_enabled_flag
 : <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a17c510cab37d6fc5cee5460fbb6462a1">VAEncSequenceParameterBufferHEVC</a>
 </li>
@@ -352,6 +367,12 @@ $(function() {
 </li>
 <li>sub_carrier_phase
 : <a class="el" href="structVAEncPictureParameterBufferMPEG2.html#a7cb05d830338506dc2fc26b6643a0bf2">VAEncPictureParameterBufferMPEG2</a>
+</li>
+<li>sub_device_count
+: <a class="el" href="unionVADisplayAttribValSubDevice.html#a079d51559ef84ae51ca74a1a63cdfa48">VADisplayAttribValSubDevice</a>
+</li>
+<li>sub_device_mask
+: <a class="el" href="unionVADisplayAttribValSubDevice.html#a30da8e514e1d9018b67b936595e1e647">VADisplayAttribValSubDevice</a>
 </li>
 <li>sub_mb_part_mask
 : <a class="el" href="group__api__fei__h264.html#ga091e51387e841fbdc3ddc75d0e5f4856">VAEncMiscParameterFEIFrameControlH264</a>

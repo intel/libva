@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.11.0.pre1</span>
+   &#160;<span id="projectnumber">2.12.0</span>
    </div>
   </td>
  </tr>
@@ -247,6 +247,12 @@ Macros</h2></td></tr>
 <tr class="separator:gafcb3bbf17dd0467c6919d6dacea2cb58"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga156a739d58e21452b0ffafa4c0a40333"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga156a739d58e21452b0ffafa4c0a40333">VA_EXEC_MODE_DEFAULT</a>&#160;&#160;&#160;0x0</td></tr>
 <tr class="separator:ga156a739d58e21452b0ffafa4c0a40333"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga552bdf90e54e30a5a29a29f02f756e34"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga552bdf90e54e30a5a29a29f02f756e34">VA_FEATURE_NOT_SUPPORTED</a>&#160;&#160;&#160;0</td></tr>
+<tr class="separator:ga552bdf90e54e30a5a29a29f02f756e34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5917cb64fd2f69489751c856ad710609"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5917cb64fd2f69489751c856ad710609">VA_FEATURE_SUPPORTED</a>&#160;&#160;&#160;1</td></tr>
+<tr class="separator:ga5917cb64fd2f69489751c856ad710609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga986974c9d57736c66314932140edfba5"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga986974c9d57736c66314932140edfba5">VA_FEATURE_REQUIRED</a>&#160;&#160;&#160;2</td></tr>
+<tr class="separator:ga986974c9d57736c66314932140edfba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="memItemLeft" align="right" valign="top"><a id="gaff38bc6c01b65c6e9d473e40bdde9df6"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaff38bc6c01b65c6e9d473e40bdde9df6">VA_RT_FORMAT_YUV420</a>&#160;&#160;&#160;0x00000001</td></tr>
 <tr class="memdesc:gaff38bc6c01b65c6e9d473e40bdde9df6"><td class="mdescLeft">&#160;</td><td class="mdescRight">YUV 4:2:0 8-bit. <br /></td></tr>
@@ -539,6 +545,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d3947eb7d70bb6ade7001eca036f863">VAConfigAttribProtectedContentCipherSampleType</a> = 48, 
 <br />
 &#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">VAConfigAttribProtectedContentUsage</a> = 49, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27">VAConfigAttribEncHEVCFeatures</a> = 50, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340">VAConfigAttribEncHEVCBlockSizes</a> = 51, 
 <b>VAConfigAttribTypeMax</b>
 <br />
  }</td></tr>
@@ -561,7 +569,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7adc8741cdd7e0daf805085ffceec5d180">VASurfaceAttribExternalBufferDescriptor</a>, 
 <a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7a0a04ea3d5e15b28d41a2853f9b795fd7">VASurfaceAttribUsageHint</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308">VASurfaceAttribCount</a>
+&#160;&#160;<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ace6541c469406786363a6fcd9ed7e227">VASurfaceAttribDRMFormatModifiers</a>, 
+<a class="el" href="group__api__core.html#gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308">VASurfaceAttribCount</a>
 <br />
  }<tr class="memdesc:ga4b89190eeab82e047c06e31edaf0b9b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface attribute types.  <a href="group__api__core.html#ga4b89190eeab82e047c06e31edaf0b9b7">More...</a><br /></td></tr>
 </td></tr>
@@ -1456,6 +1465,55 @@ vaExportSurfaceHandle() flags</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Export surface to be written by external API. </p>
+
+</div>
+</div>
+<a id="ga552bdf90e54e30a5a29a29f02f756e34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga552bdf90e54e30a5a29a29f02f756e34">&#9670;&nbsp;</a></span>VA_FEATURE_NOT_SUPPORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FEATURE_NOT_SUPPORTED&#160;&#160;&#160;0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The feature is not supported by the device.</p>
+<p>Any corresponding feature flag must not be set. </p>
+
+</div>
+</div>
+<a id="ga986974c9d57736c66314932140edfba5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga986974c9d57736c66314932140edfba5">&#9670;&nbsp;</a></span>VA_FEATURE_REQUIRED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FEATURE_REQUIRED&#160;&#160;&#160;2</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The feature is required by the device.</p>
+<p>The device does not support not enabling this feature, so any corresponding feature flag must be set and any additional configuration needed by the feature must be supplied. </p>
+
+</div>
+</div>
+<a id="ga5917cb64fd2f69489751c856ad710609"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5917cb64fd2f69489751c856ad710609">&#9670;&nbsp;</a></span>VA_FEATURE_SUPPORTED</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FEATURE_SUPPORTED&#160;&#160;&#160;1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The feature is supported by the device.</p>
+<p>The user may decide whether or not to use this feature.</p>
+<p>Note that support for a feature only indicates that the hardware is able to use it; whether it is actually a positive change to enable it in a given situation will depend on other factors including the input provided by the user. </p>
 
 </div>
 </div>
@@ -2871,6 +2929,14 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9"></a>VAConfigAttribProtectedContentUsage&#160;</td><td class="fielddoc"><p>Special usage attribute of the protected session. </p>
 <p>The attribute specifies the flow for the protected session could be used. For example, it could be <code>VA_PC_USAGE_DEFAULT</code>, <code>VA_PC_USAGE_WIDEVINE</code>, etc.... </p>
 </td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27"></a>VAConfigAttribEncHEVCFeatures&#160;</td><td class="fielddoc"><p>HEVC/H.265 encoding features. Read-only. </p>
+<p>This attribute describes the supported features of an HEVC/H.265 encoder configuration. The value returned uses the <a class="el" href="unionVAConfigAttribValEncHEVCFeatures.html">VAConfigAttribValEncHEVCFeatures</a> type.</p>
+<p>If this attribute is supported by a driver then it must also support the VAConfigAttribEncHEVCBlockSizes attribute. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340"></a>VAConfigAttribEncHEVCBlockSizes&#160;</td><td class="fielddoc"><p>HEVC/H.265 encoding block sizes. Read-only. </p>
+<p>This attribute describes the supported coding tree and transform block sizes of an HEVC/H.265 encoder configuration. The value returned uses the <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html">VAConfigAttribValEncHEVCBlockSizes</a> type.</p>
+<p>If this attribute is supported by a driver then it must also support the VAConfigAttribEncHEVCFeatures attribute. </p>
+</td></tr>
 </table>
 
 </div>
@@ -2886,7 +2952,9 @@ vaExportSurfaceHandle() flags</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Display attributes Display attributes are used to control things such as contrast, hue, saturation, brightness etc. in the rendering process. The application can query what attributes are supported by the driver, and then set the appropriate attributes before calling vaPutSurface() </p>
+<p>Display attributes Display attributes are used to control things such as contrast, hue, saturation, brightness etc. in the rendering process. The application can query what attributes are supported by the driver, and then set the appropriate attributes before calling vaPutSurface()</p>
+<p>Display attributes can also be used to query/set platform or display adaptor (vaDisplay) related information. These attributes do not depend on vaConfig, and could not be used for vaPutSurface. Application can use vaQueryDisplayAttributes/vaGetDisplayAttributes at anytime after vaInitialize, but (for settable attributes) vaSetDisplayAttributes should be called after vaInitialize and before any other function call.</p>
+<p>To distinguish these two types of display attributes, display adaptor related attributes should be marked as "HW attribute" in the description. </p>
 
 </div>
 </div>
@@ -3078,8 +3146,9 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 <p>Surface attribute types. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7ae2e9a570df9f7e3625ef0b4b533aeaa3"></a>VASurfaceAttribPixelFormat&#160;</td><td class="fielddoc"><p>Pixel format (fourcc). </p>
-<p>The value is meaningful as input to <a class="el" href="group__api__core.html#ga6b10b88a628c56377268714cc72090ce" title="Queries surface attributes for the supplied config. ">vaQuerySurfaceAttributes()</a>. If zero, the driver returns the optimal pixel format for the specified config. Otherwise, if non-zero, the value represents a pixel format (FOURCC) that is kept as is on output, if the driver supports it. Otherwise, the driver sets the value to zero and drops the <code>VA_SURFACE_ATTRIB_SETTABLE</code> flag. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7ae2e9a570df9f7e3625ef0b4b533aeaa3"></a>VASurfaceAttribPixelFormat&#160;</td><td class="fielddoc"><p>Pixel format as a FOURCC (int, read/write). </p>
+<p>When <a class="el" href="group__api__core.html#ga6b10b88a628c56377268714cc72090ce" title="Queries surface attributes for the supplied config. ">vaQuerySurfaceAttributes()</a> is called, the driver will return one PixelFormat attribute per supported pixel format.</p>
+<p>When provided as an input to <a class="el" href="group__api__core.html#gac970ea0eec412326667549f58c44129b" title="Creates an array of surfaces. ">vaCreateSurfaces()</a>, the driver will allocate a surface with the provided pixel format. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7adbcbadf8228bf2d66052700a5db0b66e"></a>VASurfaceAttribMinWidth&#160;</td><td class="fielddoc"><p>Minimal width in pixels (int, read-only). </p>
 </td></tr>
@@ -3095,6 +3164,9 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <p>Refer to the documentation for the memory type being created to determine what descriptor structure to pass here. If not otherwise stated, the common <a class="el" href="structVASurfaceAttribExternalBuffers.html" title="VASurfaceAttribExternalBuffers structure for the VASurfaceAttribExternalBufferDescriptor attribute...">VASurfaceAttribExternalBuffers</a> should be used. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7a0a04ea3d5e15b28d41a2853f9b795fd7"></a>VASurfaceAttribUsageHint&#160;</td><td class="fielddoc"><p>Surface usage hint, gives the driver a hint of intended usage to optimize allocation (e.g. tiling) (int, read/write). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7ace6541c469406786363a6fcd9ed7e227"></a>VASurfaceAttribDRMFormatModifiers&#160;</td><td class="fielddoc"><p>List of possible DRM format modifiers (pointer, write). </p>
+<p>The value must be a pointer to a VADRMFormatModifierList. This can only be used when allocating a new buffer, it's invalid to use this attribute when importing an existing buffer. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga4b89190eeab82e047c06e31edaf0b9b7ae87a47fe190ef5a8655d98aa97656308"></a>VASurfaceAttribCount&#160;</td><td class="fielddoc"><p>Number of surface attributes. </p>
 </td></tr>
