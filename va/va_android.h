@@ -27,9 +27,9 @@
 #include <va/va.h>
 
 /** \brief Android Gralloc buffer memory type. */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_GRALLOC	0x00100000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_GRALLOC  0x00100000
 /** \brief Android ION buffer memory type. */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_ION		0x00200000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_ION      0x00200000
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +38,7 @@ extern "C" {
 /*
  * Returns a suitable VADisplay for VA API
  */
-VADisplay vaGetDisplay (
+VADisplay vaGetDisplay(
     void *android_dpy
 );
 

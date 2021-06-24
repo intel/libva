@@ -126,7 +126,7 @@ typedef enum {
 } VAEncPackedHeaderTypeH264;
 
 /**
- * \brief Sequence parameter for H.264 encoding in baseline, main & high 
+ * \brief Sequence parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds information for \c seq_parameter_set_data() as
@@ -274,7 +274,7 @@ typedef struct _VAEncSequenceParameterBufferH264 {
 } VAEncSequenceParameterBufferH264;
 
 /**
- * \brief Picture parameter for H.264 encoding in baseline, main & high 
+ * \brief Picture parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds information for \c pic_parameter_set_rbsp() as
@@ -554,7 +554,7 @@ typedef struct _VAEncSliceParameterBufferH264 {
 /**@}*/
 
 /**
- * \brief Macroblock parameter for H.264 encoding in baseline, main & high 
+ * \brief Macroblock parameter for H.264 encoding in baseline, main & high
  * profiles.
  *
  * This structure holds per-macroblock information. The buffer must be
@@ -623,8 +623,7 @@ typedef struct _VAEncMacroblockParameterBufferH264 {
  * Specifies MB partition modes that are disabled. Specifies Half-pel
  * mode and Quarter-pel mode searching
  */
-typedef struct _VAEncMiscParameterSubMbPartPelH264
-{
+typedef struct _VAEncMiscParameterSubMbPartPelH264 {
     uint32_t disable_inter_sub_mb_partition;
     union {
         struct {
@@ -637,7 +636,7 @@ typedef struct _VAEncMiscParameterSubMbPartPelH264
             uint32_t disable_4x4_inter_mb_partition          : 1;
             uint32_t reserved                                : 1;
         } bits;
-         uint8_t value;
+        uint8_t value;
     } inter_sub_mb_partition_mask;
 
     /**

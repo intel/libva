@@ -83,8 +83,7 @@ typedef union _VAConfigAttribValStats {
     uint32_t value;
 } VAConfigAttribValStats;
 
-typedef struct _VAPictureStats
-{
+typedef struct _VAPictureStats {
     VASurfaceID picture_id;
     /*
      * see flags below.
@@ -105,8 +104,7 @@ typedef struct _VAPictureStats
 /** \brief Motion Vector and Statistics frame level controls.
  * common part VAStatsStatisticsParameterBufferType for a MB or CTB
  **/
-typedef struct _VAStatsStatisticsParameter
-{
+typedef struct _VAStatsStatisticsParameter {
     /** \brief Source surface ID.  */
     VAPictureStats  input;
 

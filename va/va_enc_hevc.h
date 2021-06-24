@@ -678,7 +678,7 @@ typedef struct _VAEncPictureParameterBufferHEVC {
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    transform_skip_enabled_flag                    : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
-            uint32_t    cu_qp_delta_enabled_flag	               : 1;
+            uint32_t    cu_qp_delta_enabled_flag                   : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    weighted_pred_flag                             : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
@@ -861,7 +861,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    mvd_l1_zero_flag                               : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
-            uint32_t    cabac_init_flag        	                    : 1;
+            uint32_t    cabac_init_flag                             : 1;
             /** \brief Corresponds to HEVC syntax element of the same name. */
             uint32_t    slice_deblocking_filter_disabled_flag          : 2;
             /** \brief Corresponds to HEVC syntax element of the same name. */
@@ -889,7 +889,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
     */
     uint32_t                pred_weight_table_bit_length;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM-2];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 2];
     /**@}*/
 } VAEncSliceParameterBufferHEVC;
 
@@ -905,8 +905,7 @@ typedef struct _VAEncSliceParameterBufferHEVC {
  *
  * Matrix entries are in raster scan order which follows HEVC spec.
  */
-typedef struct _VAQMatrixBufferHEVC
-{
+typedef struct _VAQMatrixBufferHEVC {
     /**
      * \brief scaling lists,
      * corresponds to same HEVC spec syntax element

@@ -52,7 +52,7 @@ extern Bool
 VA_DRI2QueryVersion(Display *display, int *major, int *minor);
 extern Bool
 VA_DRI2Connect(Display *display, XID window,
-	    char **driverName, char **deviceName);
+               char **driverName, char **deviceName);
 extern Bool
 VA_DRI2Authenticate(Display *display, XID window, drm_magic_t magic);
 extern void
@@ -61,9 +61,9 @@ extern void
 VA_DRI2DestroyDrawable(Display *display, XID handle);
 extern VA_DRI2Buffer *
 VA_DRI2GetBuffers(Display *dpy, XID drawable,
-	       int *width, int *height,
-	       unsigned int *attachments, int count,
-	       int *outCount);
+                  int *width, int *height,
+                  unsigned int *attachments, int count,
+                  int *outCount);
 extern void
 VA_DRI2CopyRegion(Display *dpy, XID drawable, XserverRegion region,
                   CARD32 dest, CARD32 src);

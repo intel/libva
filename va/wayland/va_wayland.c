@@ -10,11 +10,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -106,10 +106,14 @@ struct va_wayland_backend {
 };
 
 static const struct va_wayland_backend g_backends[] = {
-    { va_wayland_drm_create,
-      va_wayland_drm_destroy },
-    { va_wayland_emgd_create,
-      va_wayland_emgd_destroy },
+    {
+        va_wayland_drm_create,
+        va_wayland_drm_destroy
+    },
+    {
+        va_wayland_emgd_create,
+        va_wayland_emgd_destroy
+    },
     { NULL, }
 };
 
@@ -171,7 +175,7 @@ vaGetSurfaceBufferWl(
     if (!ctx->vtable_wayland || !ctx->vtable_wayland->vaGetSurfaceBufferWl)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     return ctx->vtable_wayland->vaGetSurfaceBufferWl(ctx, surface, flags,
-                                                     out_buffer);
+            out_buffer);
 }
 
 VAStatus
@@ -189,5 +193,5 @@ vaGetImageBufferWl(
     if (!ctx->vtable_wayland || !ctx->vtable_wayland->vaGetImageBufferWl)
         return VA_STATUS_ERROR_UNIMPLEMENTED;
     return ctx->vtable_wayland->vaGetImageBufferWl(ctx, image, flags,
-                                                   out_buffer);
+            out_buffer);
 }

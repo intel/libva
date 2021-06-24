@@ -47,8 +47,7 @@
 #define __DRI_BUFFER_FAKE_FRONT_LEFT    7
 #define __DRI_BUFFER_FAKE_FRONT_RIGHT   8
 
-struct dri2_drawable 
-{
+struct dri2_drawable {
     struct dri_drawable base;
     union dri_buffer buffers[5];
     int width;
@@ -60,7 +59,7 @@ struct dri2_drawable
 
 static int gsDRI2SwapAvailable;
 
-static struct dri_drawable * 
+static struct dri_drawable *
 dri2CreateDrawable(VADriverContextP ctx, XID x_drawable)
 {
     struct dri2_drawable *dri2_drawable;
@@ -78,14 +77,14 @@ dri2CreateDrawable(VADriverContextP ctx, XID x_drawable)
     return &dri2_drawable->base;
 }
 
-static void 
+static void
 dri2DestroyDrawable(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     VA_DRI2DestroyDrawable(ctx->native_dpy, dri_drawable->x_drawable);
     free(dri_drawable);
 }
 
-static void 
+static void
 dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri2_drawable *dri2_drawable = (struct dri2_drawable *)dri_drawable;
@@ -96,8 +95,8 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
         if (gsDRI2SwapAvailable) {
             CARD64 ret;
             VA_DRI2SwapBuffers(ctx->native_dpy, dri_drawable->x_drawable,
-			       0, 1, 0,
-			       &ret);
+                               0, 1, 0,
+                               &ret);
         } else {
             xrect.x = 0;
             xrect.y = 0;
@@ -113,14 +112,14 @@ dri2SwapBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 }
 
 static union dri_buffer *
-dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
+    dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
 {
     struct dri2_drawable *dri2_drawable = (struct dri2_drawable *)dri_drawable;
     int i;
     int count;
     unsigned int attachments[5];
     VA_DRI2Buffer *buffers;
-    
+
     i = 0;
     if (dri_drawable->is_window)
         attachments[i++] = __DRI_BUFFER_BACK_LEFT;
@@ -128,8 +127,8 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
         attachments[i++] = __DRI_BUFFER_FRONT_LEFT;
 
     buffers = VA_DRI2GetBuffers(ctx->native_dpy, dri_drawable->x_drawable,
-			     &dri2_drawable->width, &dri2_drawable->height, 
-                             attachments, i, &count);
+                                &dri2_drawable->width, &dri2_drawable->height,
+                                attachments, i, &count);
     if (buffers == NULL)
         return NULL;
 
@@ -141,7 +140,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
         dri2_drawable->buffers[i].dri2.pitch = buffers[i].pitch;
         dri2_drawable->buffers[i].dri2.cpp = buffers[i].cpp;
         dri2_drawable->buffers[i].dri2.flags = buffers[i].flags;
-        
+
         if (buffers[i].attachment == __DRI_BUFFER_BACK_LEFT) {
             dri2_drawable->has_backbuffer = 1;
             dri2_drawable->back_index = i;
@@ -150,7 +149,7 @@ dri2GetRenderingBuffer(VADriverContextP ctx, struct dri_drawable *dri_drawable)
         if (buffers[i].attachment == __DRI_BUFFER_FRONT_LEFT)
             dri2_drawable->front_index = i;
     }
-    
+
     dri_drawable->width = dri2_drawable->width;
     dri_drawable->height = dri2_drawable->height;
     Xfree(buffers);
@@ -169,10 +168,10 @@ dri2Close(VADriverContextP ctx)
     va_dri_free_drawable_hashtable(ctx);
 
     if (dri_state->base.fd >= 0)
-	close(dri_state->base.fd);
+        close(dri_state->base.fd);
 }
 
-Bool 
+Bool
 va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 {
     struct dri_state *dri_state = (struct dri_state *)ctx->drm_state;
@@ -180,7 +179,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
     int error_base;
     int event_base;
     char *device_name = NULL;
-    drm_magic_t magic;        
+    drm_magic_t magic;
     *driver_name = NULL;
 
     if (!VA_DRI2QueryExtension(ctx->native_dpy, &event_base, &error_base))
@@ -191,7 +190,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 
 
     if (!VA_DRI2Connect(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                     driver_name, &device_name))
+                        driver_name, &device_name))
         goto err_out;
 
     if ((dri_state->base.fd != -1) && (dri_state->base.auth_type != VA_NONE))
@@ -206,7 +205,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
         goto err_out;
 
     if (!VA_DRI2Authenticate(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                          magic))
+                             magic))
         goto err_out;
 
     dri_state->base.auth_type = VA_DRI2;
@@ -234,7 +233,7 @@ err_out:
 
     *driver_name = NULL;
     dri_state->base.fd = -1;
-    
+
     return False;
 }
 

@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -39,7 +39,7 @@
 typedef struct AdapterInfo {
     int iSize;
     int iAdapterIndex;
-    char strUDID[ADL_MAX_PATH]; 
+    char strUDID[ADL_MAX_PATH];
     int iBusNumber;
     int iDeviceNumber;
     int iFunctionNumber;
@@ -121,9 +121,9 @@ static int match_display_name(Display *x11_dpy, const char *display_name)
     return m;
 }
 
-Bool VA_FGLRXGetClientDriverName( Display *dpy, int screen,
-    int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
-    int *ddxDriverPatchVersion, char **clientDriverName )
+Bool VA_FGLRXGetClientDriverName(Display *dpy, int screen,
+                                 int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
+                                 int *ddxDriverPatchVersion, char **clientDriverName)
 {
     ADL_MAIN_CONTROL_CREATE          ADL_Main_Control_Create;
     ADL_MAIN_CONTROL_DESTROY         ADL_Main_Control_Destroy;
@@ -147,33 +147,33 @@ Bool VA_FGLRXGetClientDriverName( Display *dpy, int screen,
     if (clientDriverName)
         *clientDriverName = NULL;
 
-    libadl_handle = dlopen("libatiadlxx.so", RTLD_LAZY|RTLD_GLOBAL);
+    libadl_handle = dlopen("libatiadlxx.so", RTLD_LAZY | RTLD_GLOBAL);
     if (!libadl_handle)
         goto end;
 
     dlerror();
     ADL_Main_Control_Create = (ADL_MAIN_CONTROL_CREATE)
-        dlsym(libadl_handle,"ADL_Main_Control_Create");
+                              dlsym(libadl_handle, "ADL_Main_Control_Create");
     if (dlerror())
         goto end;
 
     ADL_Main_Control_Destroy = (ADL_MAIN_CONTROL_DESTROY)
-        dlsym(libadl_handle,"ADL_Main_Control_Destroy");
+                               dlsym(libadl_handle, "ADL_Main_Control_Destroy");
     if (dlerror())
         goto end;
 
     ADL_Adapter_NumberOfAdapters_Get = (ADL_ADAPTER_NUMBEROFADAPTERS_GET)
-        dlsym(libadl_handle,"ADL_Adapter_NumberOfAdapters_Get");
+                                       dlsym(libadl_handle, "ADL_Adapter_NumberOfAdapters_Get");
     if (dlerror())
         goto end;
 
     ADL_Adapter_AdapterInfo_Get = (ADL_ADAPTER_ADAPTERINFO_GET)
-        dlsym(libadl_handle,"ADL_Adapter_AdapterInfo_Get");
+                                  dlsym(libadl_handle, "ADL_Adapter_AdapterInfo_Get");
     if (dlerror())
         goto end;
 
     ADL_Adapter_XScreenInfo_Get = (ADL_ADAPTER_XSCREENINFO_GET)
-        dlsym(libadl_handle,"ADL_Adapter_XScreenInfo_Get");
+                                  dlsym(libadl_handle, "ADL_Adapter_XScreenInfo_Get");
     if (dlerror())
         goto end;
 

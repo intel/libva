@@ -55,20 +55,19 @@ extern "C" {
  * buffer segment of status data.
  * Application accesses it by calling VAMapBuffer() with VAEncCodedBufferType.
  */
-typedef struct  _VACodedBufferVP9Status
-{
+typedef struct  _VACodedBufferVP9Status {
     /** Final quantization index used (yac), determined by BRC.
      *  Application is providing quantization index deltas
      *  ydc(0), y2dc(1), y2ac(2), uvdc(3), uvac(4) that are applied to all segments
      *  and segmentation qi deltas, they will not be changed by BRC.
      */
-    uint16_t 	base_qp_index;
+    uint16_t    base_qp_index;
 
     /** Final loopfilter levels for the frame, if segmentation is disabled only
      *  index 0 is used.
      *  If loop_filter_level is 0, it indicates loop filter is disabled.
      */
-    uint8_t 	loop_filter_level;
+    uint8_t     loop_filter_level;
 
     /**
      * Long term reference frame indication from BRC.  BRC recommends the
@@ -78,10 +77,10 @@ typedef struct  _VACodedBufferVP9Status
     uint8_t     long_term_indication;
 
     /* suggested next frame width */
-    uint16_t	next_frame_width;
+    uint16_t    next_frame_width;
 
     /* suggested next frame height */
-    uint16_t	next_frame_height;
+    uint16_t    next_frame_height;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
@@ -93,8 +92,7 @@ typedef struct  _VACodedBufferVP9Status
  * This structure conveys sequence level parameters.
  *
  */
-typedef struct  _VAEncSequenceParameterBufferVP9
-{
+typedef struct  _VAEncSequenceParameterBufferVP9 {
     /** \brief Frame size note:
      *  Picture resolution may change frame by frame.
      *  Application needs to allocate surfaces and frame buffers based on
@@ -149,8 +147,7 @@ typedef struct  _VAEncSequenceParameterBufferVP9
  * This structure conveys picture level parameters.
  *
  */
-typedef struct  _VAEncPictureParameterBufferVP9
-{
+typedef struct  _VAEncPictureParameterBufferVP9 {
     /** VP9 encoder may support dynamic scaling function.
      *  If enabled (enable_dynamic_scaling is set), application may request
      *  GPU encodes picture with a different resolution from the raw source.
@@ -183,7 +180,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
      */
     VASurfaceID reference_frames[8];
 
-	  /* buffer to store coded data */
+    /* buffer to store coded data */
     VABufferID  coded_buf;
 
     union {
@@ -252,7 +249,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
 
             /** \brief show_frame
              *  0: current frame is not for display
-	           *  1: current frame is for display
+               *  1: current frame is for display
              */
             uint32_t    show_frame                     : 1;
 
@@ -326,9 +323,9 @@ typedef struct  _VAEncPictureParameterBufferVP9
             uint32_t    lossless_mode                  : 1;
 
             /** \brief MV prediction mode. Corresponds to VP9 variable with same name.
-             *  comp_prediction_mode = 0:		single prediction ony,
-             *  comp_prediction_mode = 1:		compound prediction,
-             *  comp_prediction_mode = 2:		hybrid prediction
+             *  comp_prediction_mode = 0:       single prediction ony,
+             *  comp_prediction_mode = 1:       compound prediction,
+             *  comp_prediction_mode = 2:       hybrid prediction
              *
              *  Not mandatory. App may suggest the setting based on power or
              *  performance. Kernal may use it as a guildline and decide the proper
@@ -518,8 +515,7 @@ typedef struct  _VAEncPictureParameterBufferVP9
 /**
  * \brief Per segment parameters
  */
-typedef struct _VAEncSegParamVP9
-{
+typedef struct _VAEncSegParamVP9 {
     union {
         struct {
             /** \brief Indicates if per segment reference frame indicator is enabled.
@@ -576,8 +572,7 @@ typedef struct _VAEncSegParamVP9
  *  The buffer is created with VABufferType VAQMatrixBufferType.
  *
  */
-typedef struct _VAEncMiscParameterTypeVP9PerSegmantParam
-{
+typedef struct _VAEncMiscParameterTypeVP9PerSegmantParam {
     /**
      *  Parameters for 8 segments.
      */

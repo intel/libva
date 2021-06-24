@@ -124,7 +124,7 @@ vaGetDisplayDRM(int fd)
 
     pDriverContext->native_dpy   = NULL;
     pDriverContext->display_type = is_render_nodes ?
-        VA_DISPLAY_DRM_RENDERNODES : VA_DISPLAY_DRM;
+                                   VA_DISPLAY_DRM_RENDERNODES : VA_DISPLAY_DRM;
     pDriverContext->drm_state    = drm_state;
 
     return pDisplayContext;

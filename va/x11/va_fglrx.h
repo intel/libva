@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -28,8 +28,8 @@
 #include <X11/Xlib.h>
 
 DLL_HIDDEN
-Bool VA_FGLRXGetClientDriverName( Display *dpy, int screen,
-    int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
-    int *ddxDriverPatchVersion, char **clientDriverName );
+Bool VA_FGLRXGetClientDriverName(Display *dpy, int screen,
+                                 int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
+                                 int *ddxDriverPatchVersion, char **clientDriverName);
 
 #endif /* VA_FGLRX_H */

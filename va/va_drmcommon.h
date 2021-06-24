@@ -10,11 +10,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -74,18 +74,18 @@ struct drm_state {
 };
 
 /** \brief Kernel DRM buffer memory type.  */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM		0x10000000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_KERNEL_DRM       0x10000000
 /** \brief DRM PRIME memory type (old version)
  *
  * This supports only single objects with restricted memory layout.
  * Used with VASurfaceAttribExternalBuffers.
  */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME		0x20000000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME        0x20000000
 /** \brief DRM PRIME memory type
  *
  * Used with VADRMPRIMESurfaceDescriptor.
  */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2		0x40000000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2      0x40000000
 
 /**
  * \brief External buffer descriptor for a DRM PRIME surface.
@@ -165,10 +165,10 @@ typedef struct _VADRMPRIMESurfaceDescriptor {
  * DRM format modifiers are defined in drm_fourcc.h in the Linux kernel.
  */
 typedef struct _VADRMFormatModifierList {
-	/** Number of modifiers. */
-	uint32_t num_modifiers;
-	/** Array of modifiers. */
-	uint64_t *modifiers;
+    /** Number of modifiers. */
+    uint32_t num_modifiers;
+    /** Array of modifiers. */
+    uint64_t *modifiers;
 } VADRMFormatModifierList;
 
 

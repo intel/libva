@@ -10,11 +10,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -232,7 +232,7 @@ static const struct wl_registry_listener registry_listener = {
 
 static bool
 wayland_roundtrip_queue(struct wl_display *display,
-                         struct wl_event_queue *queue)
+                        struct wl_event_queue *queue)
 {
     if (wl_display_roundtrip_queue(display, queue) < 0) {
         int err = wl_display_get_error(display);

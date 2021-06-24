@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -60,29 +60,29 @@ DLL_HIDDEN
 void va_TraceEnd(VADisplay dpy);
 
 DLL_HIDDEN
-void va_TraceInitialize (
+void va_TraceInitialize(
     VADisplay dpy,
-    int *major_version,	 /* out */
-    int *minor_version 	 /* out */
+    int *major_version,  /* out */
+    int *minor_version   /* out */
 );
 
 DLL_HIDDEN
-void va_TraceTerminate (
+void va_TraceTerminate(
     VADisplay dpy
 );
 
 DLL_HIDDEN
 void va_TraceCreateConfig(
     VADisplay dpy,
-    VAProfile profile, 
-    VAEntrypoint entrypoint, 
+    VAProfile profile,
+    VAEntrypoint entrypoint,
     VAConfigAttrib *attrib_list,
     int num_attribs,
     VAConfigID *config_id /* out */
 );
 
 DLL_HIDDEN
-void va_TraceDestroyConfig (
+void va_TraceDestroyConfig(
     VADisplay dpy,
     VAConfigID config_id
 );
@@ -94,7 +94,7 @@ void va_TraceCreateSurfaces(
     int height,
     int format,
     int num_surfaces,
-    VASurfaceID *surfaces,	/* out */
+    VASurfaceID *surfaces,  /* out */
     VASurfaceAttrib    *attrib_list,
     unsigned int        num_attribs
 );
@@ -115,37 +115,37 @@ void va_TraceCreateContext(
     int flag,
     VASurfaceID *render_targets,
     int num_render_targets,
-    VAContextID *context		/* out */
+    VAContextID *context        /* out */
 );
 
 DLL_HIDDEN
-void va_TraceDestroyContext (
+void va_TraceDestroyContext(
     VADisplay dpy,
     VAContextID context
 );
 
 DLL_HIDDEN
-void va_TraceCreateMFContext (
+void va_TraceCreateMFContext(
     VADisplay dpy,
-    VAContextID *mf_context	/* out */
+    VAContextID *mf_context /* out */
 );
 
 DLL_HIDDEN
-void va_TraceMFAddContext (
+void va_TraceMFAddContext(
     VADisplay dpy,
     VAMFContextID mf_context,
     VAContextID context
 );
 
 DLL_HIDDEN
-void va_TraceMFReleaseContext (
+void va_TraceMFReleaseContext(
     VADisplay dpy,
     VAMFContextID mf_context,
     VAContextID context
 );
 
 DLL_HIDDEN
-void va_TraceMFSubmit (
+void va_TraceMFSubmit(
     VADisplay dpy,
     VAMFContextID mf_context,
     VAContextID *contexts,
@@ -153,27 +153,27 @@ void va_TraceMFSubmit (
 );
 
 DLL_HIDDEN
-void va_TraceCreateBuffer (
+void va_TraceCreateBuffer(
     VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferType type,		/* in */
-    unsigned int size,		/* in */
-    unsigned int num_elements,	/* in */
-    void *data,			/* in */
-    VABufferID *buf_id		/* out */
+    VAContextID context,    /* in */
+    VABufferType type,      /* in */
+    unsigned int size,      /* in */
+    unsigned int num_elements,  /* in */
+    void *data,         /* in */
+    VABufferID *buf_id      /* out */
 );
 
 DLL_HIDDEN
-void va_TraceDestroyBuffer (
+void va_TraceDestroyBuffer(
     VADisplay dpy,
     VABufferID buf_id    /* in */
 );
 
 DLL_HIDDEN
-void va_TraceMapBuffer (
+void va_TraceMapBuffer(
     VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    void **pbuf 	/* out */
+    VABufferID buf_id,  /* in */
+    void **pbuf     /* out */
 );
 
 
@@ -231,15 +231,15 @@ DLL_HIDDEN
 void va_TraceQuerySurfaceStatus(
     VADisplay dpy,
     VASurfaceID render_target,
-    VASurfaceStatus *status	/* out */
+    VASurfaceStatus *status /* out */
 );
 
 DLL_HIDDEN
 void va_TraceQuerySurfaceError(
-	VADisplay dpy,
-	VASurfaceID surface,
-	VAStatus error_status,
-	void **error_info /*out*/
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAStatus error_status,
+    void **error_info /*out*/
 );
 
 DLL_HIDDEN
@@ -250,34 +250,34 @@ void va_TraceSyncBuffer(
 );
 
 DLL_HIDDEN
-void va_TraceMaxNumDisplayAttributes (
+void va_TraceMaxNumDisplayAttributes(
     VADisplay dpy,
     int number
 );
 
 DLL_HIDDEN
-void va_TraceQueryDisplayAttributes (
+void va_TraceQueryDisplayAttributes(
     VADisplay dpy,
-    VADisplayAttribute *attr_list,	/* out */
-    int *num_attributes			/* out */
+    VADisplayAttribute *attr_list,  /* out */
+    int *num_attributes         /* out */
 );
 
 DLL_HIDDEN
-void va_TraceGetDisplayAttributes (
+void va_TraceGetDisplayAttributes(
     VADisplay dpy,
     VADisplayAttribute *attr_list,
     int num_attributes
 );
 
 DLL_HIDDEN
-void va_TraceSetDisplayAttributes (
+void va_TraceSetDisplayAttributes(
     VADisplay dpy,
     VADisplayAttribute *attr_list,
     int num_attributes
 );
 
 /* extern function called by display side */
-void va_TracePutSurface (
+void va_TracePutSurface(
     VADisplay dpy,
     VASurfaceID surface,
     void *draw, /* the target Drawable */
@@ -299,6 +299,6 @@ void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 #ifdef __cplusplus
 }
 #endif
-    
+
 
 #endif /* VA_TRACE_H */
