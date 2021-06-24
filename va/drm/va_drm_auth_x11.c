@@ -34,11 +34,11 @@ typedef struct drm_auth_x11_vtable      DRMAuthX11VTable;
 typedef void (*VAGenericFunc)(void);
 typedef Display *(*X11OpenDisplayFunc)(const char *display_name);
 typedef int (*X11CloseDisplayFunc)(Display *display);
-typedef Bool (*VADRI2QueryExtensionFunc)(
+typedef Bool(*VADRI2QueryExtensionFunc)(
     Display *display, int *event_base, int *error_base);
-typedef Bool (*VADRI2QueryVersionFunc)(
+typedef Bool(*VADRI2QueryVersionFunc)(
     Display *display, int *major, int *minor);
-typedef Bool (*VADRI2AuthenticateFunc)(
+typedef Bool(*VADRI2AuthenticateFunc)(
     Display *display, XID window, uint32_t magic);
 
 struct drm_auth_x11_vtable {
@@ -84,9 +84,9 @@ drm_auth_x11_init(DRMAuthX11 *auth)
     int ret;
 
     ret = snprintf(
-        libva_x11_name, sizeof(libva_x11_name),
-        "libva-x11.so.%d", LIBVA_MAJOR_VERSION
-    );
+              libva_x11_name, sizeof(libva_x11_name),
+              "libva-x11.so.%d", LIBVA_MAJOR_VERSION
+          );
     if (ret < 0 || ret >= sizeof(libva_x11_name))
         return false;
 

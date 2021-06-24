@@ -54,8 +54,7 @@ extern "C" {
  * per frame.
  *
  */
-typedef struct  _VAPictureParameterBufferHEVC
-{
+typedef struct  _VAPictureParameterBufferHEVC {
     /** \brief buffer description of decoded current picture
      * only VA_PICTURE_HEVC_FIELD_PIC and VA_PICTURE_HEVC_BOTTOM_FIELD
      * of "flags" fields are meaningful.
@@ -69,11 +68,9 @@ typedef struct  _VAPictureParameterBufferHEVC
     uint16_t                pic_height_in_luma_samples;
 
 
-    union
-    {
-        struct
-        {
-        /** following flags have same syntax and semantic as those in HEVC spec */
+    union {
+        struct {
+            /** following flags have same syntax and semantic as those in HEVC spec */
             uint32_t        chroma_format_idc                           : 2;
             uint32_t        separate_colour_plane_flag                  : 1;
             uint32_t        pcm_enabled_flag                            : 1;
@@ -139,10 +136,8 @@ typedef struct  _VAPictureParameterBufferHEVC
     /**
      * \brief Parameters needed for parsing slice segment headers
      */
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             /** following parameters have same syntax with those in HEVC spec */
             uint32_t        lists_modification_present_flag             : 1;
             uint32_t        long_term_ref_pics_present_flag             : 1;
@@ -206,12 +201,9 @@ typedef struct  _VAPictureParameterBufferHEVC
  * type is same as \ref VAPictureParameterBufferHEVC.
  *
  */
-typedef struct  _VAPictureParameterBufferHEVCRext
-{
-    union
-    {
-        struct
-        {
+typedef struct  _VAPictureParameterBufferHEVCRext {
+    union {
+        struct {
             /** \brief HEVC range extension flags
              *  The following flags bears the same syntax and semantics as
              *  those defined in HEVC bit stream spec.
@@ -260,12 +252,9 @@ typedef struct  _VAPictureParameterBufferHEVCRext
  *together and the buffer type is same as \ref VAPictureParameterBufferHEVC.
  *
  */
-typedef struct  _VAPictureParameterBufferHEVCScc
-{
-    union
-    {
-        struct
-        {
+typedef struct  _VAPictureParameterBufferHEVCScc {
+    union {
+        struct {
             /** \brief HEVC Scc extension flags
              *  The following flags bears the same syntax and semantics as
              *  those defined in HEVC bit stream spec.
@@ -339,8 +328,7 @@ typedef struct  _VAPictureParameterBufferHEVCScc
  * The data buffer should be sent once per frame.
  *
  */
-typedef struct  _VAPictureParameterBufferHEVCExtension
-{
+typedef struct  _VAPictureParameterBufferHEVCExtension {
     /** \brief basic HEVC picture parameters data structure
      */
     VAPictureParameterBufferHEVC           base;
@@ -367,8 +355,7 @@ typedef struct  _VAPictureParameterBufferHEVCExtension
  * For short format, this data structure is not sent by application.
  *
  */
-typedef struct  _VASliceParameterBufferHEVC
-{
+typedef struct  _VASliceParameterBufferHEVC {
     /** @name Codec-independent Slice Parameter Buffer base. */
 
     /**@{*/
@@ -400,34 +387,32 @@ typedef struct  _VASliceParameterBufferHEVC
      * value range [0..14, 0xFF], where 0xFF indicates invalid entry.
      */
     uint8_t                 RefPicList[2][15];
-    union
-    {
+    union {
         uint32_t            value;
-        struct
-        {
+        struct {
             /** current slice is last slice of picture. */
             uint32_t        LastSliceOfPic                              : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        dependent_slice_segment_flag                : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_type                                  : 2;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        color_plane_id                              : 2;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_sao_luma_flag                         : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_sao_chroma_flag                       : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        mvd_l1_zero_flag                            : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        cabac_init_flag                             : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_temporal_mvp_enabled_flag             : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_deblocking_filter_disabled_flag       : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        collocated_from_l0_flag                     : 1;
-    /** HEVC syntax element. */
+            /** HEVC syntax element. */
             uint32_t        slice_loop_filter_across_slices_enabled_flag : 1;
             uint32_t        reserved                                    : 18;
         } fields;
@@ -510,8 +495,7 @@ typedef struct  _VASliceParameterBufferHEVC
  * For short format, this data structure is not sent by application.
  *
  */
-typedef struct  _VASliceParameterBufferHEVCRext
-{
+typedef struct  _VASliceParameterBufferHEVCRext {
     /* below four parameters are used to replace data types of the
      * corresponding parameters of those in \# VASliceParameterBufferHEVC.
      */
@@ -520,10 +504,8 @@ typedef struct  _VASliceParameterBufferHEVCRext
     int16_t                 luma_offset_l1[15];
     int16_t                 ChromaOffsetL1[15][2];
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             uint32_t        cu_chroma_qp_offset_enabled_flag    : 1;
             uint32_t        use_integer_mv_flag                 : 1;
             /** \brief Reserved bytes for future use, must be zero */
@@ -553,13 +535,12 @@ typedef struct  _VASliceParameterBufferHEVCRext
  * This structure conveys parameters related to slice segment header and should
  * be sent once per slice. For HEVC range extension and HEVC Scc decoding,
  * application should parse both basic slice parameters and extented slice
- * parameters into this buffer structure and sent it. 
+ * parameters into this buffer structure and sent it.
  *
  * For short format, this data structure is not sent by application.
  *
  */
-typedef struct  _VASliceParameterBufferHEVCExtension
-{
+typedef struct  _VASliceParameterBufferHEVCExtension {
     /** \brief baseline HEVC slice parameters data structure */
     VASliceParameterBufferHEVC               base;
 
@@ -577,8 +558,7 @@ typedef struct  _VASliceParameterBufferHEVCExtension
  *
  * Matrix entries are in raster scan order which follows HEVC spec.
  */
-typedef struct _VAIQMatrixBufferHEVC
-{
+typedef struct _VAIQMatrixBufferHEVC {
     /**
      * \brief scaling lists,
      * corresponds to same HEVC spec syntax element

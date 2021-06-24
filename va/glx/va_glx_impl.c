@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -138,7 +138,7 @@ static inline VAOpenGLVTableP gl_get_vtable(VADriverContextP ctx)
 
 // Lookup for a GLX function
 typedef void (*GLFuncPtr)(void);
-typedef GLFuncPtr (*GLXGetProcAddressProc)(const char *);
+typedef GLFuncPtr(*GLXGetProcAddressProc)(const char *);
 
 static GLFuncPtr get_proc_address_default(const char *name)
 {
@@ -151,12 +151,12 @@ static GLXGetProcAddressProc get_proc_address_func(void)
 
     dlerror();
     get_proc_func = (GLXGetProcAddressProc)
-        dlsym(RTLD_DEFAULT, "glXGetProcAddress");
+                    dlsym(RTLD_DEFAULT, "glXGetProcAddress");
     if (!dlerror())
         return get_proc_func;
 
     get_proc_func = (GLXGetProcAddressProc)
-        dlsym(RTLD_DEFAULT, "glXGetProcAddressARB");
+                    dlsym(RTLD_DEFAULT, "glXGetProcAddressARB");
     if (!dlerror())
         return get_proc_func;
 
@@ -197,15 +197,14 @@ static int check_extension3(const char *name)
     PFNGLGETSTRINGIPROC glGetStringi = 0;
 
     glGetStringi = (PFNGLGETSTRINGIPROC) get_proc_address("glGetStringi");
-    if(!glGetStringi)
+    if (!glGetStringi)
         return 0;
 
 
     glGetIntegerv(GL_NUM_EXTENSIONS, &nbExtensions);
-    for(i = 0; i < nbExtensions; i++)
-    {
+    for (i = 0; i < nbExtensions; i++) {
         const GLubyte *strExtension = glGetStringi(GL_EXTENSIONS, i);
-        if(strcmp((const char *) strExtension, name) == 0)
+        if (strcmp((const char *) strExtension, name) == 0)
             return 1;
     }
 
@@ -247,19 +246,19 @@ static int load_tfp_extensions(VADriverContextP ctx)
     VAOpenGLVTableP pOpenGLVTable = gl_get_vtable(ctx);
 
     pOpenGLVTable->glx_create_pixmap = (PFNGLXCREATEPIXMAPPROC)
-        get_proc_address("glXCreatePixmap");
+                                       get_proc_address("glXCreatePixmap");
     if (!pOpenGLVTable->glx_create_pixmap)
         return 0;
     pOpenGLVTable->glx_destroy_pixmap = (PFNGLXDESTROYPIXMAPPROC)
-        get_proc_address("glXDestroyPixmap");
+                                        get_proc_address("glXDestroyPixmap");
     if (!pOpenGLVTable->glx_destroy_pixmap)
         return 0;
     pOpenGLVTable->glx_bind_tex_image = (PFNGLXBINDTEXIMAGEEXTPROC)
-        get_proc_address("glXBindTexImageEXT");
+                                        get_proc_address("glXBindTexImageEXT");
     if (!pOpenGLVTable->glx_bind_tex_image)
         return 0;
     pOpenGLVTable->glx_release_tex_image = (PFNGLXRELEASETEXIMAGEEXTPROC)
-        get_proc_address("glXReleaseTexImageEXT");
+                                           get_proc_address("glXReleaseTexImageEXT");
     if (!pOpenGLVTable->glx_release_tex_image)
         return 0;
     return 1;
@@ -270,43 +269,43 @@ static int load_fbo_extensions(VADriverContextP ctx)
     VAOpenGLVTableP pOpenGLVTable = gl_get_vtable(ctx);
 
     pOpenGLVTable->gl_gen_framebuffers = (PFNGLGENFRAMEBUFFERSEXTPROC)
-        get_proc_address("glGenFramebuffersEXT");
+                                         get_proc_address("glGenFramebuffersEXT");
     if (!pOpenGLVTable->gl_gen_framebuffers)
         return 0;
     pOpenGLVTable->gl_delete_framebuffers = (PFNGLDELETEFRAMEBUFFERSEXTPROC)
-        get_proc_address("glDeleteFramebuffersEXT");
+                                            get_proc_address("glDeleteFramebuffersEXT");
     if (!pOpenGLVTable->gl_delete_framebuffers)
         return 0;
     pOpenGLVTable->gl_bind_framebuffer = (PFNGLBINDFRAMEBUFFEREXTPROC)
-        get_proc_address("glBindFramebufferEXT");
+                                         get_proc_address("glBindFramebufferEXT");
     if (!pOpenGLVTable->gl_bind_framebuffer)
         return 0;
     pOpenGLVTable->gl_gen_renderbuffers = (PFNGLGENRENDERBUFFERSEXTPROC)
-        get_proc_address("glGenRenderbuffersEXT");
+                                          get_proc_address("glGenRenderbuffersEXT");
     if (!pOpenGLVTable->gl_gen_renderbuffers)
         return 0;
     pOpenGLVTable->gl_delete_renderbuffers = (PFNGLDELETERENDERBUFFERSEXTPROC)
-        get_proc_address("glDeleteRenderbuffersEXT");
+            get_proc_address("glDeleteRenderbuffersEXT");
     if (!pOpenGLVTable->gl_delete_renderbuffers)
         return 0;
     pOpenGLVTable->gl_bind_renderbuffer = (PFNGLBINDRENDERBUFFEREXTPROC)
-        get_proc_address("glBindRenderbufferEXT");
+                                          get_proc_address("glBindRenderbufferEXT");
     if (!pOpenGLVTable->gl_bind_renderbuffer)
         return 0;
     pOpenGLVTable->gl_renderbuffer_storage = (PFNGLRENDERBUFFERSTORAGEEXTPROC)
-        get_proc_address("glRenderbufferStorageEXT");
+            get_proc_address("glRenderbufferStorageEXT");
     if (!pOpenGLVTable->gl_renderbuffer_storage)
         return 0;
     pOpenGLVTable->gl_framebuffer_renderbuffer = (PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)
-        get_proc_address("glFramebufferRenderbufferEXT");
+            get_proc_address("glFramebufferRenderbufferEXT");
     if (!pOpenGLVTable->gl_framebuffer_renderbuffer)
         return 0;
     pOpenGLVTable->gl_framebuffer_texture_2d = (PFNGLFRAMEBUFFERTEXTURE2DEXTPROC)
-        get_proc_address("glFramebufferTexture2DEXT");
+            get_proc_address("glFramebufferTexture2DEXT");
     if (!pOpenGLVTable->gl_framebuffer_texture_2d)
         return 0;
     pOpenGLVTable->gl_check_framebuffer_status = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)
-        get_proc_address("glCheckFramebufferStatusEXT");
+            get_proc_address("glCheckFramebufferStatusEXT");
     if (!pOpenGLVTable->gl_check_framebuffer_status)
         return 0;
     return 1;
@@ -355,7 +354,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
         GLX_RENDER_TYPE,   GLX_RGBA_BIT,
         GLX_DOUBLEBUFFER,  True,
         GLX_RED_SIZE,      8,
-        GLX_GREEN_SIZE,    8, 
+        GLX_GREEN_SIZE,    8,
         GLX_BLUE_SIZE,     8,
         None
     };
@@ -367,8 +366,7 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     if (parent) {
         cs->display = parent->display;
         cs->window  = parent->window;
-    }
-    else {
+    } else {
         cs->display = ctx->native_dpy;
         cs->window  = None;
     }
@@ -376,10 +374,10 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
 
     if (parent && parent->context) {
         status = glXQueryContext(
-            parent->display,
-            parent->context,
-            GLX_FBCONFIG_ID, &fbconfig_id
-        );
+                     parent->display,
+                     parent->context,
+                     GLX_FBCONFIG_ID, &fbconfig_id
+                 );
         if (status != Success)
             goto error;
 
@@ -387,33 +385,32 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
             goto choose_fbconfig;
 
         fbconfigs = glXGetFBConfigs(
-            parent->display,
-            DefaultScreen(parent->display),
-            &n_fbconfigs
-        );
+                        parent->display,
+                        DefaultScreen(parent->display),
+                        &n_fbconfigs
+                    );
         if (!fbconfigs)
             goto error;
 
         /* Find out a GLXFBConfig compatible with the parent context */
         for (n = 0; n < n_fbconfigs; n++) {
             status = glXGetFBConfigAttrib(
-                cs->display,
-                fbconfigs[n],
-                GLX_FBCONFIG_ID, &val
-            );
+                         cs->display,
+                         fbconfigs[n],
+                         GLX_FBCONFIG_ID, &val
+                     );
             if (status == Success && val == fbconfig_id)
                 break;
         }
         if (n == n_fbconfigs)
             goto error;
-    }
-    else {
-    choose_fbconfig:
+    } else {
+choose_fbconfig:
         fbconfigs = glXChooseFBConfig(
-            ctx->native_dpy,
-            ctx->x11_screen,
-            fbconfig_attrs, &n_fbconfigs
-        );
+                        ctx->native_dpy,
+                        ctx->x11_screen,
+                        fbconfig_attrs, &n_fbconfigs
+                    );
         if (!fbconfigs)
             goto error;
 
@@ -422,12 +419,12 @@ gl_create_context(VADriverContextP ctx, OpenGLContextStateP parent)
     }
 
     cs->context = glXCreateNewContext(
-        cs->display,
-        fbconfigs[n],
-        GLX_RGBA_TYPE,
-        parent ? parent->context : NULL,
-        True
-    );
+                      cs->display,
+                      fbconfigs[n],
+                      GLX_RGBA_TYPE,
+                      parent ? parent->context : NULL,
+                      True
+                  );
     if (cs->context)
         goto end;
 
@@ -505,12 +502,12 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     if (wattr.depth != 24 && wattr.depth != 32)
         return 0;
     pixmap = XCreatePixmap(
-        ctx->native_dpy,
-        root_window,
-        width,
-        height,
-        wattr.depth
-    );
+                 ctx->native_dpy,
+                 root_window,
+                 width,
+                 height,
+                 wattr.depth
+             );
     if (!pixmap)
         return 0;
     pSurfaceGLX->pixmap = pixmap;
@@ -538,20 +535,22 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     for (attrib = fbconfig_attrs; *attrib != GL_NONE; attrib += 2)
         ;
     if (wattr.depth == 32) {
-    *attrib++ = GLX_ALPHA_SIZE;                 *attrib++ = 8;
-    *attrib++ = GLX_BIND_TO_TEXTURE_RGBA_EXT;   *attrib++ = GL_TRUE;
-    }
-    else {
-    *attrib++ = GLX_BIND_TO_TEXTURE_RGB_EXT;    *attrib++ = GL_TRUE;
+        *attrib++ = GLX_ALPHA_SIZE;
+        *attrib++ = 8;
+        *attrib++ = GLX_BIND_TO_TEXTURE_RGBA_EXT;
+        *attrib++ = GL_TRUE;
+    } else {
+        *attrib++ = GLX_BIND_TO_TEXTURE_RGB_EXT;
+        *attrib++ = GL_TRUE;
     }
     *attrib++ = GL_NONE;
 
     fbconfig = glXChooseFBConfig(
-        ctx->native_dpy,
-        ctx->x11_screen,
-        fbconfig_attrs,
-        &n_fbconfig_attrs
-    );
+                   ctx->native_dpy,
+                   ctx->x11_screen,
+                   fbconfig_attrs,
+                   &n_fbconfig_attrs
+               );
     if (!fbconfig)
         return 0;
 
@@ -564,18 +563,18 @@ static int create_tfp_surface(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
         ;
     *attrib++ = GLX_TEXTURE_FORMAT_EXT;
     if (wattr.depth == 32)
-    *attrib++ = GLX_TEXTURE_FORMAT_RGBA_EXT;
+        *attrib++ = GLX_TEXTURE_FORMAT_RGBA_EXT;
     else
-    *attrib++ = GLX_TEXTURE_FORMAT_RGB_EXT;
+        *attrib++ = GLX_TEXTURE_FORMAT_RGB_EXT;
     *attrib++ = GL_NONE;
 
     x11_trap_errors();
     glx_pixmap = pOpenGLVTable->glx_create_pixmap(
-        ctx->native_dpy,
-        fbconfig[0],
-        pixmap,
-        pixmap_attrs
-    );
+                     ctx->native_dpy,
+                     fbconfig[0],
+                     pixmap,
+                     pixmap_attrs
+                 );
     free(fbconfig);
     if (x11_untrap_errors() != 0)
         return 0;
@@ -671,10 +670,14 @@ static void render_pixmap(VADriverContextP ctx, VASurfaceGLXP pSurfaceGLX)
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
     {
-        glTexCoord2f(0.0f, 0.0f); glVertex2i(0, 0);
-        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, h);
-        glTexCoord2f(1.0f, 1.0f); glVertex2i(w, h);
-        glTexCoord2f(1.0f, 0.0f); glVertex2i(w, 0);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2i(0, 0);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2i(0, h);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2i(w, h);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2i(w, 0);
     }
     glEnd();
 }
@@ -932,7 +935,7 @@ error:
     if (new_cs)
         gl_destroy_context(new_cs);
 
-    return VA_STATUS_ERROR_ALLOCATION_FAILED;    
+    return VA_STATUS_ERROR_ALLOCATION_FAILED;
 }
 
 static VAStatus
@@ -982,14 +985,14 @@ associate_surface(
 
     x11_trap_errors();
     status = ctx->vtable->vaPutSurface(
-        ctx,
-        surface,
-        (void *)pSurfaceGLX->pixmap,
-        0, 0, pSurfaceGLX->width, pSurfaceGLX->height,
-        0, 0, pSurfaceGLX->width, pSurfaceGLX->height,
-        NULL, 0,
-        flags
-    );
+                 ctx,
+                 surface,
+                 (void *)pSurfaceGLX->pixmap,
+                 0, 0, pSurfaceGLX->width, pSurfaceGLX->height,
+                 0, 0, pSurfaceGLX->width, pSurfaceGLX->height,
+                 NULL, 0,
+                 flags
+             );
     XSync(ctx->native_dpy, False);
     if (x11_untrap_errors() != 0)
         return VA_STATUS_ERROR_OPERATION_FAILED;
@@ -1106,8 +1109,7 @@ VAStatus va_glx_init_context(VADriverContextP ctx)
         vtable->vaCreateSurfaceGLX      = vaCreateSurfaceGLX_impl_driver;
         vtable->vaDestroySurfaceGLX     = vaDestroySurfaceGLX_impl_driver;
         vtable->vaCopySurfaceGLX        = vaCopySurfaceGLX_impl_driver;
-    }
-    else {
+    } else {
         vtable->vaCreateSurfaceGLX      = vaCreateSurfaceGLX_impl_libva;
         vtable->vaDestroySurfaceGLX     = vaDestroySurfaceGLX_impl_libva;
         vtable->vaCopySurfaceGLX        = vaCopySurfaceGLX_impl_libva;

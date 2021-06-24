@@ -34,21 +34,21 @@ extern "C" {
 /*
  * Returns a suitable VADisplay for VA API
  */
-VADisplay vaGetDisplay (
+VADisplay vaGetDisplay(
     Display *dpy
 );
 
 /*
  * Output rendering
- * Following is the rendering interface for X windows, 
+ * Following is the rendering interface for X windows,
  * to get the decode output surface to a X drawable
- * It basically performs a de-interlacing (if needed), 
+ * It basically performs a de-interlacing (if needed),
  * color space conversion and scaling to the destination
  * rectangle
  */
-VAStatus vaPutSurface (
+VAStatus vaPutSurface(
     VADisplay dpy,
-    VASurfaceID surface,	
+    VASurfaceID surface,
     Drawable draw, /* X Drawable */
     short srcx,
     short srcy,

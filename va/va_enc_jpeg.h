@@ -48,8 +48,7 @@ extern "C" {
  * This structure conveys picture level parameters.
  *
  */
-typedef struct  _VAEncPictureParameterBufferJPEG
-{
+typedef struct  _VAEncPictureParameterBufferJPEG {
     /** \brief holds reconstructed picture. */
     VASurfaceID reconstructed_picture;
     /** \brief picture width. */
@@ -59,36 +58,36 @@ typedef struct  _VAEncPictureParameterBufferJPEG
     /** \brief holds coded data. */
     VABufferID coded_buf;
 
-    /** 
+    /**
      * \brief pic_flags
      *
      */
     union {
         struct {
-            /** 
-             * \brief profile: 
+            /**
+             * \brief profile:
              * 0 - Baseline, 1 - Extended, 2 - Lossless, 3 - Hierarchical
-             */ 
+             */
             uint32_t profile     : 2;
-            /** 
-             * \brief progressive: 
+            /**
+             * \brief progressive:
              * 0 - sequential, 1 - extended, 2 - progressive
-             */ 
+             */
             uint32_t progressive : 1;
-            /** 
-             * \brief huffman: 
+            /**
+             * \brief huffman:
              * 0 - arithmetic, 1 - huffman
-             */ 
+             */
             uint32_t huffman     : 1;
-            /** 
-             * \brief interleaved: 
+            /**
+             * \brief interleaved:
              * 0 - non interleaved, 1 - interleaved
-             */ 
+             */
             uint32_t interleaved : 1;
-            /** 
-             * \brief differential: 
+            /**
+             * \brief differential:
              * 0 - non differential, 1 - differential
-             */ 
+             */
             uint32_t differential   : 1;
         } bits;
         uint32_t value;
@@ -113,7 +112,7 @@ typedef struct  _VAEncPictureParameterBufferJPEG
 
 
 /**
- * \brief Slice parameter for JPEG encoding. 
+ * \brief Slice parameter for JPEG encoding.
  *
  * This structure conveys slice (scan) level parameters.
  *
@@ -140,8 +139,7 @@ typedef struct _VAEncSliceParameterBufferJPEG {
  * \brief Quantization table for JPEG encoding.
  *
  */
-typedef struct _VAQMatrixBufferJPEG
-{
+typedef struct _VAQMatrixBufferJPEG {
     /** \brief load luma quantization table. */
     int32_t load_lum_quantiser_matrix;
     /** \brief load chroma quantization table. */

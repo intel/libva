@@ -58,25 +58,25 @@ VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
 static char va_dri2ExtensionName[] = DRI2_NAME;
 static XExtensionInfo _va_dri2_info_data;
 static XExtensionInfo *va_dri2Info = &_va_dri2_info_data;
-static XEXT_GENERATE_CLOSE_DISPLAY (VA_DRI2CloseDisplay, va_dri2Info)
+static XEXT_GENERATE_CLOSE_DISPLAY(VA_DRI2CloseDisplay, va_dri2Info)
 static /* const */ XExtensionHooks va_dri2ExtensionHooks = {
-    NULL,				/* create_gc */
-    NULL,				/* copy_gc */
-    NULL,				/* flush_gc */
-    NULL,				/* free_gc */
-    NULL,				/* create_font */
-    NULL,				/* free_font */
-    VA_DRI2CloseDisplay,		/* close_display */
-    NULL,				/* wire_to_event */
-    NULL,				/* event_to_wire */
-    VA_DRI2Error,			/* error */
-    NULL,				/* error_string */
+    NULL,               /* create_gc */
+    NULL,               /* copy_gc */
+    NULL,               /* flush_gc */
+    NULL,               /* free_gc */
+    NULL,               /* create_font */
+    NULL,               /* free_font */
+    VA_DRI2CloseDisplay,        /* close_display */
+    NULL,               /* wire_to_event */
+    NULL,               /* event_to_wire */
+    VA_DRI2Error,           /* error */
+    NULL,               /* error_string */
 };
 
-static XEXT_GENERATE_FIND_DISPLAY (DRI2FindDisplay, va_dri2Info, 
-				   va_dri2ExtensionName, 
-				   &va_dri2ExtensionHooks, 
-				   0, NULL)
+static XEXT_GENERATE_FIND_DISPLAY(DRI2FindDisplay, va_dri2Info,
+                                  va_dri2ExtensionName,
+                                  &va_dri2ExtensionHooks,
+                                  0, NULL)
 
 static CARD32 _va_resource_x_error_drawable = 0;
 static Bool   _va_resource_x_error_matched = False;
@@ -99,8 +99,8 @@ static int
 VA_DRI2Error(Display *dpy, xError *err, XExtCodes *codes, int *ret_code)
 {
     if (_va_resource_x_error_drawable == err->resourceID) {
-      _va_resource_x_error_matched = True;
-      return True;
+        _va_resource_x_error_matched = True;
+        return True;
     }
 
     return False;
@@ -111,9 +111,9 @@ Bool VA_DRI2QueryExtension(Display *dpy, int *eventBase, int *errorBase)
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
 
     if (XextHasExtension(info)) {
-	*eventBase = info->codes->first_event;
-	*errorBase = info->codes->first_error;
-	return True;
+        *eventBase = info->codes->first_event;
+        *errorBase = info->codes->first_error;
+        return True;
     }
 
     return False;
@@ -121,11 +121,11 @@ Bool VA_DRI2QueryExtension(Display *dpy, int *eventBase, int *errorBase)
 
 Bool VA_DRI2QueryVersion(Display *dpy, int *major, int *minor)
 {
-    XExtDisplayInfo *info = DRI2FindDisplay (dpy);
+    XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2QueryVersionReply rep;
     xDRI2QueryVersionReq *req;
 
-    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
+    XextCheckExtension(dpy, info, va_dri2ExtensionName, False);
 
     LockDisplay(dpy);
     GetReq(DRI2QueryVersion, req);
@@ -134,9 +134,9 @@ Bool VA_DRI2QueryVersion(Display *dpy, int *major, int *minor)
     req->majorVersion = DRI2_MAJOR;
     req->minorVersion = DRI2_MINOR;
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
     *major = rep.majorVersion;
     *minor = rep.minorVersion;
@@ -147,13 +147,13 @@ Bool VA_DRI2QueryVersion(Display *dpy, int *major, int *minor)
 }
 
 Bool VA_DRI2Connect(Display *dpy, XID window,
-		 char **driverName, char **deviceName)
+                    char **driverName, char **deviceName)
 {
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2ConnectReply rep;
     xDRI2ConnectReq *req;
 
-    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
+    XextCheckExtension(dpy, info, va_dri2ExtensionName, False);
 
     LockDisplay(dpy);
     GetReq(DRI2Connect, req);
@@ -162,36 +162,36 @@ Bool VA_DRI2Connect(Display *dpy, XID window,
     req->window = window;
     req->driverType = DRI2DriverDRI;
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
 
     if (rep.driverNameLength == 0 && rep.deviceNameLength == 0) {
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
 
     *driverName = Xmalloc(rep.driverNameLength + 1);
     if (*driverName == NULL) {
-	_XEatData(dpy, 
-		  ((rep.driverNameLength + 3) & ~3) +
-		  ((rep.deviceNameLength + 3) & ~3));
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        _XEatData(dpy,
+                  ((rep.driverNameLength + 3) & ~3) +
+                  ((rep.deviceNameLength + 3) & ~3));
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
     _XReadPad(dpy, *driverName, rep.driverNameLength);
     (*driverName)[rep.driverNameLength] = '\0';
 
     *deviceName = Xmalloc(rep.deviceNameLength + 1);
     if (*deviceName == NULL) {
-	Xfree(*driverName);
-	_XEatData(dpy, ((rep.deviceNameLength + 3) & ~3));
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        Xfree(*driverName);
+        _XEatData(dpy, ((rep.deviceNameLength + 3) & ~3));
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
     _XReadPad(dpy, *deviceName, rep.deviceNameLength);
     (*deviceName)[rep.deviceNameLength] = '\0';
@@ -208,7 +208,7 @@ Bool VA_DRI2Authenticate(Display *dpy, XID window, drm_magic_t magic)
     xDRI2AuthenticateReq *req;
     xDRI2AuthenticateReply rep;
 
-    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
+    XextCheckExtension(dpy, info, va_dri2ExtensionName, False);
 
     LockDisplay(dpy);
     GetReq(DRI2Authenticate, req);
@@ -218,9 +218,9 @@ Bool VA_DRI2Authenticate(Display *dpy, XID window, drm_magic_t magic)
     req->magic = magic;
 
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	UnlockDisplay(dpy);
-	SyncHandle();
-	return False;
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return False;
     }
 
     UnlockDisplay(dpy);
@@ -234,7 +234,7 @@ void VA_DRI2CreateDrawable(Display *dpy, XID drawable)
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2CreateDrawableReq *req;
 
-    XextSimpleCheckExtension (dpy, info, va_dri2ExtensionName);
+    XextSimpleCheckExtension(dpy, info, va_dri2ExtensionName);
 
     LockDisplay(dpy);
     GetReq(DRI2CreateDrawable, req);
@@ -252,7 +252,7 @@ void VA_DRI2DestroyDrawable(Display *dpy, XID drawable)
     unsigned int attachement = 0; // FRONT_LEFT
     VA_DRI2Buffer *buffers;
 
-    XextSimpleCheckExtension (dpy, info, va_dri2ExtensionName);
+    XextSimpleCheckExtension(dpy, info, va_dri2ExtensionName);
 
     XSync(dpy, False);
 
@@ -270,11 +270,11 @@ void VA_DRI2DestroyDrawable(Display *dpy, XID drawable)
                                          &attachement, 1, NULL);
     VA_LeaveResourceError();
     if (buffers)
-      XFree(buffers);
+        XFree(buffers);
     if (VA_ResourceErrorMatched()) {
-      UnlockDisplay(dpy);
-      SyncHandle();
-      return;
+        UnlockDisplay(dpy);
+        SyncHandle();
+        return;
     }
 
     GetReq(DRI2DestroyDrawable, req);
@@ -286,10 +286,10 @@ void VA_DRI2DestroyDrawable(Display *dpy, XID drawable)
 }
 
 VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
-                                          Display *dpy, XID drawable,
-                                          int *width, int *height,
-                                          unsigned int *attachments, int count,
-                                          int *outCount)
+        Display *dpy, XID drawable,
+        int *width, int *height,
+        unsigned int *attachments, int count,
+        int *outCount)
 {
     xDRI2GetBuffersReply rep;
     xDRI2GetBuffersReq *req;
@@ -305,46 +305,46 @@ VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
     req->count = count;
     p = (CARD32 *) &req[1];
     for (i = 0; i < count; i++)
-	p[i] = attachments[i];
+        p[i] = attachments[i];
 
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
-	return NULL;
+        return NULL;
     }
 
     if (width)
-      *width = rep.width;
+        *width = rep.width;
     if (height)
-      *height = rep.height;
+        *height = rep.height;
     if (outCount)
-      *outCount = rep.count;
+        *outCount = rep.count;
 
     buffers = Xmalloc(rep.count * sizeof buffers[0]);
     if (buffers == NULL) {
-	_XEatData(dpy, rep.count * sizeof repBuffer);
-	return NULL;
+        _XEatData(dpy, rep.count * sizeof repBuffer);
+        return NULL;
     }
 
     for (i = 0; i < rep.count; i++) {
-	_XReadPad(dpy, (char *) &repBuffer, sizeof repBuffer);
-	buffers[i].attachment = repBuffer.attachment;
-	buffers[i].name = repBuffer.name;
-	buffers[i].pitch = repBuffer.pitch;
-	buffers[i].cpp = repBuffer.cpp;
-	buffers[i].flags = repBuffer.flags;
+        _XReadPad(dpy, (char *) &repBuffer, sizeof repBuffer);
+        buffers[i].attachment = repBuffer.attachment;
+        buffers[i].name = repBuffer.name;
+        buffers[i].pitch = repBuffer.pitch;
+        buffers[i].cpp = repBuffer.cpp;
+        buffers[i].flags = repBuffer.flags;
     }
 
     return buffers;
 }
 
 VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
-			   int *width, int *height,
-			   unsigned int *attachments, int count,
-			   int *outCount)
+                                 int *width, int *height,
+                                 unsigned int *attachments, int count,
+                                 int *outCount)
 {
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     VA_DRI2Buffer *buffers;
 
-    XextCheckExtension (dpy, info, va_dri2ExtensionName, False);
+    XextCheckExtension(dpy, info, va_dri2ExtensionName, False);
 
     LockDisplay(dpy);
 
@@ -358,13 +358,13 @@ VA_DRI2Buffer *VA_DRI2GetBuffers(Display *dpy, XID drawable,
 }
 
 void VA_DRI2CopyRegion(Display *dpy, XID drawable, XserverRegion region,
-		    CARD32 dest, CARD32 src)
+                       CARD32 dest, CARD32 src)
 {
     XExtDisplayInfo *info = DRI2FindDisplay(dpy);
     xDRI2CopyRegionReq *req;
     xDRI2CopyRegionReply rep;
 
-    XextSimpleCheckExtension (dpy, info, va_dri2ExtensionName);
+    XextSimpleCheckExtension(dpy, info, va_dri2ExtensionName);
 
     LockDisplay(dpy);
     GetReq(DRI2CopyRegion, req);
@@ -406,7 +406,7 @@ void VA_DRI2SwapBuffers(Display *dpy, XID drawable, CARD64 target_msc,
     xDRI2SwapBuffersReq *req;
     xDRI2SwapBuffersReply rep;
 
-    XextSimpleCheckExtension (dpy, info, va_dri2ExtensionName);
+    XextSimpleCheckExtension(dpy, info, va_dri2ExtensionName);
 
     LockDisplay(dpy);
     GetReq(DRI2SwapBuffers, req);

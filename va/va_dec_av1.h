@@ -80,13 +80,13 @@ typedef union VAConfigAttribValDecAV1Features {
 typedef struct _VASegmentationStructAV1 {
     union {
         struct {
-             /** Indicates whether segmentation map related syntax elements
-             *  are present or not for current frame. If equal to 0,
-             *  the segmentation map related syntax elements are
-             *  not present for the current frame and the control flags of
-             *  segmentation map related tables feature_data[][], and
-             *  feature_mask[] are not valid and shall be ignored by accelerator.
-             */
+            /** Indicates whether segmentation map related syntax elements
+            *  are present or not for current frame. If equal to 0,
+            *  the segmentation map related syntax elements are
+            *  not present for the current frame and the control flags of
+            *  segmentation map related tables feature_data[][], and
+            *  feature_mask[] are not valid and shall be ignored by accelerator.
+            */
             uint32_t         enabled                                     : 1;
             /** Value 1 indicates that the segmentation map are updated
              *  during the decoding of this frame.
@@ -213,7 +213,7 @@ typedef enum {
     VAAV1TransformationCount
 } VAAV1TransformationType;
 
-typedef struct _VAWarpedMotionParamsAV1{
+typedef struct _VAWarpedMotionParamsAV1 {
 
     /** \brief Specify the type of warped motion */
     VAAV1TransformationType  wmtype;
@@ -240,8 +240,7 @@ typedef struct _VAWarpedMotionParamsAV1{
  * per frame.
  *
  */
-typedef struct  _VADecPictureParameterBufferAV1
-{
+typedef struct  _VADecPictureParameterBufferAV1 {
     /**@{*/
 
     /** \brief sequence level information
@@ -407,23 +406,21 @@ typedef struct  _VADecPictureParameterBufferAV1
     /* specify the tile index for context updating */
     uint16_t                context_update_tile_id;
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             /** \brief flags for current picture
              *  same syntax and semantic as those in AV1 code
              */
 
-             /** \brief Frame Type
-              *  0:     KEY_FRAME;
-              *  1:     INTER_FRAME;
-              *  2:     INTRA_ONLY_FRAME;
-              *  3:     SWITCH_FRAME
-              *  For SWITCH_FRAME, application shall set error_resilient_mode = 1,
-              *  refresh_frame_flags, etc. appropriately. And driver will convert it
-              *  to INTER_FRAME.
-              */
+            /** \brief Frame Type
+             *  0:     KEY_FRAME;
+             *  1:     INTER_FRAME;
+             *  2:     INTRA_ONLY_FRAME;
+             *  3:     SWITCH_FRAME
+             *  For SWITCH_FRAME, application shall set error_resilient_mode = 1,
+             *  refresh_frame_flags, etc. appropriately. And driver will convert it
+             *  to INTER_FRAME.
+             */
             uint32_t        frame_type                                  : 2;
             uint32_t        show_frame                                  : 1;
             uint32_t        showable_frame                              : 1;
@@ -471,10 +468,8 @@ typedef struct  _VADecPictureParameterBufferAV1
     uint8_t                 filter_level_u;
     uint8_t                 filter_level_v;
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             /** \brief flags for reference pictures
              *  same syntax and semantic as those in AV1 code
              */
@@ -529,10 +524,8 @@ typedef struct  _VADecPictureParameterBufferAV1
 
     /** \brief quantization_matrix
      */
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             uint16_t        using_qmatrix                               : 1;
             /** \brief qm level
              *  value range [0..15]
@@ -548,10 +541,8 @@ typedef struct  _VADecPictureParameterBufferAV1
         uint16_t            value;
     } qmatrix_fields;
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             /** \brief delta_q parameters
              */
             uint32_t        delta_q_present_flag                        : 1;
@@ -612,10 +603,8 @@ typedef struct  _VADecPictureParameterBufferAV1
 
     /** \brief loop restoration parameters
      */
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             uint16_t        yframe_restoration_type                     : 2;
             uint16_t        cbframe_restoration_type                    : 2;
             uint16_t        crframe_restoration_type                    : 2;
@@ -655,8 +644,7 @@ typedef struct  _VADecPictureParameterBufferAV1
  * per tile information. And the bit stream in sent to driver in per
  * tile granularity.
  */
-typedef struct _VASliceParameterBufferAV1
-{
+typedef struct _VASliceParameterBufferAV1 {
     /**@{*/
     /** \brief The byte count of current tile in the bitstream buffer,
      *  starting from first byte of the buffer.

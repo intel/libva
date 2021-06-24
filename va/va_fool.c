@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -78,7 +78,7 @@ struct fool_context {
     char *segbuf_jpg; /* the segment buffer of coded buffer, load frome fn_jpg */
 
     VAEntrypoint entrypoint; /* current entrypoint */
-    
+
     /* all buffers with same type share one malloc-ed memory
      * bufferID = (buffer numbers with the same type << 8) || type
      * the malloc-ed memory can be find by fool_buf[bufferID & 0xff]
@@ -109,15 +109,15 @@ void va_FoolInit(VADisplay dpy)
     char env_value[1024];
 
     struct fool_context *fool_ctx = calloc(sizeof(struct fool_context), 1);
-    
+
     if (fool_ctx == NULL)
         return;
-    
+
     if (va_parseConfig("LIBVA_FOOL_POSTP", NULL) == 0) {
         va_fool_postp = 1;
         va_infoMessage(dpy, "LIBVA_FOOL_POSTP is on, dummy vaPutSurface\n");
     }
-    
+
     if (va_parseConfig("LIBVA_FOOL_DECODE", NULL) == 0) {
         va_fool_codec  |= VA_FOOL_FLAG_DECODE;
         va_infoMessage(dpy, "LIBVA_FOOL_DECODE is on, dummy decode\n");
@@ -134,7 +134,7 @@ void va_FoolInit(VADisplay dpy)
         va_infoMessage(dpy, "LIBVA_FOOL_JPEG is on, load encode data from file with patten %s\n",
                        fool_ctx->fn_jpg);
     }
-    
+
     ((VADisplayContextP)dpy)->vafool = fool_ctx;
 }
 
@@ -159,23 +159,23 @@ int va_FoolEnd(VADisplay dpy)
 
     free(fool_ctx);
     ((VADisplayContextP)dpy)->vafool = NULL;
-    
+
     return 0;
 }
 
 int va_FoolCreateConfig(
-        VADisplay dpy,
-        VAProfile profile, 
-        VAEntrypoint entrypoint, 
-        VAConfigAttrib *attrib_list,
-        int num_attribs,
-        VAConfigID *config_id /* out */
+    VADisplay dpy,
+    VAProfile profile,
+    VAEntrypoint entrypoint,
+    VAConfigAttrib *attrib_list,
+    int num_attribs,
+    VAConfigID *config_id /* out */
 )
 {
     DPY2FOOLCTX(dpy);
 
     fool_ctx->entrypoint = entrypoint;
-    
+
     /*
      * check va_fool_codec to align with current context
      * e.g. va_fool_codec = decode then for encode, the
@@ -203,19 +203,19 @@ int va_FoolCreateConfig(
     else
         va_infoMessage(dpy, "FOOL is not enabled for this context\n");
 
-    
+
     return 0; /* continue */
 }
 
 
 VAStatus va_FoolCreateBuffer(
     VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferType type,		/* in */
-    unsigned int size,		/* in */
-    unsigned int num_elements,	/* in */
-    void *data,			/* in */
-    VABufferID *buf_id		/* out */
+    VAContextID context,    /* in */
+    VABufferType type,      /* in */
+    unsigned int size,      /* in */
+    unsigned int num_elements,  /* in */
+    void *data,         /* in */
+    VABufferID *buf_id      /* out */
 )
 {
     unsigned int new_size = size * num_elements;
@@ -226,11 +226,11 @@ VAStatus va_FoolCreateBuffer(
 
     if (old_size < new_size)
         fool_ctx->fool_buf[type] = realloc(fool_ctx->fool_buf[type], new_size);
-    
+
     fool_ctx->fool_buf_size[type] = size;
     fool_ctx->fool_buf_element[type] = num_elements;
     fool_ctx->fool_buf_count[type]++;
-    /* because we ignore the vaRenderPicture, 
+    /* because we ignore the vaRenderPicture,
      * all buffers with same type share same real memory
      * bufferID = (magic number) | type
      */
@@ -248,17 +248,17 @@ VAStatus va_FoolBufferInfo(
 )
 {
     unsigned int magic;
-    
+
     DPY2FOOLCTX_CHK(dpy);
 
     magic = buf_id & FOOL_BUFID_MASK;
     if (magic != FOOL_BUFID_MAGIC)
         return 0; /* could be VAImageBufferType from vaDeriveImage */
-    
+
     *type = buf_id & 0xff;
     *size = fool_ctx->fool_buf_size[*type];
     *num_elements = fool_ctx->fool_buf_element[*type];;
-    
+
     return 1; /* fool is valid */
 }
 
@@ -271,7 +271,7 @@ static int va_FoolFillCodedBufEnc(VADisplay dpy, struct fool_context *fool_ctx)
     ssize_t ret;
 
     /* try file_name.file_count, if fail, try file_name.file_count-- */
-    for (i=0; i<=1; i++) {
+    for (i = 0; i <= 1; i++) {
         snprintf(file_name, 1024, "%s.%d",
                  fool_ctx->fn_enc,
                  fool_ctx->file_count);
@@ -348,15 +348,15 @@ static int va_FoolFillCodedBuf(VADisplay dpy, struct fool_context *fool_ctx)
         va_FoolFillCodedBufEnc(dpy, fool_ctx);
     else if (fool_ctx->entrypoint == VAEntrypointEncPicture)
         va_FoolFillCodedBufJPG(dpy, fool_ctx);
-        
+
     return 0;
 }
 
 
 VAStatus va_FoolMapBuffer(
     VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    void **pbuf 	/* out */
+    VABufferID buf_id,  /* in */
+    void **pbuf     /* out */
 )
 {
     unsigned int magic, buftype;
@@ -365,14 +365,14 @@ VAStatus va_FoolMapBuffer(
     magic = buf_id & FOOL_BUFID_MASK;
     if (magic != FOOL_BUFID_MAGIC)
         return 0; /* could be VAImageBufferType from vaDeriveImage */
-    
+
     buftype = buf_id & 0xff;
     *pbuf = fool_ctx->fool_buf[buftype];
 
     /* it is coded buffer, fill coded segment from file */
     if (*pbuf && (buftype == VAEncCodedBufferType))
         va_FoolFillCodedBuf(dpy, fool_ctx);
-    
+
     return 1; /* fool is valid */
 }
 

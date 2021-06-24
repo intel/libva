@@ -403,45 +403,45 @@ typedef VAGenericID VAProtectedSessionID;
 
 /** \brief TEE Execucte Function ID. */
 typedef enum _VA_TEE_EXEC_FUNCTION_ID {
-  VA_TEE_EXECUTE_FUNCTION_ID_PASS_THROUGH = 0x00000001,
-  VA_TEE_EXECUTE_FUNCTION_ID_GET_FIRMWARE_VERSION = 0x00000002,
+    VA_TEE_EXECUTE_FUNCTION_ID_PASS_THROUGH = 0x00000001,
+    VA_TEE_EXECUTE_FUNCTION_ID_GET_FIRMWARE_VERSION = 0x00000002,
 
 } VA_TEE_EXECUTE_FUNCTION_ID;
 
 /** \brief Input/Output buffer of VAProtectedSessionExecuteBuffer */
 typedef struct _VAProtectedSessionBuffer {
-  /*
-   * This is used when this buffer refer to output buffer. The maximum size of
-   * data that the driver can return in the output buffer. It is not used for
-   * input buffer.
-   */
-  uint32_t max_data_size;
-  /*
-   * If it is used for input buffer, it is the size of the input data. If it is
-   * used for output buffer, it is the returns size of the output data written
-   * by the driver.
-   */
-  uint32_t data_size;
-  /*
-   * data pointer of this buffer
-   */
-  void *data;
-  uint32_t va_reserved[VA_PADDING_LOW];
+    /*
+     * This is used when this buffer refer to output buffer. The maximum size of
+     * data that the driver can return in the output buffer. It is not used for
+     * input buffer.
+     */
+    uint32_t max_data_size;
+    /*
+     * If it is used for input buffer, it is the size of the input data. If it is
+     * used for output buffer, it is the returns size of the output data written
+     * by the driver.
+     */
+    uint32_t data_size;
+    /*
+     * data pointer of this buffer
+     */
+    void *data;
+    uint32_t va_reserved[VA_PADDING_LOW];
 } VAProtectedSessionBuffer;
 
 /** \brief Buffer for vaProtectedSessionExecute() */
 typedef struct _VAProtectedSessionExecuteBuffer {
-  /** \brief Specify the function to execute. It is IHV's implementation
-   * specific */
-  uint32_t function_id;
-  /** \brief Input buffer */
-  VAProtectedSessionBuffer input;
-  /** \brief Output buffer */
-  VAProtectedSessionBuffer output;
-  /** \brief Return the result of this function. The status result is IHV's
-   * implementation specific */
-  uint32_t status;
-  uint32_t va_reserved[VA_PADDING_LOW];
+    /** \brief Specify the function to execute. It is IHV's implementation
+     * specific */
+    uint32_t function_id;
+    /** \brief Input buffer */
+    VAProtectedSessionBuffer input;
+    /** \brief Output buffer */
+    VAProtectedSessionBuffer output;
+    /** \brief Return the result of this function. The status result is IHV's
+     * implementation specific */
+    uint32_t status;
+    uint32_t va_reserved[VA_PADDING_LOW];
 } VAProtectedSessionExecuteBuffer;
 
 /**

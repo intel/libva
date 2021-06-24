@@ -47,8 +47,7 @@ enum {
     VA_DUMMY    = VA_DRM_AUTH_CUSTOM
 };
 
-union dri_buffer 
-{
+union dri_buffer {
     struct {
         unsigned int attachment;
         unsigned int name;
@@ -60,8 +59,7 @@ union dri_buffer
     } dri2;
 };
 
-struct dri_drawable 
-{
+struct dri_drawable {
     XID x_drawable;
     int is_window;
     int x;
@@ -72,8 +70,7 @@ struct dri_drawable
 };
 
 #define DRAWABLE_HASH_SZ 32
-struct dri_state 
-{
+struct dri_state {
     struct drm_state base;
 #ifndef ANDROID
     struct dri_drawable *drawable_hash[DRAWABLE_HASH_SZ];

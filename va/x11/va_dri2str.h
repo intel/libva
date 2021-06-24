@@ -33,27 +33,27 @@
 #ifndef _DRI2_PROTO_H_
 #define _DRI2_PROTO_H_
 
-#define DRI2_NAME			"DRI2"
-#define DRI2_MAJOR			1
-#define DRI2_MINOR			2
+#define DRI2_NAME           "DRI2"
+#define DRI2_MAJOR          1
+#define DRI2_MINOR          2
 
-#define DRI2NumberErrors		0
-#define DRI2NumberEvents		2
-#define DRI2NumberRequests		13
+#define DRI2NumberErrors        0
+#define DRI2NumberEvents        2
+#define DRI2NumberRequests      13
 
-#define X_DRI2QueryVersion		0
-#define X_DRI2Connect			1
-#define X_DRI2Authenticate		2
-#define X_DRI2CreateDrawable		3
-#define X_DRI2DestroyDrawable		4
-#define X_DRI2GetBuffers		5
-#define X_DRI2CopyRegion		6
-#define X_DRI2GetBuffersWithFormat	7
-#define X_DRI2SwapBuffers		8
-#define X_DRI2GetMSC			9
-#define X_DRI2WaitMSC			10
-#define X_DRI2WaitSBC			11
-#define X_DRI2SwapInterval		12
+#define X_DRI2QueryVersion      0
+#define X_DRI2Connect           1
+#define X_DRI2Authenticate      2
+#define X_DRI2CreateDrawable        3
+#define X_DRI2DestroyDrawable       4
+#define X_DRI2GetBuffers        5
+#define X_DRI2CopyRegion        6
+#define X_DRI2GetBuffersWithFormat  7
+#define X_DRI2SwapBuffers       8
+#define X_DRI2GetMSC            9
+#define X_DRI2WaitMSC           10
+#define X_DRI2WaitSBC           11
+#define X_DRI2SwapInterval      12
 
 typedef struct {
     CARD32  attachment B32;
@@ -84,7 +84,7 @@ typedef struct {
     CARD32  pad4 B32;
     CARD32  pad5 B32;
 } xDRI2QueryVersionReply;
-#define sz_xDRI2QueryVersionReply	32
+#define sz_xDRI2QueryVersionReply   32
 
 typedef struct {
     CARD8   reqType;
@@ -93,7 +93,7 @@ typedef struct {
     CARD32  window B32;
     CARD32  driverType B32;
 } xDRI2ConnectReq;
-#define sz_xDRI2ConnectReq	12
+#define sz_xDRI2ConnectReq  12
 
 typedef struct {
     BYTE    type;   /* X_Reply */
@@ -107,7 +107,7 @@ typedef struct {
     CARD32  pad4 B32;
     CARD32  pad5 B32;
 } xDRI2ConnectReply;
-#define sz_xDRI2ConnectReply	32
+#define sz_xDRI2ConnectReply    32
 
 typedef struct {
     CARD8   reqType;
@@ -130,7 +130,7 @@ typedef struct {
     CARD32  pad5 B32;
     CARD32  pad6 B32;
 } xDRI2AuthenticateReply;
-#define sz_xDRI2AuthenticateReply	32
+#define sz_xDRI2AuthenticateReply   32
 
 typedef struct {
     CARD8   reqType;
@@ -169,7 +169,7 @@ typedef struct {
     CARD32  pad3 B32;
     CARD32  pad4 B32;
 } xDRI2GetBuffersReply;
-#define sz_xDRI2GetBuffersReply	32
+#define sz_xDRI2GetBuffersReply 32
 
 typedef struct {
     CARD8   reqType;
@@ -194,7 +194,7 @@ typedef struct {
     CARD32  pad6 B32;
     CARD32  pad7 B32;
 } xDRI2CopyRegionReply;
-#define sz_xDRI2CopyRegionReply	32
+#define sz_xDRI2CopyRegionReply 32
 
 typedef struct {
     CARD8   reqType;

@@ -45,10 +45,9 @@ extern "C" {
  */
 
 /** \brief FEI frame level control buffer for HEVC */
-typedef struct _VAEncMiscParameterFEIFrameControlHEVC
-{
+typedef struct _VAEncMiscParameterFEIFrameControlHEVC {
     /* one of the VAConfigAttribFEIFunctionType values */
-    uint32_t      function; 
+    uint32_t      function;
     /** \brief CTB control input buffer. It is valid only when per_ctb_input
      * is set to 1. The data in this buffer correspond to the input source. CTB is in raster scan order,
      * each CTB control data structure is defined by VAEncFEICTBControlHEVC.
@@ -95,7 +94,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
     /** \brief control parameters */
     uint32_t      search_path               : 8;
     uint32_t      len_sp                    : 8;
-    uint32_t      reserved0	                : 16;
+    uint32_t      reserved0                 : 16;
 
     /** \brief multi pred l0/1
      * 0000: no internal MV predictor will be used
@@ -125,7 +124,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
     uint32_t      per_block_qp              : 1;
     /** \brief enables the per CTB input , if 1, need ctb_ctrl to be a real surface ID*/
     uint32_t      per_ctb_input             : 1;
-    /** when this flag is set, extra distortion between current CTB and co-located CTB is provided. 
+    /** when this flag is set, extra distortion between current CTB and co-located CTB is provided.
      * Extra distortion output has performance impact, set it only when it is needed */
     uint32_t      colocated_ctb_distortion  : 1;
     /** brief specifies whether this CTB should be forced to split to remove Inter big LCU: do not check Inter 32x32
@@ -139,19 +138,19 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
     /** \brief enables CU64x64 asymmetric motion partition check */
     uint32_t      enable_cu64_amp_check     : 1;
     /** \brief specifies if check the 64x64 merge candidate
-     * 0: after skip check, 
-     * 1: only skip check for 64x64 
+     * 0: after skip check,
+     * 1: only skip check for 64x64
      Default: 0. This field is used by LCU64 bi-directional.
      **/
     uint32_t      cu64_skip_check_only      : 1;
-    uint32_t      reserved1	            : 11;
+    uint32_t      reserved1             : 11;
     /** specifies the search region width in pixels.
      *  When bidirectional search is enabled, this applies to both search regions */
     uint32_t      ref_width                 : 8;
-    /** specifies the reference region height in pixels. When bidirectional search is enabled, 
+    /** specifies the reference region height in pixels. When bidirectional search is enabled,
      * this applies to both search regions. */
     uint32_t      ref_height                : 8;
-    /** \brief search window similar for AVC 
+    /** \brief search window similar for AVC
      *  defines predefined search windows. If it is selected, RefWidth, RefHeight, LenSP and SearchPath are ignored.
      *  0 : not use predefined search window
      *  1 : Tiny – (4 SUs) 24x24 window diamond search
@@ -192,14 +191,13 @@ typedef struct _VAEncMiscParameterFEIFrameControlHEVC
  * based on MaxNumPredictor returned from attribute VAConfigAttribFEIMVPredictors query.
  * this buffer allocation is always based on 16x16 block even block size is indicated as 32x32 or 64x64, and buffer
  * layout is always in 32x32 block raster scan order even block size is 16x16 or 64x64. If 32x32 block size is set,
- * only the data in the first 16x16 block (block 0) is used for 32x32 block. If 64x64 block size is set 
+ * only the data in the first 16x16 block (block 0) is used for 32x32 block. If 64x64 block size is set
  * MV layout is still in 32x32 raster scan order, the same as 32x32 and the first 16x16
  * block within each 32x32 block needs to have intended MV data (four 32x32 blocks will have the same MV data in the
  * correspondent first 16x16 block). Data structure for each 16x16 block is defined as below (same as AVC except
  * BlockSize/Reserved bits).
  **/
-typedef struct _VAEncFEIMVPredictorHEVC
-{
+typedef struct _VAEncFEIMVPredictorHEVC {
     /** \brief Feference index corresponding to the entry of RefPicList0 & RefPicList1 in slice header (final reference
      * list). Note that RefPicList0 & RefPicList1 needs to be the same for all slices.
      * Ref0xIndex – RefPicList0; Ref1xIndex – RefPicList1; x – 0 ~ MaxNumPredictor */
@@ -219,8 +217,7 @@ typedef struct _VAEncFEIMVPredictorHEVC
 } VAEncFEIMVPredictorHEVC;    //40 bytes
 
 /** \brief FEI CTB level control data structure */
-typedef struct _VAEncFEICTBControlHEVC
-{
+typedef struct _VAEncFEICTBControlHEVC {
     // DWORD 0
     uint32_t    force_to_intra      : 1;
     uint32_t    force_to_inter      : 1;
@@ -240,13 +237,12 @@ typedef struct _VAEncFEICTBControlHEVC
  * It is output buffer of ENC and ENC_PAK modes, The CTB block is in raster scan order.
  * Buffer size shall not be less than the number of CTB blocks multiple by sizeof(VAEncFEIDistortionHevc).
  **/
-typedef struct _VAEncFEIDistortionHevc
-{
+typedef struct _VAEncFEIDistortionHevc {
     /** best CTB distortion */
     uint32_t    best_distortion;
     /** only when colocated_ctb_distortion in VAEncMiscParameterFEIFrameControlHEVC is set */
     uint32_t    colocated_ctb_distortion;
-} VAEncFEIDistortionHevc;  
+} VAEncFEIDistortionHevc;
 #ifdef __cplusplus
 }
 #endif

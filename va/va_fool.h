@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -44,44 +44,44 @@ extern int va_fool_postp;
         if (fool_func(__VA_ARGS__))            \
             return VA_STATUS_SUCCESS;          \
     }
-    
+
 void va_FoolInit(VADisplay dpy);
 int va_FoolEnd(VADisplay dpy);
 
 int va_FoolCreateConfig(
-        VADisplay dpy,
-        VAProfile profile, 
-        VAEntrypoint entrypoint, 
-        VAConfigAttrib *attrib_list,
-        int num_attribs,
-        VAConfigID *config_id /* out */
+    VADisplay dpy,
+    VAProfile profile,
+    VAEntrypoint entrypoint,
+    VAConfigAttrib *attrib_list,
+    int num_attribs,
+    VAConfigID *config_id /* out */
 );
 
 
 VAStatus va_FoolCreateBuffer(
     VADisplay dpy,
-    VAContextID context,	/* in */
-    VABufferType type,		/* in */
-    unsigned int size,		/* in */
-    unsigned int num_elements,	/* in */
-    void *data,			/* in */
-    VABufferID *buf_id		/* out */
+    VAContextID context,    /* in */
+    VABufferType type,      /* in */
+    unsigned int size,      /* in */
+    unsigned int num_elements,  /* in */
+    void *data,         /* in */
+    VABufferID *buf_id      /* out */
 );
 
-VAStatus va_FoolMapBuffer (
+VAStatus va_FoolMapBuffer(
     VADisplay dpy,
-    VABufferID buf_id,	/* in */
-    void **pbuf 	/* out */
+    VABufferID buf_id,  /* in */
+    void **pbuf     /* out */
 );
 
-VAStatus va_FoolBufferInfo (
+VAStatus va_FoolBufferInfo(
     VADisplay dpy,
     VABufferID buf_id,  /* in */
     VABufferType *type, /* out */
     unsigned int *size,         /* out */
     unsigned int *num_elements /* out */
 );
-    
+
 VAStatus va_FoolCheckContinuity(VADisplay dpy);
 
 #ifdef __cplusplus

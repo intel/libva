@@ -528,7 +528,7 @@ typedef struct _VABlendState {
 /** @name Pipeline end flags */
 /**@{*/
 /** \brief Specifies the pipeline is the last. */
-#define VA_PIPELINE_FLAG_END		0x00000004
+#define VA_PIPELINE_FLAG_END        0x00000004
 /**@}*/
 
 /** @name Chroma Siting flag */
@@ -658,11 +658,11 @@ typedef struct _VAProcPipelineCaps {
     /** \brief Min supported output height in pixels. */
     uint32_t        min_output_height;
     /** \brief Reserved bytes for future use, must be zero */
-    #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__) || defined(__LP64__)
+#if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__) || defined(__LP64__)
     uint32_t        va_reserved[VA_PADDING_HIGH - 2];
-    #else
+#else
     uint32_t        va_reserved[VA_PADDING_HIGH];
-    #endif
+#endif
 } VAProcPipelineCaps;
 
 /** \brief Specification of values supported by the filter. */
@@ -762,8 +762,7 @@ typedef struct _VAProcColorProperties {
  *  2) the display on which the content will be presented. If it is for display, max_content_light_level
  *  and max_pic_average_light_level are ignored.
  */
-typedef struct _VAHdrMetaDataHDR10
-{
+typedef struct _VAHdrMetaDataHDR10 {
     /**
      * \brief X chromaticity coordinate of the mastering display.
      *
@@ -772,7 +771,7 @@ typedef struct _VAHdrMetaDataHDR10
      * Index value c equal to 2 should correspond to the red primary.
      * The value for display_primaries_x shall be in the range of 0 to 50000 inclusive.
      */
-    uint16_t	display_primaries_x[3];
+    uint16_t    display_primaries_x[3];
     /**
      * \brief Y chromaticity coordinate of the mastering display.
      *
@@ -781,19 +780,19 @@ typedef struct _VAHdrMetaDataHDR10
      * Index value c equal to 2 should correspond to the red primary.
      * The value for display_primaries_y shall be in the range of 0 to 50000 inclusive.
      */
-    uint16_t	display_primaries_y[3];
+    uint16_t    display_primaries_y[3];
     /**
      * \brief X chromaticity coordinate of the white point of the mastering display.
      *
      * The value for white_point_x shall be in the range of 0 to 50000 inclusive.
      */
-    uint16_t	white_point_x;
+    uint16_t    white_point_x;
     /**
      * \brief Y chromaticity coordinate of the white point of the mastering display.
      *
      * The value for white_point_y shall be in the range of 0 to 50000 inclusive.
      */
-    uint16_t	white_point_y;
+    uint16_t    white_point_y;
     /**
      * \brief The maximum display luminance of the mastering display.
      *
@@ -839,8 +838,7 @@ typedef struct _VAProcFilterCapHighDynamicRange {
 } VAProcFilterCapHighDynamicRange;
 
 /** \brief High Dynamic Range Meta Data. */
-typedef struct _VAHdrMetaData
-{
+typedef struct _VAHdrMetaData {
     /** \brief high dynamic range metadata type, HDR10 etc. */
     VAProcHighDynamicRangeMetadataType       metadata_type;
     /**
@@ -1061,7 +1059,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * bit0~3: Surface sample type
      * - 0000: Progressive --> VA_FRAME_PICTURE
      * - 0001: Single Top Field --> VA_TOP_FIELD
-     * - 0010: Single Bottom Field --> VA_BOTTOM_FIELD  
+     * - 0010: Single Bottom Field --> VA_BOTTOM_FIELD
      * - 0100: Interleaved Top Field First --> VA_TOP_FIELD_FIRST
      * - 1000: Interleaved Bottom Field First --> VA_BOTTOM_FIELD_FIRST
      *
@@ -1083,11 +1081,11 @@ typedef struct _VAProcPipelineParameterBuffer {
      *   -- set backward_reference with the second field surface id
      *   -- set input_surface_flag as VA_TOP_FIELD
      *   -- set output_surface_flag as VA_TOP_FIELD_FIRST
-     * - 4. Field to Field: 
+     * - 4. Field to Field:
      *   -- set flag according to each frame.
      *
      * bit31: Surface encryption
-     * - 0: non-protected  
+     * - 0: non-protected
      * - 1: protected
      *
      * bit4~30 for future
@@ -1099,12 +1097,12 @@ typedef struct _VAProcPipelineParameterBuffer {
      * bit0~3: Surface sample type
      * - 0000: Progressive --> VA_FRAME_PICTURE
      * - 0001: Top Field --> VA_TOP_FIELD
-     * - 0010: Bottom Field --> VA_BOTTOM_FIELD  
+     * - 0010: Bottom Field --> VA_BOTTOM_FIELD
      * - 0100: Top Field First --> VA_TOP_FIELD_FIRST
      * - 1000: Bottom Field First --> VA_BOTTOM_FIELD_FIRST
      *
      * bit31: Surface encryption
-     * - 0: non-protected  
+     * - 0: non-protected
      * - 1: protected
      *
      * bit4~30 for future
@@ -1130,11 +1128,11 @@ typedef struct _VAProcPipelineParameterBuffer {
     VAHdrMetaData          *output_hdr_metadata;
 
     /** \brief Reserved bytes for future use, must be zero */
-    #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__)|| defined(__LP64__)
+#if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__)|| defined(__LP64__)
     uint32_t                va_reserved[VA_PADDING_LARGE - 16];
-    #else
+#else
     uint32_t                va_reserved[VA_PADDING_LARGE - 13];
-    #endif
+#endif
 } VAProcPipelineParameterBuffer;
 
 /**
@@ -1167,27 +1165,27 @@ typedef struct _VAProcFilterParameterBuffer {
 
 /** @name De-interlacing flags */
 /**@{*/
-/** 
- * \brief Bottom field first in the input frame. 
+/**
+ * \brief Bottom field first in the input frame.
  * if this is not set then assumes top field first.
  */
-#define VA_DEINTERLACING_BOTTOM_FIELD_FIRST	0x0001
-/** 
- * \brief Bottom field used in deinterlacing. 
+#define VA_DEINTERLACING_BOTTOM_FIELD_FIRST 0x0001
+/**
+ * \brief Bottom field used in deinterlacing.
  * if this is not set then assumes top field is used.
  */
-#define VA_DEINTERLACING_BOTTOM_FIELD		0x0002
-/** 
- * \brief A single field is stored in the input frame. 
+#define VA_DEINTERLACING_BOTTOM_FIELD       0x0002
+/**
+ * \brief A single field is stored in the input frame.
  * if this is not set then assumes the frame contains two interleaved fields.
  */
-#define VA_DEINTERLACING_ONE_FIELD		0x0004
+#define VA_DEINTERLACING_ONE_FIELD      0x0004
 /**
  * \brief Film Mode Detection is enabled. If enabled, driver performs inverse
  * of various pulldowns, such as 3:2 pulldown.
  * if this is not set then assumes FMD is disabled.
  */
-#define VA_DEINTERLACING_FMD_ENABLE		0x0008
+#define VA_DEINTERLACING_FMD_ENABLE     0x0008
 
 //Scene change parameter for ADI on Linux, if enabled, driver use spatial DI(Bob), instead of ADI. if not, use old behavior for ADI
 //Input stream is TFF(set flags = 0), SRC0,1,2,3 are interlaced frame (top +bottom fields), DSTs are progressive frames
@@ -1220,7 +1218,7 @@ typedef struct _VAProcFilterParameterBufferDeinterlacing {
     /** \brief Deinterlacing algorithm. */
     VAProcDeinterlacingType     algorithm;
     /** \brief Deinterlacing flags. */
-    uint32_t     		flags;
+    uint32_t            flags;
 
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
@@ -1274,7 +1272,7 @@ typedef struct _VAProcFilterParameterBufferColorBalance {
     /**
      * \brief Color balance value.
      *
-     * Special case for automatically adjusted attributes. e.g. 
+     * Special case for automatically adjusted attributes. e.g.
      * #VAProcColorBalanceAutoSaturation,
      * #VAProcColorBalanceAutoBrightness,
      * #VAProcColorBalanceAutoContrast.

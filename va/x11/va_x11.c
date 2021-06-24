@@ -8,11 +8,11 @@
  * distribute, sub license, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice (including the
  * next paragraph) shall be included in all copies or substantial portions
  * of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
  * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -58,15 +58,15 @@ static const struct driver_name_map g_dri2_driver_name_map[] = {
     { NULL,         0, NULL }
 };
 
-static int va_DisplayContextIsValid (
+static int va_DisplayContextIsValid(
     VADisplayContextP pDisplayContext
 )
 {
-    return (pDisplayContext != NULL && 
+    return (pDisplayContext != NULL &&
             pDisplayContext->pDriverContext != NULL);
 }
 
-static void va_DisplayContextDestroy (
+static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
 {
@@ -87,7 +87,7 @@ static void va_DisplayContextDestroy (
     free(pDisplayContext);
 }
 
-static VAStatus va_DRI2_GetNumCandidates (
+static VAStatus va_DRI2_GetNumCandidates(
     VADisplayContextP pDisplayContext,
     int *num_candidates
 )
@@ -120,7 +120,7 @@ static VAStatus va_DRI2_GetNumCandidates (
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_DRI2_GetDriverName (
+static VAStatus va_DRI2_GetDriverName(
     VADisplayContextP pDisplayContext,
     char **driver_name_ptr,
     int candidate_index
@@ -161,7 +161,7 @@ static VAStatus va_DRI2_GetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_NVCTRL_GetDriverName (
+static VAStatus va_NVCTRL_GetDriverName(
     VADisplayContextP pDisplayContext,
     char **driver_name,
     int candidate_index
@@ -175,7 +175,7 @@ static VAStatus va_NVCTRL_GetDriverName (
         return VA_STATUS_ERROR_INVALID_PARAMETER;
 
     result = VA_NVCTRLQueryDirectRenderingCapable(ctx->native_dpy, ctx->x11_screen,
-                                                  &direct_capable);
+             &direct_capable);
     if (!result || !direct_capable)
         return VA_STATUS_ERROR_UNKNOWN;
 
@@ -188,7 +188,7 @@ static VAStatus va_NVCTRL_GetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_FGLRX_GetDriverName (
+static VAStatus va_FGLRX_GetDriverName(
     VADisplayContextP pDisplayContext,
     char **driver_name,
     int candidate_index
@@ -210,7 +210,7 @@ static VAStatus va_FGLRX_GetDriverName (
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_DisplayContextGetDriverName (
+static VAStatus va_DisplayContextGetDriverName(
     VADisplayContextP pDisplayContext,
     char **driver_name, int candidate_index
 )
@@ -231,7 +231,7 @@ static VAStatus va_DisplayContextGetDriverName (
     return vaStatus;
 }
 
-static VAStatus va_DisplayContextGetNumCandidates (
+static VAStatus va_DisplayContextGetNumCandidates(
     VADisplayContextP pDisplayContext,
     int *num_candidates
 )
@@ -245,12 +245,12 @@ static VAStatus va_DisplayContextGetNumCandidates (
      * fallbacks only have 1 candidate driver.
      */
     if (vaStatus != VA_STATUS_SUCCESS)
-      *num_candidates = 1;
+        *num_candidates = 1;
 
     return VA_STATUS_SUCCESS;
 }
 
-VADisplay vaGetDisplay (
+VADisplay vaGetDisplay(
     Display *native_dpy /* implementation specific */
 )
 {
@@ -295,7 +295,7 @@ VADisplay vaGetDisplay (
     return (VADisplay)pDisplayContext;
 }
 
-void va_TracePutSurface (
+void va_TracePutSurface(
     VADisplay dpy,
     VASurfaceID surface,
     void *draw, /* the target Drawable */
@@ -312,7 +312,7 @@ void va_TracePutSurface (
     unsigned int flags /* de-interlacing flags */
 );
 
-VAStatus vaPutSurface (
+VAStatus vaPutSurface(
     VADisplay dpy,
     VASurfaceID surface,
     Drawable draw, /* X Drawable */
@@ -329,19 +329,19 @@ VAStatus vaPutSurface (
     unsigned int flags /* de-interlacing flags */
 )
 {
-  VADriverContextP ctx;
+    VADriverContextP ctx;
 
-  if (va_fool_postp)
-      return VA_STATUS_SUCCESS;
+    if (va_fool_postp)
+        return VA_STATUS_SUCCESS;
 
-  CHECK_DISPLAY(dpy);
-  ctx = CTX(dpy);
-  
-  VA_TRACE_LOG(va_TracePutSurface, dpy, surface, (void *)draw, srcx, srcy, srcw, srch,
-               destx, desty, destw, desth,
-               cliprects, number_cliprects, flags );
-  
-  return ctx->vtable->vaPutSurface( ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
-                                   destx, desty, destw, desth,
-                                   cliprects, number_cliprects, flags );
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    VA_TRACE_LOG(va_TracePutSurface, dpy, surface, (void *)draw, srcx, srcy, srcw, srch,
+                 destx, desty, destw, desth,
+                 cliprects, number_cliprects, flags);
+
+    return ctx->vtable->vaPutSurface(ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
+                                     destx, desty, destw, desth,
+                                     cliprects, number_cliprects, flags);
 }

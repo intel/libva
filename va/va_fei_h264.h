@@ -44,8 +44,7 @@ extern "C" {
  */
 
 /** \brief FEI frame level control buffer for H.264 */
-typedef struct _VAEncMiscParameterFEIFrameControlH264
-{
+typedef struct _VAEncMiscParameterFEIFrameControlH264 {
     uint32_t      function; /* one of the VAConfigAttribFEIFunctionType values */
     /** \brief MB (16x16) control input buffer. It is valid only when (mb_input | mb_size_ctrl)
      * is set to 1. The data in this buffer correspond to the input source. 16x16 MB is in raster scan order,
@@ -100,7 +99,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
      * and all locations within the same group must be either all are chosen or all are skipped.
      * These predefined groups are called search unit (SU).*/
     uint32_t      len_sp                    : 8;
-    uint32_t      reserved0	                : 16;
+    uint32_t      reserved0                 : 16;
     /** \brief defines the bit-mask for disabling sub-partition
      * The lower 4 bits are for the major partitions (sub-macroblock) and the higher 3 bits for minor partitions (with sub-partition for 4x(8x8) sub-macroblocks.
      * xxxxxx1 : 16x16 sub-macroblock disabled
@@ -132,7 +131,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
     /** specifies distortion measure adjustments used for the inter motion search SAD comparison.
      * 00b: none
      * 10b: Haar transform adjusted*/
-    uint32_t      inter_sad 	            : 2;
+    uint32_t      inter_sad                 : 2;
     /** specifies distortion measure adjustments used for the intra motion search SAD comparison.
      * 00b: none
      * 10b: Haar transform adjusted*/
@@ -163,7 +162,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
     /** when this flag is set, extra distortion between the current MB and co-located MB is provided.
      *  Extra distortion output has performance impact, set it only when it is needed.*/
     uint32_t      colocated_mb_distortion   : 1;
-    uint32_t      reserved1	                : 4;
+    uint32_t      reserved1                 : 4;
 
     /** \brief motion search window(ref_width * ref_height) */
     uint32_t      ref_width                 : 8;
@@ -193,8 +192,7 @@ typedef struct _VAEncMiscParameterFEIFrameControlH264
 } VAEncMiscParameterFEIFrameControlH264;
 
 /** \brief FEI MB level control data structure */
-typedef struct _VAEncFEIMBControlH264
-{
+typedef struct _VAEncFEIMBControlH264 {
     /** \brief when set, correposndent MB is coded as intra */
     uint32_t force_to_intra                : 1;
     /** \brief when set, correposndent MB is coded as skip */
@@ -221,8 +219,7 @@ typedef struct _VAEncFEIMBControlH264
 /** \brief Application can use this definition as reference to allocate the buffer
  * based on MaxNumPredictor returned from attribute VAConfigAttribFEIMVPredictors query.
  **/
-typedef struct _VAEncFEIMVPredictorH264
-{
+typedef struct _VAEncFEIMVPredictorH264 {
     /** \brief Reference index corresponding to the entry of RefPicList0 & RefPicList1 in VAEncSliceParameterBufferH264.
      * Note that RefPicList0 & RefPicList1 needs to be the same for all slices.
      * ref_idx_l0_x : index to RefPicList0; ref_idx_l1_x : index to RefPicList1; x : 0 - MaxNumPredictor.
@@ -271,8 +268,7 @@ typedef struct _VAEncFEIMVPredictorH264
  * the exact layout of this buffer is needed for PAK input. App can reuse this buffer,
  * or copy to a different buffer as PAK input, reserved elements must not be modified when used as PAK input.
  **/
-typedef struct _VAEncFEIMBCodeH264
-{
+typedef struct _VAEncFEIMBCodeH264 {
     //DWORD  0~2
     uint32_t    reserved0[3];
 
@@ -284,7 +280,7 @@ typedef struct _VAEncFEIMBCodeH264
     uint32_t    reserved2                : 1;
     uint32_t    field_mb_polarity_flag   : 1;
     uint32_t    mb_type                  : 5;
-    uint32_t    intra_mb_flag	         : 1;
+    uint32_t    intra_mb_flag            : 1;
     uint32_t    field_mb_flag            : 1;
     uint32_t    transform8x8_flag        : 1;
     uint32_t    reserved3                : 1;
@@ -311,11 +307,9 @@ typedef struct _VAEncFEIMBCodeH264
     uint32_t    direct8x8_pattern        : 4;
 
     //DWORD 7 8 and 9
-    union
-    {
+    union {
         /* Intra MBs */
-        struct
-        {
+        struct {
             uint32_t   luma_intra_pred_modes0 : 16;
             uint32_t   luma_intra_pred_modes1 : 16;
 
@@ -329,8 +323,7 @@ typedef struct _VAEncFEIMBCodeH264
         } intra_mb;
 
         /* Inter MBs */
-        struct
-        {
+        struct {
             uint32_t   sub_mb_shapes          : 8;
             uint32_t   sub_mb_pred_modes      : 8;
             uint32_t   reserved7              : 16;
@@ -378,9 +371,8 @@ typedef struct _VAEncFEIDistortionH264 {
 /** \brief Motion Vector and Statistics frame level controls.
  * VAStatsStatisticsParameterBufferType for H264 16x16 block
  **/
-typedef struct _VAStatsStatisticsParameterH264
-{
-   VAStatsStatisticsParameter stats_params;
+typedef struct _VAStatsStatisticsParameterH264 {
+    VAStatsStatisticsParameter stats_params;
 
     uint32_t    frame_qp                    : 8;
     /** \brief length of search path */
@@ -415,7 +407,7 @@ typedef struct _VAStatsStatisticsParameterH264
      * 11b: reserved
      **/
     uint32_t    intra_sad                   : 2;
-    uint32_t    adaptive_search	            : 1;
+    uint32_t    adaptive_search             : 1;
     /** \brief indicate if future or/and past MV in mv_predictor buffer is valid.
      * 0: MV predictor disabled
      * 1: MV predictor enabled for past reference
@@ -457,7 +449,7 @@ typedef struct _VAStatsStatisticsParameterH264
     uint32_t    reserved2                   : 12;
 
     /** \brief MVOutput. When set to 1, MV output is NOT provided */
-    uint32_t	disable_mv_output           : 1;
+    uint32_t    disable_mv_output           : 1;
     /** \brief StatisticsOutput. When set to 1, Statistics output is NOT provided. */
     uint32_t    disable_statistics_output   : 1;
     /** \brief block 8x8 data enabling in statistics output */
@@ -472,8 +464,7 @@ typedef struct _VAStatsStatisticsParameterH264
  * The 16x16 block is in raster scan order. The buffer size shall be greater than or equal to
  * the number of 16x16 blocks multiplied by sizeof(VAStatsStatisticsH264).
  **/
-typedef struct _VAStatsStatisticsH264
-{
+typedef struct _VAStatsStatisticsH264 {
     /** \brief past reference  */
     uint32_t    best_inter_distortion0 : 16;
     uint32_t    inter_mode0            : 16;
