@@ -38,6 +38,14 @@
 extern "C" {
 #endif
 
+/**
+ * \defgroup api_dec_av1 AV1 decoding API
+ *
+ * This AV1 decoding API supports 8-bit/10bit 420 format only.
+ *
+ * @{
+ */
+
 /** Attribute value for VAConfigAttribDecAV1Features.
  *
  * This attribute decribes the supported features of a AV1
