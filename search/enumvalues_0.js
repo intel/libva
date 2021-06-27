@@ -1,6 +1,11 @@
 var searchData=
 [
   ['va_5fdeprecated_5fenum',['va_deprecated_enum',['../group__api__core.html#gga8ed0af9059a2d06bca1a54e774e679eaa86d498fbfde9d7a847864d6b6c67e2aa',1,'va_deprecated_enum():&#160;va.h'],['../group__api__enc__h264.html#gga9cf3cb8a709849fd74f1993382dbc4a0a86d498fbfde9d7a847864d6b6c67e2aa',1,'va_deprecated_enum():&#160;va_enc_h264.h'],['../group__api__enc__hevc.html#ggaa9508bfe0814259f5d2f16cae912e63fa86d498fbfde9d7a847864d6b6c67e2aa',1,'va_deprecated_enum():&#160;va_enc_hevc.h']]],
+  ['vaav1transformationaffine',['VAAV1TransformationAffine',['../group__api__dec__av1.html#gga0241c07299a9a0a691c9633e394b71d0a4b66d282272741154399ef696ad45497',1,'va_dec_av1.h']]],
+  ['vaav1transformationcount',['VAAV1TransformationCount',['../group__api__dec__av1.html#gga0241c07299a9a0a691c9633e394b71d0a7e8c948c7abeb50a702b0737a768ed87',1,'va_dec_av1.h']]],
+  ['vaav1transformationidentity',['VAAV1TransformationIdentity',['../group__api__dec__av1.html#gga0241c07299a9a0a691c9633e394b71d0a1b9715daea4a54335391d2b6b6233750',1,'va_dec_av1.h']]],
+  ['vaav1transformationrotzoom',['VAAV1TransformationRotzoom',['../group__api__dec__av1.html#gga0241c07299a9a0a691c9633e394b71d0abef31d50651cdacc653419b3ae201902',1,'va_dec_av1.h']]],
+  ['vaav1transformationtranslation',['VAAV1TransformationTranslation',['../group__api__dec__av1.html#gga0241c07299a9a0a691c9633e394b71d0a36567b6f127d914eafe681fa9b334208',1,'va_dec_av1.h']]],
   ['vaconfigattribcontextpriority',['VAConfigAttribContextPriority',['../group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3337f5f60820fcbb4109d9ae2b1f5cb8',1,'va.h']]],
   ['vaconfigattribcustomroundingcontrol',['VAConfigAttribCustomRoundingControl',['../group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a601dc0ce6a43bfb71e40f34e44c10c04',1,'va.h']]],
   ['vaconfigattribdecav1features',['VAConfigAttribDecAV1Features',['../group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01ac780378cd29ea67801726e82fc07ef03',1,'va.h']]],

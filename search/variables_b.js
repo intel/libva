@@ -2,6 +2,7 @@ var searchData=
 [
   ['macroblock_5faddress',['macroblock_address',['../structVAEncSliceParameterBufferH264.html#affea8a882436cce2824a07e9db2db9e4',1,'VAEncSliceParameterBufferH264::macroblock_address()'],['../structVAEncSliceParameterBufferMPEG2.html#af4819c2e56ccf2b963bf1ac5296a33a8',1,'VAEncSliceParameterBufferMPEG2::macroblock_address()']]],
   ['macroblock_5finfo',['macroblock_info',['../structVAEncSliceParameterBufferH264.html#a17657da9522371e9ea108cddad17f5fe',1,'VAEncSliceParameterBufferH264']]],
+  ['matrix_5fcoefficients',['matrix_coefficients',['../group__api__dec__av1.html#ga4696b2034b7132c00b9de575b88bec29',1,'VADecPictureParameterBufferAV1']]],
   ['max_5fbits_5fper_5fmin_5fcu_5fdenom',['max_bits_per_min_cu_denom',['../structVAEncSequenceParameterBufferHEVC.html#aea3b1aa10751b5edb985d1255dfbca73',1,'VAEncSequenceParameterBufferHEVC']]],
   ['max_5fbytes_5fper_5fpic_5fdenom',['max_bytes_per_pic_denom',['../structVAEncSequenceParameterBufferHEVC.html#a8853f30c03d2bd075cb65b8a77eb47e4',1,'VAEncSequenceParameterBufferHEVC']]],
   ['max_5fcontent_5flight_5flevel',['max_content_light_level',['../structVAHdrMetaDataHDR10.html#aad25cecb8e63153a0528bd29d7c431bc',1,'VAHdrMetaDataHDR10']]],
@@ -60,6 +61,7 @@ var searchData=
   ['mirror_5fstate',['mirror_state',['../structVAProcPipelineParameterBuffer.html#a46ea097164b459fa1ee20bbb356a95c1',1,'VAProcPipelineParameterBuffer']]],
   ['mixed_5fquality_5flevel',['mixed_quality_level',['../unionVAConfigAttribValMultipleFrame.html#a942b281afbd93594cd232231678f8f3a',1,'VAConfigAttribValMultipleFrame']]],
   ['mode',['mode',['../structVAProcFilterParameterBufferHVSNoiseReduction.html#ace814613cff97b062868b7746b2c8f44',1,'VAProcFilterParameterBufferHVSNoiseReduction']]],
+  ['mode_5fdeltas',['mode_deltas',['../group__api__dec__av1.html#ga9e3e3c6adc0fc4d4fcc7df082ac90df0',1,'VADecPictureParameterBufferAV1']]],
   ['mode_5flf_5fdelta',['mode_lf_delta',['../structVAEncPictureParameterBufferVP8.html#a5e4d654a16d096b7dda1d5c0fa9a2ab7',1,'VAEncPictureParameterBufferVP8::mode_lf_delta()'],['../structVAEncPictureParameterBufferVP9.html#ad91be6d93bc918d60ba63a684b658802',1,'VAEncPictureParameterBufferVP9::mode_lf_delta()']]],
   ['motion_5fvectors_5fover_5fpic_5fboundaries_5fflag',['motion_vectors_over_pic_boundaries_flag',['../structVAEncSequenceParameterBufferH264.html#a9188478eb40a4b308ce88f68678f0132',1,'VAEncSequenceParameterBufferH264::motion_vectors_over_pic_boundaries_flag()'],['../structVAEncSequenceParameterBufferHEVC.html#a723a1ead8c4a6ac75374367ea3d6265a',1,'VAEncSequenceParameterBufferHEVC::motion_vectors_over_pic_boundaries_flag()']]],
   ['multi_5fpred_5fl0',['multi_pred_l0',['../group__api__fei__h264.html#ga5c73a14d5346fccc7b9ac9eb16aad981',1,'VAEncMiscParameterFEIFrameControlH264::multi_pred_l0()'],['../group__api__fei__hevc.html#ga3b52e7866d1e82a3a29caf27562aac3d',1,'VAEncMiscParameterFEIFrameControlHEVC::multi_pred_l0()']]],

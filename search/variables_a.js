@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['large_5fscale_5ftile',['large_scale_tile',['../structVADecPictureParameterBufferAV1.html#a76e68ee3a0eb94fde649e9272611cfe6',1,'VADecPictureParameterBufferAV1::large_scale_tile()'],['../group__api__dec__av1.html#gaaa52bd656d0c3f3de670c41f504a6305',1,'VADecPictureParameterBufferAV1::@146::@152::large_scale_tile()']]],
   ['last_5fpicture',['last_picture',['../structVAEncPictureParameterBufferH264.html#acb7765f69dcc13568f258025195c4781',1,'VAEncPictureParameterBufferH264::last_picture()'],['../structVAEncPictureParameterBufferMPEG2.html#a9a619cff91a2b620c5de0e5028be564f',1,'VAEncPictureParameterBufferMPEG2::last_picture()'],['../structVAEncPictureParameterBufferHEVC.html#a4aedb7d0bc48ee890c33cd2a6eea0c3e',1,'VAEncPictureParameterBufferHEVC::last_picture()']]],
   ['last_5fref_5fframe',['last_ref_frame',['../structVADecPictureParameterBufferVP9.html#a1f35f32dd4fbf5975e4c02751d44ac85',1,'VADecPictureParameterBufferVP9']]],
   ['last_5fref_5fframe_5fsign_5fbias',['last_ref_frame_sign_bias',['../structVADecPictureParameterBufferVP9.html#ae4f44adc9483264ea87fa6194617e367',1,'VADecPictureParameterBufferVP9']]],
@@ -42,11 +43,13 @@ var searchData=
   ['loop_5ffilter_5facross_5ftiles_5fenabled_5fflag',['loop_filter_across_tiles_enabled_flag',['../structVAEncPictureParameterBufferHEVC.html#a0911b70f0049cbde5e20e6f681033c39',1,'VAEncPictureParameterBufferHEVC']]],
   ['loop_5ffilter_5fadj_5fenable',['loop_filter_adj_enable',['../structVAEncPictureParameterBufferVP8.html#adb153ffcb3c63a09ed107955735e9615',1,'VAEncPictureParameterBufferVP8']]],
   ['loop_5ffilter_5flevel',['loop_filter_level',['../structVAEncPictureParameterBufferVP8.html#aa0639353fdc16d564cbad1aa9d517979',1,'VAEncPictureParameterBufferVP8::loop_filter_level()'],['../structVACodedBufferVP9Status.html#af94c2001cb5151fa9eb1042d7a2c936f',1,'VACodedBufferVP9Status::loop_filter_level()']]],
+  ['loop_5frestoration_5ffields',['loop_restoration_fields',['../group__api__dec__av1.html#gaef1515eb099238024ba5bd4133835b9a',1,'VADecPictureParameterBufferAV1']]],
   ['lossless_5fflag',['lossless_flag',['../structVADecPictureParameterBufferVP9.html#a52bcb25f2f52f9c8068f4a614f9aff56',1,'VADecPictureParameterBufferVP9']]],
   ['lossless_5fmode',['lossless_mode',['../structVAEncPictureParameterBufferVP9.html#a5e70ec72a48b1a62c2076231579ec92d',1,'VAEncPictureParameterBufferVP9']]],
   ['low_5fdelay',['low_delay',['../structVAEncSequenceParameterBufferMPEG2.html#ae93a0c9d26b1d9b7ac4eed17a05047cc',1,'VAEncSequenceParameterBufferMPEG2']]],
   ['low_5fdelay_5fhrd_5fflag',['low_delay_hrd_flag',['../structVAEncSequenceParameterBufferH264.html#acb93ed780736d53f71d9d2f330fb1e37',1,'VAEncSequenceParameterBufferH264']]],
   ['low_5fdelay_5fseq',['low_delay_seq',['../structVAEncSequenceParameterBufferHEVC.html#a3e02fd25a45b81d326e70c6f11fd404c',1,'VAEncSequenceParameterBufferHEVC']]],
+  ['lst_5fsupport',['lst_support',['../unionVAConfigAttribValDecAV1Features.html#a55fdd2f222a48f84721fbc4275b5c528',1,'VAConfigAttribValDecAV1Features']]],
   ['lum_5fquantiser_5fmatrix',['lum_quantiser_matrix',['../structVAQMatrixBufferJPEG.html#adcd5fdb3ec3cc4a3ca0aa70dc3f766ba',1,'VAQMatrixBufferJPEG']]],
   ['luma_5fac_5fqindex',['luma_ac_qindex',['../structVAEncPictureParameterBufferVP9.html#ab045759a26416249a1c7399aed8ca496',1,'VAEncPictureParameterBufferVP9']]],
   ['luma_5fac_5fquant_5fscale',['luma_ac_quant_scale',['../structVASegmentParameterVP9.html#adaa605fdee65461e1a7a3a55b2c155a1',1,'VASegmentParameterVP9']]],

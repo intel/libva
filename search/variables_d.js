@@ -9,6 +9,7 @@ var searchData=
   ['output_5fcolor_5fproperties',['output_color_properties',['../structVAProcPipelineParameterBuffer.html#a98f7e41bcf2887bd64dd482d228fa9fb',1,'VAProcPipelineParameterBuffer']]],
   ['output_5fcolor_5fstandard',['output_color_standard',['../structVAProcPipelineParameterBuffer.html#ac583d30bead8a2c05307a8fbfcf2ea9c',1,'VAProcPipelineParameterBuffer']]],
   ['output_5fcolor_5fstandards',['output_color_standards',['../structVAProcPipelineCaps.html#a9f18b7bb981551b36599184c18d60d7f',1,'VAProcPipelineCaps']]],
+  ['output_5fframe_5fwidth_5fin_5ftiles_5fminus_5f1',['output_frame_width_in_tiles_minus_1',['../group__api__dec__av1.html#ga45a97e4eb015c16f71cf319abb0e1629',1,'VADecPictureParameterBufferAV1']]],
   ['output_5fhdr_5fmetadata',['output_hdr_metadata',['../structVAProcPipelineParameterBuffer.html#ace85ec0ed9b40990efaae8c063e10d53',1,'VAProcPipelineParameterBuffer']]],
   ['output_5fpixel_5fformat',['output_pixel_format',['../structVAProcPipelineCaps.html#ab64dad914b2a722ab9488034d94e8009',1,'VAProcPipelineCaps']]],
   ['output_5fregion',['output_region',['../structVAProcPipelineParameterBuffer.html#a5b816fff16dc1cc4b49524866c9c25b0',1,'VAProcPipelineParameterBuffer']]],

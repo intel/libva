@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.12.0</span>
+   &#160;<span id="projectnumber">2.13.0.pre1</span>
    </div>
   </td>
  </tr>
@@ -450,6 +450,8 @@ Macros</h2></td></tr>
 <tr class="separator:gaf381ffb104032f02d5cbf3550c0aabd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacdc713382bb52e675f9d988493631283"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gacdc713382bb52e675f9d988493631283">VA_FOURCC_ABGR64</a>&#160;&#160;&#160;0x34474241</td></tr>
 <tr class="separator:gacdc713382bb52e675f9d988493631283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8df81eeda033139c8ed283e7eca7cc6f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga8df81eeda033139c8ed283e7eca7cc6f">VA_FOURCC_XYUV</a>&#160;&#160;&#160;0x56555958</td></tr>
+<tr class="separator:ga8df81eeda033139c8ed283e7eca7cc6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga93dfe25c489bf1ab5416a9a96d80c5a0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga93dfe25c489bf1ab5416a9a96d80c5a0">VA_SUBPICTURE_CHROMA_KEYING</a>&#160;&#160;&#160;0x0001</td></tr>
 <tr class="separator:ga93dfe25c489bf1ab5416a9a96d80c5a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf2b89a27c2f6f5af305d54a6f25a4a01"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gaf2b89a27c2f6f5af305d54a6f25a4a01">VA_ROTATION_NONE</a>&#160;&#160;&#160;0x00000000</td></tr>
@@ -2199,6 +2201,22 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 
 </div>
 </div>
+<a id="ga8df81eeda033139c8ed283e7eca7cc6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8df81eeda033139c8ed283e7eca7cc6f">&#9670;&nbsp;</a></span>VA_FOURCC_XYUV</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VA_FOURCC_XYUV&#160;&#160;&#160;0x56555958</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>XYUV: packed 8-bit YUVX 4:4:4.</p>
+<p>Four bytes per pixel: X, Y, U, V. </p>
+
+</div>
+</div>
 <a id="gace862315b8ad74021fc05424afaeaf73"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gace862315b8ad74021fc05424afaeaf73">&#9670;&nbsp;</a></span>VA_FOURCC_Y16</h2>
 
@@ -2908,7 +2926,7 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a3337f5f60820fcbb4109d9ae2b1f5cb8"></a>VAConfigAttribContextPriority&#160;</td><td class="fielddoc"><p>priority setting for the context. Read-Write attribute value is <code><a class="el" href="unionVAConfigAttribValContextPriority.html">VAConfigAttribValContextPriority</a></code> this setting also could be update by <code><a class="el" href="structVAContextParameterUpdateBuffer.html" title="update the context parameter this structure is used to update context parameters, such as priority of...">VAContextParameterUpdateBuffer</a></code> </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01ac780378cd29ea67801726e82fc07ef03"></a>VAConfigAttribDecAV1Features&#160;</td><td class="fielddoc"><p>AV1 decoding features. Read-only. </p>
-<p>This attribute describes the supported features of an AV1 decoder configuration. The value returned uses the VAConfigAttribValDecAV1Features type. </p>
+<p>This attribute describes the supported features of an AV1 decoder configuration. The value returned uses the <a class="el" href="unionVAConfigAttribValDecAV1Features.html">VAConfigAttribValDecAV1Features</a> type. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01ac047584673c8940601fe11205848a18e"></a>VAConfigAttribTEEType&#160;</td><td class="fielddoc"><p>TEE could be any HW secure device. Read-only. </p>
 </td></tr>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['core_20api',['Core API',['../group__api__core.html',1,'']]]
+  ['av1_20decoding_20api',['AV1 decoding API',['../group__api__dec__av1.html',1,'']]]
 ];

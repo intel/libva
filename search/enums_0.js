@@ -1,6 +1,7 @@
 var searchData=
 [
   ['va_5ftee_5fexecute_5ffunction_5fid',['VA_TEE_EXECUTE_FUNCTION_ID',['../group__api__prot.html#ga12ebbce16beeeed9cfbf2f409be7ddc3',1,'va_prot.h']]],
+  ['vaav1transformationtype',['VAAV1TransformationType',['../group__api__dec__av1.html#ga0241c07299a9a0a691c9633e394b71d0',1,'va_dec_av1.h']]],
   ['vabuffertype',['VABufferType',['../group__api__core.html#ga24da9776c5d3a5ce29cb592cf22c00db',1,'va.h']]],
   ['vaconfigattribtype',['VAConfigAttribType',['../group__api__core.html#ga2c3be94ce142fb92a4bf93e9b1b4fa01',1,'va.h']]],
   ['vadisplayattribblemode',['VADisplayAttribBLEMode',['../group__api__core.html#ga0f8dad8977fc45641f49b76cd19fb6b4',1,'va.h']]],
