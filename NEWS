@@ -1,5 +1,11 @@
-libva NEWS -- summary of user visible changes.  2021-06-17
+libva NEWS -- summary of user visible changes.  2021-09-16
 Copyright (C) 2009-2020 Intel Corporation
+
+version 2.13.0 - 16.Sep.2021
+* fix:Check the function pointer before using
+* code style:unify the code styles using the style_unify script
+* doc:Fix av1 dec doc page link issue
+* add:(sep_layer) add new surface format fourcc XYUV
 
 version 2.12.0 - 17.Jun.2021
 * add: Report the capability of vaCopy support
