@@ -1,39 +1,50 @@
-pkgconf = configuration_data()
+pkg = import('pkgconfig')
 
-pkgconf.set('prefix', get_option('prefix'))
-pkgconf.set('exec_prefix', '${prefix}')
-pkgconf.set('libdir', join_paths(get_option('prefix'), get_option('libdir')))
-pkgconf.set('includedir', join_paths(get_option('prefix'), get_option('includedir')))
-pkgconf.set('LIBVA_VERSION', libva_version)
-pkgconf.set('VA_API_VERSION', va_api_version)
-pkgconf.set('LIBVA_DRIVERS_PATH', driverdir)
+vars = ['libva_version=' + libva_version, 'va_api_version=' + va_api_version]
 
-pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
-
-pkg_files = [ 'libva' ]
+va_vars = vars + ['driverdir=' + driverdir]
+pkg.generate(libva,
+  description: 'Userspace Video Acceleration (VA) core interface',
+  filebase: 'libva',
+  variables: va_vars,
+  version: va_api_version)
 
 if WITH_DRM
-  pkg_files += [ 'libva-drm' ]
+  drm_vars = vars + ['display=drm']
+  pkg.generate(libva_drm,
+    description: 'Userspace Video Acceleration (VA) DRM interface',
+    filebase: 'libva-drm',
+    requires: 'libva',
+    variables: drm_vars,
+    version: va_api_version)
 endif
 
 if WITH_X11
-  pkg_files += [ 'libva-x11' ]
+  x11_vars = vars + ['display=x11']
+  pkg.generate(libva_x11,
+    description: 'Userspace Video Acceleration (VA) X11 interface',
+    filebase: 'libva-x11',
+    requires: 'libva',
+    variables: x11_vars,
+    version: va_api_version)
 endif
 
 if WITH_GLX
-  pkg_files += [ 'libva-glx' ]
+  glx_vars = vars + ['display=glx']
+  pkg.generate(libva_glx,
+    description: 'Userspace Video Acceleration (VA) GLX interface',
+    filebase: 'libva-glx',
+    requires: 'libva',
+    variables: glx_vars,
+    version: va_api_version)
 endif
 
 if WITH_WAYLAND
-  pkg_files += [ 'libva-wayland' ]
+  wayland_vars = vars + ['display=wayland']
+  pkg.generate(libva_wayland,
+    description: 'Userspace Video Acceleration (VA) Wayland interface',
+    filebase: 'libva-wayland',
+    requires: 'libva, wayland-client',
+    variables: wayland_vars,
+    version: va_api_version)
 endif
-
-foreach p : pkg_files
-  infile = p + '.pc.in'
-  outfile = p + '.pc'
-  configure_file(
-    input : infile,
-    output : outfile,
-    configuration : pkgconf,
-    install_dir : pkg_install_dir)
-endforeach
