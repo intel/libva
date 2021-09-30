@@ -68,7 +68,7 @@ va_wayland_drm.c: $(protocol_source_h)
 %-client-protocol.h : %.xml
 	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
 %-client-protocol-export.c : %.xml
-	$(AM_V_GEN)$(WAYLAND_SCANNER) code < $< > $@
+	$(AM_V_GEN)$(WAYLAND_SCANNER) private-code < $< > $@
 %-client-protocol.c: %-client-protocol-export.c
 	$(AM_V_GEN){ echo '#include "sysdeps.h"'; $(SED) \
 		-e 's@WL_EXPORT@DLL_HIDDEN@g' \
