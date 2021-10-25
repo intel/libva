@@ -3816,14 +3816,16 @@ VAStatus vaMapBuffer(
  * /brief Map data store of the buffer into the client's address space
  *
  * vaMapBuffer2 is similar with vaMapBuffer, but with addtional parameters "flags"
- * the flags is defined as VA_MAP_XXX. Applications may combine one or more of these flags.
- * if the flags equal to 0, the behavior should be same as vaMapBuffer.
+ * which are defined as VA_MAP_XXX. Applications may combine one or more of these flags.
+ * If the flags equal to 0, the behavior should be same as vaMapBuffer.
  *
- * VA_MAP_READ / VA_MAP_WRITE is defined to identifies a resource to be accessed 
+ * VA_MAP_READ / VA_MAP_WRITE are defined to identifies a resource to be accessed
  * for reading and writing by the CPU.
- * if only set VA_MAP_READ without VA_AMP_WRITE, backend driver could not guarantee
- * correctness of data writing. Correspondingly, if only set VA_MAP_WRITE without VA_MAP_READ,
- * backend driver may not guarantee application could read correct data.
+ * If only set VA_MAP_READ without VA_MAP_WRITE, user must assure that there will be no writing
+ * to the resource.  Backend driver might not guarantee correctness of data writing.
+ * Correspondingly, if only set VA_MAP_WRITE without VA_MAP_READ, user must assure that there
+ * will be no reading from the resource. Backend driver might not guarantee application could
+ * read correct data.
  *
  * vaUnMapBuffer is mandatory after vaMapBuffer2, the data will be flushed into resource in
  * vaUnMapBuffer call if VA_MAP_WRITE is enabled.
