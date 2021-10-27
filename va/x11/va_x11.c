@@ -51,6 +51,8 @@ struct driver_name_map {
 };
 
 static const struct driver_name_map g_dri2_driver_name_map[] = {
+    { "crocus",     6, "iHD"    }, // Intel iHD  VAAPI driver with crocus Gallium driver
+    { "crocus",     6, "i965"   }, // Intel i965 VAAPI driver with crocus Gallium driver
     { "i965",       4, "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
     { "i965",       4, "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
     { "iris",       4, "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
