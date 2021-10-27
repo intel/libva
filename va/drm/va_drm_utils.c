@@ -37,6 +37,8 @@ struct driver_name_map {
 };
 
 static const struct driver_name_map g_driver_name_map[] = {
+    { "crocus",     6, "iHD"    }, // Intel Media driver
+    { "crocus",     6, "i965"   }, // Intel OTC GenX driver
     { "i915",       4, "iHD"    }, // Intel Media driver
     { "i915",       4, "i965"   }, // Intel OTC GenX driver
     { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
