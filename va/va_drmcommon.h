@@ -116,6 +116,10 @@ struct drm_state {
  * support NV12 surfaces when they are contained within a single DRM
  * object, and therefore fail to create such surfaces if the two
  * planes are in different DRM objects.
+ * Note that backend driver will retrieve the resource represent by fd,
+ * and a valid surface ID is generated. Backend driver will not close
+ * the file descriptor. Application should handle the release of the fd.
+ * releasing the fd will not impact the existence of the surface.
  */
 typedef struct _VADRMPRIMESurfaceDescriptor {
     /** Pixel format fourcc of the whole surface (VA_FOURCC_*). */
