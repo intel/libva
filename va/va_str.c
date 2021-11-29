@@ -147,6 +147,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
         TOSTR(VAConfigAttribEncAV1);
         TOSTR(VAConfigAttribEncAV1Ext1);
         TOSTR(VAConfigAttribEncAV1Ext2);
+        TOSTR(VAConfigAttribEncPerBlockControl);
     case VAConfigAttribTypeMax:
         break;
     }
@@ -200,6 +201,7 @@ const char *vaBufferTypeStr(VABufferType bufferType)
         TOSTR(VAContextParameterUpdateBufferType);
         TOSTR(VAProtectedSessionExecuteBufferType);
         TOSTR(VAEncryptionParameterBufferType);
+        TOSTR(VAEncDeltaQpPerBlockBufferType);
     case VABufferTypeMax:
         break;
     }

@@ -1021,6 +1021,13 @@ typedef enum {
      * VAConfigAttribValEncAV1Ext2 union.
      */
     VAConfigAttribEncAV1Ext2            = 54,
+    /** \brief Settings per block attribute for Encoding.  Read-only.
+     *
+     * This attribute describes whether to support delta qp per block,
+     * the supported size of delta qp block and the size of delta QP in bytes.
+     * The value returned uses the VAConfigAttribValEncPerBlockControl type.
+     */
+    VAConfigAttribEncPerBlockControl    = 55,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1400,6 +1407,21 @@ typedef union _VAConfigAttribValContextPriority {
     } bits;
     uint32_t value;
 } VAConfigAttribValContextPriority;
+
+/** brief Attribute value VAConfigAttribEncPerBlockControl */
+typedef union _VAConfigAttribValEncPerBlockControl {
+    struct {
+        /** \brief whether to support dela qp per block */
+        uint32_t delta_qp_support         : 1;
+        /** \brief supported size of delta qp block */
+        uint32_t log2_delta_qp_block_size : 4;
+        /** \brief size of delta qp per block in bytes*/
+        uint32_t delta_qp_size_in_bytes   : 3;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                 : 24;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValEncPerBlockControl;
 
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
@@ -2068,6 +2090,17 @@ typedef enum {
      * Refer to \c VAEncryptionParameters
     */
     VAEncryptionParameterBufferType = 60,
+
+    /**
+     * \brief Encoding delta QP per block buffer
+     *
+     * This buffer only could be created and accepted
+     * when \c VAConfigAttribValEncPerBlockControl delta_qp_support == 1.
+     * This input buffer contains delta QP per block for encoding.
+     * The supported size of delta QP block and the size of delta QP
+     * must be quried from \c VAConfigAttribValEncPerBlockControl.
+     */
+    VAEncDeltaQpPerBlockBufferType   = 61,
 
     VABufferTypeMax
 } VABufferType;
