@@ -119,8 +119,12 @@ int vaDisplayIsValid(VADisplay dpy)
  * Global log level configured from the config file or environment, which sets
  * whether default logging appears or not (always overridden by explicitly
  * user-configured logging).
+ *
+ * 0 = nothing
+ * 1 = errors only
+ * 2 = informational messages
  */
-static int default_log_level = 2;
+static int default_log_level = 1;
 
 static void default_log_error(void *user_context, const char *buffer)
 {
