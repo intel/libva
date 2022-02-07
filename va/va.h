@@ -371,6 +371,9 @@ typedef int VAStatus;   /** Return status type from functions */
 #define VA_EXEC_MODE_DEFAULT      0x0
 #define VA_EXEC_MODE_POWER_SAVING 0x1
 #define VA_EXEC_MODE_PERFORMANCE  0x2
+/** Values 3-7 are reserved for future extension. */
+/** Vendor specific operation mode*/
+#define VA_EXEC_MODE_CUSTOM       0x8
 
 /* Values used to describe device features. */
 /** The feature is not supported by the device.
@@ -5183,9 +5186,11 @@ typedef union _VACopyOption {
     struct {
         /** \brief va copy synchronization, the value should be /c VA_EXEC_SYNC or /c VA_EXEC_ASYNC */
         uint32_t va_copy_sync : 2;
-        /** \brief va copy mode, the value should be VA_EXEC_MODE_XXX */
+        /** \brief va copy mode, if va_copy_engine_selection is 0, the value should be VA_EXEC_MODE_XXX; else, the value should be VA_INTEL_MEDIA_ENGINE_XXX on Intel platforms */
         uint32_t va_copy_mode : 4;
-        uint32_t reserved     : 26;
+        /** \brief va copy engine selection */
+        uint32_t va_copy_engine_selection : 1;
+        uint32_t reserved     : 25;
     } bits;
     uint32_t value;
 } VACopyOption;
