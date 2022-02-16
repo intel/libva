@@ -1,5 +1,12 @@
-libva NEWS -- summary of user visible changes.  2021-09-16
-Copyright (C) 2009-2020 Intel Corporation
+libva NEWS -- summary of user visible changes.  2022-02-16
+Copyright (C) 2009-2022 Intel Corporation
+
+version 2.14.0 - 16.Feb.2022
+* add: Add av1 encode interfaces
+* add: VA/X11 VAAPI driver mapping for crocus DRI driver
+* doc: Add description of the fd management for surface importing
+* ci: fix freebsd build
+* meson: Copy public headers to build directory to support subproject
 
 version 2.13.0 - 16.Sep.2021
 * fix:Check the function pointer before using
