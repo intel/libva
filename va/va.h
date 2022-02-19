@@ -3871,6 +3871,38 @@ VAStatus vaMapBuffer(
 );
 
 /**
+ * /brief Map data store of the buffer into the client's address space
+ *
+ * vaMapBuffer2 is similar with vaMapBuffer, but with addtional parameters "flags"
+ * which are defined as VA_MAP_XXX. Applications may combine one or more of these flags.
+ * If the flags equal to 0, the behavior should be same as vaMapBuffer.
+ *
+ * VA_MAP_READ / VA_MAP_WRITE are defined to identifies a resource to be accessed
+ * for reading and writing by the CPU.
+ * If only set VA_MAP_READ without VA_MAP_WRITE, user must assure that there will be no writing
+ * to the resource.  Backend driver might not guarantee correctness of data writing.
+ * Correspondingly, if only set VA_MAP_WRITE without VA_MAP_READ, user must assure that there
+ * will be no reading from the resource. Backend driver might not guarantee application could
+ * read correct data.
+ *
+ * vaUnMapBuffer is mandatory after vaMapBuffer2, the data will be flushed into resource in
+ * vaUnMapBuffer call if VA_MAP_WRITE is enabled.
+ */
+
+/* resource is mapped for reading */
+#define VA_MAP_READ  0x01
+/* resource is mapped for writing */
+#define VA_MAP_WRITE 0x02
+
+VAStatus vaMapBuffer2(
+    VADisplay dpy,
+    VABufferID buf_id,  /* in */
+    uint32_t   flags,  /* in */
+    void **pbuf     /* out */
+);
+
+
+/**
  * After client making changes to a mapped data store, it needs to
  * "Unmap" it to let the server know that the data is ready to be
  * consumed by the server

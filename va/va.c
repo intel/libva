@@ -1441,7 +1441,41 @@ VAStatus vaMapBuffer(
 
     VA_FOOL_FUNC(va_FoolMapBuffer, dpy, buf_id, pbuf);
 
-    va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
+    if (ctx->vtable->vaMapBuffer) {
+        va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
+    } else if (ctx->vtable->vaMapBuffer2) {
+        va_status = ctx->vtable->vaMapBuffer2(ctx, buf_id, 0, pbuf);
+    } else {
+        va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
+        va_errorMessage(dpy, "vaMapBuffer is a mandatory api\n");
+    }
+
+    VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf);
+    VA_TRACE_RET(dpy, va_status);
+
+    return va_status;
+}
+
+VAStatus vaMapBuffer2(
+    VADisplay dpy,
+    VABufferID buf_id,  /* in */
+    uint32_t flags,     /* in */
+    void **pbuf         /* out */
+)
+{
+    VADriverContextP ctx;
+    VAStatus va_status;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    VA_FOOL_FUNC(va_FoolMapBuffer, dpy, buf_id, pbuf);
+
+    if (ctx->vtable->vaMapBuffer2) {
+        va_status = ctx->vtable->vaMapBuffer2(ctx, buf_id, flags, pbuf);
+    } else {
+        va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
+    }
 
     VA_TRACE_ALL(va_TraceMapBuffer, dpy, buf_id, pbuf);
     VA_TRACE_RET(dpy, va_status);
