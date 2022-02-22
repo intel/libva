@@ -1028,6 +1028,13 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /**
+     * \brief Maximum number of input streams for video composition in video processing. Read-only.
+     *
+     * This attribute determines the maximum number of input streams which the driver supports for
+     * a given configuration.
+     */
+    VAConfigAttribMaxInputStreams       = 56,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
