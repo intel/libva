@@ -4024,6 +4024,7 @@ static void va_TraceVAPictureParameterBufferVP9(
     va_TraceMsg(trace_ctx, "\tsegment_pred_probs[3]: [0x%02x, 0x%02x, 0x%02x]\n", p->segment_pred_probs[0], p->segment_pred_probs[1], p->segment_pred_probs[2]);
 
     va_TraceMsg(trace_ctx, "\tprofile = %d\n", p->profile);
+    va_TraceMsg(trace_ctx, "\tbit_depth = %d\n", p->bit_depth);
 
     va_TraceMsg(trace_ctx, NULL);
 
