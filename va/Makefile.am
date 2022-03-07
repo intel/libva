@@ -33,7 +33,6 @@ LDADD = \
 libva_source_c = \
 	va.c			\
 	va_compat.c		\
-	va_fool.c		\
 	va_str.c		\
 	va_trace.c		\
 	$(NULL)
@@ -70,7 +69,6 @@ libva_source_h = \
 
 libva_source_h_priv = \
 	sysdeps.h		\
-	va_fool.h		\
 	va_internal.h		\
 	va_trace.h		\
 	$(NULL)

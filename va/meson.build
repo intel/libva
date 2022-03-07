@@ -12,7 +12,6 @@ version_file = configure_file(
 libva_sources = [
   'va.c',
   'va_compat.c',
-  'va_fool.c',
   'va_str.c',
   'va_trace.c',
 ]
@@ -52,7 +51,6 @@ libva_headers_subproject = []
 
 libva_headers_priv = [
   'sysdeps.h',
-  'va_fool.h',
   'va_internal.h',
   'va_trace.h',
 ]

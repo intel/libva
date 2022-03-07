@@ -30,7 +30,6 @@
 #include "va_backend_vpp.h"
 #include "va_internal.h"
 #include "va_trace.h"
-#include "va_fool.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -724,8 +723,6 @@ VAStatus vaInitialize(
 
     va_TraceInit(dpy);
 
-    va_FoolInit(dpy);
-
     va_MessagingInit();
 
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
@@ -799,8 +796,6 @@ VAStatus vaTerminate(
     VA_TRACE_RET(dpy, vaStatus);
 
     va_TraceEnd(dpy);
-
-    va_FoolEnd(dpy);
 
     if (VA_STATUS_SUCCESS == vaStatus)
         pDisplayContext->vaDestroy(pDisplayContext);
@@ -931,7 +926,6 @@ VAStatus vaCreateConfig(
 
     /* record the current entrypoint for further trace/fool determination */
     VA_TRACE_ALL(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
-    VA_FOOL_FUNC(va_FoolCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
     VA_TRACE_RET(dpy, vaStatus);
     return vaStatus;
 }
@@ -1369,8 +1363,6 @@ VAStatus vaCreateBuffer(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    VA_FOOL_FUNC(va_FoolCreateBuffer, dpy, context, type, size, num_elements, data, buf_id);
-
     vaStatus = ctx->vtable->vaCreateBuffer(ctx, context, type, size, num_elements, data, buf_id);
 
     VA_TRACE_LOG(va_TraceCreateBuffer,
@@ -1419,8 +1411,6 @@ VAStatus vaBufferSetNumElements(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
-
     vaStatus = ctx->vtable->vaBufferSetNumElements(ctx, buf_id, num_elements);
     VA_TRACE_RET(dpy, vaStatus);
     return vaStatus;
@@ -1438,8 +1428,6 @@ VAStatus vaMapBuffer(
 
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
-
-    VA_FOOL_FUNC(va_FoolMapBuffer, dpy, buf_id, pbuf);
 
     va_status = ctx->vtable->vaMapBuffer(ctx, buf_id, pbuf);
 
@@ -1459,8 +1447,6 @@ VAStatus vaUnmapBuffer(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
-
     vaStatus = ctx->vtable->vaUnmapBuffer(ctx, buf_id);
     VA_TRACE_RET(dpy, vaStatus);
     return vaStatus;
@@ -1475,8 +1461,6 @@ VAStatus vaDestroyBuffer(
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
-
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
 
     VA_TRACE_LOG(va_TraceDestroyBuffer,
                  dpy, buffer_id);
@@ -1500,8 +1484,6 @@ VAStatus vaBufferInfo(
 
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
-
-    VA_FOOL_FUNC(va_FoolBufferInfo, dpy, buf_id, type, size, num_elements);
 
     vaStatus = ctx->vtable->vaBufferInfo(ctx, buf_id, type, size, num_elements);
     VA_TRACE_RET(dpy, vaStatus);
@@ -1578,7 +1560,6 @@ VAStatus vaBeginPicture(
     ctx = CTX(dpy);
 
     VA_TRACE_ALL(va_TraceBeginPicture, dpy, context, render_target);
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
 
     va_status = ctx->vtable->vaBeginPicture(ctx, context, render_target);
     VA_TRACE_RET(dpy, va_status);
@@ -1600,7 +1581,6 @@ VAStatus vaRenderPicture(
     ctx = CTX(dpy);
 
     VA_TRACE_LOG(va_TraceRenderPicture, dpy, context, buffers, num_buffers);
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
 
     vaStatus = ctx->vtable->vaRenderPicture(ctx, context, buffers, num_buffers);
     VA_TRACE_RET(dpy, vaStatus);
@@ -1618,7 +1598,6 @@ VAStatus vaEndPicture(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    VA_FOOL_FUNC(va_FoolCheckContinuity, dpy);
     VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 0);
     va_status = ctx->vtable->vaEndPicture(ctx, context);
     VA_TRACE_RET(dpy, va_status);
