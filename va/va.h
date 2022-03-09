@@ -1801,6 +1801,64 @@ vaQuerySurfaceAttributes(
     unsigned int       *num_attribs
 );
 
+
+/**
+ * \brief surface format attributes
+ * it is used to describe the additonal capibilities for given surfaces format
+ * supplied specific VA config.
+ */
+typedef enum {
+    /** \brief List of possible DRM format modifiers (pointer, read).
+     *
+     * The value must be a pointer to a VADRMFormatModifierList.the modifiers pointer
+     * should be allocated/destroyed by application.
+     * If modifiers in VADRMFormatModifierList is NULL, driver will return num_modifiers
+     * to indicate the list size. If VADRMFormatModifierList is valid and num_modifiers from
+     * application > 0, the num_modifiers indicate the list size allocated by application,
+     * driver will change the list with recommended opreference order, and set a value to
+     * num_modifiers to indicate the valid modifier. The size from driver should <= num_modifiers
+     * from application and override it.
+     */
+    VASurfaceFormatAttribDRMFormatModifiers = 0,
+}VASurfaceFormatAttribType;
+
+/** \brief Surface format attribute. */
+typedef struct _VASurfaceFormatAttrib {
+    /** \brief Type. */
+    VASurfaceFormatAttribType type;
+    /** \brief Flags. See "Surface attribute flags". */
+    uint32_t             flags;
+    /** \brief Value. See "Surface format attribute types" for the expected types. */
+    VAGenericValue      value;
+} VASurfaceFormatAttrib;
+
+/** \brief retrieve the format attributes for the given config and format FOURCC
+ * sample:
+ * \code
+ * VADRMFormatModifierList drm_list = {0};
+ * vaQuerySurfaceAttributes(dpy, config,surf_attibs, &num_attribs);
+ * for(i = 0; i < num_attribs; i ++){
+ *     if(surf_attibs.type != VASurfaceAttribPixelFormat)
+ *         continue;
+ *     fourcc = surf_attribs.value.i;
+ *     format_attribs[0].type == VASurfaceFormatAttribDRMFormatModifiers;
+ *     format_attribs[0].value.p = &drm_list;
+ *     vaGetSurfaceFormatAttributes(dpy, config, fourcc, format_attribs, 1);
+ *     drm_list.modifier = malloc(sizeof(uint64_t) * drm_list.num_modifiers);
+ *     vaGetSurfaceFormatAttributes(dpy, config, fourcc, format_attribs, 1);
+ *
+ * }
+ * \endcode
+*/
+VAStatus
+vaGetSurfaceFormatAttributes(
+    VADisplay             dpy,
+    VAConfigID            config,
+    uint32_t              format,
+    VASurfaceFormatAttrib *attrib_list,
+    uint32_t              num_attribs
+);
+
 /**
  * \brief Creates an array of surfaces
  *
