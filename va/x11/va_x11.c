@@ -28,7 +28,6 @@
 #include "va_backend.h"
 #include "va_internal.h"
 #include "va_trace.h"
-#include "va_fool.h"
 #include "va_x11.h"
 #include "va_dri2.h"
 #include "va_dricommon.h"
@@ -331,9 +330,6 @@ VAStatus vaPutSurface(
 )
 {
     VADriverContextP ctx;
-
-    if (va_fool_postp)
-        return VA_STATUS_SUCCESS;
 
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
