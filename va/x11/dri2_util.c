@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <assert.h>
+#include <sys/stat.h>
 
 #include <xf86drm.h>
 
@@ -171,6 +172,29 @@ dri2Close(VADriverContextP ctx)
         close(dri_state->base.fd);
 }
 
+int
+va_isRenderNodeFd(int fd)
+{
+    struct stat st;
+    char *name;
+
+    /* Check by device node */
+    if (fstat(fd, &st) == 0)
+        return S_ISCHR(st.st_mode) && (st.st_rdev & 0x80);
+
+    /* Check by device name */
+    name = drmGetDeviceNameFromFd(fd);
+    if (name) {
+        /* drmGetDeviceNameFromFd returns a strdup'ed string */
+        int r = (strncmp(name, "/dev/dri/renderD", 16) == 0);
+        drmFree(name);
+        return r;
+    }
+
+    /* Unrecoverable error */
+    return -1;
+}
+
 Bool
 va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 {
@@ -179,6 +203,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
     int error_base;
     int event_base;
     char *device_name = NULL;
+    int is_render_nodes;
     drm_magic_t magic;
     *driver_name = NULL;
 
@@ -198,16 +223,17 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
 
     dri_state->base.fd = open(device_name, O_RDWR);
 
-    if (dri_state->base.fd < 0)
+    if (dri_state->base.fd < 0 || (is_render_nodes = va_isRenderNodeFd(dri_state->base.fd)) < 0)
         goto err_out;
 
-    if (drmGetMagic(dri_state->base.fd, &magic))
-        goto err_out;
+    if (!is_render_nodes) {
+        if (drmGetMagic(dri_state->base.fd, &magic))
+            goto err_out;
 
-    if (!VA_DRI2Authenticate(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                             magic))
-        goto err_out;
-
+        if (!VA_DRI2Authenticate(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
+                                magic))
+            goto err_out;
+    }
     dri_state->base.auth_type = VA_DRI2;
     dri_state->createDrawable = dri2CreateDrawable;
     dri_state->destroyDrawable = dri2DestroyDrawable;
