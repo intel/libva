@@ -588,7 +588,10 @@ typedef struct  _VAEncPictureParameterBufferAV1
     /** \brief Corresponds to AV1 syntax element of the same name. */
     uint8_t     order_hint;
 
-    uint16_t    reserved16bits0;
+    /** \brief Corresponds to AV1 syntax element of the same name. */
+    uint8_t     refresh_frame_flags;
+
+    uint8_t     reserved8bits1;
 
     /** \brief Suggest which frames to be used as references.
      *  see struct #VARefFrameCtrl for details.
