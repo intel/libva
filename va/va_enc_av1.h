@@ -305,8 +305,14 @@ typedef struct  _VAEncSequenceParameterBufferAV1 {
             uint32_t    enable_cdef                                 : 1;
             /** \brief Corresponds to AV1 syntax element of the same name. */
             uint32_t    enable_restoration                          : 1;
+            /** \brief Sepcify number of bits for every channel(Y, U or V). */
+            uint32_t    bit_depth_minus8                            : 3;
+            /** \brief Corresponds to AV1 syntax element of the same name. */
+            uint32_t    subsampling_x                               : 1;
+            /** \brief Corresponds to AV1 syntax element of the same name. */
+            uint32_t    subsampling_y                               : 1;
             /** \brief Reserved bytes for future use, must be zero. */
-            uint32_t    reserved_bits                               : 18;
+            uint32_t    reserved_bits                               : 13;
         } bits;
         uint32_t value;
     } seq_fields;
