@@ -922,11 +922,13 @@ VAStatus vaCreateConfig(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VVVA(dpy, CREATE_CONFIG, TRACE_BEGIN, profile, entrypoint, num_attribs, attrib_list);
     vaStatus = ctx->vtable->vaCreateConfig(ctx, profile, entrypoint, attrib_list, num_attribs, config_id);
 
     /* record the current entrypoint for further trace/fool determination */
     VA_TRACE_ALL(va_TraceCreateConfig, dpy, profile, entrypoint, attrib_list, num_attribs, config_id);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_PV(dpy, CREATE_CONFIG, TRACE_END, config_id, vaStatus);
     return vaStatus;
 }
 
@@ -941,10 +943,12 @@ VAStatus vaDestroyConfig(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_V(dpy, DESTROY_CONFIG, TRACE_BEGIN, config_id);
     vaStatus = ctx->vtable->vaDestroyConfig(ctx, config_id);
 
     VA_TRACE_ALL(va_TraceDestroyConfig, dpy, config_id);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_V(dpy, DESTROY_CONFIG, TRACE_END, vaStatus);
 
     return vaStatus;
 }
@@ -1139,6 +1143,7 @@ vaQuerySurfaceAttributes(
     if (!ctx)
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
+    VA_TRACE_V(dpy, QUERY_SURFACE_ATTR, TRACE_BEGIN, config);
     if (!ctx->vtable->vaQuerySurfaceAttributes)
         vaStatus = va_impl_query_surface_attributes(ctx, config,
                    attrib_list, num_attribs);
@@ -1148,6 +1153,7 @@ vaQuerySurfaceAttributes(
 
     VA_TRACE_LOG(va_TraceQuerySurfaceAttributes, dpy, config, attrib_list, num_attribs);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_PA(dpy, QUERY_SURFACE_ATTR, TRACE_END, num_attribs, attrib_list);
 
     return vaStatus;
 }
@@ -1172,6 +1178,7 @@ vaCreateSurfaces(
     if (!ctx)
         return VA_STATUS_ERROR_INVALID_DISPLAY;
 
+    VA_TRACE_VVVVA(dpy, CREATE_SURFACE, TRACE_BEGIN, width, height, format, num_attribs, attrib_list);
     if (ctx->vtable->vaCreateSurfaces2)
         vaStatus = ctx->vtable->vaCreateSurfaces2(ctx, format, width, height,
                    surfaces, num_surfaces,
@@ -1185,6 +1192,7 @@ vaCreateSurfaces(
                  dpy, width, height, format, num_surfaces, surfaces,
                  attrib_list, num_attribs);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_VVA(dpy, CREATE_SURFACE, TRACE_END, vaStatus, num_surfaces, surfaces);
 
     return vaStatus;
 }
@@ -1202,11 +1210,13 @@ VAStatus vaDestroySurfaces(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VA(dpy, DESTROY_SURFACE, TRACE_BEGIN, num_surfaces, surface_list);
     VA_TRACE_LOG(va_TraceDestroySurfaces,
                  dpy, surface_list, num_surfaces);
 
     vaStatus = ctx->vtable->vaDestroySurfaces(ctx, surface_list, num_surfaces);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_V(dpy, DESTROY_SURFACE, TRACE_END, vaStatus);
 
     return vaStatus;
 }
@@ -1228,12 +1238,14 @@ VAStatus vaCreateContext(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VVVVVA(dpy, CREATE_CONTEXT, TRACE_BEGIN, config_id, picture_width, picture_height, flag, num_render_targets, render_targets);
     vaStatus = ctx->vtable->vaCreateContext(ctx, config_id, picture_width, picture_height,
                                             flag, render_targets, num_render_targets, context);
 
     /* keep current encode/decode resoluton */
     VA_TRACE_ALL(va_TraceCreateContext, dpy, config_id, picture_width, picture_height, flag, render_targets, num_render_targets, context);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_PV(dpy, CREATE_CONTEXT, TRACE_END, context, vaStatus);
 
     return vaStatus;
 }
@@ -1249,10 +1261,12 @@ VAStatus vaDestroyContext(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_V(dpy, DESTROY_CONTEXT, TRACE_BEGIN, context);
     vaStatus = ctx->vtable->vaDestroyContext(ctx, context);
 
     VA_TRACE_ALL(va_TraceDestroyContext, dpy, context);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_V(dpy, DESTROY_CONTEXT, TRACE_END, vaStatus);
 
     return vaStatus;
 }
@@ -1363,12 +1377,14 @@ VAStatus vaCreateBuffer(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VVVV(dpy, CREATE_BUFFER, TRACE_BEGIN, context, type, size, num_elements);
     vaStatus = ctx->vtable->vaCreateBuffer(ctx, context, type, size, num_elements, data, buf_id);
 
     VA_TRACE_LOG(va_TraceCreateBuffer,
                  dpy, context, type, size, num_elements, data, buf_id);
 
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_PV(dpy, CREATE_BUFFER, TRACE_END, buf_id, vaStatus);
     return vaStatus;
 }
 
@@ -1462,11 +1478,13 @@ VAStatus vaDestroyBuffer(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_V(dpy, DESTROY_BUFFER, TRACE_BEGIN, buffer_id);
     VA_TRACE_LOG(va_TraceDestroyBuffer,
                  dpy, buffer_id);
 
     vaStatus = ctx->vtable->vaDestroyBuffer(ctx, buffer_id);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_V(dpy, DESTROY_BUFFER, TRACE_END, vaStatus);
     return vaStatus;
 }
 
@@ -1559,10 +1577,12 @@ VAStatus vaBeginPicture(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VV(dpy, BEGIN_PICTURE, TRACE_BEGIN, context, render_target);
     VA_TRACE_ALL(va_TraceBeginPicture, dpy, context, render_target);
 
     va_status = ctx->vtable->vaBeginPicture(ctx, context, render_target);
     VA_TRACE_RET(dpy, va_status);
+    VA_TRACE_V(dpy, BEGIN_PICTURE, TRACE_END, va_status);
 
     return va_status;
 }
@@ -1580,10 +1600,13 @@ VAStatus vaRenderPicture(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VVA(dpy, RENDER_PICTURE, TRACE_BEGIN, context, num_buffers, buffers);
+    VA_TRACE_BUFFERS(dpy, context, num_buffers, buffers);
     VA_TRACE_LOG(va_TraceRenderPicture, dpy, context, buffers, num_buffers);
 
     vaStatus = ctx->vtable->vaRenderPicture(ctx, context, buffers, num_buffers);
     VA_TRACE_RET(dpy, vaStatus);
+    VA_TRACE_V(dpy, RENDER_PICTURE, TRACE_END, vaStatus);
     return vaStatus;
 }
 
@@ -1598,11 +1621,13 @@ VAStatus vaEndPicture(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_V(dpy, END_PICTURE, TRACE_BEGIN, context);
     VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 0);
     va_status = ctx->vtable->vaEndPicture(ctx, context);
     VA_TRACE_RET(dpy, va_status);
     /* dump surface content */
     VA_TRACE_ALL(va_TraceEndPictureExt, dpy, context, 1);
+    VA_TRACE_V(dpy, END_PICTURE, TRACE_END, va_status);
 
     return va_status;
 }
@@ -1618,9 +1643,11 @@ VAStatus vaSyncSurface(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_V(dpy, SYNC_SURFACE, TRACE_BEGIN, render_target);
     va_status = ctx->vtable->vaSyncSurface(ctx, render_target);
     VA_TRACE_LOG(va_TraceSyncSurface, dpy, render_target);
     VA_TRACE_RET(dpy, va_status);
+    VA_TRACE_V(dpy, SYNC_SURFACE, TRACE_END, va_status);
 
     return va_status;
 }
@@ -1637,12 +1664,14 @@ VAStatus vaSyncSurface2(
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
+    VA_TRACE_VV(dpy, SYNC_SURFACE2, TRACE_BEGIN, surface, timeout_ns);
     if (ctx->vtable->vaSyncSurface2)
         va_status = ctx->vtable->vaSyncSurface2(ctx, surface, timeout_ns);
     else
         va_status = VA_STATUS_ERROR_UNIMPLEMENTED;
     VA_TRACE_LOG(va_TraceSyncSurface2, dpy, surface, timeout_ns);
     VA_TRACE_RET(dpy, va_status);
+    VA_TRACE_V(dpy, SYNC_SURFACE2, TRACE_END, va_status);
 
     return va_status;
 }
