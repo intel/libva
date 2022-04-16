@@ -2405,3 +2405,31 @@ VAStatus vaProtectedSessionExecute(
     return status;
 }
 
+VAStatus
+vaGetSurfaceFormatAttributes(
+    VADisplay             dpy,
+    VAConfigID            config,
+    uint32_t              format,
+    VASurfaceFormatAttrib *attrib_list,
+    uint32_t              num_attribs
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if (!ctx)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
+
+    if (ctx->vtable->vaGetSurfaceFormatAttributes)
+        vaStatus = ctx->vtable->vaGetSurfaceFormatAttributes(ctx, config, format,
+                   attrib_list, num_attribs);
+    else
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED;
+
+    VA_TRACE_RET(dpy, vaStatus);
+
+    return vaStatus;
+}
+
