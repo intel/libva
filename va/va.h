@@ -1668,11 +1668,17 @@ typedef enum {
     /** \brief Surface usage hint, gives the driver a hint of intended usage
      *  to optimize allocation (e.g. tiling) (int, read/write). */
     VASurfaceAttribUsageHint,
-    /** \brief List of possible DRM format modifiers (pointer, write).
+    /** \brief List of possible DRM format modifiers (pointer, read/write).
      *
-     * The value must be a pointer to a VADRMFormatModifierList. This can only
+     * Write:The value must be a pointer to a VADRMFormatModifierList. This can only
      * be used when allocating a new buffer, it's invalid to use this attribute
      * when importing an existing buffer.
+     * 
+     * Read:the modifier list should be allocated by application. If the num_modifiers
+     * = 0 or modifiers = NULL, back end driver will set a valid value of num_modifiers in
+     * VADRMFormatModifierList only. If the modifiers is valid pointer and num_modifiers
+     * > 0, driver will provide a list with preference order, and return the real num_modifiers
+     * which is <= the origin num_modifiers from application.
      */
     VASurfaceAttribDRMFormatModifiers,
     /** \brief Number of surface attributes. */
