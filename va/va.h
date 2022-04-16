@@ -1807,6 +1807,20 @@ vaQuerySurfaceAttributes(
     unsigned int       *num_attribs
 );
 
+/* \brief Get designated surface attributes for the supplied config.
+ * backend driver only provide the attributes of the specified VASurfaceAttribType
+ * in the attrib_list, num_attribs is the size of attrib_list
+ */
+
+VAStatus
+vaGetSurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib     *attrib_list,
+    unsigned int        num_attribs
+);
+
+
 /**
  * \brief Creates an array of surfaces
  *
