@@ -2728,6 +2728,8 @@ static void va_TraceVAEncSequenceParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tpcm_enabled_flag = %d\n", p->seq_fields.bits.pcm_enabled_flag);
     va_TraceMsg(trace_ctx, "\tpcm_loop_filter_disabled_flag = %d\n", p->seq_fields.bits.pcm_loop_filter_disabled_flag);
     va_TraceMsg(trace_ctx, "\tsps_temporal_mvp_enabled_flag = %d\n", p->seq_fields.bits.sps_temporal_mvp_enabled_flag);
+    va_TraceMsg(trace_ctx, "\tlow_delay_seq = %d\n", p->seq_fields.bits.low_delay_seq);
+    va_TraceMsg(trace_ctx, "\thierachical_flag = %d\n", p->seq_fields.bits.hierachical_flag);
     va_TraceMsg(trace_ctx, "\treserved_bits = %d\n", p->seq_fields.bits.reserved_bits);
     va_TraceMsg(trace_ctx, "\tlog2_min_luma_coding_block_size_minus3 = %d\n", p->log2_min_luma_coding_block_size_minus3);
     va_TraceMsg(trace_ctx, "\tlog2_diff_max_min_luma_coding_block_size = %d\n", p->log2_diff_max_min_luma_coding_block_size);

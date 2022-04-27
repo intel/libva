@@ -214,21 +214,46 @@ AC_SEARCH_LIBS([dlopen], [dl], [], [
   AC_MSG_ERROR([unable to find the dlopen() function])
 ])
 
-# Check for -fstack-protector
-ssp_cc=yes
+# Check for -fstack-protector and -fstack-protector-strong
+SSP_CC_FLAG=""
 if test "X$CC-cc" != "X"; then
-    AC_MSG_CHECKING([whether ${CC-cc} accepts -fstack-protector])
+    # Do not duplicate options in CFLAGS
+    ssp_sp_set=no
+    ssp_sps_set=no
+    for ssp_x in $CFLAGS; do
+        case "X$ssp_x" in
+            X-fstack-protector) ssp_sp_set=yes ;;
+            X-fstack-protector-strong) ssp_sps_set=yes ;;
+        esac
+    done
     ssp_old_cflags="$CFLAGS"
-    CFLAGS="$CFLAGS -fstack-protector"
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[alloca(100);]])], [], [ssp_cc=no])
+    # Prefer -fstack-protector-strong over -fstack-protector
+    if test "X$ssp_sps_set" = "Xno"; then
+        SSP_CC_FLAG="-fstack-protector-strong"
+    fi
+    AC_MSG_CHECKING([whether ${CC-cc} accepts -fstack-protector-strong])
+    CFLAGS="$ssp_old_cflags $SSP_CC_FLAG"
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[alloca(100);]])], [ssp_cc=yes], [ssp_cc=no])
     AC_MSG_RESULT([$ssp_cc])
     if test "X$ssp_cc" = "Xno"; then
-        CFLAGS="$ssp_old_cflags"
-    else
+        # Fallback to -fstack-protector
+        if test "X$ssp_sp_set" = "Xno"; then
+            SSP_CC_FLAG="-fstack-protector"
+        fi
+        AC_MSG_CHECKING([whether ${CC-cc} accepts -fstack-protector])
+        CFLAGS="$ssp_old_cflags $SSP_CC_FLAG"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[alloca(100);]])], [ssp_cc=yes], [ssp_cc=no])
+        AC_MSG_RESULT([$ssp_cc])
+        if test "X$ssp_cc" = "Xno"; then
+            SSP_CC_FLAG=""
+        fi
+    fi
+    CFLAGS="$ssp_old_cflags $SSP_CC_FLAG"
+    if test "X$ssp_cc" = "Xyes"; then
         AC_DEFINE([ENABLE_SSP_CC], 1, [Define if SSP C support is enabled.])
     fi
 fi
-AM_CONDITIONAL(USE_SSP, test "$ssp_cc" = "yes")
+AC_SUBST(SSP_CC_FLAG)
 
 # Check for DRM (mandatory)
 LIBDRM_VERSION=libdrm_version
