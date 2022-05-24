@@ -5069,6 +5069,11 @@ typedef enum {
      * modes of vaCopy
      */
     VADisplayAttribCopy                 = 20,
+    /*
+     * HW attribute. read only. retrieve the device information from backend driver
+     * the value should be combined with vendor ID << 16 | device ID
+     */
+    VADisplayPCIID                      = 21,
 } VADisplayAttribType;
 
 /* flags for VADisplayAttribute */
