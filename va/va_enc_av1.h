@@ -249,10 +249,7 @@ typedef struct  _VAEncSequenceParameterBufferAV1 {
      */
     uint8_t     seq_tier;
 
-    /** \brief Indicates whether or not the encoding is in dyadic hierarchical GOP structure.
-     *  value range [0..1].
-     */
-    uint8_t    HierarchicalFlag; 
+    uint8_t     reserved8b;
 
     /** \brief Period between intra_only frames. */
     uint32_t    intra_period;
@@ -584,11 +581,7 @@ typedef struct  _VAEncPictureParameterBufferAV1
      */
     uint8_t     ref_frame_idx[7];
 
-    /** \brief When hierarchical_level_plus1 > 0, hierarchical_level_plus1-1 indicates
-     *  the current frame's level. If VAEncMiscParameterTemporalLayerStructure
-     *  is valid (number_of_layers >0), hierarchical_level_plus1 shouldn't larger than number_of_layers.
-     */
-    uint8_t     hierarchical_level_plus1;
+    uint8_t     reserved8bits0;
 
     /** \brief primary reference frame.
      *  Index into reference_frames[]
