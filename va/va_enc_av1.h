@@ -249,7 +249,10 @@ typedef struct  _VAEncSequenceParameterBufferAV1 {
      */
     uint8_t     seq_tier;
 
-    uint8_t     reserved8b;
+    /** \brief Indicates whether or not the encoding is in dyadic hierarchical GOP structure.
+     *  value range [0..1].
+     */
+    uint8_t     hierarchical_flag;
 
     /** \brief Period between intra_only frames. */
     uint32_t    intra_period;
@@ -579,7 +582,11 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
      */
     uint8_t     ref_frame_idx[7];
 
-    uint8_t     reserved8bits0;
+    /** \brief When hierarchical_level_plus1 > 0, hierarchical_level_plus1-1 indicates
+     *  the current frame's level. If VAEncMiscParameterTemporalLayerStructure
+     *  is valid (number_of_layers >0), hierarchical_level_plus1 shouldn't larger than number_of_layers.
+     */
+    uint8_t     hierarchical_level_plus1;
 
     /** \brief primary reference frame.
      *  Index into reference_frames[]
@@ -595,6 +602,7 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
     /** \brief Corresponds to AV1 syntax element of the same name. */
     uint8_t     refresh_frame_flags;
 
+    /** \brief Reserved bytes for future use, must be zero. */
     uint8_t     reserved8bits1;
 
     /** \brief Suggest which frames to be used as references.
@@ -741,6 +749,7 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
         uint16_t    value;
     } qmatrix_flags;
 
+    /** \brief Reserved bytes for future use, must be zero. */
     uint16_t reserved16bits1;
 
     union {
@@ -797,6 +806,7 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
     /** \brief Number of tile rows. */
     uint8_t     tile_rows;
 
+    /** \brief Reserved bytes for future use, must be zero. */
     uint16_t    reserved16bits2;
 
     /** \brief The last tile column or row size needs to be derived. */
@@ -949,6 +959,7 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
      */
     uint8_t     number_skip_frames;
 
+    /** \brief Reserved bytes for future use, must be zero. */
     uint16_t    reserved16bits3;
 
     /** \brief Indicates the application forced frame size change in bytes.
