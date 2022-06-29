@@ -1,4 +1,3 @@
-[![Stories in Ready](https://badge.waffle.io/intel/libva.png?label=ready&title=Ready)](http://waffle.io/intel/libva)
 [![Build Status](https://travis-ci.org/intel/libva.svg?branch=master)](https://travis-ci.org/intel/libva)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/11605/badge.svg)](https://scan.coverity.com/projects/intel-libva)
 
@@ -9,7 +8,7 @@ Libva is an implementation for VA-API (Video Acceleration API)
 VA-API is an open-source library and API specification, which
 provides access to graphics hardware acceleration capabilities
 for video processing. It consists of a main library and
-driver-specific acceleration backends for each supported hardware 
+driver-specific acceleration backends for each supported hardware
 vendor.
 
 If you would like to contribute to libva, check our [Contributing
