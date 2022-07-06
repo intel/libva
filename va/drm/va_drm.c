@@ -97,9 +97,9 @@ vaGetDisplayDRM(int fd)
     VADisplayContextP pDisplayContext = NULL;
     VADriverContextP  pDriverContext  = NULL;
     struct drm_state *drm_state       = NULL;
-    int is_render_nodes;
+    int node_type;
 
-    if (fd < 0 || (is_render_nodes = VA_DRM_IsRenderNodeFd(fd)) < 0)
+    if (fd < 0 || (node_type = drmGetNodeTypeFromFd(fd)) < 0)
         return NULL;
 
     /* Create new entry */
@@ -123,7 +123,7 @@ vaGetDisplayDRM(int fd)
         goto error;
 
     pDriverContext->native_dpy   = NULL;
-    pDriverContext->display_type = is_render_nodes ?
+    pDriverContext->display_type = node_type == DRM_NODE_RENDER ?
                                    VA_DISPLAY_DRM_RENDERNODES : VA_DISPLAY_DRM;
     pDriverContext->drm_state    = drm_state;
 
