@@ -66,16 +66,6 @@ DLL_HIDDEN
 VAStatus
 VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate_index);
 
-/**
- * \brief Checks whether the file descriptor is a DRM Render-Nodes one
- *
- * This functions checks whether the supplied file descriptor @fd
- * falls into the set of DRM Render-Nodes.
- */
-DLL_HIDDEN
-int
-VA_DRM_IsRenderNodeFd(int fd);
-
 /**@}*/
 
 #ifdef __cplusplus
