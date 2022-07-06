@@ -30,6 +30,8 @@ AM_CPPFLAGS = \
 source_c = \
 	dri2_util.c		\
 	va_dri2.c		\
+	va_dri3.c		\
+	../drm/va_drm_utils.c	\
 	va_dricommon.c		\
 	va_fglrx.c		\
 	va_nvctrl.c		\
@@ -44,11 +46,12 @@ source_h = \
 source_h_priv = \
 	va_dri2str.h		\
 	va_dri2tokens.h		\
+	va_dri3.h		\
 	va_fglrx.h		\
 	va_nvctrl.h		\
 	$(NULL)
 
-noinst_LTLIBRARIES		= libva_x11.la	
+noinst_LTLIBRARIES		= libva_x11.la
 libva_x11includedir		= ${includedir}/va
 libva_x11include_HEADERS	= $(source_h)
 libva_x11_la_SOURCES		= $(source_c)

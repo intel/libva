@@ -30,6 +30,7 @@
 #include "va_trace.h"
 #include "va_x11.h"
 #include "va_dri2.h"
+#include "va_dri3.h"
 #include "va_dricommon.h"
 #include "va_nvctrl.h"
 #include "va_fglrx.h"
@@ -80,6 +81,9 @@ static void va_DisplayContextDestroy(
 
     if (dri_state && dri_state->close)
         dri_state->close(ctx);
+
+    if (dri_state->base.fd != -1)
+        close(dri_state->base.fd);
 
     free(pDisplayContext->pDriverContext->drm_state);
     free(pDisplayContext->pDriverContext);
@@ -219,7 +223,9 @@ static VAStatus va_DisplayContextGetDriverName(
     else
         return VA_STATUS_ERROR_UNKNOWN;
 
-    vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
+    vaStatus = va_DRI3_GetDriverName(pDisplayContext, driver_name, candidate_index);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
@@ -235,7 +241,9 @@ static VAStatus va_DisplayContextGetNumCandidates(
 {
     VAStatus vaStatus;
 
-    vaStatus = va_DRI2_GetNumCandidates(pDisplayContext, num_candidates);
+    vaStatus = va_DRI3_GetNumCandidates(pDisplayContext, num_candidates);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_DRI2_GetNumCandidates(pDisplayContext, num_candidates);
 
     /* A call to va_DisplayContextGetDriverName will fallback to other
      * methods (i.e. NVCTRL, FGLRX) when DRI2 is unsuccessful.  All of those
