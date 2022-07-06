@@ -41,7 +41,6 @@ IGNORED_WARNNING = \
 LOCAL_SRC_FILES := \
 	va.c \
 	va_trace.c \
-	va_fool.c  \
 	va_str.c
 
 LOCAL_CFLAGS_32 += \

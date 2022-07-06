@@ -28,7 +28,6 @@
 #include "va_backend.h"
 #include "va_internal.h"
 #include "va_trace.h"
-#include "va_fool.h"
 #include "va_android.h"
 #include "va_drmcommon.h"
 #include "va_drm_utils.h"
