@@ -43,33 +43,6 @@
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/dri/renderD128"
 
-static int open_device(char *dev_name)
-{
-    struct stat st;
-    int fd;
-
-    if (-1 == stat(dev_name, &st)) {
-        printf("Cannot identify '%s': %d, %s\n",
-               dev_name, errno, strerror(errno));
-        return -1;
-    }
-
-    if (!S_ISCHR(st.st_mode)) {
-        printf("%s is no device\n", dev_name);
-        return -1;
-    }
-
-    fd = open(dev_name, O_RDWR);
-
-    if (-1 == fd) {
-        fprintf(stderr, "Cannot open '%s': %d, %s\n",
-                dev_name, errno, strerror(errno));
-        return -1;
-    }
-
-    return fd;
-}
-
 static int va_DisplayContextIsValid(
     VADisplayContextP pDisplayContext
 )
@@ -105,10 +78,11 @@ static VAStatus va_DisplayContextGetNumCandidates(
     struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
 
     memset(drm_state, 0, sizeof(*drm_state));
-    drm_state->fd = open_device((char *)DEVICE_NAME);
+    drm_state->fd = open(DEVICE_NAME, O_RDWR);
 
     if (drm_state->fd < 0) {
-        fprintf(stderr, "can't open DRM devices\n");
+        fprintf(stderr, "Cannot open DRM device '%s': %d, %s\n",
+                DEVICE_NAME, errno, strerror(errno));
         return VA_STATUS_ERROR_UNKNOWN;
     }
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
