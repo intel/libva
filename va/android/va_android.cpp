@@ -78,7 +78,7 @@ static VAStatus va_DisplayContextGetNumCandidates(
     struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
 
     memset(drm_state, 0, sizeof(*drm_state));
-    drm_state->fd = open(DEVICE_NAME, O_RDWR);
+    drm_state->fd = open(DEVICE_NAME, O_RDWR | O_CLOEXEC);
 
     if (drm_state->fd < 0) {
         fprintf(stderr, "Cannot open DRM device '%s': %d, %s\n",
