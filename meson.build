@@ -86,6 +86,11 @@ if get_option('with_x11') != 'no'
   xfixes_dep = dependency('xfixes', required : get_option('with_x11') == 'yes')
 
   WITH_X11 = (x11_dep.found() and xext_dep.found() and xfixes_dep.found())
+
+  x11_xcb_dep = dependency('x11-xcb', required : get_option('with_x11') == 'yes')
+  xcb_dep = dependency('xcb', required : get_option('with_x11') == 'yes')
+  xcb_dri3_dep = dependency('xcb-dri3', required : get_option('with_x11') == 'yes')
+  WITH_X11 = (WITH_X11 and x11_xcb_dep.found() and xcb_dep.found() and xcb_dri3_dep.found())
 endif
 
 if not WITH_X11 and get_option('with_glx') == 'yes'

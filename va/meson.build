@@ -133,6 +133,8 @@ if WITH_X11
   libva_x11_sources = [
     'x11/dri2_util.c',
     'x11/va_dri2.c',
+    'x11/va_dri3.c',
+    'drm/va_drm_utils.c',
     'x11/va_dricommon.c',
     'x11/va_fglrx.c',
     'x11/va_nvctrl.c',
@@ -151,13 +153,14 @@ if WITH_X11
   libva_x11_headers_priv = [
     'x11/va_dri2str.h',
     'x11/va_dri2tokens.h',
+    'x11/va_dri3.h',
     'x11/va_fglrx.h',
     'x11/va_nvctrl.h',
   ]
 
   install_headers(libva_x11_headers, subdir : 'va')
 
-  deps = [ libdrm_dep, x11_dep, xext_dep, xfixes_dep, libva_dep ]
+  deps = [ libdrm_dep, x11_dep, xext_dep, xfixes_dep, x11_xcb_dep, xcb_dep, xcb_dri3_dep, libva_dep ]
 
   libva_x11 = shared_library(
     'va-x11',
