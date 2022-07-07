@@ -101,9 +101,10 @@ if WITH_DRM
   deps = [ libdrm_dep ]
 
   libva_drm_args = []
-  if get_option('with_x11') != 'no' and x11_dep.found()
+  if WITH_X11
     libva_drm_sources += [ 'drm/va_drm_auth_x11.c' ]
     libva_drm_args += [
+      '-DHAVE_VA_X11',
       '-DLIBVA_MAJOR_VERSION=@0@'.format(libva_major_version)
     ]
     deps += [ x11_dep ]
