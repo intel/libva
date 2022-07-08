@@ -39,9 +39,6 @@ static const struct driver_name_map g_driver_name_map[] = {
     { "i915",       "iHD"    }, // Intel Media driver
     { "i915",       "i965"   }, // Intel OTC GenX driver
     { "pvrsrvkm",   "pvr"    }, // Intel UMG PVR driver
-    { "emgd",       "emgd"   }, // Intel ECG PVR driver
-    { "hybrid",     "hybrid" }, // Intel OTC Hybrid driver
-    { "nouveau",    "nouveau"  }, // Mesa Gallium driver
     { "radeon",     "r600"     }, // Mesa Gallium driver
     { "amdgpu",     "radeonsi" }, // Mesa Gallium driver
     { "nvidia-drm", "nvidia"   }, // NVIDIA driver
