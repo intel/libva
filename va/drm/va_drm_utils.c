@@ -32,21 +32,20 @@
 
 struct driver_name_map {
     const char *key;
-    int         key_len;
     const char *name;
 };
 
 static const struct driver_name_map g_driver_name_map[] = {
-    { "i915",       4, "iHD"    }, // Intel Media driver
-    { "i915",       4, "i965"   }, // Intel OTC GenX driver
-    { "pvrsrvkm",   8, "pvr"    }, // Intel UMG PVR driver
-    { "emgd",       4, "emgd"   }, // Intel ECG PVR driver
-    { "hybrid",     6, "hybrid" }, // Intel OTC Hybrid driver
-    { "nouveau",    7, "nouveau"  }, // Mesa Gallium driver
-    { "radeon",     6, "r600"     }, // Mesa Gallium driver
-    { "amdgpu",     6, "radeonsi" }, // Mesa Gallium driver
-    { "nvidia-drm",10, "nvidia"   }, // NVIDIA driver
-    { NULL,         0, NULL }
+    { "i915",       "iHD"    }, // Intel Media driver
+    { "i915",       "i965"   }, // Intel OTC GenX driver
+    { "pvrsrvkm",   "pvr"    }, // Intel UMG PVR driver
+    { "emgd",       "emgd"   }, // Intel ECG PVR driver
+    { "hybrid",     "hybrid" }, // Intel OTC Hybrid driver
+    { "nouveau",    "nouveau"  }, // Mesa Gallium driver
+    { "radeon",     "r600"     }, // Mesa Gallium driver
+    { "amdgpu",     "radeonsi" }, // Mesa Gallium driver
+    { "nvidia-drm", "nvidia"   }, // NVIDIA driver
+    { NULL,         NULL }
 };
 
 /* Returns the VA driver candidate num for the active display*/
@@ -63,8 +62,7 @@ VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates)
     if (!drm_version)
         return VA_STATUS_ERROR_UNKNOWN;
     for (m = g_driver_name_map; m->key != NULL; m++) {
-        if (drm_version->name_len >= m->key_len &&
-            strncmp(drm_version->name, m->key, m->key_len) == 0) {
+        if (strcmp(m->key, drm_version->name) == 0) {
             count ++;
         }
     }
@@ -93,8 +91,7 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate
         return VA_STATUS_ERROR_UNKNOWN;
 
     for (m = g_driver_name_map; m->key != NULL; m++) {
-        if (drm_version->name_len >= m->key_len &&
-            strncmp(drm_version->name, m->key, m->key_len) == 0) {
+        if (strcmp(m->key, drm_version->name) == 0) {
             if (current_index == candidate_index) {
                 break;
             }
