@@ -45,17 +45,16 @@
 
 struct driver_name_map {
     const char *key;
-    int         key_len;
     const char *name;
 };
 
 static const struct driver_name_map g_dri2_driver_name_map[] = {
-    { "i965",       4, "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
-    { "i965",       4, "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
-    { "iris",       4, "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
-    { "iris",       4, "i965"   }, // Intel i965 VAAPI driver with iris DRI driver
-    { "crocus",     6, "i965"   }, // Intel i965 VAAPI driver with crocus DRI driver
-    { NULL,         0, NULL }
+    { "i965",       "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
+    { "i965",       "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
+    { "iris",       "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
+    { "iris",       "i965"   }, // Intel i965 VAAPI driver with iris DRI driver
+    { "crocus",     "i965"   }, // Intel i965 VAAPI driver with crocus DRI driver
+    { NULL,         NULL }
 };
 
 static int va_DisplayContextIsValid(
@@ -102,8 +101,7 @@ static VAStatus va_DRI2_GetNumCandidates(
         return VA_STATUS_ERROR_UNKNOWN;
 
     for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
-        if (strlen(driver_name) >= m->key_len &&
-            strncmp(driver_name, m->key, m->key_len) == 0) {
+        if (strcmp(m->key, driver_name) == 0) {
             (*num_candidates)++;
         }
     }
@@ -136,8 +134,7 @@ static VAStatus va_DRI2_GetDriverName(
         return VA_STATUS_ERROR_UNKNOWN;
 
     for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
-        if (strlen(*driver_name_ptr) >= m->key_len &&
-            strncmp(*driver_name_ptr, m->key, m->key_len) == 0) {
+        if (strcmp(m->key, *driver_name_ptr) == 0) {
             if (current_index == candidate_index) {
                 break;
             }
