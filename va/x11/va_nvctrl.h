@@ -24,6 +24,8 @@
 #ifndef VA_NVCTRLLIB_H
 #define VA_NVCTRLLIB_H
 
+#ifdef HAVE_NVCTRL
+
 #include <X11/Xlib.h>
 #include "va_backend.h"
 
@@ -33,5 +35,7 @@ VAStatus va_NVCTRL_GetDriverName(
     char **driver_name,
     int candidate_index
 );
+
+#endif
 
 #endif /* VA_NVCTRLLIB_H */

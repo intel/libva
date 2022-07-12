@@ -23,6 +23,9 @@
 
 #define _GNU_SOURCE 1
 #include "sysdeps.h"
+
+#ifdef HAVE_NVCTRL
+
 #include <string.h>
 
 #define NEED_REPLIES
@@ -429,3 +432,5 @@ VAStatus va_NVCTRL_GetDriverName(
 
     return VA_STATUS_SUCCESS;
 }
+
+#endif

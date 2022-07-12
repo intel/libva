@@ -25,6 +25,8 @@
 #ifndef VA_FGLRX_H
 #define VA_FGLRX_H
 
+#ifdef HAVE_FGLRX
+
 #include <X11/Xlib.h>
 #include "va_backend.h"
 
@@ -34,5 +36,7 @@ VAStatus va_FGLRX_GetDriverName(
     char **driver_name,
     int candidate_index
 );
+
+#endif
 
 #endif /* VA_FGLRX_H */
