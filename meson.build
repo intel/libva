@@ -75,7 +75,12 @@ configinc = include_directories('.')
 cc = meson.get_compiler('c')
 dl_dep = cc.find_library('dl', required : false)
 
+backends = ''
 WITH_DRM = (host_machine.system() != 'windows')
+if WITH_DRM
+  backends += ' drm'
+endif
+
 # NOTE: libdrm is required by all non-win32 backends x11 via dri3, glx via x11,
 # wayland via wl_drm and drm. All of these use va_drm_util.c which need libdrm.
 libdrm_dep = dependency('libdrm', version : '>= 2.4.60', required : (host_machine.system() != 'windows'))
@@ -94,6 +99,9 @@ if not get_option('with_x11').disabled()
   foreach d : x11_deps
     WITH_X11 = WITH_X11 and d.found()
   endforeach
+  if WITH_X11
+    backends += ' x11'
+  endif
 endif
 
 if not WITH_X11 and get_option('with_glx').enabled()
@@ -104,6 +112,9 @@ WITH_GLX = false
 if WITH_X11 and not get_option('with_glx').disabled()
   gl_dep = dependency('gl', required : get_option('with_glx'))
   WITH_GLX = gl_dep.found()
+  if WITH_GLX
+    backends += ' glx'
+  endif
 endif
 
 WITH_WAYLAND = false
@@ -117,12 +128,18 @@ if not get_option('with_wayland').disabled()
     wl_scanner = find_program(wayland_scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))
   endif
   WITH_WAYLAND = wayland_dep.found() and wayland_scanner_dep.found()
+  if WITH_WAYLAND
+    backends += ' wayland'
+  endif
 endif
 
 WITH_WIN32 = false
 libwin32_dep = []
 if not get_option('with_win32').disabled()
   WITH_WIN32 = (host_machine.system() == 'windows')
+  if WITH_WIN32
+    backends += ' win32'
+  endif
 endif
 
 if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND and not WITH_WIN32)
@@ -148,3 +165,10 @@ doxygen = find_program('doxygen', required : get_option('enable_docs'))
 if get_option('enable_docs')
   subdir('doc')
 endif
+
+summary({
+  'Installation prefix' : get_option('prefix'),
+  'Default driver path' : driverdir,
+  'Extra window systems' : backends,
+  'Build documentation' : get_option('enable_docs'),
+}, bool_yn : true)
