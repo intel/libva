@@ -154,6 +154,21 @@ AC_ARG_ENABLE([va-messaging],
                     [build with va info and error messaging @<:@default=yes@:>@])],
     [], [enable_va_messaging="yes"])
 
+AC_ARG_WITH(legacy,
+    [AC_HELP_STRING([--with-legacy=[[components]]],
+                    [build with legacy components @<:@default=emgd,nvctrl,fglrx@:>@])],
+    [], [with_legacy="emgd,nvctrl,fglrx"])
+
+if test "$with_legacy" = *emgd*; then
+    AC_DEFINE([HAVE_EMGD], [1], [Defined to 1 if EMGD is built])
+fi
+if test "$with_legacy" = *nvctrl*; then
+    AC_DEFINE([HAVE_NVCTRL], [1], [Defined to 1 if NVCTRL is built])
+fi
+if test "$with_legacy" = *fglrx*; then
+    AC_DEFINE([HAVE_FGLRX], [1], [Defined to 1 if FGLRX is built])
+fi
+
 AC_ARG_WITH(drivers-path,
     [AC_HELP_STRING([--with-drivers-path=[[path]]],
                     [drivers path])],
@@ -359,6 +374,7 @@ echo
 echo Installation prefix .............. : $prefix
 echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
+echo Build with legacy ................ : $with_legacy
 echo Build documentation .............. : $enable_docs
 echo Build with messaging ............. : $enable_va_messaging
 echo
