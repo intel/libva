@@ -340,7 +340,7 @@ static Bool XNVCTRLQueryStringAttribute(
 }
 
 
-Bool VA_NVCTRLQueryDirectRenderingCapable(Display *dpy, int screen,
+static Bool VA_NVCTRLQueryDirectRenderingCapable(Display *dpy, int screen,
         Bool *isCapable)
 {
     int event_base;
@@ -358,9 +358,9 @@ Bool VA_NVCTRLQueryDirectRenderingCapable(Display *dpy, int screen,
     return True;
 }
 
-Bool VA_NVCTRLGetClientDriverName(Display *dpy, int screen,
-                                  int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
-                                  int *ddxDriverPatchVersion, char **clientDriverName)
+static Bool VA_NVCTRLGetClientDriverName(Display *dpy, int screen,
+        int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
+        int *ddxDriverPatchVersion, char **clientDriverName)
 {
     if (ddxDriverMajorVersion)
         *ddxDriverMajorVersion = 0;
@@ -401,4 +401,31 @@ Bool VA_NVCTRLGetClientDriverName(Display *dpy, int screen,
         *clientDriverName = strdup("nvidia");
 
     return True;
+}
+
+VAStatus va_NVCTRL_GetDriverName(
+    VADisplayContextP pDisplayContext,
+    char **driver_name,
+    int candidate_index
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    int direct_capable, driver_major, driver_minor, driver_patch;
+    Bool result;
+
+    if (candidate_index != 0)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+    result = VA_NVCTRLQueryDirectRenderingCapable(ctx->native_dpy, ctx->x11_screen,
+             &direct_capable);
+    if (!result || !direct_capable)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    result = VA_NVCTRLGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
+                                          &driver_major, &driver_minor,
+                                          &driver_patch, driver_name);
+    if (!result)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    return VA_STATUS_SUCCESS;
 }
