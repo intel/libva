@@ -143,8 +143,8 @@ add_project_arguments(c_args, language: ['c'])
 subdir('va')
 subdir('pkgconfig')
 
-doxygen = find_program('doxygen', required: false)
+doxygen = find_program('doxygen', required : get_option('enable_docs'))
 
-if get_option('enable_docs') and doxygen.found()
+if get_option('enable_docs')
   subdir('doc')
 endif
