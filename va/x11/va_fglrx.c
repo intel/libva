@@ -28,6 +28,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <X11/Xlib.h>
+#include "va_fglrx.h"
 
 #define ADL_OK 0
 #define ADL_MAX_PATH 256
@@ -121,9 +122,9 @@ static int match_display_name(Display *x11_dpy, const char *display_name)
     return m;
 }
 
-Bool VA_FGLRXGetClientDriverName(Display *dpy, int screen,
-                                 int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
-                                 int *ddxDriverPatchVersion, char **clientDriverName)
+static Bool VA_FGLRXGetClientDriverName(Display *dpy, int screen,
+                                        int *ddxDriverMajorVersion, int *ddxDriverMinorVersion,
+                                        int *ddxDriverPatchVersion, char **clientDriverName)
 {
     ADL_MAIN_CONTROL_CREATE          ADL_Main_Control_Create;
     ADL_MAIN_CONTROL_DESTROY         ADL_Main_Control_Destroy;
@@ -244,4 +245,26 @@ end:
     if (libadl_handle)
         dlclose(libadl_handle);
     return success;
+}
+
+VAStatus va_FGLRX_GetDriverName(
+    VADisplayContextP pDisplayContext,
+    char **driver_name,
+    int candidate_index
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    int driver_major, driver_minor, driver_patch;
+    Bool result;
+
+    if (candidate_index != 0)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+    result = VA_FGLRXGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
+                                         &driver_major, &driver_minor,
+                                         &driver_patch, driver_name);
+    if (!result)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    return VA_STATUS_SUCCESS;
 }
