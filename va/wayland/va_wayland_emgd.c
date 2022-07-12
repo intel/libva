@@ -25,6 +25,9 @@
  */
 
 #include "sysdeps.h"
+
+#ifdef HAVE_EMGD
+
 #include <unistd.h>
 #include <dlfcn.h>
 #include "va_drmcommon.h"
@@ -154,3 +157,5 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
         return false;
     return true;
 }
+
+#endif

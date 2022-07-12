@@ -110,10 +110,12 @@ static const struct va_wayland_backend g_backends[] = {
         va_wayland_drm_create,
         va_wayland_drm_destroy
     },
+#ifdef HAVE_EMGD
     {
         va_wayland_emgd_create,
         va_wayland_emgd_destroy
     },
+#endif
     { NULL, }
 };
 

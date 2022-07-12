@@ -23,6 +23,9 @@
  */
 
 #include "sysdeps.h"
+
+#ifdef HAVE_FGLRX
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -268,3 +271,5 @@ VAStatus va_FGLRX_GetDriverName(
 
     return VA_STATUS_SUCCESS;
 }
+
+#endif

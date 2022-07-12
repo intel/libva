@@ -130,6 +130,17 @@ if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND and not WITH_WIN32)
   error('Please install at least one backend dev files (DRM, X11, Wayland, WIN32)')
 endif
 
+c_args = []
+if get_option('with_legacy').contains('emgd')
+  c_args += ['-DHAVE_EMGD']
+elif get_option('with_legacy').contains('nvctrl')
+  c_args += ['-DHAVE_NVCTRL']
+elif get_option('with_legacy').contains('fglrx')
+  c_args += ['-DHAVE_FGLRX']
+endif
+
+add_project_arguments(c_args, language: ['c'])
+
 subdir('va')
 subdir('pkgconfig')
 

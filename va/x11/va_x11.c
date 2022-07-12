@@ -177,10 +177,14 @@ static VAStatus va_DisplayContextGetDriverName(
     vaStatus = va_DRI3_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
+#ifdef HAVE_NVCTRL
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name, candidate_index);
+#endif
+#ifdef HAVE_FGLRX
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name, candidate_index);
+#endif
 
     return vaStatus;
 }

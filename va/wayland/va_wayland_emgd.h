@@ -27,6 +27,8 @@
 #ifndef VA_WAYLAND_EMGD_H
 #define VA_WAYLAND_EMGD_H
 
+#ifdef HAVE_EMGD
+
 #include <stdbool.h>
 #include "va_wayland.h"
 #include "va_backend.h"
@@ -48,5 +50,7 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext);
 DLL_HIDDEN
 void
 va_wayland_emgd_destroy(VADisplayContextP pDisplayContext);
+
+#endif
 
 #endif /* VA_WAYLAND_EMGD_H */
