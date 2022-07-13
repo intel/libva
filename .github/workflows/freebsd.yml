@@ -12,11 +12,11 @@ on:
 
 jobs:
   freebsd:
-    runs-on: macos-10.15
+    runs-on: macos-12
     steps:
     - uses: actions/checkout@v2
     - name: test
-      uses: vmactions/freebsd-vm@v0.1.5
+      uses: vmactions/freebsd-vm@v0
       with:
         prepare: |
           pkg install -y meson pkgconf libdrm libXext libXfixes wayland
