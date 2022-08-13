@@ -11,8 +11,46 @@ on:
     - '!.github/workflows/ubuntu.yml'
 
 jobs:
-  ubuntu-latest:
-    runs-on: ubuntu-latest
+  clang-15:
+    runs-on: ubuntu-22.04
+    env:
+      CC: /usr/bin/clang-15
+      CXX: /usr/bin/clang++-15
+      ASM: /usr/bin/clang-15
+    steps:
+    - uses: actions/checkout@v2
+    - name: install toolchain
+      run: |
+        if [[ -e $CC && -e $CXX ]]; then \
+          echo "clang-15 already presents in the image"; \
+        else \
+          echo "clang-15 missed in the image, installing from llvm"; \
+          echo "deb [trusted=yes] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list; \
+          sudo apt-get update; \
+          sudo apt-get install -y --no-install-recommends clang-15; \
+        fi
+    - name: install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libdrm-dev \
+          libegl1-mesa-dev \
+          libgl1-mesa-dev \
+          libx11-dev \
+          libxext-dev \
+          libxfixes-dev \
+          libwayland-dev
+    - name: configure
+      run: ./autogen.sh --prefix=/usr
+    - name: build
+      run: make
+    - name: check
+      run: make check
+    - name: install
+      run: sudo make install
+
+  ubuntu-22-04:
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v2
     - name: install prerequisites
@@ -59,26 +97,3 @@ jobs:
     - name: install
       run: sudo make install
 
-  ubuntu-18-04:
-    runs-on: ubuntu-18.04
-    steps:
-    - uses: actions/checkout@v2
-    - name: install prerequisites
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libdrm-dev \
-          libegl1-mesa-dev \
-          libgl1-mesa-dev \
-          libx11-dev \
-          libxext-dev \
-          libxfixes-dev \
-          libwayland-dev
-    - name: configure
-      run: ./autogen.sh --prefix=/usr
-    - name: build
-      run: make
-    - name: check
-      run: make check
-    - name: install
-      run: sudo make install
