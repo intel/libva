@@ -130,7 +130,8 @@ static /* const */ char *nvctrl_extension_name = NV_CONTROL_NAME;
 #define XNVCTRLSimpleCheckExtension(dpy,i) \
   XextSimpleCheckExtension (dpy, i, nvctrl_extension_name)
 
-static int close_display();
+static XEXT_GENERATE_CLOSE_DISPLAY(close_display, nvctrl_ext_info)
+
 static /* const */ XExtensionHooks nvctrl_extension_hooks = {
     NULL,                               /* create_gc */
     NULL,                               /* copy_gc */
@@ -149,8 +150,6 @@ static XEXT_GENERATE_FIND_DISPLAY(find_display, nvctrl_ext_info,
                                   nvctrl_extension_name,
                                   &nvctrl_extension_hooks,
                                   NV_CONTROL_EVENTS, NVCTRL_EXT_NEED_CHECK)
-
-static XEXT_GENERATE_CLOSE_DISPLAY(close_display, nvctrl_ext_info)
 
 static Bool XNVCTRLQueryVersion(Display *dpy, int *major, int *minor);
 
