@@ -103,7 +103,7 @@ drm_auth_x11_init(DRMAuthX11 *auth)
     if (!auth->display)
         return false;
 
-    auth->window = DefaultRootWindow(auth->display);
+    auth->window = None;
     return true;
 }
 
