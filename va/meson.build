@@ -115,7 +115,6 @@ if WITH_DRM
       '-DHAVE_VA_X11',
       '-DLIBVA_MAJOR_VERSION=@0@'.format(libva_major_version)
     ]
-    deps += [ x11_dep ]
   endif
 
   install_headers(libva_drm_headers, subdir : 'va')
