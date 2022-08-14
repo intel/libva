@@ -34,18 +34,12 @@ typedef struct drm_auth_x11_vtable      DRMAuthX11VTable;
 typedef void (*VAGenericFunc)(void);
 typedef Display *(*X11OpenDisplayFunc)(const char *display_name);
 typedef int (*X11CloseDisplayFunc)(Display *display);
-typedef Bool(*VADRI2QueryExtensionFunc)(
-    Display *display, int *event_base, int *error_base);
-typedef Bool(*VADRI2QueryVersionFunc)(
-    Display *display, int *major, int *minor);
 typedef Bool(*VADRI2AuthenticateFunc)(
     Display *display, XID window, uint32_t magic);
 
 struct drm_auth_x11_vtable {
     X11OpenDisplayFunc          x11_open_display;
     X11CloseDisplayFunc         x11_close_display;
-    VADRI2QueryExtensionFunc    va_dri2_query_extension;
-    VADRI2QueryVersionFunc      va_dri2_query_version;
     VADRI2AuthenticateFunc      va_dri2_authenticate;
 };
 
@@ -101,12 +95,6 @@ drm_auth_x11_init(DRMAuthX11 *auth)
         return false;
     if (!get_symbol(RTLD_DEFAULT, &vtable->x11_close_display, "XCloseDisplay"))
         return false;
-    if (!get_symbol(auth->handle, &vtable->va_dri2_query_extension,
-                    "VA_DRI2QueryExtension"))
-        return false;
-    if (!get_symbol(auth->handle, &vtable->va_dri2_query_version,
-                    "VA_DRI2QueryVersion"))
-        return false;
     if (!get_symbol(auth->handle, &vtable->va_dri2_authenticate,
                     "VA_DRI2Authenticate"))
         return false;
@@ -137,32 +125,19 @@ drm_auth_x11_terminate(DRMAuthX11 *auth)
     }
 }
 
-static bool
-drm_auth_x11_authenticate(DRMAuthX11 *auth, int fd, uint32_t magic)
-{
-    DRMAuthX11VTable * const vtable = &auth->vtable;
-    int evt_base, err_base, v_major, v_minor;
-
-    if (!vtable->va_dri2_query_extension(auth->display, &evt_base, &err_base))
-        return false;
-    if (!vtable->va_dri2_query_version(auth->display, &v_major, &v_minor))
-        return false;
-    if (!vtable->va_dri2_authenticate(auth->display, auth->window, magic))
-        return false;
-    return true;
-}
-
 /* Try to authenticate the DRM connection with the supplied magic through X11 */
 bool
 va_drm_authenticate_x11(int fd, uint32_t magic)
 {
+    DRMAuthX11VTable * vtable;
     DRMAuthX11 auth;
     bool success = false;
 
     memset(&auth, 0, sizeof(auth));
     if (!drm_auth_x11_init(&auth))
         goto end;
-    success = drm_auth_x11_authenticate(&auth, fd, magic);
+    vtable = &auth.vtable;
+    success = vtable->va_dri2_authenticate(auth.display, auth.window, magic);
 
 end:
     drm_auth_x11_terminate(&auth);
