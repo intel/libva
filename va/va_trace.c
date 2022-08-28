@@ -6058,3 +6058,29 @@ void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status)
     va_TraceMsg(trace_ctx, "=========%s ret = %s, %s \n", funcName, vaStatusStr(status), vaErrorStr(status));
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
+
+void va_TraceImageInfo(VADisplay dpy, VAImage *image)
+{
+    int i;
+
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    if (image) {
+        va_TraceMsg(trace_ctx, "\t image_id = %d\n", image->image_id);
+        va_TraceMsg(trace_ctx, "\t fourcc   = %08x\n", image->format.fourcc);
+        va_TraceMsg(trace_ctx, "\t buf      = %d\n", image->buf);
+        va_TraceMsg(trace_ctx, "\t width    = %d\n", image->width);
+        va_TraceMsg(trace_ctx, "\t height   = %d\n", image->height);
+        va_TraceMsg(trace_ctx, "\t data_size= %d\n", image->data_size);
+        va_TraceMsg(trace_ctx, "\t num_planes = %d\n", image->num_planes);
+        for (i = 0; i < image->num_planes; i ++) {
+            va_TraceMsg(trace_ctx, "\t pitches[%d] = %d", i, image->pitches[i]);
+            va_TraceMsg(trace_ctx, "\t offsets[%d] = %d\n", i, image->offsets[i]);
+        }
+    } else {
+        va_TraceMsg(trace_ctx, "Error: Invalid image pointer\n");
+    }
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}

@@ -296,6 +296,8 @@ void va_TracePutSurface(
 
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 
+void va_TraceImageInfo(VADisplay dpy, VAImage *image);
+
 #ifdef __cplusplus
 }
 #endif
