@@ -1,0 +1,57 @@
+name: windows
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/windows.yml'
+    - '!.github/workflows/EnterDevShell.ps1'
+
+jobs:
+  windows-msvc:
+    runs-on: windows-2022
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v2
+    - name: 'Setup Python'
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install Meson
+      run: pip install meson
+    - name: Enter DevShell
+      run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      shell: pwsh
+    - name: Configure with meson
+      run: meson build
+    - name: Build and Install
+      run: ninja -C build install
+
+  windows-mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v2
+    - name: 'Setup MSYS2'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        update: false
+        pacboy: >-
+          toolchain:p
+          meson:p
+    - name: Enter DevShell
+      run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
+      shell: pwsh
+    - name: Configure with meson
+      run: CC=gcc meson build
+    - name: Build and Install
+      run: CC=gcc ninja -C build install
