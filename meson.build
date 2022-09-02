@@ -75,9 +75,8 @@ configinc = include_directories('.')
 cc = meson.get_compiler('c')
 dl_dep = cc.find_library('dl', required : false)
 
-libdrm_dep = dependency('libdrm', version : '>= 2.4.60')
-
-WITH_DRM = not get_option('disable_drm')
+WITH_DRM = not get_option('disable_drm') and (host_machine.system() != 'windows')
+libdrm_dep = dependency('libdrm', version : '>= 2.4.60', required : (host_machine.system() != 'windows'))
 
 WITH_X11 = false
 if get_option('with_x11') != 'no'
@@ -126,8 +125,14 @@ if cc.has_argument('-fvisibility=hidden')
   va_c_args += ['-DHAVE_GNUC_VISIBILITY_ATTRIBUTE']
 endif
 
-if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND)
-  error('Please install at least one backend dev files (DRM, X11, Wayland)')
+WITH_WIN32 = false
+libwin32_dep = []
+if get_option('with_win32') != 'no'
+    WITH_WIN32 = (host_machine.system() == 'windows')
+endif
+
+if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND and not WITH_WIN32)
+  error('Please install at least one backend dev files (DRM, X11, Wayland, WIN32)')
 endif
 
 subdir('va')
