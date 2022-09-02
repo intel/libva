@@ -48,3 +48,13 @@ if WITH_WAYLAND
     variables: wayland_vars,
     version: va_api_version)
 endif
+
+if WITH_WIN32
+  win32_vars = vars + ['display=win32']
+  pkg.generate(libva_win32,
+    description: 'Userspace Video Acceleration (VA) Win32 interface',
+    filebase: 'libva-win32',
+    requires: 'libva',
+    variables: win32_vars,
+    version: va_api_version)
+endif
