@@ -44,15 +44,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#if defined(_WIN32)
+#include <compat_win32.h>
+#else
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <pthread.h>
-#include <unistd.h>
 #include <sys/time.h>
 #include <errno.h>
-#include <fcntl.h>
+#endif
 
 #if defined(__linux__)
 #include <sys/syscall.h>
@@ -67,7 +70,9 @@
 /* bionic, glibc >= 2.30, musl >= 1.3 have gettid(), so add va_ prefix */
 static pid_t va_gettid()
 {
-#if defined(__linux__)
+#if defined(_WIN32)
+    return GetCurrentThreadId();
+#elif defined(__linux__)
     return syscall(__NR_gettid);
 #elif defined(__DragonFly__) || defined(__FreeBSD__)
     return pthread_getthreadid_np();
@@ -189,7 +194,6 @@ struct va_trace {
     char *fn_log_env;
     char *fn_codedbuf_env;
     char *fn_surface_env;
-
     pthread_mutex_t resource_mutex;
     pthread_mutex_t context_mutex;
     VADisplay dpy;
@@ -843,13 +847,13 @@ void va_TraceInit(VADisplay dpy)
         if (va_parseConfig("LIBVA_TRACE_SURFACE_GEOMETRY", &env_value[0]) == 0) {
             char *p = env_value, *q;
 
-            trace_ctx->trace_surface_width = strtod(p, &q);
+            trace_ctx->trace_surface_width = (unsigned int) strtod(p, &q);
             p = q + 1; /* skip "x" */
-            trace_ctx->trace_surface_height = strtod(p, &q);
+            trace_ctx->trace_surface_height = (unsigned int) strtod(p, &q);
             p = q + 1; /* skip "+" */
-            trace_ctx->trace_surface_xoff = strtod(p, &q);
+            trace_ctx->trace_surface_xoff = (unsigned int) strtod(p, &q);
             p = q + 1; /* skip "+" */
-            trace_ctx->trace_surface_yoff = strtod(p, &q);
+            trace_ctx->trace_surface_yoff = (unsigned int) strtod(p, &q);
 
             va_infoMessage(dpy, "LIBVA_TRACE_SURFACE_GEOMETRY is on, only dump surface %dx%d+%d+%d content\n",
                            trace_ctx->trace_surface_width,

@@ -40,4 +40,6 @@ vaCreateSurfaces_0_32_0(
     return vaCreateSurfaces(dpy, format, width, height, surfaces, num_surfaces,
                             NULL, 0);
 }
+#if !defined(_WIN32)
 VA_CPP_HELPER_ALIAS(vaCreateSurfaces, 0, 32, 0);
+#endif

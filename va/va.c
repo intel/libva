@@ -36,8 +36,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(_WIN32)
+#include <compat_win32.h>
+#define DRIVER_EXTENSION    "_drv_video.dll"
+#define DRIVER_PATH_STRING  "%s\\%s%s"
+#define ENV_VAR_SEPARATOR ";"
+#else
 #include <dlfcn.h>
 #include <unistd.h>
+#define DRIVER_EXTENSION    "_drv_video.so"
+#define DRIVER_PATH_STRING  "%s/%s%s"
+#define ENV_VAR_SEPARATOR ":"
+#endif
 #ifdef ANDROID
 #include <log/log.h>
 /* support versions < JellyBean */
@@ -48,8 +58,6 @@
 #define ALOGI LOGI
 #endif
 #endif
-
-#define DRIVER_EXTENSION    "_drv_video.so"
 
 #define ASSERT      assert
 #define CHECK_VTABLE(s, ctx, func) if (!va_checkVtable(dpy, ctx->vtable->va##func, #func)) s = VA_STATUS_ERROR_UNIMPLEMENTED;
@@ -402,13 +410,13 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
 
 static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
 {
-    int n = snprintf(0, 0, "%s/%s%s", driver_dir, driver_name, DRIVER_EXTENSION);
+    int n = snprintf(0, 0, DRIVER_PATH_STRING, driver_dir, driver_name, DRIVER_EXTENSION);
     if (n < 0)
         return NULL;
     char *driver_path = (char *) malloc(n + 1);
     if (!driver_path)
         return NULL;
-    n = snprintf(driver_path, n + 1, "%s/%s%s",
+    n = snprintf(driver_path, n + 1, DRIVER_PATH_STRING,
                  driver_dir, driver_name, DRIVER_EXTENSION);
     if (n < 0) {
         free(driver_path);
@@ -437,7 +445,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
                         __FUNCTION__, __LINE__);
         return VA_STATUS_ERROR_ALLOCATION_FAILED;
     }
-    driver_dir = strtok_r(search_path, ":", &saveptr);
+    driver_dir = strtok_r(search_path, ENV_VAR_SEPARATOR, &saveptr);
     while (driver_dir) {
         void *handle = NULL;
         char *driver_path = va_getDriverPath(driver_dir, driver_name);
@@ -583,7 +591,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
         }
         free(driver_path);
 
-        driver_dir = strtok_r(NULL, ":", &saveptr);
+        driver_dir = strtok_r(NULL, ENV_VAR_SEPARATOR, &saveptr);
     }
 
     free(search_path);
