@@ -65,6 +65,7 @@ libva = shared_library(
   sources : libva_sources +
             libva_headers +
             libva_headers_priv,
+  vs_module_defs : 'libva.def',
   soversion : libva_lt_current,
   version : libva_lt_version,
   c_args : [ '-DSYSCONFDIR="' + sysconfdir + '"'] + ['-DVA_DRIVERS_PATH="' + driverdir + '"'] + va_c_args,
@@ -273,6 +274,50 @@ if WITH_WAYLAND
 endif
 
 fs = import('fs')
+if WITH_WIN32
+  libva_win32_sources = [
+    'win32/va_win32.c',
+  ]
+
+  libva_win32_headers = [
+    'win32/va_win32.h',
+  ]
+
+  libva_headers_subproject += libva_win32_headers
+
+  deps = [ libwin32_dep, libva_dep ]
+
+  libva_win32_args = [
+    '-DLIBVA_MAJOR_VERSION=@0@'.format(libva_major_version)
+  ]
+
+  install_headers(libva_win32_headers, subdir : 'va')
+
+  libva_win32 = shared_library(
+    'va_win32',
+    sources : libva_win32_sources +
+              libva_win32_headers,
+    soversion : libva_lt_current,
+    version : libva_lt_version,
+    install : true,
+    c_args : libva_win32_args,
+    vs_module_defs : 'libva_win32.def',
+    dependencies : deps)
+
+  libva_win32_dep = declare_dependency(
+    link_with : libva_win32,
+    include_directories : configinc,
+    dependencies : deps)
+
+  if fs.is_file(libva.full_path()) and fs.is_file(libva_win32.full_path())
+    install_data(
+      [libva.full_path(), libva_win32.full_path()],
+      install_dir : get_option('bindir'),
+      rename : ['va.dll', 'va_win32.dll']
+    )
+  endif
+endif
+
 foreach header : libva_headers_subproject
   configure_file(output: fs.name(header), input: header, copy: true)
 endforeach

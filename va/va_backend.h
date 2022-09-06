@@ -51,6 +51,8 @@ enum {
     VA_DISPLAY_DRM_RENDERNODES = (VA_DISPLAY_DRM | (1 << 0)),
     /** \brief VA/Wayland API is used, through vaGetDisplayWl() entry-point. */
     VA_DISPLAY_WAYLAND  = 0x40,
+    /** \brief VA/Win32 API is used, through vaGetDisplayWin32() entry-point. */
+    VA_DISPLAY_WIN32 = 0x80,
 };
 
 struct VADriverVTable {
