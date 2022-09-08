@@ -908,6 +908,8 @@ void va_TraceEnd(VADisplay dpy)
     free(pva_trace->ptra_ctx[MAX_TRACE_CTX_NUM]);
 
     pva_trace->dpy = NULL;
+    pthread_mutex_destroy(&pva_trace->resource_mutex);
+    pthread_mutex_destroy(&pva_trace->context_mutex);
     free(pva_trace);
     ((VADisplayContextP)dpy)->vatrace = NULL;
 }
