@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include "va_drmcommon.h"
 #if defined(_WIN32)
 #include <compat_win32.h>
 #else
@@ -1168,6 +1169,16 @@ static void va_TraceSurfaceAttributes(
     if (!attrib_list || !num_attribs)
         return;
 
+    /* Try to detect VASurfaceAttribMemoryType here, so it's available in case it is
+       sent in attrib_list after the VASurfaceAttribExternalBufferDescriptor */
+    int32_t memtype = 0;
+    for (i = 0; i < *num_attribs; i++) {
+        if(attrib_list[i].type == VASurfaceAttribMemoryType) {
+            memtype = attrib_list[i].value.value.i;
+            break;
+        }
+    }
+
     p = attrib_list;
     num = *num_attribs;
     if (num > VASurfaceAttribCount)
@@ -1191,24 +1202,52 @@ static void va_TraceSurfaceAttributes(
         case VAGenericValueTypePointer:
             va_TraceMsg(trace_ctx, "\t\tvalue.value.p = %p\n", p->value.value.p);
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
-                VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
-                uint32_t j;
+                /* Use memtype to distinguish type as specified in VASurfaceAttribExternalBufferDescriptor docs */
+                /* If not otherwise stated, the common VASurfaceAttribExternalBuffers should be used. */
+                if(memtype == 0 /* unspecified in attrib_list */ || memtype == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME) {
+                    VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
+                    uint32_t j;
 
-                va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
-                va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
-                va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
-                va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
-                va_TraceMsg(trace_ctx, "\t\t  data_size=%d\n", tmp->data_size);
-                va_TraceMsg(trace_ctx, "\t\t  num_planes=%d\n", tmp->num_planes);
-                va_TraceMsg(trace_ctx, "\t\t  pitches[4]=%d %d %d %d\n",
-                            tmp->pitches[0], tmp->pitches[1], tmp->pitches[2], tmp->pitches[3]);
-                va_TraceMsg(trace_ctx, "\t\t  offsets[4]=%d %d %d %d\n",
-                            tmp->offsets[0], tmp->offsets[1], tmp->offsets[2], tmp->offsets[3]);
-                va_TraceMsg(trace_ctx, "\t\t  flags=0x%08x\n", tmp->flags);
-                va_TraceMsg(trace_ctx, "\t\t  num_buffers=0x%08x\n", tmp->num_buffers);
-                va_TraceMsg(trace_ctx, "\t\t  buffers=%p\n", tmp->buffers);
-                for (j = 0; j < tmp->num_buffers; j++) {
-                    va_TraceMsg(trace_ctx, "\t\t\tbuffers[%d]=%p\n", j, tmp->buffers[j]);
+                    va_TraceMsg(trace_ctx, "\t\t--VASurfaceAttribExternalBufferDescriptor\n");
+                    va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->pixel_format);
+                    va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
+                    va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
+                    va_TraceMsg(trace_ctx, "\t\t  data_size=%d\n", tmp->data_size);
+                    va_TraceMsg(trace_ctx, "\t\t  num_planes=%d\n", tmp->num_planes);
+                    va_TraceMsg(trace_ctx, "\t\t  pitches[4]=%d %d %d %d\n",
+                                tmp->pitches[0], tmp->pitches[1], tmp->pitches[2], tmp->pitches[3]);
+                    va_TraceMsg(trace_ctx, "\t\t  offsets[4]=%d %d %d %d\n",
+                                tmp->offsets[0], tmp->offsets[1], tmp->offsets[2], tmp->offsets[3]);
+                    va_TraceMsg(trace_ctx, "\t\t  flags=0x%08x\n", tmp->flags);
+                    va_TraceMsg(trace_ctx, "\t\t  num_buffers=0x%08x\n", tmp->num_buffers);
+                    va_TraceMsg(trace_ctx, "\t\t  buffers=%p\n", tmp->buffers);
+                    for (j = 0; j < tmp->num_buffers; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tbuffers[%d]=%p\n", j, tmp->buffers[j]);
+                    }
+                } else if (memtype == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2) {
+                    VADRMPRIMESurfaceDescriptor *tmp = (VADRMPRIMESurfaceDescriptor *) p->value.value.p;
+                    uint32_t j, k;
+
+                    va_TraceMsg(trace_ctx, "\t\t--VADRMPRIMESurfaceDescriptor\n");
+                    va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->fourcc);
+                    va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
+                    va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
+                    va_TraceMsg(trace_ctx, "\t\t  num_objects=0x%08x\n", tmp->num_objects);
+                    for (j = 0; j < tmp->num_objects; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].fd=%d\n", j, tmp->objects[j].fd);
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].size=%d\n", j, tmp->objects[j].size);
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].drm_format_modifier=%d\n", j, tmp->objects[j].drm_format_modifier);
+                    }
+                    va_TraceMsg(trace_ctx, "\t\t  num_layers=%d\n", tmp->num_layers);
+                    for (j = 0; j < tmp->num_layers; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].drm_format=0x%08x\n", j, tmp->layers[j].drm_format);
+                        va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].num_planes=0x%d\n", j, tmp->layers[j].num_planes);
+                        for (k = 0; k < 4; k++) {
+                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].object_index[%d]=0x%d\n", j, k, tmp->layers[j].object_index[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].offset[%d]=0x%d\n", j, k, tmp->layers[j].offset[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].pitch[%d]=0x%d\n", j, k, tmp->layers[j].pitch[k]);
+                        }
+                    }
                 }
             }
             break;
