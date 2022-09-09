@@ -47,6 +47,7 @@
 #include <fcntl.h>
 #include "va_drmcommon.h"
 #if defined(_WIN32)
+#include <va_win32.h>
 #include <compat_win32.h>
 #else
 #include <dlfcn.h>
@@ -1160,7 +1161,8 @@ void va_TraceDestroyConfig(
 static void va_TraceSurfaceAttributes(
     struct trace_context *trace_ctx,
     VASurfaceAttrib    *attrib_list,
-    unsigned int       *num_attribs
+    unsigned int       *num_attribs,
+    unsigned int       num_surfaces
 )
 {
     int i, num;
@@ -1243,11 +1245,25 @@ static void va_TraceSurfaceAttributes(
                         va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].drm_format=0x%08x\n", j, tmp->layers[j].drm_format);
                         va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].num_planes=0x%d\n", j, tmp->layers[j].num_planes);
                         for (k = 0; k < 4; k++) {
-                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].object_index[%d]=0x%d\n", j, k, tmp->layers[j].object_index[k]);
-                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].offset[%d]=0x%d\n", j, k, tmp->layers[j].offset[k]);
-                            va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].pitch[%d]=0x%d\n", j, k, tmp->layers[j].pitch[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].object_index[%d]=0x%d\n", j, k, tmp->layers[j].object_index[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].offset[%d]=0x%d\n", j, k, tmp->layers[j].offset[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].pitch[%d]=0x%d\n", j, k, tmp->layers[j].pitch[k]);
                         }
                     }
+#if defined(_WIN32)
+                } else if (memtype == VA_SURFACE_ATTRIB_MEM_TYPE_NTHANDLE) {
+                    va_TraceMsg(trace_ctx, "\t\t--Win32 %d surfaces\n", num_surfaces);
+                    HANDLE* surfaces = (HANDLE *) p->value.value.p;
+                    for (uint32_t j = 0; j < num_surfaces; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tSurface[%d]: 0x%p (type: HANDLE)\n", j, surfaces[j]);
+                    }
+                } else if (memtype == VA_SURFACE_ATTRIB_MEM_TYPE_D3D12_RESOURCE) {
+                    va_TraceMsg(trace_ctx, "\t\t--Win32 %d surfaces\n", num_surfaces);
+                    void** surfaces = (void**) p->value.value.p;
+                    for (uint32_t j = 0; j < num_surfaces; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tSurface[%d]: 0x%p (type: ID3D12Resource*)\n", j, surfaces[j]);
+                    }
+#endif
                 }
             }
             break;
@@ -1288,7 +1304,7 @@ void va_TraceCreateSurfaces(
             va_TraceMsg(trace_ctx, "\t\tsurfaces[%d] = 0x%08x\n", i, surfaces[i]);
     }
 
-    va_TraceSurfaceAttributes(trace_ctx, attrib_list, &num_attribs);
+    va_TraceSurfaceAttributes(trace_ctx, attrib_list, &num_attribs, num_surfaces);
 
     va_TraceMsg(trace_ctx, NULL);
 
@@ -5912,7 +5928,7 @@ void va_TraceQuerySurfaceAttributes(
 
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tconfig = 0x%08x\n", config);
-    va_TraceSurfaceAttributes(trace_ctx, attrib_list, num_attribs);
+    va_TraceSurfaceAttributes(trace_ctx, attrib_list, num_attribs, 0);
 
     va_TraceMsg(trace_ctx, NULL);
 
