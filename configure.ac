@@ -327,7 +327,7 @@ if test "x$enable_wayland" != "xno"; then
 
         AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner])
         if test "x$WAYLAND_SCANNER" = "x"; then
-            PKG_CHECK_MODULES([WL_SCANNER], [wayland-scanner],
+            PKG_CHECK_MODULES([WL_SCANNER], [wayland-scanner >= 1.15],
                 [USE_WAYLAND="yes"], [:])
 
             if test "x$USE_WAYLAND" = "xno" -a "x$enable_wayland" = "xyes"; then

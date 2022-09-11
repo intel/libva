@@ -30,7 +30,6 @@ ltmain.sh
 missing
 stamp-h1
 /va/va_version.h
-/va/wayland/wayland-drm-client-protocol-export.c
 /va/wayland/wayland-drm-client-protocol.*
 /doc/Doxyfile
 /doc/html-out
