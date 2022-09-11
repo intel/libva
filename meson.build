@@ -103,7 +103,8 @@ if get_option('with_wayland') != 'no'
   wayland_dep = dependency('wayland-client', version : '>= 1.11.0',
 			   required : get_option('with_wayland') == 'yes')
   wayland_scanner_dep = dependency('wayland-scanner',
-                                   required : get_option('with_wayland') == 'yes')
+                                   required : get_option('with_wayland') == 'yes',
+                                   native : true)
   if wayland_scanner_dep.found()
     wl_scanner = find_program(wayland_scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))
   endif
