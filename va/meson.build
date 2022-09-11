@@ -239,7 +239,7 @@ if WITH_WAYLAND
       'wayland-drm-client-protocol.c',
       output : 'wayland-drm-client-protocol.c',
       input : 'wayland/wayland-drm.xml',
-      command : [wl_scanner, 'code', '@INPUT@', '@OUTPUT@']),
+      command : [wl_scanner, 'private-code', '@INPUT@', '@OUTPUT@']),
 
     custom_target(
       'wayland-drm-client-protocol.h',

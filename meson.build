@@ -102,7 +102,7 @@ WITH_WAYLAND = false
 if get_option('with_wayland') != 'no'
   wayland_dep = dependency('wayland-client', version : '>= 1.11.0',
 			   required : get_option('with_wayland') == 'yes')
-  wayland_scanner_dep = dependency('wayland-scanner',
+  wayland_scanner_dep = dependency('wayland-scanner', version : '>= 1.15',
                                    required : get_option('with_wayland') == 'yes',
                                    native : true)
   if wayland_scanner_dep.found()
