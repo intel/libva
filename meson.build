@@ -102,12 +102,12 @@ WITH_WAYLAND = false
 if get_option('with_wayland') != 'no'
   wayland_dep = dependency('wayland-client', version : '>= 1.11.0',
 			   required : get_option('with_wayland') == 'yes')
-  if wayland_dep.found()
-    wl_prefix = wayland_dep.get_variable(pkgconfig: 'prefix')
-    wl_scanner = find_program('wayland-scanner',
-			      wl_prefix + '/bin/wayland-scanner')
+  wayland_scanner_dep = dependency('wayland-scanner',
+                                   required : get_option('with_wayland') == 'yes')
+  if wayland_scanner_dep.found()
+    wl_scanner = find_program(wayland_scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))
   endif
-  WITH_WAYLAND = wayland_dep.found()
+  WITH_WAYLAND = wayland_dep.found() and wayland_scanner_dep.found()
 endif
 
 va_c_args = []
