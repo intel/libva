@@ -428,7 +428,7 @@ typedef struct _VAEncSegMapBufferAV1 {
     /**
      * \brief Segment map.
      * Size of this map is indicated by \ref segmentMapDataSize and each element
-	 * in this map contains the segment id of a particular block.
+     * in this map contains the segment id of a particular block.
      * The element is indexed by raster scan order.
      * The value of each entry should be in the range [0..7], inclusive.
      */
@@ -448,7 +448,7 @@ typedef enum {
     VAAV1EncTransformationCount
 } VAEncTransformationTypeAV1;
 
-typedef struct _VAEncWarpedMotionParamsAV1{
+typedef struct _VAEncWarpedMotionParamsAV1 {
 
     /** \brief Specify the type of warped motion. */
     VAEncTransformationTypeAV1  wmtype;
@@ -479,8 +479,7 @@ typedef struct _VAEncWarpedMotionParamsAV1{
  *
  */
 typedef union {
-	struct
-	{
+    struct {
         /**
          * \brief Value used as index into ref_frame_idx[] to indicate that frame
          * will be included in the reference list.
@@ -526,8 +525,8 @@ typedef union {
 
         /** \brief Reserved bytes for future use, must be zero. */
         uint32_t Reserved    : 11;
-	} fields;
-	uint32_t value;
+    } fields;
+    uint32_t value;
 } VARefFrameCtrlAV1;
 
 /**
@@ -536,8 +535,7 @@ typedef union {
  * This structure conveys picture level parameters.
  *
  */
-typedef struct  _VAEncPictureParameterBufferAV1
-{
+typedef struct  _VAEncPictureParameterBufferAV1 {
     /** \brief AV1 encoder may support SupRes and dynamic scaling function.
      *  For SupRes, underline encoder is responsible to do downscaling.
      *  For dynamic scaling, app should provide the scaled raw source.

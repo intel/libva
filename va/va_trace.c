@@ -1379,9 +1379,9 @@ void va_TraceCreateContext(
     trace_ctx->trace_context = *context;
     TRACE_FUNCNAME(idx);
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x va_trace_flag 0x%x\n", *context, va_trace_flag);
-    va_TraceMsg(trace_ctx, "\tprofile = %d,%s entrypoint = %d,%s\n",trace_ctx->trace_profile,
-               vaProfileStr(trace_ctx->trace_profile),trace_ctx->trace_entrypoint,
-               vaEntrypointStr(trace_ctx->trace_entrypoint));
+    va_TraceMsg(trace_ctx, "\tprofile = %d,%s entrypoint = %d,%s\n", trace_ctx->trace_profile,
+                vaProfileStr(trace_ctx->trace_profile), trace_ctx->trace_entrypoint,
+                vaEntrypointStr(trace_ctx->trace_entrypoint));
     va_TraceMsg(trace_ctx, "\tconfig = 0x%08x\n", config_id);
     va_TraceMsg(trace_ctx, "\twidth = %d\n", picture_width);
     va_TraceMsg(trace_ctx, "\theight = %d\n", picture_height);
@@ -4185,7 +4185,7 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\tsegments.seg_flags.bits.segmentation_temporal_update = %d\n", p->segments.seg_flags.bits.segmentation_temporal_update);
     va_TraceMsg(trace_ctx, "\tsegments.segment_number = %d\n", p->segments.segment_number);
 
-    for (i = 0; i < 8; i++){
+    for (i = 0; i < 8; i++) {
         for (j = 0; j < 8; j++)
             va_TraceMsg(trace_ctx, "\tsegments.feature_data[%d][%d] = %d\n", i, j, p->segments.feature_data[i][j]);
     }
@@ -4215,7 +4215,7 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.lr_unit_shift = %d\n", p->loop_restoration_flags.bits.lr_unit_shift);
     va_TraceMsg(trace_ctx, "\tloop_restoration_flags.bits.lr_uv_shift = %d\n", p->loop_restoration_flags.bits.lr_uv_shift);
 
-    for (i = 0; i < 7; i++){
+    for (i = 0; i < 7; i++) {
         va_TraceMsg(trace_ctx, "\twm[%d].wmtype= %d\n", i, p->wm[i].wmtype);
         for (j = 0; j < 8; j++)
             va_TraceMsg(trace_ctx, "\twm[%d].wmmat[%d]= %d\n", i, j, p->wm[i].wmmat[j]);
