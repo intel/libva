@@ -325,11 +325,15 @@ if test "x$enable_wayland" != "xno"; then
 
     if test "$USE_WAYLAND" = "yes"; then
 
-        WAYLAND_PREFIX=`$PKG_CONFIG --variable=prefix wayland-client`
-        AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner],,
-                     [${WAYLAND_PREFIX}/bin$PATH_SEPARATOR$PATH])
+        AC_PATH_PROG([WAYLAND_SCANNER], [wayland-scanner])
         if test "x$WAYLAND_SCANNER" = "x"; then
-            AC_MSG_ERROR([wayland-scanner not found: Install it or use --disable-wayland])
+            PKG_CHECK_MODULES([WL_SCANNER], [wayland-scanner >= 1.15],
+                [USE_WAYLAND="yes"], [:])
+
+            if test "x$USE_WAYLAND" = "xno" -a "x$enable_wayland" = "xyes"; then
+                AC_MSG_ERROR([wayland explicitly enabled, however $WL_SCANNER_PKG_ERRORS])
+            fi
+            AC_SUBST(WAYLAND_SCANNER, `$PKG_CONFIG --variable=wayland_scanner wayland-scanner`)
         fi
 
         AC_DEFINE([HAVE_VA_WAYLAND], [1],

@@ -40,6 +40,9 @@ extern int va_trace_flag;
 #define VA_TRACE_FLAG_SURFACE         (VA_TRACE_FLAG_SURFACE_DECODE | \
                                        VA_TRACE_FLAG_SURFACE_ENCODE | \
                                        VA_TRACE_FLAG_SURFACE_JPEG)
+#define VA_TRACE_FLAG_FTRACE          0x40
+#define VA_TRACE_FLAG_FTRACE_BUFDATA  (VA_TRACE_FLAG_FTRACE | \
+                                       VA_TRACE_FLAG_BUFDATA)
 
 #define VA_TRACE_LOG(trace_func,...)            \
     if (va_trace_flag & VA_TRACE_FLAG_LOG) {    \
@@ -53,6 +56,183 @@ extern int va_trace_flag;
     if (va_trace_flag){                         \
         va_TraceStatus(dpy, __func__, ret);     \
     }
+
+/** \brief event id definition
+ * identifier of trace event, coresponding the task value in the manifest, located in libva-util/tracetool
+ * the trace tool will translate this id to event name, also the trace data carried along.
+ * Note: make sure event id definition backward compatible */
+enum {
+    INVALIDE_ID = 0,
+    CREATE_CONFIG = 1,
+    DESTROY_CONFIG,
+    CREATE_CONTEXT,
+    DESTROY_CONTEXT,
+    CREATE_BUFFER,
+    DESTROY_BUFFER,
+    CREATE_SURFACE,
+    DESTROY_SURFACE,
+    BEGIN_PICTURE,
+    RENDER_PICTURE,
+    END_PICTURE,
+    BUFFER_DATA,
+    SYNC_SURFACE,
+    SYNC_SURFACE2,
+    QUERY_SURFACE_ATTR,
+};
+
+/** \brief event opcode definition
+ * identifier of trace event operation, coresponding the opcode value in the manifest.
+ * 4 predefined opcode */
+#define TRACE_INFO  0
+#define TRACE_BEGIN 1
+#define TRACE_END   2
+#define TRACE_DATA  3
+
+/** \brief event data structure
+ * structure list to pass event data without copy, each entry contain the event data address and size.
+ * va_TraceEvent will write these raw data into ftrace entry */
+typedef struct va_event_data {
+    void *buf;
+    unsigned int size;
+} VAEventData;
+
+
+/** \brief VA_TRACE
+ * trace interface to send out trace event with empty event data. */
+#define VA_TRACE(dpy,id,op) do {                        \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {     \
+            va_TraceEvent(dpy, id, op, 0, NULL);        \
+        }                                               \
+    } while (0)
+/** \brief VA_TRACE_V
+ * trace interface to send out trace event with 1 data element from variable. the variable data type could be 8/16/32/64 bitsize */
+#define VA_TRACE_V(dpy,id,op,v) do {                    \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {     \
+            VAEventData desc[1] = {{&v, sizeof(v)}};    \
+            va_TraceEvent(dpy, id, op, 1, desc);        \
+        }                                               \
+    } while (0)
+/** \brief VA_TRACE_PV
+ * trace interface to send out trace event with 2 data element, from pointer and variable. their data size could be 8/16/32/64 bitsize */
+#define VA_TRACE_PV(dpy,id,op,p,v) do {                 \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {     \
+            VAEventData desc[2] = {{p, sizeof(*p)},     \
+                                   {&v, sizeof(v)}};    \
+            va_TraceEvent(dpy, id, op, 2, desc);        \
+        }                                               \
+    } while (0)
+/** \brief VA_TRACE_VV
+ * trace interface to send out trace event with 2 data element, both from variable. their data size could be 8/16/32/64 bitsize */
+#define VA_TRACE_VV(dpy,id,op,v1,v2) do {               \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {     \
+            VAEventData desc[2] = {{&v1, sizeof(v1)},   \
+                                   {&v2, sizeof(v2)}};  \
+            va_TraceEvent(dpy, id, op, 2, desc);        \
+        }                                               \
+    } while (0)
+/** \brief VA_TRACE_VVVV
+ * trace interface to send out trace event with 4 data element, all from variable. their data size could be 8/16/32/64 bitsize */
+#define VA_TRACE_VVVV(dpy,id,op,v1,v2,v3,v4) do {       \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {     \
+            VAEventData desc[4] = { {&v1, sizeof(v1)},  \
+                                    {&v2, sizeof(v2)},  \
+                                    {&v3, sizeof(v3)},  \
+                                    {&v4, sizeof(v4)}}; \
+            va_TraceEvent(dpy, id, op, 4, desc);        \
+        }                                               \
+    } while (0)
+/** \brief VA_TRACE_VA
+ * trace interface to send out trace event with a dynamic length array data element, array length from variable.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_VA(dpy,id,op,n,a) do {                  \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = n | sizeof(*a) << 16;              \
+            VAEventData desc[2] = {{&num, sizeof(num)},  \
+                                   {a, n * sizeof(*a)}}; \
+            va_TraceEvent(dpy, id, op, 2, desc);         \
+        }                                                \
+    } while (0)
+/** \brief VA_TRACE_PA
+ * trace interface to send out trace event with a dynamic length array data element, array length from pointer. need check null before set.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_PA(dpy,id,op,pn,a) do {                 \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = sizeof(*a) << 16;                  \
+            VAEventData desc[2] = {{&num, sizeof(num)},  \
+                                   {a, 0}};              \
+            if (pn) {                                    \
+                num |= *pn;                              \
+                desc[1].size = (*pn) * sizeof(*a);       \
+            }                                            \
+            va_TraceEvent(dpy, id, op, 2, desc);         \
+        }                                                \
+    } while (0)
+/** \brief VA_TRACE_VVA
+ * trace interface to send out trace event with 1 data element and a dynamic length array data element, array length from variable.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_VVA(dpy,id,op,v,n,a) do {               \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = n | (sizeof(*a) << 16);            \
+            VAEventData desc[3] = {{&v, sizeof(v)},      \
+                                   {&num, sizeof(num)},  \
+                                   {a, n*sizeof(*a)}};   \
+            va_TraceEvent(dpy, id, op, 3, desc);         \
+        }                                                \
+    } while (0)
+/** \brief VA_TRACE_VVVA
+ * trace interface to send out trace event with 2 data element and a dynamic length array data element, array length from variable.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_VVVA(dpy,id,op,v1,v2,n,a) do {          \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = n | (sizeof(*a) << 16);            \
+            VAEventData desc[4] = {{&v1, sizeof(v1)},    \
+                                   {&v2, sizeof(v2)},    \
+                                   {&num, sizeof(num)},  \
+                                   {a, n*sizeof(*a)}};   \
+            va_TraceEvent(dpy, id, op, 4, desc);         \
+        }                                                \
+    } while (0)
+/** \brief VA_TRACE_VVVVA
+ * trace interface to send out trace event with 3 data element and a dynamic length array data element, array length from variable.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_VVVVA(dpy,id,op,v1,v2,v3,n,a) do {      \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = n | (sizeof(*a) << 16);            \
+            VAEventData desc[5] = {{&v1, sizeof(v1)},    \
+                                   {&v2, sizeof(v2)},    \
+                                   {&v3, sizeof(v3)},    \
+                                   {&num, sizeof(num)},  \
+                                   {a, n*sizeof(*a)}};   \
+            va_TraceEvent(dpy, id, op, 5, desc);         \
+        }                                                \
+    } while (0)
+/** \brief VA_TRACE_VVVVVA
+ * trace interface to send out trace event with 4 data elsement and a dynamic length array data element, array length from variable.
+ * high 16bits of array length is used to set bitssize of array element. */
+#define VA_TRACE_VVVVVA(dpy,id,op,v1,v2,v3,v4,n,a) do {  \
+        if (va_trace_flag & VA_TRACE_FLAG_FTRACE) {      \
+            int num = n | (sizeof(*a) << 16);            \
+            VAEventData desc[6] = {{&v1, sizeof(v1)},    \
+                                   {&v2, sizeof(v2)},    \
+                                   {&v3, sizeof(v3)},    \
+                                   {&v4, sizeof(v4)},    \
+                                   {&num, sizeof(num)},  \
+                                   {a, n*sizeof(*a)}};   \
+            va_TraceEvent(dpy, id, op, 6, desc);         \
+        }                                                \
+    } while (0)
+
+/* add macro interface to support new data type combination */
+
+
+/** \brief VA_TRACE_BUFFERS
+ * trace interface to dump all data in va buffer ids into trace.
+ * libva-utils will parse buffer into fields according to buffer type */
+#define VA_TRACE_BUFFERS(dpy,ctx,num,buffers) do {                                            \
+        if ((va_trace_flag & VA_TRACE_FLAG_FTRACE_BUFDATA) == VA_TRACE_FLAG_FTRACE_BUFDATA) { \
+            va_TraceEventBuffers(dpy, ctx, num, buffers);                                     \
+        }                                                                                     \
+    } while (0)
 
 DLL_HIDDEN
 void va_TraceInit(VADisplay dpy);
@@ -295,6 +475,23 @@ void va_TracePutSurface(
 );
 
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
+
+/** \brief va_TraceEvent
+ * common trace interface to send out trace event with scatterd event data. */
+void va_TraceEvent(
+    VADisplay dpy,
+    unsigned short id,
+    unsigned short opcode,
+    unsigned int num,
+    VAEventData *desc);
+
+/** \brief va_TraceEventBuffers
+ * trace buffer interface to send out data in buffers. */
+void va_TraceEventBuffers(
+    VADisplay dpy,
+    VAContextID context,
+    int num_buffers,
+    VABufferID *buffers);
 
 #ifdef __cplusplus
 }

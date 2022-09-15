@@ -45,10 +45,6 @@ source_h_priv = \
 	va_wayland_private.h	\
 	$(NULL)
 
-protocol_source_export_c = \
-	wayland-drm-client-protocol-export.c	\
-	$(NULL)
-
 protocol_source_c = \
 	wayland-drm-client-protocol.c	\
 	$(NULL)
@@ -67,18 +63,14 @@ noinst_HEADERS			= $(source_h_priv)
 va_wayland_drm.c: $(protocol_source_h)
 %-client-protocol.h : %.xml
 	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
-%-client-protocol-export.c : %.xml
-	$(AM_V_GEN)$(WAYLAND_SCANNER) code < $< > $@
-%-client-protocol.c: %-client-protocol-export.c
-	$(AM_V_GEN){ echo '#include "sysdeps.h"'; $(SED) \
-		-e 's@WL_EXPORT@DLL_HIDDEN@g' \
-		< $<; } > $@
+%-client-protocol.c : %.xml
+	$(AM_V_GEN)$(WAYLAND_SCANNER) private-code < $< > $@
 
 EXTRA_DIST = \
 	wayland-drm.xml         \
 	$(NULL)
 
-BUILT_SOURCES = $(protocol_source_h) $(protocol_source_c) $(protocol_source_export_c)
+BUILT_SOURCES = $(protocol_source_h) $(protocol_source_c)
 CLEANFILES = $(BUILT_SOURCES)
 
 # Extra clean files so that maintainer-clean removes *everything*

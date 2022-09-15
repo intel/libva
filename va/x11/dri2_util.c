@@ -231,7 +231,7 @@ va_isDRI2Connected(VADriverContextP ctx, char **driver_name)
             goto err_out;
 
         if (!VA_DRI2Authenticate(ctx->native_dpy, RootWindow(ctx->native_dpy, ctx->x11_screen),
-                                magic))
+                                 magic))
             goto err_out;
     }
     dri_state->base.auth_type = VA_DRI2;
