@@ -1,5 +1,31 @@
-libva NEWS -- summary of user visible changes.  2022-06-28
+libva NEWS -- summary of user visible changes.  2022-09-27
 Copyright (C) 2009-2022 Intel Corporation
+
+version 2.16.0 - 27.Sep.2022
+* add: Add HierarchicalFlag & hierarchical_level_plus1 for AV1e.
+* dep: Update README.md to remove badge links
+* dep: Removed waffle-io badge from README to fix broken link
+* dep: Drop mailing list, IRC and Slack
+* autotools: use wayland-scanner private-code
+* autotools: use the wayland-scanner.pc to locate the prog
+* meson: use wayland-scanner private-code
+* meson: request native wayland-scanner
+* meson: use the wayland-scanner.pc to locate the prog
+* meson: set HAVE_VA_X11 when applicable
+* style:Correct slight coding style in several new commits
+* trace: add Linux ftrace mode for va trace
+* trace: Add missing pthread_mutex_destroy
+* drm: remove no-longer needed X == X mappings
+* drm: fallback to drm driver name == va driver name
+* drm: simplify the mapping table
+* x11: simplify the mapping table
+* android: open() with O_CLOEXEC for device fd
+* android: remove convoluted open_device() helper
+* android: drop va_fool references
+* ci: strengthen ci with -Werror
+* ci: va/x11/nvctl: fix Wdeprecated-non-prototype on close_display
+* ci: add clang-15 coverage and rearrange runners
+* ci: upgrade FreeBSD to 13.1
 
 version 2.15.0 - 28.Jun.2022
 * Add: new display HW attribute to report PCI ID
