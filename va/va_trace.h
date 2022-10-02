@@ -474,10 +474,12 @@ void va_TracePutSurface(
     unsigned int flags /* de-interlacing flags */
 );
 
+DLL_HIDDEN
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 
 /** \brief va_TraceEvent
  * common trace interface to send out trace event with scatterd event data. */
+DLL_HIDDEN
 void va_TraceEvent(
     VADisplay dpy,
     unsigned short id,
@@ -487,6 +489,7 @@ void va_TraceEvent(
 
 /** \brief va_TraceEventBuffers
  * trace buffer interface to send out data in buffers. */
+DLL_HIDDEN
 void va_TraceEventBuffers(
     VADisplay dpy,
     VAContextID context,
