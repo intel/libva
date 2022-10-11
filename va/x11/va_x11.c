@@ -82,7 +82,7 @@ static void va_DisplayContextDestroy(
     if (dri_state && dri_state->close)
         dri_state->close(ctx);
 
-    if (dri_state->base.fd != -1)
+    if (dri_state && dri_state->base.fd != -1)
         close(dri_state->base.fd);
 
     free(pDisplayContext->pDriverContext->drm_state);
