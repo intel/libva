@@ -66,7 +66,7 @@ libva = shared_library(
             libva_headers +
             libva_headers_priv,
   vs_module_defs : 'libva.def',
-  soversion : libva_lt_current,
+  soversion : host_machine.system() == 'windows' ? '' : libva_lt_current,
   version : libva_lt_version,
   c_args : [ '-DSYSCONFDIR="' + sysconfdir + '"'] + ['-DVA_DRIVERS_PATH="' + driverdir + '"'] + va_c_args,
   include_directories : configinc,
@@ -297,7 +297,7 @@ if WITH_WIN32
     'va_win32',
     sources : libva_win32_sources +
               libva_win32_headers,
-    soversion : libva_lt_current,
+    soversion : host_machine.system() == 'windows' ? '' : libva_lt_current,
     version : libva_lt_version,
     install : true,
     c_args : libva_win32_args,
@@ -308,14 +308,6 @@ if WITH_WIN32
     link_with : libva_win32,
     include_directories : configinc,
     dependencies : deps)
-
-  if fs.is_file(libva.full_path()) and fs.is_file(libva_win32.full_path())
-    install_data(
-      [libva.full_path(), libva_win32.full_path()],
-      install_dir : get_option('bindir'),
-      rename : ['va.dll', 'va_win32.dll']
-    )
-  endif
 endif
 
 foreach header : libva_headers_subproject
