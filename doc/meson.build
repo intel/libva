@@ -9,6 +9,7 @@ libva_headers_doc = [
   'va_enc_hevc.h',
   'va_enc_vp8.h',
   'va_enc_vp9.h',
+  'va_enc_av1.h',
   'va_fei.h',
   'va_fei_h264.h',
   'va_fei_hevc.h',
