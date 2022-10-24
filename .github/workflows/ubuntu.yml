@@ -21,7 +21,7 @@ jobs:
       CXX: /usr/bin/clang++-15
       ASM: /usr/bin/clang-15
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: install toolchain
       run: |
         if [[ -e $CC && -e $CXX ]]; then \
@@ -57,7 +57,7 @@ jobs:
   ubuntu-22-04:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: install prerequisites
       run: |
         sudo apt-get update
@@ -83,7 +83,7 @@ jobs:
   ubuntu-20-04:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: install prerequisites
       run: |
         sudo apt-get update
