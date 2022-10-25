@@ -56,7 +56,14 @@ libva_headers_priv = [
 ]
 
 libva_sym = 'libva.syms'
-libva_sym_path = '@0@/@1@'.format(meson.current_source_dir(), libva_sym)
+libva_sym_arg = '-Wl,-version-script,' + '@0@/@1@'.format(meson.current_source_dir(), libva_sym)
+
+libva_link_args = []
+libva_link_depends = []
+if cc.links('', name: '-Wl,--version-script', args: ['-shared', libva_sym_arg])
+  libva_link_args = libva_sym_arg
+  libva_link_depends = libva_sym
+endif
 
 install_headers(libva_headers, subdir : 'va')
 
@@ -70,8 +77,8 @@ libva = shared_library(
   version : libva_lt_version,
   c_args : [ '-DSYSCONFDIR="' + sysconfdir + '"'] + ['-DVA_DRIVERS_PATH="' + driverdir + '"'] + va_c_args,
   include_directories : configinc,
-  link_args : '-Wl,-version-script,' + libva_sym_path,
-  link_depends : libva_sym,
+  link_args : libva_link_args,
+  link_depends : libva_link_depends,
   install : true,
   dependencies : [ dl_dep ])
 
