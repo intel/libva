@@ -120,11 +120,6 @@ if get_option('enable_va_messaging')
   va_c_args += ['-DENABLE_VA_MESSAGING=1']
 endif
 
-# Symbol visibility
-if cc.has_argument('-fvisibility=hidden')
-  va_c_args += ['-DHAVE_GNUC_VISIBILITY_ATTRIBUTE']
-endif
-
 WITH_WIN32 = false
 libwin32_dep = []
 if get_option('with_win32') != 'no'
