@@ -5,33 +5,31 @@ on:
     paths-ignore:
     - '.github/workflows/**'
     - '!.github/workflows/ubuntu.yml'
+    - '!.github/workflows/install-clang.sh'
   pull_request:
     paths-ignore:
     - '.github/workflows/**'
     - '!.github/workflows/ubuntu.yml'
+    - '!.github/workflows/install-clang.sh'
 
 env:
   CFLAGS: -Wall -Werror
 
 jobs:
-  clang-15:
-    runs-on: ubuntu-22.04
+  test:
+    strategy:
+      matrix:
+        compiler: [clang-15, gcc]
+        os: [ubuntu-22.04, ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
     env:
-      CC: /usr/bin/clang-15
-      CXX: /usr/bin/clang++-15
-      ASM: /usr/bin/clang-15
+      CC: ${{ matrix.compiler }}
+      DISTRO: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - name: install toolchain
-      run: |
-        if [[ -e $CC && -e $CXX ]]; then \
-          echo "clang-15 already presents in the image"; \
-        else \
-          echo "clang-15 missed in the image, installing from llvm"; \
-          echo "deb [trusted=yes] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list; \
-          sudo apt-get update; \
-          sudo apt-get install -y --no-install-recommends clang-15; \
-        fi
+      if: ${{ (matrix.compiler == 'clang-15') }}
+      run: .github/workflows/install-clang.sh 15
     - name: install prerequisites
       run: |
         sudo apt-get update
@@ -45,6 +43,8 @@ jobs:
           libxext-dev \
           libxfixes-dev \
           libwayland-dev
+    - name: print compiler version
+      run: ${{ matrix.compiler }} --version
     - name: configure
       run: ./autogen.sh --prefix=/usr
     - name: build
@@ -53,56 +53,3 @@ jobs:
       run: make check
     - name: install
       run: sudo make install
-
-  ubuntu-22-04:
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v3
-    - name: install prerequisites
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libdrm-dev \
-          libegl1-mesa-dev \
-          libgl1-mesa-dev \
-          libx11-dev \
-          libx11-xcb-dev \
-          libxcb-dri3-dev \
-          libxext-dev \
-          libxfixes-dev \
-          libwayland-dev
-    - name: configure
-      run: ./autogen.sh --prefix=/usr
-    - name: build
-      run: make
-    - name: check
-      run: make check
-    - name: install
-      run: sudo make install
-
-  ubuntu-20-04:
-    runs-on: ubuntu-20.04
-    steps:
-    - uses: actions/checkout@v3
-    - name: install prerequisites
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libdrm-dev \
-          libegl1-mesa-dev \
-          libgl1-mesa-dev \
-          libx11-dev \
-          libx11-xcb-dev \
-          libxcb-dri3-dev \
-          libxext-dev \
-          libxfixes-dev \
-          libwayland-dev
-    - name: configure
-      run: ./autogen.sh --prefix=/usr
-    - name: build
-      run: make
-    - name: check
-      run: make check
-    - name: install
-      run: sudo make install
-
