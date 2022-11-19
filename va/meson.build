@@ -75,7 +75,7 @@ libva = shared_library(
   vs_module_defs : 'libva.def',
   soversion : host_machine.system() == 'windows' ? '' : libva_lt_current,
   version : libva_lt_version,
-  c_args : [ '-DSYSCONFDIR="' + sysconfdir + '"'] + ['-DVA_DRIVERS_PATH="' + driverdir + '"'] + va_c_args,
+  c_args : [ '-DSYSCONFDIR="' + sysconfdir + '"'] + ['-DVA_DRIVERS_PATH="' + driverdir + '"'],
   include_directories : configinc,
   link_args : libva_link_args,
   link_depends : libva_link_depends,

@@ -188,7 +188,6 @@ VAMessageCallback vaSetInfoCallback(VADisplay dpy, VAMessageCallback callback, v
 
 static void va_MessagingInit()
 {
-#if ENABLE_VA_MESSAGING
     char env_value[1024];
     int ret;
 
@@ -197,12 +196,10 @@ static void va_MessagingInit()
         if (ret < 1 || default_log_level < 0 || default_log_level > 2)
             default_log_level = 2;
     }
-#endif
 }
 
 void va_errorMessage(VADisplay dpy, const char *msg, ...)
 {
-#if ENABLE_VA_MESSAGING
     VADisplayContextP dctx = (VADisplayContextP)dpy;
     char buf[512], *dynbuf;
     va_list args;
@@ -227,12 +224,10 @@ void va_errorMessage(VADisplay dpy, const char *msg, ...)
         free(dynbuf);
     } else if (len > 0)
         dctx->error_callback(dctx->error_callback_user_context, buf);
-#endif
 }
 
 void va_infoMessage(VADisplay dpy, const char *msg, ...)
 {
-#if ENABLE_VA_MESSAGING
     VADisplayContextP dctx = (VADisplayContextP)dpy;
     char buf[512], *dynbuf;
     va_list args;
@@ -257,7 +252,6 @@ void va_infoMessage(VADisplay dpy, const char *msg, ...)
         free(dynbuf);
     } else if (len > 0)
         dctx->info_callback(dctx->info_callback_user_context, buf);
-#endif
 }
 
 static void va_driverErrorCallback(VADriverContextP ctx,

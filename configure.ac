@@ -149,11 +149,6 @@ AC_ARG_ENABLE([wayland],
                     [build with VA/Wayland API support @<:@default=auto@:>@])],
     [], [enable_wayland="auto"])
 
-AC_ARG_ENABLE([va-messaging],
-    [AC_HELP_STRING([--enable-va-messaging],
-                    [build with va info and error messaging @<:@default=yes@:>@])],
-    [], [enable_va_messaging="yes"])
-
 AC_ARG_WITH(legacy,
     [AC_HELP_STRING([--with-legacy=[[components]]],
                     [build with legacy components @<:@default=emgd,nvctrl,fglrx@:>@])],
@@ -196,11 +191,6 @@ if test "$enable_docs" = "yes"; then
     fi
 fi
 AM_CONDITIONAL(ENABLE_DOCS, test "$enable_docs" = "yes")
-
-# Check for va messaging
-if test "$enable_va_messaging" = "yes"; then
-    AC_DEFINE([ENABLE_VA_MESSAGING], [1], [Defined to 1 if va messaging is needed])
-fi
 
 # Check for -ldl (often not required)
 AC_SEARCH_LIBS([dlopen], [dl], [], [
@@ -376,5 +366,4 @@ echo Default driver path .............. : $LIBVA_DRIVERS_PATH
 echo Extra window systems ............. : $BACKENDS
 echo Build with legacy ................ : $with_legacy
 echo Build documentation .............. : $enable_docs
-echo Build with messaging ............. : $enable_va_messaging
 echo

@@ -115,11 +115,6 @@ if get_option('with_wayland') != 'no'
   WITH_WAYLAND = wayland_dep.found() and wayland_scanner_dep.found()
 endif
 
-va_c_args = []
-if get_option('enable_va_messaging')
-  va_c_args += ['-DENABLE_VA_MESSAGING=1']
-endif
-
 WITH_WIN32 = false
 libwin32_dep = []
 if get_option('with_win32') != 'no'

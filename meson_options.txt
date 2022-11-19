@@ -6,4 +6,3 @@ option('with_wayland', type : 'combo', choices : ['yes', 'no', 'auto'], value : 
 option('with_win32', type : 'combo', choices : ['yes', 'no', 'auto'], value : 'auto')
 option('with_legacy', type : 'array', choices : ['emdg', 'nvctrl', 'fglrx'], value : [])
 option('enable_docs', type : 'boolean', value : false)
-option('enable_va_messaging', type : 'boolean', value : true)
