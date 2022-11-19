@@ -1,0 +1,29 @@
+name: style
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/style.yml'
+    - '!.github/workflows/style.sh'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/style.yml'
+    - '!.github/workflows/style.sh'
+
+jobs:
+  style-check:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          astyle
+    - name: style unify
+      run: ./style_unify
+    - name: check
+      run:  .github/workflows/style.sh
+
