@@ -49,7 +49,5 @@ jobs:
       run: ./autogen.sh --prefix=/usr
     - name: build
       run: make
-    - name: check
-      run: make check
     - name: install
       run: sudo make install
