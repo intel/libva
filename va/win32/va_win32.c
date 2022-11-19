@@ -58,7 +58,7 @@ typedef struct _VADisplayContextWin32 {
 
 static bool TryLoadDriverNameFromRegistry(const LUID* adapter_luid, VADisplayContextWin32* pWin32Ctx)
 {
-    if(!adapter_luid)
+    if (!adapter_luid)
         return false;
 
     /* Get handle to GDI Runtime */

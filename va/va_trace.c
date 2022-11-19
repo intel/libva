@@ -1175,7 +1175,7 @@ static void va_TraceSurfaceAttributes(
        sent in attrib_list after the VASurfaceAttribExternalBufferDescriptor */
     int32_t memtype = 0;
     for (i = 0; i < *num_attribs; i++) {
-        if(attrib_list[i].type == VASurfaceAttribMemoryType) {
+        if (attrib_list[i].type == VASurfaceAttribMemoryType) {
             memtype = attrib_list[i].value.value.i;
             break;
         }
@@ -1206,7 +1206,7 @@ static void va_TraceSurfaceAttributes(
             if ((p->type == VASurfaceAttribExternalBufferDescriptor) && p->value.value.p) {
                 /* Use memtype to distinguish type as specified in VASurfaceAttribExternalBufferDescriptor docs */
                 /* If not otherwise stated, the common VASurfaceAttribExternalBuffers should be used. */
-                if(memtype == 0 /* unspecified in attrib_list */ || memtype == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME) {
+                if (memtype == 0 /* unspecified in attrib_list */ || memtype == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME) {
                     VASurfaceAttribExternalBuffers *tmp = (VASurfaceAttribExternalBuffers *) p->value.value.p;
                     uint32_t j;
 

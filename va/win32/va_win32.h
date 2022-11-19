@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /** \brief HANDLE memory type
- * 
+ *
  * The HANDLE type can be used with D3D12 sharing resource functions such as:
  * https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-opensharedhandle
  * https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createsharedhandle
@@ -40,7 +40,7 @@ extern "C" {
  * When used with VASurfaceAttribExternalBufferDescriptor for vaCreateSurfaces(...,num_surfaces,...),
  * the associated VAGenericValueTypePointer is of type HANDLE[num_surfaces]
  * to create each of num_surfaces from the corresponding HANDLE element
- * 
+ *
  * When used for vaAcquire/ReleaseBufferHandle VABufferInfo.handle type is HANDLE
  * When used for vlVaExportSurfaceHandle, descriptor parameter type is HANDLE*
  */
@@ -49,7 +49,7 @@ extern "C" {
  * When used with VASurfaceAttribExternalBufferDescriptor for vaCreateSurfaces(...,num_surfaces,...),
  * the associated VAGenericValueTypePointer is of type ID3D12Resource*[num_surfaces]
  * to create each of num_surfaces from the corresponding ID3D12Resource* element
- * 
+ *
  * When used for vaAcquire/ReleaseBufferHandle VABufferInfo.handle type is ID3D12Resource*
  * When used for vlVaExportSurfaceHandle, descriptor parameter type is ID3D12Resource**
  */

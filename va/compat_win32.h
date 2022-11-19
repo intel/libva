@@ -128,40 +128,33 @@ inline int gettimeofday(struct timeval *tv, struct timezone* tz)
 //
 typedef UINT D3DKMT_HANDLE;
 
-typedef struct _D3DKMT_ADAPTERINFO
-{
+typedef struct _D3DKMT_ADAPTERINFO {
     D3DKMT_HANDLE       hAdapter;
     LUID                AdapterLuid;
     ULONG               NumOfSources;
     BOOL                bPrecisePresentRegionsPreferred;
 } D3DKMT_ADAPTERINFO;
 
-typedef struct _D3DKMT_ENUMADAPTERS2
-{
+typedef struct _D3DKMT_ENUMADAPTERS2 {
     ULONG                 NumAdapters;           // in/out: On input, the count of the pAdapters array buffer.  On output, the number of adapters enumerated.
     D3DKMT_ADAPTERINFO*   pAdapters;             // out: Array of enumerated adapters containing NumAdapters elements
 } D3DKMT_ENUMADAPTERS2;
 
 
-typedef enum _KMTQUERYADAPTERINFOTYPE
-{
-     KMTQAITYPE_QUERYREGISTRY           = 48,
+typedef enum _KMTQUERYADAPTERINFOTYPE {
+    KMTQAITYPE_QUERYREGISTRY           = 48,
 } KMTQUERYADAPTERINFOTYPE;
 
-typedef struct _D3DKMT_QUERYADAPTERINFO
-{
+typedef struct _D3DKMT_QUERYADAPTERINFO {
     D3DKMT_HANDLE           hAdapter;
     KMTQUERYADAPTERINFOTYPE Type;
     VOID*                   pPrivateDriverData;
     UINT                    PrivateDriverDataSize;
 } D3DKMT_QUERYADAPTERINFO;
 
-typedef struct _D3DDDI_QUERYREGISTRY_FLAGS
-{
-    union
-    {
-        struct
-        {
+typedef struct _D3DDDI_QUERYREGISTRY_FLAGS {
+    union {
+        struct {
             UINT   TranslatePath    :  1;
             UINT   MutableValue     :  1;
             UINT   Reserved         : 30;
@@ -170,36 +163,33 @@ typedef struct _D3DDDI_QUERYREGISTRY_FLAGS
     };
 } D3DDDI_QUERYREGISTRY_FLAGS;
 
-typedef enum _D3DDDI_QUERYREGISTRY_TYPE
-{
-   D3DDDI_QUERYREGISTRY_ADAPTERKEY      = 1,
+typedef enum _D3DDDI_QUERYREGISTRY_TYPE {
+    D3DDDI_QUERYREGISTRY_ADAPTERKEY      = 1,
 } D3DDDI_QUERYREGISTRY_TYPE;
 
-typedef enum _D3DDDI_QUERYREGISTRY_STATUS
-{
-   D3DDDI_QUERYREGISTRY_STATUS_SUCCESS              = 0,
-   D3DDDI_QUERYREGISTRY_STATUS_BUFFER_OVERFLOW      = 1,
+typedef enum _D3DDDI_QUERYREGISTRY_STATUS {
+    D3DDDI_QUERYREGISTRY_STATUS_SUCCESS              = 0,
+    D3DDDI_QUERYREGISTRY_STATUS_BUFFER_OVERFLOW      = 1,
 } D3DDDI_QUERYREGISTRY_STATUS;
 
-typedef struct _D3DDDI_QUERYREGISTRY_INFO
-{
-   D3DDDI_QUERYREGISTRY_TYPE    QueryType;              // In
-   D3DDDI_QUERYREGISTRY_FLAGS   QueryFlags;             // In
-   WCHAR                        ValueName[MAX_PATH];    // In
-   ULONG                        ValueType;              // In
-   ULONG                        PhysicalAdapterIndex;   // In
-   ULONG                        OutputValueSize;        // Out. Number of bytes written to the output value or required in case of D3DDDI_QUERYREGISTRY_STATUS_BUFFER_OVERFLOW.
-   D3DDDI_QUERYREGISTRY_STATUS  Status;                 // Out
-   union {
+typedef struct _D3DDDI_QUERYREGISTRY_INFO {
+    D3DDDI_QUERYREGISTRY_TYPE    QueryType;              // In
+    D3DDDI_QUERYREGISTRY_FLAGS   QueryFlags;             // In
+    WCHAR                        ValueName[MAX_PATH];    // In
+    ULONG                        ValueType;              // In
+    ULONG                        PhysicalAdapterIndex;   // In
+    ULONG                        OutputValueSize;        // Out. Number of bytes written to the output value or required in case of D3DDDI_QUERYREGISTRY_STATUS_BUFFER_OVERFLOW.
+    D3DDDI_QUERYREGISTRY_STATUS  Status;                 // Out
+    union {
         DWORD   OutputDword;                            // Out
         UINT64  OutputQword;                            // Out
         WCHAR   OutputString[1];                        // Out. Dynamic array
         BYTE    OutputBinary[1];                        // Out. Dynamic array
-   };
- } D3DDDI_QUERYREGISTRY_INFO;
+    };
+} D3DDDI_QUERYREGISTRY_INFO;
 
-typedef _Check_return_ NTSTATUS (APIENTRY *PFND3DKMT_ENUMADAPTERS2)(_Inout_ CONST D3DKMT_ENUMADAPTERS2*);
-typedef _Check_return_ NTSTATUS (APIENTRY *PFND3DKMT_QUERYADAPTERINFO)(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
+typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_ENUMADAPTERS2)(_Inout_ CONST D3DKMT_ENUMADAPTERS2*);
+typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_QUERYADAPTERINFO)(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
 
 #endif
 
