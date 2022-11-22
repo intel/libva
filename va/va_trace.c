@@ -47,8 +47,8 @@
 #include <fcntl.h>
 #include "va_drmcommon.h"
 #if defined(_WIN32)
-#include <va_win32.h>
-#include <compat_win32.h>
+#include "win32/va_win32.h"
+#include "compat_win32.h"
 #else
 #include <dlfcn.h>
 #include <unistd.h>
