@@ -318,5 +318,9 @@ if WITH_WIN32
 endif
 
 foreach header : libva_headers_subproject
-  configure_file(output: fs.name(header), input: header, copy: true)
+  if meson.version().version_compare('>= 0.64')
+    fs.copyfile(header)
+  else
+    configure_file(output: fs.name(header), input: header, copy: true)
+  endif
 endforeach
