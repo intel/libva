@@ -14,8 +14,9 @@ jobs:
   freebsd:
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v3
-    - name: test
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+    - name: 'Install prerequisites and build'
       uses: vmactions/freebsd-vm@v0
       with:
         prepare: |
