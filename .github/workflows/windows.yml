@@ -22,18 +22,22 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
-    - name: Install Meson
+    - name: 'Install Meson'
       run: pip install meson
-    - name: Enter DevShell
+    - name: 'Enter DevShell'
       run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
-    - name: Configure with meson
-      run: meson build
-    - name: Build and Install
-      run: ninja -C build install
+    - name: 'Configure with meson'
+      run: meson setup _build
+    - name: 'Build'
+      run: meson compile -C _build
+    - name: 'Install'
+      run: meson install -C _build
 
   windows-mingw:
     runs-on: windows-2022
+    env:
+      CC: gcc
     defaults:
       run:
         shell: msys2 {0}
@@ -48,10 +52,12 @@ jobs:
         pacboy: >-
           toolchain:p
           meson:p
-    - name: Enter DevShell
+    - name: 'Enter DevShell'
       run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
-    - name: Configure with meson
-      run: CC=gcc meson build
-    - name: Build and Install
-      run: CC=gcc ninja -C build install
+    - name: 'Configure'
+      run: meson setup _build
+    - name: 'Build'
+      run: meson compile -C _build
+    - name: 'Install'
+      run: meson install -C _build
