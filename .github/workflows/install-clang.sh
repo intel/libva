@@ -27,6 +27,6 @@ if ! which $CC >/dev/null 2>&1; then
 	echo "clang-$llvm_version missed in the image, installing from llvm"
 	echo "$sources" | sudo tee -a /etc/apt/sources.list
 	sudo apt-get update
-	sudo apt-get install -y --no-install-recommends clang-15
+	sudo apt-get install -y --no-install-recommends clang-$llvm_version
 fi
 
