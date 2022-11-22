@@ -16,14 +16,13 @@ jobs:
   style-check:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
-    - name: install prerequisites
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+    - name: 'Install prerequisites'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
           astyle
-    - name: style unify
-      run: ./style_unify
-    - name: check
-      run:  .github/workflows/style.sh
+    - name: 'Check for style changes'
+      run: ./style_unify && .github/workflows/style.sh
 
