@@ -27,11 +27,12 @@ jobs:
       CC: ${{ matrix.compiler }}
       DISTRO: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
-    - name: install toolchain
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+    - name: 'Install toolchain'
       if: ${{ (matrix.compiler == 'clang-15') }}
       run: .github/workflows/install-clang.sh 15
-    - name: install prerequisites
+    - name: 'Install prerequisites'
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -45,24 +46,24 @@ jobs:
           libxfixes-dev \
           libwayland-dev \
           meson
-    - name: print compiler version
+    - name: 'Print compiler version'
       run: ${{ matrix.compiler }} --version
-    - name: meson setup
+    - name: 'Configure (meson)'
       if: ${{ (matrix.build == 'meson') }}
       run: meson setup ./builddir --prefix=/usr
-    - name: meson compile
+    - name: 'Build (meson)'
       if: ${{ (matrix.build == 'meson') }}
       run: meson compile -C ./builddir || ninja -C ./builddir
-    - name: meson install
+    - name: 'Install (meson)'
       if: ${{ (matrix.build == 'meson') }}
       run: sudo meson install -C ./builddir
 
-    - name: configure
+    - name: 'Configure (autotools)'
       if: ${{ (matrix.build == 'autotools') }}
       run: ./autogen.sh --prefix=/usr
-    - name: build
+    - name: 'Build (autotools)'
       if: ${{ (matrix.build == 'autotools') }}
       run: make
-    - name: install
+    - name: 'Build and Install (autotools)'
       if: ${{ (matrix.build == 'autotools') }}
       run: sudo make install
