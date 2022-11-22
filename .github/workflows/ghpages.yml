@@ -1,0 +1,57 @@
+name: Deploy Docs to GitHub
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-22.04
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: 'Get latest tag'
+      run: echo "GIT_LATEST_TAG=$(git tag | grep '^[0-9]\+\.[0-9]\+\?\.[0-9]\+\?$' | sort -V -r | head -n1)" >> $GITHUB_ENV
+
+    - name: 'Variables'
+      run: |
+        echo $GITHUB_REF_NAME
+        echo $GIT_LATEST_TAG
+
+    - name: 'Install prerequisites'
+      if: github.ref_name == env.GIT_LATEST_TAG
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libdrm-dev \
+          doxygen \
+          meson \
+    - name: 'Build the Docs'
+      if: github.ref_name == env.GIT_LATEST_TAG
+      run: meson setup _build -D enable_docs=true && meson compile -C _build
+
+    - name: 'Upload the artifacts'
+      if: github.ref_name == env.GIT_LATEST_TAG
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: "_build/doc/html-out"
+
+    - name: 'Deploy to GitHub Pages'
+      if: github.ref_name == env.GIT_LATEST_TAG
+      id: deployment
+      uses: actions/deploy-pages@v1
