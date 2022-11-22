@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #if defined(_WIN32)
-#include <compat_win32.h>
+#include "compat_win32.h"
 #define DRIVER_EXTENSION    "_drv_video.dll"
 #define DRIVER_PATH_STRING  "%s\\%s%s"
 #define ENV_VAR_SEPARATOR ";"
