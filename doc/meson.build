@@ -34,7 +34,7 @@ foreach h : libva_headers_doc
 endforeach
 
 config = configuration_data()
-config.set('PACKAGE_VERSION', meson.project_version())
+config.set('PACKAGE_VERSION', libva_version)
 config.set('VA_HEADER_DIR', headerdir)
 config.set('VA_HEADER_FILES', headers)
 config.set('VA_HTML_FOOTER', footer)
