@@ -1,4 +1,8 @@
- headerdir = join_paths(meson.source_root(), 'va')
+if meson.version().version_compare('>= 0.56')
+  headerdir = join_paths(meson.project_source_root(), 'va')
+else
+  headerdir = join_paths(meson.source_root(), 'va')
+endif
 footer = join_paths(meson.current_source_dir(), 'va_footer.html')
 
 libva_headers_doc = [
