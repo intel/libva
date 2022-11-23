@@ -1042,7 +1042,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      */
     const VABlendState *blend_state;
     /**
-     * \bried mirroring state. See "Mirroring directions".
+     * \brief mirroring state. See "Mirroring directions".
      *
      * Mirroring of an image can be performed either along the
      * horizontal or vertical axis. It is assumed that the rotation
