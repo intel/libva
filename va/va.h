@@ -401,6 +401,7 @@ typedef int VAStatus;   /** Return status type from functions */
  */
 const char *vaErrorStr(VAStatus error_status);
 
+/** \brief Structure to describe rectangle. */
 typedef struct _VARectangle {
     int16_t x;
     int16_t y;
@@ -410,12 +411,18 @@ typedef struct _VARectangle {
 
 /** \brief Generic motion vector data structure. */
 typedef struct _VAMotionVector {
-    /** \mv0[0]: horizontal motion vector for past reference */
-    /** \mv0[1]: vertical motion vector for past reference */
-    /** \mv1[0]: horizontal motion vector for future reference */
-    /** \mv1[1]: vertical motion vector for future reference */
-    int16_t  mv0[2];  /* past reference */
-    int16_t  mv1[2];  /* future reference */
+    /** \brief Past reference
+     *
+     * - \c [0]: horizontal motion vector for past reference
+     * - \c [1]: vertical motion vector for past reference
+     */
+    int16_t  mv0[2];
+    /** \brief Future reference
+     *
+     * - \c [0]: horizontal motion vector for future reference
+     * - \c [1]: vertical motion vector for future reference
+     */
+    int16_t  mv1[2];
 } VAMotionVector;
 
 /** Type of a message callback, used for both error and info log. */
@@ -1771,7 +1778,7 @@ typedef struct _VASurfaceAttribExternalBuffers {
  * \brief Queries surface attributes for the supplied config.
  *
  * This function queries for all supported attributes for the
- * supplied VA @config. In particular, if the underlying hardware
+ * supplied VA \c config. In particular, if the underlying hardware
  * supports the creation of VA surfaces in various formats, then
  * this function will enumerate all pixel formats that are supported.
  *
