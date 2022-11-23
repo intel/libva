@@ -1,0 +1,27 @@
+name: docs
+
+on:
+  push:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/docs.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/workflows/**'
+    - '!.github/workflows/docs.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+    - name: install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          doxygen \
+          libdrm-dev \
+          meson
+    - name: build the docs
+      run: meson setup _build -D enable_docs=true && meson compile -C _build
+
