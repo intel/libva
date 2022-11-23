@@ -480,14 +480,14 @@ typedef struct _VABlendState {
     /**
      * \brief Global alpha value.
      *
-     * Valid if \flags has VA_BLEND_GLOBAL_ALPHA.
+     * Valid if \ref flags has VA_BLEND_GLOBAL_ALPHA.
      * Valid range is 0.0 to 1.0 inclusive.
      */
     float               global_alpha;
     /**
      * \brief Minimum luma value.
      *
-     * Valid if \flags has VA_BLEND_LUMA_KEY.
+     * Valid if \ref flags has VA_BLEND_LUMA_KEY.
      * Valid range is 0.0 to 1.0 inclusive.
      * \ref min_luma shall be set to a sensible value lower than \ref max_luma.
      */
@@ -495,7 +495,7 @@ typedef struct _VABlendState {
     /**
      * \brief Maximum luma value.
      *
-     * Valid if \flags has VA_BLEND_LUMA_KEY.
+     * Valid if \ref flags has VA_BLEND_LUMA_KEY.
      * Valid range is 0.0 to 1.0 inclusive.
      * \ref max_luma shall be set to a sensible value larger than \ref min_luma.
      */
