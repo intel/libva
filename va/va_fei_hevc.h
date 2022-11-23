@@ -243,6 +243,9 @@ typedef struct _VAEncFEIDistortionHevc {
     /** only when colocated_ctb_distortion in VAEncMiscParameterFEIFrameControlHEVC is set */
     uint32_t    colocated_ctb_distortion;
 } VAEncFEIDistortionHevc;
+
+/**@}*/
+
 #ifdef __cplusplus
 }
 #endif
