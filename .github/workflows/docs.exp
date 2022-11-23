@@ -9,10 +9,6 @@ warning: Tag 'MSCGEN_PATH' at line 2178 of file 'doc/Doxyfile' has become obsole
 /home/runner/work/libva/libva/va/va.h:5270: warning: end of file with unbalanced grouping commands
 /home/runner/work/libva/libva/va/va_enc_hevc.h:795: warning: unbalanced grouping commands
 /home/runner/work/libva/libva/va/va_enc_hevc.h:893: warning: unbalanced grouping commands
-/home/runner/work/libva/libva/va/va_fei.h:169: warning: end of file while inside a group
-/home/runner/work/libva/libva/va/va_fei_h264.h:505: warning: end of file while inside a group
-/home/runner/work/libva/libva/va/va_fei_hevc.h:252: warning: end of file while inside a group
-/home/runner/work/libva/libva/va/va_dec_vp8.h:26: warning: the name 'va_dec_vp.h' supplied as the argument in the \file statement is not an input file
 /home/runner/work/libva/libva/va/va.h:904: warning: explicit link request to 'VAEncQpBuffer' could not be resolved
 /home/runner/work/libva/libva/va/va.h:2345: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
 /home/runner/work/libva/libva/va/va_enc_h264.h:468: warning: unable to resolve reference to '_VAEncPictureParameterBufferH264::num_ref_idx_l0_active_minus1' for \ref command
@@ -94,7 +90,6 @@ error: Problems running latex. Check your installation or look for typos in _for
 /home/runner/work/libva/libva/va/va.h:418: warning: Found unknown command '\mv1'
 /home/runner/work/libva/libva/va/va.h:419: warning: Found unknown command '\mv1'
 /home/runner/work/libva/libva/va/va_vpp.h:1040: warning: explicit link request to 'VA_STATUS_ERROR_INVALID_BLEND_STATE' could not be resolved
-/home/runner/work/libva/libva/va/va_vpp.h:1045: warning: Found unknown command '\bried'
 /home/runner/work/libva/libva/va/va_vpp.h:918: warning: explicit link request to 'VARectangle' could not be resolved
 /home/runner/work/libva/libva/va/va_vpp.h:1010: warning: unable to resolve reference to 'VA_ROTATION_NONE:' for \ref command
 /home/runner/work/libva/libva/va/va_vpp.h:1012: warning: unable to resolve reference to 'VA_ROTATION_90:' for \ref command
