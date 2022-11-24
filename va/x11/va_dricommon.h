@@ -24,20 +24,13 @@
 #ifndef _VA_DRICOMMON_H_
 #define _VA_DRICOMMON_H_
 
-#ifndef ANDROID
 #include <X11/Xlib.h>
 #include <xf86drm.h>
 #include <drm.h>
 #include <drm_sarea.h>
-#endif
 
 #include <va/va_backend.h>
 #include <va/va_drmcommon.h>
-
-#ifdef ANDROID
-#define XID unsigned int
-#define Bool int
-#endif
 
 enum {
     /* Compatibility. Do not use for newly-written code. */
@@ -72,7 +65,6 @@ struct dri_drawable {
 #define DRAWABLE_HASH_SZ 32
 struct dri_state {
     struct drm_state base;
-#ifndef ANDROID
     struct dri_drawable *drawable_hash[DRAWABLE_HASH_SZ];
 
     struct dri_drawable *(*createDrawable)(VADriverContextP ctx, XID x_drawable);
@@ -80,7 +72,6 @@ struct dri_state {
     void (*swapBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     union dri_buffer *(*getRenderingBuffer)(VADriverContextP ctx, struct dri_drawable *dri_drawable);
     void (*close)(VADriverContextP ctx);
-#endif
     /** \brief Reserved bytes for future use, must be zero */
     unsigned long  va_reserved[16];
 };
