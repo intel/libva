@@ -50,13 +50,6 @@
 #endif
 #ifdef ANDROID
 #include <log/log.h>
-/* support versions < JellyBean */
-#ifndef ALOGE
-#define ALOGE LOGE
-#endif
-#ifndef ALOGI
-#define ALOGI LOGI
-#endif
 #endif
 
 #define ASSERT      assert
