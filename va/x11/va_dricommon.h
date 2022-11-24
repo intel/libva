@@ -27,7 +27,6 @@
 #include <X11/Xlib.h>
 #include <xf86drm.h>
 #include <drm.h>
-#include <drm_sarea.h>
 
 #include <va/va_backend.h>
 #include <va/va_drmcommon.h>
