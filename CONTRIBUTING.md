@@ -47,7 +47,7 @@ Once you've finished making your changes push them to your fork and send the PR 
 
 ## Reporting a security issue
 
-Please mail to secure-opensource@intel.com directly for security issue
+Please refer to [security.md](security.md) file for details.
 
 ## Public issue tracking
 
