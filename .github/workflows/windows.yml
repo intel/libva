@@ -1,16 +1,6 @@
 name: windows
 
-on:
-  push:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/windows.yml'
-    - '!.github/workflows/EnterDevShell.ps1'
-  pull_request:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/windows.yml'
-    - '!.github/workflows/EnterDevShell.ps1'
+on: [push, pull_request]
 
 jobs:
   windows-msvc:

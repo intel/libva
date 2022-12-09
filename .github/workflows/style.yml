@@ -1,16 +1,6 @@
 name: style
 
-on:
-  push:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/style.yml'
-    - '!.github/workflows/style.sh'
-  pull_request:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/style.yml'
-    - '!.github/workflows/style.sh'
+on: [push, pull_request]
 
 jobs:
   style-check:

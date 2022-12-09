@@ -1,16 +1,6 @@
 name: ubuntu
 
-on:
-  push:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/ubuntu.yml'
-    - '!.github/workflows/install-clang.sh'
-  pull_request:
-    paths-ignore:
-    - '.github/workflows/**'
-    - '!.github/workflows/ubuntu.yml'
-    - '!.github/workflows/install-clang.sh'
+on: [push, pull_request]
 
 env:
   CFLAGS: -Wall -Werror
