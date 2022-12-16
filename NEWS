@@ -1,5 +1,52 @@
-libva NEWS -- summary of user visible changes.  2022-09-27
+libva NEWS -- summary of user visible changes.  2022-12-16
 Copyright (C) 2009-2022 Intel Corporation
+
+version 2.17.0 - 16.Dec.2022
+* win: Simplify signature for driver name loading
+* win: Rewrite driver registry query and fix some bugs/leaks/inefficiencies
+* win: Add missing null check after calloc
+* va: Update security disclaimer
+* ci: drop paths-ignore in github workflow
+* dep:remove the file .cvsignore
+* ci: install-clang.sh: install the requested version
+* ci: freebsd: add pretty(ier) step names
+* ci: freebsd: use meson setup and meson install
+* ci: ubuntu: add pretty(ier) step names
+* ci: polish the windows/meson invocations
+* ci: style: use prettier formatting
+* pkgconfig: add 'with-legacy' for emgd, nvctrl and fglrx
+* meson: add 'with-legacy' for emgd, nvctrl and fglrx
+* x11: move all FGLRX code to va_fglrx.c
+* x11: move all NVCTRL code to va_nvctrl.c
+* meson: stop using deprecated meson.source_root()
+* meson: stop using configure_file copy=true
+* va: correctly include the win32 (local) headers
+* ci: add style check/unify job
+* win: clean-up the coding style
+* va: dos2unix all the files
+* ci: add meson permutation in the Ubuntu builds
+* ci: remove unused make check
+* drm: remove unnecessary dri2 version/extension query
+* ci: use matrix, add ubuntu 20.04 + clang-15
+* trace: annotate internal functions with DLL_HIDDEN
+* build/sysdeps: Remove HAVE_GNUC_VISIBILITY_ATTRIBUTE and use _GNUC_ support level attribute instead
+* meson: Check support for -Wl,-version-script and build link_args accordingly
+* ci: switch python action from @v2 to @v4
+* ci: dos2unix for windows workflow files
+* ci: switch checkout action from @v2 to @v3
+* meson: Set va_win32 soversion to '' and remove the install_data rename
+* fix: resouce check null
+* ci: Add msvc/mingw Windows CI
+* va_trace: Add Win32 memory types in va_TraceSurfaceAttributes
+* va_trace: va_TraceSurfaceAttributes should check the VASurfaceAttribMemoryType
+* va: Adds Win32 Node and Windows build support
+* va: Adds compat_win32 abstraction for Windows build and prepares va common code for windows build
+* pkgconfig: Add Win32 package for when WITH_WIN32 is enabled
+* meson: Add with_win32 option, makes libdrm non-mandatory on Win
+* ci(va_win): add libx11-xcb-dev libxcb-dri3-dev to trigger X11 backend build
+* x11: add basic DRI3 support
+* drm: remove VA_DRM_IsRenderNodeFd() helper
+* drm: add radeon drm + radeonsi mesa combo
 
 version 2.16.0 - 27.Sep.2022
 * add: Add HierarchicalFlag & hierarchical_level_plus1 for AV1e.
