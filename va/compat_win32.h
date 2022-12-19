@@ -128,18 +128,14 @@ inline int gettimeofday(struct timeval *tv, struct timezone* tz)
 //
 typedef UINT D3DKMT_HANDLE;
 
-typedef struct _D3DKMT_ADAPTERINFO {
-    D3DKMT_HANDLE       hAdapter;
-    LUID                AdapterLuid;
-    ULONG               NumOfSources;
-    BOOL                bPrecisePresentRegionsPreferred;
-} D3DKMT_ADAPTERINFO;
+typedef struct _D3DKMT_CLOSEADAPTER {
+    D3DKMT_HANDLE   hAdapter;   // in: adapter handle
+} D3DKMT_CLOSEADAPTER;
 
-typedef struct _D3DKMT_ENUMADAPTERS2 {
-    ULONG                 NumAdapters;           // in/out: On input, the count of the pAdapters array buffer.  On output, the number of adapters enumerated.
-    D3DKMT_ADAPTERINFO*   pAdapters;             // out: Array of enumerated adapters containing NumAdapters elements
-} D3DKMT_ENUMADAPTERS2;
-
+typedef struct _D3DKMT_OPENADAPTERFROMLUID {
+    LUID            AdapterLuid;
+    D3DKMT_HANDLE   hAdapter;
+} D3DKMT_OPENADAPTERFROMLUID;
 
 typedef enum _KMTQUERYADAPTERINFOTYPE {
     KMTQAITYPE_QUERYREGISTRY           = 48,
@@ -188,7 +184,8 @@ typedef struct _D3DDDI_QUERYREGISTRY_INFO {
     };
 } D3DDDI_QUERYREGISTRY_INFO;
 
-typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_ENUMADAPTERS2)(_Inout_ CONST D3DKMT_ENUMADAPTERS2*);
+typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_CLOSEADAPTER)(_In_ CONST D3DKMT_CLOSEADAPTER*);
+typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_OPENADAPTERFROMLUID)(_Inout_ D3DKMT_OPENADAPTERFROMLUID*);
 typedef _Check_return_ NTSTATUS(APIENTRY *PFND3DKMT_QUERYADAPTERINFO)(_Inout_ CONST D3DKMT_QUERYADAPTERINFO*);
 
 #endif
