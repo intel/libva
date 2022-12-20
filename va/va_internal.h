@@ -45,6 +45,11 @@ VADisplayContextP va_newDisplayContext(void);
 
 VADriverContextP va_newDriverContext(VADisplayContextP dctx);
 
+DLL_HIDDEN
+VAStatus vaBufferInfo(VADisplay dpy, VAContextID context, VABufferID buf_id,
+                      VABufferType *type, unsigned int *size,
+                      unsigned int *num_elements);
+
 #ifdef __cplusplus
 }
 #endif

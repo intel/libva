@@ -60,7 +60,6 @@ EXPORTS
     vaQuerySurfaceError
     vaSetImagePalette
     vaSetSubpictureChromakey
-    vaBufferInfo
     vaLockSurface
     vaUnlockSurface
     vaCreateMFContext
