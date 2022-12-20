@@ -277,6 +277,10 @@ VADisplay vaGetDisplayWin32(
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->opaque = calloc(1, sizeof(VADisplayContextWin32));
+    if (!pDisplayContext->opaque) {
+        va_DisplayContextDestroy(pDisplayContext);
+        return NULL;
+    }
 
     VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
     if (adapter_luid) {
