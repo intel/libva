@@ -15,6 +15,6 @@ jobs:
           pkg install -y meson pkgconf libdrm libXext libXfixes wayland
           pkg install -y -x '^mesa($|-libs)'
         run: |
-          meson setup _build
+          meson setup _build -D werror=true
           meson compile -C _build
           meson install -C _build

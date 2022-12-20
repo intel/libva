@@ -18,7 +18,7 @@ jobs:
       run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
     - name: 'Configure with meson'
-      run: meson setup _build
+      run: meson setup _build -D werror=true
     - name: 'Build'
       run: meson compile -C _build
     - name: 'Install'
@@ -46,7 +46,7 @@ jobs:
       run: '.github\workflows\EnterDevShell.ps1 ${{ inputs.architecture }}'
       shell: pwsh
     - name: 'Configure'
-      run: meson setup _build
+      run: meson setup _build -D werror=true
     - name: 'Build'
       run: meson compile -C _build
     - name: 'Install'
