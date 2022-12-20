@@ -39,16 +39,16 @@ const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12";
 typedef struct _VADisplayContextWin32 {
     LUID adapter_luid;
     char registry_driver_name[MAX_PATH];
-    uint8_t registry_driver_available_flag;
+    bool registry_driver_available_flag;
 } VADisplayContextWin32;
 
-static bool TryLoadDriverNameFromRegistry(const LUID* adapter_luid, VADisplayContextWin32* pWin32Ctx)
+static void LoadDriverNameFromRegistry(VADisplayContextWin32* pWin32Ctx)
 {
     HMODULE hGdi32 = LoadLibraryA("gdi32.dll");
     if (!hGdi32)
-        return false;
+        return;
 
-    D3DKMT_OPENADAPTERFROMLUID OpenArgs = { .AdapterLuid = *adapter_luid };
+    D3DKMT_OPENADAPTERFROMLUID OpenArgs = { .AdapterLuid = pWin32Ctx->adapter_luid };
     D3DDDI_QUERYREGISTRY_INFO RegistryInfo = {
         .QueryType = D3DDDI_QUERYREGISTRY_ADAPTERKEY,
         .QueryFlags.TranslatePath = true,
@@ -66,7 +66,6 @@ static bool TryLoadDriverNameFromRegistry(const LUID* adapter_luid, VADisplayCon
         .pPrivateDriverData = &RegistryInfo,
         .PrivateDriverDataSize = sizeof(RegistryInfo),
     };
-    bool ret = false;
 
     PFND3DKMT_OPENADAPTERFROMLUID pfnOpenAdapterFromLuid = (PFND3DKMT_OPENADAPTERFROMLUID)GetProcAddress(hGdi32, "D3DKMTOpenAdapterFromLuid");
     PFND3DKMT_CLOSEADAPTER pfnCloseAdapter = (PFND3DKMT_CLOSEADAPTER)GetProcAddress(hGdi32, "D3DKMTCloseAdapter");
@@ -101,7 +100,7 @@ static bool TryLoadDriverNameFromRegistry(const LUID* adapter_luid, VADisplayCon
                              NULL, NULL))
         goto cleanup;
 
-    ret = true;
+    pWin32Ctx->registry_driver_available_flag = true;
 
 cleanup:
     if (pRegistryInfo && pRegistryInfo != &RegistryInfo)
@@ -111,7 +110,6 @@ cleanup:
         pfnCloseAdapter(&Close);
     }
     FreeLibrary(hGdi32);
-    return ret;
 }
 
 static int va_DisplayContextIsValid(
@@ -211,7 +209,7 @@ VADisplay vaGetDisplayWin32(
         memcpy(&pWin32Ctx->adapter_luid, adapter_luid, sizeof(pWin32Ctx->adapter_luid));
 
         /* Load the preferred driver name from the driver registry if available */
-        pWin32Ctx->registry_driver_available_flag = TryLoadDriverNameFromRegistry(&pWin32Ctx->adapter_luid, pWin32Ctx) ? 1 : 0;
+        LoadDriverNameFromRegistry(pWin32Ctx);
         if (pWin32Ctx->registry_driver_available_flag) {
             fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart);
         } else {
