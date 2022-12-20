@@ -43,6 +43,7 @@
 #include <xf86drm.h>
 
 #include "va_backend.h"
+#include "va_dri3.h"
 #include "va_drmcommon.h"
 #include "drm/va_drm_utils.h"
 
