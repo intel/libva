@@ -59,7 +59,7 @@ static void LoadDriverNameFromRegistry(VADisplayContextWin32* pWin32Ctx)
 #ifndef _WIN64
     BOOL isWowProcess = false;
     if (IsWow64Process(GetCurrentProcess(), &isWowProcess) && isWowProcess)
-        wcscpy(RegistryInfo.ValueName, "VAAPIDriverNameWow");
+        wcscpy(RegistryInfo.ValueName, L"VAAPIDriverNameWow");
 #endif
     D3DKMT_QUERYADAPTERINFO QAI = {
         .Type = KMTQAITYPE_QUERYREGISTRY,
