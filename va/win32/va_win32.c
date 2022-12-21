@@ -107,7 +107,10 @@ cleanup:
         free(pRegistryInfo);
     if (pfnCloseAdapter && OpenArgs.hAdapter) {
         D3DKMT_CLOSEADAPTER Close = { OpenArgs.hAdapter };
-        pfnCloseAdapter(&Close);
+        /* The explicit negation is a no-op, yet required to silence the
+         * Wunused-result warning.
+         */
+        (void) !pfnCloseAdapter(&Close);
     }
     FreeLibrary(hGdi32);
 }
