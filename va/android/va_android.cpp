@@ -61,23 +61,33 @@ static void va_DisplayContextDestroy(
     free(pDisplayContext);
 }
 
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
+static VAStatus va_DisplayContextConnect(
+    VADisplayContextP pDisplayContext
 )
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
+    struct drm_state * const drm_state = (struct drm_state *)ctx->drm_state;
 
-    memset(drm_state, 0, sizeof(*drm_state));
     drm_state->fd = open(DEVICE_NAME, O_RDWR | O_CLOEXEC);
-
     if (drm_state->fd < 0) {
         fprintf(stderr, "Cannot open DRM device '%s': %d, %s\n",
                 DEVICE_NAME, errno, strerror(errno));
         return VA_STATUS_ERROR_UNKNOWN;
     }
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus va_DisplayContextGetNumCandidates(
+    VADisplayContextP pDisplayContext,
+    int *num_candidates
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    VAStatus status = va_DisplayContextConnect(pDisplayContext);
+    if (status != VA_STATUS_SUCCESS)
+        return status;
+
     return VA_DRM_GetNumCandidates(ctx, num_candidates);
 }
 
