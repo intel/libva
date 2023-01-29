@@ -68,33 +68,6 @@ static VAStatus va_DisplayContextConnect(
 }
 
 
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VAStatus status = VA_DRM_GetNumCandidates(ctx, num_candidates);
-    if (status != VA_STATUS_SUCCESS)
-        return status;
-
-    /* XXX: This is backwards, the connect should happen first */
-    return va_DisplayContextConnect(pDisplayContext);
-}
-
-static VAStatus
-va_DisplayContextGetDriverNameByIndex(
-    VADisplayContextP pDisplayContext,
-    char            **driver_name_ptr,
-    int               candidate_index
-)
-{
-
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-
-    return VA_DRM_GetDriverName(ctx, driver_name_ptr, candidate_index);
-}
-
 static VAStatus
 va_DisplayContextGetDriverNames(
     VADisplayContextP pDisplayContext,
@@ -133,8 +106,6 @@ vaGetDisplayDRM(int fd)
         goto error;
 
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
-    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
     pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
