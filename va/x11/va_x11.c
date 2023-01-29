@@ -58,14 +58,6 @@ static const struct driver_name_map g_dri2_driver_name_map[] = {
     { NULL,         NULL }
 };
 
-static int va_DisplayContextIsValid(
-    VADisplayContextP pDisplayContext
-)
-{
-    return (pDisplayContext != NULL &&
-            pDisplayContext->pDriverContext != NULL);
-}
-
 static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
@@ -227,7 +219,6 @@ VADisplay vaGetDisplay(
     if (!pDisplayContext)
         return NULL;
 
-    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverName;

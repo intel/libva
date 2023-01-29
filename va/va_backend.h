@@ -654,6 +654,7 @@ struct VADisplayContext {
     VADisplayContextP pNext;
     VADriverContextP pDriverContext;
 
+    /* Deprecated */
     int (*vaIsValid)(
         VADisplayContextP ctx
     );
