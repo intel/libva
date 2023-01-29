@@ -31,16 +31,6 @@
 #include "va_drm_auth.h"
 #include "va_drm_utils.h"
 
-static int
-va_DisplayContextIsValid(VADisplayContextP pDisplayContext)
-{
-    VADriverContextP const pDriverContext = pDisplayContext->pDriverContext;
-
-    return (pDriverContext &&
-            ((pDriverContext->display_type & VA_DISPLAY_MAJOR_MASK) ==
-             VA_DISPLAY_DRM));
-}
-
 static void
 va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
 {
@@ -113,7 +103,6 @@ vaGetDisplayDRM(int fd)
     if (!pDisplayContext)
         goto error;
 
-    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;

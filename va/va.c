@@ -112,7 +112,9 @@ int va_parseConfig(char *env, char *env_value)
 int vaDisplayIsValid(VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    return pDisplayContext && (pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC) && pDisplayContext->vaIsValid(pDisplayContext);
+    return pDisplayContext &&
+           pDisplayContext->vadpy_magic == VA_DISPLAY_MAGIC &&
+           pDisplayContext->pDriverContext;
 }
 
 /*

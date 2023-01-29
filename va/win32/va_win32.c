@@ -115,14 +115,6 @@ cleanup:
     FreeLibrary(hGdi32);
 }
 
-static int va_DisplayContextIsValid(
-    VADisplayContextP pDisplayContext
-)
-{
-    return (pDisplayContext != NULL &&
-            pDisplayContext->pDriverContext != NULL);
-}
-
 static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
@@ -196,7 +188,6 @@ VADisplay vaGetDisplayWin32(
     if (!pDisplayContext)
         return NULL;
 
-    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;

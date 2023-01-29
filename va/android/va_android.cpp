@@ -43,14 +43,6 @@
 #define CHECK_SYMBOL(func) { if (!func) printf("func %s not found\n", #func); return VA_STATUS_ERROR_UNKNOWN; }
 #define DEVICE_NAME "/dev/dri/renderD128"
 
-static int va_DisplayContextIsValid(
-    VADisplayContextP pDisplayContext
-)
-{
-    return (pDisplayContext != NULL &&
-            pDisplayContext->pDriverContext != NULL);
-}
-
 static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
@@ -116,7 +108,6 @@ VADisplay vaGetDisplay(
     if (!pDisplayContext)
         return NULL;
 
-    pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
