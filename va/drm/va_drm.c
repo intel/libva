@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -94,6 +95,21 @@ va_DisplayContextGetDriverNameByIndex(
     return VA_DRM_GetDriverName(ctx, driver_name_ptr, candidate_index);
 }
 
+static VAStatus
+va_DisplayContextGetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char            **drivers,
+    unsigned         *num_drivers
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    VAStatus status = va_DisplayContextConnect(pDisplayContext);
+    if (status != VA_STATUS_SUCCESS)
+        return status;
+
+    return VA_DRM_GetDriverNames(ctx, drivers, num_drivers);
+}
+
 VADisplay
 vaGetDisplayDRM(int fd)
 {
@@ -119,6 +135,7 @@ vaGetDisplayDRM(int fd)
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
+    pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext)
