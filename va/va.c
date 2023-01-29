@@ -719,24 +719,13 @@ VAStatus vaSetDriverName(
     return VA_STATUS_SUCCESS;
 }
 
-VAStatus vaInitialize(
-    VADisplay dpy,
-    int *major_version,  /* out */
-    int *minor_version   /* out */
-)
+static VAStatus va_legacy_opendriver(VADisplay dpy)
 {
     char *driver_name = NULL;
     int  num_candidates = 1;
     int  candidate_index = 0;
     VAStatus vaStatus;
 
-    CHECK_DISPLAY(dpy);
-
-    va_TraceInit(dpy);
-
-    va_MessagingInit();
-
-    va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
     /*get backend driver candidate number, by default the value should be 1*/
     vaStatus = va_getDriverNumCandidates(dpy, &num_candidates);
     if (vaStatus != VA_STATUS_SUCCESS) {
@@ -760,11 +749,32 @@ VAStatus vaInitialize(
 
     }
 
-    *major_version = VA_MAJOR_VERSION;
-    *minor_version = VA_MINOR_VERSION;
-
     if (driver_name)
         free(driver_name);
+
+    return vaStatus;
+}
+
+VAStatus vaInitialize(
+    VADisplay dpy,
+    int *major_version,  /* out */
+    int *minor_version   /* out */
+)
+{
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+
+    va_TraceInit(dpy);
+
+    va_MessagingInit();
+
+    va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
+
+    vaStatus = va_legacy_opendriver(dpy);
+
+    *major_version = VA_MAJOR_VERSION;
+    *minor_version = VA_MINOR_VERSION;
 
     VA_TRACE_LOG(va_TraceInitialize, dpy, major_version, minor_version);
     VA_TRACE_RET(dpy, vaStatus);
