@@ -1,5 +1,6 @@
 /*
  * Copyright © Microsoft Corporation
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -176,6 +177,32 @@ static VAStatus va_DisplayContextGetDriverNameByIndex(
     return VA_STATUS_SUCCESS;
 }
 
+static VAStatus va_DisplayContextGetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+)
+{
+    const LUID * const adapter = pDisplayContext->pDriverContext->native_dpy;
+    const VADisplayContextWin32 * const pWin32Ctx = pDisplayContext->opaque;
+    unsigned count = 0;
+
+    /* Always prefer the adapter registered driver name as first option */
+    if (adapter && pWin32Ctx->registry_driver_available_flag) {
+        drivers[count] = _strdup(pWin32Ctx->registry_driver_name);
+        count++;
+    }
+    /* Provide the default driver name as a fallback option */
+    if (*num_drivers > count) {
+        drivers[count] = _strdup(VAAPI_DEFAULT_DRIVER_NAME);
+        count++;
+    }
+
+    *num_drivers = count;
+
+    return VA_STATUS_SUCCESS;
+}
+
 VADisplay vaGetDisplayWin32(
     /* Can be null for adapter autoselection in the VA driver */
     const LUID* adapter_luid
@@ -191,6 +218,7 @@ VADisplay vaGetDisplayWin32(
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
+    pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
     pDisplayContext->opaque = calloc(1, sizeof(VADisplayContextWin32));
     if (!pDisplayContext->opaque) {
         va_DisplayContextDestroy(pDisplayContext);
