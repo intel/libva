@@ -132,51 +132,6 @@ static void va_DisplayContextDestroy(
     free(pDisplayContext);
 }
 
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    /*  Always report the default driver name
-        If available, also add the adapter specific registered driver */
-    LUID* adapter = pDisplayContext->pDriverContext->native_dpy;
-    VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
-    if (adapter && pWin32Ctx->registry_driver_available_flag)
-        *num_candidates = 2;
-    else
-        *num_candidates = 1;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_DisplayContextGetDriverNameByIndex(
-    VADisplayContextP pDisplayContext,
-    char **driver_name,
-    int candidate_index
-)
-{
-    LUID* adapter = pDisplayContext->pDriverContext->native_dpy;
-    VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
-    if (adapter && pWin32Ctx->registry_driver_available_flag) {
-        /* Always prefer the adapter registered driver name as first option */
-        if (candidate_index == 0) {
-            *driver_name = calloc(sizeof(pWin32Ctx->registry_driver_name), sizeof(char));
-            memcpy(*driver_name, pWin32Ctx->registry_driver_name, sizeof(pWin32Ctx->registry_driver_name));
-        }
-        /* Provide the default driver name as a fallback option */
-        else if (candidate_index == 1) {
-            *driver_name = calloc(sizeof(VAAPI_DEFAULT_DRIVER_NAME), sizeof(char));
-            memcpy(*driver_name, VAAPI_DEFAULT_DRIVER_NAME, sizeof(VAAPI_DEFAULT_DRIVER_NAME));
-        }
-    } else {
-        /* Provide the default driver name as a fallback option */
-        *driver_name = calloc(sizeof(VAAPI_DEFAULT_DRIVER_NAME), sizeof(char));
-        memcpy(*driver_name, VAAPI_DEFAULT_DRIVER_NAME, sizeof(VAAPI_DEFAULT_DRIVER_NAME));
-    }
-
-    return VA_STATUS_SUCCESS;
-}
-
 static VAStatus va_DisplayContextGetDriverNames(
     VADisplayContextP pDisplayContext,
     char **drivers,
@@ -216,8 +171,6 @@ VADisplay vaGetDisplayWin32(
         return NULL;
 
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
-    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
     pDisplayContext->opaque = calloc(1, sizeof(VADisplayContextWin32));
     if (!pDisplayContext->opaque) {
