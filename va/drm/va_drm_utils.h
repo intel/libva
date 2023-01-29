@@ -41,9 +41,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 DLL_HIDDEN
 VAStatus
 VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates);
+
 /**
  * \brief Returns the VA driver name for the active display.
  *
@@ -65,6 +67,10 @@ VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates);
 DLL_HIDDEN
 VAStatus
 VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate_index);
+
+DLL_HIDDEN
+VAStatus
+VA_DRM_GetDriverNames(VADriverContextP ctx, char **drivers, unsigned *num_drivers);
 
 /**@}*/
 
