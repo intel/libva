@@ -41,19 +41,17 @@ va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
 }
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
+
+
+static VAStatus va_DisplayContextConnect(
+    VADisplayContextP pDisplayContext
 )
 {
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
     struct drm_state * const drm_state = ctx->drm_state;
-    VAStatus status = VA_STATUS_SUCCESS;
     drm_magic_t magic;
     int ret;
-    status = VA_DRM_GetNumCandidates(ctx, num_candidates);
-    if (status != VA_STATUS_SUCCESS)
-        return status;
+
     /* Authentication is only needed for a legacy DRM device */
     if (ctx->display_type != VA_DISPLAY_DRM_RENDERNODES) {
         ret = drmGetMagic(drm_state->fd, &magic);
@@ -66,6 +64,21 @@ static VAStatus va_DisplayContextGetNumCandidates(
 
     drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
     return VA_STATUS_SUCCESS;
+}
+
+
+static VAStatus va_DisplayContextGetNumCandidates(
+    VADisplayContextP pDisplayContext,
+    int *num_candidates
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    VAStatus status = VA_DRM_GetNumCandidates(ctx, num_candidates);
+    if (status != VA_STATUS_SUCCESS)
+        return status;
+
+    /* XXX: This is backwards, the connect should happen first */
+    return va_DisplayContextConnect(pDisplayContext);
 }
 
 static VAStatus
