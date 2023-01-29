@@ -30,7 +30,7 @@ extern "C" {
 #endif
 
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
-#define CHECK_DISPLAY(dpy) if( !vaDisplayIsValid(dpy) ) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
+#define CHECK_DISPLAY(dpy) if (!vaDisplayIsValid(dpy)) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
 DLL_HIDDEN
 void va_errorMessage(VADisplay dpy, const char *msg, ...);
