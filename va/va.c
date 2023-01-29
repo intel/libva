@@ -57,6 +57,8 @@
 #define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(dpy, ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 #define CHECK_STRING(s, ctx, var) if (!va_checkString(dpy, ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 #ifndef HAVE_SECURE_GETENV
 static char * secure_getenv(const char *name)
 {
@@ -755,6 +757,72 @@ static VAStatus va_legacy_opendriver(VADisplay dpy)
     return vaStatus;
 }
 
+static VAStatus va_new_opendriver(VADisplay dpy)
+{
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    /* In the extreme case we can get up-to 5ish names. Pad that out to be on
+     * the safe side. In the worst case, the DRIVER BUG below will print and
+     * we'll be capped to the current selection.
+     */
+    char *drivers[20] = { 0, };
+    unsigned int num_drivers = ARRAY_SIZE(drivers);
+    VAStatus vaStatus;
+    const char *driver_name_env;
+    VADriverContextP ctx;
+
+    /* XXX: Temporary dummy return, until all platforms are converted */
+    if (!pDisplayContext->vaGetDriverNames)
+        return VA_STATUS_ERROR_INVALID_PARAMETER;
+
+    /* XXX: The order is bonkers - env var should take highest priority, then
+     * override (which ought to be nuked) than native. It's not possible atm,
+     * since the DPY connect/init happens during the GetDriverNames.
+     */
+    vaStatus = pDisplayContext->vaGetDriverNames(pDisplayContext, drivers, &num_drivers);
+    if (vaStatus != VA_STATUS_SUCCESS) {
+        /* Print and error yet continue, as per the above ordering note */
+        va_errorMessage(dpy, "vaGetDriverNames() failed with %s\n", vaErrorStr(vaStatus));
+    } else if (num_drivers > ARRAY_SIZE(drivers)) {
+        va_errorMessage(dpy, "DRIVER BUG: vaGetDriverNames() provides too many drivers\n");
+        num_drivers = ARRAY_SIZE(drivers);
+    }
+
+    ctx = CTX(dpy);
+    driver_name_env = secure_getenv("LIBVA_DRIVER_NAME");
+
+    if ((ctx->override_driver_name) || (driver_name_env && (geteuid() == getuid()))) {
+        const char *driver = ctx->override_driver_name ?
+                             ctx->override_driver_name : driver_name_env;
+
+        drivers[0] = strdup(driver);
+        num_drivers = 1;
+
+        va_infoMessage(dpy, "User %srequested driver '%s'\n",
+                       ctx->override_driver_name ? "" : "environment variable",
+                       driver);
+    }
+
+    for (unsigned int i = 0; i < num_drivers; i++) {
+        /* The strdup() may have failed. Check here instead of a dozen+ places */
+        if (!drivers[i]) {
+            va_errorMessage(dpy, "%s:%d: Out of memory\n", __func__, __LINE__);
+            vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            break;
+        }
+
+        vaStatus = va_openDriver(dpy, drivers[i]);
+        va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
+
+        if (vaStatus == VA_STATUS_SUCCESS)
+            break;
+    }
+
+    for (unsigned int i = 0; i < num_drivers; i++)
+        free(drivers[i]);
+
+    return vaStatus;
+}
+
 VAStatus vaInitialize(
     VADisplay dpy,
     int *major_version,  /* out */
@@ -771,7 +839,9 @@ VAStatus vaInitialize(
 
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
 
-    vaStatus = va_legacy_opendriver(dpy);
+    vaStatus = va_new_opendriver(dpy);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_legacy_opendriver(dpy);
 
     *major_version = VA_MAJOR_VERSION;
     *minor_version = VA_MINOR_VERSION;
