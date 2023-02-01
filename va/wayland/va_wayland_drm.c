@@ -2,6 +2,7 @@
  * va_wayland_drm.c - Wayland/DRM helpers
  *
  * Copyright (c) 2012 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -157,6 +158,18 @@ va_DisplayContextGetDriverName(
     return VA_DRM_GetDriverName(ctx, driver_name_ptr, 0);
 }
 
+static VAStatus
+va_DisplayContextGetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char            **drivers,
+    unsigned         *num_drivers
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+
+    return VA_DRM_GetDriverNames(ctx, drivers, num_drivers);
+}
+
 void
 va_wayland_drm_destroy(VADisplayContextP pDisplayContext)
 {
@@ -269,6 +282,7 @@ va_wayland_drm_create(VADisplayContextP pDisplayContext)
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
     pDisplayContext->vaGetNumCandidates  = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
+    pDisplayContext->vaGetDriverNames    = va_DisplayContextGetDriverNames;
 
     drm_state = calloc(1, sizeof(struct drm_state));
     if (!drm_state) {
