@@ -44,32 +44,6 @@ extern "C" {
 
 DLL_HIDDEN
 VAStatus
-VA_DRM_GetNumCandidates(VADriverContextP ctx, int * num_candidates);
-
-/**
- * \brief Returns the VA driver name for the active display.
- *
- * This functions returns a newly allocated buffer in @driver_name_ptr that
- * contains the VA driver name for the active display. Active display means
- * the display obtained with any of the vaGetDisplay*() functions.
- *
- * The VADriverContext.drm_state structure must be valid, i.e. allocated
- * and containing an open DRM connection descriptor. The DRM connection
- * does *not* need to be authenticated as it only performs a call to
- * drmGetVersion().
- *
- * @param[in]   ctx     the pointer to a VADriverContext
- * @param[out]  driver_name_ptr the newly allocated buffer containing
- *     the VA driver name
- * @return VA_STATUS_SUCCESS if operation is successful, or another
- *     #VAStatus value otherwise.
- */
-DLL_HIDDEN
-VAStatus
-VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate_index);
-
-DLL_HIDDEN
-VAStatus
 VA_DRM_GetDriverNames(VADriverContextP ctx, char **drivers, unsigned *num_drivers);
 
 /**@}*/
