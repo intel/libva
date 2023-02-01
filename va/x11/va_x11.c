@@ -46,20 +46,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-struct driver_name_map {
-    const char *key;
-    const char *name;
-};
-
-static const struct driver_name_map g_dri2_driver_name_map[] = {
-    { "i965",       "iHD"    }, // Intel iHD  VAAPI driver with i965 DRI driver
-    { "i965",       "i965"   }, // Intel i965 VAAPI driver with i965 DRI driver
-    { "iris",       "iHD"    }, // Intel iHD  VAAPI driver with iris DRI driver
-    { "iris",       "i965"   }, // Intel i965 VAAPI driver with iris DRI driver
-    { "crocus",     "i965"   }, // Intel i965 VAAPI driver with crocus DRI driver
-    { NULL,         NULL }
-};
-
 static void va_DisplayContextDestroy(
     VADisplayContextP pDisplayContext
 )
@@ -82,128 +68,6 @@ static void va_DisplayContextDestroy(
     free(pDisplayContext->pDriverContext->drm_state);
     free(pDisplayContext->pDriverContext);
     free(pDisplayContext);
-}
-
-static VAStatus va_DRI2_GetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    char *driver_name = NULL;
-    const struct driver_name_map *m = NULL;
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    *num_candidates = 0;
-
-    if (!(va_isDRI2Connected(ctx, &driver_name) && driver_name))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
-        if (strcmp(m->key, driver_name) == 0) {
-            (*num_candidates)++;
-        }
-    }
-
-    free(driver_name);
-
-    /*
-     * If the dri2 driver name does not have a mapped vaapi driver name, then
-     * assume they have the same name.
-     */
-    if (*num_candidates == 0)
-        *num_candidates = 1;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_DRI2_GetDriverName(
-    VADisplayContextP pDisplayContext,
-    char **driver_name_ptr,
-    int candidate_index
-)
-{
-    const struct driver_name_map *m = NULL;
-    int current_index = 0;
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-
-    *driver_name_ptr = NULL;
-
-    if (!(va_isDRI2Connected(ctx, driver_name_ptr) && *driver_name_ptr))
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    for (m = g_dri2_driver_name_map; m->key != NULL; m++) {
-        if (strcmp(m->key, *driver_name_ptr) == 0) {
-            if (current_index == candidate_index) {
-                break;
-            }
-            current_index++;
-        }
-    }
-
-    /*
-     * If the dri2 driver name does not have a mapped vaapi driver name, then
-     * assume they have the same name.
-     */
-    if (!m->name)
-        return VA_STATUS_SUCCESS;
-
-    /* Use the mapped vaapi driver name */
-    free(*driver_name_ptr);
-    *driver_name_ptr = strdup(m->name);
-    if (!*driver_name_ptr)
-        return VA_STATUS_ERROR_ALLOCATION_FAILED;
-
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus va_DisplayContextGetDriverName(
-    VADisplayContextP pDisplayContext,
-    char **driver_name, int candidate_index
-)
-{
-    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-
-    if (driver_name)
-        *driver_name = NULL;
-    else
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    if (!getenv("LIBVA_DRI3_DISABLE"))
-        vaStatus = va_DRI3_GetDriverName(pDisplayContext, driver_name, candidate_index);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
-#ifdef HAVE_NVCTRL
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_NVCTRL_GetDriverName(pDisplayContext, driver_name, candidate_index);
-#endif
-#ifdef HAVE_FGLRX
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_FGLRX_GetDriverName(pDisplayContext, driver_name, candidate_index);
-#endif
-
-    return vaStatus;
-}
-
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
-
-    if (!getenv("LIBVA_DRI3_DISABLE"))
-        vaStatus = va_DRI3_GetNumCandidates(pDisplayContext, num_candidates);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_DRI2_GetNumCandidates(pDisplayContext, num_candidates);
-
-    /* A call to va_DisplayContextGetDriverName will fallback to other
-     * methods (i.e. NVCTRL, FGLRX) when DRI2 is unsuccessful.  All of those
-     * fallbacks only have 1 candidate driver.
-     */
-    if (vaStatus != VA_STATUS_SUCCESS)
-        *num_candidates = 1;
-
-    return VA_STATUS_SUCCESS;
 }
 
 static VAStatus va_DisplayContextGetDriverNames(
@@ -245,8 +109,6 @@ VADisplay vaGetDisplay(
         return NULL;
 
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
-    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverName;
     pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
 
     pDriverContext = va_newDriverContext(pDisplayContext);

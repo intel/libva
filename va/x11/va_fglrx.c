@@ -238,26 +238,6 @@ end:
     return success;
 }
 
-VAStatus va_FGLRX_GetDriverName(
-    VADisplayContextP pDisplayContext,
-    char **driver_name,
-    int candidate_index
-)
-{
-    VADriverContextP ctx = pDisplayContext->pDriverContext;
-    Bool result;
-
-    if (candidate_index != 0)
-        return VA_STATUS_ERROR_INVALID_PARAMETER;
-
-    result = VA_FGLRXGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
-                                         driver_name);
-    if (!result)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    return VA_STATUS_SUCCESS;
-}
-
 VAStatus va_FGLRX_GetDriverNames(
     VADisplayContextP pDisplayContext,
     char **drivers,
