@@ -2,6 +2,7 @@
  * va_wayland_emgd.c - Wayland/EMGD helpers
  *
  * Copyright (c) 2012 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -59,6 +60,18 @@ va_DisplayContextGetDriverName(
 )
 {
     *driver_name_ptr = strdup("emgd");
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus
+va_DisplayContextGetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char            **drivers,
+    unsigned         *num_drivers
+)
+{
+    drivers[0] = strdup("emgd");
+    *num_drivers = 1;
     return VA_STATUS_SUCCESS;
 }
 
@@ -129,6 +142,7 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
     wl_emgd_ctx->is_created             = 0;
     pDisplayContext->opaque             = wl_emgd_ctx;
     pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetDriverNames   = va_DisplayContextGetDriverNames;
 
     drm_state = calloc(1, sizeof(struct drm_state));
     if (!drm_state)
