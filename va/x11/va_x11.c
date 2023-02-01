@@ -211,9 +211,10 @@ static VAStatus va_DisplayContextGetDriverNames(
     char **drivers, unsigned *num_drivers
 )
 {
-    VAStatus vaStatus;
+    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 
-    vaStatus = va_DRI3_GetDriverNames(pDisplayContext, drivers, num_drivers);
+    if (!getenv("LIBVA_DRI3_DISABLE"))
+        vaStatus = va_DRI3_GetDriverNames(pDisplayContext, drivers, num_drivers);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRI2_GetDriverNames(pDisplayContext, drivers, num_drivers);
 #ifdef HAVE_NVCTRL
