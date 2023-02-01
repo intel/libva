@@ -167,14 +167,15 @@ static VAStatus va_DisplayContextGetDriverName(
     char **driver_name, int candidate_index
 )
 {
-    VAStatus vaStatus;
+    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 
     if (driver_name)
         *driver_name = NULL;
     else
         return VA_STATUS_ERROR_UNKNOWN;
 
-    vaStatus = va_DRI3_GetDriverName(pDisplayContext, driver_name, candidate_index);
+    if (!getenv("LIBVA_DRI3_DISABLE"))
+        vaStatus = va_DRI3_GetDriverName(pDisplayContext, driver_name, candidate_index);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRI2_GetDriverName(pDisplayContext, driver_name, candidate_index);
 #ifdef HAVE_NVCTRL
