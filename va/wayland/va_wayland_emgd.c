@@ -54,16 +54,6 @@ wl_emgd_destroy(struct wl_emgd *emgd)
 }
 
 static VAStatus
-va_DisplayContextGetDriverName(
-    VADisplayContextP pDisplayContext,
-    char            **driver_name_ptr
-)
-{
-    *driver_name_ptr = strdup("emgd");
-    return VA_STATUS_SUCCESS;
-}
-
-static VAStatus
 va_DisplayContextGetDriverNames(
     VADisplayContextP pDisplayContext,
     char            **drivers,
@@ -141,7 +131,6 @@ va_wayland_emgd_create(VADisplayContextP pDisplayContext)
     wl_emgd_ctx->emgd_interface         = NULL;
     wl_emgd_ctx->is_created             = 0;
     pDisplayContext->opaque             = wl_emgd_ctx;
-    pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
     pDisplayContext->vaGetDriverNames   = va_DisplayContextGetDriverNames;
 
     drm_state = calloc(1, sizeof(struct drm_state));

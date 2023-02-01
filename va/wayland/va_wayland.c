@@ -80,13 +80,6 @@ va_DisplayContextDestroy(VADisplayContextP pDisplayContext)
     free(pDisplayContext);
 }
 
-static VAStatus
-va_DisplayContextGetDriverName(VADisplayContextP pDisplayContext, char **name)
-{
-    *name = NULL;
-    return VA_STATUS_ERROR_UNKNOWN;
-}
-
 /* -------------------------------------------------------------------------- */
 /* --- Public interface                                                   --- */
 /* -------------------------------------------------------------------------- */
@@ -123,7 +116,6 @@ vaGetDisplayWl(struct wl_display *display)
         return NULL;
 
     pDisplayContext->vaDestroy          = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverName    = va_DisplayContextGetDriverName;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext)
