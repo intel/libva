@@ -36,6 +36,13 @@ VAStatus va_NVCTRL_GetDriverName(
     int candidate_index
 );
 
+DLL_HIDDEN
+VAStatus va_NVCTRL_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+);
+
 #endif
 
 #endif /* VA_NVCTRLLIB_H */

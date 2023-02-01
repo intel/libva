@@ -37,6 +37,13 @@ VAStatus va_FGLRX_GetDriverName(
     int candidate_index
 );
 
+DLL_HIDDEN
+VAStatus va_FGLRX_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+);
+
 #endif
 
 #endif /* VA_FGLRX_H */

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2007 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -30,6 +31,7 @@
 #include "va_trace.h"
 #include "va_x11.h"
 #include "va_dri2.h"
+#include "va_dri2_priv.h"
 #include "va_dri3.h"
 #include "va_dricommon.h"
 #include "va_nvctrl.h"
@@ -204,6 +206,28 @@ static VAStatus va_DisplayContextGetNumCandidates(
     return VA_STATUS_SUCCESS;
 }
 
+static VAStatus va_DisplayContextGetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers, unsigned *num_drivers
+)
+{
+    VAStatus vaStatus;
+
+    vaStatus = va_DRI3_GetDriverNames(pDisplayContext, drivers, num_drivers);
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_DRI2_GetDriverNames(pDisplayContext, drivers, num_drivers);
+#ifdef HAVE_NVCTRL
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_NVCTRL_GetDriverNames(pDisplayContext, drivers, num_drivers);
+#endif
+#ifdef HAVE_FGLRX
+    if (vaStatus != VA_STATUS_SUCCESS)
+        vaStatus = va_FGLRX_GetDriverNames(pDisplayContext, drivers, num_drivers);
+#endif
+
+    return vaStatus;
+}
+
 VADisplay vaGetDisplay(
     Display *native_dpy /* implementation specific */
 )
@@ -222,6 +246,7 @@ VADisplay vaGetDisplay(
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverName;
+    pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
     if (!pDriverContext) {

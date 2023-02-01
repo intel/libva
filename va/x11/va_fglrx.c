@@ -258,4 +258,19 @@ VAStatus va_FGLRX_GetDriverName(
     return VA_STATUS_SUCCESS;
 }
 
+VAStatus va_FGLRX_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    if (!VA_FGLRXGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
+                                     drivers))
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    *num_drivers = 1;
+    return VA_STATUS_SUCCESS;
+}
+
 #endif

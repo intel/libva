@@ -44,6 +44,7 @@ source_h = \
 	$(NULL)
 
 source_h_priv = \
+	va_dri2_priv.h		\
 	va_dri2str.h		\
 	va_dri2tokens.h		\
 	va_dri3.h		\
