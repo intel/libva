@@ -128,34 +128,6 @@ va_isDRI3Connected(VADriverContextP ctx, int *outfd)
     return 0;
 }
 
-VAStatus va_DRI3_GetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    struct drm_state * drm_state = (struct drm_state *)ctx->drm_state;
-    int fd = -1;
-
-    if (va_isDRI3Connected(ctx, &fd) && fd != -1)
-        return VA_STATUS_ERROR_UNKNOWN;
-
-    drm_state->fd = fd;
-    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
-    return VA_DRM_GetNumCandidates(ctx, num_candidates);
-}
-
-VAStatus va_DRI3_GetDriverName(
-    VADisplayContextP pDisplayContext,
-    char **driver_name,
-    int candidate_index
-)
-{
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-
-    return VA_DRM_GetDriverName(ctx, driver_name, candidate_index);
-}
-
 VAStatus va_DRI3_GetDriverNames(
     VADisplayContextP pDisplayContext,
     char **drivers,
