@@ -79,30 +79,6 @@ static VAStatus va_DisplayContextConnect(
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_DisplayContextGetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-)
-{
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-    VAStatus status = va_DisplayContextConnect(pDisplayContext);
-    if (status != VA_STATUS_SUCCESS)
-        return status;
-
-    return VA_DRM_GetNumCandidates(ctx, num_candidates);
-}
-
-static VAStatus va_DisplayContextGetDriverNameByIndex(
-    VADisplayContextP pDisplayContext,
-    char **driver_name,
-    int candidate_index
-)
-{
-    VADriverContextP const ctx = pDisplayContext->pDriverContext;
-
-    return VA_DRM_GetDriverName(ctx, driver_name, candidate_index);
-}
-
 static VAStatus
 va_DisplayContextGetDriverNames(
     VADisplayContextP pDisplayContext,
@@ -134,8 +110,6 @@ VADisplay vaGetDisplay(
         return NULL;
 
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
-    pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
-    pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->vaGetDriverNames = va_DisplayContextGetDriverNames;
 
     pDriverContext = va_newDriverContext(pDisplayContext);
