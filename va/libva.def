@@ -83,3 +83,4 @@ EXPORTS
     vaSetSubpictureImage
     vaStatusStr
     vaSyncSurface2
+    vaDisplayIsValid
