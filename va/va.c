@@ -352,66 +352,6 @@ va_getDriverInitName(char *name, int namelen, int major, int minor)
     int ret = snprintf(name, namelen, "__vaDriverInit_%d_%d", major, minor);
     return ret > 0 && ret < namelen;
 }
-/** retrieve the back end driver candidate num , by default it should be 1
-  * if there are no vaGetNumCandidates implementation in the display context
-  * it should be 1 to avoid backward compatible issue */
-static VAStatus va_getDriverNumCandidates(VADisplay dpy, int *num_candidates)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    *num_candidates = 1;
-    const char *driver_name_env = NULL;
-    VAStatus vaStatus = VA_STATUS_SUCCESS;
-    VADriverContextP ctx;
-
-    ctx = CTX(dpy);
-    driver_name_env = secure_getenv("LIBVA_DRIVER_NAME");
-
-    if (pDisplayContext->vaGetNumCandidates)
-        vaStatus = pDisplayContext->vaGetNumCandidates(pDisplayContext, num_candidates);
-    if ((ctx->override_driver_name) || (driver_name_env && (geteuid() == getuid())))
-        *num_candidates = 1;
-    return vaStatus;
-}
-
-static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int candidate_index)
-{
-    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
-    const char *driver_name_env = NULL;
-    VADriverContextP ctx;
-    VAStatus status = VA_STATUS_SUCCESS;
-
-    ctx = CTX(dpy);
-    if (pDisplayContext->vaGetDriverNameByIndex) {
-        /*if vaGetDriverNameByIndex is implemented*/
-        status = pDisplayContext->vaGetDriverNameByIndex(pDisplayContext, driver_name, candidate_index);
-    } else {
-        if (candidate_index == 0)
-            status = pDisplayContext->vaGetDriverName(pDisplayContext, driver_name);
-        else
-            status = VA_STATUS_ERROR_INVALID_PARAMETER;
-    }
-    driver_name_env = secure_getenv("LIBVA_DRIVER_NAME");
-    /*if user set driver name by vaSetDriverName */
-    if (ctx->override_driver_name) {
-        if (*driver_name)
-            free(*driver_name);
-        *driver_name = strdup(ctx->override_driver_name);
-        if (!(*driver_name)) {
-            va_errorMessage(dpy, "va_getDriverNameByIndex  failed with %s, out of memory\n", vaErrorStr(VA_STATUS_ERROR_ALLOCATION_FAILED));
-            return VA_STATUS_ERROR_ALLOCATION_FAILED;
-        }
-        va_infoMessage(dpy, "User requested driver '%s'\n", *driver_name);
-        return VA_STATUS_SUCCESS;
-    } else if (driver_name_env && (geteuid() == getuid())) {
-        if (*driver_name)
-            free(*driver_name);
-        /*if user set driver name by environment variable*/
-        *driver_name = strdup(driver_name_env);
-        va_infoMessage(dpy, "User environment variable requested driver '%s'\n", *driver_name);
-        return VA_STATUS_SUCCESS;
-    }
-    return status;
-}
 
 static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
 {
@@ -721,42 +661,6 @@ VAStatus vaSetDriverName(
     return VA_STATUS_SUCCESS;
 }
 
-static VAStatus va_legacy_opendriver(VADisplay dpy)
-{
-    char *driver_name = NULL;
-    int  num_candidates = 1;
-    int  candidate_index = 0;
-    VAStatus vaStatus;
-
-    /*get backend driver candidate number, by default the value should be 1*/
-    vaStatus = va_getDriverNumCandidates(dpy, &num_candidates);
-    if (vaStatus != VA_STATUS_SUCCESS) {
-        num_candidates = 1;
-    }
-    /*load driver one by one, until load success */
-    for (candidate_index = 0; candidate_index < num_candidates; candidate_index ++) {
-        if (driver_name)
-            free(driver_name);
-        vaStatus = va_getDriverNameByIndex(dpy, &driver_name, candidate_index);
-        if (vaStatus != VA_STATUS_SUCCESS) {
-            va_errorMessage(dpy, "vaGetDriverNameByIndex() failed with %s, driver_name = %s\n", vaErrorStr(vaStatus), driver_name);
-            break;
-        }
-        vaStatus = va_openDriver(dpy, driver_name);
-        va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
-
-        if (vaStatus == VA_STATUS_SUCCESS) {
-            break;
-        }
-
-    }
-
-    if (driver_name)
-        free(driver_name);
-
-    return vaStatus;
-}
-
 static VAStatus va_new_opendriver(VADisplay dpy)
 {
     VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
@@ -840,8 +744,6 @@ VAStatus vaInitialize(
     va_infoMessage(dpy, "VA-API version %s\n", VA_VERSION_S);
 
     vaStatus = va_new_opendriver(dpy);
-    if (vaStatus != VA_STATUS_SUCCESS)
-        vaStatus = va_legacy_opendriver(dpy);
 
     *major_version = VA_MAJOR_VERSION;
     *minor_version = VA_MINOR_VERSION;
