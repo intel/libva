@@ -1,5 +1,6 @@
 /*
  * Copyright © 2008 Red Hat, Inc.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Soft-
@@ -37,8 +38,12 @@
 #include <X11/extensions/extutil.h>
 #include "xf86drm.h"
 #include "va_dri2.h"
+#include "va_dri2_priv.h"
+#include "va_dricommon.h"
 #include "va_dri2str.h"
 #include "va_dri2tokens.h"
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #ifndef DRI2DriverDRI
 #define DRI2DriverDRI 0
@@ -421,4 +426,54 @@ void VA_DRI2SwapBuffers(Display *dpy, XID drawable, CARD64 target_msc,
 
     UnlockDisplay(dpy);
     SyncHandle();
+}
+
+VAStatus va_DRI2_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+)
+{
+#define MAX_NAMES 2 // Adjust if needed
+
+    static const struct {
+        const char * const dri_driver;
+        const char * const va_driver[MAX_NAMES];
+    } map[] = {
+        { "i965",       { "iHD", "i965"      } }, // Intel Media and OTC GenX
+        { "iris",       { "iHD", "i965"      } }, // Intel Media and OTC GenX
+        { "crocus",     { "i965"             } }, // OTC GenX
+    };
+
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    char *dri_driver;
+    unsigned count = 0;
+
+    if (!(va_isDRI2Connected(ctx, &dri_driver) && dri_driver))
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    for (unsigned i = 0; i < ARRAY_SIZE(map); i++) {
+        if (strcmp(map[i].dri_driver, dri_driver) == 0) {
+            const char * const *va_drivers = map[i].va_driver;
+
+            while (va_drivers[count]) {
+                if (count < MAX_NAMES && count < *num_drivers)
+                    drivers[count] = strdup(va_drivers[count]);
+                count++;
+            }
+            break;
+        }
+    }
+
+    /* Fallback to the dri driver, if there's no va equivalent in the map. */
+    if (!count) {
+        drivers[count] = dri_driver;
+        count++;
+    } else {
+        free(dri_driver);
+    }
+
+    *num_drivers = count;
+
+    return VA_STATUS_SUCCESS;
 }

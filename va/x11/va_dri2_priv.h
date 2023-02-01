@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Collabora Ltd.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Soft-
@@ -25,32 +25,16 @@
  * not be used in advertising or otherwise to promote the sale, use or
  * other dealings in this Software without prior written authorization of
  * the copyright holder.
- *
- * Authors:
- *   Emil Velikov (emil.velikov@collabora.com)
  */
 
-#ifndef _VA_DRI3_H_
-#define _VA_DRI3_H_
+#ifndef _VA_DRI2_PRIV_H_
+#define _VA_DRI2_PRIV_H_
 
 #include "sysdeps.h"
 #include "va_backend.h"
 
 DLL_HIDDEN
-VAStatus va_DRI3_GetNumCandidates(
-    VADisplayContextP pDisplayContext,
-    int *num_candidates
-);
-
-DLL_HIDDEN
-VAStatus va_DRI3_GetDriverName(
-    VADisplayContextP pDisplayContext,
-    char **driver_name_ptr,
-    int candidate_index
-);
-
-DLL_HIDDEN
-VAStatus va_DRI3_GetDriverNames(
+VAStatus va_DRI2_GetDriverNames(
     VADisplayContextP pDisplayContext,
     char **drivers,
     unsigned *num_drivers

@@ -1,5 +1,6 @@
 /*
  * Copyright © 2022 Collabora Ltd.
+ * Copyright (c) 2023 Emil Velikov
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Soft-
@@ -153,4 +154,22 @@ VAStatus va_DRI3_GetDriverName(
     VADriverContextP const ctx = pDisplayContext->pDriverContext;
 
     return VA_DRM_GetDriverName(ctx, driver_name, candidate_index);
+}
+
+VAStatus va_DRI3_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+)
+{
+    VADriverContextP const ctx = pDisplayContext->pDriverContext;
+    struct drm_state * const drm_state = ctx->drm_state;
+    int fd = -1;
+
+    if (va_isDRI3Connected(ctx, &fd) && fd != -1)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    drm_state->fd = fd;
+    drm_state->auth_type = VA_DRM_AUTH_CUSTOM;
+    return VA_DRM_GetDriverNames(ctx, drivers, num_drivers);
 }

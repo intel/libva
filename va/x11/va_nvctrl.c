@@ -423,4 +423,25 @@ VAStatus va_NVCTRL_GetDriverName(
     return VA_STATUS_SUCCESS;
 }
 
+VAStatus va_NVCTRL_GetDriverNames(
+    VADisplayContextP pDisplayContext,
+    char **drivers,
+    unsigned *num_drivers
+)
+{
+    VADriverContextP ctx = pDisplayContext->pDriverContext;
+    int direct_capable;
+
+    if (!VA_NVCTRLQueryDirectRenderingCapable(ctx->native_dpy, ctx->x11_screen,
+            &direct_capable) || !direct_capable)
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    if (!VA_NVCTRLGetClientDriverName(ctx->native_dpy, ctx->x11_screen,
+                                      drivers))
+        return VA_STATUS_ERROR_UNKNOWN;
+
+    *num_drivers = 1;
+    return VA_STATUS_SUCCESS;
+}
+
 #endif
