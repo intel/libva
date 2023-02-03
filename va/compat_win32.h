@@ -28,6 +28,11 @@
 #include <winsock.h>
 #include <io.h>
 #include <time.h>
+#include <string.h>
+
+#ifndef _MSC_VER
+#include <libgen.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +52,22 @@ typedef LONG NTSTATUS;
 #define WIN32_DRIVER_NAME_SUFFIX  "_drv_video"
 
 typedef unsigned int __uid_t;
+
+/* Gets driver name without suffix from absolute path */
+inline void va_win32_get_drv_from_path(const char* absolute_path, char* name_no_suffix, size_t name_no_suffix_size)
+{
+#ifdef _MSC_VER
+    _splitpath_s(absolute_path, NULL, 0, NULL, 0, name_no_suffix, name_no_suffix_size, NULL, 0);
+#else
+    strncpy(name_no_suffix, basename(absolute_path), name_no_suffix_size);
+    char* ext_pos = strrchr(name_no_suffix, '.');
+    if (ext_pos != NULL)
+        *ext_pos = '\0';
+#endif
+    char* suffix_pos = strstr(name_no_suffix, WIN32_DRIVER_NAME_SUFFIX);
+    if (suffix_pos)
+        *suffix_pos = '\0';
+}
 
 #ifdef _MSC_VER
 inline char* strtok_r(char *s, const char *delim, char **save_ptr)

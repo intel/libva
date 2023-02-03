@@ -35,6 +35,7 @@
  * does not have a registered VA driver
 */
 const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12";
+const char VAAPI_DEFAULT_DRIVER_SEARCH_PATH[] = ".";
 
 typedef struct _VADisplayContextWin32 {
     LUID adapter_luid;
@@ -165,7 +166,7 @@ static VAStatus va_DisplayContextGetDriverNameByIndex(
         /* Always prefer the adapter registered driver name as first option */
         if (candidate_index == 0) {
             *driver_name = calloc(sizeof(pWin32Ctx->registry_driver_name), sizeof(char));
-            memcpy(*driver_name, pWin32Ctx->registry_driver_name, sizeof(pWin32Ctx->registry_driver_name));
+            va_win32_get_drv_from_path(pWin32Ctx->registry_driver_name, *driver_name, sizeof(pWin32Ctx->registry_driver_name));
         }
         /* Provide the default driver name as a fallback option */
         else if (candidate_index == 1) {
@@ -178,6 +179,39 @@ static VAStatus va_DisplayContextGetDriverNameByIndex(
         memcpy(*driver_name, VAAPI_DEFAULT_DRIVER_NAME, sizeof(VAAPI_DEFAULT_DRIVER_NAME));
     }
 
+    return VA_STATUS_SUCCESS;
+}
+
+static VAStatus va_DisplayContextGetDriverSearchPathByIndex(
+    VADisplayContextP pDisplayContext,
+    char **driver_search_path,
+    int candidate_index
+)
+{
+    VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
+    if (pWin32Ctx->registry_driver_available_flag) {
+        /* Always prefer the adapter registered driver search path as first option */
+        /* Only provide the registry search path if there is no driver name override */
+        VADriverContextP ctx = CTX((VADisplay)pDisplayContext);
+        if ((candidate_index == 0) && !getenv("LIBVA_DRIVER_NAME") && !ctx->override_driver_name) {
+            /* Always prefer the adapter registered driver search path as first option */
+            char* last_separator = strrchr(pWin32Ctx->registry_driver_name, '\\');
+            if (last_separator) {
+                /* Always prefer the adapter registered driver search path as first candidate */
+                *driver_search_path = calloc(sizeof(pWin32Ctx->registry_driver_name), sizeof(char));
+                memcpy(*driver_search_path, &pWin32Ctx->registry_driver_name[0], last_separator - &pWin32Ctx->registry_driver_name[0]);
+            }
+        }
+        /* Provide the default driver search path as a fallback option */
+        else if (candidate_index == 1) {
+            *driver_search_path = calloc(sizeof(VAAPI_DEFAULT_DRIVER_SEARCH_PATH), sizeof(char));
+            memcpy(*driver_search_path, VAAPI_DEFAULT_DRIVER_SEARCH_PATH, sizeof(VAAPI_DEFAULT_DRIVER_SEARCH_PATH));
+        }
+    } else {
+        /* Provide the default driver search path as a fallback option */
+        *driver_search_path = calloc(sizeof(VAAPI_DEFAULT_DRIVER_SEARCH_PATH), sizeof(char));
+        memcpy(*driver_search_path, VAAPI_DEFAULT_DRIVER_SEARCH_PATH, sizeof(VAAPI_DEFAULT_DRIVER_SEARCH_PATH));
+    }
     return VA_STATUS_SUCCESS;
 }
 
@@ -196,6 +230,7 @@ VADisplay vaGetDisplayWin32(
     pDisplayContext->vaIsValid       = va_DisplayContextIsValid;
     pDisplayContext->vaDestroy       = va_DisplayContextDestroy;
     pDisplayContext->vaGetDriverNameByIndex = va_DisplayContextGetDriverNameByIndex;
+    pDisplayContext->vaGetDriverSearchPathByIndex = va_DisplayContextGetDriverSearchPathByIndex;
     pDisplayContext->vaGetNumCandidates = va_DisplayContextGetNumCandidates;
     pDisplayContext->opaque = calloc(1, sizeof(VADisplayContextWin32));
     if (!pDisplayContext->opaque) {
