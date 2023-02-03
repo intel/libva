@@ -686,6 +686,12 @@ struct VADisplayContext {
         int  candidate_index
     );
 
+    VAStatus(*vaGetDriverSearchPathByIndex)(
+        VADisplayContextP ctx,
+        char **driver_dir,
+        int  candidate_index
+    );
+
     /** \brief Reserved bytes for future use, must be zero */
     unsigned long reserved[30];
 };

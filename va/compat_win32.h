@@ -44,6 +44,8 @@ typedef LONG NTSTATUS;
 #define NT_SUCCESS(status) (((NTSTATUS)(status)) >= 0)
 #endif
 
+#define WIN32_DRIVER_NAME_SUFFIX  "_drv_video"
+
 typedef unsigned int __uid_t;
 
 #ifdef _MSC_VER

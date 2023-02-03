@@ -38,7 +38,7 @@
 #include <string.h>
 #if defined(_WIN32)
 #include "compat_win32.h"
-#define DRIVER_EXTENSION    "_drv_video.dll"
+#define DRIVER_EXTENSION    WIN32_DRIVER_NAME_SUFFIX".dll"
 #define DRIVER_PATH_STRING  "%s\\%s%s"
 #define ENV_VAR_SEPARATOR ";"
 #else
@@ -412,7 +412,7 @@ static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
     return driver_path;
 }
 
-static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
+static VAStatus va_openDriver(VADisplay dpy, char *driver_name, char *driver_search_path)
 {
     VADriverContextP ctx = CTX(dpy);
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
@@ -420,13 +420,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     char *saveptr;
     char *driver_dir;
 
-    if (geteuid() == getuid())
-        /* don't allow setuid apps to use LIBVA_DRIVERS_PATH */
-        search_path = getenv("LIBVA_DRIVERS_PATH");
-    if (!search_path)
-        search_path = VA_DRIVERS_PATH;
-
-    search_path = strdup((const char *)search_path);
+    search_path = strdup((const char *)driver_search_path);
     if (!search_path) {
         va_errorMessage(dpy, "%s L%d Out of memory\n",
                         __FUNCTION__, __LINE__);
@@ -703,6 +697,42 @@ VAStatus vaSetDriverName(
     return VA_STATUS_SUCCESS;
 }
 
+static VAStatus va_getDriverSearchPathByIndex(VADisplay dpy, char **out_search_path, int candidate_index)
+{
+    /* Determine usual VA driver search paths */
+    char* driver_search_path = NULL;
+    if (geteuid() == getuid())
+        /* don't allow setuid apps to use LIBVA_DRIVERS_PATH */
+        driver_search_path = getenv("LIBVA_DRIVERS_PATH");
+    if (!driver_search_path)
+        driver_search_path = VA_DRIVERS_PATH;
+
+    size_t driver_search_path_len = strlen(driver_search_path);
+
+    /* Check if the backend provides extra search paths */
+    char* extra_driver_search_path = NULL;
+    size_t extra_driver_search_path_len = 0;
+    VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+    if (pDisplayContext->vaGetDriverSearchPathByIndex
+        && (pDisplayContext->vaGetDriverSearchPathByIndex(dpy, &extra_driver_search_path, candidate_index) == VA_STATUS_SUCCESS)
+        && extra_driver_search_path)
+        extra_driver_search_path_len = 1 /* ENV_VAR_SEPARATOR */ + strlen(extra_driver_search_path);
+
+    /* The caller to this function is always responsible for freeing *out_search_path on success */
+    size_t out_search_path_size = driver_search_path_len + extra_driver_search_path_len + 1 /* NULL terminator */;
+    *out_search_path = calloc(out_search_path_size, sizeof(char));
+
+    /* Combine the backend extra paths, if any and the usual VA driver search paths*/
+    snprintf(*out_search_path,
+             out_search_path_size,
+             "%s%s%s",
+             extra_driver_search_path ? extra_driver_search_path : "",
+             extra_driver_search_path ? ENV_VAR_SEPARATOR : "",
+             driver_search_path
+            );
+    return VA_STATUS_SUCCESS;
+}
+
 VAStatus vaInitialize(
     VADisplay dpy,
     int *major_version,  /* out */
@@ -710,6 +740,7 @@ VAStatus vaInitialize(
 )
 {
     char *driver_name = NULL;
+    char *driver_search_path = NULL;
     int  num_candidates = 1;
     int  candidate_index = 0;
     VAStatus vaStatus;
@@ -730,12 +761,19 @@ VAStatus vaInitialize(
     for (candidate_index = 0; candidate_index < num_candidates; candidate_index ++) {
         if (driver_name)
             free(driver_name);
+        if (driver_search_path)
+            free(driver_search_path);
         vaStatus = va_getDriverNameByIndex(dpy, &driver_name, candidate_index);
         if (vaStatus != VA_STATUS_SUCCESS) {
             va_errorMessage(dpy, "vaGetDriverNameByIndex() failed with %s, driver_name = %s\n", vaErrorStr(vaStatus), driver_name);
             break;
         }
-        vaStatus = va_openDriver(dpy, driver_name);
+        vaStatus = va_getDriverSearchPathByIndex(dpy, &driver_search_path, candidate_index);
+        if (vaStatus != VA_STATUS_SUCCESS) {
+            va_errorMessage(dpy, "va_getDriverSearchPathByIndex() failed with %s, driver_search_path = %s\n", vaErrorStr(vaStatus), driver_search_path);
+            break;
+        }
+        vaStatus = va_openDriver(dpy, driver_name, driver_search_path);
         va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
 
         if (vaStatus == VA_STATUS_SUCCESS) {
@@ -749,6 +787,9 @@ VAStatus vaInitialize(
 
     if (driver_name)
         free(driver_name);
+
+    if (driver_search_path)
+        free(driver_search_path);
 
     VA_TRACE_LOG(va_TraceInitialize, dpy, major_version, minor_version);
     VA_TRACE_RET(dpy, vaStatus);
