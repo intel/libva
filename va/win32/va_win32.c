@@ -34,15 +34,15 @@
  * which will be selected when provided with an adapter LUID which
  * does not have a registered VA driver
 */
-const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12";
+const char VAAPI_DEFAULT_DRIVER_PATH[] = "vaon12_drv_video.dll";
 
 typedef struct _VADisplayContextWin32 {
     LUID adapter_luid;
-    char registry_driver_name[MAX_PATH];
+    char registry_driver_path[MAX_PATH];
     bool registry_driver_available_flag;
 } VADisplayContextWin32;
 
-static void LoadDriverNameFromRegistry(VADisplayContextWin32* pWin32Ctx)
+static void LoadDriverPathFromRegistry(VADisplayContextWin32* pWin32Ctx)
 {
     HMODULE hGdi32 = LoadLibraryA("gdi32.dll");
     if (!hGdi32)
@@ -95,8 +95,8 @@ static void LoadDriverNameFromRegistry(VADisplayContextWin32* pWin32Ctx)
 
     if (!WideCharToMultiByte(CP_ACP, 0, pRegistryInfo->OutputString,
                              RegistryInfo.OutputValueSize / sizeof(wchar_t),
-                             pWin32Ctx->registry_driver_name,
-                             sizeof(pWin32Ctx->registry_driver_name),
+                             pWin32Ctx->registry_driver_path,
+                             sizeof(pWin32Ctx->registry_driver_path),
                              NULL, NULL))
         goto cleanup;
 
@@ -136,43 +136,29 @@ static VAStatus va_DisplayContextGetNumCandidates(
     int *num_candidates
 )
 {
-    /*  Always report the default driver name
+    /*  Always report the default driver path
         If available, also add the adapter specific registered driver */
-    LUID* adapter = pDisplayContext->pDriverContext->native_dpy;
     VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
-    if (adapter && pWin32Ctx->registry_driver_available_flag)
-        *num_candidates = 2;
-    else
-        *num_candidates = 1;
-
+    *num_candidates = pWin32Ctx->registry_driver_available_flag ? 2 : 1;
     return VA_STATUS_SUCCESS;
 }
 
 static VAStatus va_DisplayContextGetDriverNameByIndex(
     VADisplayContextP pDisplayContext,
-    char **driver_name,
+    char **driver_absolute_path,
     int candidate_index
 )
 {
-    LUID* adapter = pDisplayContext->pDriverContext->native_dpy;
     VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
-    if (adapter && pWin32Ctx->registry_driver_available_flag) {
-        /* Always prefer the adapter registered driver name as first option */
-        if (candidate_index == 0) {
-            *driver_name = calloc(sizeof(pWin32Ctx->registry_driver_name), sizeof(char));
-            memcpy(*driver_name, pWin32Ctx->registry_driver_name, sizeof(pWin32Ctx->registry_driver_name));
-        }
-        /* Provide the default driver name as a fallback option */
-        else if (candidate_index == 1) {
-            *driver_name = calloc(sizeof(VAAPI_DEFAULT_DRIVER_NAME), sizeof(char));
-            memcpy(*driver_name, VAAPI_DEFAULT_DRIVER_NAME, sizeof(VAAPI_DEFAULT_DRIVER_NAME));
-        }
-    } else {
-        /* Provide the default driver name as a fallback option */
-        *driver_name = calloc(sizeof(VAAPI_DEFAULT_DRIVER_NAME), sizeof(char));
-        memcpy(*driver_name, VAAPI_DEFAULT_DRIVER_NAME, sizeof(VAAPI_DEFAULT_DRIVER_NAME));
+    /* Always prefer the adapter registered driver path as first option */
+    if (pWin32Ctx->registry_driver_available_flag && (candidate_index == 0)) {
+        *driver_absolute_path = calloc(sizeof(pWin32Ctx->registry_driver_path), sizeof(char));
+        memcpy(*driver_absolute_path, pWin32Ctx->registry_driver_path, sizeof(pWin32Ctx->registry_driver_path));
+        return VA_STATUS_SUCCESS;
     }
-
+    /* Provide the default driver path as a fallback option */
+    *driver_absolute_path = calloc(sizeof(VAAPI_DEFAULT_DRIVER_PATH), sizeof(char));
+    memcpy(*driver_absolute_path, VAAPI_DEFAULT_DRIVER_PATH, sizeof(VAAPI_DEFAULT_DRIVER_PATH));
     return VA_STATUS_SUCCESS;
 }
 
@@ -202,12 +188,12 @@ VADisplay vaGetDisplayWin32(
         /* Copy LUID information to display context */
         memcpy(&pWin32Ctx->adapter_luid, adapter_luid, sizeof(pWin32Ctx->adapter_luid));
 
-        /* Load the preferred driver name from the driver registry if available */
-        LoadDriverNameFromRegistry(pWin32Ctx);
+        /* Load the preferred driver path from the driver registry if available */
+        LoadDriverPathFromRegistry(pWin32Ctx);
         if (pWin32Ctx->registry_driver_available_flag) {
-            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart);
+            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_path, pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart);
         } else {
-            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_NAME);
+            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_PATH);
         }
     }
 
