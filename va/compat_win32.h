@@ -29,6 +29,11 @@
 #include <io.h>
 #include <time.h>
 
+// Include stdlib.h here to make sure we
+// always replace MSVC getenv definition
+// with the macro / _getenv inline below
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,6 +50,15 @@ typedef LONG NTSTATUS;
 #endif
 
 typedef unsigned int __uid_t;
+
+#if _MSC_VER
+#define getenv _getenv
+inline char* _getenv(const char *varname)
+{
+    static char _getenv_buf[32767];
+    return GetEnvironmentVariableA(varname, &_getenv_buf[0], sizeof(_getenv_buf)) ? &_getenv_buf[0] : NULL;
+}
+#endif
 
 #ifdef _MSC_VER
 inline char* strtok_r(char *s, const char *delim, char **save_ptr)
