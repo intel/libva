@@ -23,6 +23,8 @@ jobs:
       run: meson compile -C _build
     - name: 'Install'
       run: meson install -C _build
+    - name: 'Build dist package'
+      run: meson dist -C _build
 
   windows-mingw:
     runs-on: windows-2022
