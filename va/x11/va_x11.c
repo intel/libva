@@ -195,9 +195,10 @@ static VAStatus va_DisplayContextGetNumCandidates(
     int *num_candidates
 )
 {
-    VAStatus vaStatus;
+    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 
-    vaStatus = va_DRI3_GetNumCandidates(pDisplayContext, num_candidates);
+    if (!getenv("LIBVA_DRI3_DISABLE"))
+        vaStatus = va_DRI3_GetNumCandidates(pDisplayContext, num_candidates);
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRI2_GetNumCandidates(pDisplayContext, num_candidates);
 
