@@ -113,6 +113,9 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate
 
     *driver_name_ptr = va_DRM_GetDrmDriverName(drm_state->fd);
 
+    if (!*driver_name_ptr)
+        return VA_STATUS_ERROR_UNKNOWN;
+
     /* Map vgem to WSL2 for Windows subsystem for linux */
     struct utsname sysinfo = {};
     if (!strncmp(*driver_name_ptr, "vgem", 4) && uname(&sysinfo) >= 0 &&
@@ -120,9 +123,6 @@ VA_DRM_GetDriverName(VADriverContextP ctx, char **driver_name_ptr, int candidate
         free(*driver_name_ptr);
         *driver_name_ptr = strdup("WSL");
     }
-
-    if (!*driver_name_ptr)
-        return VA_STATUS_ERROR_UNKNOWN;
 
     for (m = g_driver_name_map; m->key != NULL; m++) {
         if (strcmp(m->key, *driver_name_ptr) == 0) {
