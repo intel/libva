@@ -441,7 +441,17 @@ typedef struct _VAProtectedSessionExecuteBuffer {
     /** \brief Return the result of this function. The status result is IHV's
      * implementation specific */
     uint32_t status;
-    uint32_t va_reserved[VA_PADDING_LOW];
+    /** \brief - vtag represents TEE sandbox identification for multiple playback scenario
+     *
+     * If TEE interface is created using VAEntrypointProtectedTEEComm then
+     * vtag is non-zero for multiple playback and vtag is zero for single playback
+     *
+     * If TEE interface is not created using VAEntrypointProtectedTEEComm then
+     * vtag - reserved
+     */
+    uint64_t vtag;
+    /** \brief reserved bytes for future use, must be zero */
+    uint32_t va_reserved[VA_PADDING_LOW - 2];
 } VAProtectedSessionExecuteBuffer;
 
 /**
