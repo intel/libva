@@ -185,11 +185,13 @@ VADisplay vaGetDisplayWin32(
 
         /* Load the preferred driver name from the driver registry if available */
         LoadDriverNameFromRegistry(pWin32Ctx);
+#ifdef _DEBUG
         if (pWin32Ctx->registry_driver_available_flag) {
             fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart);
         } else {
             fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_NAME);
         }
+#endif // _DEBUG
     }
 
     pDriverContext = va_newDriverContext(pDisplayContext);
