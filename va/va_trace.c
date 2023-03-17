@@ -1096,6 +1096,11 @@ void va_TraceInitialize(
 {
     DPY2TRACE_VIRCTX(dpy);
     TRACE_FUNCNAME(idx);
+
+    const char* vendor_string = vaQueryVendorString(dpy);
+    if (vendor_string)
+        va_TraceMsg(trace_ctx, "==========\tVA-API vendor string: %s\n", vendor_string);
+
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
 
