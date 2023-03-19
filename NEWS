@@ -1,5 +1,30 @@
-libva NEWS -- summary of user visible changes.  2022-12-16
-Copyright (C) 2009-2022 Intel Corporation
+libva NEWS -- summary of user visible changes.  2022-03-19
+Copyright (C) 2009-2023 Intel Corporation
+
+version 2.18.0 - 19.Mar.2022
+* doc: Add build and install libva informatio in home page.
+* fix: NULL check before calling strncmp.
+* ci: add dependabot
+* va: fix the codying style of CHECK_DISPLAY
+* va: remove dummy isValid() hook
+* x11: use LIBVA_DRI3_DISABLE in GetNumCandidates
+* win: compat_win32: Add getenv wrapper for WIN32
+* win(WSL): va_drm_utils: Map d3d12 gallium driver for Windows Subsytem for Linux
+* fix: Add libva.def into distribution package
+* x11: allow disabling DRI3 via LIBVA_DRI3_DISABLe env var
+* ci: enable Werror across the build
+* win: explicitly ignore CloseAdapter return value
+* win: use wide string literal where needed
+* win: Add vaDisplayIsValid to .def export list
+* va: Always build with va-messaging API
+* meson: docs: use libva_version over project_version()
+* ci: add github pages workflow
+* meson: docs: add encoder interface for av1
+* va: add VAProfileH264High10
+* fix: Remove reference to non-existent symbol
+* va: va/sysdeps.h: remove Android section
+* va: remove Android pre Jelly Bean workarounds
+* va: remove unused drm_sarea.h include & ANDROID references in va_dricommon.h
 
 version 2.17.0 - 16.Dec.2022
 * win: Simplify signature for driver name loading
