@@ -54,4 +54,4 @@ jobs:
     - name: 'Deploy to GitHub Pages'
       if: github.ref_name == env.GIT_LATEST_TAG
       id: deployment
-      uses: actions/deploy-pages@v1
+      uses: actions/deploy-pages@v2
