@@ -44,8 +44,8 @@ sudo make install
 ```
 or build using Meson
 ```
-mkdir build 
-cd build 
+mkdir builddir 
+cd builddir 
 meson .. -Dprefix=/usr -Dlibdir=/usr/lib/x86_64-linux-gnu
 ninja
 sudo ninja install
@@ -59,8 +59,8 @@ sudo make install
 ```
 or build using Meson
 ```
-mkdir build 
-cd build 
+mkdir builddir 
+cd builddir 
 meson .. -Dprefix=/usr -Dlibdir=/usr/lib64
 ninja
 sudo ninja install
