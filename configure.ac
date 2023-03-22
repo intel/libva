@@ -183,6 +183,9 @@ PKG_PROG_PKG_CONFIG
 AC_HEADER_STDC
 AC_SYS_LARGEFILE
 
+#check for secure_getenv
+AC_CHECK_FUNCS(secure_getenv)
+
 # Check for Doxygen
 if test "$enable_docs" = "yes"; then
     AC_CHECK_TOOL([DOXYGEN], [doxygen], [no])

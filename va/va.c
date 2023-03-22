@@ -57,6 +57,20 @@
 #define CHECK_MAXIMUM(s, ctx, var) if (!va_checkMaximum(dpy, ctx->max_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 #define CHECK_STRING(s, ctx, var) if (!va_checkString(dpy, ctx->str_##var, #var)) s = VA_STATUS_ERROR_UNKNOWN;
 
+#ifndef HAVE_SECURE_GETENV
+static char * secure_getenv(const char *name)
+{
+#if defined(__MINGW32__) || defined(__MINGW64__)
+    if (getuid() == geteuid())
+#else
+    if (getuid() == geteuid() && getgid() == getegid())
+#endif
+        return getenv(name);
+    else
+        return NULL;
+}
+#endif
+
 /*
  * read a config "env" for libva.conf or from environment setting
  * libva.conf has higher priority
@@ -97,7 +111,7 @@ int va_parseConfig(char *env, char *env_value)
         fclose(fp);
 
     /* no setting in config file, use env setting */
-    value = getenv(env);
+    value = secure_getenv(env);
     if (value) {
         if (env_value) {
             strncpy(env_value, value, 1024);
@@ -348,7 +362,7 @@ static VAStatus va_getDriverNumCandidates(VADisplay dpy, int *num_candidates)
     VADriverContextP ctx;
 
     ctx = CTX(dpy);
-    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+    driver_name_env = secure_getenv("LIBVA_DRIVER_NAME");
 
     if (pDisplayContext->vaGetNumCandidates)
         vaStatus = pDisplayContext->vaGetNumCandidates(pDisplayContext, num_candidates);
@@ -374,7 +388,7 @@ static VAStatus va_getDriverNameByIndex(VADisplay dpy, char **driver_name, int c
         else
             status = VA_STATUS_ERROR_INVALID_PARAMETER;
     }
-    driver_name_env = getenv("LIBVA_DRIVER_NAME");
+    driver_name_env = secure_getenv("LIBVA_DRIVER_NAME");
     /*if user set driver name by vaSetDriverName */
     if (ctx->override_driver_name) {
         if (*driver_name)
@@ -424,7 +438,7 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
 
     if (geteuid() == getuid())
         /* don't allow setuid apps to use LIBVA_DRIVERS_PATH */
-        search_path = getenv("LIBVA_DRIVERS_PATH");
+        search_path = secure_getenv("LIBVA_DRIVERS_PATH");
     if (!search_path)
         search_path = VA_DRIVERS_PATH;
 
