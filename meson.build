@@ -134,6 +134,10 @@ elif get_option('with_legacy').contains('fglrx')
   c_args += ['-DHAVE_FGLRX']
 endif
 
+if cc.has_function('secure_getenv')
+  c_args += ['-DHAVE_SECURE_GETENV']
+endif
+
 add_project_arguments(c_args, language: ['c'])
 
 subdir('va')

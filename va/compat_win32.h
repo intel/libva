@@ -53,6 +53,8 @@ typedef unsigned int __uid_t;
 
 #if _MSC_VER
 #define getenv _getenv
+#define secure_getenv _getenv
+#define HAVE_SECURE_GETENV
 inline char* _getenv(const char *varname)
 {
     static char _getenv_buf[32767];
