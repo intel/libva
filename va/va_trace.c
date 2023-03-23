@@ -4334,6 +4334,30 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     return;
 }
 
+static void va_TraceVAEncSliceParameterBufferAV1(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data)
+{
+    VAEncTileGroupBufferAV1* p = (VAEncTileGroupBufferAV1*)data;
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    if (!p)
+        return;
+
+    va_TraceMsg(trace_ctx, "\t--VAEncTileGroupBufferAV1\n");
+    va_TraceMsg(trace_ctx, "\ttg_start = %u\n", p->tg_start);
+    va_TraceMsg(trace_ctx, "\ttg_end = %u\n", p->tg_end);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    return;
+}
+
 static void va_TraceVAPictureParameterBufferAV1(
     VADisplay dpy,
     VAContextID context,
@@ -5417,11 +5441,15 @@ static void va_TraceAV1Buf(
     case VAEncPictureParameterBufferType:
         va_TraceVAEncPictureParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncSliceParameterBufferType:
+        va_TraceVAEncSliceParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     }
 }
+
 static void va_TraceVC1Buf(
     VADisplay dpy,
     VAContextID context,
