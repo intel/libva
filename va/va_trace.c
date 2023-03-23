@@ -4137,6 +4137,7 @@ static void va_TraceVAEncSequenceParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\tseq_profile = %d\n", p->seq_profile);
     va_TraceMsg(trace_ctx, "\tseq_level_idx = %d\n", p->seq_level_idx);
     va_TraceMsg(trace_ctx, "\tseq_tier = %d\n", p->seq_tier);
+    va_TraceMsg(trace_ctx, "\thierarchical_flag = %d\n", p->hierarchical_flag);
     va_TraceMsg(trace_ctx, "\tintra_period = %d\n", p->intra_period);
     va_TraceMsg(trace_ctx, "\tip_period = %d\n", p->ip_period);
     va_TraceMsg(trace_ctx, "\tbits_per_second = %d\n", p->bits_per_second);
@@ -4155,6 +4156,9 @@ static void va_TraceVAEncSequenceParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\tseq_fields.enable_superres = %d\n", p->seq_fields.bits.enable_superres);
     va_TraceMsg(trace_ctx, "\tseq_fields.enable_cdef = %d\n", p->seq_fields.bits.enable_cdef);
     va_TraceMsg(trace_ctx, "\tseq_fields.enable_restoration = %d\n", p->seq_fields.bits.enable_restoration);
+    va_TraceMsg(trace_ctx, "\tseq_fields.bit_depth_minus8 = %d\n", p->seq_fields.bits.bit_depth_minus8);
+    va_TraceMsg(trace_ctx, "\tseq_fields.subsampling_x = %d\n", p->seq_fields.bits.subsampling_x);
+    va_TraceMsg(trace_ctx, "\tseq_fields.subsampling_y = %d\n", p->seq_fields.bits.subsampling_y);
 
     va_TraceMsg(trace_ctx, "\torder_hint_bits_minus_1 = %d\n", p->order_hint_bits_minus_1);
 
@@ -4188,8 +4192,10 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     for (i = 0; i < 7; i++)
         va_TraceMsg(trace_ctx, "\tref_frame_idx[%d] = %d\n", i, p->ref_frame_idx[i]);
 
+    va_TraceMsg(trace_ctx, "\thierarchical_level_plus1 = %d\n", p->hierarchical_level_plus1);
     va_TraceMsg(trace_ctx, "\tprimary_ref_frame = %d\n", p->primary_ref_frame);
     va_TraceMsg(trace_ctx, "\torder_hint = %d\n", p->order_hint);
+    va_TraceMsg(trace_ctx, "\trefresh_frame_flags = %d\n", p->refresh_frame_flags);
 
     va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx0 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx0);
     va_TraceMsg(trace_ctx, "\tref_frame_ctrl_l0.fields.search_idx1 = %d\n", p->ref_frame_ctrl_l0.fields.search_idx1);
@@ -4225,7 +4231,7 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\ttemporal_id = %d\n", p->temporal_id);
 
     for (i = 0; i < 2; i++)
-        va_TraceMsg(trace_ctx, "\filter_level[%d] = %d\n", i, p->filter_level[i]);
+        va_TraceMsg(trace_ctx, "\tfilter_level[%d] = %d\n", i, p->filter_level[i]);
 
     va_TraceMsg(trace_ctx, "\tfilter_level_u = %d\n", p->filter_level_u);
     va_TraceMsg(trace_ctx, "\tfilter_level_v = %d\n", p->filter_level_v);
@@ -4317,6 +4323,7 @@ static void va_TraceVAEncPictureParameterBufferAV1(
 
     va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.obu_extension_flag = %d\n", p->tile_group_obu_hdr_info.bits.obu_extension_flag);
     va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.obu_has_size_field = %d\n", p->tile_group_obu_hdr_info.bits.obu_has_size_field);
+    va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.temporal_id = %d\n", p->tile_group_obu_hdr_info.bits.temporal_id);
     va_TraceMsg(trace_ctx, "\ttile_group_obu_hdr_info.bits.spatial_id = %d\n", p->tile_group_obu_hdr_info.bits.spatial_id);
 
     va_TraceMsg(trace_ctx, "\tnumber_skip_frames = %d\n", p->number_skip_frames);
