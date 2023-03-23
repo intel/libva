@@ -5444,6 +5444,12 @@ static void va_TraceAV1Buf(
     case VAEncSliceParameterBufferType:
         va_TraceVAEncSliceParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncMiscParameterBufferType:
+        va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    case VAEncPackedHeaderParameterBufferType:
+        va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
