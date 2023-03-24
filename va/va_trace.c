@@ -1802,7 +1802,7 @@ static void va_TraceVABuffers(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
-    va_TracePrint(trace_ctx, "--%s\n", vaBufferTypeStr(type));
+    va_TraceMsg(trace_ctx, "--%s\n", vaBufferTypeStr(type));
 
     if (trace_ctx->plog_file)
         fp = trace_ctx->plog_file->fp_log;
