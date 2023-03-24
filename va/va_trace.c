@@ -2377,7 +2377,7 @@ static void va_TraceVAPictureParameterBufferHEVC(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
-    va_TracePrint(trace_ctx, "VAPictureParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VAPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tCurrPic.picture_id = 0x%08x\n", p->CurrPic.picture_id);
     va_TraceMsg(trace_ctx, "\tCurrPic.frame_idx = %d\n", p->CurrPic.pic_order_cnt);
@@ -2581,7 +2581,7 @@ static void va_TraceVASliceParameterBufferHEVC(
     trace_ctx->trace_slice_no++;
     trace_ctx->trace_slice_size = p->slice_data_size;
 
-    va_TracePrint(trace_ctx, "VASliceParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VASliceParameterBufferHEVC\n");
     va_TraceMsg(trace_ctx, "\tslice_data_size = %d\n", p->slice_data_size);
     va_TraceMsg(trace_ctx, "\tslice_data_offset = %d\n", p->slice_data_offset);
     va_TraceMsg(trace_ctx, "\tslice_data_flag = %d\n", p->slice_data_flag);
@@ -2719,7 +2719,7 @@ static void va_TraceVAIQMatrixBufferHEVC(
 
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
-    va_TracePrint(trace_ctx, "VAIQMatrixBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VAIQMatrixBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tScalingList4x4[6][16]=\n");
     va_TraceMsg(trace_ctx, "");
@@ -2793,7 +2793,7 @@ static void va_TraceVAEncSequenceParameterBufferHEVC(
     if (!p)
         return;
 
-    va_TracePrint(trace_ctx, "\t--VAEncSequenceParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VAEncSequenceParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tgeneral_profile_idc = %d\n", p->general_profile_idc);
     va_TraceMsg(trace_ctx, "\tgeneral_level_idc = %d\n", p->general_level_idc);
@@ -2870,7 +2870,7 @@ static void va_TraceVAEncPictureParameterBufferHEVC(
     if (!p)
         return;
 
-    va_TracePrint(trace_ctx, "\t--VAEncPictureParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VAEncPictureParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.picture_id = 0x%08x\n", p->decoded_curr_pic.picture_id);
     va_TraceMsg(trace_ctx, "\tdecoded_curr_pic.pic_order_cnt = %d\n", p->decoded_curr_pic.pic_order_cnt);
@@ -2951,7 +2951,7 @@ static void va_TraceVAEncSliceParameterBufferHEVC(
     if (!p)
         return;
 
-    va_TracePrint(trace_ctx, "\t--VAEncSliceParameterBufferHEVC\n");
+    va_TraceMsg(trace_ctx, "\t--VAEncSliceParameterBufferHEVC\n");
 
     va_TraceMsg(trace_ctx, "\tslice_segment_address = %d\n", p->slice_segment_address);
     va_TraceMsg(trace_ctx, "\tnum_ctu_in_slice = %d\n", p->num_ctu_in_slice);
@@ -5853,7 +5853,7 @@ void va_TraceRenderPicture(
         case VAProfileHEVCSccMain444:
         case VAProfileHEVCSccMain444_10:
             for (j = 0; j < num_elements; j++) {
-                va_TraceMsg(trace_ctx, "\telement[%d] = ", j);
+                va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
 
                 va_TraceHEVCBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size * j);
             }
