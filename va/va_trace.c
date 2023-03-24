@@ -3689,6 +3689,28 @@ static void va_TraceVAEncMiscParameterBuffer(
         va_TraceMsg(trace_ctx, "\tsize_skip_frames = %d\n", p->size_skip_frames);
         break;
     }
+    case VAEncMiscParameterTypeTemporalLayerStructure: {
+        int i;
+        VAEncMiscParameterTemporalLayerStructure *p = (VAEncMiscParameterTemporalLayerStructure *)tmp->data;
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterTemporalLayerStructure\n");
+        va_TraceMsg(trace_ctx, "\tnumber_of_layers = %d\n", p->number_of_layers);
+        va_TraceMsg(trace_ctx, "\tperiodicity = %d\n", p->periodicity);
+        va_TraceMsg(trace_ctx, "\tlayer_id =\n");
+        va_TraceMsg(trace_ctx, "");
+        for (i = 0; i < 32; i++) {
+            if (i % 8 == 0)
+                va_TracePrint(trace_ctx, "\t");
+
+            va_TracePrint(trace_ctx, "\t%u", p->layer_id[i]);
+            if ((i + 1) % 8 == 0) {
+                if (i == 31)
+                    va_TracePrint(trace_ctx, "\n");
+                else
+                    TRACE_NEWLINE();
+            }
+        }
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
