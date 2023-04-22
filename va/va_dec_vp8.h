@@ -23,7 +23,7 @@
  */
 
 /**
- * \file va_dec_vp.h
+ * \file va_dec_vp8.h
  * \brief VP8 decoding API
  *
  * This file contains the \ref api_dec_vp8 "VP8 decoding API".

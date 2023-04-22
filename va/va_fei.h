@@ -161,6 +161,8 @@ typedef struct _VAStatsStatisticsParameter {
     VABufferID      qp;
 } VAStatsStatisticsParameter;
 
+/**@}*/
+
 #ifdef __cplusplus
 }
 #endif

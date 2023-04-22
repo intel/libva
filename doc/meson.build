@@ -45,10 +45,12 @@ doxyfile = configure_file(
   output: 'Doxyfile',
   configuration: config)
 
+# Simple wrapper that saves stderr to a file 'doxy.stderr'
+doxywrap = find_program('doxywrap.sh')
 doc_install_dir = join_paths(get_option('datadir'), 'doc', meson.project_name())
 custom_target(
   'doc',
-  command: [ doxygen, doxyfile ],
+  command: [ doxywrap, doxygen, doxyfile ],
   depend_files: libva_doc_files,
   input: doxyfile,
   output: 'html-out',

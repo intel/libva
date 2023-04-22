@@ -1,0 +1,109 @@
+warning: Tag 'TCL_SUBST' at line 249 of file 'doc/Doxyfile' has become obsolete.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
+warning: Tag 'COLS_IN_ALPHA_INDEX' at line 1091 of file 'doc/Doxyfile' has become obsolete.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
+warning: Tag 'PERL_PATH' at line 2156 of file 'doc/Doxyfile' has become obsolete.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
+warning: Tag 'MSCGEN_PATH' at line 2178 of file 'doc/Doxyfile' has become obsolete.
+         To avoid this warning please remove this line from your configuration file or upgrade it using "doxygen -u"
+/home/runner/work/libva/libva/va/va.h:5277: warning: end of file with unbalanced grouping commands
+/home/runner/work/libva/libva/va/va_enc_hevc.h:795: warning: unbalanced grouping commands
+/home/runner/work/libva/libva/va/va_enc_hevc.h:893: warning: unbalanced grouping commands
+/home/runner/work/libva/libva/va/va.h:911: warning: explicit link request to 'VAEncQpBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2352: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:468: warning: unable to resolve reference to '_VAEncPictureParameterBufferH264::num_ref_idx_l0_active_minus1' for \ref command
+/home/runner/work/libva/libva/va/va_enc_h264.h:469: warning: unable to resolve reference to '_VAEncPictureParameterBufferH264::num_ref_idx_l1_active_minus1' for \ref command
+/home/runner/work/libva/libva/va/va_enc_av1.h:609: warning: explicit link request to 'VARefFrameCtrl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:574: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:575: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:576: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:577: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:578: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:579: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:580: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2677: warning: explicit link request to 'VAEncMiscParameterTypeMultiPassMaxFrameSize' could not be resolved
+sh: 1: latex: not found
+error: Problems running latex. Check your installation or look for typos in _formulas.tex and check _formulas.log!
+/home/runner/work/libva/libva/va/va.h:1978: warning: Member VABufferType (enumeration) of group api_core is not documented.
+/home/runner/work/libva/libva/va/va.h:2282: warning: Member VAEncMiscParameterType (enumeration) of group api_core is not documented.
+/home/runner/work/libva/libva/va/va_dec_av1.h:203: warning: Member VAAV1TransformationType (enumeration) of group api_dec_av1 is not documented.
+/home/runner/work/libva/libva/va/va_enc_av1.h:441: warning: Member VAEncTransformationTypeAV1 (enumeration) of group api_enc_av1 is not documented.
+/home/runner/work/libva/libva/va/va_vpp.h:1210: warning: Member VA_DEINTERLACING_SCD_ENABLE (macro definition) of group api_vpp is not documented.
+/home/runner/work/libva/libva/va/va.h:1978: warning: Member VABufferType (enumeration) of group api_core is not documented.
+/home/runner/work/libva/libva/va/va.h:2282: warning: Member VAEncMiscParameterType (enumeration) of group api_core is not documented.
+/home/runner/work/libva/libva/va/va.h:2010: warning: explicit link request to 'VAEncQPBufferH264' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2076: warning: unable to resolve reference to 'num_entry_point_offsets' for \ref command
+/home/runner/work/libva/libva/va/va.h:911: warning: explicit link request to 'VAEncQpBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va.h:3929: warning: unable to resolve reference to 'buf_id' for \ref command
+/home/runner/work/libva/libva/va/va.h:3945: warning: unable to resolve reference to 'mem_type' for \ref command
+/home/runner/work/libva/libva/va/va.h:3955: warning: unable to resolve reference to 'buf_id' for \ref command
+/home/runner/work/libva/libva/va/va.h:3955: warning: unable to resolve reference to 'VA_STATUS_ERROR_SURFACE_BUSY' for \ref command
+/home/runner/work/libva/libva/va/va.h:3959: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNIMPLEMENTED:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3961: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_DISPLAY:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3962: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_BUFFER:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3963: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3965: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3979: warning: unable to resolve reference to 'buf_id' for \ref command
+/home/runner/work/libva/libva/va/va.h:3995: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNIMPLEMENTED:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3997: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_DISPLAY:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3998: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_BUFFER:' for \ref command
+/home/runner/work/libva/libva/va/va.h:3999: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4246: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNIMPLEMENTED:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4248: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_DISPLAY:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4249: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_BUFFER:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4250: warning: unable to resolve reference to 'VA_STATUS_ERROR_TIMEDOUT:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4168: warning: unable to resolve reference to 'VA_STATUS_ERROR_UNIMPLEMENTED:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4170: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_DISPLAY:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4171: warning: unable to resolve reference to 'VA_STATUS_ERROR_INVALID_SURFACE:' for \ref command
+/home/runner/work/libva/libva/va/va.h:4172: warning: unable to resolve reference to 'VA_STATUS_ERROR_TIMEDOUT:' for \ref command
+/home/runner/work/libva/libva/va/va_enc_av1.h:441: warning: Member VAEncTransformationTypeAV1 (enumeration) of group api_enc_av1 is not documented.
+/home/runner/work/libva/libva/va/va_dec_av1.h:203: warning: Member VAAV1TransformationType (enumeration) of group api_dec_av1 is not documented.
+/home/runner/work/libva/libva/va/va_vpp.h:1210: warning: Member VA_DEINTERLACING_SCD_ENABLE (macro definition) of group api_vpp is not documented.
+/home/runner/work/libva/libva/va/va.h:1366: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va.h:1367: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va.h:1383: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2677: warning: explicit link request to 'VAEncMiscParameterTypeMultiPassMaxFrameSize' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2677: warning: explicit link request to 'VAEncMiscParameterTypeMultiPassMaxFrameSize' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2352: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:574: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:575: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:576: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:577: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:578: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:579: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:580: warning: explicit link request to 'define' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:609: warning: explicit link request to 'VARefFrameCtrl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:288: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:317: warning: explicit link request to 'VAEncCodedBufferType' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:300: warning: explicit link request to 'VAPictureH264' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_hevc.h:547: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_hevc.h:578: warning: explicit link request to 'VAEncCodedBufferType' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_mpeg2.h:185: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_mpeg2.h:199: warning: explicit link request to 'VAEncCodedBufferType' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_mpeg2.h:209: warning: unable to resolve reference to 'MPEG2_LAST_PICTURE_EOSTREAM' for \ref command
+/home/runner/work/libva/libva/va/va.h:2792: warning: explicit link request to 'VAEncMiscParameterBufferROI' could not be resolved
+/home/runner/work/libva/libva/va/va.h:2794: warning: explicit link request to 'VAEncMiscParameterBufferROI' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:424: warning: explicit link request to 'VAEncMacroblockMapBufferType' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_av1.h:273: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:259: warning: Member vui_fields (variable) of struct VAEncSequenceParameterBufferH264 is not documented.
+/home/runner/work/libva/libva/va/va_enc_h264.h:140: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:164: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_hevc.h:499: warning: Member vui_fields (variable) of struct VAEncSequenceParameterBufferHEVC is not documented.
+/home/runner/work/libva/libva/va/va_enc_hevc.h:338: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_hevc.h:371: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_mpeg2.h:86: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_mpeg2.h:116: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_vp8.h:79: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_vp9.h:128: warning: explicit link request to 'VAConfigAttribRateControl' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_h264.h:462: warning: Member direct_spatial_mv_pred_flag (variable) of struct VAEncSliceParameterBufferH264 is not documented.
+/home/runner/work/libva/libva/va/va_enc_h264.h:468: warning: unable to resolve reference to '_VAEncPictureParameterBufferH264::num_ref_idx_l0_active_minus1' for \ref command
+/home/runner/work/libva/libva/va/va_enc_h264.h:469: warning: unable to resolve reference to '_VAEncPictureParameterBufferH264::num_ref_idx_l1_active_minus1' for \ref command
+/home/runner/work/libva/libva/va/va_enc_h264.h:412: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_enc_hevc.h:766: warning: explicit link request to 'VAEncPackedHeaderDataBuffer' could not be resolved
+/home/runner/work/libva/libva/va/va_dec_jpeg.h:90: warning: explicit link request to 'load_quantization_table' could not be resolved
+/home/runner/work/libva/libva/va/va_vpp.h:1040: warning: explicit link request to 'VA_STATUS_ERROR_INVALID_BLEND_STATE' could not be resolved
+/home/runner/work/libva/libva/va/va_vpp.h:1010: warning: unable to resolve reference to 'VA_ROTATION_NONE:' for \ref command
+/home/runner/work/libva/libva/va/va_vpp.h:1012: warning: unable to resolve reference to 'VA_ROTATION_90:' for \ref command
+/home/runner/work/libva/libva/va/va_vpp.h:1014: warning: unable to resolve reference to 'VA_ROTATION_180:' for \ref command
+/home/runner/work/libva/libva/va/va_vpp.h:1016: warning: unable to resolve reference to 'VA_ROTATION_270:' for \ref command
+/home/runner/work/libva/libva/va/va_dec_hevc.h:419: warning: Member LongSliceFlags (variable) of struct VASliceParameterBufferHEVC is not documented.

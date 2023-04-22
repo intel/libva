@@ -1,0 +1,21 @@
+name: Build the Docs
+
+on: [push, pull_request]
+
+jobs:
+  docs:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v3
+    - name: 'Install prerequisites'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libdrm-dev \
+          doxygen \
+          meson \
+    - name: 'Build the Docs'
+      run: meson setup _build -D enable_docs=true && meson compile -C _build
+    - name: 'Check for documentation issues'
+      run: .github/workflows/docs.sh .github/workflows/docs.exp _build/doxy.stderr
