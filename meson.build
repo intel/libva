@@ -67,7 +67,16 @@ sysconfdir = join_paths(get_option('prefix'), get_option('sysconfdir'))
 
 driverdir = get_option('driverdir')
 if driverdir == ''
-  driverdir = join_paths(get_option('prefix'), get_option('libdir'), 'dri')
+  # "libdir" on Windows is essentially only for static and import libraries,
+  # while "bindir" is the actual runtime directory - containing both
+  # executable and dynamic libraries. During install meson uses correct install
+  # location depending on the type of library, requiring zero user intervention
+  # in the common case.
+  if host_machine.system() == 'windows'
+    driverdir = join_paths(get_option('prefix'), get_option('bindir'))
+  else
+    driverdir = join_paths(get_option('prefix'), get_option('libdir'), 'dri')
+  endif
 endif
 
 configinc = include_directories('.')
