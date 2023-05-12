@@ -1,3 +1,2 @@
-LIBRARY va_win32
 EXPORTS
     vaGetDisplayWin32
