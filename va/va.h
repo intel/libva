@@ -1151,8 +1151,10 @@ typedef union _VAConfigAttribValDecJPEG {
     struct {
         /** \brief Set to (1 << VA_ROTATION_xxx) for supported rotation angles. */
         uint32_t rotation : 4;
+        /** \brief set to 1 for crop and partial decode support, 0 if not supported */
+        uint32_t crop : 1;
         /** \brief Reserved for future use. */
-        uint32_t reserved : 28;
+        uint32_t reserved : 27;
     } bits;
     uint32_t value;
 } VAConfigAttribValDecJPEG;

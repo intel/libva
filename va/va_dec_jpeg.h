@@ -75,8 +75,10 @@ typedef struct _VAPictureParameterBufferJPEGBaseline {
     uint8_t       color_space;
     /** \brief Set to VA_ROTATION_* for a single rotation angle reported by VAConfigAttribDecJPEG. */
     uint32_t      rotation;
+    /** \brief crop rectangle boundary in pixels */
+    VARectangle   crop_rectangle;
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM - 1];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 3];
 } VAPictureParameterBufferJPEGBaseline;
 
 /**
