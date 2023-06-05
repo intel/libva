@@ -305,7 +305,7 @@ typedef int VAStatus;   /** Return status type from functions */
 #define VA_STATUS_ERROR_NOT_ENOUGH_BUFFER       0x00000025
 /** \brief Indicate an operation isn't completed because time-out interval elapsed. */
 #define VA_STATUS_ERROR_TIMEDOUT                0x00000026
-#define VA_STATUS_ERROR_UNKNOWN         0xFFFFFFFF
+#define VA_STATUS_ERROR_UNKNOWN                 0xFFFFFFFF
 
 /**
  * 1. De-interlacing flags for vaPutSurface()
@@ -669,8 +669,8 @@ typedef enum {
      * at vaBeginPicture() time refers to the decode output surface.  The
      * target surface for the output of processing needs to be a different
      * surface since the decode process requires the original reconstructed buffer.
-     * The “surface” member of VAProcPipelineParameterBuffer should be set to the
-     * same as “render_target” set in vaBeginPicture(), but the driver may choose
+     * The "surface" member of VAProcPipelineParameterBuffer should be set to the
+     * same as "render_target" set in vaBeginPicture(), but the driver may choose
      * to ignore this parameter.
      */
     VAConfigAttribDecProcessing     = 8,
@@ -4205,6 +4205,7 @@ VAStatus vaQuerySurfaceStatus(
 typedef enum {
     VADecodeSliceMissing            = 0,
     VADecodeMBError                 = 1,
+    VADecodeReset                   = 2,
 } VADecodeErrorType;
 
 /**
@@ -4224,9 +4225,15 @@ typedef struct _VASurfaceDecodeMBErrors {
 /**
  * After the application gets VA_STATUS_ERROR_DECODING_ERROR after calling vaSyncSurface(),
  * it can call vaQuerySurfaceError to find out further details on the particular error.
- * VA_STATUS_ERROR_DECODING_ERROR should be passed in as "error_status",
- * upon the return, error_info will point to an array of _VASurfaceDecodeMBErrors structure,
- * which is allocated and filled by libVA with detailed information on the missing or error macroblocks.
+ * VA_STATUS_ERROR_DECODING_ERROR should be passed in as "error_status".
+ *
+ * After the applications get VA_STATUS_HW_BUSY or VA_STATUS_SUCCESSFULL from vaSyncSurface(),
+ * it still can call vaQuerySurfaceError to find out further details to know if has real hw reset
+ * happened on this surface since umd and kmd could recover the context from reset with success in sometimes.
+ * VA_STATUS_HW_BUSY or VA_STATUS_SUCCESSFULL also could be passed in as "error_status".
+ *
+ * Upon the return, error_info will point to an array of _VASurfaceDecodeMBErrors structure,
+ * which is allocated and filled by libVA with detailed information on the VADecodeErrorType.
  * The array is terminated if "status==-1" is detected.
  */
 VAStatus vaQuerySurfaceError(
