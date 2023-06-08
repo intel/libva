@@ -721,6 +721,10 @@ static VAStatus va_new_opendriver(VADisplay dpy)
         }
 
         vaStatus = va_openDriver(dpy, drivers[i]);
+        /* Try as path as fallback */
+        if (vaStatus != VA_STATUS_SUCCESS)
+            vaStatus = va_openDriverFromPath(dpy, drivers[i]);
+
         va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
 
         if (vaStatus == VA_STATUS_SUCCESS)
