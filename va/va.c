@@ -38,14 +38,12 @@
 #include <string.h>
 #if defined(_WIN32)
 #include "compat_win32.h"
-#define DRIVER_EXTENSION    "_drv_video.dll"
 #define DRIVER_PATH_STRING  "%s\\%s%s"
 #define ENV_VAR_SEPARATOR ";"
 #else
 #include <dlfcn.h>
 #include <unistd.h>
-#define DRIVER_EXTENSION    "_drv_video.so"
-#define DRIVER_PATH_STRING  "%s/%s%s"
+#define DRIVER_PATH_STRING  "%s/%s%s.so"
 #define ENV_VAR_SEPARATOR ":"
 #endif
 #ifdef ANDROID
@@ -353,16 +351,16 @@ va_getDriverInitName(char *name, int namelen, int major, int minor)
     return ret > 0 && ret < namelen;
 }
 
-static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
+static char *va_getDriverPath(const char *driver_dir, const char *driver_name, bool use_suffix)
 {
-    int n = snprintf(0, 0, DRIVER_PATH_STRING, driver_dir, driver_name, DRIVER_EXTENSION);
+    int n = snprintf(0, 0, DRIVER_PATH_STRING, driver_dir, driver_name, use_suffix ? "_drv_video" : "");
     if (n < 0)
         return NULL;
     char *driver_path = (char *) malloc(n + 1);
     if (!driver_path)
         return NULL;
     n = snprintf(driver_path, n + 1, DRIVER_PATH_STRING,
-                 driver_dir, driver_name, DRIVER_EXTENSION);
+                 driver_dir, driver_name, use_suffix ? "_drv_video" : "");
     if (n < 0) {
         free(driver_path);
         return NULL;
@@ -529,19 +527,20 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
     driver_dir = strtok_r(search_path, ENV_VAR_SEPARATOR, &saveptr);
     while (driver_dir) {
-        char *driver_path = va_getDriverPath(driver_dir, driver_name);
-        if (!driver_path) {
-            va_errorMessage(dpy, "%s L%d Out of memory\n",
-                            __FUNCTION__, __LINE__);
-            free(search_path);
-            return VA_STATUS_ERROR_ALLOCATION_FAILED;
+        for (int use_suffix = 1; use_suffix >= 0; use_suffix--) {
+            char *driver_path = va_getDriverPath(driver_dir, driver_name, use_suffix);
+            if (!driver_path) {
+                va_errorMessage(dpy, "%s L%d Out of memory\n",
+                                __FUNCTION__, __LINE__);
+                free(search_path);
+                return VA_STATUS_ERROR_ALLOCATION_FAILED;
+            }
+
+            vaStatus = va_openDriverFromPath(dpy, driver_path);
+            free(driver_path);
+            if (VA_STATUS_SUCCESS == vaStatus)
+                break;
         }
-
-        vaStatus = va_openDriverFromPath(dpy, driver_path);
-        free(driver_path);
-        if (VA_STATUS_SUCCESS == vaStatus)
-            break;
-
         driver_dir = strtok_r(NULL, ENV_VAR_SEPARATOR, &saveptr);
     }
 
