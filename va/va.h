@@ -541,6 +541,8 @@ typedef enum {
     VAProfileH264High10                 = 36,
     VAProfileAVSJizhun                  = 37,        // Chinese GB/T 20090.2—2006
     VAProfileAVSGuangdian               = 38,        // Chinese GY/T 257.1—2012
+    VAProfileAVS2Main                   = 39,
+    VAProfileAVS2Main10                 = 40
 } VAProfile;
 
 /**
@@ -5302,6 +5304,7 @@ typedef union _VACopyOption {
  */
 VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOption option);
 
+#include <va/va_dec_avs2.h>
 #include <va/va_dec_avs.h>
 #include <va/va_dec_hevc.h>
 #include <va/va_dec_jpeg.h>

@@ -48,6 +48,7 @@ libva_source_h = \
 	va_dec_jpeg.h		\
 	va_dec_vp8.h		\
 	va_dec_vp9.h		\
+	va_dec_avs2.h		\
 	va_dec_avs.h		\
 	va_drmcommon.h		\
 	va_egl.h		\
