@@ -705,7 +705,7 @@ static VAStatus va_new_opendriver(VADisplay dpy)
         num_drivers = 1;
 
         va_infoMessage(dpy, "User %srequested driver '%s'\n",
-                       ctx->override_driver_name ? "" : "environment variable",
+                       ctx->override_driver_name ? "" : "environment variable ",
                        driver);
     }
 
