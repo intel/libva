@@ -698,6 +698,9 @@ static VAStatus va_new_opendriver(VADisplay dpy)
         const char *driver = ctx->override_driver_name ?
                              ctx->override_driver_name : driver_name_env;
 
+        for (unsigned int i = 0; i < num_drivers; i++)
+            free(drivers[i]);
+
         drivers[0] = strdup(driver);
         num_drivers = 1;
 
