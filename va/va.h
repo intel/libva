@@ -2316,7 +2316,11 @@ typedef enum {
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
     /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
-    VAEncMiscParameterTypeExtensionData = 19
+    VAEncMiscParameterTypeExtensionData = 19,
+    /** \brief Buffer type used for sending repeat frame flag to the encoder */
+    VAEncMiscParameterTypeRepeatFrame = 20,
+    /** \brief Buffer type used for HEVC Pak statistics */
+    VAEncMiscParameterTypeHevcPakStat = 21
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -2763,6 +2767,37 @@ typedef struct _VAEncMiscParameterSkipFrame {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t                va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterSkipFrame;
+
+/**
+ * \brief Encoding repeat frame.
+ *
+ * The application may choose to send repeated frame to the encoder for additional
+ * encoding pass. The encoder needs to know whether the frame is repeated frame to
+ * use the proper context and update the context.
+ */
+typedef struct _VAEncMiscParameterRepeatFrame {
+    /** 0 indicates it's a new frame and 1 indicates it's a repeated frame
+      * of previous frame. */
+    uint8_t repeat_frame_flag;
+} VAEncMiscParameterRepeatFrame;
+
+/**
+ * \brief HEVC encoding PAK CU levle stream out.
+ *
+ * The application may choose to get HEVC encoding CU level stream out from
+ * encoder PAK. Detail PAK CU level stream out depends on platform.
+ */
+typedef struct _VAEncMiscParameterHevcPakStat {
+    /** brief total generated CUs count
+     *
+     *  it should be allocated by application. */
+    uint32_t *total_cus_cnt;
+
+    /** brief stream out for all CUs
+     *
+     *  it should be allocated by applicaiton. */
+    uint8_t  *cu_stream_out;
+} VAEncMiscParameterHevcPakStat;
 
 /**
  * \brief Encoding region-of-interest (ROI).
