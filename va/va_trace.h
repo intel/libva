@@ -496,6 +496,16 @@ void va_TraceEventBuffers(
     int num_buffers,
     VABufferID *buffers);
 
+/** \brief va_TraceExportSurfaceHandle
+ * trace exported surface handle. */
+DLL_HIDDEN
+void va_TraceExportSurfaceHandle(
+    VADisplay        dpy,
+    VASurfaceID      surfaceId,
+    uint32_t         memType,
+    uint32_t         flags,
+    void             *descriptor);
+
 #ifdef __cplusplus
 }
 #endif
