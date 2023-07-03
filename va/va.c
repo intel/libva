@@ -1558,6 +1558,8 @@ vaExportSurfaceHandle(VADisplay dpy, VASurfaceID surface_id,
         vaStatus = ctx->vtable->vaExportSurfaceHandle(ctx, surface_id,
                    mem_type, flags,
                    descriptor);
+    VA_TRACE_LOG(va_TraceExportSurfaceHandle, dpy, surface_id, mem_type, flags, descriptor);
+
     VA_TRACE_RET(dpy, vaStatus);
     return vaStatus;
 }

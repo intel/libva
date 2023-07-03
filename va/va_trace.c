@@ -6316,3 +6316,53 @@ void va_TraceEventBuffers(
     }
     return;
 }
+
+void va_TraceExportSurfaceHandle(
+    VADisplay        dpy,
+    VASurfaceID      surfaceId,
+    uint32_t         memType,
+    uint32_t         flags,
+    void             *descriptor)
+{
+    int i;
+
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tsurfaceId = 0x%08x\n", surfaceId);
+    va_TraceMsg(trace_ctx, "\tmemType   = 0x%08x\n", memType);
+    va_TraceMsg(trace_ctx, "\tflags     = 0x%08x\n", flags);
+
+    if (memType != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2) {
+        return;
+    }
+
+    VADRMPRIMESurfaceDescriptor *desc = (VADRMPRIMESurfaceDescriptor *)descriptor;
+
+    if (!desc) {
+        return;
+    }
+
+    va_TraceMsg(trace_ctx, "\tfourcc      = %u\n", desc->fourcc);
+    va_TraceMsg(trace_ctx, "\twidth       = %u\n", desc->width);
+    va_TraceMsg(trace_ctx, "\theight      = %u\n", desc->height);
+
+    va_TraceMsg(trace_ctx, "\tnum_objects = %u\n", desc->num_objects);
+    for (i = 0; i < desc->num_objects; i++) {
+        va_TraceMsg(trace_ctx, "\tobject %d, fd       = %d\n", i, desc->objects[i].fd);
+        va_TraceMsg(trace_ctx, "\tobject %d, size     = %u\n", i, desc->objects[i].size);
+        va_TraceMsg(trace_ctx, "\tobject %d, modifier = 0x%llx\n", i, desc->objects[i].drm_format_modifier);
+    }
+
+    va_TraceMsg(trace_ctx, "\tnum_objects = %u\n", desc->num_layers);
+    for (i = 0; i < desc->num_layers; i++) {
+        va_TraceMsg(trace_ctx, "\tlayer %d, drm_format = %d\n", i, desc->layers[i].drm_format);
+        va_TraceMsg(trace_ctx, "\tlayer %d, size       = %u\n", i, desc->layers[i].num_planes);
+        va_TraceMsg(trace_ctx, "\tlayer %d, object idx = [%d, %d, %d, %d]\n", i, desc->layers[i].object_index[0], desc->layers[i].object_index[1], desc->layers[i].object_index[2], desc->layers[i].object_index[3]);
+        va_TraceMsg(trace_ctx, "\tlayer %d, offset     = [%d, %d, %d, %d]\n", i, desc->layers[i].offset[0], desc->layers[i].offset[1], desc->layers[i].offset[2], desc->layers[i].offset[3]);
+        va_TraceMsg(trace_ctx, "\tlayer %d, pitch      = [%d, %d, %d, %d]\n", i, desc->layers[i].pitch[0], desc->layers[i].pitch[1], desc->layers[i].pitch[2], desc->layers[i].pitch[3]);
+    }
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
