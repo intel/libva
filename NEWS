@@ -1,5 +1,17 @@
-libva NEWS -- summary of user visible changes.  2023-03-19
+libva NEWS -- summary of user visible changes.  2023-07-04
 Copyright (C) 2009-2023 Intel Corporation
+
+version 2.19.0 - 04.Jul.2023
+* docs: fix references and descriptions snf focyhrn mstkup
+* ci: add build docs test
+* win: change default driver search path to bindir
+* win: rely on compiler to define link names
+* add: Add mono_chrome to VAEncSequenceParameterBufferAV1
+* add: Enable support for license acquisition of multiple protected playbacks
+* fix: year for version 2.18.0 in NEWS
+* fix: use secure_getenv instead of getenv
+* trace: Improve and add VA trace log for AV1 encode
+* trace: Unify va log message, replace va_TracePrint with va_TraceMsg.
 
 version 2.18.0 - 19.Mar.2023
 * doc: Add build and install libva informatio in home page.
