@@ -912,7 +912,8 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
      *  underline encoder. Otherwise, app can set it to 0 and ignored by driver.
      *
      *  In BRC mode, obu_size needs to be updated and this parameter should be set.
-     *  In CQP mode, this parameter should be set to 0 and ignored by driver.
+     *  In CQP mode, obu_size needs to be updated if \c enable_frame_obu == 1. Otherwise
+     *  this parameter should be set to 0 and ignored by driver.
      */
     uint32_t    byte_offset_frame_hdr_obu_size;
 
