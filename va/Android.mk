@@ -51,6 +51,7 @@ LOCAL_CFLAGS_64 += \
 
 LOCAL_CFLAGS := \
 	$(IGNORED_WARNNING) \
+	-DSYSCONFDIR=\"/system/etc\" \
 	-DLOG_TAG=\"libva\"
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
