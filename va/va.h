@@ -86,13 +86,22 @@
 extern "C" {
 #endif
 
-#if defined(__GNUC__) && !defined(__COVERITY__)
+#if defined(__cplusplus) && __cplusplus >= 201402L
+#define va_deprecated [[deprecated]]
+#define va_deprecated_enum [[deprecated]]
+#elif __STDC__ && __STDC_VERSION__ >= 202311L
+#define va_deprecated [[deprecated]]
+#define va_deprecated_enum [[deprecated]]
+#elif defined(__GNUC__) && !defined(__COVERITY__)
 #define va_deprecated __attribute__((deprecated))
 #if __GNUC__ >= 6
 #define va_deprecated_enum va_deprecated
 #else
 #define va_deprecated_enum
 #endif
+#elif defined(_MSC_VER)
+#define va_deprecated __declspec(deprecated)
+#define va_deprecated_enum
 #else
 #define va_deprecated
 #define va_deprecated_enum
