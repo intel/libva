@@ -1,12 +1,12 @@
 var searchData=
 [
-  ['enable_5f8x8_5fstatistics',['enable_8x8_statistics',['../group__api__fei__h264.html#gaa2bd5a64cac0d15fc3358bc33fa61995',1,'VAStatsStatisticsParameterH264']]],
-  ['enable_5fcu64_5famp_5fcheck',['enable_cu64_amp_check',['../group__api__fei__hevc.html#ga1314c265350b82931eed4928a4ba9b48',1,'VAEncMiscParameterFEIFrameControlHEVC']]],
-  ['enable_5fcu64_5fcheck',['enable_cu64_check',['../group__api__fei__hevc.html#ga5b3a917952f2bee4cc426857e7153bf6',1,'VAEncMiscParameterFEIFrameControlHEVC']]],
+  ['enable_5f8x8_5fstatistics',['enable_8x8_statistics',['../structVAStatsStatisticsParameterH264.html#aa2bd5a64cac0d15fc3358bc33fa61995',1,'VAStatsStatisticsParameterH264']]],
+  ['enable_5fcu64_5famp_5fcheck',['enable_cu64_amp_check',['../structVAEncMiscParameterFEIFrameControlHEVC.html#a1314c265350b82931eed4928a4ba9b48',1,'VAEncMiscParameterFEIFrameControlHEVC']]],
+  ['enable_5fcu64_5fcheck',['enable_cu64_check',['../structVAEncMiscParameterFEIFrameControlHEVC.html#a5b3a917952f2bee4cc426857e7153bf6',1,'VAEncMiscParameterFEIFrameControlHEVC']]],
   ['enable_5fcustom_5frouding_5fintra',['enable_custom_rouding_intra',['../structVAEncMiscParameterCustomRoundingControl.html#a88de2e4ddd91034bc42293d1a8fac648',1,'VAEncMiscParameterCustomRoundingControl']]],
   ['enable_5fcustom_5frounding_5finter',['enable_custom_rounding_inter',['../structVAEncMiscParameterCustomRoundingControl.html#a98389ac0c5bb22211b047e8f79548905',1,'VAEncMiscParameterCustomRoundingControl']]],
   ['enable_5fgpu_5fweighted_5fprediction',['enable_gpu_weighted_prediction',['../structVAEncPictureParameterBufferHEVC.html#a3ad6b886fa6192c3be2f2b60774d05d7',1,'VAEncPictureParameterBufferHEVC']]],
-  ['enable_5finterintra_5fcompound',['enable_interintra_compound',['../structVADecPictureParameterBufferAV1.html#a934478bfdb881028d9730a371f39e49f',1,'VADecPictureParameterBufferAV1::enable_interintra_compound()'],['../group__api__dec__av1.html#gadd1fd228982d3c0703439f7c67b4048d',1,'VADecPictureParameterBufferAV1::@145::@151::enable_interintra_compound()']]],
+  ['enable_5finterintra_5fcompound',['enable_interintra_compound',['../structVADecPictureParameterBufferAV1.html#a934478bfdb881028d9730a371f39e49f',1,'VADecPictureParameterBufferAV1::enable_interintra_compound()'],['../group__api__dec__av1.html#ga1866b0695f2ced3006c0dcdf34be74bc',1,'VADecPictureParameterBufferAV1::@146::@152::enable_interintra_compound()']]],
   ['enable_5fparallel_5fbrc',['enable_parallel_brc',['../structVAEncMiscParameterRateControl.html#ac6d8d7032f6889112f9478139b9ec2c9',1,'VAEncMiscParameterRateControl']]],
   ['enable_5fsub_5fpel_5fmode',['enable_sub_pel_mode',['../structVAEncMiscParameterSubMbPartPelH264.html#a1a00f01199a59b349134c57636ca5b70',1,'VAEncMiscParameterSubMbPartPelH264']]],
   ['enabled',['enabled',['../structVASegmentationStructAV1.html#a0690c46b484b5dd9c41c4ab925e80528',1,'VASegmentationStructAV1']]],

@@ -4,6 +4,7 @@ var searchData=
   ['va_5fdec_5fav1_2eh',['va_dec_av1.h',['../va__dec__av1_8h.html',1,'']]],
   ['va_5fdec_5fhevc_2eh',['va_dec_hevc.h',['../va__dec__hevc_8h.html',1,'']]],
   ['va_5fdec_5fjpeg_2eh',['va_dec_jpeg.h',['../va__dec__jpeg_8h.html',1,'']]],
+  ['va_5fdec_5fvp8_2eh',['va_dec_vp8.h',['../va__dec__vp8_8h.html',1,'']]],
   ['va_5fdec_5fvp9_2eh',['va_dec_vp9.h',['../va__dec__vp9_8h.html',1,'']]],
   ['va_5fenc_5fh264_2eh',['va_enc_h264.h',['../va__enc__h264_8h.html',1,'']]],
   ['va_5fenc_5fhevc_2eh',['va_enc_hevc.h',['../va__enc__hevc_8h.html',1,'']]],

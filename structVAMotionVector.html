@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -75,7 +75,11 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a5b4f89c9031f981bc7b98ffd2a5a43cd"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAMotionVector.html#a5b4f89c9031f981bc7b98ffd2a5a43cd">mv0</a> [2]</td></tr>
+<tr class="memdesc:a5b4f89c9031f981bc7b98ffd2a5a43cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Past reference.  <a href="#a5b4f89c9031f981bc7b98ffd2a5a43cd">More...</a><br /></td></tr>
 <tr class="separator:a5b4f89c9031f981bc7b98ffd2a5a43cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a458b9eb54ebb25a778121bcf7b5e34ab"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAMotionVector.html#a458b9eb54ebb25a778121bcf7b5e34ab">mv1</a> [2]</td></tr>
+<tr class="memdesc:a458b9eb54ebb25a778121bcf7b5e34ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Future reference.  <a href="#a458b9eb54ebb25a778121bcf7b5e34ab">More...</a><br /></td></tr>
+<tr class="separator:a458b9eb54ebb25a778121bcf7b5e34ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Generic motion vector data structure. </p>
@@ -91,7 +95,32 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>[0]: horizontal motion vector for past reference [1]: vertical motion vector for past reference [0]: horizontal motion vector for future reference [1]: vertical motion vector for future reference </p>
+
+<p>Past reference. </p>
+<ul>
+<li><code></code>[0]: horizontal motion vector for past reference</li>
+<li><code></code>[1]: vertical motion vector for past reference </li>
+</ul>
+
+</div>
+</div>
+<a id="a458b9eb54ebb25a778121bcf7b5e34ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a458b9eb54ebb25a778121bcf7b5e34ab">&#9670;&nbsp;</a></span>mv1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int16_t VAMotionVector::mv1[2]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Future reference. </p>
+<ul>
+<li><code></code>[0]: horizontal motion vector for future reference</li>
+<li><code></code>[1]: vertical motion vector for future reference </li>
+</ul>
 
 </div>
 </div>

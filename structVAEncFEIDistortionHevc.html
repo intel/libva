@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -74,14 +74,45 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ga9d70b02e75d05f00b0732a4514276ee5"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__hevc.html#ga9d70b02e75d05f00b0732a4514276ee5">best_distortion</a></td></tr>
-<tr class="separator:ga9d70b02e75d05f00b0732a4514276ee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8ca5468b8121c5bf5da327283949aabd"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__hevc.html#ga8ca5468b8121c5bf5da327283949aabd">colocated_ctb_distortion</a></td></tr>
-<tr class="separator:ga8ca5468b8121c5bf5da327283949aabd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d70b02e75d05f00b0732a4514276ee5"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncFEIDistortionHevc.html#a9d70b02e75d05f00b0732a4514276ee5">best_distortion</a></td></tr>
+<tr class="separator:a9d70b02e75d05f00b0732a4514276ee5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ca5468b8121c5bf5da327283949aabd"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncFEIDistortionHevc.html#a8ca5468b8121c5bf5da327283949aabd">colocated_ctb_distortion</a></td></tr>
+<tr class="separator:a8ca5468b8121c5bf5da327283949aabd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="structVAEncFEIDistortionHevc.html" title="VAEncFEIDistortionHevc defines the data structure for VAEncFEIDistortionBufferType per CTB block...">VAEncFEIDistortionHevc</a> defines the data structure for VAEncFEIDistortionBufferType per CTB block. It is output buffer of ENC and ENC_PAK modes, The CTB block is in raster scan order. Buffer size shall not be less than the number of CTB blocks multiple by sizeof(VAEncFEIDistortionHevc). </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a9d70b02e75d05f00b0732a4514276ee5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d70b02e75d05f00b0732a4514276ee5">&#9670;&nbsp;</a></span>best_distortion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncFEIDistortionHevc::best_distortion</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>best CTB distortion </p>
+
+</div>
+</div>
+<a id="a8ca5468b8121c5bf5da327283949aabd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ca5468b8121c5bf5da327283949aabd">&#9670;&nbsp;</a></span>colocated_ctb_distortion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncFEIDistortionHevc::colocated_ctb_distortion</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>only when colocated_ctb_distortion in <a class="el" href="structVAEncMiscParameterFEIFrameControlHEVC.html" title="FEI frame level control buffer for HEVC. ">VAEncMiscParameterFEIFrameControlHEVC</a> is set </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="va__fei__hevc_8h_source.html">va_fei_hevc.h</a></li>
 </ul>
 </div><!-- contents -->

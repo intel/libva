@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -74,58 +74,58 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ga5918885e636773ec2d08a97b31b06ded"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga5918885e636773ec2d08a97b31b06ded">len_sp</a>: 8</td></tr>
-<tr class="memdesc:ga5918885e636773ec2d08a97b31b06ded"><td class="mdescLeft">&#160;</td><td class="mdescRight">length of search path <br /></td></tr>
-<tr class="separator:ga5918885e636773ec2d08a97b31b06ded"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga415e9cb5e5724891edf2866f6ed7cb67"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga415e9cb5e5724891edf2866f6ed7cb67">search_path</a>: 8</td></tr>
-<tr class="memdesc:ga415e9cb5e5724891edf2866f6ed7cb67"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search method definition 0: default value, diamond search 1: full search 2: diamond search <br /></td></tr>
-<tr class="separator:ga415e9cb5e5724891edf2866f6ed7cb67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8147b4d93a5780b1f748b121caffa0ad"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga8147b4d93a5780b1f748b121caffa0ad">sub_pel_mode</a>: 2</td></tr>
-<tr class="memdesc:ga8147b4d93a5780b1f748b121caffa0ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">sub pixel mode definition 00b: integer mode searching 01b: half-pel mode searching 10b: reserved 11b: quarter-pel mode searching <br /></td></tr>
-<tr class="separator:ga8147b4d93a5780b1f748b121caffa0ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga55a657a455031b1109e6e2b194d09581"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga55a657a455031b1109e6e2b194d09581">inter_sad</a>: 2</td></tr>
-<tr class="memdesc:ga55a657a455031b1109e6e2b194d09581"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion measure adjustment for inter search SAD comparison 00b: none 01b: reserved 10b: Haar transform adjusted 11b: reserved <br /></td></tr>
-<tr class="separator:ga55a657a455031b1109e6e2b194d09581"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad816f11a76f112fa5ebf1976ff5f0c8a"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gad816f11a76f112fa5ebf1976ff5f0c8a">intra_sad</a>: 2</td></tr>
-<tr class="memdesc:gad816f11a76f112fa5ebf1976ff5f0c8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion measure adjustment for intra search SAD comparison 00b: none 01b: reserved 10b: Haar transform adjusted 11b: reserved <br /></td></tr>
-<tr class="separator:gad816f11a76f112fa5ebf1976ff5f0c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadda34c718ccc388c86477c31ca0e4d3d"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gadda34c718ccc388c86477c31ca0e4d3d">mv_predictor_ctrl</a>: 3</td></tr>
-<tr class="memdesc:gadda34c718ccc388c86477c31ca0e4d3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">indicate if future or/and past MV in mv_predictor buffer is valid. 0: MV predictor disabled 1: MV predictor enabled for past reference 2: MV predictor enabled for future reference 3: MV predictor enabled for both past and future references <br /></td></tr>
-<tr class="separator:gadda34c718ccc388c86477c31ca0e4d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabcbab4a743a35a0d3761c37a977ff974"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gabcbab4a743a35a0d3761c37a977ff974">ft_enable</a>: 1</td></tr>
-<tr class="memdesc:gabcbab4a743a35a0d3761c37a977ff974"><td class="mdescLeft">&#160;</td><td class="mdescRight">forward transform enable 0: disable 1: enable, needs frame_qp or mb_qp input for transform <br /></td></tr>
-<tr class="separator:gabcbab4a743a35a0d3761c37a977ff974"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1d97d62c4463efa44f97f94f81b7e415"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga1d97d62c4463efa44f97f94f81b7e415">intra_part_mask</a>: 5</td></tr>
-<tr class="memdesc:ga1d97d62c4463efa44f97f94f81b7e415"><td class="mdescLeft">&#160;</td><td class="mdescRight">luma intra mode partition mask xxxx1: luma_intra_16x16 disabled xxx1x: luma_intra_8x8 disabled xx1xx: luma_intra_4x4 disabled xx111: intra prediction is disabled <br /></td></tr>
-<tr class="separator:ga1d97d62c4463efa44f97f94f81b7e415"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4730bc924f30abf500494f313a6bf04a"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga4730bc924f30abf500494f313a6bf04a">ref_width</a>: 8</td></tr>
-<tr class="memdesc:ga4730bc924f30abf500494f313a6bf04a"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search window(ref_width * ref_height) <br /></td></tr>
-<tr class="separator:ga4730bc924f30abf500494f313a6bf04a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4b9f9f2bdb8f35694134719138a5e7fb"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga4b9f9f2bdb8f35694134719138a5e7fb">search_window</a>: 4</td></tr>
-<tr class="memdesc:ga4b9f9f2bdb8f35694134719138a5e7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">predefined motion search windows. If selected, len_sp, window(ref_width * ref_eight) and search_path setting are ignored. 0: not use predefined search window 1: Tiny, len_sp=4, 24x24 window and diamond search 2: Small, len_sp=9, 28x28 window and diamond search 3: Diamond, len_sp=16, 48x40 window and diamond search 4: Large Diamond, len_sp=32, 48x40 window and diamond search 5: Exhaustive, len_sp=48, 48x40 window and full search 6: Extend Diamond, len_sp=16, 64x40 window and diamond search 7: Extend Large Diamond, len_sp=32, 64x40 window and diamond search 8: Extend Exhaustive, len_sp=48, 64x40 window and full search <br /></td></tr>
-<tr class="separator:ga4b9f9f2bdb8f35694134719138a5e7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab9205de54e1fe74f3e735fc5c8793bc5"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gab9205de54e1fe74f3e735fc5c8793bc5">disable_mv_output</a>: 1</td></tr>
-<tr class="memdesc:gab9205de54e1fe74f3e735fc5c8793bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">MVOutput. When set to 1, MV output is NOT provided. <br /></td></tr>
-<tr class="separator:gab9205de54e1fe74f3e735fc5c8793bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0312178ee7d2761d44d2396285d2ef5f"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga0312178ee7d2761d44d2396285d2ef5f">disable_statistics_output</a>: 1</td></tr>
-<tr class="memdesc:ga0312178ee7d2761d44d2396285d2ef5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">StatisticsOutput. When set to 1, Statistics output is NOT provided. <br /></td></tr>
-<tr class="separator:ga0312178ee7d2761d44d2396285d2ef5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa2bd5a64cac0d15fc3358bc33fa61995"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaa2bd5a64cac0d15fc3358bc33fa61995">enable_8x8_statistics</a>: 1</td></tr>
-<tr class="memdesc:gaa2bd5a64cac0d15fc3358bc33fa61995"><td class="mdescLeft">&#160;</td><td class="mdescRight">block 8x8 data enabling in statistics output <br /></td></tr>
-<tr class="separator:gaa2bd5a64cac0d15fc3358bc33fa61995"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5918885e636773ec2d08a97b31b06ded"><td class="memItemLeft" align="right" valign="top"><a id="a5918885e636773ec2d08a97b31b06ded"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a5918885e636773ec2d08a97b31b06ded">len_sp</a>: 8</td></tr>
+<tr class="memdesc:a5918885e636773ec2d08a97b31b06ded"><td class="mdescLeft">&#160;</td><td class="mdescRight">length of search path <br /></td></tr>
+<tr class="separator:a5918885e636773ec2d08a97b31b06ded"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a415e9cb5e5724891edf2866f6ed7cb67"><td class="memItemLeft" align="right" valign="top"><a id="a415e9cb5e5724891edf2866f6ed7cb67"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a415e9cb5e5724891edf2866f6ed7cb67">search_path</a>: 8</td></tr>
+<tr class="memdesc:a415e9cb5e5724891edf2866f6ed7cb67"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search method definition 0: default value, diamond search 1: full search 2: diamond search <br /></td></tr>
+<tr class="separator:a415e9cb5e5724891edf2866f6ed7cb67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8147b4d93a5780b1f748b121caffa0ad"><td class="memItemLeft" align="right" valign="top"><a id="a8147b4d93a5780b1f748b121caffa0ad"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a8147b4d93a5780b1f748b121caffa0ad">sub_pel_mode</a>: 2</td></tr>
+<tr class="memdesc:a8147b4d93a5780b1f748b121caffa0ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">sub pixel mode definition 00b: integer mode searching 01b: half-pel mode searching 10b: reserved 11b: quarter-pel mode searching <br /></td></tr>
+<tr class="separator:a8147b4d93a5780b1f748b121caffa0ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55a657a455031b1109e6e2b194d09581"><td class="memItemLeft" align="right" valign="top"><a id="a55a657a455031b1109e6e2b194d09581"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a55a657a455031b1109e6e2b194d09581">inter_sad</a>: 2</td></tr>
+<tr class="memdesc:a55a657a455031b1109e6e2b194d09581"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion measure adjustment for inter search SAD comparison 00b: none 01b: reserved 10b: Haar transform adjusted 11b: reserved <br /></td></tr>
+<tr class="separator:a55a657a455031b1109e6e2b194d09581"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad816f11a76f112fa5ebf1976ff5f0c8a"><td class="memItemLeft" align="right" valign="top"><a id="ad816f11a76f112fa5ebf1976ff5f0c8a"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#ad816f11a76f112fa5ebf1976ff5f0c8a">intra_sad</a>: 2</td></tr>
+<tr class="memdesc:ad816f11a76f112fa5ebf1976ff5f0c8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion measure adjustment for intra search SAD comparison 00b: none 01b: reserved 10b: Haar transform adjusted 11b: reserved <br /></td></tr>
+<tr class="separator:ad816f11a76f112fa5ebf1976ff5f0c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adda34c718ccc388c86477c31ca0e4d3d"><td class="memItemLeft" align="right" valign="top"><a id="adda34c718ccc388c86477c31ca0e4d3d"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#adda34c718ccc388c86477c31ca0e4d3d">mv_predictor_ctrl</a>: 3</td></tr>
+<tr class="memdesc:adda34c718ccc388c86477c31ca0e4d3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">indicate if future or/and past MV in mv_predictor buffer is valid. 0: MV predictor disabled 1: MV predictor enabled for past reference 2: MV predictor enabled for future reference 3: MV predictor enabled for both past and future references <br /></td></tr>
+<tr class="separator:adda34c718ccc388c86477c31ca0e4d3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcbab4a743a35a0d3761c37a977ff974"><td class="memItemLeft" align="right" valign="top"><a id="abcbab4a743a35a0d3761c37a977ff974"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#abcbab4a743a35a0d3761c37a977ff974">ft_enable</a>: 1</td></tr>
+<tr class="memdesc:abcbab4a743a35a0d3761c37a977ff974"><td class="mdescLeft">&#160;</td><td class="mdescRight">forward transform enable 0: disable 1: enable, needs frame_qp or mb_qp input for transform <br /></td></tr>
+<tr class="separator:abcbab4a743a35a0d3761c37a977ff974"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d97d62c4463efa44f97f94f81b7e415"><td class="memItemLeft" align="right" valign="top"><a id="a1d97d62c4463efa44f97f94f81b7e415"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a1d97d62c4463efa44f97f94f81b7e415">intra_part_mask</a>: 5</td></tr>
+<tr class="memdesc:a1d97d62c4463efa44f97f94f81b7e415"><td class="mdescLeft">&#160;</td><td class="mdescRight">luma intra mode partition mask xxxx1: luma_intra_16x16 disabled xxx1x: luma_intra_8x8 disabled xx1xx: luma_intra_4x4 disabled xx111: intra prediction is disabled <br /></td></tr>
+<tr class="separator:a1d97d62c4463efa44f97f94f81b7e415"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4730bc924f30abf500494f313a6bf04a"><td class="memItemLeft" align="right" valign="top"><a id="a4730bc924f30abf500494f313a6bf04a"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a4730bc924f30abf500494f313a6bf04a">ref_width</a>: 8</td></tr>
+<tr class="memdesc:a4730bc924f30abf500494f313a6bf04a"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search window(ref_width * ref_height) <br /></td></tr>
+<tr class="separator:a4730bc924f30abf500494f313a6bf04a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b9f9f2bdb8f35694134719138a5e7fb"><td class="memItemLeft" align="right" valign="top"><a id="a4b9f9f2bdb8f35694134719138a5e7fb"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a4b9f9f2bdb8f35694134719138a5e7fb">search_window</a>: 4</td></tr>
+<tr class="memdesc:a4b9f9f2bdb8f35694134719138a5e7fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">predefined motion search windows. If selected, len_sp, window(ref_width * ref_eight) and search_path setting are ignored. 0: not use predefined search window 1: Tiny, len_sp=4, 24x24 window and diamond search 2: Small, len_sp=9, 28x28 window and diamond search 3: Diamond, len_sp=16, 48x40 window and diamond search 4: Large Diamond, len_sp=32, 48x40 window and diamond search 5: Exhaustive, len_sp=48, 48x40 window and full search 6: Extend Diamond, len_sp=16, 64x40 window and diamond search 7: Extend Large Diamond, len_sp=32, 64x40 window and diamond search 8: Extend Exhaustive, len_sp=48, 64x40 window and full search <br /></td></tr>
+<tr class="separator:a4b9f9f2bdb8f35694134719138a5e7fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9205de54e1fe74f3e735fc5c8793bc5"><td class="memItemLeft" align="right" valign="top"><a id="ab9205de54e1fe74f3e735fc5c8793bc5"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#ab9205de54e1fe74f3e735fc5c8793bc5">disable_mv_output</a>: 1</td></tr>
+<tr class="memdesc:ab9205de54e1fe74f3e735fc5c8793bc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">MVOutput. When set to 1, MV output is NOT provided. <br /></td></tr>
+<tr class="separator:ab9205de54e1fe74f3e735fc5c8793bc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0312178ee7d2761d44d2396285d2ef5f"><td class="memItemLeft" align="right" valign="top"><a id="a0312178ee7d2761d44d2396285d2ef5f"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#a0312178ee7d2761d44d2396285d2ef5f">disable_statistics_output</a>: 1</td></tr>
+<tr class="memdesc:a0312178ee7d2761d44d2396285d2ef5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">StatisticsOutput. When set to 1, Statistics output is NOT provided. <br /></td></tr>
+<tr class="separator:a0312178ee7d2761d44d2396285d2ef5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2bd5a64cac0d15fc3358bc33fa61995"><td class="memItemLeft" align="right" valign="top"><a id="aa2bd5a64cac0d15fc3358bc33fa61995"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAStatsStatisticsParameterH264.html#aa2bd5a64cac0d15fc3358bc33fa61995">enable_8x8_statistics</a>: 1</td></tr>
+<tr class="memdesc:aa2bd5a64cac0d15fc3358bc33fa61995"><td class="mdescLeft">&#160;</td><td class="mdescRight">block 8x8 data enabling in statistics output <br /></td></tr>
+<tr class="separator:aa2bd5a64cac0d15fc3358bc33fa61995"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Motion Vector and Statistics frame level controls. VAStatsStatisticsParameterBufferType for H264 16x16 block. </p>

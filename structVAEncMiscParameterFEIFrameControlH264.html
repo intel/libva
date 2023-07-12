@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -74,98 +74,309 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:gac258669628d65693b63cd1c488002e31"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac258669628d65693b63cd1c488002e31">mb_ctrl</a></td></tr>
-<tr class="memdesc:gac258669628d65693b63cd1c488002e31"><td class="mdescLeft">&#160;</td><td class="mdescRight">MB (16x16) control input buffer. It is valid only when (mb_input | mb_size_ctrl) is set to 1. The data in this buffer correspond to the input source. 16x16 MB is in raster scan order, each MB control data structure is defined by <a class="el" href="structVAEncFEIMBControlH264.html" title="FEI MB level control data structure. ">VAEncFEIMBControlH264</a>. Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMBControlH264). Note: if mb_qp is set, VAEncQPBufferH264 is expected. <br /></td></tr>
-<tr class="separator:gac258669628d65693b63cd1c488002e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga771de39e78dfff1eb3e17750745516b8"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga771de39e78dfff1eb3e17750745516b8">distortion</a></td></tr>
-<tr class="memdesc:ga771de39e78dfff1eb3e17750745516b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion output of MB ENC or ENC_PAK. Each 16x16 block has one distortion data with <a class="el" href="structVAEncFEIDistortionH264.html" title="VAEncFEIDistortionH264 defines the data structure for VAEncFEIDistortionBufferType per 16x16 MB block...">VAEncFEIDistortionH264</a> layout Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIDistortionH264). <br /></td></tr>
-<tr class="separator:ga771de39e78dfff1eb3e17750745516b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8f763697d824dcd1f42eeee49c6f91e1"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga8f763697d824dcd1f42eeee49c6f91e1">mv_data</a></td></tr>
-<tr class="memdesc:ga8f763697d824dcd1f42eeee49c6f91e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">MVs data output of MB ENC. Each 16x16 block has one MVs data with layout <a class="el" href="structVAMotionVector.html" title="Generic motion vector data structure. ">VAMotionVector</a> Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAMotionVector) * 16. <br /></td></tr>
-<tr class="separator:ga8f763697d824dcd1f42eeee49c6f91e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga100a5b73cae720e81570567e24198e4b"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga100a5b73cae720e81570567e24198e4b">mb_code_data</a></td></tr>
-<tr class="memdesc:ga100a5b73cae720e81570567e24198e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">MBCode data output of MB ENC. Each 16x16 block has one MB Code data with layout <a class="el" href="structVAEncFEIMBCodeH264.html" title="FEI output. ">VAEncFEIMBCodeH264</a> Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMBCodeH264). <br /></td></tr>
-<tr class="separator:ga100a5b73cae720e81570567e24198e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga351bb0d3e238e65b4f7c698f96ae0713"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga351bb0d3e238e65b4f7c698f96ae0713">qp</a></td></tr>
-<tr class="memdesc:ga351bb0d3e238e65b4f7c698f96ae0713"><td class="mdescLeft">&#160;</td><td class="mdescRight">QP input buffer with layout VAEncQPBufferH264. It is valid only when mb_qp is set to 1. The data in this buffer correspond to the input source. One QP per 16x16 block in raster scan order, each QP is a signed char (8-bit) value. <br /></td></tr>
-<tr class="separator:ga351bb0d3e238e65b4f7c698f96ae0713"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga588c98d33c031458960672165b7b37cc"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga588c98d33c031458960672165b7b37cc">mv_predictor</a></td></tr>
-<tr class="memdesc:ga588c98d33c031458960672165b7b37cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">MV predictor. It is valid only when mv_predictor_enable is set to 1. Each 16x16 block has one or more pair of motion vectors and the corresponding reference indexes as defined by <a class="el" href="structVAEncFEIMVPredictorH264.html" title="Application can use this definition as reference to allocate the buffer based on MaxNumPredictor retu...">VAEncFEIMVPredictorH264</a>. 16x16 block is in raster scan order. Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMVPredictorH264). <br /></td></tr>
-<tr class="separator:ga588c98d33c031458960672165b7b37cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf74104e940f6bd691c5d590cb5300936"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaf74104e940f6bd691c5d590cb5300936">num_mv_predictors_l0</a>: 16</td></tr>
-<tr class="memdesc:gaf74104e940f6bd691c5d590cb5300936"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of MV predictors. It must not be greater than maximum supported MV predictor. <br /></td></tr>
-<tr class="separator:gaf74104e940f6bd691c5d590cb5300936"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga39ef95600918300daf06b2dd3b22f927"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga39ef95600918300daf06b2dd3b22f927">search_path</a>: 8</td></tr>
-<tr class="memdesc:ga39ef95600918300daf06b2dd3b22f927"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search method definition 0: default value, diamond search 1: full search 2: diamond search <br /></td></tr>
-<tr class="separator:ga39ef95600918300daf06b2dd3b22f927"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad9a7af29b531c4f7a30a832047979ae5"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gad9a7af29b531c4f7a30a832047979ae5">len_sp</a>: 8</td></tr>
-<tr class="memdesc:gad9a7af29b531c4f7a30a832047979ae5"><td class="mdescLeft">&#160;</td><td class="mdescRight">maximum number of Search Units, valid range is [1, 63] 0 is treated as 1. reference search locations are grouped in a predefined pattern, and all locations within the same group must be either all are chosen or all are skipped. These predefined groups are called search unit (SU). <br /></td></tr>
-<tr class="separator:gad9a7af29b531c4f7a30a832047979ae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga091e51387e841fbdc3ddc75d0e5f4856"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga091e51387e841fbdc3ddc75d0e5f4856">sub_mb_part_mask</a>: 7</td></tr>
-<tr class="memdesc:ga091e51387e841fbdc3ddc75d0e5f4856"><td class="mdescLeft">&#160;</td><td class="mdescRight">defines the bit-mask for disabling sub-partition The lower 4 bits are for the major partitions (sub-macroblock) and the higher 3 bits for minor partitions (with sub-partition for 4x(8x8) sub-macroblocks. xxxxxx1 : 16x16 sub-macroblock disabled xxxxx1x : 2x(16x8) sub-macroblock within 16x16 disabled xxxx1xx : 2x(8x16) sub-macroblock within 16x16 disabled xxx1xxx : 1x(8x8) sub-partition for 4x(8x8) within 16x16 disabled xx1xxxx : 2x(8x4) sub-partition for 4x(8x8) within 16x16 disabled x1xxxxx : 2x(4x8) sub-partition for 4x(8x8) within 16x16 disabled 1xxxxxx : 4x(4x4) sub-partition for 4x(8x8) within 16x16 disabled 1111111 : Invalid 0000000 : default value <br /></td></tr>
-<tr class="separator:ga091e51387e841fbdc3ddc75d0e5f4856"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac84238e211dd69fd0580a887c73e140f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac84238e211dd69fd0580a887c73e140f">intra_part_mask</a>: 5</td></tr>
-<tr class="separator:gac84238e211dd69fd0580a887c73e140f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5c73a14d5346fccc7b9ac9eb16aad981"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga5c73a14d5346fccc7b9ac9eb16aad981">multi_pred_l0</a>: 1</td></tr>
-<tr class="separator:ga5c73a14d5346fccc7b9ac9eb16aad981"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga073ee7f2ab36ade5b9f25572098b8726"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga073ee7f2ab36ade5b9f25572098b8726">multi_pred_l1</a>: 1</td></tr>
-<tr class="separator:ga073ee7f2ab36ade5b9f25572098b8726"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf592800035866e3eeb6d4b08099aad50"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaf592800035866e3eeb6d4b08099aad50">sub_pel_mode</a>: 2</td></tr>
-<tr class="separator:gaf592800035866e3eeb6d4b08099aad50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac1cd1612a362caaa5cdd4a9c9dc8c16b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac1cd1612a362caaa5cdd4a9c9dc8c16b">inter_sad</a>: 2</td></tr>
-<tr class="separator:gac1cd1612a362caaa5cdd4a9c9dc8c16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0db78717d2e0572baa666ba383291f22"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga0db78717d2e0572baa666ba383291f22">intra_sad</a>: 2</td></tr>
-<tr class="separator:ga0db78717d2e0572baa666ba383291f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaccb62f4546ed6fb6d520a61f2240b64b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaccb62f4546ed6fb6d520a61f2240b64b">distortion_type</a>: 1</td></tr>
-<tr class="separator:gaccb62f4546ed6fb6d520a61f2240b64b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa344b4e3f737fbaad9d63d354d13b2d6"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaa344b4e3f737fbaad9d63d354d13b2d6">repartition_check_enable</a>: 1</td></tr>
-<tr class="separator:gaa344b4e3f737fbaad9d63d354d13b2d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaab108529bcf4801c8346a46cc58a70e2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaab108529bcf4801c8346a46cc58a70e2">adaptive_search</a>: 1</td></tr>
-<tr class="separator:gaab108529bcf4801c8346a46cc58a70e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac21b158dfbf2e82201612bf03383e85d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac21b158dfbf2e82201612bf03383e85d">mv_predictor_enable</a>: 1</td></tr>
-<tr class="separator:gac21b158dfbf2e82201612bf03383e85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0dbd1285d9a870d1180a9e019eab5100"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga0dbd1285d9a870d1180a9e019eab5100">mb_qp</a>: 1</td></tr>
-<tr class="separator:ga0dbd1285d9a870d1180a9e019eab5100"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab036b656305068d2040a8dd89005446d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gab036b656305068d2040a8dd89005446d">mb_input</a>: 1</td></tr>
-<tr class="separator:gab036b656305068d2040a8dd89005446d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaafaeacb644816555009d1f8f6689f53c"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaafaeacb644816555009d1f8f6689f53c">mb_size_ctrl</a>: 1</td></tr>
-<tr class="separator:gaafaeacb644816555009d1f8f6689f53c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac437190ba1ece1f214f415cbc32faa7e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac437190ba1ece1f214f415cbc32faa7e">colocated_mb_distortion</a>: 1</td></tr>
-<tr class="separator:gac437190ba1ece1f214f415cbc32faa7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0243ebab0d9444298b67ecfdb43231fe"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga0243ebab0d9444298b67ecfdb43231fe">ref_width</a>: 8</td></tr>
-<tr class="memdesc:ga0243ebab0d9444298b67ecfdb43231fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search window(ref_width * ref_height) <br /></td></tr>
-<tr class="separator:ga0243ebab0d9444298b67ecfdb43231fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8e8567ed8862327109a1f4631d80ecc4"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga8e8567ed8862327109a1f4631d80ecc4">search_window</a>: 4</td></tr>
-<tr class="memdesc:ga8e8567ed8862327109a1f4631d80ecc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">predefined motion search windows. If selected, len_sp, window(ref_width * ref_eight) and search_path setting are ignored. 0: not use predefined search window 1: Tiny, len_sp=4, 24x24 window and diamond search 2: Small, len_sp=9, 28x28 window and diamond search 3: Diamond, len_sp=16, 48x40 window and diamond search 4: Large Diamond, len_sp=32, 48x40 window and diamond search 5: Exhaustive, len_sp=48, 48x40 window and full search 6: Extend Diamond, len_sp=16, 64x40 window and diamond search 7: Extend Large Diamond, len_sp=32, 64x40 window and diamond search 8: Extend Exhaustive, len_sp=48, 64x40 window and full search <br /></td></tr>
-<tr class="separator:ga8e8567ed8862327109a1f4631d80ecc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5453f864b8fe9b8dcfbff54086172d74"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga5453f864b8fe9b8dcfbff54086172d74">max_frame_size</a></td></tr>
-<tr class="memdesc:ga5453f864b8fe9b8dcfbff54086172d74"><td class="mdescLeft">&#160;</td><td class="mdescRight">max frame size control with multi passes QP setting <br /></td></tr>
-<tr class="separator:ga5453f864b8fe9b8dcfbff54086172d74"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga63242c913b2d1a32919d580b9aed11d8"><td class="memItemLeft" align="right" valign="top">
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#ga63242c913b2d1a32919d580b9aed11d8">num_passes</a></td></tr>
-<tr class="memdesc:ga63242c913b2d1a32919d580b9aed11d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of passes, every pass has different QP <br /></td></tr>
-<tr class="separator:ga63242c913b2d1a32919d580b9aed11d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaba1442fef721c95dd2a0f144c329a54b"><td class="memItemLeft" align="right" valign="top">
-uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaba1442fef721c95dd2a0f144c329a54b">delta_qp</a></td></tr>
-<tr class="memdesc:gaba1442fef721c95dd2a0f144c329a54b"><td class="mdescLeft">&#160;</td><td class="mdescRight">delta QP list for every pass <br /></td></tr>
-<tr class="separator:gaba1442fef721c95dd2a0f144c329a54b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac258669628d65693b63cd1c488002e31"><td class="memItemLeft" align="right" valign="top"><a id="ac258669628d65693b63cd1c488002e31"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ac258669628d65693b63cd1c488002e31">mb_ctrl</a></td></tr>
+<tr class="memdesc:ac258669628d65693b63cd1c488002e31"><td class="mdescLeft">&#160;</td><td class="mdescRight">MB (16x16) control input buffer. It is valid only when (mb_input | mb_size_ctrl) is set to 1. The data in this buffer correspond to the input source. 16x16 MB is in raster scan order, each MB control data structure is defined by <a class="el" href="structVAEncFEIMBControlH264.html" title="FEI MB level control data structure. ">VAEncFEIMBControlH264</a>. Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMBControlH264). Note: if mb_qp is set, VAEncQPBufferH264 is expected. <br /></td></tr>
+<tr class="separator:ac258669628d65693b63cd1c488002e31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a771de39e78dfff1eb3e17750745516b8"><td class="memItemLeft" align="right" valign="top"><a id="a771de39e78dfff1eb3e17750745516b8"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a771de39e78dfff1eb3e17750745516b8">distortion</a></td></tr>
+<tr class="memdesc:a771de39e78dfff1eb3e17750745516b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">distortion output of MB ENC or ENC_PAK. Each 16x16 block has one distortion data with <a class="el" href="structVAEncFEIDistortionH264.html" title="VAEncFEIDistortionH264 defines the data structure for VAEncFEIDistortionBufferType per 16x16 MB block...">VAEncFEIDistortionH264</a> layout Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIDistortionH264). <br /></td></tr>
+<tr class="separator:a771de39e78dfff1eb3e17750745516b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f763697d824dcd1f42eeee49c6f91e1"><td class="memItemLeft" align="right" valign="top"><a id="a8f763697d824dcd1f42eeee49c6f91e1"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a8f763697d824dcd1f42eeee49c6f91e1">mv_data</a></td></tr>
+<tr class="memdesc:a8f763697d824dcd1f42eeee49c6f91e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">MVs data output of MB ENC. Each 16x16 block has one MVs data with layout <a class="el" href="structVAMotionVector.html" title="Generic motion vector data structure. ">VAMotionVector</a> Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAMotionVector) * 16. <br /></td></tr>
+<tr class="separator:a8f763697d824dcd1f42eeee49c6f91e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a100a5b73cae720e81570567e24198e4b"><td class="memItemLeft" align="right" valign="top"><a id="a100a5b73cae720e81570567e24198e4b"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a100a5b73cae720e81570567e24198e4b">mb_code_data</a></td></tr>
+<tr class="memdesc:a100a5b73cae720e81570567e24198e4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">MBCode data output of MB ENC. Each 16x16 block has one MB Code data with layout <a class="el" href="structVAEncFEIMBCodeH264.html" title="FEI output. ">VAEncFEIMBCodeH264</a> Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMBCodeH264). <br /></td></tr>
+<tr class="separator:a100a5b73cae720e81570567e24198e4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a351bb0d3e238e65b4f7c698f96ae0713"><td class="memItemLeft" align="right" valign="top"><a id="a351bb0d3e238e65b4f7c698f96ae0713"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a351bb0d3e238e65b4f7c698f96ae0713">qp</a></td></tr>
+<tr class="memdesc:a351bb0d3e238e65b4f7c698f96ae0713"><td class="mdescLeft">&#160;</td><td class="mdescRight">QP input buffer with layout VAEncQPBufferH264. It is valid only when mb_qp is set to 1. The data in this buffer correspond to the input source. One QP per 16x16 block in raster scan order, each QP is a signed char (8-bit) value. <br /></td></tr>
+<tr class="separator:a351bb0d3e238e65b4f7c698f96ae0713"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a588c98d33c031458960672165b7b37cc"><td class="memItemLeft" align="right" valign="top"><a id="a588c98d33c031458960672165b7b37cc"></a>
+<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a588c98d33c031458960672165b7b37cc">mv_predictor</a></td></tr>
+<tr class="memdesc:a588c98d33c031458960672165b7b37cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">MV predictor. It is valid only when mv_predictor_enable is set to 1. Each 16x16 block has one or more pair of motion vectors and the corresponding reference indexes as defined by <a class="el" href="structVAEncFEIMVPredictorH264.html" title="Application can use this definition as reference to allocate the buffer based on MaxNumPredictor retu...">VAEncFEIMVPredictorH264</a>. 16x16 block is in raster scan order. Buffer size shall not be less than the number of 16x16 blocks multiplied by sizeof(VAEncFEIMVPredictorH264). <br /></td></tr>
+<tr class="separator:a588c98d33c031458960672165b7b37cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af74104e940f6bd691c5d590cb5300936"><td class="memItemLeft" align="right" valign="top"><a id="af74104e940f6bd691c5d590cb5300936"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#af74104e940f6bd691c5d590cb5300936">num_mv_predictors_l0</a>: 16</td></tr>
+<tr class="memdesc:af74104e940f6bd691c5d590cb5300936"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of MV predictors. It must not be greater than maximum supported MV predictor. <br /></td></tr>
+<tr class="separator:af74104e940f6bd691c5d590cb5300936"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39ef95600918300daf06b2dd3b22f927"><td class="memItemLeft" align="right" valign="top"><a id="a39ef95600918300daf06b2dd3b22f927"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a39ef95600918300daf06b2dd3b22f927">search_path</a>: 8</td></tr>
+<tr class="memdesc:a39ef95600918300daf06b2dd3b22f927"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search method definition 0: default value, diamond search 1: full search 2: diamond search <br /></td></tr>
+<tr class="separator:a39ef95600918300daf06b2dd3b22f927"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9a7af29b531c4f7a30a832047979ae5"><td class="memItemLeft" align="right" valign="top"><a id="ad9a7af29b531c4f7a30a832047979ae5"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ad9a7af29b531c4f7a30a832047979ae5">len_sp</a>: 8</td></tr>
+<tr class="memdesc:ad9a7af29b531c4f7a30a832047979ae5"><td class="mdescLeft">&#160;</td><td class="mdescRight">maximum number of Search Units, valid range is [1, 63] 0 is treated as 1. reference search locations are grouped in a predefined pattern, and all locations within the same group must be either all are chosen or all are skipped. These predefined groups are called search unit (SU). <br /></td></tr>
+<tr class="separator:ad9a7af29b531c4f7a30a832047979ae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a091e51387e841fbdc3ddc75d0e5f4856"><td class="memItemLeft" align="right" valign="top"><a id="a091e51387e841fbdc3ddc75d0e5f4856"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a091e51387e841fbdc3ddc75d0e5f4856">sub_mb_part_mask</a>: 7</td></tr>
+<tr class="memdesc:a091e51387e841fbdc3ddc75d0e5f4856"><td class="mdescLeft">&#160;</td><td class="mdescRight">defines the bit-mask for disabling sub-partition The lower 4 bits are for the major partitions (sub-macroblock) and the higher 3 bits for minor partitions (with sub-partition for 4x(8x8) sub-macroblocks. xxxxxx1 : 16x16 sub-macroblock disabled xxxxx1x : 2x(16x8) sub-macroblock within 16x16 disabled xxxx1xx : 2x(8x16) sub-macroblock within 16x16 disabled xxx1xxx : 1x(8x8) sub-partition for 4x(8x8) within 16x16 disabled xx1xxxx : 2x(8x4) sub-partition for 4x(8x8) within 16x16 disabled x1xxxxx : 2x(4x8) sub-partition for 4x(8x8) within 16x16 disabled 1xxxxxx : 4x(4x4) sub-partition for 4x(8x8) within 16x16 disabled 1111111 : Invalid 0000000 : default value <br /></td></tr>
+<tr class="separator:a091e51387e841fbdc3ddc75d0e5f4856"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac84238e211dd69fd0580a887c73e140f"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ac84238e211dd69fd0580a887c73e140f">intra_part_mask</a>: 5</td></tr>
+<tr class="separator:ac84238e211dd69fd0580a887c73e140f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c73a14d5346fccc7b9ac9eb16aad981"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a5c73a14d5346fccc7b9ac9eb16aad981">multi_pred_l0</a>: 1</td></tr>
+<tr class="separator:a5c73a14d5346fccc7b9ac9eb16aad981"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a073ee7f2ab36ade5b9f25572098b8726"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a073ee7f2ab36ade5b9f25572098b8726">multi_pred_l1</a>: 1</td></tr>
+<tr class="separator:a073ee7f2ab36ade5b9f25572098b8726"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af592800035866e3eeb6d4b08099aad50"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#af592800035866e3eeb6d4b08099aad50">sub_pel_mode</a>: 2</td></tr>
+<tr class="separator:af592800035866e3eeb6d4b08099aad50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1cd1612a362caaa5cdd4a9c9dc8c16b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ac1cd1612a362caaa5cdd4a9c9dc8c16b">inter_sad</a>: 2</td></tr>
+<tr class="separator:ac1cd1612a362caaa5cdd4a9c9dc8c16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0db78717d2e0572baa666ba383291f22"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a0db78717d2e0572baa666ba383291f22">intra_sad</a>: 2</td></tr>
+<tr class="separator:a0db78717d2e0572baa666ba383291f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:accb62f4546ed6fb6d520a61f2240b64b"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#accb62f4546ed6fb6d520a61f2240b64b">distortion_type</a>: 1</td></tr>
+<tr class="separator:accb62f4546ed6fb6d520a61f2240b64b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa344b4e3f737fbaad9d63d354d13b2d6"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#aa344b4e3f737fbaad9d63d354d13b2d6">repartition_check_enable</a>: 1</td></tr>
+<tr class="separator:aa344b4e3f737fbaad9d63d354d13b2d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab108529bcf4801c8346a46cc58a70e2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#aab108529bcf4801c8346a46cc58a70e2">adaptive_search</a>: 1</td></tr>
+<tr class="separator:aab108529bcf4801c8346a46cc58a70e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac21b158dfbf2e82201612bf03383e85d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ac21b158dfbf2e82201612bf03383e85d">mv_predictor_enable</a>: 1</td></tr>
+<tr class="separator:ac21b158dfbf2e82201612bf03383e85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0dbd1285d9a870d1180a9e019eab5100"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a0dbd1285d9a870d1180a9e019eab5100">mb_qp</a>: 1</td></tr>
+<tr class="separator:a0dbd1285d9a870d1180a9e019eab5100"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab036b656305068d2040a8dd89005446d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ab036b656305068d2040a8dd89005446d">mb_input</a>: 1</td></tr>
+<tr class="separator:ab036b656305068d2040a8dd89005446d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafaeacb644816555009d1f8f6689f53c"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#aafaeacb644816555009d1f8f6689f53c">mb_size_ctrl</a>: 1</td></tr>
+<tr class="separator:aafaeacb644816555009d1f8f6689f53c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac437190ba1ece1f214f415cbc32faa7e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#ac437190ba1ece1f214f415cbc32faa7e">colocated_mb_distortion</a>: 1</td></tr>
+<tr class="separator:ac437190ba1ece1f214f415cbc32faa7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0243ebab0d9444298b67ecfdb43231fe"><td class="memItemLeft" align="right" valign="top"><a id="a0243ebab0d9444298b67ecfdb43231fe"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a0243ebab0d9444298b67ecfdb43231fe">ref_width</a>: 8</td></tr>
+<tr class="memdesc:a0243ebab0d9444298b67ecfdb43231fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">motion search window(ref_width * ref_height) <br /></td></tr>
+<tr class="separator:a0243ebab0d9444298b67ecfdb43231fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e8567ed8862327109a1f4631d80ecc4"><td class="memItemLeft" align="right" valign="top"><a id="a8e8567ed8862327109a1f4631d80ecc4"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a8e8567ed8862327109a1f4631d80ecc4">search_window</a>: 4</td></tr>
+<tr class="memdesc:a8e8567ed8862327109a1f4631d80ecc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">predefined motion search windows. If selected, len_sp, window(ref_width * ref_eight) and search_path setting are ignored. 0: not use predefined search window 1: Tiny, len_sp=4, 24x24 window and diamond search 2: Small, len_sp=9, 28x28 window and diamond search 3: Diamond, len_sp=16, 48x40 window and diamond search 4: Large Diamond, len_sp=32, 48x40 window and diamond search 5: Exhaustive, len_sp=48, 48x40 window and full search 6: Extend Diamond, len_sp=16, 64x40 window and diamond search 7: Extend Large Diamond, len_sp=32, 64x40 window and diamond search 8: Extend Exhaustive, len_sp=48, 64x40 window and full search <br /></td></tr>
+<tr class="separator:a8e8567ed8862327109a1f4631d80ecc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5453f864b8fe9b8dcfbff54086172d74"><td class="memItemLeft" align="right" valign="top"><a id="a5453f864b8fe9b8dcfbff54086172d74"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a5453f864b8fe9b8dcfbff54086172d74">max_frame_size</a></td></tr>
+<tr class="memdesc:a5453f864b8fe9b8dcfbff54086172d74"><td class="mdescLeft">&#160;</td><td class="mdescRight">max frame size control with multi passes QP setting <br /></td></tr>
+<tr class="separator:a5453f864b8fe9b8dcfbff54086172d74"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63242c913b2d1a32919d580b9aed11d8"><td class="memItemLeft" align="right" valign="top"><a id="a63242c913b2d1a32919d580b9aed11d8"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#a63242c913b2d1a32919d580b9aed11d8">num_passes</a></td></tr>
+<tr class="memdesc:a63242c913b2d1a32919d580b9aed11d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">number of passes, every pass has different QP <br /></td></tr>
+<tr class="separator:a63242c913b2d1a32919d580b9aed11d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba1442fef721c95dd2a0f144c329a54b"><td class="memItemLeft" align="right" valign="top"><a id="aba1442fef721c95dd2a0f144c329a54b"></a>
+uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncMiscParameterFEIFrameControlH264.html#aba1442fef721c95dd2a0f144c329a54b">delta_qp</a></td></tr>
+<tr class="memdesc:aba1442fef721c95dd2a0f144c329a54b"><td class="mdescLeft">&#160;</td><td class="mdescRight">delta QP list for every pass <br /></td></tr>
+<tr class="separator:aba1442fef721c95dd2a0f144c329a54b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>FEI frame level control buffer for H.264. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="aab108529bcf4801c8346a46cc58a70e2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab108529bcf4801c8346a46cc58a70e2">&#9670;&nbsp;</a></span>adaptive_search</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::adaptive_search</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>defines whether adaptive searching is enabled for IME(Integer Motion Estimation). 0: disable 1: enable </p>
+
+</div>
+</div>
+<a id="ac437190ba1ece1f214f415cbc32faa7e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac437190ba1ece1f214f415cbc32faa7e">&#9670;&nbsp;</a></span>colocated_mb_distortion</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::colocated_mb_distortion</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>when this flag is set, extra distortion between the current MB and co-located MB is provided. Extra distortion output has performance impact, set it only when it is needed. </p>
+
+</div>
+</div>
+<a id="accb62f4546ed6fb6d520a61f2240b64b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accb62f4546ed6fb6d520a61f2240b64b">&#9670;&nbsp;</a></span>distortion_type</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::distortion_type</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>specifies if the output distortion is the raw distortion or cost adjusted distortion. 0: Raw Distortion without Cost 1: Distortion with added Cost </p>
+
+</div>
+</div>
+<a id="ac1cd1612a362caaa5cdd4a9c9dc8c16b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1cd1612a362caaa5cdd4a9c9dc8c16b">&#9670;&nbsp;</a></span>inter_sad</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::inter_sad</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>specifies distortion measure adjustments used for the inter motion search SAD comparison. 00b: none 10b: Haar transform adjusted </p>
+
+</div>
+</div>
+<a id="ac84238e211dd69fd0580a887c73e140f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac84238e211dd69fd0580a887c73e140f">&#9670;&nbsp;</a></span>intra_part_mask</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::intra_part_mask</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>specifies which Luma Intra partition is enabled/disabled for intra mode decision. xxxx1: luma_intra_16x16 disabled xxx1x: luma_intra_8x8 disabled xx1xx: luma_intra_4x4 disabled xx111: intra prediction is disabled </p>
+
+</div>
+</div>
+<a id="a0db78717d2e0572baa666ba383291f22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0db78717d2e0572baa666ba383291f22">&#9670;&nbsp;</a></span>intra_sad</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::intra_sad</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>specifies distortion measure adjustments used for the intra motion search SAD comparison. 00b: none 10b: Haar transform adjusted </p>
+
+</div>
+</div>
+<a id="ab036b656305068d2040a8dd89005446d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab036b656305068d2040a8dd89005446d">&#9670;&nbsp;</a></span>mb_input</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::mb_input</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>enable mb_ctrl buffer to handle MB </p>
+
+</div>
+</div>
+<a id="a0dbd1285d9a870d1180a9e019eab5100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dbd1285d9a870d1180a9e019eab5100">&#9670;&nbsp;</a></span>mb_qp</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::mb_qp</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>enables using the QP buffer to set the QP for each block </p>
+
+</div>
+</div>
+<a id="aafaeacb644816555009d1f8f6689f53c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aafaeacb644816555009d1f8f6689f53c">&#9670;&nbsp;</a></span>mb_size_ctrl</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::mb_size_ctrl</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>when this flag is set, mb_ctrl must be set too and a buffer with per MB input needs to be provided and MaxSizeInWord and </p>
+
+</div>
+</div>
+<a id="a5c73a14d5346fccc7b9ac9eb16aad981"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c73a14d5346fccc7b9ac9eb16aad981">&#9670;&nbsp;</a></span>multi_pred_l0</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::multi_pred_l0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>when set to 1, neighbor MV will be used as predictor; when set to 0, no neighbor MV will be used as predictor. </p>
+
+</div>
+</div>
+<a id="a073ee7f2ab36ade5b9f25572098b8726"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a073ee7f2ab36ade5b9f25572098b8726">&#9670;&nbsp;</a></span>multi_pred_l1</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::multi_pred_l1</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>when set to 1, neighbor MV will be used as predictor; when set to 0, no neighbor MV will be used as predictor. </p>
+
+</div>
+</div>
+<a id="ac21b158dfbf2e82201612bf03383e85d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac21b158dfbf2e82201612bf03383e85d">&#9670;&nbsp;</a></span>mv_predictor_enable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::mv_predictor_enable</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>enables using the motion vector as an extra predictor provided by the host. If it is set, host needs to provide a buffer with motion vectors and the associated reference index for each 16x16 block as defined . The host can call processing function to get motion vectors and use as predictor. 0: MV predictor disabled 1: MV predictor enabled </p>
+
+</div>
+</div>
+<a id="aa344b4e3f737fbaad9d63d354d13b2d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa344b4e3f737fbaad9d63d354d13b2d6">&#9670;&nbsp;</a></span>repartition_check_enable</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::repartition_check_enable</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>when set to 1, enables the additional calls on Fraction &amp; Bidirectional Refinement </p>
+
+</div>
+</div>
+<a id="af592800035866e3eeb6d4b08099aad50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af592800035866e3eeb6d4b08099aad50">&#9670;&nbsp;</a></span>sub_pel_mode</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t VAEncMiscParameterFEIFrameControlH264::sub_pel_mode</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>defines the half/quarter pel modes. The mode is inclusive, ie., higher precision mode samples lower precision locations. 00b: integer mode searching 01b: half-pel mode searching 10b: reserved 11b: quarter-pel mode searching </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li><a class="el" href="va__fei__h264_8h_source.html">va_fei_h264.h</a></li>
 </ul>
 </div><!-- contents -->

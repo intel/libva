@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -72,6 +72,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVARectangle.html">VARectangle</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure to describe rectangle.  <a href="structVARectangle.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAMotionVector.html">VAMotionVector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic motion vector data structure.  <a href="structVAMotionVector.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -93,6 +96,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attribute value for VAConfigAttribMultipleFrame.  <a href="unionVAConfigAttribValMultipleFrame.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValContextPriority.html">VAConfigAttribValContextPriority</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAGenericValue.html">VAGenericValue</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic value.  <a href="structVAGenericValue.html#details">More...</a><br /></td></tr>
@@ -321,7 +326,7 @@ Macros</h2></td></tr>
 <tr class="separator:ga13a541a66a4585335e74a2e2c9f1a5da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga6836ddbf3178e7cbf49599a820fe17a9">VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR</a>&#160;&#160;&#160;0x00000001  /* AES CTR fullsample */</td></tr>
 <tr class="separator:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3fd349cafd4b89440b25e690f4bbba25">VA_SLICE_DATA_FLAG_ALL</a>&#160;&#160;&#160;0x00	/* whole slice is in the buffer */</td></tr>
+<tr class="memitem:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3fd349cafd4b89440b25e690f4bbba25">VA_SLICE_DATA_FLAG_ALL</a>&#160;&#160;&#160;0x00    /* whole slice is in the buffer */</td></tr>
 <tr class="separator:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7437a12fa7c585fa7a51313c640652c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga7437a12fa7c585fa7a51313c640652c0">VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK</a>&#160;&#160;&#160;0xff</td></tr>
 <tr class="separator:ga7437a12fa7c585fa7a51313c640652c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -549,6 +554,11 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">VAConfigAttribProtectedContentUsage</a> = 49, 
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27">VAConfigAttribEncHEVCFeatures</a> = 50, 
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340">VAConfigAttribEncHEVCBlockSizes</a> = 51, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a820e8ebad6aa7ef48577da24be7ce2d5">VAConfigAttribEncAV1</a> = 52, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01af1399f8002924f3840a06263e6437f4e">VAConfigAttribEncAV1Ext1</a> = 53, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a6fed679cc783118c32d4021ecbf4d39e">VAConfigAttribEncAV1Ext2</a> = 54, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d8f534f3b934443b9532011bb3dde60">VAConfigAttribEncPerBlockControl</a> = 55, 
 <b>VAConfigAttribTypeMax</b>
 <br />
  }</td></tr>
@@ -594,7 +604,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba376b3a8e2e04babb89984fc9779e616e">VAContextParameterUpdateBufferType</a> = 58, 
 <br />
 &#160;&#160;<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba7a2ea7b1732bc899a151543e7bd79ddd">VAProtectedSessionExecuteBufferType</a> = 59, 
-<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">VAEncryptionParameterBufferType</a> = 60
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">VAEncryptionParameterBufferType</a> = 60, 
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbae4308d18dc9974d690e03b9bb4af12c6">VAEncDeltaQpPerBlockBufferType</a> = 61
 <br />
  }</td></tr>
 <tr class="separator:ga24da9776c5d3a5ce29cb592cf22c00db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1068,7 +1079,7 @@ Surface attribute flags</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 VASurfaceAttribMemoryType values in bit fields.</h2></td></tr>
-<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrpe87051bcf8912242af39342b8effae81"></a>Bit 0:7 are reserved for generic types, Bit 31:28 are reserved for Linux DRM, Bit 23:20 are reserved for Android. DRM and Android specific types are defined in DRM and Android header files. </p>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrpe87051bcf8912242af39342b8effae81"></a>Bits 0:7 are reserved for generic types. Bits 31:28 are reserved for Linux DRM. Bits 23:20 are reserved for Android. Bits 19:16 are reserved for Win32. DRM, Android and Win32 specific types are defined in respective va_*.h header files. </p>
 </td></tr>
 <tr class="memitem:ga4df50c026f0029fff7a0651a7b8642df"><td class="memItemLeft" align="right" valign="top"><a id="ga4df50c026f0029fff7a0651a7b8642df"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga4df50c026f0029fff7a0651a7b8642df">VA_SURFACE_ATTRIB_MEM_TYPE_VA</a>&#160;&#160;&#160;0x00000001</td></tr>
@@ -2563,7 +2574,7 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define VA_SLICE_DATA_FLAG_ALL&#160;&#160;&#160;0x00	/* whole slice is in the buffer */</td>
+          <td class="memname">#define VA_SLICE_DATA_FLAG_ALL&#160;&#160;&#160;0x00    /* whole slice is in the buffer */</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2806,6 +2817,9 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5"></a>VAEncryptionParameterBufferType&#160;</td><td class="fielddoc"><p>Encryption parameters buffer for protected content session. </p>
 <p>Refer to <code><a class="el" href="structVAEncryptionParameters.html" title="Encryption parameters buffer for VAEncryptionParameterBufferType. ">VAEncryptionParameters</a></code> </p>
 </td></tr>
+<tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbae4308d18dc9974d690e03b9bb4af12c6"></a>VAEncDeltaQpPerBlockBufferType&#160;</td><td class="fielddoc"><p>Encoding delta QP per block buffer. </p>
+<p>This buffer only could be created and accepted when <code><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></code> delta_qp_support == 1. This input buffer contains delta QP per block for encoding. The supported size of delta QP block and the size of delta QP must be quried from <code><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></code>. </p>
+</td></tr>
 </table>
 
 </div>
@@ -2954,6 +2968,18 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340"></a>VAConfigAttribEncHEVCBlockSizes&#160;</td><td class="fielddoc"><p>HEVC/H.265 encoding block sizes. Read-only. </p>
 <p>This attribute describes the supported coding tree and transform block sizes of an HEVC/H.265 encoder configuration. The value returned uses the <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html">VAConfigAttribValEncHEVCBlockSizes</a> type.</p>
 <p>If this attribute is supported by a driver then it must also support the VAConfigAttribEncHEVCFeatures attribute. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a820e8ebad6aa7ef48577da24be7ce2d5"></a>VAConfigAttribEncAV1&#160;</td><td class="fielddoc"><p>AV1 encoding attribute. Read-only. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1 union. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01af1399f8002924f3840a06263e6437f4e"></a>VAConfigAttribEncAV1Ext1&#160;</td><td class="fielddoc"><p>AV1 encoding attribute extend1. Read-only. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1Ext1 union. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a6fed679cc783118c32d4021ecbf4d39e"></a>VAConfigAttribEncAV1Ext2&#160;</td><td class="fielddoc"><p>AV1 encoding attribute extend2. Read-only. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1Ext2 union. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d8f534f3b934443b9532011bb3dde60"></a>VAConfigAttribEncPerBlockControl&#160;</td><td class="fielddoc"><p>Settings per block attribute for Encoding. Read-only. </p>
+<p>This attribute describes whether to support delta qp per block, the supported size of delta qp block and the size of delta QP in bytes. The value returned uses the <a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a> type. </p>
 </td></tr>
 </table>
 
@@ -5025,7 +5051,7 @@ vaExportSurfaceHandle() flags</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Queries surface attributes for the supplied config. </p>
-<p>This function queries for all supported attributes for the supplied VA . In particular, if the underlying hardware supports the creation of VA surfaces in various formats, then this function will enumerate all pixel formats that are supported.</p>
+<p>This function queries for all supported attributes for the supplied VA <code>config</code>. In particular, if the underlying hardware supports the creation of VA surfaces in various formats, then this function will enumerate all pixel formats that are supported.</p>
 <p>The <code>attrib_list</code> array is allocated by the user and <code>num_attribs</code> shall be initialized to the number of allocated elements in that array. Upon successful return, the actual number of attributes will be overwritten into <code>num_attribs</code>. Otherwise, <code>VA_STATUS_ERROR_MAX_NUM_EXCEEDED</code> is returned and <code>num_attribs</code> is adjusted to the number of elements that would be returned if enough space was available.</p>
 <p>Note: it is perfectly valid to pass NULL to the <code>attrib_list</code> argument when <a class="el" href="group__api__core.html#ga6b10b88a628c56377268714cc72090ce" title="Queries surface attributes for the supplied config. ">vaQuerySurfaceAttributes()</a> is used to determine the actual number of elements that need to be allocated.</p>
 <dl class="params"><dt>Parameters</dt><dd>

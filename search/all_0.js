@@ -2,7 +2,7 @@ var searchData=
 [
   ['ac_5ftable_5fselector',['ac_table_selector',['../structVAEncSliceParameterBufferJPEG.html#a875d62bf9f597b85e1f2135810220a0f',1,'VAEncSliceParameterBufferJPEG::ac_table_selector()'],['../structVASliceParameterBufferJPEGBaseline.html#a1bcf9f5ec59008a74a7c245dcbadcfed',1,'VASliceParameterBufferJPEGBaseline::ac_table_selector()']]],
   ['ac_5fvalues',['ac_values',['../structVAHuffmanTableBufferJPEGBaseline.html#ae39764646cd5b413730a3b63ab26db6e',1,'VAHuffmanTableBufferJPEGBaseline']]],
-  ['adaptive_5fsearch',['adaptive_search',['../group__api__fei__h264.html#gaab108529bcf4801c8346a46cc58a70e2',1,'VAEncMiscParameterFEIFrameControlH264']]],
+  ['adaptive_5fsearch',['adaptive_search',['../structVAEncMiscParameterFEIFrameControlH264.html#aab108529bcf4801c8346a46cc58a70e2',1,'VAEncMiscParameterFEIFrameControlH264']]],
   ['additional_5foutputs',['additional_outputs',['../structVAProcPipelineParameterBuffer.html#af4d4141fba176fe2eb61bc22fb9dc215',1,'VAProcPipelineParameterBuffer']]],
   ['aes_5fcbc_5fiv_5for_5fctr',['aes_cbc_iv_or_ctr',['../structVAEncryptionSegmentInfo.html#a22d6c5b3821cc4bbeae3631635c25ea3',1,'VAEncryptionSegmentInfo']]],
   ['algorithm',['algorithm',['../structVAProcFilterParameterBufferDeinterlacing.html#a3185061a0c07e7dcb319a5eb0893e968',1,'VAProcFilterParameterBufferDeinterlacing']]],

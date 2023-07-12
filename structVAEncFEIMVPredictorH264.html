@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -74,15 +74,15 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:gaaa85e77f966826375b9a4e53982a862f"><td class="memItemLeft" >
+<tr class="memitem:a670207273d7946601be5e2855c374347"><td class="memItemLeft" ><a id="a670207273d7946601be5e2855c374347"></a>
 struct {</td></tr>
-<tr class="memitem:gaaa85e77f966826375b9a4e53982a862f"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gaaa85e77f966826375b9a4e53982a862f">ref_idx</a> [4]</td></tr>
-<tr class="memdesc:gaaa85e77f966826375b9a4e53982a862f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference index corresponding to the entry of RefPicList0 &amp; RefPicList1 in <a class="el" href="structVAEncSliceParameterBufferH264.html" title="Slice parameter for H.264 encoding in baseline, main &amp; high profiles. ">VAEncSliceParameterBufferH264</a>. Note that RefPicList0 &amp; RefPicList1 needs to be the same for all slices. ref_idx_l0_x : index to RefPicList0; ref_idx_l1_x : index to RefPicList1; x : 0 - MaxNumPredictor. <br /></td></tr>
-<tr class="separator:gaaa85e77f966826375b9a4e53982a862f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac729495b9553b8c8edd4992fb8069077"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="structVAMotionVector.html">VAMotionVector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei__h264.html#gac729495b9553b8c8edd4992fb8069077">mv</a> [4]</td></tr>
-<tr class="memdesc:gac729495b9553b8c8edd4992fb8069077"><td class="mdescLeft">&#160;</td><td class="mdescRight">MV. MaxNumPredictor must be the returned value from attribute VAConfigAttribFEIMVPredictors query. Even application doesn't use the maximum predictors, the VAFEIMVPredictorH264 structure size has to be defined as maximum so each MB can be at a fixed location. Note that 0x8000 must be used for correspondent intra block. <br /></td></tr>
-<tr class="separator:gac729495b9553b8c8edd4992fb8069077"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a670207273d7946601be5e2855c374347"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncFEIMVPredictorH264.html#a670207273d7946601be5e2855c374347">ref_idx</a> [4]</td></tr>
+<tr class="memdesc:a670207273d7946601be5e2855c374347"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reference index corresponding to the entry of RefPicList0 &amp; RefPicList1 in <a class="el" href="structVAEncSliceParameterBufferH264.html" title="Slice parameter for H.264 encoding in baseline, main &amp; high profiles. ">VAEncSliceParameterBufferH264</a>. Note that RefPicList0 &amp; RefPicList1 needs to be the same for all slices. ref_idx_l0_x : index to RefPicList0; ref_idx_l1_x : index to RefPicList1; x : 0 - MaxNumPredictor. <br /></td></tr>
+<tr class="separator:a670207273d7946601be5e2855c374347"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac729495b9553b8c8edd4992fb8069077"><td class="memItemLeft" align="right" valign="top"><a id="ac729495b9553b8c8edd4992fb8069077"></a>
+<a class="el" href="structVAMotionVector.html">VAMotionVector</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAEncFEIMVPredictorH264.html#ac729495b9553b8c8edd4992fb8069077">mv</a> [4]</td></tr>
+<tr class="memdesc:ac729495b9553b8c8edd4992fb8069077"><td class="mdescLeft">&#160;</td><td class="mdescRight">MV. MaxNumPredictor must be the returned value from attribute VAConfigAttribFEIMVPredictors query. Even application doesn't use the maximum predictors, the VAFEIMVPredictorH264 structure size has to be defined as maximum so each MB can be at a fixed location. Note that 0x8000 must be used for correspondent intra block. <br /></td></tr>
+<tr class="separator:ac729495b9553b8c8edd4992fb8069077"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Application can use this definition as reference to allocate the buffer based on MaxNumPredictor returned from attribute VAConfigAttribFEIMVPredictors query. </p>

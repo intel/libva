@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -77,7 +77,7 @@ $(function() {
 <code>#include &lt;va/va_version.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__hevc_8h_source.html">va/va_dec_hevc.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__jpeg_8h_source.html">va/va_dec_jpeg.h</a>&gt;</code><br />
-<code>#include &lt;va/va_dec_vp8.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="va__dec__vp8_8h_source.html">va/va_dec_vp8.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__vp9_8h_source.html">va/va_dec_vp9.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__av1_8h_source.html">va/va_dec_av1.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__hevc_8h_source.html">va/va_enc_hevc.h</a>&gt;</code><br />
@@ -87,6 +87,7 @@ $(function() {
 <code>#include &lt;<a class="el" href="va__enc__mpeg2_8h_source.html">va/va_enc_mpeg2.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__vp8_8h_source.html">va/va_enc_vp8.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__vp9_8h_source.html">va/va_enc_vp9.h</a>&gt;</code><br />
+<code>#include &lt;va/va_enc_av1.h&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__fei_8h_source.html">va/va_fei.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__fei__h264_8h_source.html">va/va_fei_h264.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__vpp_8h_source.html">va/va_vpp.h</a>&gt;</code><br />
@@ -96,6 +97,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVARectangle.html">VARectangle</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structure to describe rectangle.  <a href="structVARectangle.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAMotionVector.html">VAMotionVector</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic motion vector data structure.  <a href="structVAMotionVector.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -117,6 +121,8 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Attribute value for VAConfigAttribMultipleFrame.  <a href="unionVAConfigAttribValMultipleFrame.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValContextPriority.html">VAConfigAttribValContextPriority</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAGenericValue.html">VAGenericValue</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic value.  <a href="structVAGenericValue.html#details">More...</a><br /></td></tr>
@@ -354,7 +360,7 @@ Macros</h2></td></tr>
 <tr class="separator:ga13a541a66a4585335e74a2e2c9f1a5da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga6836ddbf3178e7cbf49599a820fe17a9">VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR</a>&#160;&#160;&#160;0x00000001  /* AES CTR fullsample */</td></tr>
 <tr class="separator:ga6836ddbf3178e7cbf49599a820fe17a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3fd349cafd4b89440b25e690f4bbba25">VA_SLICE_DATA_FLAG_ALL</a>&#160;&#160;&#160;0x00	/* whole slice is in the buffer */</td></tr>
+<tr class="memitem:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3fd349cafd4b89440b25e690f4bbba25">VA_SLICE_DATA_FLAG_ALL</a>&#160;&#160;&#160;0x00    /* whole slice is in the buffer */</td></tr>
 <tr class="separator:ga3fd349cafd4b89440b25e690f4bbba25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7437a12fa7c585fa7a51313c640652c0"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga7437a12fa7c585fa7a51313c640652c0">VA_CODED_BUF_STATUS_PICTURE_AVE_QP_MASK</a>&#160;&#160;&#160;0xff</td></tr>
 <tr class="separator:ga7437a12fa7c585fa7a51313c640652c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -786,7 +792,7 @@ Macros</h2></td></tr>
 <tr class="memdesc:ga997c27d75ba17caf5fe879b71fa64820"><td class="mdescLeft">&#160;</td><td class="mdescRight">Surface attribute can be set through <a class="el" href="group__api__core.html#gac970ea0eec412326667549f58c44129b" title="Creates an array of surfaces. ">vaCreateSurfaces()</a>. <br /></td></tr>
 <tr class="separator:ga997c27d75ba17caf5fe879b71fa64820"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">VASurfaceAttribMemoryType values in bit fields.</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><p>Bit 0:7 are reserved for generic types, Bit 31:28 are reserved for Linux DRM, Bit 23:20 are reserved for Android. DRM and Android specific types are defined in DRM and Android header files. </p>
+<tr><td colspan="2"><div class="groupText"><p>Bits 0:7 are reserved for generic types. Bits 31:28 are reserved for Linux DRM. Bits 23:20 are reserved for Android. Bits 19:16 are reserved for Win32. DRM, Android and Win32 specific types are defined in respective va_*.h header files. </p>
 </div></td></tr>
 <tr class="memitem:ga4df50c026f0029fff7a0651a7b8642df"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga4df50c026f0029fff7a0651a7b8642df">VA_SURFACE_ATTRIB_MEM_TYPE_VA</a>&#160;&#160;&#160;0x00000001</td></tr>
@@ -862,7 +868,7 @@ Macros</h2></td></tr>
 <tr class="memitem:gae3ff9dcf480ccbe181f847d89216059c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gae3ff9dcf480ccbe181f847d89216059c">VA_EXPORT_SURFACE_COMPOSED_LAYERS</a>&#160;&#160;&#160;0x0008</td></tr>
 <tr class="separator:gae3ff9dcf480ccbe181f847d89216059c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Mirroring directions</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><p>Those values could be used for VADisplayAttribMirror attribute or <a class="el" href="structVAProcPipelineParameterBuffer.html#a46ea097164b459fa1ee20bbb356a95c1">VAProcPipelineParameterBuffer::mirror_state</a>. </p>
+<tr><td colspan="2"><div class="groupText"><p>Those values could be used for VADisplayAttribMirror attribute or <a class="el" href="structVAProcPipelineParameterBuffer.html#a46ea097164b459fa1ee20bbb356a95c1" title="mirroring state. See &quot;Mirroring directions&quot;. ">VAProcPipelineParameterBuffer::mirror_state</a>. </p>
 </div></td></tr>
 <tr class="memitem:ac8b6a5d29edc2528c2e8ed6f02a6b6ed"><td class="memItemLeft" align="right" valign="top"><a id="ac8b6a5d29edc2528c2e8ed6f02a6b6ed"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="va_8h.html#ac8b6a5d29edc2528c2e8ed6f02a6b6ed">VA_MIRROR_NONE</a>&#160;&#160;&#160;0x00000000</td></tr>
@@ -969,6 +975,11 @@ Enumerations</h2></td></tr>
 &#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a3787994abd0e4b2e55761b43ab7729d9">VAConfigAttribProtectedContentUsage</a> = 49, 
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a691f6ee84de2a248b3bbb3689b2bfc27">VAConfigAttribEncHEVCFeatures</a> = 50, 
 <a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01aa6f0d08af09071301832df0ae9f61340">VAConfigAttribEncHEVCBlockSizes</a> = 51, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a820e8ebad6aa7ef48577da24be7ce2d5">VAConfigAttribEncAV1</a> = 52, 
+<br />
+&#160;&#160;<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01af1399f8002924f3840a06263e6437f4e">VAConfigAttribEncAV1Ext1</a> = 53, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a6fed679cc783118c32d4021ecbf4d39e">VAConfigAttribEncAV1Ext2</a> = 54, 
+<a class="el" href="group__api__core.html#gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d8f534f3b934443b9532011bb3dde60">VAConfigAttribEncPerBlockControl</a> = 55, 
 <b>VAConfigAttribTypeMax</b>
 <br />
  }</td></tr>
@@ -1014,7 +1025,8 @@ Enumerations</h2></td></tr>
 <a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba376b3a8e2e04babb89984fc9779e616e">VAContextParameterUpdateBufferType</a> = 58, 
 <br />
 &#160;&#160;<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dba7a2ea7b1732bc899a151543e7bd79ddd">VAProtectedSessionExecuteBufferType</a> = 59, 
-<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">VAEncryptionParameterBufferType</a> = 60
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbadce96bfbad3362a27848b18e2a3843f5">VAEncryptionParameterBufferType</a> = 60, 
+<a class="el" href="group__api__core.html#gga24da9776c5d3a5ce29cb592cf22c00dbae4308d18dc9974d690e03b9bb4af12c6">VAEncDeltaQpPerBlockBufferType</a> = 61
 <br />
  }</td></tr>
 <tr class="separator:ga24da9776c5d3a5ce29cb592cf22c00db"><td class="memSeparator" colspan="2">&#160;</td></tr>

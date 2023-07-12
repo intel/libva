@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -77,13 +77,13 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a9a60820f23d4b34e4b9b3ef63c6e56d4"><td class="memItemLeft" align="right" valign="top">VASurfaceID&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a9a60820f23d4b34e4b9b3ef63c6e56d4">surface</a></td></tr>
 <tr class="memdesc:a9a60820f23d4b34e4b9b3ef63c6e56d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source surface ID.  <a href="#a9a60820f23d4b34e4b9b3ef63c6e56d4">More...</a><br /></td></tr>
 <tr class="separator:a9a60820f23d4b34e4b9b3ef63c6e56d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a7be6853d73307e6209109bfd4bbf08"><td class="memItemLeft" align="right" valign="top">const VARectangle *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a2a7be6853d73307e6209109bfd4bbf08">surface_region</a></td></tr>
+<tr class="memitem:a2a7be6853d73307e6209109bfd4bbf08"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structVARectangle.html">VARectangle</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a2a7be6853d73307e6209109bfd4bbf08">surface_region</a></td></tr>
 <tr class="memdesc:a2a7be6853d73307e6209109bfd4bbf08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Region within the source surface to be processed.  <a href="#a2a7be6853d73307e6209109bfd4bbf08">More...</a><br /></td></tr>
 <tr class="separator:a2a7be6853d73307e6209109bfd4bbf08"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28c546d07d38ae6f9b04c0fc12465f67"><td class="memItemLeft" align="right" valign="top"><a class="el" href="group__api__vpp.html#ga7aa895516a4020fb9eb3fcb672429c6f">VAProcColorStandardType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a28c546d07d38ae6f9b04c0fc12465f67">surface_color_standard</a></td></tr>
 <tr class="memdesc:a28c546d07d38ae6f9b04c0fc12465f67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Requested input color standard.  <a href="#a28c546d07d38ae6f9b04c0fc12465f67">More...</a><br /></td></tr>
 <tr class="separator:a28c546d07d38ae6f9b04c0fc12465f67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5b816fff16dc1cc4b49524866c9c25b0"><td class="memItemLeft" align="right" valign="top">const VARectangle *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a5b816fff16dc1cc4b49524866c9c25b0">output_region</a></td></tr>
+<tr class="memitem:a5b816fff16dc1cc4b49524866c9c25b0"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structVARectangle.html">VARectangle</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a5b816fff16dc1cc4b49524866c9c25b0">output_region</a></td></tr>
 <tr class="memdesc:a5b816fff16dc1cc4b49524866c9c25b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Region within the output surface.  <a href="#a5b816fff16dc1cc4b49524866c9c25b0">More...</a><br /></td></tr>
 <tr class="separator:a5b816fff16dc1cc4b49524866c9c25b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92262881f575dbcbb6032569d4b02ba7"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a92262881f575dbcbb6032569d4b02ba7">output_background_color</a></td></tr>
@@ -128,6 +128,7 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="memdesc:ae58f2a373e1638afc1673a55de28a04c"><td class="mdescLeft">&#160;</td><td class="mdescRight">blending state. See "Video blending state definition".  <a href="#ae58f2a373e1638afc1673a55de28a04c">More...</a><br /></td></tr>
 <tr class="separator:ae58f2a373e1638afc1673a55de28a04c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46ea097164b459fa1ee20bbb356a95c1"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#a46ea097164b459fa1ee20bbb356a95c1">mirror_state</a></td></tr>
+<tr class="memdesc:a46ea097164b459fa1ee20bbb356a95c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">mirroring state. See "Mirroring directions".  <a href="#a46ea097164b459fa1ee20bbb356a95c1">More...</a><br /></td></tr>
 <tr class="separator:a46ea097164b459fa1ee20bbb356a95c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4d4141fba176fe2eb61bc22fb9dc215"><td class="memItemLeft" align="right" valign="top"><a id="af4d4141fba176fe2eb61bc22fb9dc215"></a>
 VASurfaceID *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structVAProcPipelineParameterBuffer.html#af4d4141fba176fe2eb61bc22fb9dc215">additional_outputs</a></td></tr>
@@ -282,7 +283,8 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
         </tr>
       </table>
 </div><div class="memdoc">
-<p>mirroring state. See "Mirroring directions".</p>
+
+<p>mirroring state. See "Mirroring directions". </p>
 <p>Mirroring of an image can be performed either along the horizontal or vertical axis. It is assumed that the rotation operation is always performed before the mirroring operation. </p>
 
 </div>
@@ -346,13 +348,13 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const VARectangle* VAProcPipelineParameterBuffer::output_region</td>
+          <td class="memname">const <a class="el" href="structVARectangle.html">VARectangle</a>* VAProcPipelineParameterBuffer::output_region</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Region within the output surface. </p>
-<p>Pointer to a #VARectangle defining the region within the output surface that receives the processed pixels. If NULL, <code>output_region</code> implies the whole surface.</p>
+<p>Pointer to a <a class="el" href="structVARectangle.html" title="Structure to describe rectangle. ">VARectangle</a> defining the region within the output surface that receives the processed pixels. If NULL, <code>output_region</code> implies the whole surface.</p>
 <p>Note that any pixels residing outside the specified region will be filled in with the <a class="el" href="structVAProcPipelineParameterBuffer.html#a92262881f575dbcbb6032569d4b02ba7">output_background_color</a>. </p>
 
 </div>
@@ -468,13 +470,13 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const VARectangle* VAProcPipelineParameterBuffer::surface_region</td>
+          <td class="memname">const <a class="el" href="structVARectangle.html">VARectangle</a>* VAProcPipelineParameterBuffer::surface_region</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Region within the source surface to be processed. </p>
-<p>Pointer to a #VARectangle defining the region within the source surface to be processed. If NULL, <code>surface_region</code> implies the whole surface. </p>
+<p>Pointer to a <a class="el" href="structVARectangle.html" title="Structure to describe rectangle. ">VARectangle</a> defining the region within the source surface to be processed. If NULL, <code>surface_region</code> implies the whole surface. </p>
 
 </div>
 </div>

@@ -14,5 +14,5 @@ var searchData=
   ['output_5fpixel_5fformat',['output_pixel_format',['../structVAProcPipelineCaps.html#ab64dad914b2a722ab9488034d94e8009',1,'VAProcPipelineCaps']]],
   ['output_5fregion',['output_region',['../structVAProcPipelineParameterBuffer.html#a5b816fff16dc1cc4b49524866c9c25b0',1,'VAProcPipelineParameterBuffer']]],
   ['output_5fsurface_5fflag',['output_surface_flag',['../structVAProcPipelineParameterBuffer.html#afed9e9553380dd5572e5a8753257e7e8',1,'VAProcPipelineParameterBuffer']]],
-  ['outputs',['outputs',['../group__api__fei.html#ga479f817114b82f1554e4bdcb920c2de2',1,'VAStatsStatisticsParameter']]]
+  ['outputs',['outputs',['../structVAStatsStatisticsParameter.html#a479f817114b82f1554e4bdcb920c2de2',1,'VAStatsStatisticsParameter']]]
 ];

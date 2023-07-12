@@ -18,5 +18,5 @@ var searchData=
   ['hmedisable',['HMEDisable',['../structVAEncMiscParameterEncQuality.html#a589437585d2d9de89a04a3914782a468',1,'VAEncMiscParameterEncQuality']]],
   ['hmemvcostscalingfactor',['HMEMVCostScalingFactor',['../structVAEncMiscParameterEncQuality.html#a6f286bf2f535b730b20230fb8e9a24d3',1,'VAEncMiscParameterEncQuality']]],
   ['huffman',['huffman',['../structVAEncPictureParameterBufferJPEG.html#a83504679e9d52ce36926d2bdc033eac3',1,'VAEncPictureParameterBufferJPEG']]],
-  ['huffman_5ftable',['huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#a97fe3a9f5b6427141b5850ab4d7388cc',1,'VAHuffmanTableBufferJPEGBaseline']]]
+  ['huffman_5ftable',['huffman_table',['../structVAHuffmanTableBufferJPEGBaseline.html#a3cd689ada8bdf083f5a393992574e16d',1,'VAHuffmanTableBufferJPEGBaseline']]]
 ];

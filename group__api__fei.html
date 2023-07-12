@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.13.0.pre1</span>
+   &#160;<span id="projectnumber">2.19.0</span>
    </div>
   </td>
  </tr>
@@ -61,8 +61,7 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#define-members">Macros</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle">
 <div class="title">FEI encoding common API</div>  </div>
 </div><!--header-->
@@ -83,65 +82,6 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga4d4d4c9dcccc756235b62cd1c350a779">VA_PICTURE_STATS_CONTENT_UPDATED</a>&#160;&#160;&#160;0x00000010</td></tr>
 <tr class="memdesc:ga4d4d4c9dcccc756235b62cd1c350a779"><td class="mdescLeft">&#160;</td><td class="mdescRight">picutre surface content updated indicator. The picture surface content is updated, it means temporary buffer like downscaled pixel data in driver internal needs be forced freshing <br /></td></tr>
 <tr class="separator:ga4d4d4c9dcccc756235b62cd1c350a779"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:ga63d529bcde53b05182a740dca4b1ed44"><td class="memItemLeft" >
-uint32_t&#160;&#160;&#160;<a class="el" href="group__api__fei.html#ga6c777921f779a35c8d282cc54a98743a">VAConfigAttribValStats::max_num_past_references</a>: 4</td></tr>
-<tr class="memdesc:ga63d529bcde53b05182a740dca4b1ed44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max number of past reference frames that are supported. <br /></td></tr>
-<tr class="separator:ga63d529bcde53b05182a740dca4b1ed44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6b45ebf403bd1ed372bcfae5f581734f"><td class="memItemLeft" >
-uint32_t&#160;&#160;&#160;<a class="el" href="group__api__fei.html#ga41847a7b78f2c3c2c065adbb1e80b5e8">VAConfigAttribValStats::max_num_future_references</a>: 4</td></tr>
-<tr class="memdesc:ga6b45ebf403bd1ed372bcfae5f581734f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Max number of future reference frames that are supported. <br /></td></tr>
-<tr class="separator:ga6b45ebf403bd1ed372bcfae5f581734f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadd85167fc6d33f16890ed42b3b5a9e77"><td class="memItemLeft" >
-uint32_t&#160;&#160;&#160;<a class="el" href="group__api__fei.html#ga3f3fe99a7e4cce21d900e3b790f11b26">VAConfigAttribValStats::num_outputs</a>: 3</td></tr>
-<tr class="memdesc:gadd85167fc6d33f16890ed42b3b5a9e77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of supported output buffers for VAStatsStatisticsParameter-&gt;outputs. <br /></td></tr>
-<tr class="separator:gadd85167fc6d33f16890ed42b3b5a9e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae64be4af3abd88d63a6188aca96ce821"><td class="memItemLeft" >
-uint32_t&#160;&#160;&#160;<a class="el" href="group__api__fei.html#gac4279fe65dfe730d2bb061d4b724879b">VAConfigAttribValStats::interlaced</a>: 1</td></tr>
-<tr class="memdesc:gae64be4af3abd88d63a6188aca96ce821"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interlaced content is supported. <br /></td></tr>
-<tr class="separator:gae64be4af3abd88d63a6188aca96ce821"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa85ee1b8c96148cbdea0296172b0ca78"><td class="memItemLeft" align="right" valign="top"><a id="gaa85ee1b8c96148cbdea0296172b0ca78"></a>
-VAPictureStats&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#gaa85ee1b8c96148cbdea0296172b0ca78">VAStatsStatisticsParameter::input</a></td></tr>
-<tr class="memdesc:gaa85ee1b8c96148cbdea0296172b0ca78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Source surface ID. <br /></td></tr>
-<tr class="separator:gaa85ee1b8c96148cbdea0296172b0ca78"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0776d49966a9c147c26844d43da23bcf"><td class="memItemLeft" align="right" valign="top"><a id="ga0776d49966a9c147c26844d43da23bcf"></a>
-VAPictureStats *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga0776d49966a9c147c26844d43da23bcf">VAStatsStatisticsParameter::past_references</a></td></tr>
-<tr class="memdesc:ga0776d49966a9c147c26844d43da23bcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Past reference surface ID pointer. <br /></td></tr>
-<tr class="separator:ga0776d49966a9c147c26844d43da23bcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae376d1f90b27a504b0f4e6c15fae16e3"><td class="memItemLeft" align="right" valign="top"><a id="gae376d1f90b27a504b0f4e6c15fae16e3"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#gae376d1f90b27a504b0f4e6c15fae16e3">VAStatsStatisticsParameter::num_past_references</a></td></tr>
-<tr class="memdesc:gae376d1f90b27a504b0f4e6c15fae16e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Past reference surface number. <br /></td></tr>
-<tr class="separator:gae376d1f90b27a504b0f4e6c15fae16e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5ea149989b7eda3c9bf257cfc701e162"><td class="memItemLeft" align="right" valign="top"><a id="ga5ea149989b7eda3c9bf257cfc701e162"></a>
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga5ea149989b7eda3c9bf257cfc701e162">VAStatsStatisticsParameter::past_ref_stat_buf</a></td></tr>
-<tr class="memdesc:ga5ea149989b7eda3c9bf257cfc701e162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Statistics output for past reference surface. Only enabling statistics output for past reference picture when *past_ref_stat_buf is a valid VABufferID, it is needed in case app wants statistics data of both reference and current pictures in very special use cases for better performance. The output layout is defined by VAStatsStatisticsBufferType(for progressive and top field of interlaced case) and VAStatsStatisticsBottomFieldBufferType(only for interlaced case), only pixel_average_16x16/pixel_average_8x8 and variance_16x16/variance_8x8 data are valid. <br /></td></tr>
-<tr class="separator:ga5ea149989b7eda3c9bf257cfc701e162"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad3eea608a4e77ad0c8be3bf307666adb"><td class="memItemLeft" align="right" valign="top"><a id="gad3eea608a4e77ad0c8be3bf307666adb"></a>
-VAPictureStats *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#gad3eea608a4e77ad0c8be3bf307666adb">VAStatsStatisticsParameter::future_references</a></td></tr>
-<tr class="memdesc:gad3eea608a4e77ad0c8be3bf307666adb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Future reference surface ID pointer. <br /></td></tr>
-<tr class="separator:gad3eea608a4e77ad0c8be3bf307666adb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gacb37ceae8fec3f1f334f5f938ecc8b50"><td class="memItemLeft" align="right" valign="top"><a id="gacb37ceae8fec3f1f334f5f938ecc8b50"></a>
-uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#gacb37ceae8fec3f1f334f5f938ecc8b50">VAStatsStatisticsParameter::num_future_references</a></td></tr>
-<tr class="memdesc:gacb37ceae8fec3f1f334f5f938ecc8b50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Future reference surface number. <br /></td></tr>
-<tr class="separator:gacb37ceae8fec3f1f334f5f938ecc8b50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3b87700b851d38fe65c98378f93f74c6"><td class="memItemLeft" align="right" valign="top"><a id="ga3b87700b851d38fe65c98378f93f74c6"></a>
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga3b87700b851d38fe65c98378f93f74c6">VAStatsStatisticsParameter::future_ref_stat_buf</a></td></tr>
-<tr class="memdesc:ga3b87700b851d38fe65c98378f93f74c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Statistics output for future reference surface. Only enabling statistics output for future reference picture when *past_ref_stat_buf is a valid VABufferID, it is needed in case app wants statistics data of both reference and current pictures in very special use cases for better performance. The output layout is defined by VAStatsStatisticsBufferType(for progressive and top field of interlaced case) and VAStatsStatisticsBottomFieldBufferType(only for interlaced case), only pixel_average_16x16/pixel_average_8x8 and variance_16x16/variance_8x8 data are valid. <br /></td></tr>
-<tr class="separator:ga3b87700b851d38fe65c98378f93f74c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga479f817114b82f1554e4bdcb920c2de2"><td class="memItemLeft" align="right" valign="top"><a id="ga479f817114b82f1554e4bdcb920c2de2"></a>
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga479f817114b82f1554e4bdcb920c2de2">VAStatsStatisticsParameter::outputs</a></td></tr>
-<tr class="memdesc:ga479f817114b82f1554e4bdcb920c2de2"><td class="mdescLeft">&#160;</td><td class="mdescRight">ID of the output buffer. The number of outputs is determined by below DisableMVOutput and DisableStatisticsOutput. The output layout is defined by VAStatsMVBufferType, VAStatsStatisticsBufferType(for progressive and top field of interlaced case) and VAStatsStatisticsBottomFieldBufferType(only for interlaced case). <br /></td></tr>
-<tr class="separator:ga479f817114b82f1554e4bdcb920c2de2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga06bb68d09e66586ff3ca5cc7090ac66d"><td class="memItemLeft" align="right" valign="top"><a id="ga06bb68d09e66586ff3ca5cc7090ac66d"></a>
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga06bb68d09e66586ff3ca5cc7090ac66d">VAStatsStatisticsParameter::mv_predictor</a></td></tr>
-<tr class="memdesc:ga06bb68d09e66586ff3ca5cc7090ac66d"><td class="mdescLeft">&#160;</td><td class="mdescRight">MV predictor. It is valid only when mv_predictor_ctrl is not 0. Each block has a pair of MVs, one for past and one for future reference as defined by <a class="el" href="structVAMotionVector.html" title="Generic motion vector data structure. ">VAMotionVector</a>. The block is in raster scan order. Buffer size shall not be less than the number of blocks multiplied by sizeof(VAMotionVector). <br /></td></tr>
-<tr class="separator:ga06bb68d09e66586ff3ca5cc7090ac66d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3c3c8fc9a1b9b61a9a5be9e73153984b"><td class="memItemLeft" align="right" valign="top"><a id="ga3c3c8fc9a1b9b61a9a5be9e73153984b"></a>
-<a class="el" href="group__api__core.html#gad26441ddf2f4441ef65bbefa4662607f">VABufferID</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__fei.html#ga3c3c8fc9a1b9b61a9a5be9e73153984b">VAStatsStatisticsParameter::qp</a></td></tr>
-<tr class="memdesc:ga3c3c8fc9a1b9b61a9a5be9e73153984b"><td class="mdescLeft">&#160;</td><td class="mdescRight">QP input buffer. It is valid only when mb_qp is set to 1. The data in this buffer correspond to the input source. One QP per MB or CTB block in raster scan order, each QP is a signed char (8-bit) value. <br /></td></tr>
-<tr class="separator:ga3c3c8fc9a1b9b61a9a5be9e73153984b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Attribute values for VAConfigAttribFEIFunctionType</h2></td></tr>
