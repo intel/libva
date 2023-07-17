@@ -686,6 +686,7 @@ static VAStatus va_new_opendriver(VADisplay dpy)
     if (vaStatus != VA_STATUS_SUCCESS) {
         /* Print and error yet continue, as per the above ordering note */
         va_errorMessage(dpy, "vaGetDriverNames() failed with %s\n", vaErrorStr(vaStatus));
+        num_drivers = 0;
     } else if (num_drivers > ARRAY_SIZE(drivers)) {
         va_errorMessage(dpy, "DRIVER BUG: vaGetDriverNames() provides too many drivers\n");
         num_drivers = ARRAY_SIZE(drivers);
