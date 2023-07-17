@@ -88,12 +88,9 @@ VA_DRM_GetDriverNames(VADriverContextP ctx, char **drivers, unsigned *num_driver
     for (unsigned i = 0; i < ARRAY_SIZE(map); i++) {
         if (strcmp(map[i].drm_driver, drm_driver) == 0) {
             const char * const *va_drivers = map[i].va_driver;
+            for (; count < MAX_NAMES && va_drivers[count] && count < *num_drivers; count++)
+                drivers[count] = strdup(va_drivers[count]);
 
-            while (va_drivers[count]) {
-                if (count < MAX_NAMES && count < *num_drivers)
-                    drivers[count] = strdup(va_drivers[count]);
-                count++;
-            }
             break;
         }
     }
