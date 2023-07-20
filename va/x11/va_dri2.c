@@ -456,11 +456,9 @@ VAStatus va_DRI2_GetDriverNames(
         if (strcmp(map[i].dri_driver, dri_driver) == 0) {
             const char * const *va_drivers = map[i].va_driver;
 
-            while (va_drivers[count]) {
-                if (count < MAX_NAMES && count < *num_drivers)
-                    drivers[count] = strdup(va_drivers[count]);
-                count++;
-            }
+            for (; count < MAX_NAMES && va_drivers[count] && count < *num_drivers; count++)
+                drivers[count] = strdup(va_drivers[count]);
+
             break;
         }
     }
