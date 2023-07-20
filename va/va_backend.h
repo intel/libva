@@ -670,6 +670,7 @@ struct VADisplayContext {
 
     void *opaque; /* opaque for display extensions (e.g. GLX) */
     void *vatrace; /* opaque for VA trace context */
+    /* Deprecated */
     void *vafool; /* opaque for VA fool context */
 
     VAMessageCallback error_callback;
