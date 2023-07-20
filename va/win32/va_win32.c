@@ -38,18 +38,17 @@
 const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12";
 
 typedef struct _VADisplayContextWin32 {
-    LUID adapter_luid;
     char registry_driver_name[MAX_PATH];
     bool registry_driver_available_flag;
 } VADisplayContextWin32;
 
-static void LoadDriverNameFromRegistry(VADisplayContextWin32* pWin32Ctx)
+static void LoadDriverNameFromRegistry(const LUID* adapter_luid, VADisplayContextWin32* pWin32Ctx)
 {
     HMODULE hGdi32 = LoadLibraryA("gdi32.dll");
     if (!hGdi32)
         return;
 
-    D3DKMT_OPENADAPTERFROMLUID OpenArgs = { .AdapterLuid = pWin32Ctx->adapter_luid };
+    D3DKMT_OPENADAPTERFROMLUID OpenArgs = { .AdapterLuid = *adapter_luid };
     D3DDDI_QUERYREGISTRY_INFO RegistryInfo = {
         .QueryType = D3DDDI_QUERYREGISTRY_ADAPTERKEY,
         .QueryFlags.TranslatePath = true,
@@ -180,16 +179,13 @@ VADisplay vaGetDisplayWin32(
 
     VADisplayContextWin32* pWin32Ctx = (VADisplayContextWin32*) pDisplayContext->opaque;
     if (adapter_luid) {
-        /* Copy LUID information to display context */
-        memcpy(&pWin32Ctx->adapter_luid, adapter_luid, sizeof(pWin32Ctx->adapter_luid));
-
         /* Load the preferred driver name from the driver registry if available */
-        LoadDriverNameFromRegistry(pWin32Ctx);
+        LoadDriverNameFromRegistry(adapter_luid, pWin32Ctx);
 #ifdef _DEBUG
         if (pWin32Ctx->registry_driver_available_flag) {
-            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart);
+            fprintf(stderr, "VA_Win32: Found driver %s in the registry for LUID %ld %ld \n", pWin32Ctx->registry_driver_name, adapter_luid.LowPart, adapter_luid.HighPart);
         } else {
-            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", pWin32Ctx->adapter_luid.LowPart, pWin32Ctx->adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_NAME);
+            fprintf(stderr, "VA_Win32: Couldn't find a driver in the registry for LUID %ld %ld. Using default driver: %s \n", adapter_luid.LowPart, adapter_luid.HighPart, VAAPI_DEFAULT_DRIVER_NAME);
         }
 #endif // _DEBUG
     }
