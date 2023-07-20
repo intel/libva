@@ -663,6 +663,7 @@ struct VADisplayContext {
         VADisplayContextP ctx
     );
 
+    /* Deprecated */
     VAStatus(*vaGetDriverName)(
         VADisplayContextP ctx,
         char **driver_name
@@ -677,17 +678,36 @@ struct VADisplayContext {
     void *error_callback_user_context;
     VAMessageCallback info_callback;
     void *info_callback_user_context;
+
+    /* Deprecated */
     VAStatus(*vaGetNumCandidates)(
         VADisplayContextP ctx,
         int * num_candidates
     );
 
+    /* Deprecated */
     VAStatus(*vaGetDriverNameByIndex)(
         VADisplayContextP ctx,
         char **driver_name,
         int  candidate_index
     );
 
+    /**
+     * \brief Callback to get an array of driver names.
+     *
+     *
+     * The caller must provide a num_drivers
+     * This structure is allocated from libva with calloc().
+     *
+     * @param drivers  An num_drivers sized array of null terminated strings.
+     *                 The array is managed my the caller. The callee will
+     *                 populate the individual driver name strings and the
+     *                 caller must free them.
+     * @param num_driver The number of driver strings contained within drivers.
+     *                   The caller must set that to the size of the drivers
+     *                   array, where the callee will update the value to
+     *                   min(caller num_driver, num_drivers_support).
+     */
     VAStatus(*vaGetDriverNames)(
         VADisplayContextP ctx,
         char **drivers,
