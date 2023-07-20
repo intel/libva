@@ -674,10 +674,6 @@ static VAStatus va_new_opendriver(VADisplay dpy)
     const char *driver_name_env;
     VADriverContextP ctx;
 
-    /* XXX: Temporary dummy return, until all platforms are converted */
-    if (!pDisplayContext->vaGetDriverNames)
-        return VA_STATUS_ERROR_INVALID_PARAMETER;
-
     /* XXX: The order is bonkers - env var should take highest priority, then
      * override (which ought to be nuked) than native. It's not possible atm,
      * since the DPY connect/init happens during the GetDriverNames.
