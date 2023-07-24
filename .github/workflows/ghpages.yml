@@ -47,7 +47,7 @@ jobs:
 
     - name: 'Upload the artifacts'
       if: github.ref_name == env.GIT_LATEST_TAG
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v2
       with:
         path: "_build/doc/html-out"
 
