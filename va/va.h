@@ -4583,6 +4583,11 @@ VAStatus vaSyncBuffer(
  * Four bytes per pixel: X, Y, U, V.
  */
 #define VA_FOURCC_XYUV          0x56555958
+/** Q416: three-plane 16-bit YUV 4:4:4.
+ *
+ * The three planes contain Y, U and V respectively.
+ */
+#define VA_FOURCC_Q416          0x36313451
 
 /* byte order */
 #define VA_LSB_FIRST        1
