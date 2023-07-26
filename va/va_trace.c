@@ -6335,12 +6335,14 @@ void va_TraceExportSurfaceHandle(
     va_TraceMsg(trace_ctx, "\tflags     = 0x%08x\n", flags);
 
     if (memType != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2) {
+        DPY2TRACE_VIRCTX_EXIT(pva_trace);
         return;
     }
 
     VADRMPRIMESurfaceDescriptor *desc = (VADRMPRIMESurfaceDescriptor *)descriptor;
 
     if (!desc) {
+        DPY2TRACE_VIRCTX_EXIT(pva_trace);
         return;
     }
 
