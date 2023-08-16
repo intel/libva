@@ -1240,13 +1240,13 @@ static void va_TraceSurfaceAttributes(
                     va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
                     va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
                     va_TraceMsg(trace_ctx, "\t\t  num_objects=0x%08x\n", tmp->num_objects);
-                    for (j = 0; j < tmp->num_objects; j++) {
+                    for (j = 0; j < tmp->num_objects && tmp->num_objects <= 4; j++) {
                         va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].fd=%d\n", j, tmp->objects[j].fd);
                         va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].size=%d\n", j, tmp->objects[j].size);
-                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].drm_format_modifier=%d\n", j, tmp->objects[j].drm_format_modifier);
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].drm_format_modifier=%llx\n", j, tmp->objects[j].drm_format_modifier);
                     }
                     va_TraceMsg(trace_ctx, "\t\t  num_layers=%d\n", tmp->num_layers);
-                    for (j = 0; j < tmp->num_layers; j++) {
+                    for (j = 0; j < tmp->num_layers && tmp->num_layers <= 4; j++) {
                         va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].drm_format=0x%08x\n", j, tmp->layers[j].drm_format);
                         va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].num_planes=0x%d\n", j, tmp->layers[j].num_planes);
                         for (k = 0; k < 4; k++) {
@@ -5980,7 +5980,7 @@ void va_TraceSyncSurface2(
     TRACE_FUNCNAME(idx);
 
     va_TraceMsg(trace_ctx, "\tsurface = 0x%08x\n", surface);
-    va_TraceMsg(trace_ctx, "\ttimeout_ns = %d\n", timeout_ns);
+    va_TraceMsg(trace_ctx, "\ttimeout_ns = %lld\n", timeout_ns);
     va_TraceMsg(trace_ctx, NULL);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
@@ -6061,7 +6061,7 @@ void va_TraceSyncBuffer(
     TRACE_FUNCNAME(idx);
 
     va_TraceMsg(trace_ctx, "\tbuf_id = 0x%08x\n", buf_id);
-    va_TraceMsg(trace_ctx, "\ttimeout_ns = %d\n", timeout_ns);
+    va_TraceMsg(trace_ctx, "\ttimeout_ns = %lld\n", timeout_ns);
     va_TraceMsg(trace_ctx, NULL);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
@@ -6241,7 +6241,7 @@ void va_TraceEvent(
     write_size = VA_TRACE_HEADER_SIZE;
     for (i = 0; i < num; i++) {
         if (write_size + desc[i].size > VA_TRACE_MAX_SIZE) {
-            va_errorMessage(pva_trace->dpy, "error: trace event %d carry too big data. max size \n", id, VA_TRACE_MAX_SIZE);
+            va_errorMessage(pva_trace->dpy, "error: trace event %d carry too big data. max size %d \n", id, VA_TRACE_MAX_SIZE);
             break;
         }
         if (desc[i].buf) {
