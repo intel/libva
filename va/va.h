@@ -1053,6 +1053,14 @@ typedef enum {
      * columns supported for encoding with tile support.
      */
     VAConfigAttribEncMaxTileCols        = 57,
+    /**
+     * \brief VP9 encoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * VP9 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncVP9 union.
+     */
+    VAConfigAttribEncVP9                = 58,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
