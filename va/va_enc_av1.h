@@ -148,8 +148,10 @@ typedef union _VAConfigAttribValEncAV1Ext1 {
          */
         uint32_t interpolation_filter          : 5;
         /**
-         * \brief Min segmentId block size accepted.
+         * \brief segmentId block size accepted.
          * Application need to send seg_id_block_size in PPS equal or larger than this value.
+         * one bit represent one block size defined as VA_SEGID_BLOCKXXXX
+         * should be (1 << VA_SEGID_BLOCKXXX | 1 << VA_SEGID_BLOCKXXX ... )
          */
         uint32_t min_segid_block_size_accepted : 8;
         /**
@@ -667,10 +669,7 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
     } picture_flags;
 
     /** \brief Block size for each Segment ID in Segment Map.
-     *  0: 16x16 block size, default value;
-     *  1: 32x32 block size;
-     *  2: 64x64 block size;
-     *  3: 8x8 block size.
+     *  should be \c VA_SEGID_BLOCK_XXXX;
      */
     uint8_t     seg_id_block_size;
 
