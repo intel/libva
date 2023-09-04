@@ -120,12 +120,13 @@ extern "C" {
  *  - \ref api_enc_vp8
  *  - \ref api_enc_vp9
  *  - \ref api_enc_av1
- * - Decoder (HEVC, JPEG, VP8, VP9, AV1)
+ * - Decoder (HEVC, JPEG, VP8, VP9, AV1, VVC)
  *      - \ref api_dec_hevc
  *      - \ref api_dec_jpeg
  *      - \ref api_dec_vp8
  *      - \ref api_dec_vp9
  *      - \ref api_dec_av1
+ *      - \ref api_dec_vvc
  * - \ref api_vpp
  * - \ref api_prot
  * - FEI (H264, HEVC)
@@ -538,7 +539,9 @@ typedef enum {
     VAProfileHEVCSccMain444_10          = 34,
     /** \brief Profile ID used for protected video playback. */
     VAProfileProtected                  = 35,
-    VAProfileH264High10                 = 36
+    VAProfileH264High10                 = 36,
+    VAProfileVVCMain10                  = 37,
+    VAProfileVVCMultilayerMain10        = 38
 } VAProfile;
 
 /**
@@ -2148,6 +2151,37 @@ typedef enum {
      * must be quried from \c VAConfigAttribValEncPerBlockControl.
      */
     VAEncDeltaQpPerBlockBufferType   = 61,
+
+    /**
+     * \brief VVC ALF data buffer
+     *
+     * Refer to \c VAAlfDataVVC
+     */
+    VAAlfBufferType = 62,
+    /**
+     * \brief VVC LMCS data buffer
+     *
+     * Refer to \c VALmcsDataVVC
+     */
+    VALmcsBufferType = 63,
+    /**
+     * \brief VVC SubPic data buffer
+     *
+     * Refer to \c VASubPicVVC
+     */
+    VASubPicBufferType = 64,
+    /**
+     * \brief VVC Tile Dimension data buffer
+     *
+     * Data buffer of tile widths and heights, with each element formatted as uint16_t
+     */
+    VATileBufferType = 65,
+    /**
+     * \brief VVC Slice Structure data buffer
+     *
+     * Refer to \c VASliceStructVVC
+     */
+    VASliceStructBufferType = 66,
 
     VABufferTypeMax
 } VABufferType;
@@ -5283,6 +5317,43 @@ typedef struct _VAPictureHEVC {
  */
 #define VA_PICTURE_HEVC_RPS_LT_CURR             0x00000040
 
+/****************************
+ * VVC data structures
+ ****************************/
+/**
+ * \brief Description of picture properties of those in DPB surfaces.
+ *
+ * Only progressive scan is supported, each surface contains one whole
+ * frame picture.
+ */
+
+typedef struct _VAPictureVVC {
+    /** \brief reconstructed picture buffer surface index
+     * invalid when taking value VA_INVALID_SURFACE.
+     */
+    VASurfaceID             picture_id;
+
+    /** \brief picture order count. */
+    int32_t                 pic_order_cnt;
+
+    /* described below */
+    uint32_t                flags;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                va_reserved[VA_PADDING_LOW];
+} VAPictureVVC;
+
+/* flags in VAPictureVVC could be OR of the following */
+#define VA_PICTURE_VVC_INVALID                  0x00000001
+/** \brief Long term reference picture */
+#define VA_PICTURE_VVC_LONG_TERM_REFERENCE      0x00000002
+/** \brief Unavailable reference picture
+ * This flag indicates the situation that the process of
+ * "generating unavailable reference pictures" (spec section 8.3.4)
+ * is required.
+ */
+#define VA_PICTURE_VVC_UNAVAILABLE_REFERENCE    0x00000004
+
 typedef enum {
     VACopyObjectSurface = 0,
     VACopyObjectBuffer  = 1,
@@ -5328,6 +5399,7 @@ VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOpt
 #include <va/va_dec_vp8.h>
 #include <va/va_dec_vp9.h>
 #include <va/va_dec_av1.h>
+#include <va/va_dec_vvc.h>
 #include <va/va_enc_hevc.h>
 #include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>
