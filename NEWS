@@ -1,5 +1,33 @@
-libva NEWS -- summary of user visible changes.  2023-07-04
+libva NEWS -- summary of user visible changes.  2023-09-14
 Copyright (C) 2009-2023 Intel Corporation
+
+version 2.20.0 - 14.Sep.2023
+* va: drop no longer applicable vaGetDriverNames check
+* va: remove unreachable "DRIVER BUG"
+* x11/dri2: limit the array handling to avoid out of range access
+* va/backend: document the vaGetDriver* APIs
+* va/backend: annotate vafool as deprecated
+* win32: remove duplicate adapter_luid entry
+* va: Added Q416 fourcc (three-plane 16-bit YUV 4:4:4)
+* trace: fix minor issue about printf data type and value range
+* jpeg: add support for crop and partial decode
+* trace: Unlock mutex before return
+* trace: Add trace for vaExportSurfaceHandle
+* av1: Revise offsets comments for av1 encode
+* va: Add new VADecodeErrorType to indicate the reset happended in the driver.
+* drm: limit the array size to avoid out of range
+* va: fix:set driver number to be zero if vaGetDriverNames failed
+* va: fix:don't leak driver names, when override is set
+* win32: Only print win32 driver messages in DEBUG builds
+* va: Add vendor string on va_TraceInitialize
+* va: remove legacy code paths
+* drm: remove no longer used helpers
+* x11: remove legacy code paths
+* x11: allow disabling DRI3 via LIBVA_DRI3_DISABLE env var
+* x11: implement vaGetDriverNames
+* va/x11/va_nvctrl: remove some dead code
+* va/x11/va_fglrx: remove some dead code
+* va: optimize code of getting driver name for all protocols/os(wayland,x11,drm,win32,android)
 
 version 2.19.0 - 04.Jul.2023
 * docs: fix references and descriptions snf focyhrn mstkup
