@@ -595,8 +595,10 @@ typedef struct _VAEncMiscParameterTypeVP9PerSegmantParam {
  * \brief VP9 Block Segmentation ID Buffer
  *
  * The application provides a buffer of VAEncMacroblockMapBufferType containing
- * the initial segmentation id for each 8x8 block, one byte each, in raster scan order.
- * Rate control may reassign it.  For example, a 640x480 video, the buffer has 4800 entries.
+ * the initial segmentation id for each block, block size is specified by seg_id_block_size
+ * in VAEncPictureParameterBufferVP9  , one byte each, in raster scan order.
+ * Rate control may reassign it.  For example, a 640x480 video, seg_id_block_size is
+ * VA_SEGID_BLOCK_16X16 , the buffer has 1200 entries.
  * The value of each entry should be in the range [0..7], inclusive.
  * If segmentation is not enabled, the application does not need to provide it.
  */
