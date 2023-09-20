@@ -1491,6 +1491,19 @@ typedef union _VAConfigAttribValEncPerBlockControl {
 /** \brief Driver supports decode processing rate report  */
 #define VA_PROCESSING_RATE_DECODE                     0x00000002
 /**@}*/
+
+/** @name segment ID map block size */
+/**@{*/
+/** \brief each segmentID represent a 16x16 block */
+#define VA_SEGID_BLOCK_16X16                          0
+/** \brief each segmentID represent a 32x32 block */
+#define VA_SEGID_BLOCK_32X32                          1
+/** \brief each segmentID represent a 64x64 block */
+#define VA_SEGID_BLOCK_64X64                          2
+/** \brief each segmentID represent a 8x8 block */
+#define VA_SEGID_BLOCK_8X8                            3
+/**@}*/
+
 /**
  * if an attribute is not applicable for a given
  * profile/entrypoint pair, then set the value to the following
