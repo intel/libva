@@ -428,19 +428,19 @@ typedef struct _VAEncSegParamAV1 {
  * #VAEncMacroblockMapBufferType and the driver as well as the underline encoder
  * should honor what is given by the app.
  */
-typedef struct _VAEncSegMapBufferAV1 {
-    /** \brief Segment map data size. */
-    uint32_t    segmentMapDataSize;
 
-    /**
-     * \brief Segment map.
-     * Size of this map is indicated by \ref segmentMapDataSize and each element
-     * in this map contains the segment id of a particular block.
-     * The element is indexed by raster scan order.
-     * The value of each entry should be in the range [0..7], inclusive.
-     */
-    uint8_t    *pSegmentMap;
-} VAEncSegMapBufferAV1;
+/**
+ * \brief AV1 Block Segmentation ID Buffer
+ *
+ * The application provides a buffer of VAEncMacroblockMapBufferType containing
+ * the initial segmentation id for each block, block size is specified by seg_id_block_size
+ * in VAEncPictureParameterBufferAV1, one byte each, in raster scan order.
+ * Rate control may reassign it.  For example, a 640x480 video, set_id_block_size is
+ * VA_SEGID_BLOCK_16X16 , the buffer has 1200 entries.
+ * The value of each entry should be in the range [0..7], inclusive.
+ * If segmentation is not enabled, the application does not need to provide it.
+ */
+
 
 typedef enum {
     /** \brief Identity transformation, 0-parameter. */
