@@ -1036,6 +1036,20 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /**
+     * \brief Maximum number of tile rows. Read-only.
+     *
+     * This attribute determines the maximum number of tile
+     * rows supported for encoding with tile support.
+     */
+    VAConfigAttribEncMaxTileRows        = 56,
+    /**
+     * \brief Maximum number of tile cols. Read-only.
+     *
+     * This attribute determines the maximum number of tile
+     * columns supported for encoding with tile support.
+     */
+    VAConfigAttribEncMaxTileCols        = 57,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
