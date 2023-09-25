@@ -60,7 +60,7 @@ libva_sym_arg = '-Wl,-version-script,' + '@0@/@1@'.format(meson.current_source_d
 
 libva_link_args = []
 libva_link_depends = []
-if cc.links('', name: '-Wl,--version-script', args: ['-shared', libva_sym_arg])
+if cc.links('void vaCreateSurfaces_0_32_0(void) {} void vaCreateSurfaces() {}', name: '-Wl,--version-script', args: ['-shared', libva_sym_arg])
   libva_link_args = libva_sym_arg
   libva_link_depends = libva_sym
 endif
