@@ -149,6 +149,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
         TOSTR(VAConfigAttribEncAV1Ext1);
         TOSTR(VAConfigAttribEncAV1Ext2);
         TOSTR(VAConfigAttribEncPerBlockControl);
+        TOSTR(VAConfigAttribDynamicResolutionChange);
     case VAConfigAttribTypeMax:
         break;
     }

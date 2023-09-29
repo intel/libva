@@ -1036,6 +1036,13 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /** \brief dynamic resolution change support. Read-only.
+     *
+     * This attributes describes whether backend driver support dynamic resolution change
+     * It could be used for encode/decode profile to indicate whether need to reset context.
+     * The value returned uses the /c VAConfigAttribValDynamicResolutionChange.
+     */
+    VAConfigAttribDynamicResolutionChange = 56,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1432,6 +1439,23 @@ typedef union _VAConfigAttribValEncPerBlockControl {
     } bits;
     uint32_t value;
 } VAConfigAttribValEncPerBlockControl;
+
+typedef union _VAConfigAttribValDynamicResolutionChange {
+    struct {
+        /** \brief whether to support dynamic resolution change */
+        uint32_t drc_support             : 1;
+        /** \brief whether need to reset context for drc
+         *
+         *  0: invalid value
+         *  1: need to reset context for drc
+         *  2: could not reset context for drc
+         */
+        uint32_t drc_context_reset       : 4;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                : 25;
+    } bits;
+    uint32_t value; 
+} VAConfigAttribValDynamicResolutionChange;
 
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
