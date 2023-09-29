@@ -1036,6 +1036,14 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /**
+     * \brief VP9 encoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * VP9 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncVP9 union.
+     */
+    VAConfigAttribEncVP9                = 56,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1474,6 +1482,17 @@ typedef union _VAConfigAttribValEncPerBlockControl {
 /** \brief Driver supports decode processing rate report  */
 #define VA_PROCESSING_RATE_DECODE                     0x00000002
 /**@}*/
+
+/** @name segment ID map block size */
+/**@{*/
+/** \brief each segmentID represent a 16x16 block */
+#define VA_SEGID_BLOCK_16X16                          0
+/** \brief each segmentID represent a 32x32 block */
+#define VA_SEGID_BLOCK_32X32                          1
+/** \brief each segmentID represent a 64x64 block */
+#define VA_SEGID_BLOCK_64X64                          2
+/**@}*/
+
 /**
  * if an attribute is not applicable for a given
  * profile/entrypoint pair, then set the value to the following
