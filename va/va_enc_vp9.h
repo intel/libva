@@ -507,8 +507,19 @@ typedef struct  _VAEncPictureParameterBufferVP9 {
      */
     uint32_t    skip_frames_size;
 
+    /** \brief Block size for each Segment ID in Segment Map.
+     *  This specify the granularity of media driver of reading and processing the segment map.
+     *  0: 16x16 block size, default value;
+     *  1: 32x32 block size;
+     *  2: 64x64 block size;
+     *  3: 8x8 block size.
+     */
+    uint8_t     seg_id_block_size;
+
+    uint8_t     va_reserved8[3];
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t    va_reserved[VA_PADDING_MEDIUM];
+    uint32_t    va_reserved[7];
 } VAEncPictureParameterBufferVP9;
 
 
@@ -593,6 +604,30 @@ typedef struct _VAEncMiscParameterTypeVP9PerSegmantParam {
  * If segmentation is not enabled, the application does not need to provide it.
  */
 
+
+/** \brief Attribute value for VAConfigAttribEncVP9. */
+typedef union _VAConfigAttribValEncVP9 {
+    struct {
+        /**
+         * \brief Min segmentId block size accepted.
+         * This is the granularity of segmentation map.
+         */
+        uint32_t min_segid_block_size_accepted : 8;
+
+        /**
+         * \brief Type of segment feature supported.
+         * (segment_feature_support & 0x01) == 1: SEG_LVL_ALT_Q is supported, 0: not.
+         * (segment_feature_support & 0x02) == 1: SEG_LVL_ALT_L is supported, 0: not.
+         * (segment_feature_support & 0x04) == 1: SEG_LVL_REF_FRAME is supported, 0: not.
+         * (segment_feature_support & 0x08) == 1: SEG_LVL_SKIP is supported, 0: not.
+         */
+        uint32_t segment_feature_support       : 4;
+
+        /** \brief Reserved bits for future, must be zero. */
+        uint32_t reserved                      : 20;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValEncVP9;
 
 /**@}*/
 

@@ -1036,6 +1036,14 @@ typedef enum {
      * The value returned uses the VAConfigAttribValEncPerBlockControl type.
      */
     VAConfigAttribEncPerBlockControl    = 55,
+    /**
+     * \brief VP9 encoding attribute. Read-only.
+     *
+     * This attribute exposes a number of capabilities of the underlying
+     * VP9 implementation. The attribute value is partitioned into fields as defined in the
+     * VAConfigAttribValEncVP9 union.
+     */
+    VAConfigAttribEncVP9                = 56,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;

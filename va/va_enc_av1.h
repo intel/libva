@@ -666,7 +666,8 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
      *  0: 16x16 block size, default value;
      *  1: 32x32 block size;
      *  2: 64x64 block size;
-     *  3: 8x8 block size.
+     *  3: 8x8 block size;
+     *  4: 4x4 block size.
      */
     uint8_t     seg_id_block_size;
 
