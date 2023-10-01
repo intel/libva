@@ -87,6 +87,12 @@ dl_dep = cc.find_library('dl', required : false)
 WITH_DRM = not get_option('disable_drm') and (host_machine.system() != 'windows')
 libdrm_dep = dependency('libdrm', version : '>= 2.4.60', required : (host_machine.system() != 'windows'))
 
+ld_supports_version_script = cc.links(
+  'int main() { return 0; }',
+  name : '-Wl,--version-script',
+  args : ['-shared', '-Wl,--version-script,' + '@0@/@1@'.format(meson.current_source_dir(), 'conftest.syms')]
+)
+
 WITH_X11 = false
 if get_option('with_x11') != 'no'
   x11_dep = dependency('x11', required : get_option('with_x11') == 'yes')
