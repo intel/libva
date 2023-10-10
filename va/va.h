@@ -1699,6 +1699,17 @@ typedef enum {
      * when importing an existing buffer.
      */
     VASurfaceAttribDRMFormatModifiers,
+    /** \brief surface region/location (int read/write)
+     * read: when read the value by vaQuerySurfaceAttributes or vaGetSurfaceAttributes
+     * the bit0 represent the system memory existence and could be used by backend driver for given profile
+     * bit 1 represent the local memory existence and could be used by backend driver for given profile.
+     *
+     * write: when call vaCreateSurfaces, the attribute could be used to specify the memory location
+     * if bit0 is 1, it will be allocated on system memory, if bit1 is 1, it will be allocated on local memory
+     * could not set both bit0 and bit1 to same value, if so, backend driver will allocate the surface ignoring
+     * this hint.
+     */
+    VASurfaceAttribValueMemoryRegion,
     /** \brief Number of surface attributes. */
     VASurfaceAttribCount
 } VASurfaceAttribType;
@@ -4662,9 +4673,16 @@ typedef struct _VAImage {
      * Only entry_bytes characters of the string are used.
      */
     int8_t component_order[4];
+    /*
+     * Image flags , app could retrieve surface informations by this flag after calling vaDeriveImage
+     * the flags could include the memory location/region etc.
+     * bit0: whether the flags is valid, 0 invalid, 1 valid
+     * bit1: memory location 0 system memeory, 1 local memory.
+     */
+    uint32_t     flags;
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VAImage;
 
 /** Get maximum number of image formats supported by the implementation */
