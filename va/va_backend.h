@@ -504,8 +504,18 @@ struct VADriverVTable {
         VACopyObject        *src,           /* in */
         VACopyOption        option          /* in */
     );
+
+    VAStatus
+    (*vaGetSurfaceFormatAttributes)(
+        VADriverContextP      ctx,
+        VAConfigID            config,
+        uint32_t              format,
+        VASurfaceFormatAttrib *attrib_list,
+        uint32_t              num_attribs
+    );
+
     /** \brief Reserved bytes for future use, must be zero */
-    unsigned long reserved[54];
+    unsigned long reserved[53];
 };
 
 struct VADriverContext {
