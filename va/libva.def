@@ -32,6 +32,7 @@ EXPORTS
     vaGetDisplayAttributes
     vaGetImage
     vaMapBuffer
+    vaMapBuffer2
     vaMaxNumDisplayAttributes
     vaMaxNumImageFormats
     vaMaxNumSubpictureFormats
