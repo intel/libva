@@ -1255,6 +1255,31 @@ static void va_TraceSurfaceAttributes(
                             va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].pitch[%d]=0x%d\n", j, k, tmp->layers[j].pitch[k]);
                         }
                     }
+                } else if (memtype == VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3) {
+                    VADRMPRIME3SurfaceDescriptor *tmp = (VADRMPRIME3SurfaceDescriptor *) p->value.value.p;
+                    uint32_t j, k;
+
+                    va_TraceMsg(trace_ctx, "\t\t--VADRMPRIME3SurfaceDescriptor\n");
+                    va_TraceMsg(trace_ctx, "\t\t  pixel_format=0x%08x\n", tmp->fourcc);
+                    va_TraceMsg(trace_ctx, "\t\t  width=%d\n", tmp->width);
+                    va_TraceMsg(trace_ctx, "\t\t  height=%d\n", tmp->height);
+                    va_TraceMsg(trace_ctx, "\t\t  num_objects=0x%08x\n", tmp->num_objects);
+                    va_TraceMsg(trace_ctx, "\t\t  flags=0x%08x\n", tmp->flags);
+                    for (j = 0; j < tmp->num_objects && tmp->num_objects <= 4; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].fd=%d\n", j, tmp->objects[j].fd);
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].size=%d\n", j, tmp->objects[j].size);
+                        va_TraceMsg(trace_ctx, "\t\t\tobjects[%d].drm_format_modifier=%llx\n", j, tmp->objects[j].drm_format_modifier);
+                    }
+                    va_TraceMsg(trace_ctx, "\t\t  num_layers=%d\n", tmp->num_layers);
+                    for (j = 0; j < tmp->num_layers && tmp->num_layers <= 4; j++) {
+                        va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].drm_format=0x%08x\n", j, tmp->layers[j].drm_format);
+                        va_TraceMsg(trace_ctx, "\t\t\tlayers[%d].num_planes=0x%d\n", j, tmp->layers[j].num_planes);
+                        for (k = 0; k < 4; k++) {
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].object_index[%d]=0x%d\n", j, k, tmp->layers[j].object_index[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].offset[%d]=0x%d\n", j, k, tmp->layers[j].offset[k]);
+                            va_TraceMsg(trace_ctx, "\t\t\t\tlayers[%d].pitch[%d]=0x%d\n", j, k, tmp->layers[j].pitch[k]);
+                        }
+                    }
 #if defined(_WIN32)
                 } else if (memtype == VA_SURFACE_ATTRIB_MEM_TYPE_NTHANDLE) {
                     va_TraceMsg(trace_ctx, "\t\t--Win32 %d surfaces\n", num_surfaces);
@@ -6336,7 +6361,7 @@ void va_TraceExportSurfaceHandle(
     va_TraceMsg(trace_ctx, "\tmemType   = 0x%08x\n", memType);
     va_TraceMsg(trace_ctx, "\tflags     = 0x%08x\n", flags);
 
-    if (memType != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2) {
+    if (memType != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2 && memType != VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3) {
         DPY2TRACE_VIRCTX_EXIT(pva_trace);
         return;
     }

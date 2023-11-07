@@ -28,6 +28,7 @@
 #define VA_DRM_COMMON_H
 
 #include <stdint.h>
+#include <va/va.h>
 
 
 /** \brief DRM authentication type. */
@@ -86,6 +87,11 @@ struct drm_state {
  * Used with VADRMPRIMESurfaceDescriptor.
  */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2      0x40000000
+/** \brief DRM PRIME3 memory type
+ *
+ * Used with VADRMPRIME3SurfaceDescriptor.
+ */
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3      0x80000000
 
 /**
  * \brief External buffer descriptor for a DRM PRIME surface.
@@ -158,6 +164,55 @@ typedef struct _VADRMPRIMESurfaceDescriptor {
     } layers[4];
 } VADRMPRIMESurfaceDescriptor;
 
+/**
+ * \brief External buffer descriptor for a DRM PRIME surface with flags
+ *
+ * This structure is an extention for VADRMPRIMESurfaceDescriptor,
+ * it has the same behavior as if used with VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_2.
+ *
+ * The field "flags" is added, see "Surface external buffer descriptor flags".
+ * To use this structure, use VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3 instead.
+ */
+typedef struct _VADRMPRIME3SurfaceDescriptor {
+    /** Pixel format fourcc of the whole surface (VA_FOURCC_*). */
+    uint32_t fourcc;
+    /** Width of the surface in pixels. */
+    uint32_t width;
+    /** Height of the surface in pixels. */
+    uint32_t height;
+    /** Number of distinct DRM objects making up the surface. */
+    uint32_t num_objects;
+    /** Description of each object. */
+    struct {
+        /** DRM PRIME file descriptor for this object. */
+        int fd;
+        /** Total size of this object (may include regions which are
+         *  not part of the surface). */
+        uint32_t size;
+        /** Format modifier applied to this object. */
+        uint64_t drm_format_modifier;
+    } objects[4];
+    /** Number of layers making up the surface. */
+    uint32_t num_layers;
+    /** Description of each layer in the surface. */
+    struct {
+        /** DRM format fourcc of this layer (DRM_FOURCC_*). */
+        uint32_t drm_format;
+        /** Number of planes in this layer. */
+        uint32_t num_planes;
+        /** Index in the objects array of the object containing each
+         *  plane. */
+        uint32_t object_index[4];
+        /** Offset within the object of each plane. */
+        uint32_t offset[4];
+        /** Pitch of each plane. */
+        uint32_t pitch[4];
+    } layers[4];
+    /** \brief flags. See "Surface external buffer descriptor flags". */
+    uint32_t flags;
+    /** reserved bytes, must be zero */
+    uint32_t reserved[VA_PADDING_MEDIUM + 1];
+} VADRMPRIME3SurfaceDescriptor;
 /**
  * \brief List of DRM format modifiers.
  *
