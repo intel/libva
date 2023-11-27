@@ -4,12 +4,12 @@ on: [push, pull_request]
 
 jobs:
   freebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v4
     - name: 'Install prerequisites and build'
-      uses: vmactions/freebsd-vm@v0
+      uses: vmactions/freebsd-vm@v1
       with:
         prepare: |
           pkg install -y meson pkgconf libdrm libXext libXfixes wayland
