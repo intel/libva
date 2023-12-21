@@ -84,3 +84,4 @@ EXPORTS
     vaStatusStr
     vaSyncSurface2
     vaDisplayIsValid
+    vaGetLibFunc
