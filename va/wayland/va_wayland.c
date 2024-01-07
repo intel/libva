@@ -133,11 +133,9 @@ vaGetDisplayWl(struct wl_display *display)
 
     for (i = 0; g_backends[i].create != NULL; i++) {
         if (g_backends[i].create(pDisplayContext))
-            break;
+            return (VADisplay)pDisplayContext;
         g_backends[i].destroy(pDisplayContext);
     }
-
-    return (VADisplay)pDisplayContext;
 
 error:
     va_DisplayContextDestroy(pDisplayContext);
