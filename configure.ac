@@ -75,7 +75,8 @@ m4_define([libva_lt_age],
           [m4_eval(libva_binary_age - libva_interface_age)])
 
 # libdrm minimun version requirement
-m4_define([libdrm_version], [2.4.60])
+# 2.4.75 for drmGetDevices2
+m4_define([libdrm_version], [2.4.75])
 
 # Wayland minimum version number
 # 1.11.0 for wl_proxy_create_wrapper

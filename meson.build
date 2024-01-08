@@ -85,7 +85,7 @@ cc = meson.get_compiler('c')
 dl_dep = cc.find_library('dl', required : false)
 
 WITH_DRM = not get_option('disable_drm') and (host_machine.system() != 'windows')
-libdrm_dep = dependency('libdrm', version : '>= 2.4.60', required : (host_machine.system() != 'windows'))
+libdrm_dep = dependency('libdrm', version : '>= 2.4.75', required : (host_machine.system() != 'windows'))
 
 WITH_X11 = false
 if get_option('with_x11') != 'no'

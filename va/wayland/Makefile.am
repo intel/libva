@@ -29,6 +29,7 @@ AM_CPPFLAGS = \
 
 source_c = \
 	va_wayland.c		\
+	va_wayland_linux_dmabuf.c \
 	va_wayland_drm.c	\
 	va_wayland_emgd.c	\
 	../drm/va_drm_utils.c 	\
@@ -40,16 +41,19 @@ source_h = \
 	$(NULL)
 
 source_h_priv = \
+	va_wayland_linux_dmabuf.h \
 	va_wayland_drm.h	\
 	va_wayland_emgd.h	\
 	va_wayland_private.h	\
 	$(NULL)
 
 protocol_source_c = \
+	linux-dmabuf-v1-client-protocol.c \
 	wayland-drm-client-protocol.c	\
 	$(NULL)
 
 protocol_source_h = \
+	linux-dmabuf-v1-client-protocol.h \
 	wayland-drm-client-protocol.h	\
 	$(NULL)
 
@@ -61,6 +65,7 @@ noinst_HEADERS			= $(source_h_priv)
 
 # Wayland protocol
 va_wayland_drm.c: $(protocol_source_h)
+va_wayland_linux_dmabuf.c: $(protocol_source_h)
 %-client-protocol.h : %.xml
 	$(AM_V_GEN)$(WAYLAND_SCANNER) client-header < $< > $@
 %-client-protocol.c : %.xml
@@ -68,6 +73,7 @@ va_wayland_drm.c: $(protocol_source_h)
 
 EXTRA_DIST = \
 	wayland-drm.xml         \
+	linux-dmabuf-v1.xml     \
 	$(NULL)
 
 BUILT_SOURCES = $(protocol_source_h) $(protocol_source_c)
