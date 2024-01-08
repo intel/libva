@@ -228,6 +228,7 @@ endif
 if WITH_WAYLAND
   libva_wayland_sources = [
     'wayland/va_wayland.c',
+    'wayland/va_wayland_linux_dmabuf.c',
     'wayland/va_wayland_drm.c',
     'wayland/va_wayland_emgd.c',
     'drm/va_drm_utils.c',
@@ -241,24 +242,31 @@ if WITH_WAYLAND
   libva_headers_subproject += libva_wayland_headers
 
   libva_wayland_headers_priv = [
+    'wayland/va_wayland_linux_dmabuf.h',
     'wayland/va_wayland_drm.h',
     'wayland/va_wayland_emgd.h',
     'wayland/va_wayland_private.h',
   ]
 
-  protocol_files = [
-    custom_target(
-      'wayland-drm-client-protocol.c',
-      output : 'wayland-drm-client-protocol.c',
-      input : 'wayland/wayland-drm.xml',
-      command : [wl_scanner, 'private-code', '@INPUT@', '@OUTPUT@']),
+  # XXX: grab linux-dmabuf-v1.xml from wayland-protocols
+  protocols = {
+    'wayland-drm': 'wayland/wayland-drm.xml',
+    'linux-dmabuf-v1': 'wayland/linux-dmabuf-v1.xml',
+  }
 
-    custom_target(
-      'wayland-drm-client-protocol.h',
-      output : 'wayland-drm-client-protocol.h',
-      input : 'wayland/wayland-drm.xml',
+  protocol_files = []
+  foreach name, xml : protocols
+    protocol_files += custom_target(
+      name + '-client-protocol.c',
+      output : name + '-client-protocol.c',
+      input : xml,
+      command : [wl_scanner, 'private-code', '@INPUT@', '@OUTPUT@'])
+    protocol_files += custom_target(
+      name + '-client-protocol.h',
+      output : name + '-client-protocol.h',
+      input : xml,
       command : [wl_scanner, 'client-header', '@INPUT@', '@OUTPUT@'])
-  ]
+  endforeach
 
   install_headers(libva_wayland_headers, subdir : 'va')
 
