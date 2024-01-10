@@ -36,7 +36,7 @@ cd "$srcdir"
 
 mkdir -p m4
 
-AUTORECONF=`which autoreconf`
+AUTORECONF=`command -v autoreconf`
 if test -z $AUTORECONF; then
     echo "*** No autoreconf found ***"
     exit 1
