@@ -23,6 +23,13 @@
 
 PROJECT="libva"
 
+# for `meson dist`
+if test -z "$srcdir"; then
+    srcdir="$MESON_PROJECT_DIST_ROOT"
+    test -n "$srcdir" || srcdir="$MESON_DIST_ROOT"
+    test -n "$srcdir" && NOCONFIGURE=1
+fi
+
 test -n "$srcdir" || srcdir="`dirname \"$0\"`"
 test -n "$srcdir" || srcdir=.
 
