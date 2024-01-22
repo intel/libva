@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2024 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -81,6 +81,9 @@ typedef struct _VAWeightedPredInfo {
  * This structure conveys picture level parameters and should be sent once
  * per frame.
  *
+ * Host decoder is required to send in a buffer of VAPictureParameterBufferVVC
+ * as the first va buffer for each frame.
+ *
  */
 typedef struct  _VAPictureParameterBufferVVC {
     /** \brief buffer description of decoded current picture
@@ -102,7 +105,7 @@ typedef struct  _VAPictureParameterBufferVVC {
     uint8_t                 sps_log2_ctu_size_minus5;
     uint8_t                 sps_log2_min_luma_coding_block_size_minus2;
     uint8_t                 sps_log2_transform_skip_max_size_minus2;
-    int8_t                  ChromaQpTable[3][112];
+    int8_t                  ChromaQpTable[3][111];
     uint8_t                 sps_six_minus_max_num_merge_cand;
     uint8_t                 sps_five_minus_max_num_subblock_merge_cand;
     uint8_t                 sps_max_num_merge_cand_minus_max_num_gpm_cand;
@@ -279,7 +282,9 @@ typedef struct  _VAPictureParameterBufferVVC {
     union {
         struct {
             /** \brief Flag to indicate if current picture is an intra picture.
-             *  Takes value 1 when all the slices are intra slices, 0 otherwise.
+             *  Takes value 1 when all slices of current picture are intra slices.
+             *  Takes value 0 when some slices of current picture may not be
+             *  intra slices.
              */
             uint32_t        IntraPicFlag                                                    : 1;    // [0..1]
             /** \brief Reserved for future use, must be zero */
@@ -350,7 +355,7 @@ typedef struct  _VASliceParameterBufferVVC {
     uint8_t                 sh_alf_aps_id_chroma;
     uint8_t                 sh_alf_cc_cb_aps_id;
     uint8_t                 sh_alf_cc_cr_aps_id;
-    uint8_t                 sh_num_ref_idx_active_minus1[2];
+    uint8_t                 NumRefIdxActive[2];
     uint8_t                 sh_collocated_ref_idx;
     /* VVC spec variable indicating quantization parameter for the slice. */
     int8_t                  SliceQpY;
@@ -403,9 +408,11 @@ typedef struct  _VASliceParameterBufferVVC {
 /**
  * \brief VVC Scaling List Data Structure
  *
- * Host decoder sends in a buffer surface of array of VVC Scaling Lists.
- * The surface buffer may contain 1 to 8 VAScalingListVVC data structures.
- * Driver may store the data internally. Host decode may choose not to
+ * Host decoder sends in an array of VVC Scaling Lists through one or multiple
+ * buffers which may contain 1 to 8 VAScalingListVVC data structures in total.
+ * Each buffer contains an integer number of VAScalingListVVC data structures
+ * with no gap in between.
+ * Driver may store the data internally. Host decoder may choose not to
  * send the same scaling list data for each frame. When a VAScalingListVVC
  * structure carries a same value of aps_adaptation_parameter_set_id
  * as a previously stored structure, driver should override the old structure
@@ -445,15 +452,17 @@ typedef struct _VAScalingListVVC {
 /**
  * \brief VVC Adaptive Loop Filter Data Structure
  *
- * Host decoder sends in a buffer surface of array of VVC ALF sets.
- * The surface buffer may contain 1 to 8 VAAlfDataVVC data structures.
- * Driver may store the data internally. Host decode may choose not to
+ * Host decoder sends in an array of VVC ALF sets through one or multiple
+ * buffers which may contain 1 to 8 VAAlfDataVVC data structures in total.
+ * Each buffer contains an integer number of VAAlfDataVVC data structures
+ * with no gap in between.
+ * Driver may store the data internally. Host decoder may choose not to
  * send the same ALF data for each frame. When a VAAlfDataVVC structure
  * carries a same value of aps_adaptation_parameter_set_id as a previously
  * stored structure, driver should override the old structure
  * with values in the new structure.
  * VAAlfBufferType is used to send this buffer.
-*/
+ */
 typedef struct _VAAlfDataVVC {
     /**
      * \brief VVC Adaptive Loop Filter parameters.
@@ -462,7 +471,7 @@ typedef struct _VAAlfDataVVC {
     uint8_t                 aps_adaptation_parameter_set_id;
     uint8_t                 alf_luma_num_filters_signalled_minus1;
     uint8_t                 alf_luma_coeff_delta_idx[25];
-    int8_t                  AlfCoeffL[25][12];
+    int8_t                  filtCoeff[25][12];
     uint8_t                 alf_luma_clip_idx[25][12];
     uint8_t                 alf_chroma_num_alt_filters_minus1;
     int8_t                  AlfCoeffC[8][6];
@@ -496,9 +505,11 @@ typedef struct _VAAlfDataVVC {
 /**
  * \brief VVC Luma Mapping with Chroma Scaling Data Structure
  *
- * Host decoder sends in a buffer surface of array of VVC LMCS sets.
- * The surface buffer may contain 1 to 4 VALmcsDataVVC data structures.
- * Driver may store the data internally. Host decode may choose not to
+ * Host decoder sends in an array of VVC LMCS sets through one or multiple
+ * buffers which may contain 1 to 4 VALmcsDataVVC data structures in total.
+ * Each buffer contains an integer number of VALmcsDataVVC data structures
+ * with no gap in between.
+ * Driver may store the data internally. Host decoder may choose not to
  * send the same LMCS data for each frame. When a VALmcsDataVVC structure
  * carries a same value of aps_adaptation_parameter_set_id as a previously
  * stored structure, driver should override the old structure
@@ -523,13 +534,12 @@ typedef struct _VALmcsDataVVC {
 /**
  * \brief VVC SubPicture Data Structure
  *
- * Host decoder sends in a data buffer of array of VVC SubPic sets.
- * The Subpic sets are laid out sequentially in the order of indices
- * from 0 to sps_num_subpics_minus1 according to the bitstream with
- * no gap in between. The number of element should equal to
- * sps_num_subpics_minus1 + 1.
- * App should allocate enough buffer size to hold
- * all the SubPic data.
+ * Host decoder sends in an array of VVC SubPic sets through one or
+ * multiple buffers which contain sps_num_subpics_minus1 + 1
+ * VASubPicVVC data structures in total. Each buffer contains
+ * an integer number of VASubPicVVC data structures with no gap in between.
+ * The Subpic sets are sent sequentially in the order of indices
+ * from 0 to sps_num_subpics_minus1 according to the bitstream.
  * VASubPicBufferType is used to send this buffer.
  */
 typedef struct _VASubPicVVC {
@@ -564,42 +574,52 @@ typedef struct _VASubPicVVC {
  * \brief data buffer of tile widths and heights.
  * VATileBufferType is used to send this buffer.
  *
- * The buffer is filled with number of pps_num_exp_tile_columns_minus1 + 1
- * tile column widths of pps_tile_column_width_minus1[i], starting
- * from buffer beginning. Then it is followed by number of
- * pps_num_exp_tile_rows_minus1 + 1 of tile row heights of
- * pps_tile_row_height_minus1[i]. No gaps in between.
- * Each element is formatted as
-    uint16_t                tile_dimension;
+ * Host decoder sends in number of pps_num_exp_tile_columns_minus1 + 1
+ * tile column widths of pps_tile_column_width_minus1[i], followed by
+ * number of pps_num_exp_tile_rows_minus1 + 1 of tile row heights of
+ * pps_tile_row_height_minus1[i], through one or multiple buffers.
+ * Each tile width or height is formatted as
+     uint16_t                tile_dimension;
+ * Each buffer contains an integer number of tile_dimension with
+ * no gap in between.
+ * The buffers with type VATileBufferType should be submitted for each
+ * picture. And driver will derive the tile structure from it.
  * When pps_num_exp_tile_columns_minus1 + pps_num_exp_tile_rows_minus1 equals 0,
- * this surface is still submitted by app to driver.
- * For each picture, this surface should be submitted once.
- * And driver will derive the tile structure from it.
+ * this buffer is still submitted by app to driver.
  */
 
 
 /**
- * \brief VVC SliceStruct Data Structure
- *
- * Host decoder sends in a data buffer of array of SliceStruct sets.
- * The buffer contains only the "explicit" slices parsed from PPS
- * header.
- * Each element is described by VASliceStructVVC data structures.
- * And they are laid out sequentially in the order of
- * ascending slice indices according to the spec with no gap in between.
- * And the buffer size is large enough to hold all SliceStruct elements.
- * When pps_rect_slice_flag or there are no explicit slices,
- * this surface is not submitted by app to driver. Otherwise, for each picture,
- * this surface should be submitted once.
- * App should populate the data entries regardless of values of
- * pps_single_slice_per_subpic_flag or sps_subpic_info_present_flag.
- *
- * VASliceStructBufferType is used to send this buffer.
- */
+  * \brief VVC SliceStruct Data Structure
+  *
+  * Host decoder sends in an array of SliceStruct sets through one or multiple
+  * buffers. These SliceStruct sets contain only the "explicit" slices parsed
+  * from PPS header.
+  * Each SliceStruct set is described by VASliceStructVVC data structure.
+  * Each buffer contains an integer number of VASliceStructVVC data structures,
+  * which are laid out sequentially in the order of
+  * ascending slice indices according to the spec with no gap in between.
+  *
+  * When pps_rect_slice_flag equals 0 or there are no explicit slices,
+  * this buffer is not submitted by app to driver. Otherwise, for each picture,
+  * this buffer should be submitted.
+  *
+  * Note: When pps_slice_width_in_tiles_minus1 + pps_slice_height_in_tiles_minus1
+  * equals 0, if the sum of pps_exp_slice_height_in_ctus_minus1 + 1 of all those
+  * slices with same SliceTopLeftTileIdx value is less than the height of tile
+  * SliceTopLeftTileIdx in unit of CTUs, driver should derive the rest slices in
+  * that tile according to equation (21) in spec section 6.5.1. And VASliceStructVVC
+  * for these (derived) slices are not passed in to LibVA by App.
+  *
+  * App should populate the data entries regardless of values of
+  * pps_single_slice_per_subpic_flag or sps_subpic_info_present_flag.
+  *
+  * VASliceStructBufferType is used to send this buffer.
+  */
 typedef struct _VASliceStructVVC {
     /** \brief the tile index of which the starting CTU (top-left) of
      *  the slice belongs to. The tile index is in raster scan order.
-     *  Same syntax varible as in VVC spec.
+     *  Same syntax variable as in VVC spec.
      */
     uint16_t                SliceTopLeftTileIdx;
     /* plus 1 specifies the width of the rectangular slice in units
@@ -616,9 +636,8 @@ typedef struct _VASliceStructVVC {
      * If pps_slice_width_in_tiles_minus1 + pps_slice_height_in_tiles_minus1 > 0,
      * set this value to 0.
      * If pps_slice_width_in_tiles_minus1 + pps_slice_height_in_tiles_minus1 == 0,
-     * and if there is only one slice in tile (pps_num_exp_slices_in_tile == 0),
-     * set this value to the number of CTU rows of the tile minus 1.
-     * Otherwise (pps_num_exp_slices_in_tile != 0), set the value equal to
+     * and if there is only one slice in tile, set this value to the number of
+     * CTU rows of the tile minus 1, otherwise, set the value equal to
      * corresponding pps_exp_slice_height_in_ctus_minus1 from bitstream.
      */
     uint16_t                pps_exp_slice_height_in_ctus_minus1;

@@ -5283,7 +5283,11 @@ typedef struct _VAPictureVVC {
 #define VA_PICTURE_VVC_INVALID                  0x00000001
 /** \brief Long term reference picture */
 #define VA_PICTURE_VVC_LONG_TERM_REFERENCE      0x00000002
-/** \brief Unavailable reference picture */
+/** \brief Unavailable reference picture
+ * This flag indicates the situation that the process of
+ * "generating unavailable reference pictures" (spec section 8.3.4)
+ * is required.
+ */
 #define VA_PICTURE_VVC_UNAVAILABLE_REFERENCE    0x00000004
 
 typedef enum {

@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2009-2023 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2009-2024 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -2356,10 +2356,10 @@ static void va_TraceVAPictureParameterBufferVVC(
     va_TraceMsg(trace_ctx, "\tsps_log2_min_luma_coding_block_size_minus2 = %d\n", p->sps_log2_min_luma_coding_block_size_minus2);
     va_TraceMsg(trace_ctx, "\tsps_log2_transform_skip_max_size_minus2 = %d\n", p->sps_log2_transform_skip_max_size_minus2);
 
-    va_TraceMsg(trace_ctx, "\tChromaQpTable[3][112] =\n");
+    va_TraceMsg(trace_ctx, "\tChromaQpTable[3][111] =\n");
     va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 3; i++) {
-        for (j = 0; j < 112; j++) {
+        for (j = 0; j < 111; j++) {
             va_TracePrint(trace_ctx, "\t%d", p->ChromaQpTable[i][j]);
             if ((j + 1) % 8 == 0)
                 TRACE_NEWLINE();
@@ -2634,10 +2634,10 @@ static void va_TraceVASliceParameterBufferVVC(
     va_TraceMsg(trace_ctx, "\tsh_alf_cc_cb_aps_id = %d\n", p->sh_alf_cc_cb_aps_id);
     va_TraceMsg(trace_ctx, "\tsh_alf_cc_cr_aps_id = %d\n", p->sh_alf_cc_cr_aps_id);
 
-    va_TraceMsg(trace_ctx, "\tsh_num_ref_idx_active_minus1[2]=\n");
+    va_TraceMsg(trace_ctx, "\tNumRefIdxActive[2]=\n");
     va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 2; i++) {
-        va_TracePrint(trace_ctx, "\t%d", p->sh_num_ref_idx_active_minus1[i]);
+        va_TracePrint(trace_ctx, "\t%d", p->NumRefIdxActive[i]);
     }
     va_TracePrint(trace_ctx, "\n");
 
@@ -2894,11 +2894,11 @@ static void va_TraceVAAlfBufferVVC(
     }
     va_TracePrint(trace_ctx, "\n");
 
-    va_TraceMsg(trace_ctx, "\tAlfCoeffL[25][12]=\n");
+    va_TraceMsg(trace_ctx, "\tfiltCoeff[25][12]=\n");
     va_TraceMsg(trace_ctx, "");
     for (i = 0; i < 25; i++) {
         for (j = 0; j < 12; j++) {
-            va_TracePrint(trace_ctx, "\t%d", p->AlfCoeffL[i][j]);
+            va_TracePrint(trace_ctx, "\t%d", p->filtCoeff[i][j]);
             if ((j + 1) % 8 == 0)
                 TRACE_NEWLINE();
         }
