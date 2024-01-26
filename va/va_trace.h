@@ -475,7 +475,6 @@ void va_TracePutSurface(
     unsigned int flags /* de-interlacing flags */
 );
 
-DLL_HIDDEN
 void va_TraceStatus(VADisplay dpy, const char * funcName, VAStatus status);
 
 /** \brief va_TraceEvent

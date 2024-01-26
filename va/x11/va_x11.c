@@ -171,7 +171,7 @@ VAStatus vaPutSurface(
 )
 {
     VADriverContextP ctx;
-
+    VAStatus vaStatus = VA_STATUS_SUCCESS;
     CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
@@ -179,7 +179,9 @@ VAStatus vaPutSurface(
                  destx, desty, destw, desth,
                  cliprects, number_cliprects, flags);
 
-    return ctx->vtable->vaPutSurface(ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
-                                     destx, desty, destw, desth,
-                                     cliprects, number_cliprects, flags);
+    vaStatus = ctx->vtable->vaPutSurface(ctx, surface, (void *)draw, srcx, srcy, srcw, srch,
+                                         destx, desty, destw, desth,
+                                         cliprects, number_cliprects, flags);
+    VA_TRACE_RET(dpy, vaStatus);
+    return vaStatus;
 }
