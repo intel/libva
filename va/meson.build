@@ -115,7 +115,6 @@ if WITH_DRM
       '-DHAVE_VA_X11',
       '-DLIBVA_MAJOR_VERSION=@0@'.format(libva_major_version)
     ]
-    deps += [ x11_dep ]
   endif
 
   install_headers(libva_drm_headers, subdir : 'va')
@@ -168,7 +167,7 @@ if WITH_X11
 
   install_headers(libva_x11_headers, subdir : 'va')
 
-  deps = [ libdrm_dep, x11_dep, xext_dep, xfixes_dep, x11_xcb_dep, xcb_dep, xcb_dri3_dep, libva_dep ]
+  deps = [ libdrm_dep, x11_deps, libva_dep ]
 
   libva_x11 = shared_library(
     'va-x11',

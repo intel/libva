@@ -44,7 +44,6 @@ source_h_priv = \
 
 if USE_X11
 source_c			+= va_drm_auth_x11.c
-AM_CPPFLAGS			+= $(X11_CFLAGS)
 AM_CPPFLAGS			+= -DLIBVA_MAJOR_VERSION=$(LIBVA_MAJOR_VERSION)
 endif
 

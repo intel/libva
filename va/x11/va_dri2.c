@@ -164,7 +164,7 @@ Bool VA_DRI2Connect(Display *dpy, XID window,
     GetReq(DRI2Connect, req);
     req->reqType = info->codes->major_opcode;
     req->dri2ReqType = X_DRI2Connect;
-    req->window = window;
+    req->window = DefaultRootWindow(dpy);
     req->driverType = DRI2DriverDRI;
     if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
         UnlockDisplay(dpy);

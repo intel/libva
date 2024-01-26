@@ -84,50 +84,71 @@ configinc = include_directories('.')
 cc = meson.get_compiler('c')
 dl_dep = cc.find_library('dl', required : false)
 
-WITH_DRM = not get_option('disable_drm') and (host_machine.system() != 'windows')
+backends = ''
+WITH_DRM = (host_machine.system() != 'windows')
+if WITH_DRM
+  backends += ' drm'
+endif
+
+# NOTE: libdrm is required by all non-win32 backends x11 via dri3, glx via x11,
+# wayland via wl_drm and drm. All of these use va_drm_util.c which need libdrm.
 libdrm_dep = dependency('libdrm', version : '>= 2.4.60', required : (host_machine.system() != 'windows'))
 
 WITH_X11 = false
-if get_option('with_x11') != 'no'
-  x11_dep = dependency('x11', required : get_option('with_x11') == 'yes')
-  xext_dep = dependency('xext', required : get_option('with_x11') == 'yes')
-  xfixes_dep = dependency('xfixes', required : get_option('with_x11') == 'yes')
-
-  WITH_X11 = (x11_dep.found() and xext_dep.found() and xfixes_dep.found())
-
-  x11_xcb_dep = dependency('x11-xcb', required : get_option('with_x11') == 'yes')
-  xcb_dep = dependency('xcb', required : get_option('with_x11') == 'yes')
-  xcb_dri3_dep = dependency('xcb-dri3', required : get_option('with_x11') == 'yes')
-  WITH_X11 = (WITH_X11 and x11_xcb_dep.found() and xcb_dep.found() and xcb_dri3_dep.found())
+if not get_option('with_x11').disabled()
+  x11_deps = [
+    dependency('x11', required : get_option('with_x11')),
+    dependency('xext', required : get_option('with_x11')),
+    dependency('xfixes', required : get_option('with_x11')),
+    dependency('x11-xcb', required : get_option('with_x11')),
+    dependency('xcb', required : get_option('with_x11')),
+    dependency('xcb-dri3', required : get_option('with_x11')),
+  ]
+  WITH_X11 = true
+  foreach d : x11_deps
+    WITH_X11 = WITH_X11 and d.found()
+  endforeach
+  if WITH_X11
+    backends += ' x11'
+  endif
 endif
 
-if not WITH_X11 and get_option('with_glx') == 'yes'
+if not WITH_X11 and get_option('with_glx').enabled()
   error('VA/GLX explicitly enabled, but VA/X11 isn\'t built')
 endif
 
 WITH_GLX = false
-if WITH_X11 and get_option('with_glx') != 'no'
-  gl_dep = dependency('gl', required : get_option('with_glx') == 'yes')
+if WITH_X11 and not get_option('with_glx').disabled()
+  gl_dep = dependency('gl', required : get_option('with_glx'))
   WITH_GLX = gl_dep.found()
+  if WITH_GLX
+    backends += ' glx'
+  endif
 endif
 
 WITH_WAYLAND = false
-if get_option('with_wayland') != 'no'
+if not get_option('with_wayland').disabled()
   wayland_dep = dependency('wayland-client', version : '>= 1.11.0',
-			   required : get_option('with_wayland') == 'yes')
+                           required : get_option('with_wayland'))
   wayland_scanner_dep = dependency('wayland-scanner', version : '>= 1.15',
-                                   required : get_option('with_wayland') == 'yes',
+                                   required : get_option('with_wayland'),
                                    native : true)
   if wayland_scanner_dep.found()
     wl_scanner = find_program(wayland_scanner_dep.get_variable(pkgconfig: 'wayland_scanner'))
   endif
   WITH_WAYLAND = wayland_dep.found() and wayland_scanner_dep.found()
+  if WITH_WAYLAND
+    backends += ' wayland'
+  endif
 endif
 
 WITH_WIN32 = false
 libwin32_dep = []
-if get_option('with_win32') != 'no'
-    WITH_WIN32 = (host_machine.system() == 'windows')
+if not get_option('with_win32').disabled()
+  WITH_WIN32 = (host_machine.system() == 'windows')
+  if WITH_WIN32
+    backends += ' win32'
+  endif
 endif
 
 if (not WITH_DRM and not WITH_X11 and not WITH_WAYLAND and not WITH_WIN32)
@@ -152,8 +173,15 @@ add_project_arguments(c_args, language: ['c'])
 subdir('va')
 subdir('pkgconfig')
 
-doxygen = find_program('doxygen', required: false)
+doxygen = find_program('doxygen', required : get_option('enable_docs'))
 
-if get_option('enable_docs') and doxygen.found()
+if get_option('enable_docs')
   subdir('doc')
 endif
+
+summary({
+  'Installation prefix' : get_option('prefix'),
+  'Default driver path' : driverdir,
+  'Extra window systems' : backends,
+  'Build documentation' : get_option('enable_docs'),
+}, bool_yn : true)

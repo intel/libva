@@ -25,8 +25,22 @@
 #define _GNU_SOURCE 1
 #include "sysdeps.h"
 #include <dlfcn.h>
-#include <X11/Xlib.h>
+#include <stdint.h>
 #include "va_drm_auth_x11.h"
+
+/*
+ * A few ABI compabible defines and typedefs to avoid pulling Xlib.h
+ *
+ * Pulling the header, we get a plethora of Xlib internals, which we don't want
+ * or need. More importantly, it popputes the namespace which can lead to API or
+ * ABI issues. Other projects have done this for a while, for the exact same
+ * reasons.
+ */
+#define Display void
+#define None 0
+typedef uint32_t XID;
+typedef XID Window;
+typedef int Bool;
 
 typedef struct drm_auth_x11             DRMAuthX11;
 typedef struct drm_auth_x11_vtable      DRMAuthX11VTable;
@@ -103,7 +117,7 @@ drm_auth_x11_init(DRMAuthX11 *auth)
     if (!auth->display)
         return false;
 
-    auth->window = DefaultRootWindow(auth->display);
+    auth->window = None;
     return true;
 }
 
