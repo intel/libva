@@ -151,10 +151,11 @@ if WITH_X11
 
   libva_dri_headers = [
     'x11/va_dri2.h',
+    'x11/va_dri3.h',
     'x11/va_dricommon.h',
   ]
 
-  libva_x11_headers = ['va_x11.h'] + libva_dri_headers
+  libva_x11_headers = ['va_x11.h'] + libva_dri_headers + ['va_trace.h']
 
   libva_headers_subproject += libva_dri_headers
 
