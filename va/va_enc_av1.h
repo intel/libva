@@ -656,8 +656,12 @@ typedef struct  _VAEncPictureParameterBufferAV1 {
              * Otherwise disable palette encoding.
              */
             uint32_t    palette_mode_enable             : 1;
+            /** \brief Corresponds to AV1 syntax element of the same name. */
+            uint32_t    allow_screen_content_tools      : 1;
+            /** \brief Corresponds to AV1 syntax element of the same name. */
+            uint32_t    force_integer_mv                : 1;
             /** \brief Reserved bytes for future use, must be zero. */
-            uint32_t    reserved                        : 18;
+            uint32_t    reserved                        : 16;
         } bits;
         uint32_t value;
     } picture_flags;
