@@ -1699,6 +1699,15 @@ typedef enum {
      * when importing an existing buffer.
      */
     VASurfaceAttribDRMFormatModifiers,
+    /** \brief width and height log2 aligment in pixels (int, read-only)
+     *
+     * For special HW requirement used in some codecs, if
+     * VASurfaceAttribAlignmentSize is not implemented in the driver, then
+     * the surface_width and surface_height should keep the original logic
+     * without any modification, this is an add-on requirement to
+     * surface_width and surface_height.
+     */
+    VASurfaceAttribAlignmentSize,
     /** \brief Number of surface attributes. */
     VASurfaceAttribCount
 } VASurfaceAttribType;
@@ -1727,6 +1736,20 @@ typedef struct _VASurfaceAttrib {
 /** \brief User pointer memory type is supported. */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_USER_PTR     0x00000004
 /**@}*/
+/**
+ * \brief VASurfaceAttribAlignmentStruct structure for
+ * the VASurfaceAttribAlignmentSize attribute.
+ */
+typedef union _VASurfaceAttribAlignmentStruct {
+    struct {
+        /** \brief log2 width aligment */
+        uint32_t log2_width_alignment  : 4;
+        /** \brief log2 height aligment */
+        uint32_t log2_height_alignment : 4;
+        uint32_t reserved              : 24;
+    } bits;
+    uint32_t value;
+} VASurfaceAttribAlignmentStruct;
 
 /**
  * \brief VASurfaceAttribExternalBuffers structure for
