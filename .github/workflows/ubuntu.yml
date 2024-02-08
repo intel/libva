@@ -1,5 +1,8 @@
 name: ubuntu
 
+permissions:
+  contents: read
+
 on: [push, pull_request]
 
 env:

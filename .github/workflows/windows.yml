@@ -1,5 +1,8 @@
 name: windows
 
+permissions:
+  contents: read
+
 on: [push, pull_request]
 
 jobs:
