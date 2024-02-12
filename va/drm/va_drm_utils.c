@@ -72,6 +72,9 @@ VA_DRM_GetDriverNames(VADriverContextP ctx, char **drivers, unsigned *num_driver
     char *drm_driver;
     unsigned count = 0;
 
+    if (!drm_state || drm_state->fd < 0)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
+
     drm_driver = va_DRM_GetDrmDriverName(drm_state->fd);
     if (!drm_driver)
         return VA_STATUS_ERROR_UNKNOWN;
