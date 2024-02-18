@@ -91,7 +91,7 @@ struct drm_state {
  *
  * Used with VADRMPRIME3SurfaceDescriptor.
  */
-#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3      0x80000000
+#define VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME_3      0x08000000
 
 /**
  * \brief External buffer descriptor for a DRM PRIME surface.
