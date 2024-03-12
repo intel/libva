@@ -1,5 +1,28 @@
-libva NEWS -- summary of user visible changes.  2023-09-14
-Copyright (C) 2009-2023 Intel Corporation
+libva NEWS -- summary of user visible changes.  2024-03-12
+Copyright (C) 2009-2024 Intel Corporation
+
+version 2.21.0 - 12.Mar.2024
+* va: Add allow_content_tools and force_intger_mv to AV1 enc
+* va: add VASurfaceAttribAlignmentSize
+* va: Re-add drm_state and fd checks to VA_DRM_GetDriverNames
+* va: export symbol vaGetLibFunc for Windows
+* va: Add PRIME3 defination and correct the value
+* va: add driver name map for new intel KMD xe
+* va: export symbol vaMapBuffer2 for Windows
+* va: add new interface vaMapBuffer2 for map operation optimization
+* va: Add VAConfigAttribEncMaxTileRows and VAConfigAttribEncMaxTileCols
+* va: fix handling when all wayland backends fail
+* va_trace:add return value trace for vaPutSurfaces
+* ci: harden permissions for all github workflows
+* ci: update to vmactions/freebsd-vm from v0 to v1
+* ci: windows.yml: Add windows-msvc-debug
+* meson: create dist archives suitable for building with configure, too
+* autogen.sh: successfully detect if the autoreconf program is installed
+* build(deps): bump actions/upload-pages-artifact from 2 to 3
+* build(deps): bump actions/deploy-pages from 3 to 4
+* build(deps): bump actions/setup-python from 4 to 5
+* build(deps): bump actions/deploy-pages from 2 to 3
+* win32: Fix debug build break
 
 version 2.20.0 - 14.Sep.2023
 * va: drop no longer applicable vaGetDriverNames check
