@@ -3642,6 +3642,7 @@ static void va_TraceVAEncMiscParameterBuffer(
 
         va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterBufferQualityLevel\n");
         va_TraceMsg(trace_ctx, "\tquality_level = %d\n", p->quality_level);
+        va_TraceMsg(trace_ctx, "\ttuning_mode = %d\n", p->tuning_mode);
         break;
     }
     case VAEncMiscParameterTypeROI: {
