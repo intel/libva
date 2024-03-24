@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2009-2011 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2009-2020 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -5761,6 +5761,66 @@ va_TraceVAProcPipelineParameterBuffer(
                 va_TraceMsg(trace_ctx, "\t    backward_references[%d] = (NULL)\n", i);
             }
         }
+    }
+
+    va_TraceMsg(trace_ctx, "\t  rotation_state = 0x%08x\n", p->rotation_state);
+
+    if (p->blend_state) {
+        va_TraceMsg(trace_ctx, "\t  VABlendState\n");
+
+        va_TraceMsg(trace_ctx, "\t    flags = 0x%04x\n", p->blend_state->flags);
+        va_TraceMsg(trace_ctx, "\t    global_alpha = %f\n", p->blend_state->global_alpha);
+        va_TraceMsg(trace_ctx, "\t    min_luma = %f\n", p->blend_state->min_luma);
+        va_TraceMsg(trace_ctx, "\t    max_luma = %f\n", p->blend_state->max_luma);
+    } else {
+        va_TraceMsg(trace_ctx, "\t  VABlendState = (NULL)\n");
+    }
+
+    va_TraceMsg(trace_ctx, "\t  mirror_state = 0x%08x\n", p->mirror_state);
+
+    va_TraceMsg(trace_ctx, "\t  num_additional_outputs = 0x%08x\n", p->num_additional_outputs);
+    for (i = 0; i < p->num_additional_outputs; i++) {
+        va_TraceMsg(trace_ctx, "\t    additional_outputs[%d] = 0x%08x\n", i, p->additional_outputs[i]);
+    }
+
+    va_TraceMsg(trace_ctx, "\t  input_surface_flag = 0x%08x\n", p->input_surface_flag);
+    va_TraceMsg(trace_ctx, "\t  output_surface_flag = 0x%08x\n", p->output_surface_flag);
+
+    va_TraceMsg(trace_ctx, "\t  input_color_properties\n");
+    va_TraceMsg(trace_ctx, "\t    chroma_sample_location = 0x%08x\n", p->input_color_properties.chroma_sample_location);
+    va_TraceMsg(trace_ctx, "\t    color_range = 0x%08x\n", p->input_color_properties.color_range);
+    va_TraceMsg(trace_ctx, "\t    colour_primaries = %d\n", p->input_color_properties.colour_primaries);
+    va_TraceMsg(trace_ctx, "\t    transfer_characteristics = %d\n", p->input_color_properties.transfer_characteristics);
+    va_TraceMsg(trace_ctx, "\t    matrix_coefficients = %d\n", p->input_color_properties.matrix_coefficients);
+
+    va_TraceMsg(trace_ctx, "\t  output_color_properties\n");
+    va_TraceMsg(trace_ctx, "\t    chroma_sample_location = 0x%08x\n", p->output_color_properties.chroma_sample_location);
+    va_TraceMsg(trace_ctx, "\t    color_range = 0x%08x\n", p->output_color_properties.color_range);
+    va_TraceMsg(trace_ctx, "\t    colour_primaries = %d\n", p->output_color_properties.colour_primaries);
+    va_TraceMsg(trace_ctx, "\t    transfer_characteristics = %d\n", p->output_color_properties.transfer_characteristics);
+    va_TraceMsg(trace_ctx, "\t    matrix_coefficients = %d\n", p->output_color_properties.matrix_coefficients);
+
+    va_TraceMsg(trace_ctx, "\t  processing_mode = %d\n", p->processing_mode);
+    if (p->output_hdr_metadata) {
+        va_TraceMsg(trace_ctx, "\t  output_hdr_metadata\n");
+
+        va_TraceMsg(trace_ctx, "\t    metadata_type = %d\n", p->output_hdr_metadata->metadata_type);
+        va_TraceMsg(trace_ctx, "\t    metadata_size = %d\n", p->output_hdr_metadata->metadata_size);
+        if (p->output_hdr_metadata->metadata_type == VAProcHighDynamicRangeMetadataHDR10) {
+            va_TraceMsg(trace_ctx, "\t  metadata\n");
+
+            VAHdrMetaDataHDR10* hdr10_metadata = (VAHdrMetaDataHDR10*)p->output_hdr_metadata->metadata;
+            va_TraceMsg(trace_ctx, "\t    display_primaries_x[green, blue, red] = %d, %d, %d\n", hdr10_metadata->display_primaries_x[0], hdr10_metadata->display_primaries_x[1], hdr10_metadata->display_primaries_x[2]);
+            va_TraceMsg(trace_ctx, "\t    display_primaries_y[green, blue, red] = %d, %d, %d\n", hdr10_metadata->display_primaries_y[0], hdr10_metadata->display_primaries_y[1], hdr10_metadata->display_primaries_y[2]);
+            va_TraceMsg(trace_ctx, "\t    white_point_x = %d\n", hdr10_metadata->white_point_x);
+            va_TraceMsg(trace_ctx, "\t    white_point_y = %d\n", hdr10_metadata->white_point_y);
+            va_TraceMsg(trace_ctx, "\t    max_display_mastering_luminance = %d\n", hdr10_metadata->max_display_mastering_luminance);
+            va_TraceMsg(trace_ctx, "\t    min_display_mastering_luminance = %d\n", hdr10_metadata->min_display_mastering_luminance);
+            va_TraceMsg(trace_ctx, "\t    max_content_light_level = %d\n", hdr10_metadata->max_content_light_level);
+            va_TraceMsg(trace_ctx, "\t    max_pic_average_light_level = %d\n", hdr10_metadata->max_pic_average_light_level);
+      }
+    } else {
+        va_TraceMsg(trace_ctx, "\t  output_hdr_metadata = (NULL)\n");
     }
 
     /* FIXME: add other info later */
