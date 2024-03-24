@@ -287,23 +287,6 @@ VAStatus vaBufferInfo(
     unsigned int *num_elements  /* out */
 );
 
-VAStatus vaLockSurface(VADisplay dpy,
-                       VASurfaceID surface,
-                       unsigned int *fourcc, /* following are output argument */
-                       unsigned int *luma_stride,
-                       unsigned int *chroma_u_stride,
-                       unsigned int *chroma_v_stride,
-                       unsigned int *luma_offset,
-                       unsigned int *chroma_u_offset,
-                       unsigned int *chroma_v_offset,
-                       unsigned int *buffer_name,
-                       void **buffer
-                      );
-
-VAStatus vaUnlockSurface(VADisplay dpy,
-                         VASurfaceID surface
-                        );
-
 static int get_valid_config_idx(
     struct va_trace *pva_trace,
     VAConfigID config_id)
