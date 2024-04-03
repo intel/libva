@@ -155,7 +155,7 @@ if WITH_X11
     'x11/va_dricommon.h',
   ]
 
-  libva_x11_headers = ['va_x11.h'] + libva_dri_headers + ['va_trace.h']
+  libva_x11_headers = ['va_x11.h'] + libva_dri_headers
 
   libva_headers_subproject += libva_dri_headers
 
@@ -165,6 +165,7 @@ if WITH_X11
     'x11/va_dri3.h',
     'x11/va_fglrx.h',
     'x11/va_nvctrl.h',
+    'va_trace.h',
   ]
 
   install_headers(libva_x11_headers, subdir : 'va')
