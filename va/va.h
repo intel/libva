@@ -1097,11 +1097,14 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CBR                       0x00000002
 /** \brief Variable bitrate. */
 #define VA_RC_VBR                       0x00000004
-/** \brief Video conference mode. */
+/** \brief Video conference mode.
+ *  special VBR mode designed to achieve better bit accuracy and quality
+ *  for video conference like contents */
 #define VA_RC_VCM                       0x00000008
 /** \brief Constant QP. */
 #define VA_RC_CQP                       0x00000010
-/** \brief Variable bitrate with peak rate higher than average bitrate. */
+/** \brief Variable bitrate with peak rate higher than average bitrate.
+ *  so , it allow HRD violation to get better quality */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
 /** \brief Intelligent Constant Quality. Provided an initial ICQ_quality_factor,
  *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
