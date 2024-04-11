@@ -1107,7 +1107,8 @@ typedef struct _VAConfigAttrib {
  *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
 #define VA_RC_ICQ           0x00000040
 /** \brief Macroblock based rate control.  Per MB control is decided
- *  internally in the encoder. It may be combined with other RC modes, except CQP. */
+ *  internally in the encoder. It may be combined with other RC modes, except CQP.
+ *  @deprecated , it is decided internally in driver, driver should enable/disable it internally*/
 #define VA_RC_MB                        0x00000080
 /** \brief Constant Frame Size, it is used for small tolerent  */
 #define VA_RC_CFS                       0x00000100
