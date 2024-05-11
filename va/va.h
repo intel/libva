@@ -4175,6 +4175,24 @@ VAStatus vaEndPicture(
 );
 
 /**
+ * Same behavior as vaEndPicture except a sync fd list for synchronizations.
+ * if sync_num = 0 or sync_fds == NULL, the behavior should be same as vaEndPicture.
+ * if sync_num >= 1, the sync_fds[0] should be the fence out, this fd(or the fence
+ * behind this fd)  will be overridden by this call, and will be signaled to indicate
+ * current frame finishing. sync_num = 1 means only fence out is needed.
+ * sync_fds[1] to sync_fds[1 ~ sync_num-1] is fence in, current HW execution
+ * will be blocked until all these fences are signaled.
+ * these fence fds is file descriptor of dma_fence.
+ */
+
+VAStatus vaEndPicture2(
+    VADisplay dpy,
+    VAContextID context,
+    int32_t *sync_fds,
+    int32_t sync_num
+);
+
+/**
  * Make the end of rendering for a pictures in contexts passed with submission.
  * The server should start processing all pending operations for contexts.
  * All contexts passed should be associated through vaMFAddContext

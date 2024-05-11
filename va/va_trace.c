@@ -5943,6 +5943,8 @@ void va_TraceRenderPicture(
 void va_TraceEndPicture(
     VADisplay dpy,
     VAContextID context,
+    int32_t *sync_fds,
+    int32_t sync_num,
     int endpic_done
 )
 {
@@ -5952,6 +5954,12 @@ void va_TraceEndPicture(
 
     va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
     va_TraceMsg(trace_ctx, "\trender_targets = 0x%08x\n", trace_ctx->trace_rendertarget);
+    if (sync_num && sync_fds) {
+        va_TraceMsg(trace_ctx, "\t fence out = %d \n", sync_fds[0]);
+        for (int i = 1; i < sync_num && sync_num > 1; i ++) {
+            va_TraceMsg(trace_ctx, "\t fence_in index %d  = %d \n", i - 1, sync_fds[i]);
+        }
+    }
     va_TraceMsg(trace_ctx, NULL);
 }
 
