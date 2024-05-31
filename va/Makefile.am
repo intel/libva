@@ -32,7 +32,6 @@ LDADD = \
 
 libva_source_c = \
 	va.c			\
-	va_compat.c		\
 	va_str.c		\
 	va_trace.c		\
 	$(NULL)
@@ -75,7 +74,6 @@ libva_source_h_priv = \
 
 libva_ldflags = \
 	$(LDADD) -no-undefined	\
-	-Wl,-version-script,${srcdir}/libva.syms \
 	$(NULL)
 
 libva_cflags = \
@@ -91,7 +89,6 @@ noinst_HEADERS			= $(libva_source_h_priv)
 libva_la_SOURCES		= $(libva_source_c)
 libva_la_CFLAGS			= $(libva_cflags)
 libva_la_LDFLAGS		= $(libva_ldflags)
-libva_la_DEPENDENCIES		= libva.syms
 libva_la_LIBADD			= $(LIBVA_LIBS)
 
 if USE_DRM
@@ -146,7 +143,6 @@ DISTCLEANFILES = \
 	$(NULL)
 
 EXTRA_DIST = \
-	libva.syms		\
 	va_version.h.in		\
 	meson.build		\
         libva.def               \
