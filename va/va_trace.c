@@ -5572,6 +5572,46 @@ static void va_TraceVC1Buf(
     }
 }
 
+static void va_TraceAVS2Buf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    switch (type) {
+
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    }
+}
+
+static void va_TraceAVSBuf(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *pbuf
+)
+{
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    switch (type) {
+
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+    }
+}
+
 static void
 va_TraceProcFilterParameterBufferDeinterlacing(
     VADisplay dpy,
@@ -5929,6 +5969,20 @@ void va_TraceRenderPicture(
                 va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
 
                 va_TraceAV1Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size * j);
+            }
+            break;
+        case VAProfileAVSJizhun:
+        case VAProfileAVSGuangdian:
+            for (j = 0; j < num_elements; j++) {
+                va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
+                va_TraceAVSBuf(dpy, context, buffers[i], type, size, num_elements, pbuf + size * j);
+            }
+            break;
+        case VAProfileAVS2Main:
+        case VAProfileAVS2Main10:
+            for (j = 0; j < num_elements; j++) {
+                va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
+                va_TraceAVS2Buf(dpy, context, buffers[i], type, size, num_elements, pbuf + size * j);
             }
             break;
         default:
