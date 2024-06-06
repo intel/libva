@@ -158,4 +158,3 @@ if get_option('enable_docs') and doxygen.found()
   subdir('doc')
 endif
 
-meson.add_dist_script('./autogen.sh')
