@@ -1813,6 +1813,10 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /** \brief Surface used for export to third-party APIs, e.g. via
  *  vaExportSurfaceHandle(). */
 #define VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT     0x00000020
+/** \brief Surface read by decoder or video post-processing.
+ * use to set DRM_XE_GEM_CREATE_FLAG_SCANOUT which is required
+ * for XE DMA DRM render case */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_SCANOUT   0x00000040
 
 /**@}*/
 
