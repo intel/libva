@@ -84,6 +84,15 @@ configinc = include_directories('.')
 cc = meson.get_compiler('c')
 dl_dep = cc.find_library('dl', required : false)
 
+if cc.get_argument_syntax() == 'gcc'
+  add_project_arguments(
+    cc.get_supported_arguments([
+      '-Werror=missing-prototypes',
+    ]),
+    language: ['c'],
+  )
+endif
+
 WITH_DRM = not get_option('disable_drm') and (host_machine.system() != 'windows')
 libdrm_dep = dependency('libdrm', version : '>= 2.4.75', required : (host_machine.system() != 'windows'))
 
