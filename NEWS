@@ -1,5 +1,12 @@
-libva NEWS -- summary of user visible changes.  2024-03-12
+libva NEWS -- summary of user visible changes.  2024-06-20
 Copyright (C) 2009-2024 Intel Corporation
+
+version 2.22.0 - 20.Jun.2024
+* va:Add VVC decode LibVA interface.
+* va: fix --version-script detection for lld >= 17
+* wayland: add support for linux-dmabuf
+* meson:remove autogen.sh from the meson script
+* trace: Add bit_depth capturing in trace log
 
 version 2.21.0 - 12.Mar.2024
 * va: Add allow_content_tools and force_intger_mv to AV1 enc
