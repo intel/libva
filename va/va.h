@@ -1053,6 +1053,15 @@ typedef enum {
      * columns supported for encoding with tile support.
      */
     VAConfigAttribEncMaxTileCols        = 57,
+    /**
+     * \brief Encoding tuning mode attribute. Read-only.
+     *
+     * This attribute conveys whether the driver supports different tuning modes
+     * for encoding. The attribute value is any combination of VA_ENC_TUNING_MODE_XXX.
+     *
+     * The tuning mode is passed to the driver using VAEncMiscParameterBufferQualityLevel.
+     */
+    VAConfigAttribEncTuningMode         = 58,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -2764,6 +2773,13 @@ typedef struct _VAEncMiscParameterBufferMultiPassFrameSize {
     unsigned long           va_reserved[VA_PADDING_LOW];
 } VAEncMiscParameterBufferMultiPassFrameSize;
 
+/** \brief Default tuning mode */
+#define VA_ENC_TUNING_MODE_DEFAULT                      0x00000000
+/** \brief Compromise quality to lower the latency of video encode operations */
+#define VA_ENC_TUNING_MODE_LOW_LATENCY                  0x00000001
+/** \brief Compromise quality for lowest latency of video encode operations */
+#define VA_ENC_TUNING_MODE_ULTRA_LOW_LATENCY            0x00000002
+
 /**
  * \brief Encoding quality level.
  *
@@ -2774,6 +2790,8 @@ typedef struct _VAEncMiscParameterBufferMultiPassFrameSize {
  * attribute. A lower value means higher quality, and a value of 1 represents the highest
  * quality. The quality level setting is used as a trade-off between quality and speed/power
  * consumption, with higher quality corresponds to lower speed and higher power consumption.
+ * The number of supported tuning modes can be queried through the VAConfigAttribEncTuningMode
+ * attribute.
  */
 typedef struct _VAEncMiscParameterBufferQualityLevel {
     /** \brief Encoding quality level setting. When set to 0, default quality
@@ -2781,8 +2799,11 @@ typedef struct _VAEncMiscParameterBufferQualityLevel {
      */
     uint32_t                quality_level;
 
+    /** \brief Encoding tuning mode setting, see VA_ENC_TUNING_MODE_XXX */
+    uint32_t                tuning_mode;
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_LOW];
+    uint32_t                va_reserved[VA_PADDING_LOW - 1];
 } VAEncMiscParameterBufferQualityLevel;
 
 /**
