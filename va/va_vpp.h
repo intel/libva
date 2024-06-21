@@ -989,11 +989,11 @@ typedef struct _VAProcPipelineParameterBuffer {
     VABufferID         *filters;
     /** \brief Actual number of filters. */
     uint32_t           num_filters;
-    /** \brief Array of forward reference frames (past frames). */
+    /** \brief Array of forward reference frames (future frames by default). */
     VASurfaceID        *forward_references;
     /** \brief Number of forward reference frames that were supplied. */
     uint32_t           num_forward_references;
-    /** \brief Array of backward reference frames (future frames). */
+    /** \brief Array of backward reference frames (past frames by default). */
     VASurfaceID        *backward_references;
     /** \brief Number of backward reference frames that were supplied. */
     uint32_t           num_backward_references;
@@ -1126,10 +1126,21 @@ typedef struct _VAProcPipelineParameterBuffer {
      * If output_metadata is NULL, then output default to SDR.
      */
     VAHdrMetaData          *output_hdr_metadata;
+    /**
+     * \brief Swap references.
+     *
+     * There are different understanding of forward references(could be past frames or future frames)
+     * and backward references (could be past frames or future frames).
+     *
+     * This flag allows the user to configure the reference as past or future frames.
+     * - Value 0: by default, forward_references mean future frames, backward_references mean past frames
+     * - Value 1: swap, forward_references mean past frames, backward_references mean future frames
+     */
+    uint8_t                swap_references;
 
     /** \brief Reserved bytes for future use, must be zero */
 #if defined(__AMD64__) || defined(__x86_64__) || defined(__amd64__)|| defined(__LP64__)
-    uint32_t                va_reserved[VA_PADDING_LARGE - 16];
+    uint32_t                va_reserved[VA_PADDING_LARGE - 17];
 #else
     uint32_t                va_reserved[VA_PADDING_LARGE - 13];
 #endif
