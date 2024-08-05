@@ -25,8 +25,8 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-LIBVA_DRIVERS_PATH_32 := /vendor/lib/dri
-LIBVA_DRIVERS_PATH_64 := /vendor/lib64/dri
+LIBVA_DRIVERS_PATH_32 := /system/lib/dri
+LIBVA_DRIVERS_PATH_64 := /system/lib64/dri
 
 include $(CLEAR_VARS)
 
@@ -51,6 +51,7 @@ LOCAL_CFLAGS_64 += \
 
 LOCAL_CFLAGS := \
 	$(IGNORED_WARNNING) \
+	-DSYSCONFDIR=\"/system/etc\" \
 	-DLOG_TAG=\"libva\"
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
@@ -58,7 +59,6 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/..
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libdl libdrm libcutils liblog
 
@@ -95,7 +95,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := libva-android
-LOCAL_PROPRIETARY_MODULE := true
 
 LOCAL_SHARED_LIBRARIES := libva libdrm liblog
 
