@@ -64,7 +64,7 @@ const char *vaProfileStr(VAProfile profile)
         TOSTR(VAProfileHEVCSccMain444);
         TOSTR(VAProfileAV1Profile0);
         TOSTR(VAProfileAV1Profile1);
-        TOSTR(VAProfileAV1Profile2);
+        TOSTR(VAProfileAV1Profile2_420);
         TOSTR(VAProfileHEVCSccMain444_10);
         TOSTR(VAProfileProtected);
         TOSTR(VAProfileVVCMain10);
