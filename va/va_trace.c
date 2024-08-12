@@ -6775,7 +6775,7 @@ void va_TraceRenderPicture(
             break;
         case VAProfileAV1Profile0:
         case VAProfileAV1Profile1:
-        case VAProfileAV1Profile2:
+        case VAProfileAV1Profile2_420:
             for (j = 0; j < num_elements; j++) {
                 va_TraceMsg(trace_ctx, "\telement[%d] = \n", j);
 
