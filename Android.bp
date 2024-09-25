@@ -18,6 +18,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+package {
+    default_applicable_licenses: ["external_intel_libva_license"],
+}
+
+license {
+    name: "external_intel_libva_license",
+    visibility: [":__subpackages__"],
+    license_text: [
+        "COPYING",
+    ],
+}
+
+sh_binary_host {
+    name: "libva_gen_version_script",
+    src: "build/gen_version.sh",
+}
+
+genrule {
+    name: "libva_gen_version",
+    srcs: [
+        "configure.ac",
+        "va/va_version.h.in",
+    ],
+    tools: [
+        "libva_gen_version_script",
+    ],
+    out: ["va/va_version.h"],
+    cmd: "$(location libva_gen_version_script) " +
+         "$$(dirname $(location configure.ac)) " +
+         "$(location va/va_version.h.in) > $(out)",
+}
+
 cc_library_headers {
     name: "libva_headers",
 
@@ -27,7 +59,20 @@ cc_library_headers {
         "va/drm"
     ],
 
+    generated_headers: [
+        "libva_gen_version",
+    ],
+    export_generated_headers: [
+        "libva_gen_version",
+    ],
+
     vendor: true,
+    enabled: false,
+    arch: {
+        x86_64: {
+            enabled: true,
+        },
+    },
 }
 
 cc_library_shared {
@@ -41,16 +86,18 @@ cc_library_shared {
     ],
 
     local_include_dirs: [
-        ".",
         "va"
     ],
 
-    header_libs: [
-        "libutils_headers",
+    generated_headers: [
+        "libva_gen_version",
+    ],
+    export_generated_headers: [
+        "libva_gen_version",
     ],
 
-    export_include_dirs: [
-        ".",
+    header_libs: [
+        "liblog_headers",
     ],
 
     srcs: [
@@ -64,29 +111,24 @@ cc_library_shared {
 
     cflags: [
         "-Werror",
-        "-Wno-error",
+        "-Winvalid-pch",
         "-DSYSCONFDIR=\"/vendor/etc\"",
         "-DLOG_TAG=\"libva\"",
     ],
 
     arch: {
-        x86: {
-            cflags: ["-DVA_DRIVERS_PATH=\"/vendor/lib\""],
-        },
         x86_64: {
             cflags: ["-DVA_DRIVERS_PATH=\"/vendor/lib64\""],
+            enabled: true,
         },
     },
 
     vendor: true,
+    enabled: false,
 }
 
 cc_library_shared {
     name: "libva-android",
-
-    static_libs: [
-        "libarect",
-    ],
 
     shared_libs: [
         "libva",
@@ -99,24 +141,22 @@ cc_library_shared {
         "va/drm",
     ],
 
-    header_libs: [
-        "libnativebase_headers",
-        "libutils_headers",
-    ],
-
-    include_dirs: [
-    ],
-
     srcs: [
         "va/android/va_android.cpp",
         "va/drm/va_drm_utils.c",
     ],
 
     cflags: [
-        "-Wall",
         "-Werror",
-        "-Wno-error",
+        "-Winvalid-pch",
+        "-DLOG_TAG=\"libva-android\"",
     ],
 
     vendor: true,
+    enabled: false,
+    arch: {
+        x86_64: {
+            enabled: true,
+        },
+    },
 }
