@@ -3585,6 +3585,11 @@ typedef struct _VAPictureH264 {
 #define VA_PICTURE_H264_BOTTOM_FIELD        0x00000004
 #define VA_PICTURE_H264_SHORT_TERM_REFERENCE    0x00000008
 #define VA_PICTURE_H264_LONG_TERM_REFERENCE 0x00000010
+/** \brief Non existing picture
+ * This flag indicates that the picture is marked
+ * as “non-existing” (spec section 8.2.5.2)
+ */
+#define VA_PICTURE_H264_NON_EXISTING        0x00000020
 
 /** H.264 Picture Parameter Buffer */
 /*
