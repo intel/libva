@@ -36,18 +36,23 @@ sh_binary_host {
 }
 
 genrule {
-    name: "libva_gen_version",
+    name: "libva_gen_headers",
     srcs: [
         "configure.ac",
         "va/va_version.h.in",
+        "va/drm/va_drm.h",
     ],
     tools: [
         "libva_gen_version_script",
     ],
-    out: ["va/va_version.h"],
+    out: [
+        "va/va_version.h",
+        "va/va_drm.h",
+    ],
     cmd: "$(location libva_gen_version_script) " +
-         "$$(dirname $(location configure.ac)) " +
-         "$(location va/va_version.h.in) > $(out)",
+        "$$(dirname $(location configure.ac)) " +
+        "$(location va/va_version.h.in) > $(location va/va_version.h);" +
+        "cp $(location va/drm/va_drm.h) $(location va/va_drm.h)",
 }
 
 cc_library_headers {
@@ -56,14 +61,14 @@ cc_library_headers {
     export_include_dirs: [
         ".",
         "va",
-        "va/drm"
+        "va/drm",
     ],
 
     generated_headers: [
-        "libva_gen_version",
+        "libva_gen_headers",
     ],
     export_generated_headers: [
-        "libva_gen_version",
+        "libva_gen_headers",
     ],
 
     vendor: true,
@@ -86,14 +91,17 @@ cc_library_shared {
     ],
 
     local_include_dirs: [
-        "va"
+        "va",
     ],
 
     generated_headers: [
-        "libva_gen_version",
+        "libva_gen_headers",
     ],
     export_generated_headers: [
-        "libva_gen_version",
+        "libva_gen_headers",
+    ],
+    export_include_dirs: [
+        ".",
     ],
 
     header_libs: [
@@ -139,6 +147,15 @@ cc_library_shared {
     local_include_dirs: [
         "va",
         "va/drm",
+    ],
+    generated_headers: [
+        "libva_gen_headers",
+    ],
+    export_generated_headers: [
+        "libva_gen_headers",
+    ],
+    export_include_dirs: [
+        ".",
     ],
 
     srcs: [
