@@ -44,7 +44,7 @@ enum {
     /** \brief VA/GLX API is used, through vaGetDisplayGLX() entry-point. */
     VA_DISPLAY_GLX      = (VA_DISPLAY_X11 | (1 << 0)),
     /** \brief VA/Android API is used, through vaGetDisplay() entry-point. */
-    VA_DISPLAY_ANDROID  = 0x20,
+    VA_DISPLAY_ANDROID va_deprecated_enum = 0x20,
     /** \brief VA/DRM API is used, through vaGetDisplayDRM() entry-point. */
     VA_DISPLAY_DRM      = 0x30,
     /** \brief VA/DRM API is used, with a render-node device path */

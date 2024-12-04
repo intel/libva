@@ -31,19 +31,4 @@
 /** \brief Android ION buffer memory type. */
 #define VA_SURFACE_ATTRIB_MEM_TYPE_ANDROID_ION      0x00200000
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/*
- * Returns a suitable VADisplay for VA API
- */
-VADisplay vaGetDisplay(
-    void *android_dpy
-);
-
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* _VA_ANDROID_H_ */

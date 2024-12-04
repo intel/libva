@@ -120,6 +120,7 @@ cc_library_shared {
     cflags: [
         "-Werror",
         "-Winvalid-pch",
+        "-DANDROID",
         "-DSYSCONFDIR=\"/vendor/etc\"",
         "-DLOG_TAG=\"libva\"",
     ],
@@ -133,47 +134,4 @@ cc_library_shared {
 
     vendor: true,
     enabled: false,
-}
-
-cc_library_shared {
-    name: "libva-android",
-
-    shared_libs: [
-        "libva",
-        "libdrm",
-        "liblog",
-    ],
-
-    local_include_dirs: [
-        "va",
-        "va/drm",
-    ],
-    generated_headers: [
-        "libva_gen_headers",
-    ],
-    export_generated_headers: [
-        "libva_gen_headers",
-    ],
-    export_include_dirs: [
-        ".",
-    ],
-
-    srcs: [
-        "va/android/va_android.cpp",
-        "va/drm/va_drm_utils.c",
-    ],
-
-    cflags: [
-        "-Werror",
-        "-Winvalid-pch",
-        "-DLOG_TAG=\"libva-android\"",
-    ],
-
-    vendor: true,
-    enabled: false,
-    arch: {
-        x86_64: {
-            enabled: true,
-        },
-    },
 }
