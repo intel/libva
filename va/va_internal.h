@@ -45,6 +45,21 @@ VADisplayContextP va_newDisplayContext(void);
 
 VADriverContextP va_newDriverContext(VADisplayContextP dctx);
 
+DLL_HIDDEN
+VAStatus vaBufferInfo(VADisplay dpy, VAContextID context, VABufferID buf_id,
+                      VABufferType *type, unsigned int *size,
+                      unsigned int *num_elements);
+
+DLL_HIDDEN
+VAStatus vaLockSurface(VADisplay dpy, VASurfaceID surface, unsigned int *fourcc,
+                       unsigned int *luma_stride, unsigned int *chroma_u_stride,
+                       unsigned int *chroma_v_stride, unsigned int *luma_offset,
+                       unsigned int *chroma_u_offset, unsigned int *chroma_v_offset,
+                       unsigned int *buffer_name, void **buffer);
+
+DLL_HIDDEN
+VAStatus vaUnlockSurface(VADisplay dpy, VASurfaceID surface);
+
 #ifdef __cplusplus
 }
 #endif
