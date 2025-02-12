@@ -5411,6 +5411,9 @@ static void va_TraceVAPictureParameterBufferAV1(
         va_TraceMsg(trace_ctx, "\t\twm[%d].invalid = %d:\n", i, p->wm[i].invalid);
     }
 
+    va_TraceMsg(trace_ctx, "\tmax_frame_width_minus_1 = %d\n", p->max_frame_width_minus_1);
+    va_TraceMsg(trace_ctx, "\tmax_frame_height_minus_1 = %d\n", p->max_frame_height_minus_1);
+
     va_TraceMsg(trace_ctx, NULL);
 
     return;
