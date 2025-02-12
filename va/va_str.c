@@ -155,6 +155,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
         TOSTR(VAConfigAttribEncMaxTileRows);
         TOSTR(VAConfigAttribEncMaxTileCols);
         TOSTR(VAConfigAttribEncVP9);
+        TOSTR(VAConfigAttribLowLatency);
     case VAConfigAttribTypeMax:
         break;
     }
