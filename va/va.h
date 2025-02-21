@@ -1062,6 +1062,17 @@ typedef enum {
      * VAConfigAttribValEncVP9 union.
      */
     VAConfigAttribEncVP9                = 58,
+    /**
+     * \brief QP map encoding attribute. Read-only.
+     *
+     * This attribute describes whether encoder supports QP map (delta QP or absolute QP),
+     * and the specification of the supported QP map buffer, the block size each element
+     * covered as well as the number of bytes used by each element, the assumption
+     * here is each MB (h264), CTB (h265), or SB (AV1) is sharing the same QP/QI, and the
+     * QP map is in raster scan order, it can be applied to all encoders. The attribute
+     * value is partitioned into fields as defined in the VAConfigAttribValEncQPMap union.
+     */
+    VAConfigAttribEncQPMap              = 59,
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
@@ -1458,6 +1469,45 @@ typedef union _VAConfigAttribValEncPerBlockControl {
     } bits;
     uint32_t value;
 } VAConfigAttribValEncPerBlockControl;
+
+/** @name Attribute values for VAConfigAttribValEncQPMap */
+/**@{*/
+#define VA_ENC_QP_MAP_MODE_NONE           0x00000000
+/** \brief QP MAP MODE DELTA. */
+#define VA_ENC_QP_MAP_MODE_DELTA          0x00000001
+/** \brief QP MAP MODE ABSOLUTE. */
+#define VA_ENC_QP_MAP_MODE_ABSOLUTE       0x00000002
+/**@}*/
+
+/** brief Attribute value VAConfigAttribValEncQPMap */
+typedef union _VAConfigAttribValEncQPMap {
+    struct {
+        /* \brief QP map mode, there are two valid modes: 1 - delta QP and
+         * 2 - absolute QP map mode. When \ref delta QP map mode, each element
+         * represents a delta value; for each block, final QP =
+         * current QP + delta_QP, and delta_QP must be a signed number.
+         * In abolute QP map mode, absolute QP values are used,
+         * final QP = QP. Absolute QP map mode can be only applied to CQP
+         * mode because it bypasses RC QP adjustments. This attribute is only valid
+         * when qp_map_mode & (VA_ENC_QP_MAP_MODE_DELTA | VA_ENC_QP_MAP_MODE_ABSOLUTE)
+         * is valid. */
+        uint32_t qp_map_mode                : 2;
+        /** \brief supported size of qp map block, for h264, if MB size is
+         * (16x16), then \ref log2_block_size = 4, because 2^4 = 16; for HEVC/AV1,
+         * if CTB (SB) size is 64x64, then \ref log2_block_size = 6.*/
+        uint32_t log2_block_size            : 4;
+        /* \brief The size of each QP map element per block in bytes,
+         * If there are 4 bytes per QP map element, \ref unit_size_in_bytes
+         * equals 4. Please note that \ref unit_size_in_bytes cannot be 0.
+         * For 4 bytes, It can be interpreted as an int32_t number; for 2 bytes,
+         * as an int16_t number; and for 1 byte, as an int8_t/uint8_t number,
+         * which represents the unit QP(QI) or delta QP(QI). */
+        uint32_t unit_size_in_bytes         : 3;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                   : 23;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValEncQPMap;
 
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
@@ -2204,6 +2254,15 @@ typedef enum {
      * Refer to \c VASliceStructVVC
      */
     VASliceStructBufferType = 66,
+    /**
+     * \brief VA encoding QP map data buffer
+     *
+     * It contains QP delta or absolute values for each MB
+     * (h264), CTB (Hevc), or SB (AV1) in raster scan order,
+     * Its format defined in \c VAConfigAttribValEncQPMap.
+     * Refer to \c VAEncMiscParameterQPMap
+     */
+    VAEncQPMapBufferType = 67,
 
     VABufferTypeMax
 } VABufferType;
@@ -2411,7 +2470,9 @@ typedef enum {
     /** \brief Buffer type used for FEI input frame level parameters */
     VAEncMiscParameterTypeFEIFrameControl = 18,
     /** \brief encode extension buffer, ect. MPEG2 Sequence extenstion data */
-    VAEncMiscParameterTypeExtensionData = 19
+    VAEncMiscParameterTypeExtensionData = 19,
+    /** \brief Buffer type used for QP map */
+    VAEncMiscParameterTypeQPMap = 20
 } VAEncMiscParameterType;
 
 /** \brief Packed header type. */
@@ -3067,6 +3128,39 @@ typedef struct _VAEncMiscParameterCustomRoundingControl {
         uint32_t    value;
     }   rounding_offset_setting;
 } VAEncMiscParameterCustomRoundingControl;
+
+/**
+ *  \brief Encoding QP map paramters
+ *
+ *  \ref qp_map mode:
+ *     VA_ENC_QP_MAP_MODE_NONE     (0)
+ *     VA_ENC_QP_MAP_MODE_DELTA    (1)
+ *     VA_ENC_QP_MAP_MODE_ABSOLUTE (2)
+ *  Valid when \c VAConfigAttribValEncQPMap \c qp_map_mode is valid.
+ */
+typedef struct _VAEncMiscParameterQPMap {
+    struct {
+        uint32_t qp_map_mode             : 2 ;
+        uint32_t reserved                : 30;
+
+    };
+    /* \breif qp_map input buffer with the layout described in
+     * VAConfigAttribValEncQPMap. Each qp_map element should be
+     * arranged in raster scan order, and uses the number of
+     * byte as described in \ref unit_size_in_bytes, each of the unit can
+     * be a signed/unsigned value representing a block QP(QI) or detla QP (QI),
+     * which can be in h264 MB(16x16), Hevc CTB(32x32 or 64x64), or AV1
+     * in SB (32x32 or 64x64) and etc. The buffer size should be no less
+     * than the number of block size calculated by the aligned block size
+     * in the image in \ref unit_size_in_bytes, otherwise the qp_map will
+     * be incomplete. The final qp value will be capped by max_qp/min_qp in
+     * VAEncMiscParameterRateControl or by min_base_qindex/ max_base_qindex
+     * from VAEncPictureParameterBufferAV1 or other rate control related
+     * parameters. Regarding the valid QP map element and buffer format,
+     * please refers to VAConfigAttribValEncQPMap as well. */
+    VABufferID  qp_map;
+    uint32_t    va_reserved[VA_PADDING_LOW];
+} VAEncMiscParameterQPMap;
 
 /**
  * There will be cases where the bitstream buffer will not have enough room to hold

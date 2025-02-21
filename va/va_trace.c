@@ -4542,6 +4542,13 @@ static void va_TraceVAEncMiscParameterBuffer(
         }
         break;
     }
+    case VAEncMiscParameterTypeQPMap: {
+        VAEncMiscParameterQPMap *p = (VAEncMiscParameterQPMap *)tmp->data;
+        va_TraceMsg(trace_ctx, "\t--VAEncMiscParameterQPMap\n");
+        va_TraceMsg(trace_ctx, "\t qp_map_mode = %d\n", p->qp_map_mode);
+        va_TraceMsg(trace_ctx, "\t qp_map = 0x%x\n", p->qp_map);
+        break;
+    }
     default:
         va_TraceMsg(trace_ctx, "Unknown VAEncMiscParameterBuffer(type = %d):\n", tmp->type);
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, data);
