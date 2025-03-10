@@ -155,6 +155,7 @@ const char *vaConfigAttribTypeStr(VAConfigAttribType configAttribType)
         TOSTR(VAConfigAttribEncMaxTileRows);
         TOSTR(VAConfigAttribEncMaxTileCols);
         TOSTR(VAConfigAttribEncVP9);
+        TOSTR(VAConfigAttribEncQPMap);
     case VAConfigAttribTypeMax:
         break;
     }
@@ -214,6 +215,7 @@ const char *vaBufferTypeStr(VABufferType bufferType)
         TOSTR(VASubPicBufferType);
         TOSTR(VATileBufferType);
         TOSTR(VASliceStructBufferType);
+        TOSTR(VAEncQPMapBufferType);
     case VABufferTypeMax:
         break;
     }
