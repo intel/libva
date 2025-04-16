@@ -6688,6 +6688,7 @@ void va_TraceRenderPicture(
             }
             break;
         case VAProfileH264High10:
+        case VAProfileH264High422:
         case VAProfileH264Main:
         case VAProfileH264High:
         case VAProfileH264ConstrainedBaseline:
