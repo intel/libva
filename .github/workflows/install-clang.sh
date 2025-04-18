@@ -10,13 +10,13 @@ fi
 if ! which $CC >/dev/null 2>&1; then
 	case $DISTRO in
 		"ubuntu-22.04") distro_name=jammy;;
-		"ubuntu-20.04") distro_name=focal;;
+		"ubuntu-24.04") distro_name=noble;;
 		*)
 		echo "Unknown distribution $DISTRO"
 		exit 1
 	esac
 	case $1 in
-		"14" | "15") llvm_version=$1;;
+		"18" | "15") llvm_version=$1;;
 		*)
 		echo "Unknown llvm version $1"
 		exit 1

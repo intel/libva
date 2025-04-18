@@ -12,8 +12,8 @@ jobs:
   test:
     strategy:
       matrix:
-        compiler: [clang-15, gcc]
-        os: [ubuntu-22.04, ubuntu-20.04]
+        compiler: [clang, gcc]
+        os: [ubuntu-24.04, ubuntu-22.04]
         build: [meson, autotools]
     runs-on: ${{ matrix.os }}
     env:
@@ -23,8 +23,11 @@ jobs:
     - name: 'Checkout'
       uses: actions/checkout@v4
     - name: 'Install toolchain'
-      if: ${{ (matrix.compiler == 'clang-15') }}
+      if: ${{ (matrix.compiler == 'clang') && (matrix.os == 'ubuntu-22.04') }}
       run: .github/workflows/install-clang.sh 15
+    - name: 'Install toolchain'
+      if: ${{ (matrix.compiler == 'clang') && (matrix.os == 'ubuntu-24.04') }}
+      run: .github/workflows/install-clang.sh 18
     - name: 'Install prerequisites'
       run: |
         sudo apt-get update
