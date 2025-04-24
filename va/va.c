@@ -38,14 +38,12 @@
 #include <string.h>
 #if defined(_WIN32)
 #include "compat_win32.h"
-#define DRIVER_EXTENSION    "_drv_video.dll"
 #define DRIVER_PATH_STRING  "%s\\%s%s"
 #define ENV_VAR_SEPARATOR ";"
 #else
 #include <dlfcn.h>
 #include <unistd.h>
-#define DRIVER_EXTENSION    "_drv_video.so"
-#define DRIVER_PATH_STRING  "%s/%s%s"
+#define DRIVER_PATH_STRING  "%s/%s%s.so"
 #define ENV_VAR_SEPARATOR ":"
 #endif
 #ifdef ANDROID
@@ -353,16 +351,16 @@ va_getDriverInitName(char *name, int namelen, int major, int minor)
     return ret > 0 && ret < namelen;
 }
 
-static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
+static char *va_getDriverPath(const char *driver_dir, const char *driver_name, bool use_suffix)
 {
-    int n = snprintf(0, 0, DRIVER_PATH_STRING, driver_dir, driver_name, DRIVER_EXTENSION);
+    int n = snprintf(0, 0, DRIVER_PATH_STRING, driver_dir, driver_name, use_suffix ? "_drv_video" : "");
     if (n < 0)
         return NULL;
     char *driver_path = (char *) malloc(n + 1);
     if (!driver_path)
         return NULL;
     n = snprintf(driver_path, n + 1, DRIVER_PATH_STRING,
-                 driver_dir, driver_name, DRIVER_EXTENSION);
+                 driver_dir, driver_name, use_suffix ? "_drv_video" : "");
     if (n < 0) {
         free(driver_path);
         return NULL;
@@ -370,9 +368,146 @@ static char *va_getDriverPath(const char *driver_dir, const char *driver_name)
     return driver_path;
 }
 
-static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
+static VAStatus va_openDriverFromPath(VADisplay dpy, char *driver_path)
 {
     VADriverContextP ctx = CTX(dpy);
+    VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
+    va_infoMessage(dpy, "Trying to open %s\n", driver_path);
+#if defined(RTLD_NODELETE) && !defined(ANDROID)
+    void* handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
+#else
+    void* handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL);
+#endif
+    if (!handle) {
+        /* Don't give errors for non-existing files */
+        if (0 == access(driver_path, F_OK))
+            va_errorMessage(dpy, "dlopen of %s failed: %s\n", driver_path, dlerror());
+    } else {
+        VADriverInit init_func = NULL;
+        char init_func_s[256];
+        int i;
+
+        struct {
+            int major;
+            int minor;
+        } compatible_versions[VA_MINOR_VERSION + 2];
+        for (i = 0; i <= VA_MINOR_VERSION; i ++) {
+            compatible_versions[i].major = VA_MAJOR_VERSION;
+            compatible_versions[i].minor = VA_MINOR_VERSION - i;
+        }
+        compatible_versions[i].major = -1;
+        compatible_versions[i].minor = -1;
+
+        for (i = 0; compatible_versions[i].major >= 0; i++) {
+            if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
+                                     compatible_versions[i].major,
+                                     compatible_versions[i].minor)) {
+                init_func = (VADriverInit)dlsym(handle, init_func_s);
+                if (init_func) {
+                    va_infoMessage(dpy, "Found init function %s\n", init_func_s);
+                    break;
+                }
+            }
+        }
+
+        if (compatible_versions[i].major < 0) {
+            va_errorMessage(dpy, "%s has no function %s\n",
+                            driver_path, init_func_s);
+            dlclose(handle);
+        } else {
+            struct VADriverVTable *vtable = ctx->vtable;
+            struct VADriverVTableVPP *vtable_vpp = ctx->vtable_vpp;
+            struct VADriverVTableProt *vtable_prot = ctx->vtable_prot;
+
+            vaStatus = VA_STATUS_SUCCESS;
+            if (!vtable) {
+                vtable = calloc(1, sizeof(*vtable));
+                if (!vtable)
+                    vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            }
+            ctx->vtable = vtable;
+
+            if (!vtable_vpp) {
+                vtable_vpp = calloc(1, sizeof(*vtable_vpp));
+                if (vtable_vpp)
+                    vtable_vpp->version = VA_DRIVER_VTABLE_VPP_VERSION;
+                else
+                    vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            }
+            ctx->vtable_vpp = vtable_vpp;
+
+            if (!vtable_prot) {
+                vtable_prot = calloc(1, sizeof(*vtable_prot));
+                if (vtable_prot)
+                    vtable_prot->version = VA_DRIVER_VTABLE_PROT_VERSION;
+                else
+                    vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
+            }
+            ctx->vtable_prot = vtable_prot;
+
+            if (init_func && VA_STATUS_SUCCESS == vaStatus)
+                vaStatus = (*init_func)(ctx);
+
+            if (VA_STATUS_SUCCESS == vaStatus) {
+                CHECK_MAXIMUM(vaStatus, ctx, profiles);
+                CHECK_MAXIMUM(vaStatus, ctx, entrypoints);
+                CHECK_MAXIMUM(vaStatus, ctx, attributes);
+                CHECK_MAXIMUM(vaStatus, ctx, image_formats);
+                CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
+                CHECK_STRING(vaStatus, ctx, vendor);
+                CHECK_VTABLE(vaStatus, ctx, Terminate);
+                CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
+                CHECK_VTABLE(vaStatus, ctx, QueryConfigEntrypoints);
+                CHECK_VTABLE(vaStatus, ctx, QueryConfigAttributes);
+                CHECK_VTABLE(vaStatus, ctx, CreateConfig);
+                CHECK_VTABLE(vaStatus, ctx, DestroyConfig);
+                CHECK_VTABLE(vaStatus, ctx, GetConfigAttributes);
+                CHECK_VTABLE(vaStatus, ctx, CreateSurfaces);
+                CHECK_VTABLE(vaStatus, ctx, DestroySurfaces);
+                CHECK_VTABLE(vaStatus, ctx, CreateContext);
+                CHECK_VTABLE(vaStatus, ctx, DestroyContext);
+                CHECK_VTABLE(vaStatus, ctx, CreateBuffer);
+                CHECK_VTABLE(vaStatus, ctx, BufferSetNumElements);
+                CHECK_VTABLE(vaStatus, ctx, MapBuffer);
+                CHECK_VTABLE(vaStatus, ctx, UnmapBuffer);
+                CHECK_VTABLE(vaStatus, ctx, DestroyBuffer);
+                CHECK_VTABLE(vaStatus, ctx, BeginPicture);
+                CHECK_VTABLE(vaStatus, ctx, RenderPicture);
+                CHECK_VTABLE(vaStatus, ctx, EndPicture);
+                CHECK_VTABLE(vaStatus, ctx, SyncSurface);
+                CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
+                CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
+                CHECK_VTABLE(vaStatus, ctx, CreateImage);
+                CHECK_VTABLE(vaStatus, ctx, DeriveImage);
+                CHECK_VTABLE(vaStatus, ctx, DestroyImage);
+                CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
+                CHECK_VTABLE(vaStatus, ctx, GetImage);
+                CHECK_VTABLE(vaStatus, ctx, PutImage);
+                CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
+                CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
+                CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
+                CHECK_VTABLE(vaStatus, ctx, SetSubpictureImage);
+                CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
+                CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
+                CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
+                CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
+                CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
+                CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
+                CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
+            }
+            if (VA_STATUS_SUCCESS != vaStatus) {
+                va_errorMessage(dpy, "%s init failed\n", driver_path);
+                dlclose(handle);
+            }
+            if (VA_STATUS_SUCCESS == vaStatus)
+                ctx->handle = handle;
+        }
+    }
+    return vaStatus;
+}
+
+static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
+{
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
     char *search_path = NULL;
     char *saveptr;
@@ -392,150 +527,20 @@ static VAStatus va_openDriver(VADisplay dpy, char *driver_name)
     }
     driver_dir = strtok_r(search_path, ENV_VAR_SEPARATOR, &saveptr);
     while (driver_dir) {
-        void *handle = NULL;
-        char *driver_path = va_getDriverPath(driver_dir, driver_name);
-        if (!driver_path) {
-            va_errorMessage(dpy, "%s L%d Out of memory\n",
-                            __FUNCTION__, __LINE__);
-            free(search_path);
-            return VA_STATUS_ERROR_ALLOCATION_FAILED;
-        }
-
-        va_infoMessage(dpy, "Trying to open %s\n", driver_path);
-#if defined(RTLD_NODELETE) && !defined(ANDROID)
-        handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
-#else
-        handle = dlopen(driver_path, RTLD_NOW | RTLD_GLOBAL);
-#endif
-        if (!handle) {
-            /* Don't give errors for non-existing files */
-            if (0 == access(driver_path, F_OK))
-                va_errorMessage(dpy, "dlopen of %s failed: %s\n", driver_path, dlerror());
-        } else {
-            VADriverInit init_func = NULL;
-            char init_func_s[256];
-            int i;
-
-            struct {
-                int major;
-                int minor;
-            } compatible_versions[VA_MINOR_VERSION + 2];
-            for (i = 0; i <= VA_MINOR_VERSION; i ++) {
-                compatible_versions[i].major = VA_MAJOR_VERSION;
-                compatible_versions[i].minor = VA_MINOR_VERSION - i;
-            }
-            compatible_versions[i].major = -1;
-            compatible_versions[i].minor = -1;
-
-            for (i = 0; compatible_versions[i].major >= 0; i++) {
-                if (va_getDriverInitName(init_func_s, sizeof(init_func_s),
-                                         compatible_versions[i].major,
-                                         compatible_versions[i].minor)) {
-                    init_func = (VADriverInit)dlsym(handle, init_func_s);
-                    if (init_func) {
-                        va_infoMessage(dpy, "Found init function %s\n", init_func_s);
-                        break;
-                    }
-                }
+        for (int use_suffix = 1; use_suffix >= 0; use_suffix--) {
+            char *driver_path = va_getDriverPath(driver_dir, driver_name, use_suffix);
+            if (!driver_path) {
+                va_errorMessage(dpy, "%s L%d Out of memory\n",
+                                __FUNCTION__, __LINE__);
+                free(search_path);
+                return VA_STATUS_ERROR_ALLOCATION_FAILED;
             }
 
-            if (compatible_versions[i].major < 0) {
-                va_errorMessage(dpy, "%s has no function %s\n",
-                                driver_path, init_func_s);
-                dlclose(handle);
-            } else {
-                struct VADriverVTable *vtable = ctx->vtable;
-                struct VADriverVTableVPP *vtable_vpp = ctx->vtable_vpp;
-                struct VADriverVTableProt *vtable_prot = ctx->vtable_prot;
-
-                vaStatus = VA_STATUS_SUCCESS;
-                if (!vtable) {
-                    vtable = calloc(1, sizeof(*vtable));
-                    if (!vtable)
-                        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-                }
-                ctx->vtable = vtable;
-
-                if (!vtable_vpp) {
-                    vtable_vpp = calloc(1, sizeof(*vtable_vpp));
-                    if (vtable_vpp)
-                        vtable_vpp->version = VA_DRIVER_VTABLE_VPP_VERSION;
-                    else
-                        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-                }
-                ctx->vtable_vpp = vtable_vpp;
-
-                if (!vtable_prot) {
-                    vtable_prot = calloc(1, sizeof(*vtable_prot));
-                    if (vtable_prot)
-                        vtable_prot->version = VA_DRIVER_VTABLE_PROT_VERSION;
-                    else
-                        vaStatus = VA_STATUS_ERROR_ALLOCATION_FAILED;
-                }
-                ctx->vtable_prot = vtable_prot;
-
-                if (init_func && VA_STATUS_SUCCESS == vaStatus)
-                    vaStatus = (*init_func)(ctx);
-
-                if (VA_STATUS_SUCCESS == vaStatus) {
-                    CHECK_MAXIMUM(vaStatus, ctx, profiles);
-                    CHECK_MAXIMUM(vaStatus, ctx, entrypoints);
-                    CHECK_MAXIMUM(vaStatus, ctx, attributes);
-                    CHECK_MAXIMUM(vaStatus, ctx, image_formats);
-                    CHECK_MAXIMUM(vaStatus, ctx, subpic_formats);
-                    CHECK_STRING(vaStatus, ctx, vendor);
-                    CHECK_VTABLE(vaStatus, ctx, Terminate);
-                    CHECK_VTABLE(vaStatus, ctx, QueryConfigProfiles);
-                    CHECK_VTABLE(vaStatus, ctx, QueryConfigEntrypoints);
-                    CHECK_VTABLE(vaStatus, ctx, QueryConfigAttributes);
-                    CHECK_VTABLE(vaStatus, ctx, CreateConfig);
-                    CHECK_VTABLE(vaStatus, ctx, DestroyConfig);
-                    CHECK_VTABLE(vaStatus, ctx, GetConfigAttributes);
-                    CHECK_VTABLE(vaStatus, ctx, CreateSurfaces);
-                    CHECK_VTABLE(vaStatus, ctx, DestroySurfaces);
-                    CHECK_VTABLE(vaStatus, ctx, CreateContext);
-                    CHECK_VTABLE(vaStatus, ctx, DestroyContext);
-                    CHECK_VTABLE(vaStatus, ctx, CreateBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, BufferSetNumElements);
-                    CHECK_VTABLE(vaStatus, ctx, MapBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, UnmapBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, DestroyBuffer);
-                    CHECK_VTABLE(vaStatus, ctx, BeginPicture);
-                    CHECK_VTABLE(vaStatus, ctx, RenderPicture);
-                    CHECK_VTABLE(vaStatus, ctx, EndPicture);
-                    CHECK_VTABLE(vaStatus, ctx, SyncSurface);
-                    CHECK_VTABLE(vaStatus, ctx, QuerySurfaceStatus);
-                    CHECK_VTABLE(vaStatus, ctx, QueryImageFormats);
-                    CHECK_VTABLE(vaStatus, ctx, CreateImage);
-                    CHECK_VTABLE(vaStatus, ctx, DeriveImage);
-                    CHECK_VTABLE(vaStatus, ctx, DestroyImage);
-                    CHECK_VTABLE(vaStatus, ctx, SetImagePalette);
-                    CHECK_VTABLE(vaStatus, ctx, GetImage);
-                    CHECK_VTABLE(vaStatus, ctx, PutImage);
-                    CHECK_VTABLE(vaStatus, ctx, QuerySubpictureFormats);
-                    CHECK_VTABLE(vaStatus, ctx, CreateSubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, DestroySubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureImage);
-                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureChromakey);
-                    CHECK_VTABLE(vaStatus, ctx, SetSubpictureGlobalAlpha);
-                    CHECK_VTABLE(vaStatus, ctx, AssociateSubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, DeassociateSubpicture);
-                    CHECK_VTABLE(vaStatus, ctx, QueryDisplayAttributes);
-                    CHECK_VTABLE(vaStatus, ctx, GetDisplayAttributes);
-                    CHECK_VTABLE(vaStatus, ctx, SetDisplayAttributes);
-                }
-                if (VA_STATUS_SUCCESS != vaStatus) {
-                    va_errorMessage(dpy, "%s init failed\n", driver_path);
-                    dlclose(handle);
-                }
-                if (VA_STATUS_SUCCESS == vaStatus)
-                    ctx->handle = handle;
-                free(driver_path);
+            vaStatus = va_openDriverFromPath(dpy, driver_path);
+            free(driver_path);
+            if (VA_STATUS_SUCCESS == vaStatus)
                 break;
-            }
         }
-        free(driver_path);
-
         driver_dir = strtok_r(NULL, ENV_VAR_SEPARATOR, &saveptr);
     }
 
@@ -712,6 +717,10 @@ static VAStatus va_new_opendriver(VADisplay dpy)
         }
 
         vaStatus = va_openDriver(dpy, drivers[i]);
+        /* Try as path as fallback */
+        if (vaStatus != VA_STATUS_SUCCESS)
+            vaStatus = va_openDriverFromPath(dpy, drivers[i]);
+
         va_infoMessage(dpy, "va_openDriver() returns %d\n", vaStatus);
 
         if (vaStatus == VA_STATUS_SUCCESS)
