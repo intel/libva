@@ -53,6 +53,9 @@ jobs:
     - name: 'Install (meson)'
       if: ${{ (matrix.build == 'meson') }}
       run: sudo meson install -C ./builddir
+    - name: 'Build dist package (meson)'
+      if: ${{ (matrix.build == 'meson') }}
+      run: meson dist -C ./builddir
 
     - name: 'Configure (autotools)'
       if: ${{ (matrix.build == 'autotools') }}
@@ -63,3 +66,7 @@ jobs:
     - name: 'Build and Install (autotools)'
       if: ${{ (matrix.build == 'autotools') }}
       run: sudo make install
+    - name: 'Build dist package (autotools)'
+      if: ${{ (matrix.build == 'autotools') }}
+      run: make distcheck
+
