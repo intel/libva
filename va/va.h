@@ -1110,17 +1110,21 @@ typedef struct _VAConfigAttrib {
 #define VA_RC_CBR                       0x00000002
 /** \brief Variable bitrate. */
 #define VA_RC_VBR                       0x00000004
-/** \brief Video conference mode. */
+/** \brief Video conference mode.
+ *  special VBR mode designed to achieve better bit accuracy and quality
+ *  for video conference like contents */
 #define VA_RC_VCM                       0x00000008
 /** \brief Constant QP. */
 #define VA_RC_CQP                       0x00000010
-/** \brief Variable bitrate with peak rate higher than average bitrate. */
+/** \brief Variable bitrate with peak rate higher than average bitrate.
+ *  so , it allow HRD violation to get better quality */
 #define VA_RC_VBR_CONSTRAINED           0x00000020
 /** \brief Intelligent Constant Quality. Provided an initial ICQ_quality_factor,
  *  adjusts QP at a frame and MB level based on motion to improve subjective quality. */
 #define VA_RC_ICQ           0x00000040
 /** \brief Macroblock based rate control.  Per MB control is decided
- *  internally in the encoder. It may be combined with other RC modes, except CQP. */
+ *  internally in the encoder. It may be combined with other RC modes, except CQP.
+ *  @deprecated , it is decided internally in driver, driver should enable/disable it internally*/
 #define VA_RC_MB                        0x00000080
 /** \brief Constant Frame Size, it is used for small tolerent  */
 #define VA_RC_CFS                       0x00000100
