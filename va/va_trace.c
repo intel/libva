@@ -3317,6 +3317,12 @@ static void va_TraceVAPictureParameterBufferHEVC(
     va_TraceMsg(trace_ctx, "\tpps_tc_offset_div2 = %d\n", p->pps_tc_offset_div2);
     va_TraceMsg(trace_ctx, "\tnum_extra_slice_header_bits = %d\n", p->num_extra_slice_header_bits);
     va_TraceMsg(trace_ctx, "\tst_rps_bits = %d\n", p->st_rps_bits);
+    va_TraceMsg(trace_ctx, "\tRefPicSetLtCurr[8] = \n");
+    va_TraceMsg(trace_ctx, "");
+    for (i = 0; i < 8; i++)
+        va_TracePrint(trace_ctx, "\t%d", p->RefPicSetLtCurr[i]);
+    va_TracePrint(trace_ctx, "\n");
+    va_TraceMsg(trace_ctx, "\tNumPocLtCurr = %d\n", p->NumPocLtCurr);
 
     if (isRext && pRext) {
         va_TraceMsg(trace_ctx, "\trange_extension_pic_fields = %d\n", pRext->range_extension_pic_fields.value);
