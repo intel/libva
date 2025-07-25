@@ -14,6 +14,12 @@ Doxygen files are regularly updated through Github Pages and can be accessed dir
 
 The libva development team can be reached via github issues.
 
+# Backward Compatibility
+No code changes may be introduced that would regress support for existing API.  All contributions must ensure continued compatibility and functionality. Failure to maintain API compatibility may result in the rejection or reversion of the contribution.
+
+Any deliberate modifications or removal of existing API will be transparently communicated in the release notes.
+
+API options are solely considered as a stable interface. Any debug parameters, environmental variables, and internal data structures, are not considered as an interface and may be changed or removed at any time.
 
 # Build and Install Libva
 *This build documentation was tested under clear Ubuntu Server 18.04 (with gcc-7.3.0, gcc-8.1.0 and clang-6.0 compilers) but it should work on another OS distributions with various versions of gcc and clang.*
