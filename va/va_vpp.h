@@ -909,7 +909,7 @@ typedef struct _VAProcPipelineParameterBuffer {
      * be queried with vaQueryVideoProcPipelineCaps().
      *
      * If this is set to VAProcColorStandardExplicit, the color properties
-     * are specified explicitly in surface_color_properties instead.
+     * are specified explicitly in input_color_properties instead.
      */
     VAProcColorStandardType surface_color_standard;
     /**
