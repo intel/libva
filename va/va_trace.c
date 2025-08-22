@@ -6606,7 +6606,62 @@ va_TraceVAProcPipelineParameterBuffer(
         }
     }
 
-    /* FIXME: add other info later */
+    va_TraceMsg(trace_ctx, "\t  rotation_state = 0x%08x\n", p->rotation_state);
+
+    if (p->blend_state) {
+        va_TraceMsg(trace_ctx, "\t  blend_state\n");
+        va_TraceMsg(trace_ctx, "\t    flags = 0x%08x\n", p->blend_state->flags);
+        va_TraceMsg(trace_ctx, "\t    global_alpha = %f\n", p->blend_state->global_alpha);
+        va_TraceMsg(trace_ctx, "\t    min_luma = %f\n", p->blend_state->min_luma);
+        va_TraceMsg(trace_ctx, "\t    max_luma = %f\n", p->blend_state->max_luma);
+    } else {
+        va_TraceMsg(trace_ctx, "\t  blend_state = (NULL)\n");
+    }
+
+    va_TraceMsg(trace_ctx, "\t  mirror_state = 0x%08x\n", p->mirror_state);
+    va_TraceMsg(trace_ctx, "\t  num_additional_outputs = %d\n", p->num_additional_outputs);
+
+    if (p->num_additional_outputs) {
+        va_TraceMsg(trace_ctx, "\t  additional_outputs\n");
+
+        if (p->additional_outputs) {
+            /* only dump the first 5 additional outputs */
+            for (i = 0; i < p->num_additional_outputs && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    additional_outputs[%d] = 0x%08x\n", i, p->additional_outputs[i]);
+            }
+        } else {
+            for (i = 0; i < p->num_additional_outputs && i < 5; i++) {
+                va_TraceMsg(trace_ctx, "\t    additional_outputs[%d] = (NULL)\n", i);
+            }
+        }
+    }
+
+    va_TraceMsg(trace_ctx, "\t  input_surface_flag = 0x%08x\n", p->input_surface_flag);
+    va_TraceMsg(trace_ctx, "\t  output_surface_flag = 0x%08x\n", p->output_surface_flag);
+
+    va_TraceMsg(trace_ctx, "\t  input_color_properties\n");
+    va_TraceMsg(trace_ctx, "\t    chroma_sample_location = 0x%02x\n", p->input_color_properties.chroma_sample_location);
+    va_TraceMsg(trace_ctx, "\t    color_range = %d\n", p->input_color_properties.color_range);
+    va_TraceMsg(trace_ctx, "\t    colour_primaries = %d\n", p->input_color_properties.colour_primaries);
+    va_TraceMsg(trace_ctx, "\t    transfer_characteristics = %d\n", p->input_color_properties.transfer_characteristics);
+    va_TraceMsg(trace_ctx, "\t    matrix_coefficients = %d\n", p->input_color_properties.matrix_coefficients);
+
+    va_TraceMsg(trace_ctx, "\t  output_color_properties\n");
+    va_TraceMsg(trace_ctx, "\t    chroma_sample_location = 0x%02x\n", p->output_color_properties.chroma_sample_location);
+    va_TraceMsg(trace_ctx, "\t    color_range = %d\n", p->output_color_properties.color_range);
+    va_TraceMsg(trace_ctx, "\t    colour_primaries = %d\n", p->output_color_properties.colour_primaries);
+    va_TraceMsg(trace_ctx, "\t    transfer_characteristics = %d\n", p->output_color_properties.transfer_characteristics);
+    va_TraceMsg(trace_ctx, "\t    matrix_coefficients = %d\n", p->output_color_properties.matrix_coefficients);
+
+    va_TraceMsg(trace_ctx, "\t  processing_mode = %d\n", p->processing_mode);
+
+    if (p->output_hdr_metadata) {
+        va_TraceMsg(trace_ctx, "\t  output_hdr_metadata\n");
+        va_TraceMsg(trace_ctx, "\t    metadata_type = %d\n", p->output_hdr_metadata->metadata_type);
+        va_TraceMsg(trace_ctx, "\t    metadata_size = %d\n", p->output_hdr_metadata->metadata_size);
+    } else {
+        va_TraceMsg(trace_ctx, "\t  output_hdr_metadata = (NULL)\n");
+    }
 
     va_TraceMsg(trace_ctx, NULL);
 }
