@@ -4267,6 +4267,26 @@ Synchronization
  * This function blocks until all pending operations on the render target
  * have been completed.  Upon return it is safe to use the render target for a
  * different picture.
+ *
+ * Possible errors:
+ * - \ref VA_STATUS_ERROR_INVALID_CONTEXT: This error occurs when the function is provided with an invalid VADisplay(dpy).
+ *   It is typically due to the VADriverContext contained by VADisplay is not being properly initialized or already being freed.
+ *   To address this, ensure that the VADriverContext or VADisplay has been properly initialized and has not been freed.
+ * - \ref VA_STATUS_ERROR_INVALID_SURFACE: This error is triggered when the supplied render target is invalid,
+ *   possibly due to being freed or corrupted. To resolve this, ensure the usage of the correct render target
+ *   and verify its validity and integrity.
+ * - \ref VA_STATUS_ERROR_OPERATION_FAILED: When the attempt to retrieve the status report fails or related work
+ *   on the current surface fails, this error is generated. In such cases, the client can proceed with subsequent
+ *   frames by ignore the error, but it may involve incorrect result like corruption, MD5 mismatch or HW hang.
+ *   Initializing new context can avoid the potential issues.
+ * - \ref VA_STATUS_ERROR_HW_BUSY: This error indicates that synchronization is still in progress or GPU hang happens.
+ *   The client could call the function again with the same render_target within a period of time to wait hw execution completion.
+ *   If hw execution could not complete successfully, gpu hang and reset may occur, in this case,
+ *   application could try to recover media context by initializing new one.
+ * - \ref VA_STATUS_ERROR_DECODING_ERROR: This error is encountered when macroblock (MB) errors with
+ *   non-conformance input clips are detected during the decoding process. The application can proceed with
+ *   subsequent frames, but it is advised to be aware of potential corruption in the output.
+ *   Call vaQuerySurfaceError to get more details on mb error.
  */
 VAStatus vaSyncSurface(
     VADisplay dpy,
