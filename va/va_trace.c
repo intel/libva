@@ -7303,3 +7303,40 @@ void va_TraceExportSurfaceHandle(
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
 }
+
+void va_TraceDeriveImage(VADisplay dpy, VASurfaceID surface, VAImage *image)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "surfaceID = %d, imageID = %d\n", surface, image->image_id);
+    va_TraceMsg(trace_ctx, "format:\n");
+    va_TraceMsg(trace_ctx, "\tfourcc = 0x%08x\n", image->format.fourcc);
+    if (image->format.byte_order == VA_LSB_FIRST)
+        va_TraceMsg(trace_ctx, "byte_order = VA_LSB_FIRST\n");
+    else if (image->format.byte_order == VA_MSB_FIRST)
+        va_TraceMsg(trace_ctx, "byte_order = VA_MSB_FIRST\n");
+    else
+        va_TraceMsg(trace_ctx, "byte_order = %d\n", image->format.byte_order);
+    va_TraceMsg(trace_ctx, "\tformat.bits_per_pixel = %d\n", image->format.bits_per_pixel);
+    va_TraceMsg(trace_ctx, "\tformat.depth= %d\n", image->format.depth);
+    va_TraceMsg(trace_ctx, "\tformat.red_mask = 0x%08x\n", image->format.red_mask);
+    va_TraceMsg(trace_ctx, "\tformat.greeen_mask = 0x%08x\n", image->format.green_mask);
+    va_TraceMsg(trace_ctx, "\tformat.blue_mask = 0x%08x\n", image->format.blue_mask);
+    va_TraceMsg(trace_ctx, "\tformat.alpha_mask = 0x%08x\n", image->format.alpha_mask);
+
+    va_TraceMsg(trace_ctx, "bufferID = %d\n", image->buf);
+    va_TraceMsg(trace_ctx, "width = %d\n", image->width);
+    va_TraceMsg(trace_ctx, "height = %d\n", image->height);
+    va_TraceMsg(trace_ctx, "data_size = %d\n", image->data_size);
+    va_TraceMsg(trace_ctx, "num_planes = %d\n", image->num_planes);
+    va_TraceMsg(trace_ctx, "pitches = %d, %d, %d\n", image->pitches[0], image->pitches[1], image->pitches[2]);
+    va_TraceMsg(trace_ctx, "offsets = %d, %d, %d\n", image->offsets[0], image->offsets[1], image->offsets[2]);
+
+    va_TraceMsg(trace_ctx, "num_palette_entries = %d\n", image->num_palette_entries);
+    va_TraceMsg(trace_ctx, "entry_bytes= %d\n", image->entry_bytes);
+    va_TraceMsg(trace_ctx, "component_order = %c%c%c%c\n", image->component_order[0], image->component_order[1], image->component_order[2], image->component_order[3]);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}

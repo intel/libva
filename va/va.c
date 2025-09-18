@@ -1938,6 +1938,7 @@ VAStatus vaDeriveImage(
     ctx = CTX(dpy);
 
     va_status = ctx->vtable->vaDeriveImage(ctx, surface, image);
+    VA_TRACE_LOG(va_TraceDeriveImage, dpy, surface, image);
     VA_TRACE_RET(dpy, va_status);
     return va_status;
 }

@@ -506,6 +506,14 @@ void va_TraceExportSurfaceHandle(
     uint32_t         flags,
     void             *descriptor);
 
+/** \brief va_TraceDeriveImage
+ * trace derive image */
+DLL_HIDDEN
+void va_TraceDeriveImage(
+    VADisplay dpy,
+    VASurfaceID surface,
+    VAImage *image);
+
 #ifdef __cplusplus
 }
 #endif
