@@ -1055,7 +1055,9 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     Y_data = (unsigned char*)buffer;
     UV_data = (unsigned char*)buffer + chroma_u_offset;
 
-    if (fourcc == VA_FOURCC_P010)
+    if (fourcc == VA_FOURCC_Y410)
+        pixel_byte = 4;
+    else if (fourcc == VA_FOURCC_P010)
         pixel_byte = 2;
     else
         pixel_byte = 1;
