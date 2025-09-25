@@ -1643,7 +1643,7 @@ VAStatus vaEndPicture(
     ctx = CTX(dpy);
 
     VA_TRACE_V(dpy, END_PICTURE, TRACE_BEGIN, context);
-    VA_TRACE_ALL(va_TraceEndPicture, dpy, context, 0);
+    VA_TRACE_ALL(va_TraceEndPicture, dpy, context, NULL, 0, 0);
     va_status = ctx->vtable->vaEndPicture(ctx, context);
     VA_TRACE_RET(dpy, va_status);
     /* dump surface content */
@@ -1652,6 +1652,32 @@ VAStatus vaEndPicture(
 
     return va_status;
 }
+
+VAStatus vaEndPicture2(
+    VADisplay dpy,
+    VAContextID context,
+    int32_t *sync_fds,
+    int32_t sync_num
+
+)
+{
+    VAStatus va_status = VA_STATUS_SUCCESS;
+    VADriverContextP ctx;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+
+    VA_TRACE_V(dpy, END_PICTURE, TRACE_BEGIN, context);
+    VA_TRACE_ALL(va_TraceEndPicture, dpy, context, sync_fds, sync_num, 0);
+    va_status = ctx->vtable->vaEndPicture2(ctx, context, sync_fds, sync_num);
+    VA_TRACE_RET(dpy, va_status);
+    /* dump surface content */
+    VA_TRACE_ALL(va_TraceEndPictureExt, dpy, context, 1);
+    VA_TRACE_V(dpy, END_PICTURE, TRACE_END, va_status);
+
+    return va_status;
+}
+
 
 VAStatus vaSyncSurface(
     VADisplay dpy,
