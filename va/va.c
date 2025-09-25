@@ -742,6 +742,11 @@ VAStatus vaInitialize(
 
     vaStatus = va_new_opendriver(dpy);
 
+    if (VA_STATUS_SUCCESS != vaStatus) {
+        VADisplayContextP pDisplayContext = (VADisplayContextP)dpy;
+        pDisplayContext->vaDestroy(pDisplayContext);
+    }
+
     *major_version = VA_MAJOR_VERSION;
     *minor_version = VA_MINOR_VERSION;
 
