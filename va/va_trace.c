@@ -1000,6 +1000,247 @@ static void va_TraceMsg(struct trace_context *trace_ctx, const char *msg, ...)
     va_end(args);
 }
 
+typedef struct _TracePictureLayout {
+    /*input*/
+    uint32_t fourcc;
+    uint32_t width;
+    uint32_t height;
+    uint32_t start_x;
+    uint32_t start_y;
+    /*output*/
+    uint32_t num_planes;
+    uint32_t plane_start_x[4];
+    uint32_t plane_start_y[4];
+    uint32_t plane_width[4]; /*width in bytes*/
+    uint32_t plane_height[4]; /*lines*/
+    uint32_t reserved[4];
+} TracePictureLayout;
+
+static void va_TraceRetrieveImageInfo(TracePictureLayout * pLayout)
+{
+    uint32_t fourcc = pLayout->fourcc;
+    uint32_t width = pLayout->width;
+    uint32_t height = pLayout->height;
+    uint32_t start_x = pLayout->start_x;
+    uint32_t start_y = pLayout->start_y;
+
+    if ((!fourcc) || (!width) || (!height)) {
+        pLayout->num_planes = 0;
+        return;
+    }
+    /* set initial values*/
+    pLayout->plane_width[0] = width;
+    pLayout->plane_height[0] = height;
+    pLayout->plane_start_x[0] = start_x;
+    pLayout->plane_start_y[0] = start_y;
+
+    pLayout->num_planes = 1;
+
+    switch (fourcc) {
+    case VA_FOURCC_NV12:
+    case VA_FOURCC_NV21:
+        pLayout->plane_width[1] = width;
+        pLayout->plane_height[1] = height / 2;
+        pLayout->plane_start_x[1] = start_x;
+        pLayout->plane_start_y[1] = start_y / 2;
+        pLayout->num_planes = 2;
+        break;
+    case VA_FOURCC_RGBA:
+    case VA_FOURCC_RGBX:
+    case VA_FOURCC_BGRA:
+    case VA_FOURCC_BGRX:
+    case VA_FOURCC_ARGB:
+    case VA_FOURCC_XRGB:
+    case VA_FOURCC_ABGR:
+    case VA_FOURCC_XBGR:
+    case VA_FOURCC_AYUV:
+    case VA_FOURCC_Y410:
+    case VA_FOURCC_A2R10G10B10:
+    case VA_FOURCC_A2B10G10R10:
+    case VA_FOURCC_X2R10G10B10:
+    case VA_FOURCC_X2B10G10R10:
+    case VA_FOURCC_XYUV:
+        pLayout->plane_width[0] = width * 4;
+        pLayout->plane_start_x[0] = start_x * 4;
+        break;
+
+    case VA_FOURCC_UYVY:
+    case VA_FOURCC_YUY2:
+    case VA_FOURCC_Y16:
+    case VA_FOURCC_VYUY:
+    case VA_FOURCC_YVYU:
+        pLayout->plane_width[0] = width * 2;
+        pLayout->plane_start_x[0] = start_x * 2;
+        break;
+
+    case VA_FOURCC_YV12:
+    case VA_FOURCC_I420:
+    case VA_FOURCC_IMC3:
+    case VA_FOURCC_411P:
+    case VA_FOURCC_411R:
+        pLayout->plane_width[1] = width / 2;
+        pLayout->plane_width[2] = width / 2;
+        pLayout->plane_height[1] = height / 2;
+        pLayout->plane_height[2] = height / 2;
+        pLayout->plane_start_x[1] = start_x / 2;
+        pLayout->plane_start_x[2] = start_x / 2;
+        pLayout->plane_start_y[1] = start_y / 2;
+        pLayout->plane_start_y[2] = start_y / 2;
+        pLayout->num_planes = 3;
+        break;
+
+    case VA_FOURCC_P208:
+        pLayout->plane_width[1] = width;
+        pLayout->plane_height[1] = height;
+        pLayout->plane_start_x[1] = start_x;
+        pLayout->plane_start_y[1] = start_y;
+        pLayout->num_planes = 2;
+        break;
+
+    case VA_FOURCC_YV32:
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] =
+                pLayout->plane_width[3] = width;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] =
+                pLayout->plane_height[3] = height;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] =
+                pLayout->plane_start_x[3] = start_x;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] =
+                pLayout->plane_start_y[3] = start_y;
+        pLayout->num_planes = 4;
+        break;
+
+
+    case VA_FOURCC_YV24:
+    case VA_FOURCC_444P:
+    case VA_FOURCC_RGBP:
+    case VA_FOURCC_BGRP:
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] = width;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] = start_x;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y;
+        pLayout->num_planes = 3;
+        break;
+
+    case VA_FOURCC_422H:
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] = width / 2;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] = start_x / 2;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y;
+        pLayout->num_planes = 3;
+        break;
+    case VA_FOURCC_422V:
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] = width;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height / 2;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] = start_x;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y / 2;
+        pLayout->num_planes = 3;
+        break;
+    case VA_FOURCC_RGB565:
+    case VA_FOURCC_BGR565:
+        pLayout->plane_width[0] = width * 2;
+        pLayout->plane_start_x[0] = start_x * 2;
+        break;
+
+    case VA_FOURCC_Y210:
+    case VA_FOURCC_Y212:
+    case VA_FOURCC_Y216:
+    case VA_FOURCC_Y412:
+    case VA_FOURCC_Y416:
+        pLayout->plane_width[0] = width * 8;
+        pLayout->plane_start_x[0] = start_x * 8;
+        break;
+
+    case VA_FOURCC_YV16:
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] = width / 2;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] = start_x / 2;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y;
+        pLayout->num_planes = 3;
+        break;
+    case VA_FOURCC_P010:
+    case VA_FOURCC_P012:
+    case VA_FOURCC_P016:
+        pLayout->plane_width[0] = width * 2;
+        pLayout->plane_width[1] = width * 2;
+        pLayout->plane_height[1] = height / 2;
+        pLayout->plane_start_x[0] = start_x * 2;
+        pLayout->plane_start_x[1] = start_x * 2;
+        pLayout->plane_start_y[1] = start_y / 2;
+        pLayout->num_planes = 2;
+        break;
+    case VA_FOURCC_I010:
+        pLayout->plane_width[0] = width * 2;
+        pLayout->plane_width[1] =
+            pLayout->plane_width[2] = width;
+        pLayout->plane_height[0] = height;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height / 2;
+        pLayout->plane_start_x[0] = start_x * 2;
+        pLayout->plane_start_x[1] =
+            pLayout->plane_start_x[2] = start_x;
+        pLayout->plane_start_y[0] = start_y;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y / 2;
+        pLayout->num_planes = 3;
+
+        break;
+
+    case VA_FOURCC_ARGB64:
+    case VA_FOURCC_ABGR64:
+        pLayout->plane_width[0] =
+            pLayout->plane_width[1] =
+                pLayout->plane_width[2] =
+                    pLayout->plane_width[3] = width * 2;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] =
+                pLayout->plane_height[3] = height;
+        pLayout->plane_start_x[0] =
+            pLayout->plane_start_x[1] =
+                pLayout->plane_start_x[2] =
+                    pLayout->plane_start_x[3] = start_x * 2;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] =
+                pLayout->plane_start_y[3] = start_y;
+        pLayout->num_planes = 4;
+        break;
+    case VA_FOURCC_Q416:
+        pLayout->plane_width[0] =
+            pLayout->plane_width[1] =
+                pLayout->plane_width[2] = width * 2;
+        pLayout->plane_height[1] =
+            pLayout->plane_height[2] = height;
+        pLayout->plane_start_x[0] =
+            pLayout->plane_start_x[1] =
+                pLayout->plane_start_x[2] = start_x * 2;
+        pLayout->plane_start_y[1] =
+            pLayout->plane_start_y[2] = start_y;
+        break;
+
+    default: /*Y800 Y8*/
+        break;
+    }
+}
+
 static void va_TraceSurface(VADisplay dpy, VAContextID context)
 {
     unsigned int i;
@@ -1012,9 +1253,9 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     unsigned int chroma_v_offset;
     unsigned int buffer_name;
     void *buffer = NULL;
-    unsigned char *Y_data, *UV_data, *tmp;
-    unsigned int pixel_byte;
+    unsigned char *Y_data, *U_data, *V_data, *tmp;
     VAStatus va_status;
+    TracePictureLayout layout = {0};
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     if (!trace_ctx->trace_fp_surface)
@@ -1058,35 +1299,47 @@ static void va_TraceSurface(VADisplay dpy, VAContextID context)
     va_TraceMsg(trace_ctx, NULL);
 
     Y_data = (unsigned char*)buffer;
-    UV_data = (unsigned char*)buffer + chroma_u_offset;
+    U_data = (unsigned char*)buffer + chroma_u_offset;
+    V_data = (unsigned char*)buffer + chroma_v_offset;
 
-    if (fourcc == VA_FOURCC_Y410)
-        pixel_byte = 4;
-    else if (fourcc == VA_FOURCC_P010)
-        pixel_byte = 2;
-    else
-        pixel_byte = 1;
+    layout.width = trace_ctx->trace_surface_width;
+    layout.height = trace_ctx->trace_surface_height;
+    layout.start_x = trace_ctx->trace_surface_xoff;
+    layout.start_y = trace_ctx->trace_surface_yoff;
+    layout.fourcc = fourcc;
 
-    tmp = Y_data + luma_stride * trace_ctx->trace_surface_yoff;
+    va_TraceRetrieveImageInfo(&layout);
 
-    for (i = 0; i < trace_ctx->trace_surface_height; i++) {
-        fwrite(tmp + trace_ctx->trace_surface_xoff,
-               trace_ctx->trace_surface_width,
-               pixel_byte, trace_ctx->trace_fp_surface);
+    tmp = Y_data + luma_stride * layout.plane_start_y[0];
+
+    for (i = 0; i < layout.plane_height[0]; i++) {
+        fwrite(tmp + layout.plane_start_x[0],
+               layout.plane_width[0],
+               1, trace_ctx->trace_fp_surface);
 
         tmp += luma_stride;
     }
 
-    tmp = UV_data + chroma_u_stride * trace_ctx->trace_surface_yoff / 2;
-    if (fourcc == VA_FOURCC_NV12 || fourcc == VA_FOURCC_P010) {
-        for (i = 0; i < trace_ctx->trace_surface_height / 2; i++) {
-            fwrite(tmp + trace_ctx->trace_surface_xoff,
-                   trace_ctx->trace_surface_width,
-                   pixel_byte, trace_ctx->trace_fp_surface);
-
+    if (layout.num_planes > 1) {
+        tmp = U_data + chroma_u_stride * layout.plane_start_y[1];
+        for (i = 0; i < layout.plane_height[1]; i++) {
+            fwrite(tmp + layout.plane_start_x[1],
+                   layout.plane_width[1],
+                   1, trace_ctx->trace_fp_surface);
             tmp += chroma_u_stride;
         }
     }
+
+    if (layout.num_planes > 2) {
+        tmp = V_data + chroma_v_stride * layout.plane_start_y[2];
+        for (i = 0; i < layout.plane_height[2]; i++) {
+            fwrite(tmp + layout.plane_start_x[2],
+                   layout.plane_width[2],
+                   1, trace_ctx->trace_fp_surface);
+            tmp += chroma_v_stride;
+        }
+    }
+
 
     fflush(trace_ctx->trace_fp_surface);
 
