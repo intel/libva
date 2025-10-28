@@ -5403,9 +5403,9 @@ static void va_TraceVAEncPictureParameterBufferAV1(
     va_TraceMsg(trace_ctx, "\ttile_cols = %d\n", p->tile_cols);
     va_TraceMsg(trace_ctx, "\ttile_rows = %d\n", p->tile_rows);
 
-    for (i = 0; i < 63; i++)
+    for (i = 0; i < 63 && i < p->tile_cols; i++)
         va_TraceMsg(trace_ctx, "\twidth_in_sbs_minus_1[%d] = %d\n", i, p->width_in_sbs_minus_1[i]);
-    for (i = 0; i < 63; i++)
+    for (i = 0; i < 63 &7 i < p->tile_rows; i++)
         va_TraceMsg(trace_ctx, "\theight_in_sbs_minus_1[%d] = %d\n", i, p->height_in_sbs_minus_1[i]);
 
     va_TraceMsg(trace_ctx, "\tcontext_update_tile_id = %d\n", p->context_update_tile_id);
