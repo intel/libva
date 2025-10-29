@@ -77,8 +77,37 @@ static VAStatus va_DisplayContextGetDriverNames(
 {
     VAStatus vaStatus = VA_STATUS_ERROR_UNKNOWN;
 
-    if (!getenv("LIBVA_DRI3_DISABLE"))
+    const char* dri3_disable = getenv("LIBVA_DRI3_DISABLE");
+    if (!dri3_disable || !atoi(dri3_disable)) {
+        unsigned old_num_drivers = *num_drivers;
+
         vaStatus = va_DRI3_GetDriverNames(pDisplayContext, drivers, num_drivers);
+        /* As of 8 July 2023, i965 and iHD drivers lack DRI3 support.
+         *
+         * Requests by the community were raised as early as 29 July 2017,
+         * with DRI3 support landing in libva on the 27 September 2022. At of
+         * time of writing it's unknown if/when that would materialise.
+         *
+         * To handle this on libva level, we are explicitly disabling DRI3
+         * support on said drivers - it scales better than having every user
+         * to set the environment override listed above.
+         *
+         * Omit them by default, set LIBVA_DRI3_DISABLE=0 to bypass.
+         */
+        if (vaStatus == VA_STATUS_SUCCESS && dri3_disable && !atoi(dri3_disable)) {
+            for (unsigned i = 0; i < *num_drivers; i++) {
+                if (drivers[i] && (!strcmp(drivers[i], "iHD") ||
+                                   !strcmp(drivers[i], "i965")))
+                    vaStatus = VA_STATUS_ERROR_UNKNOWN;
+            }
+            if (vaStatus == VA_STATUS_ERROR_UNKNOWN) {
+                for (unsigned i = 0; i < *num_drivers; i++)
+                    free(drivers[i]);
+                *num_drivers = old_num_drivers;
+            }
+        }
+    }
+
     if (vaStatus != VA_STATUS_SUCCESS)
         vaStatus = va_DRI2_GetDriverNames(pDisplayContext, drivers, num_drivers);
 #ifdef HAVE_NVCTRL
