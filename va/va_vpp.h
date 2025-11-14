@@ -255,6 +255,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterHighDynamicRangeToneMapping,
     /** \brief Three-Dimensional Look Up Table (3DLUT). */
     VAProcFilter3DLUT,
+    /** \brief One-Dimensional Look Up Table (1DLUT). */
+    VAProcFilter1DLUT,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -1446,6 +1448,83 @@ typedef struct _VAProcFilterCap3DLUT {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t            va_reserved[VA_PADDING_HIGH];
 } VAProcFilterCap3DLUT;
+
+/** @name 1DLUT Channel Layout and Mapping */
+/**@{*/
+/** \brief 1DLUT Channel Layout is unknown. */
+#define VA_1DLUT_CHANNEL_UNKNOWN              0x00000000
+/** \brief 1DLUT Channel Layout is R, G, B, the default layout. Map RGB to RGB. */
+#define VA_1DLUT_CHANNEL_RGB_RGB              0x00000001
+/** \brief 1DLUT Channel Layout is Y, U, V. Map YUV to YUV. */
+#define VA_1DLUT_CHANNEL_YUV_YUV              0x00000002
+/**@}*/
+
+/**
+  * \brief 1DLUT filter parametrization.
+  *
+  * 1DLUT (One Dimensional Look Up Table) has long been utilized in image processing such as monitor gamma table
+  * which typically leverages three 1DLUTs, one for each color channel. 1DLUT gives an output value for each of
+  * a range of index value.
+  *
+  * This buffer defines 1DLUT attributes and memory layout. The typical 1DLUT (y = f(x)) has fixed number(lut_size)
+  * entries which includes input value (x) and corrected/output value(y). For example, one dimensional identity LUT
+  * (lut_size = 4, bit_depth = 8), the index of entry is {0, 1, 2, 3}, input value (x) of the entry is {0, 84, 168, 255},
+  * corrected value (y) of the entry is {0, 84, 168, 255}. The lut_buffer points to the start of entry. The memory layout
+  * of lut buffer 1DLUT[lut_size][Entry]is as the below (3 channels RGB as the example).This memory layout accutally is
+  * 3x1DLUT(R channel 1DLUT, G channel 1DLUT, B channel 1DLUT), RGB 3 channel sharing the same control points in x axis
+  * (input value of the function f(x)).
+  *     for (index = 0; index < lut_size; index++) {
+  *         1DLUT[index] = [Input_Value][Corrected_R/Y][Corrected_G/U][Corrected_B/V];
+  *     }
+  * The input value(Input_Value) can be any value of the range, for example, 8 bit image, it could be anyone in [0, 255],
+  * but must be in ascending order.
+  *
+  * 1DLUT usually does not change the format or color space of image. But when there are 1DLUT->3DLUT in the processing
+  * pipeline for a nonuniform lattice sampling, 3DLUT may change the format and color space, in this case, API user needs
+  * to set the correct 1DLUT/3DLUT mapping mode(1DLUT output should be same as 3DLUT input), implicit format conversion
+  * may be added automatically in the pipeline. For example, P010->1DLUT->3DLUT, if 3DLUT mapping mode is VA_3DLUT_CHANNEL_RGB_RGB,
+  * 1DLUT mapping mode should be same VA_1DLUT_CHANNEL_RGB_RGB, one format conversion could be added implicitly as the pipeline
+  * P010->RGB->1DLUT->3DLUT; if 3DLUT mapping mode is VA_3DLUT_CHANNEL_YUV_RGB, 1DLUT mapping mode
+  * should be same VA_1DLUT_CHANNEL_YUV_YUV(same as the input of 3DLUT).
+  */
+typedef struct _VAProcFilterParameterBuffer1DLUT {
+    /** \brief Filter type. Shall be set to #VAProcFilter1DLUT.*/
+    VAProcFilterType    type;
+
+    /** \brief lut_buffer points to 1DLUT data in the 1DLUT memory layout, must be linear */
+    uint8_t             *lut_buffer;
+    /**
+      * \brief lut_size is the number of valid points on the 1 dimensional look up table.
+      */
+    uint16_t            lut_size;
+    /** \brief bit_depth is the number of bits for every channel R, G or B (or Y, U, V) */
+    uint16_t            bit_depth;
+    /** \brief num_channel is the number of channels */
+    uint16_t            num_channel;
+    /**
+      * \brief size of the 1dlut buffer in bytes.
+      * The 1DLUT buffer_size should be lut_size * (num_channel + 1) * (bit_depth / 8).
+      */
+    uint32_t            buffer_size;
+    /** \brief channel_mapping defines the mapping of input and output channels, could be one of VA_1DLUT_CHANNEL_XXX*/
+    uint32_t            channel_mapping;
+
+    /** \brief reserved bytes for future use, must be zero */
+    uint32_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBuffer1DLUT;
+
+/** \brief Capabilities specification for the 1DLUT filter. */
+typedef struct _VAProcFilterCap1DLUT {
+    /** \brief lut_size is the number of valid points of the one dimensional look up table. */
+    uint16_t            lut_size;
+    /** \brief bit_depth is the number of bits for every channel R, G or B (or Y, U, V) */
+    uint16_t            bit_depth;
+    /** \brief num_channel is the number of channels */
+    uint16_t            num_channel;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t            va_reserved[VA_PADDING_HIGH];
+} VAProcFilterCap1DLUT;
 
 /**
  * \brief Default filter cap specification (single range value).
