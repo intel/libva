@@ -346,12 +346,17 @@ typedef struct  _VADecPictureParameterBufferAV1 {
 
     /** \brief Surface indices of reference frames in DPB.
      *
-     *  Contains a list of uncompressed frame buffer surface indices as references.
-     *  Application needs to make sure all the entries point to valid frames
-     *  except for intra frames by checking ref_frame_id[]. If missing frame
-     *  is identified, application may choose to perform error recovery by
-     *  pointing problematic index to an alternative frame buffer.
-     *  Driver is not responsible to validate reference frames' id.
+     *  Contains a list of uncompressed frame buffer surface indices as
+     *  references for the current frame. If the current frame is not an intra
+     *  frame (i.e., it's neither a key frame nor an intra-only frame), the
+     *  application needs to make sure all the entries in ref_frame_idx[] point
+     *  to valid frames in ref_frame_map[]. If a missing frame is identified,
+     *  the application may choose to perform error recovery by pointing the
+     *  problematic entry in ref_frame_idx[] to an alternative frame buffer. If
+     *  the current frame is an intra frame, then ref_frame_idx[] must be
+     *  ignored by the driver.
+     *  The driver is not responsible for validating the indices in
+     *  ref_frame_idx[].
      */
     VASurfaceID             ref_frame_map[8];
 
