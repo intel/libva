@@ -1881,6 +1881,9 @@ vaQuerySurfaceAttributes(
  * be constructed based on what the underlying hardware could expose
  * through vaQuerySurfaceAttributes().
  *
+ * If one of the attributes is not supported, this function returns
+ * \c VA_STATUS_ERROR_ATTR_NOT_SUPPORTED.
+ *
  * @param[in] dpy               the VA display
  * @param[in] format            the desired surface format. See \c VA_RT_FORMAT_*
  * @param[in] width             the surface width
