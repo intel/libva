@@ -6507,6 +6507,7 @@ static void va_TraceVP8Buf(
         va_TraceVASliceParameterBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VASliceDataBufferType:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
     case VAProbabilityBufferType:
         va_TraceVAProbabilityBufferVP8(dpy, context, buffer, type, size, num_elements, pbuf);
