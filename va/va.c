@@ -2456,3 +2456,30 @@ VAStatus vaProtectedSessionExecute(
     return status;
 }
 
+VAStatus
+vaGetSurfaceAttributes(
+    VADisplay           dpy,
+    VAConfigID          config,
+    VASurfaceAttrib     *attrib_list,
+    unsigned int        num_attribs
+)
+{
+    VADriverContextP ctx;
+    VAStatus vaStatus;
+
+    CHECK_DISPLAY(dpy);
+    ctx = CTX(dpy);
+    if (!ctx)
+        return VA_STATUS_ERROR_INVALID_DISPLAY;
+
+    if (ctx->vtable->vaGetSurfaceAttributes)
+        vaStatus = ctx->vtable->vaGetSurfaceAttributes(ctx, config,
+                   attrib_list, num_attribs);
+    else
+        vaStatus = VA_STATUS_ERROR_UNIMPLEMENTED; 
+
+    VA_TRACE_RET(dpy, vaStatus);
+
+    return vaStatus;
+}
+
