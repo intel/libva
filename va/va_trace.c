@@ -6589,6 +6589,8 @@ static void va_TraceAV1Buf(
     DPY2TRACECTX(dpy, context, VA_INVALID_ID);
 
     switch (type) {
+    default:
+        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
     case VAPictureParameterBufferType:
         va_TraceVAPictureParameterBufferAV1(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -6610,9 +6612,7 @@ static void va_TraceAV1Buf(
     case VAEncPackedHeaderParameterBufferType:
         va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
-    default:
-        va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
-        break;
+
     }
 }
 
