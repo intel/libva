@@ -460,6 +460,40 @@ void va_TraceSetDisplayAttributes(
     int num_attributes
 );
 
+DLL_HIDDEN
+void va_TraceCreateProtectedSession(
+    VADisplay dpy,
+    VAConfigID config_id,
+    VAProtectedSessionID *protected_session
+);
+
+DLL_HIDDEN
+void va_TraceDestroyProtectedSession(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session
+);
+
+DLL_HIDDEN
+void va_TraceAttachProtectedSession(
+    VADisplay dpy,
+    VAContextID context,
+    VAProtectedSessionID protected_session
+);
+
+DLL_HIDDEN
+void va_TraceDetachProtectedSession(
+    VADisplay dpy,
+    VAContextID context
+);
+
+DLL_HIDDEN
+void va_TraceProtectedSessionExecute(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session,
+    VABufferID buf_id
+);
+
+
 /* extern function called by display side */
 void va_TracePutSurface(
     VADisplay dpy,
