@@ -4612,6 +4612,85 @@ static void va_TraceVAEncPackedHeaderParameterBufferType(
     return;
 }
 
+static void va_TraceVAEncryptionParameters(
+    VADisplay dpy,
+    VAContextID context,
+    VABufferID buffer,
+    VABufferType type,
+    unsigned int size,
+    unsigned int num_elements,
+    void *data
+)
+{
+    VAEncryptionParameters *p = (VAEncryptionParameters *)data;
+    unsigned int i;
+
+    DPY2TRACECTX(dpy, context, VA_INVALID_ID);
+
+    va_TraceMsg(trace_ctx, "--VAEncryptionParameters\n");
+    va_TraceMsg(trace_ctx, "\tencryption_type = 0x%08x\n", p->encryption_type);
+
+    if (p->encryption_type & VA_ENCRYPTION_TYPE_FULLSAMPLE_CTR)
+        va_TraceMsg(trace_ctx, "\t\tVA_ENCRYPTION_TYPE_FULLSAMPLE_CTR\n");
+    if (p->encryption_type & VA_ENCRYPTION_TYPE_FULLSAMPLE_CBC)
+        va_TraceMsg(trace_ctx, "\t\tVA_ENCRYPTION_TYPE_FULLSAMPLE_CBC\n");
+    if (p->encryption_type & VA_ENCRYPTION_TYPE_SUBSAMPLE_CTR)
+        va_TraceMsg(trace_ctx, "\t\tVA_ENCRYPTION_TYPE_SUBSAMPLE_CTR\n");
+    if (p->encryption_type & VA_ENCRYPTION_TYPE_SUBSAMPLE_CBC)
+        va_TraceMsg(trace_ctx, "\t\tVA_ENCRYPTION_TYPE_SUBSAMPLE_CBC\n");
+
+    va_TraceMsg(trace_ctx, "\tnum_segments = %u\n", p->num_segments);
+    va_TraceMsg(trace_ctx, "\tsegment_info = %p\n", p->segment_info);
+
+    if (p->segment_info && p->num_segments > 0) {
+        for (i = 0; i < p->num_segments && i < 16; i++) {
+            va_TraceMsg(trace_ctx, "\t\tsegment[%u]:\n", i);
+            va_TraceMsg(trace_ctx, "\t\t\tsegment_start_offset = %u\n",
+                        p->segment_info[i].segment_start_offset);
+            va_TraceMsg(trace_ctx, "\t\t\tsegment_length = %u\n",
+                        p->segment_info[i].segment_length);
+            va_TraceMsg(trace_ctx, "\t\t\tpartial_aes_block_size = %u\n",
+                        p->segment_info[i].partial_aes_block_size);
+            va_TraceMsg(trace_ctx, "\t\t\tinit_byte_length = %u\n",
+                        p->segment_info[i].init_byte_length);
+
+            /* Print first 16 bytes of IV/CTR */
+            va_TraceMsg(trace_ctx, "\t\t\taes_cbc_iv_or_ctr = ");
+            for (unsigned int j = 0; j < 16 && j < sizeof(p->segment_info[i].aes_cbc_iv_or_ctr); j++) {
+                va_TracePrint(trace_ctx, "%02x ", p->segment_info[i].aes_cbc_iv_or_ctr[j]);
+            }
+            va_TracePrint(trace_ctx, "\n");
+        }
+        if (p->num_segments > 16) {
+            va_TraceMsg(trace_ctx, "\t\t... (%u more segments not shown)\n",
+                        p->num_segments - 16);
+        }
+    }
+
+    va_TraceMsg(trace_ctx, "\tstatus_report_index = %u\n", p->status_report_index);
+    va_TraceMsg(trace_ctx, "\tsize_of_length = %u\n", p->size_of_length);
+    va_TraceMsg(trace_ctx, "\tkey_blob_size = %u\n", p->key_blob_size);
+    va_TraceMsg(trace_ctx, "\tblocks_stripe_encrypted = %u\n", p->blocks_stripe_encrypted);
+    va_TraceMsg(trace_ctx, "\tblocks_stripe_clear = %u\n", p->blocks_stripe_clear);
+
+    /* Print wrapped decrypt blob (first 16 bytes) */
+    va_TraceMsg(trace_ctx, "\twrapped_decrypt_blob = ");
+    for (i = 0; i < 16 && i < sizeof(p->wrapped_decrypt_blob); i++) {
+        va_TracePrint(trace_ctx, "%02x ", p->wrapped_decrypt_blob[i]);
+    }
+    va_TracePrint(trace_ctx, "...\n");
+
+    /* Print wrapped encrypt blob (first 16 bytes) */
+    va_TraceMsg(trace_ctx, "\twrapped_encrypt_blob = ");
+    for (i = 0; i < 16 && i < sizeof(p->wrapped_encrypt_blob); i++) {
+        va_TracePrint(trace_ctx, "%02x ", p->wrapped_encrypt_blob[i]);
+    }
+    va_TracePrint(trace_ctx, "...\n");
+
+    va_TraceMsg(trace_ctx, NULL);
+}
+
+
 static void va_TraceVAEncMiscParameterBuffer(
     VADisplay dpy,
     VAContextID context,
@@ -6400,6 +6479,10 @@ static void va_TraceHEVCBuf(
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncryptionParameterBufferType:
+        va_TraceVAEncryptionParameters(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -6468,10 +6551,14 @@ static void va_TraceH264Buf(
     case VAEncPackedHeaderParameterBufferType:
         va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
-
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncryptionParameterBufferType:
+        va_TraceVAEncryptionParameters(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+
+
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -6570,6 +6657,10 @@ static void va_TraceVP9Buf(
     case VAEncMiscParameterBufferType:
         va_TraceVAEncMiscParameterBuffer(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncryptionParameterBufferType:
+        va_TraceVAEncryptionParameters(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -6610,6 +6701,10 @@ static void va_TraceAV1Buf(
     case VAEncPackedHeaderParameterBufferType:
         va_TraceVAEncPackedHeaderParameterBufferType(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
+    case VAEncryptionParameterBufferType:
+        va_TraceVAEncryptionParameters(dpy, context, buffer, type, size, num_elements, pbuf);
+        break;
+
     default:
         va_TraceVABuffers(dpy, context, buffer, type, size, num_elements, pbuf);
         break;
@@ -7365,6 +7460,129 @@ void va_TraceSetDisplayAttributes(
     va_TraceDisplayAttributes(trace_ctx, attr_list, num_attributes);
 
     DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+
+void va_TraceCreateProtectedSession(
+    VADisplay dpy,
+    VAConfigID config_id,
+    VAProtectedSessionID *protected_session
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tconfig_id = 0x%08x\n", config_id);
+    if (protected_session)
+        va_TraceMsg(trace_ctx, "\tprotected_session = 0x%08x\n", *protected_session);
+    else
+        va_TraceMsg(trace_ctx, "\tprotected_session = (NULL)\n");
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceDestroyProtectedSession(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tprotected_session = 0x%08x\n", protected_session);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceAttachProtectedSession(
+    VADisplay dpy,
+    VAContextID context,
+    VAProtectedSessionID protected_session
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
+    va_TraceMsg(trace_ctx, "\tprotected_session = 0x%08x\n", protected_session);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceDetachProtectedSession(
+    VADisplay dpy,
+    VAContextID context
+)
+{
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tcontext = 0x%08x\n", context);
+
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+}
+
+void va_TraceProtectedSessionExecute(
+    VADisplay dpy,
+    VAProtectedSessionID protected_session,
+    VABufferID buf_id
+)
+{
+    VABufferType type;
+    unsigned int size;
+    unsigned int num_elements;
+    bool buf_valid = false;
+    VAProtectedSessionExecuteBuffer *execute_buf = NULL;
+
+    /* Try to get buffer info and map the buffer*/
+    if (vaBufferInfo(dpy, VA_INVALID_ID, buf_id, &type, &size, &num_elements) == VA_STATUS_SUCCESS) {
+        if (type == VAProtectedSessionExecuteBufferType) {
+            if (vaMapBuffer(dpy, buf_id, (void **)&execute_buf) == VA_STATUS_SUCCESS && execute_buf) {
+                buf_valid = true;
+            }
+        }
+    }
+
+    DPY2TRACE_VIRCTX(dpy);
+
+    TRACE_FUNCNAME(idx);
+
+    va_TraceMsg(trace_ctx, "\tprotected_session = 0x%08x\n", protected_session);
+    va_TraceMsg(trace_ctx, "\tbuf_id = 0x%08x\n", buf_id);
+
+    if (buf_valid) {
+        va_TraceMsg(trace_ctx, "\tbuffer type = %s\n", vaBufferTypeStr(type));
+        va_TraceMsg(trace_ctx, "\tbuffer size = %u\n", size);
+        va_TraceMsg(trace_ctx, "\tnum_elements = %u\n", num_elements);
+        va_TraceMsg(trace_ctx, "\tVAProtectedSessionExecuteBuffer:\n");
+        va_TraceMsg(trace_ctx, "\t\tfunction_id = 0x%08x\n", execute_buf->function_id);
+        va_TraceMsg(trace_ctx, "\t\tinput.data = 0x%p\n", execute_buf->input.data);
+        va_TraceMsg(trace_ctx, "\t\tinput.data_size = %u\n", execute_buf->input.data_size);
+        va_TraceMsg(trace_ctx, "\t\tinput.max_data_size = %u\n", execute_buf->input.max_data_size);
+        va_TraceMsg(trace_ctx, "\t\toutput.data = 0x%p\n", execute_buf->output.data);
+        va_TraceMsg(trace_ctx, "\t\toutput.data_size = %u\n", execute_buf->output.data_size);
+        va_TraceMsg(trace_ctx, "\t\toutput.max_data_size = %u\n", execute_buf->output.max_data_size);
+        va_TraceMsg(trace_ctx, "\t\tstatus = 0x%08x\n", execute_buf->status);
+    } else {
+        va_TraceMsg(trace_ctx, "\tbuffer is not valid\n");
+    }
+    va_TraceMsg(trace_ctx, NULL);
+
+    DPY2TRACE_VIRCTX_EXIT(pva_trace);
+
+    vaUnmapBuffer(dpy, buf_id);
 }
 
 

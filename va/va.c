@@ -2373,6 +2373,8 @@ VAStatus vaCreateProtectedSession(
         CreateProtectedSession,
         (ctx, config_id, protected_session)
     );
+    VA_TRACE_LOG(va_TraceCreateProtectedSession, dpy, config_id, protected_session);
+
     VA_TRACE_RET(dpy, status);
 
     return status;
@@ -2392,6 +2394,8 @@ VAStatus vaDestroyProtectedSession(
         DestroyProtectedSession,
         (ctx, protected_session)
     );
+    VA_TRACE_LOG(va_TraceDestroyProtectedSession, dpy, protected_session);
+
     VA_TRACE_RET(dpy, status);
 
     return status;
@@ -2412,6 +2416,8 @@ VAStatus vaAttachProtectedSession(
         AttachProtectedSession,
         (ctx, context, protected_session)
     );
+    VA_TRACE_LOG(va_TraceAttachProtectedSession, dpy, context, protected_session);
+
     VA_TRACE_RET(dpy, status);
 
     return status;
@@ -2431,6 +2437,8 @@ VAStatus vaDetachProtectedSession(
         DetachProtectedSession,
         (ctx, context)
     );
+    VA_TRACE_LOG(va_TraceDetachProtectedSession, dpy, context);
+
     VA_TRACE_RET(dpy, status);
 
     return status;
@@ -2451,6 +2459,8 @@ VAStatus vaProtectedSessionExecute(
         ProtectedSessionExecute,
         (ctx, protected_session, data)
     );
+    VA_TRACE_LOG(va_TraceProtectedSessionExecute, dpy, protected_session, data);
+
     VA_TRACE_RET(dpy, status);
 
     return status;
