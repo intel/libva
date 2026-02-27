@@ -543,7 +543,11 @@ typedef enum {
     VAProfileVVCMain10                  = 37,
     VAProfileVVCMultilayerMain10        = 38,
     VAProfileAV1Profile2                = 39,
-    VAProfileH264High422                = 40
+    VAProfileH264High422                = 40,
+    /** \brief VC3 HD profile (CBR, fixed resolutions 1920x1080 and 1280x720, DNxHD variants with CIDs 1235-1259). */
+    VAProfileVC3HD                      = 41,
+    /** \brief VC3 Resolution-Independent profile (VBR, flexible resolution up to 16384x16384, DNxHR variants with CIDs 1270-1274). */
+    VAProfileVC3RI                      = 42,
 } VAProfile;
 
 /**
@@ -5428,6 +5432,7 @@ VAStatus vaCopy(VADisplay dpy, VACopyObject * dst, VACopyObject * src, VACopyOpt
 #include <va/va_dec_vp9.h>
 #include <va/va_dec_av1.h>
 #include <va/va_dec_vvc.h>
+#include <va/va_dec_vc3.h>
 #include <va/va_enc_hevc.h>
 #include <va/va_fei_hevc.h>
 #include <va/va_enc_h264.h>
