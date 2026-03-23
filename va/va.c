@@ -59,19 +59,6 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-#ifndef HAVE_SECURE_GETENV
-static char * secure_getenv(const char *name)
-{
-#if defined(__MINGW32__) || defined(__MINGW64__)
-    if (getuid() == geteuid())
-#else
-    if (getuid() == geteuid() && getgid() == getegid())
-#endif
-        return getenv(name);
-    else
-        return NULL;
-}
-#endif
 
 /*
  * read a config "env" for libva.conf or from environment setting

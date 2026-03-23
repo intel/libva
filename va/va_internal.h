@@ -29,6 +29,21 @@
 extern "C" {
 #endif
 
+#ifndef HAVE_SECURE_GETENV
+#ifdef _WIN32
+/* No setuid/setgid on Windows, secure_getenv is just getenv */
+#define secure_getenv getenv
+#else
+static inline char * secure_getenv(const char *name)
+{
+    if (getuid() == geteuid() && getgid() == getegid())
+        return getenv(name);
+    else
+        return NULL;
+}
+#endif
+#endif
+
 #define CTX(dpy) (((VADisplayContextP)dpy)->pDriverContext)
 #define CHECK_DISPLAY(dpy) if (!vaDisplayIsValid(dpy)) { return VA_STATUS_ERROR_INVALID_DISPLAY; }
 
