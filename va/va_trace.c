@@ -7543,6 +7543,8 @@ void va_TraceProtectedSessionExecute(
     VABufferType type;
     unsigned int size;
     unsigned int num_elements;
+    unsigned int i;
+    unsigned char *p;
     bool buf_valid = false;
     VAProtectedSessionExecuteBuffer *execute_buf = NULL;
 
@@ -7575,6 +7577,29 @@ void va_TraceProtectedSessionExecute(
         va_TraceMsg(trace_ctx, "\t\toutput.data_size = %u\n", execute_buf->output.data_size);
         va_TraceMsg(trace_ctx, "\t\toutput.max_data_size = %u\n", execute_buf->output.max_data_size);
         va_TraceMsg(trace_ctx, "\t\tstatus = 0x%08x\n", execute_buf->status);
+
+        if (va_trace_flag & VA_TRACE_FLAG_BUFDATA) {
+            if (execute_buf->input.data && execute_buf->input.data_size > 0) {
+                p = (unsigned char *)execute_buf->input.data;
+                for (i = 0; i < execute_buf->input.data_size; i++) {
+                    if ((i % 16) == 0)
+                        va_TraceMsg(trace_ctx, "\t\tinput.data[0x%04x]:", i);
+                    va_TracePrint(trace_ctx, " %02x", p[i]);
+                    if (((i % 16) == 15) || (i == execute_buf->input.data_size - 1))
+                        va_TracePrint(trace_ctx, "\n");
+                }
+            }
+            if (execute_buf->output.data && execute_buf->output.data_size > 0) {
+                p = (unsigned char *)execute_buf->output.data;
+                for (i = 0; i < execute_buf->output.data_size; i++) {
+                    if ((i % 16) == 0)
+                        va_TraceMsg(trace_ctx, "\t\toutput.data[0x%04x]:", i);
+                    va_TracePrint(trace_ctx, " %02x", p[i]);
+                    if (((i % 16) == 15) || (i == execute_buf->output.data_size - 1))
+                        va_TracePrint(trace_ctx, "\n");
+                }
+            }
+        }
     } else {
         va_TraceMsg(trace_ctx, "\tbuffer is not valid\n");
     }
