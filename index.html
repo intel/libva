@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -71,14 +71,14 @@ Introduction</h1>
 <p>The main motivation for VA-API (Video Acceleration API) is to enable hardware accelerated video decode and encode at various entry-points (VLD, IDCT, Motion Compensation etc.) for the prevailing coding standards today (MPEG-2, MPEG-4 ASP/H.263, MPEG-4 AVC/H.264, VC-1/VMW3, and JPEG, HEVC/H265, VP8, VP9) and video pre/post processing</p>
 <p>VA-API is split into several modules:</p><ul>
 <li><a class="el" href="group__api__core.html">Core API</a></li>
-<li>Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9)<ul>
+<li>Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9, AV1)<ul>
 <li><a class="el" href="group__api__enc__h264.html">H.264 encoding API</a></li>
 <li><a class="el" href="group__api__enc__hevc.html">HEVC encoding API</a></li>
 <li><a class="el" href="group__api__enc__jpeg.html">JPEG encoding API</a></li>
 <li><a class="el" href="group__api__enc__mpeg2.html">MPEG-2 encoding API</a></li>
 <li><a class="el" href="group__api__enc__vp8.html">VP8 encoding API</a></li>
 <li><a class="el" href="group__api__enc__vp9.html">VP9 encoding API</a></li>
-<li>api_enc_av1</li>
+<li><a class="el" href="group__api__enc__av1.html">AV1 encoding API</a></li>
 </ul>
 </li>
 <li>Decoder (HEVC, JPEG, VP8, VP9, AV1, VVC)<ul>
@@ -87,7 +87,7 @@ Introduction</h1>
 <li><a class="el" href="group__api__dec__vp8.html">VP8 decoding API</a></li>
 <li><a class="el" href="group__api__dec__vp9.html">VP9 decoding API</a></li>
 <li><a class="el" href="group__api__dec__av1.html">AV1 decoding API</a></li>
-<li>api_dec_vvc</li>
+<li><a class="el" href="group__api__dec__vvc.html">VVC decoding API</a></li>
 </ul>
 </li>
 <li><a class="el" href="group__api__vpp.html">Video processing API</a></li>
@@ -176,7 +176,7 @@ Multithreading Guide</h1>
 <div class="ttc" id="agroup__api__core_html_ga9ff7833d425406cb1834c783b0a47652"><div class="ttname"><a href="group__api__core.html#ga9ff7833d425406cb1834c783b0a47652">vaCreateConfig</a></div><div class="ttdeci">VAStatus vaCreateConfig(VADisplay dpy, VAProfile profile, VAEntrypoint entrypoint, VAConfigAttrib *attrib_list, int num_attribs, VAConfigID *config_id)</div></div>
 <div class="ttc" id="agroup__api__core_html_gac970ea0eec412326667549f58c44129b"><div class="ttname"><a href="group__api__core.html#gac970ea0eec412326667549f58c44129b">vaCreateSurfaces</a></div><div class="ttdeci">VAStatus vaCreateSurfaces(VADisplay dpy, unsigned int format, unsigned int width, unsigned int height, VASurfaceID *surfaces, unsigned int num_surfaces, VASurfaceAttrib *attrib_list, unsigned int num_attribs)</div><div class="ttdoc">Creates an array of surfaces.</div></div>
 <div class="ttc" id="agroup__api__core_html_gacf031b9aaf39365bf8d79d92372f2ec8"><div class="ttname"><a href="group__api__core.html#gacf031b9aaf39365bf8d79d92372f2ec8">vaBeginPicture</a></div><div class="ttdeci">VAStatus vaBeginPicture(VADisplay dpy, VAContextID context, VASurfaceID render_target)</div></div>
-<div class="ttc" id="agroup__api__core_html_gaff38bc6c01b65c6e9d473e40bdde9df6"><div class="ttname"><a href="group__api__core.html#gaff38bc6c01b65c6e9d473e40bdde9df6">VA_RT_FORMAT_YUV420</a></div><div class="ttdeci">#define VA_RT_FORMAT_YUV420</div><div class="ttdoc">YUV 4:2:0 8-bit.</div><div class="ttdef"><b>Definition:</b> va.h:1073</div></div>
+<div class="ttc" id="agroup__api__core_html_gaff38bc6c01b65c6e9d473e40bdde9df6"><div class="ttname"><a href="group__api__core.html#gaff38bc6c01b65c6e9d473e40bdde9df6">VA_RT_FORMAT_YUV420</a></div><div class="ttdeci">#define VA_RT_FORMAT_YUV420</div><div class="ttdoc">YUV 4:2:0 8-bit.</div><div class="ttdef"><b>Definition:</b> va.h:1083</div></div>
 <div class="ttc" id="agroup__api__core_html_gaffbd38af17b5f061707010287e7d4c97"><div class="ttname"><a href="group__api__core.html#gaffbd38af17b5f061707010287e7d4c97">vaEndPicture</a></div><div class="ttdeci">VAStatus vaEndPicture(VADisplay dpy, VAContextID context)</div></div>
 </div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->

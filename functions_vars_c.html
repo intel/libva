@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -75,11 +75,22 @@ $(function() {
 <li>caps_flag
 : <a class="el" href="structVAProcFilterCapHighDynamicRange.html#aa92624b6f9f2f89f970c54f4921072ce">VAProcFilterCapHighDynamicRange</a>
 </li>
+<li>cbframe_restoration_type
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a82aace4f53741702d120a9d6696c2647">VAEncPictureParameterBufferAV1</a>
+</li>
+<li>cdef_bits
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ad28ea688603ad55807724b97558f4710">VAEncPictureParameterBufferAV1</a>
+</li>
 <li>cdef_damping_minus_3
 : <a class="el" href="group__api__dec__av1.html#gafd2850a234683025f5cf6dac4f36b861">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#aa1141fcc2c4d25407344332900fac759">VAEncPictureParameterBufferAV1</a>
+</li>
+<li>cdef_uv_strengths
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#aeb5fb2144c472fdb268f121f2ff59f50">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>cdef_y_strengths
 : <a class="el" href="group__api__dec__av1.html#ga5500d95e3391107523555657fa873b9f">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#ad2e35f3abc1037f1294efb38a5291cbe">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>cfs_I_frames
 : <a class="el" href="structVAEncMiscParameterRateControl.html#a77e70fbf9591951cc319759171da0fe7">VAEncMiscParameterRateControl</a>
@@ -149,6 +160,9 @@ $(function() {
 <li>ChromaOffsetL1
 : <a class="el" href="structVASliceParameterBufferHEVC.html#ab4564121e738b0e69b1b6e4b1a358e7f">VASliceParameterBufferHEVC</a>
 </li>
+<li>ChromaQpTable
+: <a class="el" href="structVAPictureParameterBufferVVC.html#a967f31d1b42dd2bc31f47196fb336ebd">VAPictureParameterBufferVVC</a>
+</li>
 <li>clamp_qindex_high
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#a82c44af4f5f7011bf723d421909d0867">VAEncPictureParameterBufferVP8</a>
 </li>
@@ -162,7 +176,8 @@ $(function() {
 : <a class="el" href="structVAEncSequenceParameterBufferMPEG2.html#aa47dd8409a18c90a57500104f5f24d2e">VAEncSequenceParameterBufferMPEG2</a>
 </li>
 <li>coded_buf
-: <a class="el" href="structVAEncPictureParameterBufferH264.html#a88f3191fba5d3d534de080151de6a932">VAEncPictureParameterBufferH264</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a0c3fd1afbfb86016b8a3d97c8e2bba65">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferH264.html#a88f3191fba5d3d534de080151de6a932">VAEncPictureParameterBufferH264</a>
 , <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a15c5a96f28d691a30bd70e26d7980682">VAEncPictureParameterBufferHEVC</a>
 , <a class="el" href="structVAEncPictureParameterBufferJPEG.html#a7e7849e6cd9a1227dd84fbc96633c561">VAEncPictureParameterBufferJPEG</a>
 , <a class="el" href="structVAEncPictureParameterBufferMPEG2.html#a0c04fc83f6ac2357b9a810e84635cfd7">VAEncPictureParameterBufferMPEG2</a>
@@ -230,11 +245,17 @@ $(function() {
 <li>context_priority_update
 : <a class="el" href="structVAContextParameterUpdateBuffer.html#a9f0eed4cac9fb8c3c7af30758018207c">VAContextParameterUpdateBuffer</a>
 </li>
+<li>context_update_tile_id
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a443a8d22555978703cf4f5d74650384c">VAEncPictureParameterBufferAV1</a>
+</li>
 <li>copy_buffer_to_alternate
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#ad09a48a6028722b8c2b8bbd68b5590cf">VAEncPictureParameterBufferVP8</a>
 </li>
 <li>copy_buffer_to_golden
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#ab907fbaf5c9b8d013cf7cb73b20fae75">VAEncPictureParameterBufferVP8</a>
+</li>
+<li>crframe_restoration_type
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a3ea98728c18a2de41b9696dc999d5437">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>crop_rectangle
 : <a class="el" href="structVAPictureParameterBufferJPEGBaseline.html#a14f55607a56731ddd46b110050dba06b">VAPictureParameterBufferJPEGBaseline</a>
@@ -272,6 +293,7 @@ $(function() {
 <li>CurrPic
 : <a class="el" href="structVAEncPictureParameterBufferH264.html#a94a2b75bdb362b2adb7a6bbb31900024">VAEncPictureParameterBufferH264</a>
 , <a class="el" href="structVAPictureParameterBufferHEVC.html#aa5937ceffb944fc8300cec7c214e1b1b">VAPictureParameterBufferHEVC</a>
+, <a class="el" href="structVAPictureParameterBufferVVC.html#a608b9c93aaaae92bb945cd55a67059c5">VAPictureParameterBufferVVC</a>
 </li>
 </ul>
 </div><!-- contents -->

@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -68,6 +68,9 @@ $(function() {
 <li>enable_8x8_statistics
 : <a class="el" href="structVAStatsStatisticsParameterH264.html#aa2bd5a64cac0d15fc3358bc33fa61995">VAStatsStatisticsParameterH264</a>
 </li>
+<li>enable_cdef
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a1259d277f225576c470c4d63a2fbf5a9">VAEncSequenceParameterBufferAV1</a>
+</li>
 <li>enable_cu64_amp_check
 : <a class="el" href="structVAEncMiscParameterFEIFrameControlHEVC.html#a1314c265350b82931eed4928a4ba9b48">VAEncMiscParameterFEIFrameControlHEVC</a>
 </li>
@@ -80,17 +83,51 @@ $(function() {
 <li>enable_custom_rounding_inter
 : <a class="el" href="structVAEncMiscParameterCustomRoundingControl.html#a98389ac0c5bb22211b047e8f79548905">VAEncMiscParameterCustomRoundingControl</a>
 </li>
+<li>enable_dual_filter
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a5609afe9248262d6034eb0c77e5536ae">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_filter_intra
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a61d6499feee11c461f1f237ec67ba57b">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_frame_obu
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a4106697955bfafae4bb8aca76949a0e3">VAEncPictureParameterBufferAV1</a>
+</li>
 <li>enable_gpu_weighted_prediction
 : <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a3ad6b886fa6192c3be2f2b60774d05d7">VAEncPictureParameterBufferHEVC</a>
 </li>
 <li>enable_interintra_compound
 : <a class="el" href="structVADecPictureParameterBufferAV1.html#a934478bfdb881028d9730a371f39e49f">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a678f71db63e88024ba85ddf384ec0590">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_intra_edge_filter
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a41f3bb293884927f62b1c10fc67987fc">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_jnt_comp
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#acb4e868ae7bcf8ddfaaae06e285518af">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_masked_compound
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#afc390b67657f1d15fe69f47fed064577">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_order_hint
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a41a89c3733fb2b8361b632ffe51bd5af">VAEncSequenceParameterBufferAV1</a>
 </li>
 <li>enable_parallel_brc
 : <a class="el" href="structVAEncMiscParameterRateControl.html#ac6d8d7032f6889112f9478139b9ec2c9">VAEncMiscParameterRateControl</a>
 </li>
+<li>enable_ref_frame_mvs
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a99812e3f5c2ba506a88fb57741c4a788">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_restoration
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#aa028502f393f3ee9228de399c5c64c30">VAEncSequenceParameterBufferAV1</a>
+</li>
 <li>enable_sub_pel_mode
 : <a class="el" href="structVAEncMiscParameterSubMbPartPelH264.html#a1a00f01199a59b349134c57636ca5b70">VAEncMiscParameterSubMbPartPelH264</a>
+</li>
+<li>enable_superres
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a117dc4392e52efdf7b6f9ca061ceed20">VAEncSequenceParameterBufferAV1</a>
+</li>
+<li>enable_warped_motion
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#abdbdf20500f4318f1eaf9f4494c6183e">VAEncSequenceParameterBufferAV1</a>
 </li>
 <li>enabled
 : <a class="el" href="structVASegmentationStructAV1.html#a0690c46b484b5dd9c41c4ab925e80528">VASegmentationStructAV1</a>
@@ -108,7 +145,8 @@ $(function() {
 : <a class="el" href="structVASliceParameterBufferHEVC.html#ae75eaadd6cff08eab33b7bb9442d70d0">VASliceParameterBufferHEVC</a>
 </li>
 <li>error_resilient_mode
-: <a class="el" href="structVAEncPictureParameterBufferVP9.html#ae3e1cc448e99ef3078610a602f8b6b78">VAEncPictureParameterBufferVP9</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ae3a472938af8d80a1e9fc83ab6a2f796">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferVP9.html#ae3e1cc448e99ef3078610a602f8b6b78">VAEncPictureParameterBufferVP9</a>
 </li>
 </ul>
 </div><!-- contents -->

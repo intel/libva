@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -73,9 +73,15 @@ $(function() {
 <li>RapPicFlag
 : <a class="el" href="structVAPictureParameterBufferHEVC.html#a31ec8f71dd7585a670d3f7bc12f2733b">VAPictureParameterBufferHEVC</a>
 </li>
+<li>reconstructed_frame
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a1af6a10912e4a1749da85c50ab67c095">VAEncPictureParameterBufferAV1</a>
+</li>
 <li>reconstructed_picture
 : <a class="el" href="structVAEncPictureParameterBufferJPEG.html#ab96d7936f1b696e9e5b7e50e54ce7e62">VAEncPictureParameterBufferJPEG</a>
 , <a class="el" href="structVAEncPictureParameterBufferMPEG2.html#a90666f6d22e456cac9014ea5742c9e03">VAEncPictureParameterBufferMPEG2</a>
+</li>
+<li>reduced_tx_set
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#af6d2c9cd34c52e32c22544ca28ca2a68">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>redundant_pic_cnt_present_flag
 : <a class="el" href="structVAEncPictureParameterBufferH264.html#a8d1fd087c3ceed528caec11f6420639a">VAEncPictureParameterBufferH264</a>
@@ -88,12 +94,15 @@ $(function() {
 </li>
 <li>ref_deltas
 : <a class="el" href="group__api__dec__av1.html#ga3dca77196cf286740d0e8de57a4a6378">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#a5f86f11c899b2bfcca0df3cf5a1b8d75">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>ref_frame_ctrl_l0
-: <a class="el" href="structVAEncPictureParameterBufferVP9.html#ada4ced9c239bab566b0d33d175f57020">VAEncPictureParameterBufferVP9</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ab52dfb9faa7098b050697a75306e9c31">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferVP9.html#ada4ced9c239bab566b0d33d175f57020">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>ref_frame_idx
 : <a class="el" href="group__api__dec__av1.html#ga7da66acfa828f2401415d09e544b0ae8">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#ada3a1ea7149414ea555e13f7be367c00">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>ref_frame_map
 : <a class="el" href="group__api__dec__av1.html#ga32fd81c82965ccf7e704d85ddf312178">VADecPictureParameterBufferAV1</a>
@@ -108,8 +117,8 @@ $(function() {
 : <a class="el" href="structVAEncMiscParameterFEIFrameControlHEVC.html#a4ea42d40b0ae37f47c684b3e6eb75cfa">VAEncMiscParameterFEIFrameControlHEVC</a>
 </li>
 <li>ref_idx
-: <a class="el" href="structVAEncFEIMVPredictorH264.html#a9af71a5c8988f5788b5b80e026ef0dbd">VAEncFEIMVPredictorH264</a>
-, <a class="el" href="structVAEncFEIMVPredictorHEVC.html#aabde74f5138845c84299760a01f58915">VAEncFEIMVPredictorHEVC</a>
+: <a class="el" href="structVAEncFEIMVPredictorH264.html#a3bfacbf74f51f17c504e638be4ae33b1">VAEncFEIMVPredictorH264</a>
+, <a class="el" href="structVAEncFEIMVPredictorHEVC.html#a442dd8490f365fb1998f3f7eaec90f60">VAEncFEIMVPredictorHEVC</a>
 </li>
 <li>ref_last_idx
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#a688c7ac722e9a06b24a722f20e724c47">VAEncPictureParameterBufferVP9</a>
@@ -134,8 +143,12 @@ $(function() {
 </li>
 <li>reference_frames
 : <a class="el" href="structVADecPictureParameterBufferVP9.html#a192e9cb4f3cc7411c2259ecc5a8ad91e">VADecPictureParameterBufferVP9</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#aa72f81e8dc823da86da251c28ef7e825">VAEncPictureParameterBufferAV1</a>
 , <a class="el" href="structVAEncPictureParameterBufferHEVC.html#a27cfbeaf1b462418b9fcc3ed3d8291a8">VAEncPictureParameterBufferHEVC</a>
 , <a class="el" href="structVAEncPictureParameterBufferVP9.html#a5755e9f57004b81516b9da765c9fff0a">VAEncPictureParameterBufferVP9</a>
+</li>
+<li>reference_mode
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a1647fc5b6605ef6b65487afa4a1edf51">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>reference_pic_flag
 : <a class="el" href="structVAEncPictureParameterBufferH264.html#a6383128edef18210785a98a3fb98adf5">VAEncPictureParameterBufferH264</a>
@@ -144,9 +157,11 @@ $(function() {
 <li>ReferenceFrames
 : <a class="el" href="structVAEncPictureParameterBufferH264.html#a920c76eff533f6c9228fe18ed1bd2bb0">VAEncPictureParameterBufferH264</a>
 , <a class="el" href="structVAPictureParameterBufferHEVC.html#abac5f2621a6747b8e762d31934fb88fd">VAPictureParameterBufferHEVC</a>
+, <a class="el" href="structVAPictureParameterBufferVVC.html#a180767d801acea9fd84ea0a6d23485e6">VAPictureParameterBufferVVC</a>
 </li>
 <li>RefPicList
 : <a class="el" href="structVASliceParameterBufferHEVC.html#ae64b18192a284a2393f3d47e69fde309">VASliceParameterBufferHEVC</a>
+, <a class="el" href="structVASliceParameterBufferVVC.html#ae95a5f08f713d35efb9ed21dfa27ba85">VASliceParameterBufferVVC</a>
 </li>
 <li>RefPicList0
 : <a class="el" href="structVAEncSliceParameterBufferH264.html#a35cef3edd3067207db3470e9cd21c813">VAEncSliceParameterBufferH264</a>
@@ -161,7 +176,8 @@ $(function() {
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#a1c7125f6026ec38bcdbf40b35a97ca55">VAEncPictureParameterBufferVP8</a>
 </li>
 <li>refresh_frame_flags
-: <a class="el" href="structVAEncPictureParameterBufferVP9.html#abe1bcc84d9490d48f92323770716c9a2">VAEncPictureParameterBufferVP9</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ae77b3c84bc57bc8a0bd8136a3a138158">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferVP9.html#abe1bcc84d9490d48f92323770716c9a2">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>refresh_golden_frame
 : <a class="el" href="structVAEncPictureParameterBufferVP8.html#af74d67e63db16f3ebcabaf235e22f94d">VAEncPictureParameterBufferVP8</a>
@@ -176,20 +192,27 @@ $(function() {
 : <a class="el" href="structVAEncPictureParameterBufferMPEG2.html#ad38747f13b13c4fcdc07f5b13c6f8be4">VAEncPictureParameterBufferMPEG2</a>
 </li>
 <li>reserved
-: <a class="el" href="structVACodedBufferSegment.html#afb9a4666451633e9f7ed66b3f930b8eb">VACodedBufferSegment</a>
+: <a class="el" href="structVAAlfDataVVC.html#adfb6058c576104f62e27e7a58dcdf464">VAAlfDataVVC</a>
+, <a class="el" href="structVACodedBufferSegment.html#afb9a4666451633e9f7ed66b3f930b8eb">VACodedBufferSegment</a>
 , <a class="el" href="unionVAConfigAttribValContextPriority.html#a5eb0747fd72ad24d052f69474c8c6fa2">VAConfigAttribValContextPriority</a>
+, <a class="el" href="unionVAConfigAttribValEncAV1.html#a44cb96113fe6494e9a36bba2140cf88c">VAConfigAttribValEncAV1</a>
+, <a class="el" href="unionVAConfigAttribValEncAV1Ext1.html#ad6b31bb47ecf0bd1f777436b8352559d">VAConfigAttribValEncAV1Ext1</a>
+, <a class="el" href="unionVAConfigAttribValEncAV1Ext2.html#ab34f8cb2b351f661de22aefcdf669a22">VAConfigAttribValEncAV1Ext2</a>
 , <a class="el" href="unionVAConfigAttribValEncHEVCBlockSizes.html#a1f9d752ef4b3851800d323194cb83a4a">VAConfigAttribValEncHEVCBlockSizes</a>
 , <a class="el" href="unionVAConfigAttribValEncPerBlockControl.html#a4539e9af9fbe06d80856b27eb4ec51ab">VAConfigAttribValEncPerBlockControl</a>
+, <a class="el" href="unionVAConfigAttribValEncVP9.html#ae259c0e4f0a065459f0e53ef3ffa7d14">VAConfigAttribValEncVP9</a>
 , <a class="el" href="unionVAConfigAttribValMaxFrameSize.html#a2adf723c8973f434266f4ed1be38c4a0">VAConfigAttribValMaxFrameSize</a>
 , <a class="el" href="unionVAConfigAttribValMultipleFrame.html#a66f2f1f85ea284ec1a215f82939dc60e">VAConfigAttribValMultipleFrame</a>
 , <a class="el" href="structVAContextParameterUpdateBuffer.html#afe3ee49064f92649416873502482fa45">VAContextParameterUpdateBuffer</a>
-, <a class="el" href="structVADecPictureParameterBufferAV1.html#a0e14967b04225b95b6e9a8cffc780006">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVADecPictureParameterBufferAV1.html#ad17fbd95106dc2ed2d0095945aee0c3c">VADecPictureParameterBufferAV1</a>
 , <a class="el" href="unionVADisplayAttribValSubDevice.html#a14c9b69930c7f86c6b68b3996712e539">VADisplayAttribValSubDevice</a>
 , <a class="el" href="structVAEncMiscParameterBufferMultiPassFrameSize.html#a2a9119e9f82fc8ee0704fbc4c3bd3330">VAEncMiscParameterBufferMultiPassFrameSize</a>
 , <a class="el" href="structVAEncMiscParameterFrameRate.html#a799f9dd449d39eea77b7f9936a71522d">VAEncMiscParameterFrameRate</a>
 , <a class="el" href="structVAEncMiscParameterRateControl.html#a47d3a6e9b254801bd3929e15e9c9e3b8">VAEncMiscParameterRateControl</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#a1ab6f70aa236a8b7654510ab55ba39d6">VAEncPictureParameterBufferAV1</a>
 , <a class="el" href="structVAEncPictureParameterBufferHEVC.html#af7342235ffd38a8b034317a3fc15ecd9">VAEncPictureParameterBufferHEVC</a>
 , <a class="el" href="structVAEncPictureParameterBufferVP8.html#a00f28a3f07ef30bd5cf96a0404110a71">VAEncPictureParameterBufferVP8</a>
+, <a class="el" href="structVAEncSegParamAV1.html#a859327e7dfb792b40ccf7a6d18290d27">VAEncSegParamAV1</a>
 , <a class="el" href="structVAEncSequenceParameterBufferH264.html#a2ef587a4af4b8adbd89a3b2787caad9c">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a113179185b50a7c3e0f1fd7fceaa04cd">VAEncSequenceParameterBufferHEVC</a>
 , <a class="el" href="structVAFilmGrainStructAV1.html#a83afe8e1e92cc4ce234a8f5242d449ea">VAFilmGrainStructAV1</a>
@@ -197,11 +220,56 @@ $(function() {
 , <a class="el" href="structVAHdrMetaDataHDR10.html#add6a7d3bf4305e5d739b07023e7a68e4">VAHdrMetaDataHDR10</a>
 , <a class="el" href="structVAPictureParameterBufferHEVCRext.html#a0ad78053ff767b7cae4a5c8d50a44d64">VAPictureParameterBufferHEVCRext</a>
 , <a class="el" href="structVAPictureParameterBufferHEVCScc.html#ab4c927b1e8580adca2960e465f5ce665">VAPictureParameterBufferHEVCScc</a>
-, <a class="el" href="structVASegmentationStructAV1.html#a59421ace92b4e4b6d8818c9a1e66dbbc">VASegmentationStructAV1</a>
+, <a class="el" href="structVAPictureParameterBufferVVC.html#a6d414c3e52422a86a9106f0dccd8ed33">VAPictureParameterBufferVVC</a>
+</li>
+<li>Reserved
+: <a class="el" href="unionVARefFrameCtrlAV1.html#a7fe4738763f62aebc2e91c23a7df0108">VARefFrameCtrlAV1</a>
+</li>
+<li>reserved
+: <a class="el" href="structVASegmentationStructAV1.html#a59421ace92b4e4b6d8818c9a1e66dbbc">VASegmentationStructAV1</a>
 , <a class="el" href="structVASliceParameterBufferHEVCRext.html#a640efc629e68f0d38e5244a6ae25bba1">VASliceParameterBufferHEVCRext</a>
+, <a class="el" href="structVASliceParameterBufferVVC.html#a6e475812e533d0110c43d7438fef97aa">VASliceParameterBufferVVC</a>
+, <a class="el" href="structVASubPicVVC.html#ac7e2c9ba8da7b16bc74cdd8daeaca57b">VASubPicVVC</a>
+</li>
+<li>reserved16b
+: <a class="el" href="structVAAlfDataVVC.html#a90709a4f3ed777f99e2248baead73cdb">VAAlfDataVVC</a>
+, <a class="el" href="structVAWeightedPredInfo.html#aff40bd03ad67b328d951080195b1529d">VAWeightedPredInfo</a>
+</li>
+<li>reserved16b01
+: <a class="el" href="structVAPictureParameterBufferVVC.html#a5f7a7305b5e43c2e38758127c70708be">VAPictureParameterBufferVVC</a>
+</li>
+<li>reserved16b02
+: <a class="el" href="structVAPictureParameterBufferVVC.html#a0fb4ebb322b2fdace5b6dd3f31da0946">VAPictureParameterBufferVVC</a>
+</li>
+<li>reserved16bits1
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a654c17c042d4885ec8b5321e8b1e300d">VAEncPictureParameterBufferAV1</a>
+</li>
+<li>reserved16bits2
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#abddd4d852d9c779a0b2977481e6e8024">VAEncPictureParameterBufferAV1</a>
+</li>
+<li>reserved16bits3
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ae02e3df3b07c2e6d31394a5ff6975803">VAEncPictureParameterBufferAV1</a>
+</li>
+<li>reserved32b
+: <a class="el" href="structVAPictureParameterBufferVVC.html#a83e4e2043e196b6b910d941560c5b746">VAPictureParameterBufferVVC</a>
+</li>
+<li>reserved32b01
+: <a class="el" href="structVAPictureParameterBufferVVC.html#ad5640173df22f387770461bdc72d8f51">VAPictureParameterBufferVVC</a>
+</li>
+<li>reserved32b04
+: <a class="el" href="structVAPictureParameterBufferVVC.html#a9be35fd9aff7356db570ce4ea0792f4a">VAPictureParameterBufferVVC</a>
+</li>
+<li>reserved8b
+: <a class="el" href="structVALmcsDataVVC.html#aca70b6d837c4f61786f3128d63fe91ed">VALmcsDataVVC</a>
+, <a class="el" href="structVAScalingListVVC.html#aeecafb6c092fe3619e2e6cba57701679">VAScalingListVVC</a>
+, <a class="el" href="structVASliceParameterBufferVVC.html#a733ea2ee3814dccdadc6a2d08266fc51">VASliceParameterBufferVVC</a>
+</li>
+<li>reserved8bits1
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a8cd570974e4de0b124b37ccca662400e">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>reserved_bits
-: <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a1658a27c685a211a7f7ee1a45aacfa41">VAEncSequenceParameterBufferHEVC</a>
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#ac51072a8a58cc2dce40e027ba847e1b2">VAEncSequenceParameterBufferAV1</a>
+, <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a1658a27c685a211a7f7ee1a45aacfa41">VAEncSequenceParameterBufferHEVC</a>
 </li>
 <li>reset
 : <a class="el" href="structVAEncMiscParameterRateControl.html#ad3a3193d9e905e2ed79e2c1795032693">VAEncMiscParameterRateControl</a>

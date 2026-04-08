@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -544,6 +544,8 @@ Enumerations</h2></td></tr>
 , <b>VAProfileH264High10</b> = 36
 , <b>VAProfileVVCMain10</b> = 37
 , <b>VAProfileVVCMultilayerMain10</b> = 38
+, <b>VAProfileAV1Profile2</b> = 39
+, <b>VAProfileH264High422</b> = 40
  }</td></tr>
 <tr class="separator:gaa4851f694a48c22af8877f5cfbb11bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5f3bcbb940e51be2e84097463557321e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5f3bcbb940e51be2e84097463557321e">VAEntrypoint</a> { <br />
@@ -987,6 +989,24 @@ Functions</h2></td></tr>
 <tr class="memdesc:gac4e578743bd5c26676a50f2312a26732"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver supports decode processing rate report <br  />
  <br /></td></tr>
 <tr class="separator:gac4e578743bd5c26676a50f2312a26732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader">segment ID map block size</h2></td></tr>
+<tr class="memitem:ga933d836b6c1cfa5e1553d2847267ab60"><td class="memItemLeft" align="right" valign="top"><a id="ga933d836b6c1cfa5e1553d2847267ab60"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga933d836b6c1cfa5e1553d2847267ab60">VA_SEGID_BLOCK_16X16</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memdesc:ga933d836b6c1cfa5e1553d2847267ab60"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 16x16 block <br /></td></tr>
+<tr class="separator:ga933d836b6c1cfa5e1553d2847267ab60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="memItemLeft" align="right" valign="top"><a id="gad9ecaa3ca4e7954a0d2a04f3741b2474"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gad9ecaa3ca4e7954a0d2a04f3741b2474">VA_SEGID_BLOCK_32X32</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memdesc:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 32x32 block <br /></td></tr>
+<tr class="separator:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d24e028a4293565841b92a63d3aa12d"><td class="memItemLeft" align="right" valign="top"><a id="ga3d24e028a4293565841b92a63d3aa12d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3d24e028a4293565841b92a63d3aa12d">VA_SEGID_BLOCK_64X64</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memdesc:ga3d24e028a4293565841b92a63d3aa12d"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 64x64 block <br /></td></tr>
+<tr class="separator:ga3d24e028a4293565841b92a63d3aa12d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0cff27464ec966144930875d2ea8dc39"><td class="memItemLeft" align="right" valign="top"><a id="ga0cff27464ec966144930875d2ea8dc39"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga0cff27464ec966144930875d2ea8dc39">VA_SEGID_BLOCK_8X8</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memdesc:ga0cff27464ec966144930875d2ea8dc39"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 8x8 block <br /></td></tr>
+<tr class="separator:ga0cff27464ec966144930875d2ea8dc39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">Surface attribute flags</h2></td></tr>
 <tr class="memitem:ga074ffcf02345a70ca10cd259ae9b8b25"><td class="memItemLeft" align="right" valign="top"><a id="ga074ffcf02345a70ca10cd259ae9b8b25"></a>
@@ -2779,19 +2799,19 @@ Functions</h2></td></tr>
 <p>This buffer only could be created and accepted when <code><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></code> delta_qp_support == 1. This input buffer contains delta QP per block for encoding. The supported size of delta QP block and the size of delta QP must be quried from <code><a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a></code>. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbab8bb77135915414694fb8e24d4edc8d9"></a>VAAlfBufferType&#160;</td><td class="fielddoc"><p>VVC ALF data buffer. </p>
-<p>Refer to <code>VAAlfDataVVC</code> </p>
+<p>Refer to <code><a class="el" href="structVAAlfDataVVC.html" title="VVC Adaptive Loop Filter Data Structure.">VAAlfDataVVC</a></code> </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbad260d583321172e7509cd86abe118d56"></a>VALmcsBufferType&#160;</td><td class="fielddoc"><p>VVC LMCS data buffer. </p>
-<p>Refer to <code>VALmcsDataVVC</code> </p>
+<p>Refer to <code><a class="el" href="structVALmcsDataVVC.html" title="VVC Luma Mapping with Chroma Scaling Data Structure.">VALmcsDataVVC</a></code> </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dba541a52e52ad65744381e52a468a9717a"></a>VASubPicBufferType&#160;</td><td class="fielddoc"><p>VVC SubPic data buffer. </p>
-<p>Refer to <code>VASubPicVVC</code> </p>
+<p>Refer to <code><a class="el" href="structVASubPicVVC.html" title="VVC SubPicture Data Structure.">VASubPicVVC</a></code> </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dba78963e06aa727bb146c53f0a4bfc1187"></a>VATileBufferType&#160;</td><td class="fielddoc"><p>VVC Tile Dimension data buffer. </p>
 <p>Data buffer of tile widths and heights, with each element formatted as uint16_t </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga24da9776c5d3a5ce29cb592cf22c00dbab61c6da7ddc07fbfe74ddb3504041b5d"></a>VASliceStructBufferType&#160;</td><td class="fielddoc"><p>VVC Slice Structure data buffer. </p>
-<p>Refer to <code>VASliceStructVVC</code> </p>
+<p>Refer to <code><a class="el" href="structVASliceStructVVC.html" title="data buffer of tile widths and heights. VATileBufferType is used to send this buffer.">VASliceStructVVC</a></code> </p>
 </td></tr>
 </table>
 
@@ -2943,13 +2963,13 @@ Functions</h2></td></tr>
 <p>If this attribute is supported by a driver then it must also support the VAConfigAttribEncHEVCFeatures attribute. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a820e8ebad6aa7ef48577da24be7ce2d5"></a>VAConfigAttribEncAV1&#160;</td><td class="fielddoc"><p>AV1 encoding attribute. Read-only. </p>
-<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1 union. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the <a class="el" href="unionVAConfigAttribValEncAV1.html" title="Attribute value for VAConfigAttribEncAV1.">VAConfigAttribValEncAV1</a> union. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01af1399f8002924f3840a06263e6437f4e"></a>VAConfigAttribEncAV1Ext1&#160;</td><td class="fielddoc"><p>AV1 encoding attribute extend1. Read-only. </p>
-<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1Ext1 union. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the <a class="el" href="unionVAConfigAttribValEncAV1Ext1.html" title="Attribute value for VAConfigAttribEncAV1Ext1.">VAConfigAttribValEncAV1Ext1</a> union. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a6fed679cc783118c32d4021ecbf4d39e"></a>VAConfigAttribEncAV1Ext2&#160;</td><td class="fielddoc"><p>AV1 encoding attribute extend2. Read-only. </p>
-<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the VAConfigAttribValEncAV1Ext2 union. </p>
+<p>This attribute exposes a number of capabilities of the underlying AV1 implementation. The attribute value is partitioned into fields as defined in the <a class="el" href="unionVAConfigAttribValEncAV1Ext2.html" title="Attribute value for VAConfigAttribEncAV1Ext2.">VAConfigAttribValEncAV1Ext2</a> union. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01a4d8f534f3b934443b9532011bb3dde60"></a>VAConfigAttribEncPerBlockControl&#160;</td><td class="fielddoc"><p>Settings per block attribute for Encoding. Read-only. </p>
 <p>This attribute describes whether to support delta qp per block, the supported size of delta qp block and the size of delta QP in bytes. The value returned uses the <a class="el" href="unionVAConfigAttribValEncPerBlockControl.html">VAConfigAttribValEncPerBlockControl</a> type. </p>
@@ -2959,6 +2979,9 @@ Functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01abcfae47db1171646e8c7fccb6b7f281b"></a>VAConfigAttribEncMaxTileCols&#160;</td><td class="fielddoc"><p>Maximum number of tile cols. Read-only. </p>
 <p>This attribute determines the maximum number of tile columns supported for encoding with tile support. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga2c3be94ce142fb92a4bf93e9b1b4fa01aeba05648bf9cb858ed0a1261949192a6"></a>VAConfigAttribEncVP9&#160;</td><td class="fielddoc"><p>VP9 encoding attribute. Read-only. </p>
+<p>This attribute exposes a number of capabilities of the underlying VP9 implementation. The attribute value is partitioned into fields as defined in the <a class="el" href="unionVAConfigAttribValEncVP9.html" title="VP9 Block Segmentation ID Buffer.">VAConfigAttribValEncVP9</a> union. </p>
 </td></tr>
 </table>
 

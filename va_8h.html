@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -83,7 +83,7 @@ $(function() {
 <code>#include &lt;<a class="el" href="va__dec__vp8_8h_source.html">va/va_dec_vp8.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__vp9_8h_source.html">va/va_dec_vp9.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__dec__av1_8h_source.html">va/va_dec_av1.h</a>&gt;</code><br />
-<code>#include &lt;va/va_dec_vvc.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="va__dec__vvc_8h_source.html">va/va_dec_vvc.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__hevc_8h_source.html">va/va_enc_hevc.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__fei__hevc_8h_source.html">va/va_fei_hevc.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__h264_8h_source.html">va/va_enc_h264.h</a>&gt;</code><br />
@@ -91,7 +91,7 @@ $(function() {
 <code>#include &lt;<a class="el" href="va__enc__mpeg2_8h_source.html">va/va_enc_mpeg2.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__vp8_8h_source.html">va/va_enc_vp8.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__enc__vp9_8h_source.html">va/va_enc_vp9.h</a>&gt;</code><br />
-<code>#include &lt;va/va_enc_av1.h&gt;</code><br />
+<code>#include &lt;<a class="el" href="va__enc__av1_8h_source.html">va/va_enc_av1.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__fei_8h_source.html">va/va_fei.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__fei__h264_8h_source.html">va/va_fei_h264.h</a>&gt;</code><br />
 <code>#include &lt;<a class="el" href="va__vpp_8h_source.html">va/va_vpp.h</a>&gt;</code><br />
@@ -812,6 +812,23 @@ Macros</h2></td></tr>
 <tr class="memdesc:gac4e578743bd5c26676a50f2312a26732"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver supports decode processing rate report <br  />
  <br /></td></tr>
 <tr class="separator:gac4e578743bd5c26676a50f2312a26732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">segment ID map block size</div></td></tr>
+<tr class="memitem:ga933d836b6c1cfa5e1553d2847267ab60"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga933d836b6c1cfa5e1553d2847267ab60">VA_SEGID_BLOCK_16X16</a>&#160;&#160;&#160;0</td></tr>
+<tr class="memdesc:ga933d836b6c1cfa5e1553d2847267ab60"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 16x16 block <br /></td></tr>
+<tr class="separator:ga933d836b6c1cfa5e1553d2847267ab60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#gad9ecaa3ca4e7954a0d2a04f3741b2474">VA_SEGID_BLOCK_32X32</a>&#160;&#160;&#160;1</td></tr>
+<tr class="memdesc:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 32x32 block <br /></td></tr>
+<tr class="separator:gad9ecaa3ca4e7954a0d2a04f3741b2474"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3d24e028a4293565841b92a63d3aa12d"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga3d24e028a4293565841b92a63d3aa12d">VA_SEGID_BLOCK_64X64</a>&#160;&#160;&#160;2</td></tr>
+<tr class="memdesc:ga3d24e028a4293565841b92a63d3aa12d"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 64x64 block <br /></td></tr>
+<tr class="separator:ga3d24e028a4293565841b92a63d3aa12d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0cff27464ec966144930875d2ea8dc39"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga0cff27464ec966144930875d2ea8dc39">VA_SEGID_BLOCK_8X8</a>&#160;&#160;&#160;3</td></tr>
+<tr class="memdesc:ga0cff27464ec966144930875d2ea8dc39"><td class="mdescLeft">&#160;</td><td class="mdescRight">each segmentID represent a 8x8 block <br /></td></tr>
+<tr class="separator:ga0cff27464ec966144930875d2ea8dc39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Surface attribute flags</div></td></tr>
 <tr class="memitem:ga074ffcf02345a70ca10cd259ae9b8b25"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga074ffcf02345a70ca10cd259ae9b8b25">VA_SURFACE_ATTRIB_NOT_SUPPORTED</a>&#160;&#160;&#160;0x00000000</td></tr>
@@ -980,6 +997,8 @@ Enumerations</h2></td></tr>
 , <b>VAProfileH264High10</b> = 36
 , <b>VAProfileVVCMain10</b> = 37
 , <b>VAProfileVVCMultilayerMain10</b> = 38
+, <b>VAProfileAV1Profile2</b> = 39
+, <b>VAProfileH264High422</b> = 40
  }</td></tr>
 <tr class="separator:gaa4851f694a48c22af8877f5cfbb11bde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5f3bcbb940e51be2e84097463557321e"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__api__core.html#ga5f3bcbb940e51be2e84097463557321e">VAEntrypoint</a> { <br />

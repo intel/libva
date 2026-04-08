@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">VA-API
-   &#160;<span id="projectnumber">2.22.0</span>
+   &#160;<span id="projectnumber">2.23.0</span>
    </div>
   </td>
  </tr>
@@ -77,6 +77,7 @@ $(function() {
 </li>
 <li>base_qindex
 : <a class="el" href="group__api__dec__av1.html#ga2bc798bccf2dcefa55177ea419590ba9">VADecPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferAV1.html#a34016cabdf73e32bba32840c4962517f">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>base_qp_index
 : <a class="el" href="structVACodedBufferVP9Status.html#a8b3f49d2e054348ae008800eaef372d7">VACodedBufferVP9Status</a>
@@ -109,11 +110,17 @@ $(function() {
 : <a class="el" href="structVAEncSequenceParameterBufferH264.html#a6d1562b6bff329bc48d188fdc29405ff">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#a0c4183f712ecf439d2cde364fec130fc">VAEncSequenceParameterBufferHEVC</a>
 </li>
+<li>bit_depth_minus8
+: <a class="el" href="structVAEncSequenceParameterBufferAV1.html#a4d7e2018fd2f0deac89321a9b387969b">VAEncSequenceParameterBufferAV1</a>
+</li>
 <li>bit_length
 : <a class="el" href="structVAEncPackedHeaderParameterBuffer.html#abc64e39e979495cd7ad77008693a2778">VAEncPackedHeaderParameterBuffer</a>
 </li>
 <li>bit_offset
 : <a class="el" href="structVACodedBufferSegment.html#a1300cc1ce3d25d4fbd60ff05f7e56064">VACodedBufferSegment</a>
+</li>
+<li>bit_offset_cdef_params
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a7b34a4ab736c9a35620ff048b9e3547c">VAEncPictureParameterBufferAV1</a>
 </li>
 <li>bit_offset_first_partition_size
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#a5d1bceea9a333a8f00e47a3e5346c958">VAEncPictureParameterBufferVP9</a>
@@ -121,23 +128,29 @@ $(function() {
 <li>bit_offset_lf_level
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#afd1aea5bfe9dab9be5c76507a880163b">VAEncPictureParameterBufferVP9</a>
 </li>
+<li>bit_offset_loopfilter_params
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a99c31f678bb4f9269c347995a53e6ffa">VAEncPictureParameterBufferAV1</a>
+</li>
 <li>bit_offset_mode_lf_delta
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#adc8434527066004e64f1a08dd2228312">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>bit_offset_qindex
-: <a class="el" href="structVAEncPictureParameterBufferVP9.html#a5c2742b2a871e50fb3832380ecfd95a5">VAEncPictureParameterBufferVP9</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#ab026aee7581ba1917d873991edfe2df7">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferVP9.html#a5c2742b2a871e50fb3832380ecfd95a5">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>bit_offset_ref_lf_delta
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#a5ebd1bce53897920016ad6b6c615c511">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>bit_offset_segmentation
-: <a class="el" href="structVAEncPictureParameterBufferVP9.html#a7a01a1d137482ee7a72db54c9cb048ff">VAEncPictureParameterBufferVP9</a>
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#a82daf85f4fc2307b54b663af4624fefc">VAEncPictureParameterBufferAV1</a>
+, <a class="el" href="structVAEncPictureParameterBufferVP9.html#a7a01a1d137482ee7a72db54c9cb048ff">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>bit_size_segmentation
 : <a class="el" href="structVAEncPictureParameterBufferVP9.html#a9e0bf7e97e0162584ac827b70b4153d6">VAEncPictureParameterBufferVP9</a>
 </li>
 <li>bits_per_second
 : <a class="el" href="structVAEncMiscParameterRateControl.html#a1033da0093007fa144991c6e87f19bb2">VAEncMiscParameterRateControl</a>
+, <a class="el" href="structVAEncSequenceParameterBufferAV1.html#af7429b6a6a34067a9489ed2b4ed3697a">VAEncSequenceParameterBufferAV1</a>
 , <a class="el" href="structVAEncSequenceParameterBufferH264.html#ab79a5169daa2e4d9a362c683375616ca">VAEncSequenceParameterBufferH264</a>
 , <a class="el" href="structVAEncSequenceParameterBufferHEVC.html#aca0173bb6b42a3448caed53752f5cb22">VAEncSequenceParameterBufferHEVC</a>
 , <a class="el" href="structVAEncSequenceParameterBufferMPEG2.html#a906d0cb2cf273560a6593a6b0685ff76">VAEncSequenceParameterBufferMPEG2</a>
@@ -177,6 +190,9 @@ $(function() {
 </li>
 <li>burst_amplitude
 : <a class="el" href="structVAEncPictureParameterBufferMPEG2.html#ab4560ad36f960f0efa90ce752680613d">VAEncPictureParameterBufferMPEG2</a>
+</li>
+<li>byte_offset_frame_hdr_obu_size
+: <a class="el" href="structVAEncPictureParameterBufferAV1.html#afe92b05773103020f6bdc8628ba61371">VAEncPictureParameterBufferAV1</a>
 </li>
 </ul>
 </div><!-- contents -->
