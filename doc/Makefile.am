@@ -37,6 +37,7 @@ VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va_enc_hevc.h	\
 	$(VA_HEADER_DIR)/va_enc_vp8.h	\
 	$(VA_HEADER_DIR)/va_enc_vp9.h	\
+	$(VA_HEADER_DIR)/va_enc_av1.h	\
 	$(VA_HEADER_DIR)/va_fei.h	\
 	$(VA_HEADER_DIR)/va_fei_h264.h	\
 	$(VA_HEADER_DIR)/va_fei_hevc.h	\
@@ -45,6 +46,7 @@ VA_HEADER_FILES = \
 	$(VA_HEADER_DIR)/va_dec_vp8.h	\
 	$(VA_HEADER_DIR)/va_dec_vp9.h	\
 	$(VA_HEADER_DIR)/va_dec_av1.h	\
+	$(VA_HEADER_DIR)/va_dec_vvc.h	\
 	$(VA_HEADER_DIR)/va_prot.h	\
 	$(VA_HEADER_DIR)/va_vpp.h	\
 	$(NULL)
