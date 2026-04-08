@@ -112,7 +112,7 @@ extern "C" {
  *
  * VA-API is split into several modules:
  * - \ref api_core
- * - Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9)
+ * - Encoder (H264, HEVC, JPEG, MPEG2, VP8, VP9, AV1)
  *  - \ref api_enc_h264
  *  - \ref api_enc_hevc
  *  - \ref api_enc_jpeg
