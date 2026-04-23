@@ -116,9 +116,6 @@ vaGetDisplayWl(struct wl_display *display)
     struct VADriverVTableWayland *vtable;
     unsigned int i;
 
-    if (!display)
-        return NULL;
-
     pDisplayContext = va_newDisplayContext();
     if (!pDisplayContext)
         return NULL;
