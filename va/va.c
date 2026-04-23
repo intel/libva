@@ -627,10 +627,9 @@ VAStatus vaSetDriverName(
     VADriverContextP ctx;
     VAStatus vaStatus = VA_STATUS_SUCCESS;
     char *override_driver_name = NULL;
-    CHECK_DISPLAY(dpy);
     ctx = CTX(dpy);
 
-    if (!driver_name || strlen(driver_name) == 0 || strlen(driver_name) >= 256) {
+    if (strlen(driver_name) == 0 || strlen(driver_name) >= 256) {
         vaStatus = VA_STATUS_ERROR_INVALID_PARAMETER;
         va_errorMessage(dpy, "vaSetDriverName returns %s\n",
                         vaErrorStr(vaStatus));
