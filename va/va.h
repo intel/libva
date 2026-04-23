@@ -1460,6 +1460,19 @@ typedef union _VAConfigAttribValEncPerBlockControl {
     uint32_t value;
 } VAConfigAttribValEncPerBlockControl;
 
+/** brief Attribute value VAConfigAttribFrameSizeToleranceSupport */
+typedef union _VAConfigAttribValFrameSizeToleranceSupport {
+    struct {
+        /** \brief whether to support sliding window */
+        uint32_t sliding_window           : 1;
+        /** \brief whether to support low delay */
+        uint32_t low_delay                : 1;
+        /** \brief reserved bit for future, must be zero */
+        uint32_t reserved                 : 30;
+    } bits;
+    uint32_t value;
+} VAConfigAttribValFrameSizeToleranceSupport;
+
 /** @name Attribute values for VAConfigAttribProtectedContentCipherAlgorithm */
 /** \brief AES cipher */
 #define VA_PC_CIPHER_AES                    0x00000001
