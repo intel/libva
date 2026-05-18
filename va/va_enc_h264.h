@@ -150,6 +150,8 @@ typedef struct _VAEncSequenceParameterBufferH264 {
     uint8_t   seq_parameter_set_id;
     /** \brief Same as the H.264 bitstream syntax element. */
     uint8_t   level_idc;
+    /** \brief Flags for constrained profiles. */
+    uint32_t    enc_constraint_set_flags;
     /** \brief Period between I frames. */
     uint32_t    intra_period;
     /** \brief Period between IDR frames. */

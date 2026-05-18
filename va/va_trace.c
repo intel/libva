@@ -4338,6 +4338,7 @@ static void va_TraceVAEncSequenceParameterBufferH264(
 
     va_TraceMsg(trace_ctx, "\tseq_parameter_set_id = %d\n", p->seq_parameter_set_id);
     va_TraceMsg(trace_ctx, "\tlevel_idc = %d\n", p->level_idc);
+    va_TraceMsg(trace_ctx, "\tenc_constraint_set_flags = %u\n", p->enc_constraint_set_flags);
     va_TraceMsg(trace_ctx, "\tintra_period = %u\n", p->intra_period);
     va_TraceMsg(trace_ctx, "\tintra_idr_period = %u\n", p->intra_idr_period);
     va_TraceMsg(trace_ctx, "\tip_period = %u\n", p->ip_period);
