@@ -271,7 +271,7 @@ version 2.9.0 - 11.Sep.2020
 
 version 2.8.0 - 18.Jun.2020
 * trace: enable return value trace for successful function call
-* trace: divide va_TraceEndPicture to two seperate function
+* trace: divide va_TraceEndPicture to two separate function
 * trace: add support for VAProfileHEVCSccMain444_10
 * fix:Fixes file descriptor leak
 * add fourcc code for P012 format
