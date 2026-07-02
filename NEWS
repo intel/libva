@@ -1,5 +1,12 @@
-libva NEWS -- summary of user visible changes.  2025-12-12
-Copyright (C) 2009-2025 Intel Corporation
+libva NEWS -- summary of user visible changes.  2026-7-2
+Copyright (C) 2009-2026 Intel Corporation
+
+version 2.24.0 - 02.Jul.2026
+* va: Add VA_PICTURE_H264_NON_EXISTING flag
+* va: use secure_getenv instead of getenv in va_x11.c
+* doc: fix libva av1 link for doxygen
+* trace: dump input/output data in va_TraceProtectedSessionExecute
+* trace: Add ProtectedSession Related Log in Trace
 
 version 2.23.0 - 12.Dec.2025
 * va: add VAProfileH264High422
