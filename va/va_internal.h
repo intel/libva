@@ -34,6 +34,7 @@ extern "C" {
 /* No setuid/setgid on Windows, secure_getenv is just getenv */
 #define secure_getenv getenv
 #else
+#include <unistd.h>
 static inline char * secure_getenv(const char *name)
 {
     if (getuid() == geteuid() && getgid() == getegid())
