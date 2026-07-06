@@ -1,0 +1,36 @@
+name: netbsd
+
+permissions:
+  contents: read
+
+on: [push, pull_request]
+
+jobs:
+  netbsd:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v7
+    - name: 'Install prerequisites and build'
+      uses: vmactions/netbsd-vm@v1
+      with:
+        prepare: |
+          set -e
+          # meson, pkgconf and wayland come from pkgsrc.
+          /usr/sbin/pkg_add -v meson pkgconf wayland
+          # libdrm and the X11 libs are part of NetBSD's base X11 distribution,
+          # not pkgsrc: xbase holds the shared libs, xcomp the headers and
+          # pkg-config files. The CI image ships neither, so fetch and unpack
+          # them into / (libdrm.pc is 2.4.109, satisfying meson's >= 2.4.75).
+          sets="https://cdn.NetBSD.org/pub/NetBSD/NetBSD-$(uname -r)/$(uname -m)/binary/sets"
+          for set in xbase xcomp; do
+            ftp -o "/tmp/$set.tar.xz" "$sets/$set.tar.xz"
+            xzcat "/tmp/$set.tar.xz" | tar -xpf - -C /
+          done
+        run: |
+          # pkgsrc deps live under /usr/pkg; the base-system DRM/X11 backend
+          # deps live under /usr/X11R7 -- make pkg-config search both.
+          export PKG_CONFIG_PATH="/usr/pkg/lib/pkgconfig:/usr/X11R7/lib/pkgconfig"
+          meson setup _build -D werror=true
+          meson compile -C _build
+          meson install -C _build
