@@ -7,7 +7,7 @@
 # - reset micro version to zero when VA-API major or minor version is changed
 project(
   'libva', 'c',
-  version : '2.24.0',
+  version : '2.24.1',
   meson_version : '>= 0.53.0',
   default_options : [ 'warning_level=1',
                       'buildtype=debugoptimized' ])
