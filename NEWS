@@ -1,5 +1,8 @@
-libva NEWS -- summary of user visible changes.  2026-7-2
+libva NEWS -- summary of user visible changes.  2026-7-8
 Copyright (C) 2009-2026 Intel Corporation
+
+version 2.24.1 - 08.Jul.2026
+* va: include <unistd.h> for getuid/getgid in secure_getenv fallback
 
 version 2.24.0 - 02.Jul.2026
 * va: Add VA_PICTURE_H264_NON_EXISTING flag
