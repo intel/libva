@@ -543,7 +543,8 @@ typedef enum {
     VAProfileVVCMain10                  = 37,
     VAProfileVVCMultilayerMain10        = 38,
     VAProfileAV1Profile2                = 39,
-    VAProfileH264High422                = 40
+    VAProfileH264High422                = 40,
+    VAProfileH264High444Predictive      = 41,
 } VAProfile;
 
 /**
