@@ -1489,6 +1489,30 @@ typedef struct _VAProcFilterCapTotalColorCorrection {
     VAProcFilterValueRange            range;
 } VAProcFilterCapTotalColorCorrection;
 
+/** \brief Capabilities specification for HVS Noise Reduction filter. */
+typedef struct _VAProcFilterCapHVSNoiseReduction {
+    /**
+     *  \brief HVS Denoise Mode which controls denoise method.
+     *  It is a value of VA_PROC_HVS_DENOISE_xxx.
+     *  Please see the definition of VA_PROC_HVS_DENOISE_xxx.
+     *  Different mode may have different qp and strength setting and range.
+     */
+    uint16_t                    mode;
+    /** \brief QP for encoding */
+    VAProcFilterValueRange      qp_range;
+    /**
+     *  \brief Noise Reduction Strength controls strength (conservative or aggressive level).
+     *  It is an integer from [0-16].
+     *  Value 0 means completely turn off Noise Reduction;
+     *  Value 16 means the most aggressive mode of Noise Reduction;
+     *  Value 10 is the default value.
+     */
+    VAProcFilterValueRange      strength_range;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t                    va_reserved[VA_PADDING_HIGH];
+} VAProcFilterCapHVSNoiseReduction;
+
 /**
  * \brief Queries video processing filters.
  *
