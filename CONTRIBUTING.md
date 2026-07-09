@@ -4,7 +4,7 @@ Libva is an open source project licensed under the [MIT License](https://opensou
 
 ## Coding Style
 
-Libva does not have a defined coding style at this time, but that will be updated.
+Libva is using standard linux c style, use astyle as a code formatter, please run style_unify before submitting code.
 
 ## Certificate of Origin
 
@@ -51,11 +51,6 @@ Please refer to [security.md](security.md) file for details.
 
 ## Public issue tracking
 
-If you have a problem, please let us know.  IRC is a perfectly fine place
-to quickly informally bring something up, if you get a response.  The
-[mailing list](https://lists.01.org/postorius/lists/intel-vaapi-media.lists.01.org)
-is a more durable communication channel.
-
 If it's a bug not already documented, by all means please [open an
 issue in github](https://github.com/intel/libva/issues/new) so we all get visibility
 to the problem and can work towards a resolution.
@@ -63,8 +58,7 @@ to the problem and can work towards a resolution.
 For feature requests we're also using github issues, with the label
 "enhancement".
 
-Our github bug/enhancement backlog and work queue are tracked in a
-[Libva waffle.io kanban](https://waffle.io/intel/libva).
+If you have a problem, and is unsuitable to file issue, or is urgent to get support, you could send a mail to maintainers in https://github.com/orgs/intel/teams/libva-maintainers/members
 
 ## Closing issues
 
