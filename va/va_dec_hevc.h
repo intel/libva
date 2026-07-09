@@ -185,8 +185,15 @@ typedef struct  _VAPictureParameterBufferHEVC {
      */
     uint32_t                st_rps_bits;
 
+    /* Corresponds to the variables of same name as defined in section 8.3.2
+     * of the HEVC spec. Index into ReferenceFrames[]. */
+    uint8_t                 RefPicSetLtCurr[8];
+    uint8_t                 NumPocLtCurr;
+
+    uint8_t                 reserved[3];
+
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 3];
 } VAPictureParameterBufferHEVC;
 
 /**
