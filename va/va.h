@@ -368,10 +368,24 @@ typedef int VAStatus;   /** Return status type from functions */
 /** asynchronization,application should call additonal sync operation to access output */
 #define VA_EXEC_ASYNC             0x1
 
-/** operation mode */
+/** operation mode
+  * Operation mode is defined to distinguish the code path if there are different algorithm
+  * or hw implementation candidates. Application could query which implementation supported
+  * in backend driver and select one by demand.
+  * VA_EXEC_MODE_DEFAULT is the basic recommended one from backend driver, it could be same with
+  * one of VA_EXEC_MODE_XXX on different platform.
+  */
+
 #define VA_EXEC_MODE_DEFAULT      0x0
 #define VA_EXEC_MODE_POWER_SAVING 0x1
 #define VA_EXEC_MODE_PERFORMANCE  0x2
+/*
+ * VA_EXEC_MODE_3 is defined for the third solution. It is for the developer with
+ * the expertise and know enough information about the backend driver, and want to balance
+ * the hardware workload for multiple session usage. Backend driver may provide more
+ * implementation to bring in more customization/flexibility.
+ */
+#define VA_EXEC_MODE_3            0x3
 
 /* Values used to describe device features. */
 /** The feature is not supported by the device.
