@@ -71,3 +71,14 @@ meson .. -Dprefix=/usr -Dlibdir=/usr/lib64
 ninja
 sudo ninja install
 ```
+
+
+# Backward Compatibility
+No code changes may be introduced that would regress support for any currently supported hardware.
+All contributions must ensure continued compatibility and functionality across all supported hardware platforms.
+Failure to maintain hardware compatibility may result in the rejection or reversion of the contribution.
+
+Any deliberate modifications or removal of hardware support will be transparently communicated in the release notes.
+
+API options are solely considered as a stable interface.
+Any debug parameters, environmental variables, and internal data structures, are not considered as an interface and may be changed or removed at any time.
