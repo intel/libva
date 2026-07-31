@@ -551,18 +551,25 @@ static void FILE_NAME_SUFFIX(
     if (suffix_str)
         size = strlen(suffix_str);
 
-    if (left < (size + 8 + 10))
+    if (left < (size + 15 + 10))
         return;
 
     if (gettimeofday(&tv, NULL) == 0) {
+        /* Include microseconds so that multiple VADisplays created on the
+         * same thread within the same second get distinct trace file names.
+         * With only second resolution the names collide and each fopen(...,"w")
+         * truncates the previous one, losing traces (e.g. the encode trace when
+         * a decode and an encode display are initialized in the same second).
+         */
         sprintf(env_value + tmp,
-                ".%02d%02d%02d.",
+                ".%02d%02d%02d.%06ld.",
                 (unsigned int)(tv.tv_sec / 3600) % 24,
                 (unsigned int)(tv.tv_sec / 60) % 60,
-                (unsigned int)tv.tv_sec % 60);
+                (unsigned int)tv.tv_sec % 60,
+                (long)tv.tv_usec);
 
-        tmp += 8;
-        left -= 8;
+        tmp += 15;
+        left -= 15;
     }
 
     if (suffix_str) {
