@@ -21,3 +21,5 @@ jobs:
           meson setup _build -D werror=true
           meson compile -C _build
           meson install -C _build
+          meson dist -C _build
+
