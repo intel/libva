@@ -1063,6 +1063,19 @@ typedef enum {
      * VAConfigAttribValEncVP9 union.
      */
     VAConfigAttribEncVP9                = 58,
+
+    /**
+     * \brief Low latency context. Read/write.
+     *
+     * This attribute determines if the driver supports low latency context,
+     * through vaGetConfigAttributes(); and the user requests low latency context
+     * through vaCreateConfig(), if the driver supports it.
+     *
+     * Driver should minimize latency of operations, possibly at the cost of
+     * increased power use.
+     */
+    VAConfigAttribLowLatency = 59,
+
     /**@}*/
     VAConfigAttribTypeMax
 } VAConfigAttribType;
