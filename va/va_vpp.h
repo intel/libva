@@ -1375,6 +1375,16 @@ typedef struct _VAProcFilterParameterBufferHDRToneMapping {
 #define VA_3DLUT_CHANNEL_VUY_RGB              0x00000004
 /**@}*/
 
+/** @name 3DLUT Interpolation Method */
+/**@{*/
+/** \brief 3DLUT Interpolation Method is unknown. */
+#define VA_3DLUT_INTERPOLATION_UNKNOWN                0
+/** \brief 3DLUT Interpolation Method is Trilinear. */
+#define VA_3DLUT_INTERPOLATION_TRILINEAR              1
+/** \brief 3DLUT Interpolation Method is Tetrahedral */
+#define VA_3DLUT_INTERPOLATION_TETRAHEDRAL            2
+/**@}*/
+
 /**
   *  \brief 3DLUT filter parametrization.
   *
@@ -1426,8 +1436,12 @@ typedef struct _VAProcFilterParameterBuffer3DLUT {
     /** \brief channel_mapping defines the mapping of input and output channels, could be one of VA_3DLUT_CHANNEL_XXX*/
     uint32_t            channel_mapping;
 
+    /** \brief interpolation_method defines the 3DLUT interpolation method, could be one of VA_3DLUT_INTERPOLATION_XXX*/
+    uint32_t            interpolation_method : 4;
+
     /** \brief reserved bytes for future use, must be zero */
-    uint32_t            va_reserved[VA_PADDING_HIGH];
+    uint32_t            va_reserved1 : 28;
+    uint32_t            va_reserved[VA_PADDING_HIGH - 1];
 } VAProcFilterParameterBuffer3DLUT;
 
 /** \brief Capabilities specification for the 3DLUT filter. */
@@ -1442,9 +1456,12 @@ typedef struct _VAProcFilterCap3DLUT {
     uint16_t            num_channel;
     /** \brief channel_mapping defines the mapping of channels, could be some combination of VA_3DLUT_CHANNEL_XXX*/
     uint32_t            channel_mapping;
+    /** \brief interpolation_method defines the 3DLUT interpolation method, could be one of VA_3DLUT_INTERPOLATION_XXX*/
+    uint32_t            interpolation_method : 4;
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t            va_reserved[VA_PADDING_HIGH];
+    uint32_t            va_reserved1 : 28;
+    uint32_t            va_reserved[VA_PADDING_HIGH - 1];
 } VAProcFilterCap3DLUT;
 
 /**
