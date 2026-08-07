@@ -922,16 +922,21 @@ typedef enum {
      * attribute value \c VAConfigAttribValMaxFrameSize represent max frame size support
      */
     VAConfigAttribMaxFrameSize           = 38,
-    /** \brief inter frame prediction directrion attribute. Read-only.
-     * this attribute conveys the prediction direction (backward or forword) for specific config
-     * the value could be  VA_PREDICTION_DIRECTION_XXXX. it can be combined with VAConfigAttribEncMaxRefFrames
-     * to describe reference list , and the prediction direction. if this attrib is not present,both direction
-     * should be supported, no restriction.
-     * for example: normal HEVC encoding , maximum reference frame number in reflist 0 and reflist 1 is deduced
-     * by  VAConfigAttribEncMaxRefFrames. so there are typical P frame, B frame,
-     * if VAConfigAttribPredictionDirection is also present. it will stipulate prediction direction in both
-     * reference list. if only one prediction direction present(such as PREVIOUS),all reference frame should be
-     *  previous frame (PoC < current).
+    /**
+     * \brief reference picture list attribute. Read-only.
+     * This attribute conveys the additional requirements on reference picture list for inter prediction, the
+     * value could be OR'd VA_PREDICTION_DIRECTION_XXXX. User should query #VAConfigAttribEncMaxRefFrames and
+     * #VAConfigAttribPredictionDirection to find out the requirements on reference picture list.
+     *
+     * For example: for HEVC encoding, the maximum reference frame number in reflist0 and reflist1 is deduced
+     * by #VAConfigAttribEncMaxRefFrames, user should provide reflist0 for typical P slice, reflist0 and
+     * reflist1 for typical B slice. If #VAConfigAttribPredictionDirection is present and the value is
+     * (VA_PREDICTION_DIRECTION_PREVIOUS | VA_PREDICTION_DIRECTION_BI_NOT_EMPTY), the driver doesn't support
+     * typical P slice and B slice, it supports B slice with two same reference picture lists (L0 == L1) which
+     * have only previous reference frame, the maximum reference frame number for reflist0 must be equal to
+     * the one for reflist1 in #VAConfigAttribEncMaxRefFrames.
+     *
+     * See \c VA_PREDICTION_DIRECTION_xxx for the description for each flag
      */
     VAConfigAttribPredictionDirection   = 39,
     /** \brief combined submission of multiple frames from different streams, it is optimization for different HW
@@ -1309,16 +1314,18 @@ typedef union _VAConfigAttribValEncJPEG {
 
 /** @name Attribute values for VAConfigAttribPredictionDirection */
 /**@{*/
-/** \brief Driver support forward reference frame (inter frame for vpx, P frame for H26x MPEG)
- * can work with the VAConfigAttribEncMaxRefFrames. for example: low delay B frame of HEVC.
- * these value can be OR'd together. typical value should be VA_PREDICTION_DIRECTION_PREVIOUS
- * or VA_PREDICTION_DIRECTION_PREVIOUS | VA_PREDICTION_DIRECTION_FUTURE, theoretically, there
- * are no stream only include future reference frame.
+/** \brief Indicates user must provide reflist0 (for P and B slices) and reflist1 (for B slices)
+ * which have only previous reference frames, reflist0 and reflist1 for B slices must be the same.
+ * Theoretically the driver must set this flag when inter prediction is supported
  */
 #define VA_PREDICTION_DIRECTION_PREVIOUS                0x00000001
-/** \brief Driver support backward prediction frame/slice */
+/** \brief Indicates user may provide reflist1 which has future reference frames for B slices. It
+ * overrides the requirements of \c VA_PREDICTION_DIRECTION_PREVIOUS for B slices.
+ */
 #define VA_PREDICTION_DIRECTION_FUTURE                  0x00000002
-/** \brief Dirver require both reference list must be not empty for inter frame */
+/** \brief Indicates that the driver doesn't support P slices, user may fake up P frames by using
+ * B slices with the same reflist0 and reflist1 which have only previous reference frames.
+ */
 #define VA_PREDICTION_DIRECTION_BI_NOT_EMPTY            0x00000004
 /**@}*/
 
