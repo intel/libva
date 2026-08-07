@@ -35,6 +35,16 @@ vaCreateSurfaces_0_32_0(
     int          format,
     int          num_surfaces,
     VASurfaceID *surfaces
+);
+
+VAStatus
+vaCreateSurfaces_0_32_0(
+    VADisplay    dpy,
+    int          width,
+    int          height,
+    int          format,
+    int          num_surfaces,
+    VASurfaceID *surfaces
 )
 {
     return vaCreateSurfaces(dpy, format, width, height, surfaces, num_surfaces,
