@@ -86,7 +86,8 @@ libva = shared_library(
 libva_dep = declare_dependency(
   link_with : libva,
   include_directories : configinc,
-  dependencies : [ dl_dep ])
+  dependencies : [ dl_dep ],
+  version : va_api_version)
 
 if WITH_DRM
   libva_drm_sources = [
@@ -135,7 +136,8 @@ if WITH_DRM
   libva_drm_dep = declare_dependency(
     link_with : libva_drm,
     include_directories : configinc,
-    dependencies : deps)
+    dependencies : deps,
+    version : va_api_version)
 endif
 
 if WITH_X11
@@ -185,7 +187,8 @@ if WITH_X11
   libva_x11_dep = declare_dependency(
     link_with : libva_x11,
     include_directories : configinc,
-    dependencies : deps)
+    dependencies : deps,
+    version : va_api_version)
 endif
 
 if WITH_GLX
@@ -223,7 +226,8 @@ if WITH_GLX
   libva_glx_dep = declare_dependency(
     link_with : libva_glx,
     include_directories : configinc,
-    dependencies : deps)
+    dependencies : deps,
+    version : va_api_version)
 endif
 
 if WITH_WAYLAND
@@ -287,7 +291,8 @@ if WITH_WAYLAND
   libva_wayland_dep = declare_dependency(
     link_with : libva_wayland,
     include_directories : configinc,
-    dependencies : deps)
+    dependencies : deps,
+    version : va_api_version)
 endif
 
 fs = import('fs')
@@ -324,7 +329,8 @@ if WITH_WIN32
   libva_win32_dep = declare_dependency(
     link_with : libva_win32,
     include_directories : configinc,
-    dependencies : deps)
+    dependencies : deps,
+    version : va_api_version)
 endif
 
 foreach header : libva_headers_subproject
