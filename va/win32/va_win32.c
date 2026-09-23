@@ -35,7 +35,7 @@
  * which will be selected when provided with an adapter LUID which
  * does not have a registered VA driver
 */
-const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12";
+const char VAAPI_DEFAULT_DRIVER_NAME[] = "vaon12_drv_video";
 
 typedef struct _VADisplayContextWin32 {
     char registry_driver_name[MAX_PATH];
