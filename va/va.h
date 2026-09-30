@@ -4506,6 +4506,12 @@ VAStatus vaSyncBuffer(
  * The first plane contains Y, the second plane contains U and V in pairs of bytes.
  */
 #define VA_FOURCC_P208          0x38303250
+/** P210: two-plane 10-bit YUV 4:2:2.
+ *
+ * Each sample is a two-byte little-endian value with the bottom six bits ignored.
+ * The first plane contains Y, the second plane contains U and V in pairs of samples.
+ */
+#define VA_FOURCC_P210          0x30313250
 /** I420: three-plane 8-bit YUV 4:2:0.
  *
  * The three planes contain Y, U and V respectively.
