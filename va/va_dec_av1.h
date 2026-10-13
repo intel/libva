@@ -621,10 +621,14 @@ typedef struct  _VADecPictureParameterBufferAV1 {
      */
     VAWarpedMotionParamsAV1 wm[7];
 
+    /** \brief corresponds to AV1 spec variable of the same name. */
+    uint16_t                max_frame_width_minus_1;
+    uint16_t                max_frame_height_minus_1;
+
     /**@}*/
 
     /** \brief Reserved bytes for future use, must be zero */
-    uint32_t                va_reserved[VA_PADDING_MEDIUM];
+    uint32_t                va_reserved[VA_PADDING_MEDIUM - 1];
 } VADecPictureParameterBufferAV1;
 
 
