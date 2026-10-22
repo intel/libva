@@ -1837,6 +1837,17 @@ typedef struct _VASurfaceAttribExternalBuffers {
 /** \brief Surface used for export to third-party APIs, e.g. via
  *  vaExportSurfaceHandle(). */
 #define VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT     0x00000020
+/** \brief Surface is private to the VA driver and will never be shared
+ *  with other components (e.g. compute, display) or exported via
+ *  vaExportSurfaceHandle().
+ *
+ *  The driver may use a memory layout which is not shareable outside of
+ *  the VA driver. It must not be combined with
+ *  VA_SURFACE_ATTRIB_USAGE_HINT_DISPLAY or
+ *  VA_SURFACE_ATTRIB_USAGE_HINT_EXPORT, otherwise vaCreateSurfaces()
+ *  returns VA_STATUS_ERROR_INVALID_PARAMETER. Drivers which do not
+ *  recognize this flag may ignore it. */
+#define VA_SURFACE_ATTRIB_USAGE_HINT_PRIVATE    0x00000040
 
 /**@}*/
 
@@ -4184,7 +4195,8 @@ vaReleaseBufferHandle(VADisplay dpy, VABufferID buf_id);
  * - VA_STATUS_ERROR_UNIMPLEMENTED:  The driver does not implement
  *     this interface.
  * - VA_STATUS_ERROR_INVALID_SURFACE:  The surface is not valid, or
- *     the surface is not exportable in the specified way.
+ *     the surface is not exportable in the specified way (e.g. it was
+ *     created with VA_SURFACE_ATTRIB_USAGE_HINT_PRIVATE).
  * - VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE:  The driver does not
  *     support exporting surfaces to the specified memory type.
  */
