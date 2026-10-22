@@ -31,6 +31,9 @@ jobs:
           # pkgsrc deps live under /usr/pkg; the base-system DRM/X11 backend
           # deps live under /usr/X11R7 -- make pkg-config search both.
           export PKG_CONFIG_PATH="/usr/pkg/lib/pkgconfig:/usr/X11R7/lib/pkgconfig"
-          meson setup _build -D werror=true
+          # meson >= 1.12 turns werror into -Wl,--fatal-warnings, and the
+          # base-system libm emits link-time warnings for its compatibility
+          # cabs()/cabsf() symbols. Keep -Werror for the compiler only.
+          meson setup _build -D werror=true -D c_link_args=-Wl,--no-fatal-warnings
           meson compile -C _build
           meson install -C _build
