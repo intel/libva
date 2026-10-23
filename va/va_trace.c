@@ -968,6 +968,8 @@ static void va_TraceVPrint(struct trace_context *trace_ctx, const char *msg, va_
         return;
 
     fp = trace_ctx->plog_file->fp_log;
+    if (!fp)
+        return;
     if (msg)  {
         vfprintf(fp, msg, args);
     } else

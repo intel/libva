@@ -303,6 +303,9 @@ VA_DRI2Buffer *VA_DRI2GetBuffers_internal(XExtDisplayInfo *info,
     CARD32 *p;
     int i;
 
+    if (!info->codes)
+        return NULL;
+
     GetReqExtra(DRI2GetBuffers, count * 4, req);
     req->reqType = info->codes->major_opcode;
     req->dri2ReqType = X_DRI2GetBuffers;
