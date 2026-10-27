@@ -345,8 +345,11 @@ typedef int VAStatus;   /** Return status type from functions */
 /** Scaling flags for vaPutSurface() */
 #define VA_FILTER_SCALING_DEFAULT       0x00000000
 #define VA_FILTER_SCALING_FAST          0x00000100
+/** HQ scaling flag indicates scaling is optimized for high quality */
 #define VA_FILTER_SCALING_HQ            0x00000200
 #define VA_FILTER_SCALING_NL_ANAMORPHIC 0x00000300
+/** PERF scaling flag indicates scaling is optimized for performance */
+#define VA_FILTER_SCALING_PERF          0x00000400
 #define VA_FILTER_SCALING_MASK          0x00000f00
 
 /** Interpolation method for scaling */
