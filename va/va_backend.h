@@ -511,8 +511,16 @@ struct VADriverVTable {
         void **pbuf,                        /* out */
         uint32_t flags                      /* in */
     );
+
+    VAStatus(*vaEndPicture2)(
+        VADriverContextP ctx,              /* in */
+        VAContextID context,               /* in */
+        int32_t *sync_fds,
+        int32_t sync_num
+    );
+
     /** \brief Reserved bytes for future use, must be zero */
-    unsigned long reserved[53];
+    unsigned long reserved[52];
 
 };
 

@@ -380,6 +380,8 @@ DLL_HIDDEN
 void va_TraceEndPicture(
     VADisplay dpy,
     VAContextID context,
+    int32_t *sync_fds,
+    int32_t sync_num,
     int endpic_done
 );
 
