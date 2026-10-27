@@ -510,11 +510,20 @@ typedef struct _VABlendState {
  * \brief Specifies whether to apply power or performance
  * optimizations to a pipeline.
  *
- * When processing several surfaces, it may be necessary to prioritize
- * more certain pipelines than others. This flag is only a hint to the
- * video processor so that it can omit certain filters to save power
- * for example. Typically, this flag could be used with video surfaces
- * decoded from a secondary bitstream.
+ * This flag is a hint to the video processor to achieve faster processing speed
+ * (better performance)in the pipeine. Hardware vendor might have several approaches
+ * for one functionality, this flag is to indicate the one with best performance.
+ * Performance depends on the hardware capablity, plesae refer to the specific hardware
+ * specification from hardware vendors. Here, lists a few examples as the reference.
+ * 1) When processing several surfaces, it may be necessary to prioritize more certain
+ * pipelines with this flag than others. 2) This flag is only a hint to the video processor
+ * so that it can omit certain filters for better performance for example. 3) Typically, this
+ * flag could be used with video surfaces decoded from a secondary bitstream.
+ *
+ * Regarding the usage of this flag, there are some filter properties in vaapi such as
+ * VA_FILTER_SCALING_XXX, when VA_PROC_PIPELINE_FAST is combined with these properties,
+ * the backend implementation should honor VA_PROC_PIPELINE_FAST which means this flag
+ * could change the filter properties implicitly for better performance.
  */
 #define VA_PROC_PIPELINE_FAST           0x00000002
 /**@}*/
