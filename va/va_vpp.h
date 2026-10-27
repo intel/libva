@@ -255,6 +255,8 @@ typedef enum _VAProcFilterType {
     VAProcFilterHighDynamicRangeToneMapping,
     /** \brief Three-Dimensional Look Up Table (3DLUT). */
     VAProcFilter3DLUT,
+    /** \brief Super Resolution. */
+    VAProcFilterSuperResolution,
     /** \brief Number of video filters. */
     VAProcFilterCount
 } VAProcFilterType;
@@ -1446,6 +1448,105 @@ typedef struct _VAProcFilterCap3DLUT {
     /** \brief Reserved bytes for future use, must be zero */
     uint32_t            va_reserved[VA_PADDING_HIGH];
 } VAProcFilterCap3DLUT;
+
+/**
+ *  \brief Video Processing Super Resolution Predefined Type.
+ *
+ *  Super Resolution is the process of recovering a High Resolution(HR) image/video
+ *  from a given Low Resolution(LR) image/video. A few types are predefined for
+ *  different scenarios.
+ */
+typedef enum _VAProcSuperResolutionType {
+    /** \brief Super Resolution None.*/
+    VAProcSuperResolutionNone = 0,
+    /**
+     * \brief Super Resolution Typical Type.
+     * This type is recommended to be used by default and in typical video usage
+     * such natural video playback etc.
+     */
+    VAProcSuperResolutionTypical,
+    /**
+     * \brief Super Resolution Sharpen Type.
+     * In this type, Super Resolution is optimized or trained to have high sharpness level.
+     * This type is recommended to be used in video conference(camera noise) related
+     * or similar usage scenario.
+     */
+    VAProcSuperResolutionSharpen,
+    /**
+     * \brief Super Resolution Artifact Removal Type.
+     * In this type, Super Resolution is optimized or trained to remove encoding artifacts
+     * (usually limited network bandwidth) with medium sharpness level.
+     * This type is recommended to be used in video surveillance simliar usage secenario
+     * which may have camera noise and encoding artifacts in the video stream
+     * due to limited network bandwidth.
+     */
+    VAProcSuperResolutionArtifactRemoval,
+} VAProcSuperResolutionType;
+
+/**
+ *  \brief Super Resolution(SR) filter parametrization.
+ */
+typedef struct _VAProcFilterParameterBufferSuperResolution {
+    /**
+     * \brief Filter type. Shall be set to #VAProcFilterSuperResolution.
+     */
+    VAProcFilterType                 type;
+    /**
+     * \brief Super Resolution Type, should be one of VAProcSuperResolutionXXX
+     */
+    VAProcSuperResolutionType        algorithm;
+    /**
+     *\brief reserved bytes for future use, must be zero
+     */
+    uint32_t                         va_reserved[VA_PADDING_HIGH];
+} VAProcFilterParameterBufferSuperResolution;
+
+/**
+ * \brief Capabilities specification for the Super Resolution filter.
+ *
+ * Super resolution filter capabilities can be checked with vaQueryVideoProcFilterCaps.
+ *
+ * \pseudo code Query the number of Caps first, then Query Caps
+ * unsigned int num_sr_caps = 0;
+ * VAProcFilterCapSuperResolution* sr_caps = nullptr;
+ * vaQueryVideoProcFilterCaps(va_dpy, vpp_ctx,
+ *     VAProcFilterSuperResolution,
+ *     &sr_caps, &num_sr_caps);
+ * sr_caps = new vaQueryVideoProcFilterCaps[num_sr_caps];
+ * vaQueryVideoProcFilterCaps(va_dpy, vpp_ctx,
+ *     VAProcFilterSuperResolution,
+ *     &sr_caps, &num_sr_caps);
+ */
+typedef struct _VAProcFilterCapSuperResolution {
+    /** \brief Super Resolution mode, should be one of VAProcSuperResolutionXXX.*/
+    VAProcSuperResolutionType            algorithm;
+    /** \brief The maximum value of input width SR filter is capable of supporting.*/
+    uint32_t                             max_input_width;
+    /** \brief The maximum value of input height SR filter is capable of supporting.*/
+    uint32_t                             max_input_height;
+    /**
+     * \brief The maximum value of scaling ratio SR filter is capable of supporting.
+     *
+     * If output resolution / input resolution > max_scaling_ratio, it is up to
+     * backend implementation how to handle this case.
+     * Here, lists two possible options for the reference.
+     * Option #1: return VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED;
+     * Option #2: input resolution * max_scaling_ratio with SR, the remaining
+     * scaling ratio could be performed by other scaling method if the backend
+     * can ganrantee the scaling quality.
+     */
+    float                                max_scaling_ratio;
+    /**
+     * \brief The minimum value of scaling ratio SR filter is capable of supporting.
+     *
+     * If output resolution / input resolution < min_scaling_ratio, recommend
+     * backend implementation to return VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED.
+     */
+    float                                min_scaling_ratio;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint32_t                             va_reserved[VA_PADDING_MEDIUM];
+} VAProcFilterCapSuperResolution;
 
 /**
  * \brief Default filter cap specification (single range value).
