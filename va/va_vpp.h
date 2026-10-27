@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2011 Intel Corporation. All Rights Reserved.
+ * Copyright (c) 2007-2022 Intel Corporation. All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the
@@ -439,6 +439,8 @@ typedef enum _VAProcHighDynamicRangeMetadataType {
     VAProcHighDynamicRangeMetadataNone = 0,
     /** \brief Metadata type for HDR10. */
     VAProcHighDynamicRangeMetadataHDR10,
+    /** \brief Metadata type for HDR10+. */
+    VAProcHighDynamicRangeMetadataHDR10Plus,
     /** \brief Number of Metadata type. */
     VAProcHighDynamicRangeMetadataTypeCount
 } VAProcHighDynamicRangeMetadataType;
@@ -1580,6 +1582,281 @@ vaQueryVideoProcPipelineCaps(
     unsigned int        num_filters,
     VAProcPipelineCaps *pipeline_caps
 );
+
+/**
+ * \brief Option for overlapping elliptical pixel selectors in a picture for SMPTE 2094-40.
+ */
+typedef enum _VAOverlapProcessOption {
+    VA_OVERLAP_PROCESS_WEIGHTED_AVERAGING = 0,
+    VA_OVERLAP_PROCESS_LAYERING = 1,
+} VAOverlapProcessOption;
+
+/**
+ * \brief Processing window Parameters
+ *
+ * Processing window parameters in a dynamic metadata for SMPTE 2094-40.
+ */
+typedef struct _VAProcessingWindow {
+    /**
+     * \brief The x coordinate of the top left pixel of the processing window.
+     *
+     * The value shall be in the range of 0 and (width of Picture - 1), inclusive.
+     * The value for first processing window shall be 0.
+     */
+    uint16_t    window_upper_left_corner_x;
+    /**
+     * \brief The y coordinate of the top left pixel of the processing window.
+     *
+     * The value shall be in the range of 0 and (height of Picture - 1), inclusive.
+     * The value for first processing window shall be 0.
+     */
+    uint16_t    window_upper_left_corner_y;
+    /**
+     * \brief The x coordinate of the bottom right pixel of the processing window.
+     *
+     * The value shall be in the range of 0 and (width of Picture - 1), inclusive.
+     * The value for first processing window shall be (width of Picture - 1).
+     */
+    uint16_t    window_lower_right_corner_x;
+    /**
+     * \brief The y coordinate of the bottom right pixel of the processing window.
+     *
+     * The value shall be in the range of 0 and (height of Picture - 1), inclusive.
+     * The value for first processing window shall be (height of Picture - 1).
+     */
+    uint16_t    window_lower_right_corner_y;
+    /**
+     * \brief The x coordinate of the center position of the concentric internal and
+     * external ellipses of the elliptical pixel selector in the processing window.
+     *
+     * The value shall be in the range of 0 to (width of Picture - 1), inclusive and in multiples of 1 pixel.
+     */
+    uint16_t    center_of_ellipse_x;
+    /**
+     * \brief The y coordinate of the center position of the concentric internal and
+     * external ellipses of the elliptical pixel selector in the processing window.
+     *
+     * The value shall be in the range of 0 to (height of Picture - 1), inclusive and in multiples of 1 pixel.
+     */
+    uint16_t    center_of_ellipse_y;
+    /**
+     * \brief The clockwise rotation angle in degree of arc with respect to the
+     * positive direction of the x-axis of the concentric internal and external
+     * ellipses of the elliptical pixel selector in the processing window.
+     *
+     * The value shall be in the range of 0 to 180, inclusive and in multiples of 1.
+     */
+    uint8_t     rotation_angle;
+    /**
+     * \brief The semi-major axis value of the internal ellipse of the elliptical pixel
+     * selector in amount of pixels in the processing window.
+     *
+     * The value shall be in the range of 1 to 65535, inclusive and in multiples of 1 pixel.
+     */
+    uint16_t    semimajor_axis_internal_ellipse;
+    /**
+     * \brief The semi-major axis value of the external ellipse of the elliptical pixel
+     * selector in amount of pixels in the processing window. The value
+     * shall not be less than semimajor_axis_internal_ellipse of the current
+     * processing window.
+     *
+     * The value shall be in the range of 1 to 65535, inclusive and in multiples of 1 pixel.
+     */
+    uint16_t    semimajor_axis_external_ellipse;
+    /**
+     * \brief The semi-minor axis value of the external ellipse of the elliptical pixel
+     * selector in amount of pixels in the processing window.
+     *
+     * The value shall be in the range of 1 to 65535, inclusive and in multiples of 1 pixel.
+     */
+    uint16_t    semiminor_axis_external_ellipse;
+    /**
+     * \brief Overlap process option indicates one of the two methods of combining
+     * rendered pixels in the processing window in an image with at least one
+     * elliptical pixel selector.
+     *
+     * For overlapping elliptical pixel selectors in a picture, overlap_process_option shall have the same value.
+     */
+    VAOverlapProcessOption    overlap_process_option;
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t    va_reserved[VA_PADDING_HIGH];
+} VAProcessingWindow;
+
+/**
+ * \brief Color Volume Transform Parameters
+ *
+ * Color Volume transform parameters at a processing window in a dynamic metadata for SMPTE 2094-40.
+ */
+typedef struct _VAColorVolumeTransformParams {
+    /**
+     * \brief The maximum scene color component levels (MaxSCL).
+     *
+     * The MaxSCL is the maximum of each compoment of linearized RGB values in the scene.
+     * The elements shall be in the range of [0, 100000]. A MaxSCL value (0,0,0) indicates not a calculated value.
+     *
+     */
+    uint32_t    max_scl[3];
+    /**
+     * \brief The average maximum RGB (AverageMaxRGB).
+     *
+     * The AverageMaxRGB is the average of linearized maxRGB values in the scene.
+     * The value shall be in the range of [0, 100000].
+     *
+     */
+    uint32_t    average_max_rgb;
+    /**
+     * \brief The number of distribution maximum RGB (DistributionMaxRGB), DistributionMaxRGB provides descriptive metadata in compact
+     * form of the scene's cumulative frequency distribution(CFD) and is a set of two equal-length vectors(DistributionMaxRGBPercentages,
+     * DistributionMaxRGBPercentiles).
+     */
+    uint16_t    distribution_max_rgb_number;
+    /**
+    * \brief The percentage of distribution maximum RGB.
+    *
+    * The value shall be an integer value in the range [0,100] and the elements of vector DistributionMaxRGBPercentages shall be in
+    * ascending order by value.
+    */
+    uint32_t    *distribution_max_rgb_percentages;
+    /**
+    * \brief The percentile of distribution maximum RGB.
+    *
+    * The value shall be an integer value in the range [0,100000].
+    */
+    uint32_t    *distribution_max_rgb_percentiles;
+    /**
+     * \brief The Fraction of Bright Pixels (FractionBrightPixels).
+     *
+     * The value shall be an integer value in the range [0,1000].
+     */
+    uint16_t    fraction_bright_pixels;
+    /**
+     * \brief This flag indicates that the metadata for the tone mapping function is present (for value of 1)
+     */
+    uint8_t     tone_mapping_flag;
+    /**
+     * \brief The Knee Point x. Value should be in the range of [0,4095].
+     */
+    uint32_t    knee_point_x;
+    /**
+     * \brief The Knee Point y. Value should be in the range of [0,4095]
+     */
+    uint32_t    knee_point_y;
+    /**
+     * \brief The number of the intermediate anchor parameters of the tone mapping function.
+     *
+     * The maximum value shall be 15.
+     */
+    uint16_t    bezier_curve_anchors_number;
+    /**
+     * \brief The Bezier Curve Anchors.
+     *
+     * The intermediate anchor parameters of the tone mapping function. Value should be [0, 1023].
+     */
+    uint32_t    *bezier_curve_anchors;
+    /**
+     * \brief This flag indicates that the color saturation mapping is present (for value of 1).
+     */
+    uint8_t color_saturation_mapping_flag;
+    /**
+     * \brief The color saturation gain in the scene.
+     *
+     * The value shall be in the range of 0 to 63, The default value shall be 8.
+     */
+    uint8_t color_saturation_weight;
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t    va_reserved[VA_PADDING_HIGH];
+} VAColorVolumeTransform;
+
+/**
+ * \brief Targeted System display metadata
+ *
+ * Targeted System display metadata in a dynamic metadata for SMPTE 2094-40.
+ */
+typedef struct _VATargetedSystemDisplay {
+    /**
+     * \brief The nominal maximum display luminance of the targeted system display
+     *
+     * It is in units of 0.0001 candelas per square metre. The value shall be in the range of 0 to 10000, inclusive.
+     */
+    uint32_t    targeted_system_display_maximum_luminance;
+    /**
+     * \brief This flag indicates that the targeted system display actual peak luminance is present (for value of 1).
+     */
+    uint8_t     targeted_system_display_actual_peak_luminance_flag;
+    /**
+     * \brief The number of rows in the targeted system_display_actual_peak_luminance array.
+     *
+     * The value shall be in the range of 2 to 25, inclusive.
+     */
+    uint8_t     num_rows_targeted_system_display_actual_peak_luminance;
+    /**
+     * \brief The number of columns in the targeted_system_display_actual_peak_luminance array.
+     *
+     * The value shall be in the range of 2 to 25, inclusive.
+     */
+    uint8_t    num_cols_targeted_system_display_actual_peak_luminance;
+    /**
+     * \brief The normalized actual peak luminance of the targeted system display.
+     *
+     * The values should be in the range of 0 to 15, inclusive.
+     */
+    uint8_t    targeted_system_display_actual_peak_luminance[25][25];
+    /**
+     * \brief This flag indicates that the mastering display actual peak luminance is present (for value of 1).
+     */
+    uint8_t    mastering_display_actual_peak_luminance_flag;
+    /**
+     * \brief The number of rows in the mastering_display_actual_peak_luminance array.
+     *
+     * The value shall be in the range of 2 to 25, inclusive.
+     */
+    uint8_t    num_rows_mastering_display_actual_peak_luminance;
+    /**
+     * \brief The number of columns in the mastering_display_actual_peak_luminance array.
+     *
+     * The value shall be in the range of 2 to 25, inclusive.
+     */
+    uint8_t    num_cols_mastering_display_actual_peak_luminance;
+    /**
+     * \brief The normalized actual peak luminance of the mastering display used for mastering the image essence.
+     *
+     * The values should be in the range of 0 to 15, inclusive.
+     */
+    uint8_t    mastering_display_actual_peak_luminance[25][25];
+
+    /** \brief Reserved bytes for future use, must be zero */
+    uint16_t   va_reserved[VA_PADDING_HIGH];
+} VATargetedSystemDisplay;
+
+/**
+ * \brief This struct represents dynamic metadata for color volume transform - application 4 of SMPTE 2094-40:2020 standard.
+ */
+typedef struct _VAHdrMetaDataHDR10Plus {
+    /**
+     * \brief Targeted System display metadata.
+     */
+    VATargetedSystemDisplay     targeted_system_display_max_luminance;
+    /**
+    * \brief The number of processing windows.
+    *
+    * The value shall be in the range of 1 to 3, inclusive.
+    */
+    uint8_t                     num_processing_windows;
+    /**
+     * \brief Processing window Parameters
+     */
+    VAProcessingWindow          processing_window[3];
+    /**
+     * \brief Color Volume Transform Parameters
+     */
+    VAColorVolumeTransform      color_volume_transform[3];
+
+    /**
+     * \brief Reserved bytes for future use, must be zero
+     */
+    uint32_t    va_reserved[VA_PADDING_HIGH];
+} VAHdrMetaDataHDR10Plus;
 
 /**@}*/
 
