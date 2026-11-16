@@ -2443,7 +2443,19 @@ typedef enum {
     VAEncPackedHeaderMiscMask va_deprecated_enum  = 0x80000000,
 } VAEncPackedHeaderType;
 
-/** \brief Packed header parameter. */
+/**
+ * \brief Packed header parameter.
+ *
+ * Applications should submit packed header parameter/data pairs to
+ * vaRenderPicture() in the order in which the headers should appear in the
+ * final bitstream, consistent with the syntax and semantics of the codec
+ * specification. This ordering should also be preserved across
+ * vaRenderPicture() calls for the same picture.
+ *
+ * This allows compatibility with backend drivers that insert packed headers
+ * in submission order. Applications should not rely on a backend driver to
+ * reorder packed headers.
+ */
 typedef struct _VAEncPackedHeaderParameterBuffer {
     /** Type of the packed header buffer. See #VAEncPackedHeaderType. */
     uint32_t                type;
